@@ -1,0 +1,106 @@
+{
+    "properties": {
+        "usr_id": {
+            "bsonType": "string",
+            "minLength": 0,
+            "maxLength": 64,
+            "pattern": "^.+@.+$",
+            "title": "Email",
+            "description": "Email",
+            "required": true,
+            "width": 200
+        },
+        "usr_name": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "Full Name",
+            "description": "User Full Name",
+            "required": true,
+            "width": 140
+        },
+        "usr_group_id": {
+            "bsonType": "string",
+            "minLength": 0,
+            "maxLength": 32,
+            "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$",
+            "title": "Group ID",
+            "description": "Group id",
+            "required": true,
+            "width": 140
+        },
+        "usr_enabled": {
+            "bsonType": "bool",
+            "title": "Enabled",
+            "description": "Enabled or not",
+            "width": 110
+        },
+        "_tags": {
+            "bsonType": "array",
+            "uniqueItems": true,
+            "minItems": 0,
+            "maxItems": 100,
+            "items": {
+                "bsonType": "string",
+                "minLength": 0,
+                "maxLength": 32,
+                "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$"
+            },
+            "title": "Tags",
+            "description": "Tags",
+            "subType": "tag",
+            "manualAdd": true,
+            "chips": true,
+            "width": 300
+        }
+    },
+    "required": [
+        "usr_id",
+        "usr_name",
+        "usr_group_id"
+    ],
+    "unique": [
+        [
+            "usr_id"
+        ]
+    ],
+    "index": [
+        [
+            "usr_group_id"
+        ],
+        [
+            "_tags"
+        ]
+    ],
+    "sort": {
+        "_modified_at": -1
+    },
+    "actions": [
+        {
+            "id": "act-assign-to-group",
+            "title": "ASSIGN A GROUP",
+            "description": "Assigns a group to selected records.",
+            "enabled": true,
+            "filter": [],
+            "fields": [
+                {
+                    "key": "usr_group_id",
+                    "value": null
+                }
+            ]
+        },
+        {
+            "id": "act-assign-tag",
+            "title": "ASSIGN TAGS",
+            "description": "Assign TAG to users which are selected.",
+            "enabled": true,
+            "filter": [],
+            "fields": [
+                {
+                    "key": "_tags",
+                    "value": null
+                }
+            ]
+        }
+    ]
+}

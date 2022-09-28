@@ -1,0 +1,90 @@
+<ion-reorder-group disabled="false" (ionItemReorder)="doReorder($event, fieldname)" class="ion-no-padding">
+  <ion-item *ngIf="!field.manualAdd && (!data[fieldname] || data[fieldname].length == 0)" lines="none" class="ion-no-margin ion-no-padding">
+    <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
+      <ion-icon name="add-circle-outline"></ion-icon>
+      {{ 'Click to add a new Item' | translate }}
+    </ion-button>
+  </ion-item>
+  <ion-item *ngFor="let kv of data[fieldname]; let i = index" lines="full" class="ion-no-padding ion-no-margin">
+    <ion-reorder slot="start"></ion-reorder>
+    <ion-grid *ngIf="type=='key'" class="kov-grid" fixed="true">
+      <ion-row>
+        <ion-col size="10.5">
+          <ion-input *ngIf="!kovs || field.manualAdd" required="true" [(ngModel)]="data[field.name][i]" [ngModelOptions]="{standalone: true}"></ion-input>
+          <ion-select *ngIf="kovs && !field.manualAdd" required="true" [(ngModel)]="data[fieldname][i]" [ngModelOptions]="{standalone: true}"
+            mode="md" placeholder="{{ 'key' | translate }}">
+            <ion-select-option *ngFor="let item of kovs" [value]="item.key">
+              {{ item.key }}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col size="1.5" class="ion-no-padding ion-text-right">
+          <ion-button *ngIf="!field.manualAdd && i == data[fieldname].length - 1" fill="clear" size="default" (click)="doLineAdd(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="default" (click)="doLineRemove(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="remove-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid *ngIf="type=='keyvalue'" class="kov-grid" fixed="true">
+      <ion-row>
+        <ion-col size="4">
+          <ion-select required="true" [(ngModel)]="data[fieldname][i].key" [ngModelOptions]="{standalone: true}"
+            mode="md" placeholder="{{ 'key' | translate }}">
+            <ion-select-option *ngFor="let item of kovs" [value]="item.key">
+              {{ item.key }}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col size="6.5">
+          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fieldname][i].value"
+            [ngModelOptions]="{standalone: true}" placeholder="{{ 'value' | translate }}">
+          </ion-input>
+        </ion-col>
+        <ion-col size="1.5" class="ion-no-padding ion-text-right">
+          <ion-button *ngIf="!field.manualAdd && i == data[fieldname].length - 1" fill="clear" size="default" (click)="doLineAdd(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="default" (click)="doLineRemove(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="remove-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-grid *ngIf="type=='keyopvalue'" class="kov-grid" fixed="true">
+      <ion-row>
+        <ion-col size="4">
+          <ion-select required="true" [(ngModel)]="data[fieldname][i].key" [ngModelOptions]="{standalone: true}"
+            mode="md" placeholder="{{ 'key' | translate }}">
+            <ion-select-option *ngFor="let item of kovs" [value]="item.key">
+              {{ item.key }}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col size="3">
+          <ion-select required="true" [(ngModel)]="data[fieldname][i].op" [ngModelOptions]="{standalone: true}"
+            mode="md" placeholder="{{ 'operator' | translate }}">
+            <ion-select-option *ngFor="let f of filterops" [value]="f.value">
+              {{ f.key | translate }}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col size="3.5">
+          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fieldname][i].value"
+            [ngModelOptions]="{standalone: true}" placeholder="{{ 'value' | translate }}">
+          </ion-input>
+        </ion-col>
+        <ion-col size="1.5" class="ion-no-padding ion-text-right">
+          <ion-button *ngIf="!field.manualAdd && i == data[fieldname].length - 1" fill="clear" size="default" (click)="doLineAdd(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="default" (click)="doLineRemove(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="remove-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-item>
+</ion-reorder-group>

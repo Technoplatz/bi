@@ -1,0 +1,98 @@
+{
+    "properties": {
+        "log_type": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 16,
+            "title": "Type",
+            "description": "Log type",
+            "enum": [
+                "Info",
+                "Error",
+                "Warning",
+                "Denied",
+                "Announcement"
+            ],
+            "pattern": "^[a-zA-Z]{1,16}$",
+            "required": true,
+            "width": 130
+        },
+        "log_date": {
+            "bsonType": "date",
+            "title": "Date",
+            "description": "Log date",
+            "required": true,
+            "width": 90
+        },
+        "log_user_id": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "User",
+            "description": "User id",
+            "required": true,
+            "width": 140
+        },
+        "log_ip": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 16,
+            "title": "IP",
+            "description": "IP address",
+            "width": 100
+        },
+        "log_collection_id": {
+            "bsonType": "string",
+            "minLength": 3,
+            "maxLength": 32,
+            "pattern": "^[a-z0-9-_]{3,32}$",
+            "title": "Collection",
+            "description": "Collection ID",
+            "permanent": true,
+            "width": 140
+        },
+        "log_operation": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "Operation",
+            "description": "Operation",
+            "required": true,
+            "width": 120
+        },
+        "log_object_id": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "Object Id",
+            "description": "Object Id",
+            "width": 120
+        },
+        "log_document": {
+            "bsonType": "object",
+            "title": "Document",
+            "description": "Document",
+            "width": 120
+        }
+    },
+    "required": [
+        "log_type",
+        "log_date",
+        "log_user_id",
+        "log_operation"
+    ],
+    "sort": {
+        "_modified_at": -1
+    },
+    "index": [
+        [
+            "log_object_id"
+        ],
+        [
+            "log_operation"
+        ],
+        [
+            "log_collection_id"
+        ]
+    ]
+}

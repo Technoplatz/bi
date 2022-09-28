@@ -1,0 +1,28 @@
+[
+    {
+        "_id": "template-account",
+        "name": "Accounts Template",
+        "title": "Accounts",
+        "description": "Accounts Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "collection": "accounts",
+        "prefix": "acc",
+        "structure": "accounts-structure.json",
+        "data": "accounts-data.json",
+        "sort": 20,
+        "enabled": true,
+        "icon": "business-outline"
+    },
+    {
+        "_id": "template-transactions",
+        "name": "Transactions Template",
+        "title": "Transactions",
+        "description": "Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "collection": "transactions",
+        "prefix": "trx",
+        "structure": "transactions-structure.json",
+        "data": "transactions-data.json",
+        "sort": 20,
+        "enabled": true,
+        "icon": "qr-code-outline"
+    }
+]

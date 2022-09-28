@@ -1,0 +1,121 @@
+[
+    {
+        "version": "2.0.43",
+        "date": "2022-07-18",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "2.0.1",
+        "date": "2022-04-17",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.9",
+        "date": "2022-04-13",
+        "description": "Cosmetic improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.8",
+        "date": "2022-04-13",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.7",
+        "date": "2022-04-12",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.6",
+        "date": "2022-04-12",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.5",
+        "date": "2022-04-11",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.3",
+        "date": "2022-04-11",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.2",
+        "date": "2022-04-11",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.9.1",
+        "date": "2022-04-11",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.8.4",
+        "date": "2022-03-27",
+        "description": "General improvements",
+        "updates": []
+    },
+    {
+        "version": "1.8.3",
+        "date": "2022-03-24",
+        "description": "Network alert fixed",
+        "updates": []
+    },
+    {
+        "version": "1.8.2",
+        "date": "2022-03-24",
+        "description": "Quick actions added",
+        "updates": []
+    },
+    {
+        "version": "1.8.1",
+        "date": "2022-03-24",
+        "description": "GUI and service improvements.",
+        "updates": []
+    },
+    {
+        "version": "1.7.9",
+        "date": "2022-03-23",
+        "description": "Version issues have been fixed.",
+        "updates": []
+    },
+    {
+        "version": "1.7.8",
+        "date": "2022-03-23",
+        "description": "Some GUI improvements have been made.",
+        "updates": []
+    },
+    {
+        "version": "1.7.7",
+        "date": "2022-03-22",
+        "description": "Some cosmetic updates have been made.",
+        "updates": [
+            {
+                "type": "BUGFIX",
+                "description": null
+            },
+            {
+                "type": "CHANGED",
+                "description": null
+            },
+            {
+                "type": "ADDED",
+                "description": null
+            },
+            {
+                "type": "REMOVED",
+                "description": null
+            }
+        ]
+    }
+]

@@ -1,0 +1,17 @@
+Flask
+flask-cors
+pymongo[srv]
+bcrypt
+requests
+bleach
+pandas
+numpy
+openpyxl
+apscheduler
+sendgrid
+Jinja2
+xlsxwriter
+xlwt
+xlrd
+pyotp
+python-magic

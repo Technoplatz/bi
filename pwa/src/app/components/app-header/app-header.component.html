@@ -1,0 +1,32 @@
+<ion-header class="app-header ion-no-padding ion-no-border ion-no-margin ion-padding-start ion-padding-end">
+  <ion-item class="ion-no-padding" lines="none">
+    <ion-button size="large" fill="clear" class="ion-no-margin ion-no-padding logo-button clear-dark-button"
+      href="/console">
+      <ion-icon [name]="logo" color="primary" class="logo-electron-small"></ion-icon>
+      <ion-label>{{ 'Technoplatz BI' }}</ion-label>
+    </ion-button>
+    <ion-button *ngIf="swu_" slot="end" color="danger" (click)="doActivate()" size="small"
+      class="ion-no-margin ion-no-padding ion-margin-end notification-button">
+      <ion-icon name="notifications-outline" class="ion-padding-start"></ion-icon>
+      <ion-label class="ion-padding-end">{{ 'New Version Available' | translate }}</ion-label>
+    </ion-button>
+    <ion-button *ngIf="!net_" slot="end" color="danger" size="small"
+      class="ion-no-margin ion-no-padding ion-margin-end notification-button no-cursor">
+      <ion-label class="ion-padding-start ion-padding-end">{{ 'Internet connection is Lost' | translate }}</ion-label>
+    </ion-button>
+    <ion-button *ngIf="user" slot="end" fill="clear" (click)="Signout()" size="default"
+      class="ion-no-padding ion-margin-end clear-dark-button">
+      <ion-label>{{ 'Sign Out' | translate }}&nbsp;&nbsp;&nbsp;</ion-label>
+    </ion-button>
+    <ion-button *ngIf="user" slot="end" size="default" fill="clear" href="/console/account/settings"
+      class="ion-no-margin ion-no-padding clear-dark-button">
+      <ion-label>{{ name }}&nbsp;&nbsp;</ion-label>
+      <ion-icon name="person-circle-outline" color="primary"></ion-icon>
+    </ion-button>
+    <ion-button *ngIf="!user" slot="end" fill="clear" (click)="doSign('signin')" size="default"
+    class="ion-no-margin ion-no-padding ion-margin-end clear-dark-button">
+    <ion-icon name="log-in-outline"></ion-icon>
+    <ion-label>{{ 'Sign In' | translate }}</ion-label>
+  </ion-button>
+  </ion-item>
+</ion-header>

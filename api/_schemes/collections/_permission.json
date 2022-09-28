@@ -1,0 +1,88 @@
+{
+    "properties": {
+        "per_id": {
+            "bsonType": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-]{3,64}$",
+            "title": "ID",
+            "description": "Permission ID",
+            "required": true,
+            "width": 240
+        },
+        "per_tag_id": {
+            "bsonType": "string",
+            "minLength": 3,
+            "maxLength": 32,
+            "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$",
+            "title": "Tag",
+            "description": "Tag",
+            "required": true,
+            "width": 240
+        },
+        "per_col_id": {
+            "bsonType": "string",
+            "minLength": 3,
+            "maxLength": 32,
+            "pattern": "^[a-z0-9-_]{3,32}$",
+            "title": "Collection ID",
+            "description": "Collection ID",
+            "required": true,
+            "collection": true,
+            "width": 150
+        },
+        "per_create": {
+            "bsonType": "bool",
+            "title": "Create",
+            "description": "Create Permission",
+            "default": false,
+            "width": 110
+        },
+        "per_read": {
+            "bsonType": "bool",
+            "title": "Read",
+            "description": "Read Permission",
+            "default": false,
+            "width": 110
+        },
+        "per_update": {
+            "bsonType": "bool",
+            "title": "Update",
+            "description": "Update Permission",
+            "default": false,
+            "width": 110
+        },
+        "per_delete": {
+            "bsonType": "bool",
+            "title": "Delete",
+            "description": "Delete Permission",
+            "default": false,
+            "width": 110
+        }
+    },
+    "required": [
+        "per_id",
+        "per_tag_id",
+        "per_col_id"
+    ],
+    "unique": [
+        [
+            "per_id"
+        ],
+        [
+            "per_tag_id",
+            "per_col_id"
+        ]
+    ],
+    "index": [
+        [
+            "per_tag_id"
+        ],
+        [
+            "per_col_id"
+        ]
+    ],
+    "sort": {
+        "_modified_at": -1
+    }
+}

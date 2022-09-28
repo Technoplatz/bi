@@ -1,0 +1,192 @@
+{
+    "properties": {
+        "acc_id": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "ID",
+            "description": "Primary unique ID of the account",
+            "pattern": "^[A-Za-z0-9ğüşıöçĞÜŞİÖÇß]{1,64}$",
+            "required": true,
+            "permanent": true,
+            "width": 140
+        },
+        "acc_no": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "Account No",
+            "description": "Secondary unique identifier of the account",
+            "required": true,
+            "permanent": true,
+            "width": 120
+        },
+        "acc_type": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "enum": [
+                "0-Company",
+                "1-Individual",
+                "2-Government",
+                "3-Internal"
+            ],
+            "title": "Type",
+            "description": "Account Type",
+            "required": true,
+            "default": "0-Company",
+            "width": 100
+        },
+        "acc_status": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "enum": [
+                "0-Open",
+                "1-Active",
+                "2-Inactive"
+            ],
+            "title": "Status",
+            "description": "Transaction Status",
+            "required": true,
+            "default": "0-Open",
+            "width": 100
+        },
+        "acc_legal_name": {
+            "bsonType": "string",
+            "maxLength": 256,
+            "title": "Legal Name",
+            "description": "Account Legal Name",
+            "required": true,
+            "width": 250
+        },
+        "acc_tax_no": {
+            "bsonType": "string",
+            "minLength": 0,
+            "maxLength": 64,
+            "title": "Tax No",
+            "description": "Tax number of the account holder",
+            "permanent": true,
+            "pattern": "^[A-Z0-9-.]{0,64}$",
+            "width": 110
+        },
+        "acc_is_enabled": {
+            "bsonType": "bool",
+            "title": "Enabled?",
+            "description": "Is the account enabled?",
+            "width": 130
+        },
+        "acc_is_customer": {
+            "bsonType": "bool",
+            "title": "Customer?",
+            "description": "Is the account holder a customer?",
+            "width": 140
+        },
+        "acc_is_supplier": {
+            "bsonType": "bool",
+            "title": "Supplier?",
+            "description": "Is the account holder a supplier?",
+            "width": 130
+        },
+        "acc_is_distributor": {
+            "bsonType": "bool",
+            "title": "Distributor?",
+            "description": "Is the account holder a distributor?",
+            "width": 150
+        },
+        "acc_is_dealer": {
+            "bsonType": "bool",
+            "title": "Dealer?",
+            "description": "Is the account holder a dealer?",
+            "width": 120
+        },
+        "acc_billing_address": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "title": "Billing Address",
+            "description": "Billing Address",
+            "required": true,
+            "width": 240
+        },
+        "acc_shipping_address": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "title": "Shipping Address",
+            "description": "Shipping Address",
+            "required": true,
+            "width": 240
+        },
+        "acc_country": {
+            "bsonType": "string",
+            "minLength": 2,
+            "maxLength": 3,
+            "title": "Country",
+            "description": "Country",
+            "pattern": "^[A-Z]{2,3}$",
+            "required": true,
+            "width": 110
+        },
+        "acc_notes": {
+            "bsonType": "string",
+            "minLength": 0,
+            "maxLength": 1024,
+            "title": "Notes",
+            "description": "Account Notes",
+            "width": 140
+        },
+        "_tags": {
+            "bsonType": "array",
+            "uniqueItems": true,
+            "minItems": 0,
+            "maxItems": 100,
+            "items": {
+                "bsonType": "string",
+                "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$"
+            },
+            "title": "Tags",
+            "description": "Tags",
+            "subType": "tag",
+            "manualAdd": true,
+            "chips": true,
+            "width": 300
+        }
+    },
+    "required": [
+        "acc_id",
+        "acc_type",
+        "acc_no",
+        "acc_legal_name",
+        "acc_status"
+    ],
+    "unique": [
+        [
+            "acc_id"
+        ],
+        [
+            "acc_no"
+        ],
+        [
+            "acc_legal_name"
+        ]
+    ],
+    "index": [
+        [
+            "acc_status"
+        ],
+        [
+            "acc_no"
+        ],
+        [
+            "acc_tax_no"
+        ],
+        [
+            "_tags"
+        ]
+    ],
+    "parents": [],
+    "sort": {
+        "acc_id": 1
+    }
+}

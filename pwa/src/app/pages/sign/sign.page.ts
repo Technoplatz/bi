@@ -1,0 +1,435 @@
+import { Component, OnInit, ViewChild, HostListener, Input } from "@angular/core";
+import { IonInput } from "@ionic/angular";
+import { Validators, FormBuilder, FormGroup } from "@angular/forms";
+import { Storage } from "@ionic/storage";
+import { Auth } from "../../classes/auth";
+import { Miscellaneous } from "../../classes/miscellaneous";
+
+@Component({
+  selector: "app-sign",
+  templateUrl: "./sign.page.html",
+  styleUrls: ["./sign.page.scss"],
+})
+export class SignPage implements OnInit {
+  @Input() op: string;
+  @Input() user: any;
+  @Input() isSignedIn: boolean;
+  @ViewChild("emailfocus", { static: false }) emailfocus: IonInput;
+  @ViewChild("emailfocussignin", { static: false }) emailfocussignin: IonInput;
+  @ViewChild("emailfocussignup", { static: false }) emailfocussignup: IonInput;
+  @ViewChild("namefocus", { static: false }) namefocus: IonInput;
+  @ViewChild("passwordfocus", { static: false }) passwordfocus: IonInput;
+  @ViewChild("passcodefocus", { static: false }) passcodefocus: IonInput;
+  @ViewChild("tfacfocus", { static: false }) tfacfocus: IonInput;
+
+  public error: string = null;
+  public success_str: string = null;
+  public successMessage: string = null;
+  public signupForm: FormGroup;
+  public forgotForm: FormGroup;
+  public signinForm: FormGroup;
+  public resetForm: FormGroup;
+  public TFACForm: FormGroup;
+  public successForm: FormGroup;
+  public formtype: string;
+  public isInProgress: boolean = false;
+  public is_ready: boolean = false;
+  public isEuTaxRequired: boolean;
+  public cart: any;
+  public taxExcluded: boolean = false;
+  public tax: Number = 0;
+  public rate: number = 0;
+  public total: any = 0;
+  public grandtotal: any = 0;
+  public currency: string;
+  public isRememberMe: boolean = false;
+  public showhide: string = "hide-segment";
+  public email: string = null;
+  private focustime = 600;
+  private passwordpttrn_: string = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_-]).{8,32}";
+
+  @HostListener("document:keydown", ["$event"]) func(event: any) {
+    if (event.key === "Enter") {
+      const q =
+        this.formtype === "success"
+          ? this.doAfterSuccess()
+          : this.formtype === "signup"
+            ? this.Signup()
+            : this.formtype === "forgot"
+              ? this.doForgot()
+              : this.formtype === "signin"
+                ? this.Signin()
+                : this.formtype === "tfac"
+                  ? this.TFAC()
+                  : null;
+    }
+  }
+
+  constructor(private formBuilder: FormBuilder, private auth: Auth, private misc: Miscellaneous, private storage: Storage) {
+    this.resetForm = this.formBuilder.group(
+      {
+        password: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.minLength(8),
+            Validators.maxLength(32),
+            Validators.pattern(this.passwordpttrn_)
+          ]),
+        ],
+        tfac: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.pattern(/^\d{6}$/)
+          ])]
+      },
+      {}
+    );
+    this.signupForm = this.formBuilder.group(
+      {
+        name: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.minLength(5),
+            Validators.maxLength(32)
+          ])
+        ],
+        email: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.email,
+            Validators.maxLength(32)
+          ])
+        ],
+        password: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.minLength(8),
+            Validators.maxLength(32),
+            Validators.pattern(this.passwordpttrn_)
+          ]),
+        ],
+        passcode: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.minLength(16),
+            Validators.maxLength(32)
+          ])
+        ]
+      },
+      {}
+    );
+    this.storage.get("LSUSEREMAIL").then((LSUSEREMAIL: string) => {
+      this.storage.get("LSREMEMBERME").then((LSREMEMBERME: boolean) => {
+        this.email = LSUSEREMAIL;
+        this.isRememberMe = LSREMEMBERME;
+        this.signinForm = this.formBuilder.group(
+          {
+            email: [
+              this.email,
+              Validators.compose([
+                Validators.required,
+                Validators.email,
+                Validators.maxLength(64)
+              ])],
+            password: [
+              null,
+              Validators.compose([
+                Validators.required,
+                Validators.minLength(8),
+                Validators.maxLength(32),
+                Validators.pattern(this.passwordpttrn_)
+              ])],
+            isRememberMe: [this.isRememberMe, Validators.compose([])],
+          },
+          {}
+        );
+      });
+    });
+    this.TFACForm = this.formBuilder.group(
+      {
+        tfac: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.pattern(/^\d{6}$/)
+          ])],
+      },
+      {}
+    );
+    this.forgotForm = this.formBuilder.group(
+      {
+        email: [
+          null,
+          Validators.compose([
+            Validators.required,
+            Validators.email,
+            Validators.maxLength(64)]
+          )]
+      },
+      {}
+    );
+    this.successForm = this.formBuilder.group({}, {});
+  }
+
+  ngOnInit() {
+    this.doSetOp(this.op);
+  }
+
+  ngOnDestroy() {
+    this.storage.remove("LSOP").then(() => {
+      this.storage.remove("LSFORMTYPE").then(() => { }).catch((error: any) => {
+        console.error("storage formtype remove error", error);
+      });
+    }).catch((error: any) => {
+      console.error("storage op remove error", error);
+    });
+  }
+
+  doSetOp(op: string) {
+    this.storage.set("LSOP", op).then(() => {
+      this.op = op;
+      if (op === "signup") {
+        this.doStartSignup().then(() => { }).catch((error: any) => {
+          console.error("signup start error", error);
+        });
+      } else if (op === "signin") {
+        this.doStartSignin().then(() => { }).catch((error: any) => {
+          console.error("signin start error", error);
+        });
+      } else if (op === "forgot") {
+        this.doStartForgot().then(() => { }).catch((error: any) => {
+          console.error("forgot start error", error);
+        });
+      }
+    }).catch((error: any) => {
+      console.error("storage set op error", error);
+    });
+  }
+
+  doSetFormType(f: string) {
+    return new Promise((resolve, reject) => {
+      this.storage.set("LSFORMTYPE", f).then(() => {
+        this.formtype = f;
+        resolve(true);
+      }).catch((error: any) => {
+        console.error("storage set error", error);
+        reject(error);
+      });
+    });
+  }
+
+  doStartSignin() {
+    return new Promise((resolve, reject) => {
+      this.doSetFormType("signin").then(() => {
+        this.signinForm.get("email").value
+          ? setTimeout(() => {
+            this.showhide = "show-segment";
+            this.passwordfocus.setFocus().then(() => {
+              resolve(true);
+            });
+          }, this.focustime)
+          : setTimeout(() => {
+            this.showhide = "show-segment";
+            this.emailfocussignin.setFocus().then(() => {
+              resolve(true);
+            });
+          }, this.focustime);
+      }).catch((error: any) => {
+        console.error(error);
+        reject(error);
+      });
+    });
+  }
+
+  doStartForgot() {
+    return new Promise((resolve, reject) => {
+      this.doSetFormType("forgot").then(() => {
+        setTimeout(() => {
+          this.showhide = "show-segment";
+          this.emailfocus.setFocus().then(() => {
+            resolve(true);
+          });
+        }, this.focustime);
+      }).catch((error: any) => {
+        console.error(error);
+        reject(error);
+      });
+    });
+  }
+
+  doStartSignup() {
+    return new Promise((resolve, reject) => {
+      this.doSetFormType("signup").then(() => {
+        setTimeout(() => {
+          this.showhide = "show-segment";
+          this.emailfocussignup.setFocus().then(() => {
+            resolve(true);
+          });
+        }, this.focustime);
+      }).catch((error: any) => {
+        console.error(error);
+        reject(error);
+      });
+    });
+  }
+
+  doAfterSuccess() {
+    this.storage.get("LSOP").then((LSOP: string) => {
+      const q = LSOP === "forgot" || LSOP === "signup" || LSOP === "checkout" ? this.doSetOp("signin") : null;
+    }).catch((error: any) => {
+      console.error("storage get error", error);
+    });
+  }
+
+  Signin() {
+    this.isInProgress = true;
+    this.error = null;
+    this.success_str = null;
+    const r = this.isRememberMe
+      ? this.storage.set("LSREMEMBERME", this.isRememberMe).then(() => {
+        this.storage.set("LSUSEREMAIL", this.signinForm.get("email").value).then(() => { });
+      })
+      : this.storage.set("LSUSEREMAIL", null).then(() => {
+        this.storage.set("LSREMEMBERME", null).then(() => { });
+      });
+    if (this.signinForm.get("email").valid && this.signinForm.get("password").valid) {
+      this.auth.Signin({
+        email: this.signinForm.get("email").value,
+        password: this.signinForm.get("password").value
+      }).then(() => {
+        this.storage.set("LSREMEMBERME", this.signinForm.get("isRememberMe").value).then(() => {
+          this.storage.set("LSUSEREMAIL", this.signinForm.get("email").value).then(() => {
+            this.doSetFormType("tfac").then(() => {
+              setTimeout(() => {
+                this.tfacfocus.setFocus().then(() => {
+                  this.isInProgress = false;
+                });
+              }, this.focustime);
+            }).catch((error: any) => {
+              console.error(error);
+            });
+          });
+        });
+      }).catch((error: any) => {
+        this.isInProgress = false;
+        this.signinForm.controls["password"].setValue(null);
+        this.error = error;
+      });
+    } else {
+      this.isInProgress = false;
+      this.signinForm.controls["password"].setValue(null);
+      this.error = "invalid credentials";
+    }
+
+  }
+
+  TFAC() {
+    this.isInProgress = true;
+    this.error = null;
+    this.success_str = null;
+    this.auth.TFAC({
+      email: this.signinForm.get("email").value,
+      password: this.signinForm.get("password").value,
+      tfac: this.TFACForm.get("tfac").value
+    }).then(() => {
+      this.doDismissModal();
+      this.isInProgress = false;
+    }).catch((error: any) => {
+      this.isInProgress = false;
+      console.error("error tfac", error);
+      this.TFACForm.controls["tfac"].setValue(null);
+      this.error = error;
+    });
+  }
+
+  Reset() {
+    this.isInProgress = true;
+    this.error = null;
+    this.success_str = null;
+    this.auth.Reset({
+      email: this.email,
+      password: this.resetForm.get("password").value,
+      tfac: this.resetForm.get("tfac").value
+    }).then(() => {
+      this.isInProgress = false;
+      this.success_str = "password was reset successfully";
+      this.formtype = "signin"
+    }).catch((error: any) => {
+      this.isInProgress = false;
+      console.error("error reset", error);
+      this.resetForm.controls["tfac"].setValue(null);
+      this.error = error;
+    });
+  }
+
+  doForgot() {
+    if (!this.forgotForm.valid) {
+      console.error("*** form is not valid");
+    } else {
+      this.isInProgress = true;
+      this.error = null;
+      this.success_str = null;
+      this.auth.Forgot({
+        email: this.forgotForm.get("email").value
+      }).then(() => {
+        this.email = this.forgotForm.get("email").value
+        this.doSetFormType("reset").then(() => {
+          setTimeout(() => {
+            this.tfacfocus.setFocus().then(() => {
+              this.isInProgress = false;
+            });
+          }, this.focustime);
+        }).catch((error: any) => {
+          console.error(error);
+        });
+      }).catch((error: any) => {
+        this.isInProgress = false;
+        this.forgotForm.controls["email"].setValue(null);
+        this.error = error;
+      });
+    }
+  }
+
+  Signup() {
+    if (this.signupForm.get("email").valid && this.signupForm.get("name").valid && this.signupForm.get("password").valid && this.signupForm.get("passcode").valid) {
+      this.isInProgress = true;
+      this.error = null;
+      this.success_str = null;
+      this.auth.Signup({
+        name: this.signupForm.get("name").value,
+        email: this.signupForm.get("email").value,
+        password: this.signupForm.get("password").value,
+        passcode: this.signupForm.get("passcode").value
+      }).then((res: any) => {
+        this.storage.set("LSUSEREMAIL", this.signupForm.get("email").value).then(() => {
+          this.isInProgress = false;
+          this.successMessage = res.msg;
+          this.formtype = "success";
+        }).catch((error: any) => {
+          console.error("storage error", error);
+          this.error = error;
+        });
+      }).catch((error: any) => {
+        this.isInProgress = false;
+        this.signinForm.controls["password"].setValue(null);
+        this.error = error;
+      });
+    }
+  }
+
+  doBackToSignup() {
+    this.formtype = "signup";
+  }
+
+  doDismissModal() {
+    this.misc.dismissModal(null).then(() => { }).catch((error: any) => {
+      console.error("error", error.message);
+    });
+  }
+}
