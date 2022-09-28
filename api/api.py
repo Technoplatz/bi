@@ -3166,7 +3166,8 @@ class Email():
     def __init__(self):
         self.SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
         self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
-        self.FROM_NAME = os.environ.get("FROM_NAME")
+        # self.FROM_NAME = os.environ.get("FROM_NAME")
+        self.FROM_NAME = "Technoplatz BI"
         self.SG_TFA_SUBJECT = "Your Backup OTP"
         self.SG_SIGNUP_SUBJECT = "Welcome"
         self.SG_SIGNIN_SUBJECT = "New Sign-in"
