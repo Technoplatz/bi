@@ -20,16 +20,15 @@ jobs:
       - name: Build API image
         run: |
           cd $API_FOLDER
+          ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          if [ $ref_ != "main" ]; then API_IMAGE_NAME=$API_IMAGE_NAME-$ref_; fi
           docker build . --file $API_DOCKERFILE --tag $API_IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
       - name: Log in to Github registry
         run: |
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
       - name: Echo system variables
         run: |
-          ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          IMAGE_NAME=$API_IMAGE_NAME
-          if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
-          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$API_VERSION
+          IMAGE_ID=ghcr.io/technoplatz/$API_IMAGE_NAME:$API_VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $API_IMAGE_NAME $IMAGE_ID
           docker push $IMAGE_ID
