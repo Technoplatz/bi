@@ -32,7 +32,7 @@ jobs:
       - name: Push API Image
         id: push-api-image
         run: |
-          IMAGE_NAME=${{steps.push-to-packages.outputs.imagename}}
+          IMAGE_NAME=${{steps.build-api-image.outputs.imagename}}
           IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$API_VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $IMAGE_NAME $IMAGE_ID
