@@ -3,8 +3,12 @@ on:
   push:
     branches:
       - dev0
+      - main
 env:
-  PWA_VERSION: latest
+  API_IMAGE_NAME: bi-api
+  API_FOLDER: api
+  API_DOCKERFILE: Dockerfile
+  API_VERSION: latest
 jobs:
   deneme:
     runs-on: ubuntu-latest
@@ -13,14 +17,22 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
+      - name: Build API image
+        run: |
+          cd $API_FOLDER
+          docker build . --file $API_DOCKERFILE --tag $API_IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+      - name: Log in to Github registry
+        run: |
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
       - name: Echo system variables
         run: |
-          echo "github.repository: ${{ github.repository }}"
-          echo "github.repository_owner: ${{ github.repository_owner }}"
-          echo "github.ref: ${{ github.ref }}"
           ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          echo "ref_: $ref_"
-          IMAGE_ID="bi-api"
-          if [ $ref_ != "main" ]; then IMAGE_ID=$IMAGE_ID-$ref_; fi
-          echo $IMAGE_ID-$ref_
-          echo "IMAGE_ID: $IMAGE_ID-$ref_"
+          IMAGE_NAME=$API_IMAGE_NAME
+          if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
+          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$API_VERSION
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          docker tag $API_IMAGE_NAME $IMAGE_ID
+          docker push $IMAGE_ID
+      - name: Logout from Github registry
+        run: |
+          docker logout ghcr.io
