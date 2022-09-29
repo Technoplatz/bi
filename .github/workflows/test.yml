@@ -19,8 +19,8 @@ jobs:
           echo "github.repository_owner: ${{ github.repository_owner }}"
           echo "github.ref: ${{ github.ref }}"
           ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          IMAGE_ID="bi-api"
-          # echo "$(echo $IMAGE_ID)-$(echo $ref_)"
-          echo $IMAGE_ID-$ref_
           echo "ref_: $ref_"
-          echo "IMAGE_ID: $IMAGE_ID"
+          IMAGE_ID="bi-api"
+          if [ $ref_ != "main" ]; then IMAGE_ID=$IMAGE_ID-$ref_; fi
+          echo $IMAGE_ID-$ref_
+          echo "IMAGE_ID: $IMAGE_ID-$ref_"
