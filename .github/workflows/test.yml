@@ -10,32 +10,34 @@ env:
   API_DOCKERFILE: Dockerfile
   API_VERSION: latest
 jobs:
-  push-to-docker:
+  push-to-packages:
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
+    outputs:
+      imagename: ${{ steps.build-api-image.outputs.imagename }}
     steps:
       - uses: actions/checkout@v3
       - name: Build API image
         id: build-api-image
         run: |
           cd $API_FOLDER
-          ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           IMAGE_NAME=$API_IMAGE_NAME
+          ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
           docker build . --file $API_DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
-          echo "::set-output name=IMAGE_NAME::$(echo ${IMAGE_NAME})"
+          echo "::set-output name=imagename::$IMAGE_NAME"
       - name: Log in to Github registry
         run: |
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
       - name: Push API Image
         id: push-api-image
         run: |
-          IMAGE_NAME="${{ steps.build-api-image.outputs.IMAGE_NAME }}"
+          IMAGE_NAME=${{needs.push-to-packages.outputs.imagename}}
           IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$API_VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          docker tag $API_IMAGE_NAME $IMAGE_ID
+          docker tag $IMAGE_NAME $IMAGE_ID
           docker push $IMAGE_ID
       - name: Logout from Github registry
         run: |
