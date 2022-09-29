@@ -1,4 +1,4 @@
-name: Action for test
+name: Action for pushing images
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ env:
   API_DOCKERFILE: Dockerfile
   API_VERSION: latest
 jobs:
-  deneme:
+  push-to-docker:
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -33,7 +33,7 @@ jobs:
         id: push-api-image
         run: |
           IMAGE_NAME="${{ steps.build-api-image.outputs.IMAGE_NAME }}"
-          IMAGE_ID=ghcr.io/technoplatz/$API_IMAGE_NAME:$API_VERSION
+          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$API_VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $API_IMAGE_NAME $IMAGE_ID
           docker push $IMAGE_ID
