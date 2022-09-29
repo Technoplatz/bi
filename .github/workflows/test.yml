@@ -1,0 +1,22 @@
+name: Action for test
+on:
+  push:
+    branches:
+      - dev0
+env:
+  PWA_VERSION: latest
+jobs:
+  deneme:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - name: Echo system variables
+        run: |
+          echo "github.repository: ${{ github.repository }}"
+          echo "github.repository_owner: ${{ github.repository_owner }}"
+          echo "github.ref: ${{ github.ref }}"
+          REFOPT=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          echo "REFOPT: $REFOPT"
