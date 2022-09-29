@@ -18,5 +18,11 @@ jobs:
           echo "github.repository: ${{ github.repository }}"
           echo "github.repository_owner: ${{ github.repository_owner }}"
           echo "github.ref: ${{ github.ref }}"
-          REFOPT=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          echo "REFOPT: $REFOPT"
+          ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          echo "ref_: $ref_"
+          IMAGE_ID_ = "bi-api"
+          PREFIX=""
+          if ($ref_ != "main") {
+            IMAGE_ID_ = "$IMAGE_ID_-$ref_"
+          }
+          echo "IMAGE_ID_: $IMAGE_ID_"
