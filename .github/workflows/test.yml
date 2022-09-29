@@ -23,6 +23,6 @@ jobs:
           IMAGE_ID_ = "bi-api"
           PREFIX=""
           if ($ref_ != "main") {
-            IMAGE_ID_ = "$IMAGE_ID_-$ref_"
+            IMAGE_ID_ = $IMAGE_ID_-$ref_
           }
           echo "IMAGE_ID_: $IMAGE_ID_"
