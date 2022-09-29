@@ -7,8 +7,11 @@ on:
 env:
   API_IMAGE_NAME: bi-api
   API_FOLDER: api
-  API_DOCKERFILE: Dockerfile
-  API_VERSION: latest
+  PWA_IMAGE_NAME: bi-pwa
+  PWA_FOLDER: pwa
+  PWA_VERSION: latest
+  DOCKERFILE: Dockerfile
+  VERSION: latest
 jobs:
   push-to-packages:
     runs-on: ubuntu-latest
@@ -24,7 +27,16 @@ jobs:
           IMAGE_NAME=$API_IMAGE_NAME
           ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
-          docker build . --file $API_DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          echo "::set-output name=imagename::$(echo $IMAGE_NAME)"
+      - name: Build PWA image
+        id: build-pwa-image
+        run: |
+          cd $PWA_FOLDER
+          IMAGE_NAME=$PWA_IMAGE_NAME
+          ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
+          docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "::set-output name=imagename::$(echo $IMAGE_NAME)"
       - name: Log in to Github registry
         run: |
@@ -33,7 +45,15 @@ jobs:
         id: push-api-image
         run: |
           IMAGE_NAME=${{steps.build-api-image.outputs.imagename}}
-          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$API_VERSION
+          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$VERSION
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          docker tag $IMAGE_NAME $IMAGE_ID
+          docker push $IMAGE_ID
+      - name: Push PWA Image
+        id: push-pwa-image
+        run: |
+          IMAGE_NAME=${{steps.build-pwa-image.outputs.imagename}}
+          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $IMAGE_NAME $IMAGE_ID
           docker push $IMAGE_ID
