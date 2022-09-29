@@ -20,9 +20,8 @@ jobs:
           echo "github.ref: ${{ github.ref }}"
           ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           echo "ref_: $ref_"
-          IMAGE_ID_ = "bi-api"
-          PREFIX=""
+          IMAGE_ID = "bi-api"
           if ($ref_ != "main") {
-            IMAGE_ID_ = $IMAGE_ID_-$ref_
+            IMAGE_ID = ${{ format('{0}-{1}', IMAGE_ID, ref_) }}
           }
-          echo "IMAGE_ID_: $IMAGE_ID_"
+          echo "IMAGE_ID: $IMAGE_ID"
