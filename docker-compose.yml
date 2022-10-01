@@ -1,7 +1,6 @@
 # Technoplatz BI - Docker Compose
 # Mustafa Mat @Technoplatz 2019-2023
 # docker-compose up --build --detach --remove-orphans
-
 version: "3.7"
 services:
   traefik:

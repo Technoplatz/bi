@@ -1,9 +1,14 @@
+# Technoplatz BI - Action
+# Mustafa Mat @Technoplatz 2019-2023
 name: Action for pushing images
 on:
   push:
     branches:
       - dev0
       - main
+    paths:
+      - api
+      - pwa
 env:
   API_IMAGE_NAME: bi-api
   API_FOLDER: api
@@ -16,14 +21,14 @@ jobs:
   push-to-packages:
     runs-on: ubuntu-latest
     permissions:
-      packages: write
+      packages: read
       contents: read
     steps:
       - uses: actions/checkout@v3
       - name: Build API image
         id: build-api-image
+        working-directory: $API_FOLDER
         run: |
-          cd $API_FOLDER
           IMAGE_NAME=$API_IMAGE_NAME
           ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
@@ -31,8 +36,8 @@ jobs:
           echo "::set-output name=imagename::$(echo $IMAGE_NAME)"
       - name: Build PWA image
         id: build-pwa-image
+        working-directory: $PWA_FOLDER
         run: |
-          cd $PWA_FOLDER
           IMAGE_NAME=$PWA_IMAGE_NAME
           ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi

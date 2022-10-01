@@ -2,7 +2,7 @@
   "name": "technoplatz-bi-pwa",
   "version": "3.0.1",
   "author": "Mustafa Mat",
-  "homepage": "https://www.technoplatz.de",
+  "homepage": "https://bi.technoplatz.com",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
