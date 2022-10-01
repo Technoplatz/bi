@@ -1,6 +1,7 @@
 # Technoplatz BI - Docker Compose
 # Mustafa Mat @Technoplatz 2019-2023
-# docker-compose up --build --detach --remove-orphans
+# docker-compose --env-file .dev.env --file docker-compose-dev.yml up --build --detach --remove-orphans
+
 version: "3.7"
 services:
   traefik:
@@ -174,7 +175,10 @@ services:
 
   api:
     container_name: api
-    image: ghcr.io/technoplatz/bi-api:latest
+    image: ghcr.io/technoplatz/bi-api-dev0:latest
+    build:
+      context: api/.
+      dockerfile: Dockerfile
     pull_policy: always
     depends_on:
       - replicaset
@@ -222,7 +226,10 @@ services:
 
   pwa:
     container_name: pwa
-    image: ghcr.io/technoplatz/bi-pwa:latest
+    image: ghcr.io/technoplatz/bi-pwa-dev0:latest
+    build:
+      context: pwa/.
+      dockerfile: Dockerfile
     pull_policy: always
     hostname: pwa
     restart: always
