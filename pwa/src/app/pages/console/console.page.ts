@@ -69,6 +69,7 @@ export class ConsolePage implements OnInit {
   public is_pivot_showed: boolean = true;
   public is_pivot_loading: boolean = false;
   public pivot_: string = null;
+  public statistics_html_: string = null;
   public multicheckbox: boolean = false;
   public clonok: number = -1;
   public show_select: boolean = true;
@@ -295,6 +296,7 @@ export class ConsolePage implements OnInit {
 
   doEnterViewMode(view_: any) {
     return new Promise((resolve, reject) => {
+      console.log("*** doEnterViewMode", view_);
       this.is_loaded = false;
       this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
       this.menu = "collections";
@@ -327,13 +329,14 @@ export class ConsolePage implements OnInit {
           this.view_mode[this.id] = LSVIEW ? true : false;
           this.view_mode["vie_title"] = LSVIEW ? LSVIEW.vie_title : null;
           this.view_mode["_tags"] = LSVIEW ? LSVIEW._tags : null;
-          console.log("*** this.view._id", this.view._id);
           this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
+            console.log("*** Pivot res", res);
             this.pivot_ = res && res.pivot ? res.pivot : null;
-            resolve(true);
+            this.statistics_html_ = res && res.statistics_html ? res.statistics_html : null;
           }).catch((error: any) => {
             console.error("*** doGetViewMode", error);
             this.misc.doMessage(error.error.message, "error");
+          }).finally(() => {
             resolve(true);
           });
         } else {
@@ -1132,11 +1135,11 @@ export class ConsolePage implements OnInit {
     this.views[v_].loading = true;
     this.crud.Visual("_visual", data._id, this.accountf_apikey).then((chart: any) => {
       this.views[v_].chart = chart;
-      this.views[v_].loading = false;
     }).catch((error: any) => {
       this.views[v_].chart = {};
       this.visuals[v_].error = error;
-      this.visuals[v_].loading = false;
+    }).finally(() => {
+      this.views[v_].loading = false;
     });
   }
 

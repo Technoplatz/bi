@@ -70,8 +70,8 @@ SENDGRID_API_KEY="SG.********.********"
 **SENDGRID_API_KEY:** An API key used for sending automated emails over Sendgrid. Please find the detailed information about how to obtain an API key for Technoplatz BI. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key</sub>
 
 
-#### Step-4
-Run the platform;
+#### STEP 4
+Set the containers up and running;
 
 ```bash
 docker-compose up --build --detach --remove-orphans
