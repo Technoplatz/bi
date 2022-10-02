@@ -7,7 +7,7 @@ on:
       - dev0
     paths:
       - "api/**"
-      - "push-api-to-packages.yml"
+      - ".github/workflows/push-api-to-packages.yml"
       - ".dev.env"
   pull_request:
     branches:
