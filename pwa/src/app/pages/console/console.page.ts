@@ -69,8 +69,12 @@ export class ConsolePage implements OnInit {
   public is_pivot_showed: boolean = true;
   public is_pivot_loading: boolean = false;
   public pivot_: string = null;
+<<<<<<< HEAD
   public statistics_key_: string = null;
   public statistics_: any = null;
+=======
+  public statistics_html_: string = null;
+>>>>>>> 9e410e4 (API and action issues)
   public multicheckbox: boolean = false;
   public clonok: number = -1;
   public show_select: boolean = true;
@@ -331,11 +335,16 @@ export class ConsolePage implements OnInit {
           this.view_mode["vie_title"] = LSVIEW ? LSVIEW.vie_title : null;
           this.view_mode["_tags"] = LSVIEW ? LSVIEW._tags : null;
           this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
+            console.log("*** Pivot res", res);
             this.pivot_ = res && res.pivot ? res.pivot : null;
+<<<<<<< HEAD
             const statistics_ = res && res.statistics ? res.statistics : null;
             this.statistics_key_ = this.view.vie_pivot_values[0].key;
             this.statistics_ = statistics_ && statistics_[this.statistics_key_] ? statistics_[this.statistics_key_] : null;
             console.log("*** statistics_", this.statistics_);
+=======
+            this.statistics_html_ = res && res.statistics_html ? res.statistics_html : null;
+>>>>>>> 9e410e4 (API and action issues)
           }).catch((error: any) => {
             console.error("*** doGetViewMode", error);
             this.misc.doMessage(error.error.message, "error");
