@@ -60,7 +60,7 @@ FROM_EMAIL="bi@company.com"
 SENDGRID_API_KEY="SG.********.********"
 ```
 
-<sub>**TZ:** Time zone of your platform's location must be entered in accordance to the official TZ format (eg. America/New_York). For more info about TZ https://en.wikipedia.org/wiki/List_of_tz_database_time_zones\
+<sub>**TZ:** Time zone of your platform's location must be entered in accordance to the official TZ format (eg. America/New_York). https://en.wikipedia.org/wiki/List_of_tz_database_time_zones is the link for more info about TZ.\
 **DOMAIN:** Leave it as "localhost" for local access or testing use.\
 **USER_EMAIL:** Company e-mail address of Administrator user.\
 **USER_NAME:** First and last names of Administartor user (eg. John Doe).\
