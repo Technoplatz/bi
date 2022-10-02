@@ -15,7 +15,8 @@ on:
       - "api/**"
 env:
   API_IMAGE_NAME: bi-api
-  DOCKERFILE: api/Dockerfile
+  API_FOLDER_NAME: api
+  DOCKERFILE: Dockerfile
   VERSION: latest
 jobs:
   push-to-packages:
@@ -33,6 +34,7 @@ jobs:
           IMAGE_NAME=$API_IMAGE_NAME
           ref_=${{steps.vars.outputs.oref}}
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
+          cd $API_FOLDER_NAME
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
       - name: Log in to Github registry
