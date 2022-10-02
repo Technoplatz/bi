@@ -14,7 +14,7 @@ on:
       - "api/**"
 env:
   API_IMAGE_NAME: bi-api
-  API_FOLDER: ./api
+  API_FOLDER: api
   DOCKERFILE: Dockerfile
   VERSION: latest
 jobs:
