@@ -31,7 +31,7 @@ jobs:
         id: build-api-image
         run: |
           IMAGE_NAME=$API_IMAGE_NAME
-          ref_ = ${{steps.vars.outputs.oref}}
+          ref_=${{steps.vars.outputs.oref}}
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
