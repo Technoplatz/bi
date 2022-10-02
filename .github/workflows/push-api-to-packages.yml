@@ -13,9 +13,10 @@ on:
       - main
     paths:
       - "api/**"
+      - ".github/workflows/push-api-to-packages.yml"
 env:
   API_IMAGE_NAME: bi-api
-  API_FOLDER_NAME: api
+  API_FOLDER: api
   DOCKERFILE: Dockerfile
   VERSION: latest
 jobs:
@@ -34,7 +35,7 @@ jobs:
           IMAGE_NAME=$API_IMAGE_NAME
           ref_=${{steps.vars.outputs.oref}}
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
-          cd $API_FOLDER_NAME
+          cd $API_FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
       - name: Log in to Github registry
