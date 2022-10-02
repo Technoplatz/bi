@@ -1,7 +1,8 @@
 # Technoplatz BI - Docker Compose
 # Mustafa Mat @Technoplatz 2019-2023
-# docker-compose --env-file .dev.env --file docker-compose-dev.yml up --build --detach --remove-orphans
-
+# docker-compose --env-file .dev.env --file docker-compose.dev.yml up --build --detach --remove-orphans
+# docker-compose --env-file .dev.env --file docker-compose.dev.yml up --build --detach --remove-orphans --no-deps api
+# docker-compose logs -f | grep -v 'mongo' | grep -v 'traefik' | grep -v 'watchtower'
 version: "3.7"
 services:
   traefik:
