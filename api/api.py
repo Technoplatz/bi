@@ -162,8 +162,10 @@ class Announcement():
             footer_ = f"<br />Generated at {strftime_}"
             html_ = f"<div style=\"{style_div_}\"><p>{header_}</p><p>{body_}</p><p>{footer_}</p></div>" if scope_ == "live" else f"<div style=\"{style_div_}\"><p style='color:#c00; font-weight: bold;'>THIS IS A TEST MESSAGE</p><p>{header_}</p><p>{body_}</p><p>{footer_}</p></div>"
 
-            email_sent_ = Email().sendEmail_wAttachment_f({
+            email_sent_ = Email().sendEmail_f({
                 "personalizations": personalizations_,
+                "op": "view",
+                "name": None,
                 "html": html_,
                 "subject": vie_title_ if scope_ == "live" else f"TEST: {vie_title_}",
                 "files": files_
@@ -3165,8 +3167,7 @@ class Email():
     def __init__(self):
         self.SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
         self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
-        # self.FROM_NAME = os.environ.get("FROM_NAME")
-        self.FROM_NAME = "Technoplatz BI"
+        self.FROM_NAME = os.environ.get("FROM_NAME")
         self.SG_TFA_SUBJECT = "Your Backup OTP"
         self.SG_SIGNUP_SUBJECT = "Welcome"
         self.SG_SIGNIN_SUBJECT = "New Sign-in"
@@ -3179,62 +3180,31 @@ class Email():
 
     def sendEmail_f(self, msg):
         try:
-            op = msg["op"]
-            subject = self.SG_UPLOADERR_SUBJECT if op in ["uploaderr",
-                                                          "importerr"] else self.SG_SIGNIN_SUBJECT if op == "signin" else self.SG_TFA_SUBJECT if op == "tfa" else self.SG_SIGNUP_SUBJECT if op == "signup" else self.SG_DEFAULT_SUBJECT
+            op_ = msg["op"] if "op" in msg else None
+            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
+            html_ = f"{msg['html']}" if "html" in msg else ""
+            personalizations_ = msg["personalizations"] if "personalizations" in msg else None
+            to_ = msg["to"] if "to" in msg else None
+            name_ = msg["name"] if "name" in msg else None
 
-            html_ = f"{msg['html']}"
+            if not personalizations_:
+                if not to_:
+                    raise APIError("to is missing")
+                if not name_:
+                    raise APIError("name is missing")
+                personalizations_ = [{
+                    "from": {
+                        "email": self.FROM_EMAIL,
+                        "name": self.FROM_NAME,
+                    },
+                    "to": [{
+                        "email": to_,
+                        "name": name_
+                    }]
+                }]
 
-            req_ = {
-                "personalizations": [
-                    {
-                        "from": {
-                            "email": self.FROM_EMAIL,
-                            "name": self.FROM_NAME,
-                        },
-                        "to": [{
-                            "email": msg["to"],
-                            "name": msg["name"]
-                        }]
-                    }
-                ],
-                "from": {
-                    "email": self.FROM_EMAIL,
-                    "name": self.FROM_NAME
-                },
-                "subject": subject,
-                "content": [
-                    {
-                        "type": "text/html",
-                        "value": html_
-                    }
-                ],
-                "mail_settings": {
-                    "footer": {
-                        "enable": True,
-                        "html": self.disclaimer_,
-                        "text": self.disclaimer_text_
-                    }
-                },
-                "categories": [
-                    "technoplatz-bi"
-                ]
-            }
-
-            # post sg request
-            self.sg_.client.mail.send.post(request_body=req_)
-            res = {"result": True}
-
-        except Exception as exc:
-            res = Misc().exception_f(exc)
-
-        finally:
-            return res
-
-    def sendEmail_wAttachment_f(self, msg):
-        try:
-            files_ = msg["files"]
-            html_ = f"{msg['html']}"
+            subject_ = self.SG_UPLOADERR_SUBJECT if op_ in [
+                "uploaderr", "importerr"] else self.SG_SIGNIN_SUBJECT if op_ == "signin" else self.SG_TFA_SUBJECT if op_ == "tfa" else self.SG_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.SG_DEFAULT_SUBJECT
 
             # read attachment into variable
             attachments_ = []
@@ -3253,20 +3223,17 @@ class Email():
                 })
                 f_.close()
 
-            # create a request for sendgrid v3
             req_ = {
-                "personalizations": msg["personalizations"],
+                "personalizations": personalizations_,
                 "from": {
                     "email": self.FROM_EMAIL,
                     "name": self.FROM_NAME
                 },
-                "subject": msg["subject"],
-                "content": [
-                    {
-                        "type": "text/html",
-                        "value": html_
-                    }
-                ],
+                "subject": subject_,
+                "content": [{
+                    "type": "text/html",
+                    "value": html_
+                }],
                 "mail_settings": {
                     "footer": {
                         "enable": True,
@@ -3282,11 +3249,12 @@ class Email():
             if attachments_ and len(attachments_) > 0:
                 req_["attachments"] = attachments_
 
-            # post sg request
             self.sg_.client.mail.send.post(request_body=req_)
 
-            # send response ok
             res_ = {"result": True}
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
             res_ = Misc().exception_f(exc)

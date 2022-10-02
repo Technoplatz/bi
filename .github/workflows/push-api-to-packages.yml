@@ -5,11 +5,6 @@ on:
   push:
     branches:
       - dev0
-    paths:
-      - "api/**"
-      - ".github/workflows/push-api-to-packages.yml"
-  pull_request:
-    branches:
       - main
     paths:
       - "api/**"

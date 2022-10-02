@@ -85,5 +85,5 @@ Official Web Site\
 #### Author
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
 Founder, Technoplatz IT Solutions GmbH\
-Senior System Analist Developer\
-Data Sciences, Statistics B.Sc.
+<sub>Senior System Analist Developer\
+Data Sciences, Statistics B.Sc.</sub>
