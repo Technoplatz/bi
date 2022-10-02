@@ -109,7 +109,7 @@ class Announcement():
             to_ = list(dict.fromkeys(to_))
 
             _id = view_["_id"]
-            view_to_pivot_f_ = Crud().view_to_pivot_f({
+            view_to_pivot_f_ = Crud().view_to_dataset_f({
                 "id": _id,
                 "user": user_
             })
@@ -1809,7 +1809,7 @@ class Crud():
         finally:
             return res_
 
-    def view_to_pivot_f(self, obj):
+    def view_to_dataset_f(self, obj):
         try:
             id_ = obj["id"]
             user_ = obj["user"]
@@ -1835,7 +1835,7 @@ class Crud():
             if is_crud_ and not collection_find_one_:
                 raise APIError(f"collection not found: {col_id_}")
 
-            structure_ = collection_find_one_["col_structure"] if is_crud_ else self.root_schemes_f(f"collections/{vie_collection_id_}")
+            # structure_ = collection_find_one_["col_structure"] if is_crud_ else self.root_schemes_f(f"collections/{vie_collection_id_}")
             # properties_ = structure_["properties"] if "properties" in structure_ else None
 
             generate_view_data_f_ = Crud().view_f({
@@ -1859,6 +1859,8 @@ class Crud():
                     "file_excel": None,
                     "file_csv_raw": None,
                     "file_excel_raw": None,
+                    "count": 0,
+                    "statistics": None,
                     "df": None
                 }
                 return
@@ -2012,8 +2014,9 @@ class Crud():
             df_.to_excel(f"/cron/{file_excel_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
             df_raw_.to_csv(f"/cron/{file_csv_raw_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
             df_raw_.to_excel(f"/cron/{file_excel_raw_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
-
             dfj_ = df_raw_.head(10).to_json(orient="records")
+            describe_ = df_.describe(include="all") if df_ is not None else None
+            statistics_ = json.loads(describe_.to_json()) if describe_ is not None else None
 
             res_ = {
                 "result": True,
@@ -2023,6 +2026,7 @@ class Crud():
                 "file_csv_raw": file_csv_raw_,
                 "file_excel_raw": file_excel_raw_,
                 "count": len(df_),
+                "statistics": statistics_,
                 "df": dfj_
             }
 
@@ -2099,22 +2103,17 @@ class Crud():
             if not vie_structure_:
                 raise APIError("view structure not found")
 
-            filter_ = {
+            views_ = self.db["_view"].find(filter={
                 "vie_enabled": True,
                 "_tags": {"$elemMatch": {"$in": user_["_tags"]}}
-            }
+            }, sort=[("vie_priority", 1)])
 
-            views_ = self.db["_view"].find(filter=filter_, sort=[("vie_priority", 1)])
-
-            # loops in the cursor to create reault set
             for view_ in views_:
                 vie_collection_id_ = view_["vie_collection_id"]
                 is_crud_ = True if vie_collection_id_[:1] != "_" else False
-
                 collection_ = self.db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"collections/{vie_collection_id_}")
                 if not collection_:
                     continue
-
                 records_.append(view_)
 
             res_ = {
@@ -3831,7 +3830,7 @@ class Auth():
             jdate_exp_ = int(user_["jdate"]) + int(secur_max_age_)
 
             if jdate_curr_ > jdate_exp_:
-                raise APIError(f"session expired {email_}")
+                raise APIError(f"session expired")
 
             # set the result
             res_ = {"result": True, "user": user_}
@@ -4699,10 +4698,7 @@ def auth_f():
 @app.route("/get/visual/<string:id>", methods=["GET", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_visual_f(id):
-
     try:
-
-        # validates restapi request
         web_validate_ = RestAPI().validate_pwa_f()
         if not web_validate_["result"]:
             raise APIError(web_validate_["msg"] if "msg" in web_validate_ else "validation error")
@@ -4762,10 +4758,7 @@ def get_visual_f(id):
 @app.route("/get/pivot/<string:id>", methods=["GET", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_pivot_f(id):
-
     try:
-
-        # validates restapi request
         validate_ = RestAPI().validate_pwa_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
@@ -4786,20 +4779,22 @@ def get_pivot_f(id):
         if not user_ or not user_["usr_id"] or "usr_id" not in user_:
             raise AuthError("user not found for pivot")
 
-        view_to_pivot_f_ = Crud().view_to_pivot_f({
+        view_to_dataset_f_ = Crud().view_to_dataset_f({
             "id": id,
             "user": user_
         })
 
-        if not view_to_pivot_f_["result"]:
-            raise APIError(view_to_pivot_f_["msg"])
+        if not view_to_dataset_f_["result"]:
+            raise APIError(view_to_dataset_f_["msg"])
 
-        pivot_ = view_to_pivot_f_["pivot"].to_html().replace('border="1"', "") if "pivot" in view_to_pivot_f_ and view_to_pivot_f_["pivot"] is not None else ""
-        count_ = view_to_pivot_f_["count"] if "count" in view_to_pivot_f_ and view_to_pivot_f_["count"] > 0 else 0
+        pivot_ = view_to_dataset_f_["pivot"].to_html().replace('border="1"', "") if "pivot" in view_to_dataset_f_ and view_to_dataset_f_["pivot"] is not None else ""
+        statistics_ = view_to_dataset_f_["statistics"] if "statistics" in view_to_dataset_f_ else None
+        count_ = view_to_dataset_f_["count"] if "count" in view_to_dataset_f_ and view_to_dataset_f_["count"] > 0 else 0
 
         res_ = {
             "result": True,
             "pivot": pivot_,
+            "statistics": statistics_,
             "count": count_
         }
 
@@ -4821,8 +4816,8 @@ def get_pivot_f(id):
         code_ = 500
 
     finally:
-        # return res_, code_, headers
         headers = {"Content-Type": "application/json; charset=utf-8"}
+        print("*** 222 statistics_", res_, flush=True)
         return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers
 
 

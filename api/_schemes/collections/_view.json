@@ -378,7 +378,7 @@
             "title": "KPI Target Value",
             "description": "KPI Target Value",
             "default": 1,
-            "width": 140
+            "width": 160
         },
         "vie_p_xaxis_show": {
             "bsonType": "bool",
