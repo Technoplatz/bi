@@ -8,7 +8,6 @@ on:
     paths:
       - "api/**"
       - ".github/workflows/push-api-to-packages.yml"
-      - ".dev.env"
   pull_request:
     branches:
       - main
@@ -16,7 +15,7 @@ on:
       - "api/**"
 env:
   API_IMAGE_NAME: bi-api
-  API_FOLDER: api
+  API_FOLDER_NAME: api
   DOCKERFILE: Dockerfile
   VERSION: latest
 jobs:
@@ -24,22 +23,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Variables
+        id: vars
+        shell: bash
+        run: |
+          if [ ${{ github.event_name }} != "pull_request" ]; then echo "::set-output name=oref::$(echo ${GITHUB_REF#refs/heads/})"; else echo "::set-output name=oref::$(echo ${GITHUB_HEAD_REF})"; fi
       - name: Build API image
         id: build-api-image
         run: |
           IMAGE_NAME=$API_IMAGE_NAME
-          ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          ref_=${{steps.vars.outputs.oref}}
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
-          cd $API_FOLDER
+          cd $API_FOLDER_NAME
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
-          echo "::set-output name=imagename::$(echo $IMAGE_NAME)"
+          echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
       - name: Log in to Github registry
         run: |
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
       - name: Push API image
         id: push-api-image
         run: |
-          IMAGE_NAME=${{steps.build-api-image.outputs.imagename}}
+          IMAGE_NAME=${{steps.build-api-image.outputs.oimagename}}
           IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $IMAGE_NAME $IMAGE_ID
