@@ -14,7 +14,7 @@ on:
       - "api/**"
 env:
   API_IMAGE_NAME: bi-api
-  API_FOLDER: api
+  API_FOLDER: ./api
   DOCKERFILE: Dockerfile
   VERSION: latest
 jobs:
@@ -24,12 +24,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build API image
         id: build-api-image
-        working-directory: $API_FOLDER
         run: |
           IMAGE_NAME=$API_IMAGE_NAME
           ref_=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
-          docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          docker build $API_FOLDER --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "::set-output name=imagename::$(echo $IMAGE_NAME)"
       - name: Log in to Github registry
         run: |
