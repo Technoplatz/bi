@@ -121,11 +121,13 @@
                           <ng-template #notargetv><br /></ng-template>
                         </div>
                         <div class="hdr3" *ngIf="item.chart.kpi && item.chart.kpi_target_value; else notarget">
-                          <ion-icon *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value" name="thumbs-down"
-                            color="danger">
+                          <ion-icon
+                            *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value"
+                            name="thumbs-down" color="danger">
                           </ion-icon>
-                          <ion-icon *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value <= item.chart.value" name="thumbs-up"
-                            color="success">
+                          <ion-icon
+                            *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value <= item.chart.value"
+                            name="thumbs-up" color="success">
                           </ion-icon>
                           <!-- <ion-icon name="arrow-up"
                             [color]="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value ? 'danger' : 'success'">
@@ -330,7 +332,65 @@
                         </div>
                         <div *ngIf="pivot_ && is_pivot_showed" lines="none" class="ion-no-padding">
                           <div [innerHtml]="pivot_" class="pivot"></div>
-                          <div [innerHtml]="statistics_html_" class="pivot"></div>
+                          <table class="stat">
+                            <tr>
+                              <th colspan="8">
+                                {{ 'Descriptive statistics of' | translate }} {{ statistics_key_ }}
+                              </th>
+                            </tr>
+                            <tr>
+                              <th>
+                                {{ 'count' }}
+                              </th>
+                              <th>
+                                {{ 'mean' }}
+                              </th>
+                              <th>
+                                {{ 'stdev' }}
+                              </th>
+                              <th>
+                                {{ 'min' }}
+                              </th>
+                              <th>
+                                {{ 'max' }}
+                              </th>
+                              <th>
+                                {{ 'top' }}
+                              </th>
+                              <th>
+                                {{ 'unique' }}
+                              </th>
+                              <th>
+                                {{ 'freq' }}
+                              </th>
+                            </tr>
+                            <tr>
+                              <td>
+                                {{ statistics_.count}}
+                              </td>
+                              <td>
+                                {{ statistics_.mean}}
+                              </td>
+                              <td>
+                                {{ statistics_.std}}
+                              </td>
+                              <td>
+                                {{ statistics_.min}}
+                              </td>
+                              <td>
+                                {{ statistics_.max}}
+                              </td>
+                              <td>
+                                {{ statistics_.top}}
+                              </td>
+                              <td>
+                                {{ statistics_.unique}}
+                              </td>
+                              <td>
+                                {{ statistics_.freq}}
+                              </td>
+                            </tr>
+                          </table>
                         </div>
                       </ion-col>
                     </ion-row>
@@ -863,7 +923,8 @@
                 </ion-item>
                 <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }}</ion-list-header>
                 <div *ngIf="views.length > 0; else nopaneviewfound">
-                  <ion-item *ngFor="let item of views; let p = index" class="pane-item cursored" (click)="doEnterViewMode(item)">
+                  <ion-item *ngFor="let item of views; let p = index" class="pane-item cursored"
+                    (click)="doEnterViewMode(item)">
                     <ion-icon slot="end"
                       [name]="item.vie_scheduled ? 'notifications-outline' : 'notifications-off-outline'" size="small">
                     </ion-icon>

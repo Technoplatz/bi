@@ -1,14 +1,13 @@
-### Technoplatz BI Community Edition
+## Technoplatz BI Community Edition
 *It's time to get data-driven with your inner-cycle!*
 
-- [What is Technoplatz BI](#what-is-technoplatz-bi)
+Technoplatz BI is a low-code data application and data sharing solution that empowers those who manage data-driven business processes.
+
+- [Highlights](#what-is-technoplatz-bi)
 - [How to install](#how-to-install)
 - [About](#about)
 
-## What is Technoplatz BI
-Technoplatz BI is a low-code data application and sharing solution that empowers those who manage data-driven business processes.
-
-#### Highlights;
+## Highlights
 
 - Data Application\
 Basic data operations and end-to-end process management on a self-service platform that supports flexible data structure.
@@ -25,26 +24,31 @@ Get responses to your data requests via your own API instead of Spreadsheets.
 ## How to install
 Thanks to its multi-container structure built on Docker, the system can be run on all cloud service providers, embedded servers and even personal computers.
 
-#### STEP 1
-You can install Docker on your computer for free or choose a paid ready-to-use Docker platform from one of the leading cloud service providers. You can find the necessary instruction for cloud or on-premise installation in the links below;
+**STEP 1**\
+<sup>BUILDING A MULTI-CONTAINER PLATFORM</sup>\
+You can install Docker on your computer for free or choose a paid, ready-to-use Docker platform from any of the leading cloud service providers. The links below contain detailed instructions on cloud or on-premises setup of the Docker environment.
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
-#### STEP 2
-Clone the repository from GitHub.
+**STEP 2**\
+<sup>BI INSTALLATION</sup>\
+The community edition is a set of applications running as a service. Unlike desktop apps, there is no traditional installer. The BI tool uses Docker Compose technology to load and run the services as needed.
+
+Please enter the following command to clone the system folder from Github.
 
 ```bash
 git clone https://github.com/technoplatz/bi.git
 ```
 
-After running this command, a folder named `bi` is going to be created in the directory you are already in. Please change your directory into this folder before following the next steps.
+A folder which named `bi` is going to be created in the directory you are in. Please jump into this folder before following the next steps;
 
 ```bash
 cd bi
 ```
 
-#### STEP 3
+**STEP 3**\
+<sup>SETTING UP THE ENVIRONMENT VARIABLES</sup>\
 Edit `.env` file and change the user parameters to the actual values.
 
 ```bash

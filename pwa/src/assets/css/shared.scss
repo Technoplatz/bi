@@ -366,6 +366,16 @@ form ion-item ion-label {
   color: var(--ion-color-primary) !important;
 }
 
+.stat {
+  margin-top: 16px;
+}
+
+.stat th,
+.stat td {
+  padding: 16px;
+  border: 1px solid var(--ion-color-light);
+}
+
 .pivot .dataframe td,
 .pivot .dataframe th {
   padding: 8px;
@@ -1517,6 +1527,15 @@ ion-checkbox {
   max-height: 60px;
   overflow: hidden;
   font-size: small;
+}
+
+.stat-grid ion-row {
+  padding: 0px;
+}
+
+.stat-grid ion-row ion-col {
+  border: 0.5px solid var(--ion-color-light);
+  padding: 0.4rem;
 }
 
 .data-grid ion-row ion-col {
