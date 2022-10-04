@@ -1,28 +1,25 @@
 ## Technoplatz BI Community Edition
 *It's time to get data-driven with your inner-cycle!*
 
-Technoplatz BI is a low-code data application and data sharing solution that empowers those who manage data-driven business processes. Community Edition is free to use under the circumstances of [AGPL-3.0 license terms](https://github.com/Technoplatz/bi/blob/main/LICENSE).
-
-- [Highlights](#what-is-technoplatz-bi)
-- [How to install](#how-to-install)
+- [What is Technoplatz BI](#what-is-technoplatz-bi)
+- [Product Highlights](#product-highlights)
+- [Installation](#installation)
 - [Management](#management)
+- [License](#license)
 - [About](#about)
 
-## Highlights
+## What is Technoplatz BI
+Technoplatz BI is a low-code, multi-container business software and data sharing platform that includes many beneficial features to empower those trying to manage data-driven processes;
 
-- Data Application\
-Basic data operations and end-to-end process management on a self-service platform that supports flexible data structure.
+- Self-service application to manage basic data operations.
+- BI-directional data sharing methods between user and business partners.
+- Descriptive statistics and real-time data visualization.
+- API for sending data requests and retrieving responses.
 
-- BI-directional data sharing\
-Secure data sharing with business partners via live data connections and messaging.
+## Product Highlights
+This section is in progress.
 
-- Visualization\
-Basic statistics and real-time visualization on business data without the need to be a data expert.
-
-- Integration\
-Get responses to your data requests via your own API instead of Spreadsheets.
-
-## How to install
+## Installation
 Thanks to its multi-container structure built on Docker, the system can be run on the cloud, on-preimses and personal computers. Installation consists of four stages. A certain level of command line knowledge is required and it is assumed that you have [GiT](https://git-scm.com) installed on your computer. Please follow the steps below to start working more data-driven;
 
 #### STEP 1
@@ -33,7 +30,7 @@ In the first stage, what you need to do is to select and install a Docker based 
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
 #### STEP 2
-<sup>CLONNING THE OFFICIAL REPOSITORY</sup>\
+<sup>CLONING THE OFFICIAL REPOSITORY</sup>\
 The community edition is a set of applications that running as services. Unlike a desktop application, there is no any traditional installer. The BI tool uses Docker Compose technology to load, run or stop the services as needed. In the second stage, the following command must be entered to receive the system folder from the official Github repository.
 
 ```bash
@@ -72,7 +69,6 @@ SENDGRID_API_KEY="SG.********.********"
 **FROM_NAME:** A name or nickname that appears next to the sender e-mail address.\
 **SENDGRID_API_KEY:** An API key used for sending automated emails over Sendgrid. Please find the detailed information about how to obtain an API key for Technoplatz BI. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key</sub>
 
-
 #### STEP 4
 <sup>STARTING SERVICES</sup>\
 From this point on, `bi` is the system folder and all commands should be run in it.
@@ -85,7 +81,6 @@ docker-compose up --build --detach --remove-orphans
 ```
 
 ## Management
-
 To start or restart the system by receiving the latest updates and keep it running in the background;
 
 ```bash
@@ -113,24 +108,25 @@ docker-compose logs -f | grep 'api'
 ```
 
 ## Production
-Community Edition's default settings are provided for testing and local use. In case the system is used in a real business environment under your subdomain, e.g. **bi.company.com**, there is no stopper for this however the security and system requirements recommended below must be fulfilled prior to the production phase, including but not limited to. All responsibilities in this regard belongs to the user.
-- Define bi.company.com and **api**.bi.company.com in your DNS records and forward them to the IP address of your [Docker platform](#step-1) by adding an "A" record for each.
-- Change DOMAIN parameter to **bi.company.com** in .env file.
+Community Edition's default settings are provided for testing and local use. In case the system is used in a real business environment under your subdomain, e.g. **bi.company.com**, there is no stopper for this however the there are crucial security and system requirements recommended (including but not limited to) below must be fulfilled before making the system public. All responsibilities in this regard belongs to the user.
+- Define **bi**.company.com and **api.bi**.company.com subdomains in your name server and forward them to the IP address of your [Docker platform](#step-1) by adding an "A" record for each.
+- Change DOMAIN parameter to **bi**.company.com in .env file.
 - Get your Docker platform behind the cloud firewall and configure the access settings according to your corporate security policy.
-- Get subdomain *.bi.company.com behind a web application firewall (WAF) and make the required security settings in accordance with your corporate policy.
+- Get subdomains behind a web application firewall (WAF) and make the required security settings in accordance with your corporate policy.
 - Enable HTTPS access.
-- Activate a health check procedure for the application ports of the Docker platform.
+- Activate a "health check" procedure for the public ports of the Docker platform.
 - Check for system updates of the Docker platform regularly.
-- Schedule a regular system-based backup procedure and keep the files in a safe place.
-- Complete the necessary SPF authorization and DMARC policy settings for FROM_EMAIL address defined in .env file, e.g. 'bi@company.com', so that posts are not rejected as Junk by the recipients .
+- Schedule a regular backup procedure and keep the files in safe place.
+- Complete the necessary SPF authorization and DMARC policy settings for FROM_EMAIL address defined in .env file so that posts are not rejected as Junk by recipients.
+
+## License
+Community Edition is free under the [GNU Affero General Public License v3.0](https://github.com/Technoplatz/bi/blob/main/LICENSE) terms.
 
 ## About
-
 Official Web Site\
 [https://bi.technoplatz.com](https://bi.technoplatz.com)
 
 #### Author
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
 Founder, Technoplatz IT Solutions GmbH\
-<sub>Senior System Analist Developer\
-Data Sciences, Statistics B.Sc.</sub>
+<sup>Senior Developer - Data Sciences, Statistics B.Sc.</sup>
