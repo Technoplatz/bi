@@ -73,13 +73,8 @@ SENDGRID_API_KEY="SG.********.********"
 <sup>STARTING SERVICES</sup>\
 From this point on, `bi` is the system folder and all commands should be run in it.
 
-<<<<<<< HEAD
 #### Commands
 To start or restart the system and keep it running in the background;
-=======
-#### STEP 4
-Set the containers up and running;
->>>>>>> 9e410e4 (API and action issues)
 
 ```bash
 docker-compose up --build --detach --remove-orphans
