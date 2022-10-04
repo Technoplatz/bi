@@ -20,24 +20,24 @@ Technoplatz BI is a low-code, multi-container business software and data sharing
 This section is in progress.
 
 ## Installation
-Thanks to its multi-container structure built on Docker, the system can be run on the cloud, on-preimses and personal computers. Installation consists of four stages. A certain level of command line knowledge is required and it is assumed that you have [GiT](https://git-scm.com) installed on your computer. Please follow the steps below to start working more data-driven;
+Thanks to its multi-container structure the system can be run on the cloud, on-preimses and personal computers. Installation consists of four stages. A certain level of command line knowledge is required and it is assumed that you have [GiT](https://git-scm.com) installed on your computer. Please follow the steps below to start working more data-driven;
 
 #### STEP 1
-<sup>SETTING UP A MULTI-CONTAINER PLATFORM</sup>\
-In the first stage, what you need to do is to select and install a Docker based system infrastructure which is required. Your options are installing Docker on your computer for free or choosing a ready-to-use platform from any of the leading cloud service providers. The links below will help you about how to install Docker environment on the cloud or on-premises;
+<sup>SETTING A DOCKER PLATFORM</sup>\
+Docker is an open platform for developing, shipping, and running applications. You can install it on your computer for free or buy a managed service from any of the leading providers. The links below will help you about how to establish a Docker environment on the cloud and on-premises;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
 #### STEP 2
-<sup>CLONING THE OFFICIAL REPOSITORY</sup>\
-The community edition is a set of applications that running as services. Unlike a desktop application, there is no any traditional installer. The BI tool uses Docker Compose technology to load, run or stop the services as needed. In the second stage, the following command must be entered to receive the system folder from the official Github repository.
+<sup>CLONING THE OFFICIAL BI REPOSITORY</sup>\
+The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official repository from Github by running the following command;
 
 ```bash
 git clone https://github.com/technoplatz/bi.git
 ```
 
-A folder which named `bi` is going to be created in the directory you are in. Please jump into this folder;
+When the command runs, a new folder named **bi** will be created in the directory you are in. Please change your directory to **bi** folder;
 
 ```bash
 cd bi
@@ -45,7 +45,7 @@ cd bi
 
 #### STEP 3
 <sup>SETTING ENVIRONMENT VARIABLES</sup>\
-In order for the system run smoothly a couple of core paramateres must be defined once before proceeding to the next steps. The core parameters can be found in the "user parameters" section in `.env` file. Initially, all user parameters are given as sample values must be updated. Please Edit `.env` file, replace the sample values to the actual ones according to below instructions and save the file.
+Before proceeding to the next steps, some user parameters should be defined once. Please edit the `.env` file, replace sample values with actual ones then save the file.
 
 ```bash
 # USER_PARAMETERS
@@ -70,18 +70,27 @@ SENDGRID_API_KEY="SG.********.********"
 **SENDGRID_API_KEY:** An API key used for sending automated emails over Sendgrid. Please find the detailed information about how to obtain an API key for Technoplatz BI. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key</sub>
 
 #### STEP 4
-<sup>STARTING SERVICES</sup>\
-From this point on, `bi` is the system folder and all commands should be run in it.
-
-#### Commands
-To start or restart the system and keep it running in the background;
+<sup>KICK-OFF</sup>\
+Run the following command so that Docker can start the services and keep them up and running in the background;
 
 ```bash
 docker-compose up --detach --remove-orphans
 ```
 
+Installation may take 1-2 minutes depending on your internet speed. After the process is completed, go to the following address in your web browser, click the "Sign in" link and open your first session with your email and password provided in the `.env` file.
+
+```bash
+http://localhost:8100
+```
+
 ## Management
-To start or restart the system by receiving the latest updates and keep it running in the background;
+To start the system and keep it up and running in the background;
+
+```bash
+docker-compose up --detach --remove-orphans
+```
+
+To start or restart the system by receiving the latest software updates and keep it up and running at the background;
 
 ```bash
 docker-compose pull && docker-compose up --detach --remove-orphans
