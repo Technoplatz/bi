@@ -77,14 +77,14 @@ From this point on, `bi` is the system folder and all commands should be run in 
 To start or restart the system and keep it running in the background;
 
 ```bash
-docker-compose up --build --detach --remove-orphans
+docker-compose up --detach --remove-orphans
 ```
 
 ## Management
 To start or restart the system by receiving the latest updates and keep it running in the background;
 
 ```bash
-docker-compose pull && docker-compose up --build --detach --remove-orphans
+docker-compose pull && docker-compose up --detach --remove-orphans
 ```
 
 To stop the system;

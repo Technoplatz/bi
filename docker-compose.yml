@@ -35,10 +35,7 @@ services:
 
   init:
     container_name: init
-    image: bi-init:latest
-    build:
-      context: _init/.
-      dockerfile: Dockerfile
+    image: ghcr.io/technoplatz/bi-init:latest
     hostname: init
     volumes:
       - bi-storage-volume:/init

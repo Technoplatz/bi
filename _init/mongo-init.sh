@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 # Mustafa Mat @Technoplatz 2019-2023
-echo "INIT STARTED"
 openssl rand -base64 756 > /init/replicaset.key
 chmod 400 /init/replicaset.key
-echo "INIT COMPLETED"

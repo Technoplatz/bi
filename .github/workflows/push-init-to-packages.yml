@@ -1,0 +1,50 @@
+# Technoplatz BI - Action
+# Mustafa Mat @Technoplatz 2019-2023
+name: Deploy init image to Github Packages
+on:
+  push:
+    branches:
+      - dev0
+      - main
+    paths:
+      - "_init/**"
+env:
+  INIT_IMAGE_NAME: bi-init
+  INIT_FOLDER: _init
+  DOCKERFILE: Dockerfile
+  VERSION: latest
+jobs:
+  push-to-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Variables
+        id: vars
+        shell: bash
+        run: |
+          echo "GITHUB_REF: ${GITHUB_REF}"
+          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
+          if [ ${{ github.event_name }} != "pull_request" ]; then echo "::set-output name=oref::$(echo ${GITHUB_REF#refs/heads/})"; else echo "::set-output name=oref::$(echo ${GITHUB_HEAD_REF})"; fi
+      - name: Build init image
+        id: build-init-image
+        run: |
+          IMAGE_NAME=$INIT_IMAGE_NAME
+          ref_=${{steps.vars.outputs.oref}}
+          if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
+          cd $INIT_FOLDER
+          docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
+      - name: Log in to Github registry
+        run: |
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Push init image
+        id: push-init-image
+        run: |
+          IMAGE_NAME=${{steps.build-init-image.outputs.oimagename}}
+          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$VERSION
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          docker tag $IMAGE_NAME $IMAGE_ID
+          docker push $IMAGE_ID
+      - name: Logout from Github
+        run: |
+          docker logout ghcr.io
