@@ -90,7 +90,7 @@ To start or restart the system by keeping it up and running in the background;
 docker-compose up --detach --remove-orphans
 ```
 
-To start or restart the system by receiving the latest software updates and keep it up and running at the background;
+To start or restart the system by receiving the latest software updates and keep it up and running in the background;
 
 ```bash
 docker-compose pull && docker-compose up --detach --remove-orphans
@@ -102,13 +102,13 @@ To stop the system;
 docker-compose down
 ```
 
-To remove all dangling images and cache to free up system resources when needed;
+In order to make room for resources when needed;
 
 ```bash
 docker system prune
 ```
 
-To take a look at the system logs;
+To take a look at the logs;
 
 ```bash
 # To display all, except db and only api logs.
