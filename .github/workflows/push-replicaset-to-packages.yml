@@ -1,16 +1,16 @@
 # Technoplatz BI - Action
 # Mustafa Mat @Technoplatz 2019-2023
-name: Deploy API image to Github Packages
+name: Deploy replicaset image to Github Packages
 on:
   push:
     branches:
       - dev0
       - main
     paths:
-      - "api/**"
+      - "_replicaset/**"
 env:
-  API_IMAGE_NAME: bi-api
-  API_FOLDER: api
+  REPLICASET_IMAGE_NAME: bi-replicaset
+  REPLICASET_FOLDER: _replicaset
   DOCKERFILE: Dockerfile
   VERSION: latest
 jobs:
@@ -25,22 +25,22 @@ jobs:
           echo "GITHUB_REF: ${GITHUB_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           if [ ${{ github.event_name }} != "pull_request" ]; then echo "::set-output name=oref::$(echo ${GITHUB_REF#refs/heads/})"; else echo "::set-output name=oref::$(echo ${GITHUB_HEAD_REF})"; fi
-      - name: Build API image
-        id: build-api-image
+      - name: Build replicaset image
+        id: build-replicaset-image
         run: |
-          IMAGE_NAME=$API_IMAGE_NAME
+          IMAGE_NAME=$REPLICASET_IMAGE_NAME
           ref_=${{steps.vars.outputs.oref}}
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
-          cd $API_FOLDER
+          cd $REPLICASET_FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
       - name: Log in to Github registry
         run: |
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-      - name: Push API image
-        id: push-api-image
+      - name: Push replicaset image
+        id: push-replicaset-image
         run: |
-          IMAGE_NAME=${{steps.build-api-image.outputs.oimagename}}
+          IMAGE_NAME=${{steps.build-replicaset-image.outputs.oimagename}}
           IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $IMAGE_NAME $IMAGE_ID
