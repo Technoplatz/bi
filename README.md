@@ -9,12 +9,12 @@
 - [About](#about)
 
 ## What is Technoplatz BI
-Technoplatz BI is a low-code, multi-container business software and data sharing platform that includes many beneficial features to empower those trying to manage data-driven processes;
+Technoplatz BI is a low-code, multi-container business software and data sharing platform that provides many beneficial features to empower those trying to manage data-driven processes;
 
 - Self-service application to manage basic data operations.
 - BI-directional data sharing methods between user and business partners.
 - Descriptive statistics and real-time data visualization.
-- API for sending data requests and retrieving responses.
+- API for making data requests and retrieving responses.
 
 ## Product Highlights
 This section is in progress.
