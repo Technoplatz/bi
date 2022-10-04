@@ -23,11 +23,13 @@ jobs:
         id: vars
         shell: bash
         run: |
+          echo "GITHUB_REF: ${GITHUB_REF}"
+          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           if [ ${{ github.event_name }} != "pull_request" ]; then echo "::set-output name=oref::$(echo ${GITHUB_REF#refs/heads/})"; else echo "::set-output name=oref::$(echo ${GITHUB_HEAD_REF})"; fi
       - name: Build PWA image
         id: build-pwa-image
         run: |
-          IMAGE_NAME=$API_IMAGE_NAME
+          IMAGE_NAME=$PWA_IMAGE_NAME
           ref_=${{steps.vars.outputs.oref}}
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
           cd $PWA_FOLDER
