@@ -20,7 +20,7 @@ Technoplatz BI is a low-code, multi-container business software and data sharing
 This section is in progress.
 
 ## Installation
-Thanks to its multi-container structure the system can be run on the cloud, on-preimses and personal computers. Installation consists of four stages. A certain level of command line knowledge is required and it is assumed that you have [GiT](https://git-scm.com) installed on your computer. Please follow the steps below to start working more data-driven;
+Please complete the following steps in order. You must have [GiT](https://git-scm.com) installed on your computer and a certain level of command line knowledge is required.
 
 #### STEP 1
 <sup>SETTING A DOCKER PLATFORM</sup>\
@@ -31,13 +31,13 @@ Docker is an open platform for developing, shipping, and running applications. Y
 
 #### STEP 2
 <sup>CLONING THE OFFICIAL BI REPOSITORY</sup>\
-The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official repository from Github by running the following command;
+The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official repository from Github;
 
 ```bash
 git clone https://github.com/technoplatz/bi.git
 ```
 
-When the command runs, a new folder named **bi** will be created in the directory you are in. Please change your directory to **bi** folder;
+Then go to `bi` folder which is going to be downloaded;
 
 ```bash
 cd bi
@@ -45,11 +45,11 @@ cd bi
 
 #### STEP 3
 <sup>SETTING ENVIRONMENT VARIABLES</sup>\
-Before proceeding to the next steps, some user parameters should be defined once. Please edit the `.env` file, replace sample values with actual ones then save the file.
+Before proceeding to the next steps, user parameters should be entered once. Please edit the `.env` file, replace the sample values with your own data and save the file.
 
 ```bash
 # USER_PARAMETERS
-# Change the parameters to actual values before installation.
+# Replace sample values with yours before installation.
 # --------------------------------
 TZ="Europe/Berlin"
 DOMAIN="localhost"
@@ -71,20 +71,20 @@ SENDGRID_API_KEY="SG.********.********"
 
 #### STEP 4
 <sup>KICK-OFF</sup>\
-Run the following command so that Docker can start the services and keep them up and running in the background;
+Start the services and keep them up and running in the background. Installation may take 1-2 minutes depending on your internet speed;
 
 ```bash
 docker-compose up --detach --remove-orphans
 ```
 
-Installation may take 1-2 minutes depending on your internet speed. After the process is completed, go to the following address in your web browser, click the "Sign in" link and open your first session with your email and password provided in the `.env` file.
+To open your first session go to the following address in your web browser, click the "Sign in" button and enter your email and password provided in the `.env` file.
 
 ```bash
 http://localhost:8100
 ```
 
 ## Management
-To start the system and keep it up and running in the background;
+To start or restart the system by keeping it up and running in the background;
 
 ```bash
 docker-compose up --detach --remove-orphans
@@ -102,15 +102,16 @@ To stop the system;
 docker-compose down
 ```
 
-Free up space by cleaning all dangling images and cache;
+To remove all dangling images and cache to free up system resources when needed;
 
 ```bash
 docker system prune
 ```
 
-To take a look at the system logs. All logs, except db and only api.
+To take a look at the system logs;
 
 ```bash
+# To display all, except db and only api logs.
 docker-compose logs -f
 docker-compose logs -f | grep -v 'mongo'
 docker-compose logs -f | grep 'api'
