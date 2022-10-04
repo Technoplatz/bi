@@ -332,7 +332,7 @@
                         </div>
                         <div *ngIf="pivot_ && is_pivot_showed" lines="none" class="ion-no-padding">
                           <div [innerHtml]="pivot_" class="pivot"></div>
-                          <table class="stat">
+                          <table *ngIf="statistics_" class="stat">
                             <tr>
                               <th colspan="8">
                                 {{ 'Descriptive statistics of' | translate }} {{ statistics_key_ }}
@@ -524,8 +524,7 @@
                   <!-- CRUD LIST PAGINATION -->
                   <ion-row *ngIf="count>=0">
                     <ion-col size="12" class="ion-no-padding pages-col">
-
-                      <!-- NO RECORD FOUND -->
+                      <!-- NO RECORD FOUND PAGING -->
                       <div *ngIf="!count || count==0; else showpaging" class="ion-padding-top">
                         <h6>{{ 'No records found' | translate }}</h6>
                         {{ 'To create the first record click button below' | translate }}.<br />
@@ -533,7 +532,6 @@
                           {{ 'Add record' | translate }}
                         </ion-button>
                       </div>
-
                       <!-- RECORDS FOUND PAGING -->
                       <ng-template #showpaging>
                         <ion-button size="small" fill="clear" (click)="RefreshData(0)"

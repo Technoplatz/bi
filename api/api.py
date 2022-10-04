@@ -276,24 +276,43 @@ class Misc():
         return {"result": False, "msg": str(exc)}
 
     def mongo_error_f(self, exc):
-        print("*** mongo error", str(exc.details), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** mongo error", str(exc.details), flush=True)
+        print("*** mongo error", type(exc).__name__, flush=True)
+        print("*** mongo error", __file__, flush=True)
+        print("*** mongo error", exc.__traceback__.tb_lineno, flush=True)
         notify_ = False
         errhtml_ = ""
         count_ = 0
-        write_errors_ = exc.details["writeErrors"] if exc.details and "writeErrors" in exc.details else None
+        excdetails_ = exc.details
+        write_errors_ = excdetails_["writeErrors"] if excdetails_ and "writeErrors" in excdetails_ else None
         if write_errors_:
             notify_ = True
             errhtml_ += "<ul>"
             count_ = len(write_errors_)
             for error_ in write_errors_:
                 errmsg_ = str(error_["errmsg"]) if "errmsg" in error_ else ""
-                errInfo_ = str(error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]["propertiesNotSatisfied"]) if "errInfo" in error_ and "details" in error_["errInfo"] and "schemaRulesNotSatisfied" in error_[
-                    "errInfo"]["details"] and error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] and "propertiesNotSatisfied" in error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] else ""
+                errInfo_ = str(error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]["propertiesNotSatisfied"]) if "errInfo" in error_ and "details" in error_["errInfo"] and "schemaRulesNotSatisfied" in error_["errInfo"]["details"] and error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] and "propertiesNotSatisfied" in error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] else ""
                 err_ = f"{errmsg_} {errInfo_}"
                 errhtml_ += f"<li>{err_}</li>"
             errhtml_ += "</ul>"
         else:
-            errhtml_ = str(exc.details["errmsg"])
+            errmsg_ = excdetails_["errmsg"] if "errmsg" in excdetails_ else None
+            errInfo_ = excdetails_["errInfo"] if "errInfo" in excdetails_ else None
+            details_ = errInfo_["details"] if errInfo_ and "details" in errInfo_ else None
+            schemaRulesNotSatisfied_ = details_["schemaRulesNotSatisfied"][0] if details_ and "schemaRulesNotSatisfied" in details_ and len(details_["schemaRulesNotSatisfied"]) > 0 else None
+            propertiesNotSatisfied_ = schemaRulesNotSatisfied_["propertiesNotSatisfied"][0] if schemaRulesNotSatisfied_ and "propertiesNotSatisfied" in schemaRulesNotSatisfied_ and len(schemaRulesNotSatisfied_["propertiesNotSatisfied"]) > 0 else None
+            err_property_name_ = propertiesNotSatisfied_["propertyName"] if "propertyName" in propertiesNotSatisfied_ else None
+            err_details_ = propertiesNotSatisfied_["details"][0] if "details" in propertiesNotSatisfied_ and len(propertiesNotSatisfied_["details"]) > 0 else None
+            err_details__ = err_details_["details"][0] if err_details_ and "details" in err_details_ and len(err_details_["details"]) > 0 else None
+            reason_ = err_details__["reason"] if err_details__ and "reason" in err_details__ else None
+            consideredValue_ = err_details__["consideredValue"] if err_details__ and "consideredValue" in err_details__ else None
+            specifiedAs_ = err_details__["specifiedAs"] if err_details__ and "specifiedAs" in err_details__ else None
+            pattern_ = specifiedAs_["pattern"] if specifiedAs_ and "pattern" in specifiedAs_ else None
+            errhtml_ = ""
+            errhtml_ += f"Error in field {err_property_name_}" if err_property_name_ else ""
+            errhtml_ += f", value: {str(consideredValue_)}" if consideredValue_ else ""
+            errhtml_ += f", reason: {str(reason_)}" if reason_ else ""
+            errhtml_ += f", pattern: {str(pattern_)}" if pattern_ else ""
 
         return {"result": False, "msg": errhtml_, "notify": notify_, "count": count_}
 
@@ -3117,8 +3136,8 @@ class Crud():
                     raise APIError(f"collection not found: {doc_['fie_collection_id']}")
                 if doc_["fie_id"][:3] != field_col_["col_prefix"]:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
-
             self.db[collection_].insert_one(doc_)
+
             log_ = self.log_f({
                 "type": "Info",
                 "collection": collection_id_,
@@ -3128,6 +3147,7 @@ class Crud():
             })
             if not log_["result"]:
                 raise APIError(log_["msg"])
+
             if collection_id_ == "_collection":
                 col_id_ = doc_["col_id"] if "col_id" in doc_ else None
                 col_structure_ = doc_["col_structure"] if "col_structure" in doc_ else None
@@ -3140,7 +3160,8 @@ class Crud():
                     if not schemevalidate_["result"]:
                         raise APIError(schemevalidate_["msg"])
                     self.db[datac_].delete_one({})
-            res = {"result": True}
+
+            res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
             self.log_f({
@@ -3150,16 +3171,16 @@ class Crud():
                 "user": user_["email"] if user_ else None,
                 "document": exc.details
             })
-            res = Misc().mongo_error_f(exc)
+            res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            res = Misc().api_error_f(exc)
+            res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            res = Misc().exception_f(exc)
+            res_ = Misc().exception_f(exc)
 
         finally:
-            return res
+            return res_
 
 
 class Email():

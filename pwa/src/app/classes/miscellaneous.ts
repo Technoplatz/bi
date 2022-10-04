@@ -158,7 +158,7 @@ export class Miscellaneous {
   async doMessage(msg: string, type: string) {
     const typed: any = {
       message: msg,
-      duration: 5000,
+      duration: type === "success" ? 5000 : 10000,
       position: "top",
       cssClass: type === "success" ? "toast-class-success" : "toast-class-error",
       buttons: [

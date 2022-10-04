@@ -333,8 +333,8 @@ export class ConsolePage implements OnInit {
           this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
             this.pivot_ = res && res.pivot ? res.pivot : null;
             const statistics_ = res && res.statistics ? res.statistics : null;
-            this.statistics_key_ = this.view.vie_pivot_values[0].key;
-            this.statistics_ = statistics_ && statistics_[this.statistics_key_] ? statistics_[this.statistics_key_] : null;
+            this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
+            this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
           }).catch((error: any) => {
             console.error("*** doGetViewMode", error);
             this.misc.doMessage(error.error.message, "error");

@@ -228,15 +228,16 @@ export class CrudPage implements OnInit {
       } else {
         this.modified = true;
         this.isInProgress = true;
+        console.log("*** op", this.op);
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then(() => {
           setTimeout(() => {
-            this.isInProgress = false;
             this.doCancel({ op: this.op, modified: this.modified, filter: [] });
           }, 500);
         }).catch((error: any) => {
           this.doShowError(error);
           console.error(error);
           this.misc.doMessage(error, "error");
+        }).finally(() => {
           this.isInProgress = false;
         });
       }
@@ -249,12 +250,12 @@ export class CrudPage implements OnInit {
     this.isInProgress = true;
     this.crud.Dump().then(() => {
       setTimeout(() => {
-        this.isInProgress = false;
         this.doCancel({ op: this.op, modified: this.modified, filter: [] });
       }, 500);
     }).catch((error: any) => {
       this.doShowError(error);
       console.error(error);
+    }).finally(() => {
       this.isInProgress = false;
     });
   }
@@ -268,12 +269,12 @@ export class CrudPage implements OnInit {
       "type": this.data.bak_type
     }).then(() => {
       setTimeout(() => {
-        this.isInProgress = false;
         this.doCancel({ op: this.op, modified: this.modified, filter: [] });
       }, 500);
     }).catch((error: any) => {
       this.doShowError(error);
       console.error(error);
+    }).finally(() => {
       this.isInProgress = false;
     });
   }
