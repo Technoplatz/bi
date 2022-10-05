@@ -9,30 +9,31 @@
 - [About](#about)
 
 ### What is Technoplatz BI
-BI is a low-code, multi-container data application and sharing platform that provides many useful features to empower those trying to manage data-driven business processes.
+Technoplatz BI (Brezel) is a low-code, multi-container data-driven application and sharing platform that provides many useful features to empower those who're trying to manage mission critical processes on spreadsheets, legacy software or completely manual methods.
 
 BI provides you to;
 
 - Create an **inner-circle** of customers, suppliers and internal departments.
 - Use a data application without the need to develop a software from scratch.
+- Process data in a flexible database instead of spreadsheets.
 - Share data with the inner-cycle by using BI-directional methods.
+- Perform bulk actions to change the status of a data block from one state to another.
 - Make data announcements, receive responses and match them.
 - Visualize data on real-time charts without having to be an expert.
 - Build a data culture internally.
 
 ### Highlights
 
-- Platform independent
-- Cost effective
-- Flexible and scalable
-- Self service
-- Open source
-- Data sciences ready
-- Cloud native
-- ISO27001 friendly
+- **Platform independent**: Runs on any cloud, on-premises or PCs.
+- **Flexible**: It has the sweet smell of JSON data structure.
+- **Scalable**: Starts small, grows when needed.
+- **Self service**: Your data is now under your control, completely.
+- **Open source**: Codes are public. Everyone can review them and learn from them a lot.
+- **Data sciences**: Accessibility from other BI tools, AI processes and Excel.
+- **ISO27001**: It supports the certification process, not a stopper.
 
 ## Installation
-Please complete the following steps in order. You must have [GiT](https://git-scm.com) installed on your computer and a certain level of command line knowledge is required.
+To get started use BI there are four steps to complete. You must have [GiT](https://git-scm.com) installed on your computer and a certain level of command line knowledge is required.
 
 #### STEP 1
 <sup>SETTING A DOCKER PLATFORM</sup>\
@@ -40,6 +41,8 @@ Docker is an open platform for developing, shipping, and running applications. Y
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
+
+After the platform installation is complete, log in to the console or connect to the system remotely via SSH and proceed to the next step.
 
 #### STEP 2
 <sup>CLONING THE OFFICIAL BI REPOSITORY</sup>\
@@ -69,6 +72,7 @@ USER_EMAIL="bi@company.com"
 USER_NAME="John Doe"
 COMPANY_NAME="Acme Company Inc."
 FROM_EMAIL="bi@company.com"
+FROM_NAME="Technoplatz BI"
 SENDGRID_API_KEY="SG.********.********"
 ```
 
@@ -153,7 +157,7 @@ The system is offered in two different ways of use;
 
 | | Community Edition | Enterprise Edition (Brezel) |
 | :--- | :--- | :--- |
-|  Hosting | Self hosted | Managed |
+|  Hosting | Self hosted | Managed SaaS |
 |  Cloud Options | Yes | Azure, GCP, DigitalOcean |
 |  Database | MongoDB 6 | MongoDB 6 |
 |  DB Replication | Yes [3 internal nodes] | Yes [3 regional nodes] |
