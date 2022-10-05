@@ -2,22 +2,34 @@
 *It's time to get data-driven with your inner-cycle!*
 
 - [What is Technoplatz BI](#what-is-technoplatz-bi)
-- [Product Highlights](#product-highlights)
+- [Highlights](#highlights)
 - [Installation](#installation)
 - [Management](#management)
-- [License](#license)
+- [Licensing Options](#licensing-options)
 - [About](#about)
 
-## What is Technoplatz BI
-Technoplatz BI is a low-code, multi-container business software and data sharing platform that provides many beneficial features to empower those trying to manage data-driven processes;
+### What is Technoplatz BI
+BI is a low-code, multi-container data application and sharing platform that provides many useful features to empower those trying to manage data-driven business processes.
 
-- Self-service application to manage basic data operations.
-- BI-directional data sharing methods between user and business partners.
-- Descriptive statistics and real-time data visualization.
-- API for making data requests and retrieving responses.
+BI provides you to;
 
-## Product Highlights
-This section is in progress.
+- Create an **inner-circle** of customers, suppliers and internal departments.
+- Use a data application without the need to develop a software from scratch.
+- Share data with the inner-cycle by using BI-directional methods.
+- Make data announcements, receive responses and match them.
+- Visualize data on real-time charts without having to be an expert.
+- Build a data culture internally.
+
+### Highlights
+
+- Platform independent
+- Cost effective
+- Flexible and scalable
+- Self service
+- Open source
+- Data sciences ready
+- Cloud native
+- ISO27001 friendly
 
 ## Installation
 Please complete the following steps in order. You must have [GiT](https://git-scm.com) installed on your computer and a certain level of command line knowledge is required.
@@ -31,7 +43,7 @@ Docker is an open platform for developing, shipping, and running applications. Y
 
 #### STEP 2
 <sup>CLONING THE OFFICIAL BI REPOSITORY</sup>\
-The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official repository from Github;
+The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official BI repository from Github;
 
 ```bash
 git clone https://github.com/technoplatz/bi.git
@@ -129,8 +141,30 @@ Community Edition's default settings are provided for testing and local use. In 
 - Schedule a regular backup procedure and keep the files in safe place.
 - Complete the necessary SPF authorization and DMARC policy settings for FROM_EMAIL address defined in .env file so that posts are not rejected as Junk by recipients.
 
-## License
-Community Edition is free under the [GNU Affero General Public License v3.0](https://github.com/Technoplatz/bi/blob/main/LICENSE) terms.
+## Licensing Options
+The system is offered in two different ways of use;
+
+- **Community Edition** is free under the [GNU Affero General Public License v3.0](https://github.com/Technoplatz/bi/blob/main/LICENSE) terms.
+- **Enterprise Edition (Brezel)** is supported version of BI.
+
+#### COMPARISON CHART
+
+<div class="licensing">
+
+| | Community Edition | Enterprise Edition (Brezel) |
+| :--- | :--- | :--- |
+|  Hosting | Self hosted | Managed |
+|  Cloud Options | Yes | Azure, GCP, DigitalOcean |
+|  Database | MongoDB 6 | MongoDB 6 |
+|  DB Replication | Yes [3 internal nodes] | Yes [3 regional nodes] |
+|  External Security | No | Cloudflare |
+|  OTP Auth | Yes | Yes |
+|  Support | No | Yes |
+|  Custom Domain | Yes | Yes |
+|  Custom Branding | Not Allowed | Yes |
+|  Licensing | AGPL-3.0 | AGPL-3.0 + SLA |
+
+</div>
 
 ## About
 Official Web Site\
@@ -140,3 +174,21 @@ Official Web Site\
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
 Founder, Technoplatz IT Solutions GmbH\
 <sup>Senior Developer - Data Sciences, Statistics B.Sc.</sup>
+
+<style>
+.licensing {
+    width: 100%;
+}
+.licensing td {
+    vertical-align: top;
+    text-align: center;
+    padding: 8px !important;
+}
+.licensing td:nth-child(1) {
+    width: 28%;
+}
+.licensing td:nth-child(2),
+.licensing td:nth-child(3) {
+    width: 36%;
+}
+</style>
