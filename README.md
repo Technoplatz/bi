@@ -175,20 +175,4 @@ Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
 Founder, Technoplatz IT Solutions GmbH\
 <sup>Senior Developer - Data Sciences, Statistics B.Sc.</sup>
 
-<style>
-.licensing {
-    width: 100%;
-}
-.licensing td {
-    vertical-align: top;
-    text-align: center;
-    padding: 8px !important;
-}
-.licensing td:nth-child(1) {
-    width: 28%;
-}
-.licensing td:nth-child(2),
-.licensing td:nth-child(3) {
-    width: 36%;
-}
-</style>
+<link rel="stylesheet" href=".github/md.css">
