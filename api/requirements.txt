@@ -15,3 +15,4 @@ xlwt
 xlrd
 pyotp
 python-magic
+get_docker_secret

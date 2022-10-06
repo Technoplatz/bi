@@ -33,7 +33,7 @@ BI provides you to;
 - **ISO27001**: It supports the certification process, not a stopper.
 
 ## Installation
-To get started use BI there are four steps to complete. You must have [GiT](https://git-scm.com) installed on your computer and a certain level of command line knowledge is required.
+There are four steps you need to complete to start using BI. In order to run the commands you must have [GiT](https://git-scm.com) installed on your computer and also have a certain level of experience with Terminal.
 
 #### STEP 1
 <sup>SETTING A DOCKER PLATFORM</sup>\
@@ -73,7 +73,6 @@ USER_NAME="John Doe"
 COMPANY_NAME="Acme Company Inc."
 FROM_EMAIL="bi@company.com"
 FROM_NAME="Technoplatz BI"
-SENDGRID_API_KEY="SG.********.********"
 ```
 
 <sub>**TZ:** Time zone of your platform's location must be entered according to the official TZ format (eg. America/New_York). https://en.wikipedia.org/wiki/List_of_tz_database_time_zones is the link for more info about TZ.\

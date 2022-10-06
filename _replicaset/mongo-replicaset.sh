@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Mustafa Mat @Technoplatz 2019-2023
 echo "DB REPLICASET STARTED"
+MONGO_PASSWORD=$(</run/secrets/mongo-password)
 if [ ! -f /init/mongo-init.flag ]; then
     echo "replicaset will be initialized within 10 seconds"
     sleep 10s

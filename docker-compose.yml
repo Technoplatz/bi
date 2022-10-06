@@ -150,7 +150,6 @@ services:
       - USER_NAME=${USER_NAME}
       - COMPANY_NAME=${COMPANY_NAME}
       - MONGO_USERNAME=${MONGO_USERNAME}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST=${MONGO_HOST}
@@ -162,6 +161,8 @@ services:
       - mongo0:${SUBNET_MONGO_IPV4}
       - mongo1:${SUBNET_MONGO_REPLICA1_IPV4}
       - mongo2:${SUBNET_MONGO_REPLICA2_IPV4}
+    secrets:
+      - mongo-password
     networks:
       network0:
         ipv4_address: ${SUBNET_REPLICASET_IPV4}
@@ -193,7 +194,6 @@ services:
       - COMPANY_NAME=${COMPANY_NAME}
       - FROM_EMAIL=${FROM_EMAIL}
       - MONGO_USERNAME=${MONGO_USERNAME}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST=${MONGO_HOST}
@@ -201,15 +201,16 @@ services:
       - MONGO_REPLICASET=${MONGO_REPLICASET}
       - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
       - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
-      - PWA_API_KEY=${PWA_API_KEY}
       - API_SCHEDULE_INTERVAL_MIN=${API_SCHEDULE_INTERVAL_MIN}
       - API_DUMP_HOURS=${API_DUMP_HOURS}
-      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - SECUR_SALTED_ROUNDS=${SECUR_SALTED_ROUNDS}
       - SECUR_MAX_AGE=${SECUR_MAX_AGE}
       - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
     links:
       - pwa
+    secrets:
+      - mongo-password
+      - pwa-apikey
+      - sendgrid-apikey
     networks:
       network0:
         ipv4_address: ${SUBNET_API_IPV4}
@@ -272,3 +273,11 @@ networks:
       driver: default
       config:
         - subnet: ${SUBNET}
+
+secrets:
+  mongo-password:
+    file: .secret-mongo-password
+  sendgrid-apikey:
+    file: .secret-sendgrid-apikey
+  pwa-apikey:
+    file: .secret-pwa-apikey

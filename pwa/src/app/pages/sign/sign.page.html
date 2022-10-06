@@ -20,14 +20,14 @@
     </ion-grid>
     <form [formGroup]="resetForm" *ngIf="formtype=='reset'">
         <ion-item class="section-header" lines="none">
-            <h1>{{ 'Reset Password' | translate }}</h1>
+            <h1>{{ 'New Password' | translate }}</h1>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'New password' | translate }} <sup>
+            <ion-label position="stacked">{{ 'Password' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #passwordfocus formControlName="password" type="password"
-                placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" required>
+                placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" class="ion-no-padding" required>
             </ion-input>
             <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="resetForm.controls.password.valid">
@@ -44,8 +44,7 @@
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
-            <ion-button (click)="Reset()" size="default" [disabled]="!resetForm.valid" class="no-hover" slot="end"
-                fill="outline">
+            <ion-button (click)="Reset()" size="default" [disabled]="!resetForm.valid" class="no-hover">
                 <span *ngIf="!isInProgress">{{ 'Reset Password' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
@@ -254,7 +253,7 @@
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="doForgot()" size="default" class="sign-button">
-                <span *ngIf="!isInProgress">{{ 'Send' | translate }}</span>
+                <span *ngIf="!isInProgress">{{ 'Submit' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
             <ion-button slot="end" fill="outline" (click)="doSetOp('signin')" size="default" type="reset"

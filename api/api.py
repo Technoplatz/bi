@@ -26,6 +26,7 @@ import sendgrid
 import base64
 import magic
 import pyotp
+from get_docker_secret import get_docker_secret
 from pymongo import MongoClient, ASCENDING
 from werkzeug.utils import secure_filename
 from flask import Flask, request, send_from_directory
@@ -291,7 +292,8 @@ class Misc():
             count_ = len(write_errors_)
             for error_ in write_errors_:
                 errmsg_ = str(error_["errmsg"]) if "errmsg" in error_ else ""
-                errInfo_ = str(error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]["propertiesNotSatisfied"]) if "errInfo" in error_ and "details" in error_["errInfo"] and "schemaRulesNotSatisfied" in error_["errInfo"]["details"] and error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] and "propertiesNotSatisfied" in error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] else ""
+                errInfo_ = str(error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]["propertiesNotSatisfied"]) if "errInfo" in error_ and "details" in error_["errInfo"] and "schemaRulesNotSatisfied" in error_[
+                    "errInfo"]["details"] and error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] and "propertiesNotSatisfied" in error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] else ""
                 err_ = f"{errmsg_} {errInfo_}"
                 errhtml_ += f"<li>{err_}</li>"
             errhtml_ += "</ul>"
@@ -300,7 +302,8 @@ class Misc():
             errInfo_ = excdetails_["errInfo"] if "errInfo" in excdetails_ else None
             details_ = errInfo_["details"] if errInfo_ and "details" in errInfo_ else None
             schemaRulesNotSatisfied_ = details_["schemaRulesNotSatisfied"][0] if details_ and "schemaRulesNotSatisfied" in details_ and len(details_["schemaRulesNotSatisfied"]) > 0 else None
-            propertiesNotSatisfied_ = schemaRulesNotSatisfied_["propertiesNotSatisfied"][0] if schemaRulesNotSatisfied_ and "propertiesNotSatisfied" in schemaRulesNotSatisfied_ and len(schemaRulesNotSatisfied_["propertiesNotSatisfied"]) > 0 else None
+            propertiesNotSatisfied_ = schemaRulesNotSatisfied_["propertiesNotSatisfied"][0] if schemaRulesNotSatisfied_ and "propertiesNotSatisfied" in schemaRulesNotSatisfied_ and len(schemaRulesNotSatisfied_[
+                                                                                                                                                                                         "propertiesNotSatisfied"]) > 0 else None
             err_property_name_ = propertiesNotSatisfied_["propertyName"] if "propertyName" in propertiesNotSatisfied_ else None
             err_details_ = propertiesNotSatisfied_["details"][0] if "details" in propertiesNotSatisfied_ and len(propertiesNotSatisfied_["details"]) > 0 else None
             err_details__ = err_details_["details"][0] if err_details_ and "details" in err_details_ and len(err_details_["details"]) > 0 else None
@@ -409,7 +412,7 @@ class Mongo():
         self.mongo_db_ = os.environ.get("MONGO_DB")
         self.mongo_authdb_ = os.environ.get("MONGO_AUTH_DB")
         self.mongo_username_ = os.environ.get("MONGO_USERNAME")
-        self.mongo_password_ = os.environ.get("MONGO_PASSWORD")
+        self.mongo_password_ = get_docker_secret("mongo-password", default="")
 
         # static parameters
         self.mongo_appname_ = "api"
@@ -3184,9 +3187,8 @@ class Crud():
 
 
 class Email():
-
     def __init__(self):
-        self.SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+        self.SENDGRID_API_KEY = get_docker_secret("sendgrid-apikey", default="")
         self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
         self.FROM_NAME = os.environ.get("FROM_NAME")
         self.SG_TFA_SUBJECT = "Your Backup OTP"
@@ -3306,7 +3308,7 @@ class RestAPI():
             if origin_ != DOMAIN_:
                 raise APIError(f"invalid origin {origin_} - {DOMAIN_}")
 
-            PWA_API_KEY_ = os.environ.get("PWA_API_KEY")
+            PWA_API_KEY_ = get_docker_secret("pwa-apikey", default="61c09da62f1f9ca9357796c9")
             api_key_header_ = request.headers["X-Api-Key"]
 
             if PWA_API_KEY_ != api_key_header_:
@@ -3649,12 +3651,8 @@ class Auth():
 
     def encrypt_f(self, password_):
         try:
-            SECUR_SALTED_ROUNDS_ = os.environ.get("SECUR_SALTED_ROUNDS")
-            if not SECUR_SALTED_ROUNDS_:
-                raise APIError("password validation error")
-
-            # password needs to be salted first
-            gensalt_ = bcrypt.gensalt(rounds=int(SECUR_SALTED_ROUNDS_))
+            salted_rounds_ = 8
+            gensalt_ = bcrypt.gensalt(rounds=salted_rounds_)
             salted_ = bcrypt.hashpw(password_.encode(), gensalt_).decode()
             res_ = {"result": True, "salted": salted_}
 
