@@ -35,8 +35,9 @@ BI provides you to;
 ## Installation
 There are four steps you need to complete to start using BI. In order to run the commands you must have [GiT](https://git-scm.com) installed on your computer and also have a certain level of experience with Terminal.
 
-#### STEP 1
-<sup>SETTING A DOCKER PLATFORM</sup>\
+### Step 1
+
+#### Setting a Docker Platform
 Docker is an open platform for developing, shipping, and running applications. You can install it on your computer for free or buy a managed service from any of the leading providers. The links below will help you about how to establish a Docker environment on the cloud and on-premises;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
@@ -44,8 +45,9 @@ Docker is an open platform for developing, shipping, and running applications. Y
 
 After the platform installation is complete, log in to the console or connect to the system remotely via SSH and proceed to the next step.
 
-#### STEP 2
-<sup>CLONING THE OFFICIAL BI REPOSITORY</sup>\
+### Step 2
+
+#### Cloning the Official Repository
 The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official BI repository from Github;
 
 ```bash
@@ -58,8 +60,9 @@ Then go to `bi` folder which is going to be downloaded;
 cd bi
 ```
 
-#### STEP 3
-<sup>SETTING ENVIRONMENT VARIABLES</sup>\
+### Step 3
+
+#### 3.1 Settings Required Parameters
 Before proceeding to the next steps, user parameters should be entered once. Please edit the `.env` file, replace the sample values with your own data and save the file.
 
 ```bash
@@ -84,8 +87,30 @@ FROM_NAME="Technoplatz BI"
 **FROM_NAME:** A name or nickname that appears next to the sender e-mail address.\
 **SENDGRID_API_KEY:** An API key used for sending automated emails over Sendgrid. Please find the detailed information about how to obtain an API key for Technoplatz BI. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key</sub>
 
-#### STEP 4
-<sup>KICK-OFF</sup>\
+#### 3.2 Settings Secrets
+
+#### BI API Key
+Uygulamanın güvenliğini sağlayan anahtardır. İnternete açık olmayan lokal kullanım için anahtar belirlemeniz gerekmez, sistem jenerik bir anahtar kullanır ancak internet ortamında 24 karaktere kadar harf ve sayıdan oluşan karışık bir API anahtarı kullanılmalıdır. Güvenlik açısından [Production, Madde 10](#production) 'da belirtilen şekilde bir anahtar tanımlayarak aşağıdaki komut ile kaydediniz;
+
+```bash
+echo -n "your-bi-apikey" > .secret-bi-apikey
+```
+
+#### Database Password
+
+```bash
+echo -n "your-database-password" > .secret-mongo-password
+```
+
+#### Sendgrid API key
+It is used for sending automated emails over the Twilio [Sendgrid](#https://sendgrid.com) which is one of the leading e-mail API service providers. Please find the detailed information about how to obtain an API key on Sendgrid. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key
+```bash
+echo -n "your-sendgrid-apikey" > .secret-sendgrid-apikey
+```
+
+### Step 4
+
+#### Kick-Off
 Start the services and keep them up and running in the background. Installation may take 1-2 minutes depending on your internet speed;
 
 ```bash
@@ -134,15 +159,16 @@ docker-compose logs -f | grep 'api'
 
 ## Production
 Community Edition's default settings are provided for testing and local use. In case the system is used in a real business environment under your subdomain, e.g. **bi.company.com**, there is no stopper for this however the there are crucial security and system requirements recommended (including but not limited to) below must be fulfilled before making the system public. All responsibilities in this regard belongs to the user.
-- Define **bi**.company.com and **api.bi**.company.com subdomains in your name server and forward them to the IP address of your [Docker platform](#step-1) by adding an "A" record for each.
-- Change DOMAIN parameter to **bi**.company.com in .env file.
-- Get your Docker platform behind the cloud firewall and configure the access settings according to your corporate security policy.
-- Get subdomains behind a web application firewall (WAF) and make the required security settings in accordance with your corporate policy.
-- Enable HTTPS access.
-- Activate a "health check" procedure for the public ports of the Docker platform.
-- Check for system updates of the Docker platform regularly.
-- Schedule a regular backup procedure and keep the files in safe place.
-- Complete the necessary SPF authorization and DMARC policy settings for FROM_EMAIL address defined in .env file so that posts are not rejected as Junk by recipients.
+
+1. Define **bi**.company.com and **api.bi**.company.com subdomains in your name server and forward them to the IP address of your [Docker platform](#step-1) by adding an "A" record for each.
+2. Change DOMAIN parameter to **bi**.company.com in .env file.
+3. Get subdomains behind a web application firewall (WAF) and make the required security settings in accordance with your corporate policy.
+4. Enable HTTPS access.
+5. Activate a "health check" procedure for the public ports of the Docker platform.
+6. Check for system updates of the Docker platform regularly.
+7. Schedule a regular backup procedure and keep the files in safe place.
+8. Complete the necessary SPF authorization and DMARC policy settings for FROM_EMAIL address defined in .env file so that posts are not rejected as Junk by recipients.
+9. Get your Docker platform behind a cloud firewall and configure the access settings according to your corporate security policy.
 
 ## Licensing Options
 The system is offered in two different ways of use;

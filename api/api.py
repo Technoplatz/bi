@@ -46,6 +46,7 @@ app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 app.config["UPLOAD_FOLDER"] = "/vault/"
+app.url_map.host_matching = True
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -3308,10 +3309,10 @@ class RestAPI():
             if origin_ != DOMAIN_:
                 raise APIError(f"invalid origin {origin_} - {DOMAIN_}")
 
-            PWA_API_KEY_ = get_docker_secret("pwa-apikey", default="61c09da62f1f9ca9357796c9")
+            BI_API_KEY_ = get_docker_secret("bi-apikey", default="61c09da62f1f9ca9357796c9")
             api_key_header_ = request.headers["X-Api-Key"]
 
-            if PWA_API_KEY_ != api_key_header_:
+            if BI_API_KEY_ != api_key_header_:
                 raise APIError(f"invalid api request")
 
             res_ = {"result": True, "data": request}
@@ -3847,7 +3848,6 @@ class Auth():
             return res_
 
     def account_f(self, input_):
-
         try:
             # gets the user and op
             user_ = input_["user"]
@@ -3914,7 +3914,6 @@ class Auth():
             return res_
 
     def forgot_f(self):
-
         try:
             # gets the required variables
             input_ = request.json
@@ -3947,7 +3946,6 @@ class Auth():
             return res_
 
     def reset_f(self):
-
         try:
             # sets the required parameters
             input_ = request.json
@@ -4011,7 +4009,6 @@ class Auth():
             return res_
 
     def tfac_f(self):
-
         try:
             # sets the required parameters
             input_ = request.json
@@ -4101,7 +4098,6 @@ class Auth():
             return res_
 
     def user_validate_by_basic_auth_f(self, input_, op_):
-
         try:
             # sets the required variables
             user_id_ = bleach.clean(input_["userid"]) if "userid" in input_ else None
@@ -4179,7 +4175,6 @@ class Auth():
             return res_
 
     def user_validate_by_apikey_f(self, input_):
-
         try:
             # sets the required variables
             apikey_ = bleach.clean(input_["apikey"]) if "apikey" in input_ else None
@@ -4256,7 +4251,6 @@ class Auth():
             return res
 
     def signup_f(self):
-
         try:
             checkup_ = self.checkup_f()
             if not checkup_["result"]:
@@ -4326,7 +4320,7 @@ class Auth():
             return res_
 
 
-@app.route("/file", methods=["POST"])
+@app.route("/file", methods=["POST"], host="localhost:5001")
 @cross_origin(origin="*")
 def file_f():
     try:
@@ -4386,7 +4380,7 @@ def file_f():
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/import", methods=["POST"], endpoint="import")
+@app.route("/import", methods=["POST"], endpoint="import", host="localhost:5001")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def storage_f():
     try:
@@ -4445,12 +4439,10 @@ def storage_f():
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/crud", methods=["POST", "OPTIONS"])
+@app.route("/crud", methods=["POST", "OPTIONS"], host="localhost:5001")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization", "X-Requested-With"])
 def crud_f():
-
     try:
-
         # validates restapi request
         validate_ = RestAPI().validate_pwa_f()
         if not validate_["result"]:
@@ -4556,10 +4548,9 @@ def crud_f():
         return json.dumps(crud_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/otp", methods=["POST", "OPTIONS"])
+@app.route("/otp", methods=["POST", "OPTIONS"], host="localhost:5001")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def otp_f():
-
     try:
         # validates restapi request
         validate_ = RestAPI().validate_pwa_f()
@@ -4620,10 +4611,9 @@ def otp_f():
         return json.dumps(res_, default=json_util.default)
 
 
-@app.route("/auth", methods=["POST", "OPTIONS"])
+@app.route("/auth", methods=["POST", "OPTIONS"], host="localhost:5001")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization", "X-Requested-With"])
 def auth_f():
-
     try:
         # validates restapi request
         validate_ = RestAPI().validate_pwa_f()
@@ -4682,7 +4672,7 @@ def auth_f():
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/get/visual/<string:id>", methods=["GET", "OPTIONS"])
+@app.route("/get/visual/<string:id>", methods=["GET", "OPTIONS"], host="localhost:5001")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_visual_f(id):
     try:
@@ -4742,7 +4732,7 @@ def get_visual_f(id):
         return res_, code_, headers
 
 
-@app.route("/get/pivot/<string:id>", methods=["GET", "OPTIONS"])
+@app.route("/get/pivot/<string:id>", methods=["GET", "OPTIONS"], host="localhost:5001")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_pivot_f(id):
     try:
@@ -4804,7 +4794,6 @@ def get_pivot_f(id):
 
     finally:
         headers = {"Content-Type": "application/json; charset=utf-8"}
-        print("*** 222 statistics_", res_, flush=True)
         return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers
 
 
@@ -4987,11 +4976,10 @@ def post_f():
         return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers
 
 
-@app.route("/get/dump", methods=["POST", "OPTIONS"])
+@app.route("/get/dump", methods=["POST", "OPTIONS"], host="localhost:5001")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_dump_f():
     try:
-
         # validates restapi request
         validate_ = RestAPI().validate_pwa_f()
         if not validate_["result"]:
@@ -5038,10 +5026,8 @@ def get_dump_f():
         return res_
 
 
-@app.route("/get/view/<string:id>", methods=["GET", "OPTIONS"])
 @app.route("/get/data/<string:id>", methods=["GET", "OPTIONS"])
 def get_data_f(id):
-
     try:
         if not request.headers:
             raise AuthError("no header provided")

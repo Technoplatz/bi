@@ -29,7 +29,7 @@ export class Miscellaneous {
     private nav: Navigation,
     private alert: AlertController,
     private http: HttpClient,
-    private cb: ClipboardPluginWeb,
+    private cb: ClipboardPluginWeb
   ) { }
 
   go(p: string) {
@@ -43,9 +43,9 @@ export class Miscellaneous {
   }
 
   getAPIHost() {
-    return new Promise((resolve, reject) => {
-      this.apiHost = window.location.host.includes("8100") ? window.location.protocol + "//" + window.location.host.replace(/8100/gi, environment.apiPort) : window.location.host.includes("8101") ? window.location.protocol + "//" + window.location.host.replace(/8101/gi, environment.apiPort) : window.location.protocol + "//api." + window.location.hostname;
-      resolve(this.apiHost);
+    return new Promise((resolve) => {
+      this.apiHost = environment.apiHost;
+      resolve(environment.apiHost);
     });
   }
 

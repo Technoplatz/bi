@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
   appVersion: require("../../package.json").version + "-dev",
-  apiPort: "5001",
+  apiHost: "http://localhost:5001",
   apiKey: "61c09da62f1f9ca9357796c9",
   misc: {
     logo: "logo-electron",

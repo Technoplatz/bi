@@ -209,7 +209,7 @@ services:
       - pwa
     secrets:
       - mongo-password
-      - pwa-apikey
+      - bi-apikey
       - sendgrid-apikey
     networks:
       network0:
@@ -277,7 +277,7 @@ networks:
 secrets:
   mongo-password:
     file: .secret-mongo-password
+  bi-apikey:
+    file: .secret-bi-apikey
   sendgrid-apikey:
     file: .secret-sendgrid-apikey
-  pwa-apikey:
-    file: .secret-pwa-apikey
