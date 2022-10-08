@@ -46,7 +46,7 @@ app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 app.config["UPLOAD_FOLDER"] = "/vault/"
-app.url_map.host_matching = True
+# app.url_map.host_matching = True
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
