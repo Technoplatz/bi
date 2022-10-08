@@ -44,8 +44,8 @@ export class Miscellaneous {
 
   getAPIHost() {
     return new Promise((resolve) => {
-      this.apiHost = environment.apiHost;
-      resolve(environment.apiHost);
+      this.apiHost = window.location.host.includes("8100") ? window.location.protocol + "//" + window.location.host.replace(/8100/gi, environment.apiPort) : window.location.host.includes("8101") ? window.location.protocol + "//" + window.location.host.replace(/8101/gi, environment.apiPort) : window.location.protocol + "//api." + window.location.hostname;
+      resolve(this.apiHost);
     });
   }
 

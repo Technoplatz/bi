@@ -43,10 +43,17 @@ Docker is an open platform for developing, shipping, and running applications. Y
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
-After the platform installation is complete, log in to the console or connect to the system remotely via SSH and proceed to the next step.
+#### The first touch
+After the installation is complete, perform the recent updates and reboot. If you need an administrator right, add `sudo` to the beginning of the commands;
+
+```bash
+apt update && apt upgrade -y
+```
+```bash
+reboot
+```
 
 ### Step 2
-
 #### Cloning the Official Repository
 The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official BI repository from Github;
 
@@ -61,7 +68,6 @@ cd bi
 ```
 
 ### Step 3
-
 #### 3.1 Settings Required Parameters
 Before proceeding to the next steps, user parameters should be entered once. Please edit the `.env` file, replace the sample values with your own data and save the file.
 
