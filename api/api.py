@@ -4320,7 +4320,7 @@ class Auth():
             return res_
 
 
-@app.route("/file", methods=["POST"], host="localhost:5001")
+@app.route("/file", methods=["POST"])
 @cross_origin(origin="*")
 def file_f():
     try:
@@ -4380,7 +4380,7 @@ def file_f():
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/import", methods=["POST"], endpoint="import", host="localhost:5001")
+@app.route("/import", methods=["POST"], endpoint="import")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def storage_f():
     try:
@@ -4439,7 +4439,7 @@ def storage_f():
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/crud", methods=["POST", "OPTIONS"], host="localhost:5001")
+@app.route("/crud", methods=["POST", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization", "X-Requested-With"])
 def crud_f():
     try:
@@ -4548,7 +4548,7 @@ def crud_f():
         return json.dumps(crud_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/otp", methods=["POST", "OPTIONS"], host="localhost:5001")
+@app.route("/otp", methods=["POST", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def otp_f():
     try:
@@ -4611,7 +4611,7 @@ def otp_f():
         return json.dumps(res_, default=json_util.default)
 
 
-@app.route("/auth", methods=["POST", "OPTIONS"], host="localhost:5001")
+@app.route("/auth", methods=["POST", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization", "X-Requested-With"])
 def auth_f():
     try:
@@ -4672,7 +4672,7 @@ def auth_f():
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
-@app.route("/get/visual/<string:id>", methods=["GET", "OPTIONS"], host="localhost:5001")
+@app.route("/get/visual/<string:id>", methods=["GET", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_visual_f(id):
     try:
@@ -4732,7 +4732,7 @@ def get_visual_f(id):
         return res_, code_, headers
 
 
-@app.route("/get/pivot/<string:id>", methods=["GET", "OPTIONS"], host="localhost:5001")
+@app.route("/get/pivot/<string:id>", methods=["GET", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_pivot_f(id):
     try:
@@ -4976,7 +4976,7 @@ def post_f():
         return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers
 
 
-@app.route("/get/dump", methods=["POST", "OPTIONS"], host="localhost:5001")
+@app.route("/get/dump", methods=["POST", "OPTIONS"])
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_dump_f():
     try:

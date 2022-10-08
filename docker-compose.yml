@@ -205,8 +205,6 @@ services:
       - API_DUMP_HOURS=${API_DUMP_HOURS}
       - SECUR_MAX_AGE=${SECUR_MAX_AGE}
       - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
-    links:
-      - pwa
     secrets:
       - mongo-password
       - bi-apikey
