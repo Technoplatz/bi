@@ -161,16 +161,14 @@ export class Miscellaneous {
       duration: type === "success" ? 5000 : 10000,
       position: "top",
       cssClass: type === "success" ? "toast-class-success" : "toast-class-error",
-      buttons: [
-        {
-          side: "end",
-          icon: "close-outline",
-          role: "cancel",
-          handler: () => {
-            console.info("alert canceled");
-          }
+      buttons: [{
+        side: "end",
+        icon: "close-outline",
+        role: "cancel",
+        handler: () => {
+          console.info("alert canceled");
         }
-      ]
+      }]
     };
     this.toast.dismiss().then(() => { }).catch((error: any) => { });
     const toast = await this.toast.create(typed);

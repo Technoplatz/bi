@@ -40,16 +40,16 @@ export const environment = {
     { "key": "false", "op": "", "value": "false" }
   ],
   segmentsadm: [
-    { "id": "_collection", "title": "Collections", "description": "Collections" },
-    { "id": "_field", "title": "Data Fields", "description": "Field is the core element of a data collection. Here's where you can manage them." },
-    { "id": "_view", "title": "Views", "description": "Views" },
-    { "id": "_action", "title": "Actions", "description": "Actions" },
-    { "id": "_user", "title": "Users", "description": "Users" },
-    { "id": "_permission", "title": "Permissions", "description": "Permissions" },
-    { "id": "_token", "title": "Access Tokens", "description": "Access Tokens" },
-    { "id": "_firewall", "title": "Firewall", "description": "Firewall" },
-    { "id": "_backup", "title": "Backups", "description": "Backups" },
-    { "id": "_log", "title": "Log", "description": "Log" }
+    { "id": "_collection", "title": "Collections" },
+    { "id": "_field", "title": "Data Fields" },
+    { "id": "_view", "title": "Views" },
+    { "id": "_action", "title": "Actions" },
+    { "id": "_user", "title": "Users" },
+    { "id": "_permission", "title": "Permissions" },
+    { "id": "_token", "title": "Access Tokens" },
+    { "id": "_firewall", "title": "Firewall" },
+    { "id": "_backup", "title": "Backups" },
+    { "id": "_log", "title": "Log" }
   ],
   charts: {
     colorScheme: {

@@ -323,7 +323,7 @@ export class ConsolePage implements OnInit {
   doGetViewMode() {
     return new Promise((resolve) => {
       this.storage.get("LSVIEW-" + this.id).then((LSVIEW: any) => {
-        if (this.is_crud) {
+        if (this.is_crud && this.view) {
           this.view = LSVIEW ? LSVIEW : this.views[0] ? this.views[0] : null;
           this.view_mode[this.id] = LSVIEW ? true : false;
           this.view_mode["vie_title"] = LSVIEW ? LSVIEW.vie_title : null;

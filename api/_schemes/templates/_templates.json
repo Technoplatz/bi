@@ -6,8 +6,8 @@
         "description": "Accounts Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "collection": "accounts",
         "prefix": "acc",
-        "structure": "accounts-structure.json",
         "data": "accounts-data.json",
+        "fields": "accounts-fields.json",
         "sort": 20,
         "enabled": true,
         "icon": "business-outline"
@@ -19,8 +19,8 @@
         "description": "Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "collection": "transactions",
         "prefix": "trx",
-        "structure": "transactions-structure.json",
         "data": "transactions-data.json",
+        "fields": "transactions-fields.json",
         "sort": 20,
         "enabled": true,
         "icon": "qr-code-outline"

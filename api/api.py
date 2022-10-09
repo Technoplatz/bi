@@ -523,7 +523,7 @@ class Crud():
     def get_properties_f(self, collection):
         try:
             # gets the required collection
-            cursor_ = self.db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"collections/{collection}")
+            cursor_ = self.db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"_collection/{collection}")
 
             if not cursor_:
                 raise APIError("collection not found")
@@ -583,11 +583,14 @@ class Crud():
 
             user_ = input_["user"] if "user" in input_ else None
             if not user_:
-                raise APIError("invalid user")
+                raise APIError("user not provided")
             email_ = user_["email"]
 
-            data_ = None
+            userindb_ = input_["userindb"] if "userindb" in input_ else None
+            if not userindb_:
+                raise APIError("user not found")
 
+            data_ = None
             f_ = open(f"/app/_schemes/templates/_templates.json", "r")
             data_ = json.loads(f_.read())
 
@@ -602,16 +605,10 @@ class Crud():
 
                 col_id_ = template_["collection"]
                 col_title_ = template_["title"]
-                col_description_ = template_["description"]
-                structure_ = template_["structure"]
                 prefix_ = template_["prefix"] if "prefix" in template_ else "xxx"
                 data_file_ = template_["data"]
+                fields_ = template_["fields"]
                 collection__ = f"{col_id_}_data"
-
-                f_ = open(f"/app/_schemes/templates/{structure_}", "r")
-                col_structure_ = json.loads(f_.read())
-
-                data_ = col_structure_
 
                 find_one_ = self.db["_collection"].find_one({"col_id": col_id_})
                 if find_one_:
@@ -623,37 +620,44 @@ class Crud():
                 doc_ = {
                     "col_id": col_id_,
                     "col_title": col_title_,
-                    "col_description": col_description_,
                     "col_enabled": True,
                     "col_protected": False,
                     "col_prefix": prefix_,
-                    "col_structure": col_structure_,
+                    "col_bypass_fields": False,
+                    "col_structure": None,
                     "_created_at": datetime.now(),
                     "_created_by": email_,
                     "_modified_at": datetime.now(),
                     "_modified_by": email_,
                     "_modified_count": 0
                 }
-
                 # insert collection
                 session_db_["_collection"].insert_one(doc_)
 
-                # add validation before adding dummy records
-                schemevalidate_ = self.crudscheme_validate_f({
-                    "collection": collection__,
-                    "structure": col_structure_
+                # process _field records
+                f_ = open(f"/app/_schemes/templates/{fields_}", "r")
+                data_ = json.loads(f_.read())
+                if data_ and len(data_) > 0:
+                    session_db_["_field"].delete_many({"fie_collection_id": col_id_})
+                    for rec_ in data_:
+                        rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
+                        rec_["_created_by"] = rec_["_modified_by"] = email_
+                        rec_["_modified_count"] = 0
+                        session_db_["_field"].insert_one(rec_)
+
+                setstructure_f_ = self.setstructure_f({
+                    "userindb": userindb_,
+                    "collection": col_id_
                 })
+                if not setstructure_f_["result"]:
+                    raise APIError(setstructure_f_["msg"])
+                col_structure_ = setstructure_f_["structure"]
 
-                if not schemevalidate_["result"]:
-                    raise APIError(schemevalidate_["msg"])
-
-                # delete data records
-                session_db_[collection__].delete_many({})
-
+                # process data
                 f_ = open(f"/app/_schemes/templates/{data_file_}", "r")
                 data_ = json.loads(f_.read())
-
                 if data_ and len(data_) > 0:
+                    session_db_[collection__].delete_many({})
                     for rec_ in data_:
                         decoded_ = Crud().decode_crud_input_f({
                             "collection": col_id_,
@@ -664,6 +668,14 @@ class Crud():
                         doc__["_created_by"] = doc__["_modified_by"] = email_
                         doc__["_modified_count"] = 0
                         session_db_[collection__].insert_one(doc__)
+
+                # add validation before adding dummy records
+                schemevalidate_ = self.crudscheme_validate_f({
+                    "collection": collection__,
+                    "structure": col_structure_
+                })
+                if not schemevalidate_["result"]:
+                    raise APIError(schemevalidate_["msg"])
 
                 session_.commit_transaction() if session_ else None
 
@@ -688,7 +700,7 @@ class Crud():
     def collection_f(self, c):
         try:
             is_crud_ = True if c[:1] != "_" else False
-            collection_ = self.db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"collections/{c}")
+            collection_ = self.db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"_collection/{c}")
             if not collection_:
                 raise APIError(f"collection not found: {c}")
             res_ = {"result": True, "collection": collection_}
@@ -836,7 +848,7 @@ class Crud():
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             # created a cursor for retrieve the collection structure will be added into the respone
-            cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"collections/{collection_}")
+            cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collection/{collection_}")
             if not cursor_:
                 raise APIError(f"collection not found: {collection_}")
 
@@ -1252,7 +1264,7 @@ class Crud():
             if is_crud_ and not "col_structure" in vie_collection_:
                 raise APIError("structure not found in collection")
 
-            col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemes_f(f"collections/{vie_collection_id_}")
+            col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemes_f(f"_collection/{vie_collection_id_}")
 
             # Get properties of the structure
             if not "properties" in col_structure_:
@@ -1860,9 +1872,6 @@ class Crud():
             if is_crud_ and not collection_find_one_:
                 raise APIError(f"collection not found: {col_id_}")
 
-            # structure_ = collection_find_one_["col_structure"] if is_crud_ else self.root_schemes_f(f"collections/{vie_collection_id_}")
-            # properties_ = structure_["properties"] if "properties" in structure_ else None
-
             generate_view_data_f_ = Crud().view_f({
                 "user": {
                     "email": user_["usr_id"],
@@ -2069,7 +2078,7 @@ class Crud():
             # receives the user in db
             user_ = obj["userindb"]
 
-            vis_structure_ = self.root_schemes_f("collections/_visual")
+            vis_structure_ = self.root_schemes_f("_collection/_visual")
             if not vis_structure_:
                 raise APIError("structure of the visual is missing")
 
@@ -2124,7 +2133,7 @@ class Crud():
             user_ = obj["userindb"]
             records_ = []
 
-            vie_structure_ = self.root_schemes_f("collections/_view")
+            vie_structure_ = self.root_schemes_f("_collection/_view")
             if not vie_structure_:
                 raise APIError("view structure not found")
 
@@ -2136,7 +2145,7 @@ class Crud():
             for view_ in views_:
                 vie_collection_id_ = view_["vie_collection_id"]
                 is_crud_ = True if vie_collection_id_[:1] != "_" else False
-                collection_ = self.db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"collections/{vie_collection_id_}")
+                collection_ = self.db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"_collection/{vie_collection_id_}")
                 if not collection_:
                     continue
                 records_.append(view_)
@@ -2217,7 +2226,7 @@ class Crud():
             collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
 
             # created a cursor for retrieve the collection structure will be added into the respone
-            cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"collections/{collection_id_}")
+            cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collection/{collection_id_}")
 
             if not cursor_:
                 raise APIError(f"collection not found: {collection_id_}")
@@ -2402,7 +2411,7 @@ class Crud():
             # The process remark will be located here
             collection_ = obj["collection"]
 
-            structure_ = self.root_schemes_f(f"collections/{collection_}")
+            structure_ = self.root_schemes_f(f"_collection/{collection_}")
 
             # The process remark will be located here
             schemevalidate_ = self.crudscheme_validate_f({
@@ -2436,6 +2445,9 @@ class Crud():
             doc_ = self.db["_collection"].find_one({"col_id": cid_})
             if not doc_:
                 raise APIError("collection not found")
+
+            if "col_bypass_fields" in doc_ and doc_["col_bypass_fields"] == True:
+                raise APIError("fields to structure is bypassed")
 
             structure_ = {
                 "properties": {},
@@ -2935,7 +2947,7 @@ class Crud():
 
             # retrieves the collection structure
             # root collection's structures can be found at github
-            structure__ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"collections/{collection_id_}")
+            structure__ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collection/{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:
@@ -3040,7 +3052,7 @@ class Crud():
 
             # retrieves the collection structure
             # root collection's structures can be found at github
-            structure__ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"collections/{collection_id_}")
+            structure__ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collection/{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:

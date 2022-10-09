@@ -28,24 +28,6 @@ if [ ! -f /init/mongo-init.flag ]; then
         print('db connected');
         print('update started');
         db = db.getSiblingDB('${MONGO_DB}');
-        bulkset_ = { _created_by: '${USER_EMAIL}', _modified_by: '${USER_EMAIL}', _created_at: new Date(), _modified_at: new Date() }
-        db.getCollection('accounts_data').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('orders_data').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('products_data').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('transactions_data').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('exchanges_data').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_view').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_collection').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_field').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_action').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_token').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_backup').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_permission').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_auth').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_user').updateMany({}, { \$set: bulkset_ });
-        db.getCollection('_firewall').updateMany({}, { \$set: bulkset_ });
-        // LOG
-        db.getCollection('_log').updateMany({}, { \$set: { log_user_id: '${USER_EMAIL}' }});
         // SAAS
         db.getCollection('_saas').drop();
         db.createCollection('_saas', { 'capped': false });
@@ -141,8 +123,7 @@ else
         }
         rs.reconfig(rs_, { force: true });
     "
-    echo "replicaset reconfigured"
-    sleep 10s
+    echo "replicaset reconfigured successfully"
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --eval "
         print('db user credentials updating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
