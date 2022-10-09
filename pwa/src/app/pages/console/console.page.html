@@ -13,7 +13,7 @@
           </ion-item>
           <ion-item lines="none">
             <ion-button size="default" fill="clear" class="dash-button"
-              (click)="goSection('dashboard', null, 'Dashboard', null)">
+              (click)="goSection('dashboard', null, 'Dashboard')">
               <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Dashboard' | translate }}
             </ion-button>
           </ion-item>
@@ -26,7 +26,7 @@
                 <ion-text color="medium">{{ 'No collections found' | translate }}</ion-text>
               </p>
               <p *ngFor="let item of collections"
-                (click)="goSection('collections', item.col_id, item.col_id, item.col_description)" class="clicked-item">
+                (click)="goSection('collections', item.col_id, item.col_id)" class="clicked-item">
                 {{ item.col_title }}
               </p>
             </ion-label>
@@ -36,7 +36,7 @@
               <ion-button size="default" fill="clear" class="menu-button">
                 <ion-icon name="settings-outline"></ion-icon>{{ 'Administration' | translate }}
               </ion-button>
-              <p *ngFor="let item of segmentsadm" (click)="goSection('admin', item.id, item.title, item.description)"
+              <p *ngFor="let item of segmentsadm" (click)="goSection('admin', item.id, item.title)"
                 class="clicked-item">
                 {{ item.title }}
               </p>
@@ -47,15 +47,15 @@
               <ion-button size="default" fill="clear" class="menu-button">
                 <ion-icon name="options-outline"></ion-icon>{{ 'Preferences' | translate }}
               </ion-button>
-              <p (click)="goSection('account', 'apikey', 'API Key', 'Your secret to access your data from the outside')"
+              <p (click)="goSection('account', 'apikey', 'API Key')"
                 class="clicked-item">
                 {{ 'API Key' | translate }}
               </p>
-              <p (click)="goSection('account', 'settings', 'Account Settings', 'Edit your personal info')"
+              <p (click)="goSection('account', 'settings', 'Account Settings')"
                 class="clicked-item">
                 {{ 'Account Settings' | translate }}
               </p>
-              <p (click)="goSection('account', 'preferences', 'Preferences', 'Customize your data environment')"
+              <p (click)="goSection('account', 'preferences', 'Preferences')"
                 class="clicked-item">
                 {{ 'Preferences' | translate }}
               </p>
@@ -70,19 +70,14 @@
         <ion-grid class="ion-no-padding ion-no-border">
           <ion-row>
             <ion-col class="console-right-0">
-
               <!-- HEADER -->
               <ion-button (click)="doMenuToggle()" size="large" fill="clear"
                 class="ion-no-padding ion-no-margin toggle-button">
                 <ion-icon name="menu-sharp" color="primary"></ion-icon> {{ header | capitalize }}
               </ion-button>
-              <div *ngIf="header_desc" class="ion-text-nowrap header-desc">{{ header_desc }}</div>
-
               <!-- DASHBOARD -->
               <div *ngIf="menu=='dashboard'">
-
                 <div *ngIf="is_dash_ok; else dashloading">
-
                   <!-- TEMPLATES -->
                   <div *ngIf="submenu=='templates'">
                     <div *ngIf="templates" class="banner-container ion-padding-bottom">
@@ -185,7 +180,7 @@
                       </ion-col>
                     </ion-row>
                     <ion-row *ngFor="let item of announcements; let a = index"
-                      (click)="goSection('view', item.log_object_id, item.log_object_id, null)">
+                      (click)="goSection('view', item.log_object_id, item.log_object_id)">
                       <ion-col size="2">
                         {{ item.log_date.replace(' ', 'T') | date:'dd.MM.yyyy
                         HH:mm' }}
@@ -271,13 +266,6 @@
                           <span>{{ 'Purge' | translate }}</span>
                         </div>
                       </ng-template>
-                      <!-- <div *ngIf="view_mode[id]" (click)="doCopy('view')" class="data-sq-button">
-                        <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
-                        <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
-                        <br />
-                        <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}</span>
-                        <span *ngIf="is_url_copied">{{ 'Copied!' | translate }}</span>
-                      </div> -->
                       <div *ngIf="view_mode[id]" (click)="doAnnounceNow(view, 'test')" class="data-sq-button">
                         <ion-icon *ngIf="!in_otp_process_test" name="megaphone-outline"></ion-icon>
                         <ion-icon *ngIf="in_otp_process_test" name="hourglass-outline"></ion-icon>
@@ -290,11 +278,15 @@
                         <br />
                         {{ 'Live' | translate }}!
                       </div>
-                      <!-- <div *ngIf="perm && view_mode[id]" (click)="Settings('_view', 'update', view, 0)"
+                      <div *ngIf="perm && view_mode[id]" (click)="Settings('_view', 'update', view, 0)"
                         class="data-sq-button">
-                        <ion-icon name="create-outline"></ion-icon><br />
-                        {{ 'Edit' | translate }}
-                      </div> -->
+                        <ion-icon name="settings-outline"></ion-icon><br />
+                        {{ 'Settings' | translate }}
+                      </div>
+                      <div *ngIf="perm && !view_mode[id]" (click)="doCollectionSettings()" class="data-sq-button">
+                        <ion-icon name="settings-outline"></ion-icon><br />
+                        {{ 'Settings' | translate }}
+                      </div>
                     </ion-col>
                   </ion-row>
                   <ion-grid *ngIf="is_loaded && view_mode[id] && view" class="announce-grid ion-no-padding">
@@ -323,8 +315,6 @@
                             Connection URL'
                             | translate }}</a>
                           <span *ngIf="is_url_copied">{{ 'Copied' | translate }} &#10003;&nbsp;&nbsp;</span>
-                          <a href="javascript:void(0);" (click)="Settings('_view', 'update', view, 0)">{{ 'Edit View'
-                            | translate }}</a>
                           <a href="javascript:void(0);" (click)="doShowPivot()"><span *ngIf="!is_pivot_showed">{{ 'Show
                               Data Pivot'
                               | translate }}</span><span *ngIf="is_pivot_showed">{{ 'Hide Pivot'
@@ -912,7 +902,7 @@
                   </ion-label>
                 </ion-item>
                 <ion-item class="pane-item cursored"
-                  (click)="goSection('dashboard', 'templates', 'Templates', 'Ready to use stacks')">
+                  (click)="goSection('dashboard', 'templates', 'Templates')">
                   <ion-icon slot="end" name="documents-outline" size="small"></ion-icon>
                   <ion-label>
                     {{ 'Show Templates' | translate }}<br />
@@ -994,13 +984,13 @@
                     <span>{{ 'upload an excel file' | translate }}</span>
                   </ion-label>
                 </ion-item>
-                <ion-item (click)="doCollectionSettings()" class="pane-item cursored">
+                <!-- <ion-item (click)="doCollectionSettings()" class="pane-item cursored">
                   <ion-icon slot="end" name="build-outline" size="small"></ion-icon>
                   <ion-label>
                     {{ 'Settings' | translate }}<br />
                     <span>{{ 'edit collection information' | translate }}</span>
                   </ion-label>
-                </ion-item>
+                </ion-item> -->
                 <ion-item (click)="doSetStructure()" class="pane-item cursored">
                   <ion-icon slot="end" name="git-compare-outline" size="small"></ion-icon>
                   <ion-label>
@@ -1008,6 +998,14 @@
                     <span>{{ 'initialize data structure from fields' | translate }}</span>
                   </ion-label>
                 </ion-item>
+                <ion-item (click)="doGoFields()" class="pane-item cursored">
+                  <ion-icon slot="end" name="list-outline" size="small"></ion-icon>
+                  <ion-label>
+                    {{ 'Data Fields' | translate }}<br />
+                    <span>{{ 'collection fields' | translate }}</span>
+                  </ion-label>
+                </ion-item>
+                
                 <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }}</ion-list-header>
                 <div *ngIf="views_pane.length > 0; else nopaneviewfound">
                   <ion-item *ngFor="let item of views_pane; let p = index" class="pane-item cursored"

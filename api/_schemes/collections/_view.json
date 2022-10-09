@@ -52,7 +52,7 @@
             "title": "Dashboard",
             "description": "Show on Dashboard",
             "default": false,
-            "width": 110
+            "width": 120
         },
         "vie_filter": {
             "bsonType": "array",
@@ -292,13 +292,13 @@
             "title": "Pivot Values",
             "description": "Pivot Values",
             "subType": "keyvalue",
-            "width": 130
+            "width": 140
         },
         "vie_pivot_totals": {
             "bsonType": "bool",
             "title": "Pivot Totals",
             "description": "Showing pivot totals",
-            "width": 140
+            "width": 130
         },
         "vie_attach_pivot": {
             "bsonType": "bool",
@@ -399,7 +399,7 @@
             "title": "Show Legend",
             "default": false,
             "description": "Show Legend",
-            "width": 140
+            "width": 150
         },
         "vie_p_datalabel_show": {
             "bsonType": "bool",

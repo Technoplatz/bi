@@ -18,17 +18,12 @@ if [ ! -f /init/mongo-init.flag ]; then
         rs.initiate(rs_, { force: true });
     "
     echo "replicaset was initiated successfully"
-    sleep 10s
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --eval "
         print('db user creating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
         db.createUser({ user: '${MONGO_USERNAME}', pwd: '${MONGO_PASSWORD}', roles: [{ role: 'root', db: '${MONGO_AUTH_DB}' },{ role: 'dbOwner', db: '${MONGO_DB}' }] });
         print('db user created');
     "
-    echo "db restore starting..."
-    mongorestore --uri "mongodb://$MONGO_USERNAME:$MONGO_PASSWORD@$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --gzip --archive="sample-data/dump.gz" --nsInclude="$MONGO_DB.*" --drop
-    echo "db restore completed"
-    sleep 5s
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --eval "
         print('db connected');
         print('update started');

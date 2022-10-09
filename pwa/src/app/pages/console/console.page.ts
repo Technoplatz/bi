@@ -25,7 +25,6 @@ export class ConsolePage implements OnInit {
   public menu: string;
   public submenu: string;
   public header: string;
-  public header_desc: string;
   public segment = "data";
   public user: any = null;
   public segmentsadm: any;
@@ -234,7 +233,7 @@ export class ConsolePage implements OnInit {
         this.crud.getAnnouncements();
         this.doRefreshDash().then(() => {
           this.is_initialized = true;
-          this.goSection(qstr1, qstr2, qstr2, null);
+          this.goSection(qstr1, qstr2, qstr2);
         }).catch(() => {
           this.is_initialized = true;
         });
@@ -297,7 +296,6 @@ export class ConsolePage implements OnInit {
 
   doEnterViewMode(view_: any) {
     return new Promise((resolve, reject) => {
-      console.log("*** doEnterViewMode", view_);
       this.is_loaded = false;
       this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
       this.menu = "collections";
@@ -366,12 +364,11 @@ export class ConsolePage implements OnInit {
     });
   }
 
-  goSection(menu_: string, submenu_: any, header_: string, description_: string) {
+  goSection(menu_: string, submenu_: any, header_: string) {
     if (!submenu_ || submenu_ !== this.submenu) {
       this.menu = menu_;
       this.submenu = submenu_;
       this.header = header_ ? header_ : "dashboard";
-      this.header_desc = description_ ? description_ : "Welcome to Technoplatz BI";
       this.pivot_ = null;
       this.submenu ? this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu + "/" + this.submenu) : this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu);
       if (menu_ === "collections" || menu_ === "admin") {
@@ -1102,9 +1099,7 @@ export class ConsolePage implements OnInit {
     const s = w === "apikey" ? this.accountf_apikey : w === "view" ? this.viewurl_ : "";
     this.is_apikey_copied = w === "apikey" ? true : false;
     this.is_url_copied = w === "view" || w === "collection" ? true : false;
-    this.misc.copyToClipboard(s).then(() => {
-      console.log("*** copied");
-    }).catch((error: any) => {
+    this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {
       this.is_apikey_copied = false;
@@ -1262,6 +1257,17 @@ export class ConsolePage implements OnInit {
 
   doMenuToggle() {
     this.menu_toggle = !this.menu_toggle;
+  }
+
+  doGoFields() {
+    const id_ = "_field";
+    this.storage.set("LSFILTER_" + id_, [{
+      "key": "fie_collection_id",
+      "op": "eq",
+      "value": this.id
+    }]).then(() => {
+      this.goSection("admin", id_, "Data Fields");
+    });
   }
 
   doSetStructure() {
