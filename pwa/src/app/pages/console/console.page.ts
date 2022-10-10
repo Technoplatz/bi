@@ -1259,7 +1259,11 @@ export class ConsolePage implements OnInit {
     this.menu_toggle = !this.menu_toggle;
   }
 
-  doGoFields() {
+  goField(f_: string) {
+    console.log("*** f_", this.id, f_);
+  }
+
+  goFields() {
     const id_ = "_field";
     this.storage.set("LSFILTER_" + id_, [{
       "key": "fie_collection_id",

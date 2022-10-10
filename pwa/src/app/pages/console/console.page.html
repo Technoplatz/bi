@@ -411,6 +411,9 @@
                           <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
                             <ion-icon name="arrow-up"></ion-icon>
                           </ion-button>
+                          <ion-button color="light" size="small" (click)="goField(item.key)">
+                            <ion-icon name="settings-outline"></ion-icon>
+                          </ion-button>
                           <br />
                           <div *ngIf="item.value.bsonType!='bool'">
                             <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
@@ -859,14 +862,13 @@
                     <span>{{ 'initialize data structure from fields' | translate }}</span>
                   </ion-label>
                 </ion-item>
-                <ion-item (click)="doGoFields()" class="pane-item cursored">
+                <ion-item (click)="goFields()" class="pane-item cursored">
                   <ion-icon slot="end" name="list-outline" size="small"></ion-icon>
                   <ion-label>
                     {{ 'Data Fields' | translate }}<br />
                     <span>{{ 'collection fields' | translate }}</span>
                   </ion-label>
                 </ion-item>
-                
                 <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }}</ion-list-header>
                 <div *ngIf="views_pane.length > 0; else nopaneviewfound">
                   <ion-item *ngFor="let item of views_pane; let p = index" class="pane-item cursored"
@@ -910,7 +912,7 @@
                     <ion-label class="ion-text-wrap">
                       {{ item.title }}<br />
                       <div>{{ item.description }}<br />
-                        <a href="javascript:void(0);">{{ 'run this action' | translate }}</a>
+                        <a href="javascript:void(0);">{{ 'RUN this action' | translate }}</a>
                       </div>
                     </ion-label>
                   </ion-item>

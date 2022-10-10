@@ -608,6 +608,7 @@ class Crud():
                 prefix_ = template_["prefix"] if "prefix" in template_ else "xxx"
                 data_file_ = template_["data"]
                 fields_ = template_["fields"]
+                actions_ = template_["actions"]
                 collection__ = f"{col_id_}_data"
 
                 find_one_ = self.db["_collection"].find_one({"col_id": col_id_})
@@ -644,6 +645,17 @@ class Crud():
                         rec_["_created_by"] = rec_["_modified_by"] = email_
                         rec_["_modified_count"] = 0
                         session_db_["_field"].insert_one(rec_)
+
+                # process _action records
+                f_ = open(f"/app/_schemes/templates/{actions_}", "r")
+                data_ = json.loads(f_.read())
+                if data_ and len(data_) > 0:
+                    session_db_["_action"].delete_many({"act_collection_id": col_id_})
+                    for rec_ in data_:
+                        rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
+                        rec_["_created_by"] = rec_["_modified_by"] = email_
+                        rec_["_modified_count"] = 0
+                        session_db_["_action"].insert_one(rec_)
 
                 setstructure_f_ = self.setstructure_f({
                     "userindb": userindb_,

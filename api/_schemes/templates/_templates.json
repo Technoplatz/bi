@@ -8,7 +8,8 @@
         "prefix": "acc",
         "data": "accounts-data.json",
         "fields": "accounts-fields.json",
-        "sort": 20,
+        "actions": "accounts-actions.json",
+        "sort": 10,
         "enabled": true,
         "icon": "business-outline"
     },
@@ -21,6 +22,7 @@
         "prefix": "trx",
         "data": "transactions-data.json",
         "fields": "transactions-fields.json",
+        "actions": "transactions-actions.json",
         "sort": 20,
         "enabled": true,
         "icon": "qr-code-outline"

@@ -1,0 +1,48 @@
+[
+  {
+    "act_id": "act-account-status-0",
+    "act_collection_id": "accounts",
+    "act_title": "Set status Open",
+    "act_description": "This action updates the status of the selected records back to 0-Open.",
+    "act_enabled": true,
+    "act_one_click": false,
+    "act_priority": 1000,
+    "act_filter": [],
+    "act_fields": [
+      {
+        "key": "acc_status",
+        "value": "0-Open"
+      }
+    ],
+    "_tags": [
+      "#Managers",
+      "#Administrators"
+    ]
+  },
+  {
+    "act_id": "act-account-status-0-to-1",
+    "act_collection_id": "accounts",
+    "act_title": "Set status Active",
+    "act_description": "This action updates records with account status 0-Open to 1-Active all at once.",
+    "act_enabled": true,
+    "act_one_click": true,
+    "act_priority": 1000,
+    "act_filter": [
+      {
+        "key": "acc_status",
+        "op": "eq",
+        "value": "0-Open"
+      }
+    ],
+    "act_fields": [
+      {
+        "key": "acc_status",
+        "value": "1-Active"
+      }
+    ],
+    "_tags": [
+      "#Managers",
+      "#Administrators"
+    ]
+  }
+]

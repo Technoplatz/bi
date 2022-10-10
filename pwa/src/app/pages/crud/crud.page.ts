@@ -228,7 +228,6 @@ export class CrudPage implements OnInit {
       } else {
         this.modified = true;
         this.isInProgress = true;
-        console.log("*** op", this.op);
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then(() => {
           setTimeout(() => {
             this.doCancel({ op: this.op, modified: this.modified, filter: [] });
