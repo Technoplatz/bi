@@ -458,7 +458,6 @@
             "description": "Tags",
             "subType": "tag",
             "manualAdd": true,
-            "chips": true,
             "width": 300
         }
     },

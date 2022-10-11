@@ -266,7 +266,7 @@ class Misc():
     def __init__(self):
         self.db = Mongo().db_f()
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
-        self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "chips", "map", "hidden", "default", "secret", "token", "file", "permanent",
+        self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd"]
 
     def exception_f(self, exc):

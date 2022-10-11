@@ -104,7 +104,6 @@
                         "bsonType": "string",
                         "minLength": 1,
                         "maxLength": 64,
-                        "pattern": "^[\\p{L}\\p{N}.,;?*_/()! -]{1,64}$",
                         "title": "value",
                         "description": "Value"
                     }
@@ -143,7 +142,6 @@
                         "bsonType": "string",
                         "minLength": 0,
                         "maxLength": 64,
-                        "pattern": "^[\\p{L}\\p{N}.,;?*_/()$! -]{0,64}$",
                         "title": "Value",
                         "description": "Field value"
                     }
@@ -165,13 +163,12 @@
             "maxItems": 100,
             "items": {
                 "bsonType": "string",
-                "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$"
+                "pattern": "^[#@][a-zA-Z0-9]{0,32}$"
             },
             "title": "Tags",
             "description": "Tags",
             "subType": "tag",
             "manualAdd": true,
-            "chips": true,
             "width": 300
         }
     },
