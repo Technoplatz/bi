@@ -1336,7 +1336,10 @@ class Crud():
             if "parents" in col_structure_:
                 parents_ = col_structure_["parents"]
 
-            if "sort" in col_structure_ and col_structure_["sort"] != {}:
+            if "vie_order_by" in view_ and len(view_["vie_order_by"]) > 0:
+                sort_ = {}
+                sort_[view_["vie_order_by"][0]] = 1
+            elif "sort" in col_structure_ and col_structure_["sort"] != {}:
                 sort_ = col_structure_["sort"]
             else:
                 sort_ = {"_modified_at_": -1}
