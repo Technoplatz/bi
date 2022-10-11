@@ -9,6 +9,7 @@
         "data": "accounts-data.json",
         "fields": "accounts-fields.json",
         "actions": "accounts-actions.json",
+        "views": "accounts-views.json",
         "sort": 10,
         "enabled": true,
         "icon": "business-outline"
@@ -19,10 +20,11 @@
         "title": "Transactions",
         "description": "Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "collection": "transactions",
-        "prefix": "trx",
+        "prefix": "tra",
         "data": "transactions-data.json",
         "fields": "transactions-fields.json",
         "actions": "transactions-actions.json",
+        "views": "transactions-views.json",
         "sort": 20,
         "enabled": true,
         "icon": "qr-code-outline"

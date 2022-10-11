@@ -13,8 +13,8 @@
         "per_tag_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$",
+            "maxLength": 64,
+            "pattern": "^[#@][a-zA-Z0-9]{3,64}$",
             "title": "Tag",
             "description": "Tag",
             "required": true,
@@ -23,8 +23,8 @@
         "per_col_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[a-z0-9-_]{3,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-_]{3,64}$",
             "title": "Collection ID",
             "description": "Collection ID",
             "required": true,

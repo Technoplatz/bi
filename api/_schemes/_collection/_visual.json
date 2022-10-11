@@ -34,8 +34,8 @@
         "vis_view_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[a-z0-9-_]{3,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-_]{3,64}$",
             "title": "View ID",
             "description": "View ID",
             "required": true,
@@ -79,8 +79,8 @@
         "vis_chart_xaxis": {
             "bsonType": "string",
             "minLength": 1,
-            "maxLength": 32,
-            "pattern": "^[a-z_]{1,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z_]{1,64}$",
             "title": "X Axis",
             "description": "Chart X Axis",
             "property": true,
@@ -89,8 +89,8 @@
         "vis_chart_yaxis": {
             "bsonType": "string",
             "minLength": 1,
-            "maxLength": 32,
-            "pattern": "^[a-z_]{1,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z_]{1,64}$",
             "title": "Y Axis (Data)",
             "description": "Chart Y Axis",
             "property": true,
@@ -99,8 +99,8 @@
         "vis_chart_legend": {
             "bsonType": "string",
             "minLength": 1,
-            "maxLength": 32,
-            "pattern": "^[a-z_]{1,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z_]{1,64}$",
             "title": "Legend (Group)",
             "description": "Legend (Group) Column",
             "property": true,
@@ -208,8 +208,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 3,
-                "maxLength": 32,
-                "pattern": "^[a-zA-Z0-9# ]{3,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-zA-Z0-9# ]{3,64}$"
             },
             "title": "Color Scheme",
             "description": "Color Scheme",

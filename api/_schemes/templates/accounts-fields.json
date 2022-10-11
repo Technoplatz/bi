@@ -13,7 +13,7 @@
     "fie_permanent": false,
     "fie_indexed": false,
     "fie_min_length": 1,
-    "fie_max_length": 32,
+    "fie_max_length": 64,
     "fie_minimum": null,
     "fie_maximum": null,
     "fie_array_unique_items": false,

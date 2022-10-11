@@ -3,7 +3,7 @@
         "fwa_rule_id": {
             "bsonType": "string",
             "minLength": 1,
-            "maxLength": 32,
+            "maxLength": 64,
             "pattern": "^[a-z0-9-]+$",
             "title": "ID",
             "description": "Rule ID",

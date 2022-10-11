@@ -3,8 +3,8 @@
         "fie_collection_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[a-z_]{3,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z_]{3,64}$",
             "title": "Collection ID",
             "description": "Collection ID",
             "collection": true,
@@ -104,8 +104,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 0,
-                "maxLength": 32,
-                "pattern": "^[a-z_]{1,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-z_]{0,64}$"
             },
             "title": "Unique Additionals",
             "description": "Unique Additionals",
@@ -134,8 +134,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 0,
-                "maxLength": 32,
-                "pattern": "^[a-z_]{1,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-z_]{1,64}$"
             },
             "title": "Indexed Additionals",
             "description": "Indexed Additionals",
@@ -241,8 +241,8 @@
         "fie_parent_collection_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[a-z_]{3,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z_]{3,64}$",
             "title": "Parent Collection",
             "description": "Parent Collection",
             "collection": true,
@@ -283,7 +283,7 @@
                 "unsorted"
             ],
             "minLength": 0,
-            "maxLength": 32,
+            "maxLength": 64,
             "default": "unsorted",
             "width": 90
         }

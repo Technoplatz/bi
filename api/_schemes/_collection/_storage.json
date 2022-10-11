@@ -3,8 +3,8 @@
         "sto_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[a-z0-9-]{3,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-]{3,64}$",
             "title": "ID",
             "description": "Storage ID",
             "permanent": true,
@@ -14,8 +14,8 @@
         "sto_collection_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[a-z0-9-_]{3,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-_]{3,64}$",
             "title": "Collection",
             "description": "Collection ID",
             "collection": true,

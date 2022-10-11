@@ -88,12 +88,11 @@
                         </ion-text>
                         <ion-icon [name]="item.icon" class="banner-icon"></ion-icon>
                         <div class="banner-buttons">
-                          <ion-button size="small" (click)="doInstallTemplate(item, t)"
-                            [disabled]="collections_[item.collection]">
+                          <ion-button size="small" (click)="doInstallTemplate(item, t)">
                             <ion-icon *ngIf="!item.processing" name="cloud-download"></ion-icon>
                             <ion-spinner *ngIf="item.processing" name="dots" class="ion-margin-end"></ion-spinner>
-                            <span *ngIf="!collections_[item.collection]">{{ 'INSTALL' | translate }}</span>
-                            <span *ngIf="collections_[item.collection]">{{ 'INSTALLED' | translate }}</span>
+                            <span>{{ 'INSTALL' | translate }}</span>
+                            <!-- <span *ngIf="collections_[item.collection]">{{ 'INSTALLED' | translate }}</span> -->
                           </ion-button>
                         </div>
                       </div>

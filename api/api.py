@@ -591,7 +591,11 @@ class Crud():
                 raise APIError("user not found")
 
             data_ = None
-            f_ = open(f"/app/_schemes/templates/_templates.json", "r")
+            path_ = f"/app/_schemes/templates/_templates.json"
+            if not os.path.isfile(path_):
+                raise APIError("no templates found")
+
+            f_ = open(path_, "r")
             data_ = json.loads(f_.read())
 
             if proc_ == "list":
@@ -609,12 +613,12 @@ class Crud():
                 data_file_ = template_["data"]
                 fields_ = template_["fields"]
                 actions_ = template_["actions"]
+                views_ = template_["views"]
                 collection__ = f"{col_id_}_data"
 
                 find_one_ = self.db["_collection"].find_one({"col_id": col_id_})
                 if find_one_:
                     raise APIError("collection is already exists")
-
                 if col_id_ in self.db.list_collection_names():
                     raise APIError("collection data is already exists")
 
@@ -622,6 +626,7 @@ class Crud():
                     "col_id": col_id_,
                     "col_title": col_title_,
                     "col_enabled": True,
+                    "col_priority": 1000,
                     "col_protected": False,
                     "col_prefix": prefix_,
                     "col_bypass_fields": False,
@@ -632,30 +637,35 @@ class Crud():
                     "_modified_by": email_,
                     "_modified_count": 0
                 }
+
                 # insert collection
                 session_db_["_collection"].insert_one(doc_)
 
                 # process _field records
-                f_ = open(f"/app/_schemes/templates/{fields_}", "r")
-                data_ = json.loads(f_.read())
-                if data_ and len(data_) > 0:
-                    session_db_["_field"].delete_many({"fie_collection_id": col_id_})
-                    for rec_ in data_:
-                        rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
-                        rec_["_created_by"] = rec_["_modified_by"] = email_
-                        rec_["_modified_count"] = 0
-                        session_db_["_field"].insert_one(rec_)
+                path_ = f"/app/_schemes/templates/{fields_}"
+                if os.path.isfile(path_):
+                    f_ = open(path_, "r")
+                    data_ = json.loads(f_.read())
+                    if data_ and len(data_) > 0:
+                        session_db_["_field"].delete_many({"fie_collection_id": col_id_})
+                        for rec_ in data_:
+                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
+                            rec_["_created_by"] = rec_["_modified_by"] = email_
+                            rec_["_modified_count"] = 0
+                            session_db_["_field"].insert_one(rec_)
 
                 # process _action records
-                f_ = open(f"/app/_schemes/templates/{actions_}", "r")
-                data_ = json.loads(f_.read())
-                if data_ and len(data_) > 0:
-                    session_db_["_action"].delete_many({"act_collection_id": col_id_})
-                    for rec_ in data_:
-                        rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
-                        rec_["_created_by"] = rec_["_modified_by"] = email_
-                        rec_["_modified_count"] = 0
-                        session_db_["_action"].insert_one(rec_)
+                path_ = f"/app/_schemes/templates/{actions_}"
+                if os.path.isfile(path_):
+                    f_ = open(path_, "r")
+                    data_ = json.loads(f_.read())
+                    if data_ and len(data_) > 0:
+                        session_db_["_action"].delete_many({"act_collection_id": col_id_})
+                        for rec_ in data_:
+                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
+                            rec_["_created_by"] = rec_["_modified_by"] = email_
+                            rec_["_modified_count"] = 0
+                            session_db_["_action"].insert_one(rec_)
 
                 setstructure_f_ = self.setstructure_f({
                     "userindb": userindb_,
@@ -666,20 +676,22 @@ class Crud():
                 col_structure_ = setstructure_f_["structure"]
 
                 # process data
-                f_ = open(f"/app/_schemes/templates/{data_file_}", "r")
-                data_ = json.loads(f_.read())
-                if data_ and len(data_) > 0:
-                    session_db_[collection__].delete_many({})
-                    for rec_ in data_:
-                        decoded_ = Crud().decode_crud_input_f({
-                            "collection": col_id_,
-                            "doc": rec_
-                        })
-                        doc__ = decoded_["doc"]
-                        doc__["_created_at"] = doc__["_modified_at"] = datetime.now()
-                        doc__["_created_by"] = doc__["_modified_by"] = email_
-                        doc__["_modified_count"] = 0
-                        session_db_[collection__].insert_one(doc__)
+                path_ = f"/app/_schemes/templates/{data_file_}"
+                if os.path.isfile(path_):
+                    f_ = open(path_, "r")
+                    data_ = json.loads(f_.read())
+                    if data_ and len(data_) > 0:
+                        session_db_[collection__].delete_many({})
+                        for rec_ in data_:
+                            decoded_ = Crud().decode_crud_input_f({
+                                "collection": col_id_,
+                                "doc": rec_
+                            })
+                            doc__ = decoded_["doc"]
+                            doc__["_created_at"] = doc__["_modified_at"] = datetime.now()
+                            doc__["_created_by"] = doc__["_modified_by"] = email_
+                            doc__["_modified_count"] = 0
+                            session_db_[collection__].insert_one(doc__)
 
                 # add validation before adding dummy records
                 schemevalidate_ = self.crudscheme_validate_f({
@@ -688,6 +700,19 @@ class Crud():
                 })
                 if not schemevalidate_["result"]:
                     raise APIError(schemevalidate_["msg"])
+
+                # process views
+                path_ = f"/app/_schemes/templates/{views_}"
+                if os.path.isfile(path_):
+                    f_ = open(path_, "r")
+                    data_ = json.loads(f_.read())
+                    if data_ and len(data_) > 0:
+                        session_db_["_view"].delete_many({"vie_collection_id": col_id_})
+                        for rec_ in data_:
+                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
+                            rec_["_created_by"] = rec_["_modified_by"] = email_
+                            rec_["_modified_count"] = 0
+                            session_db_["_view"].insert_one(rec_)
 
                 session_.commit_transaction() if session_ else None
 
@@ -948,9 +973,8 @@ class Crud():
                 "vie_title": vie_title_,
                 "vie_priority": 1000,
                 "vie_enabled": True,
+                "vie_dashboard": True,
                 "vie_filter": match_,
-                "vie_color": "dark",
-                "vie_icon": "easel-outline",
                 "vie_sched_timezone": TZ_,
                 "vie_scheduled": False,
                 "vie_attach_pivot": True,

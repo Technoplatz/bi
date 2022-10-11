@@ -1,122 +1,110 @@
 [
-    {
-        "act_id": "DN01765005",
-        "act_item_no": "10",
-        "act_status": "0-Open",
-        "act_date": "2022-03-29",
-        "act_account_id": "Teknoplatz",
-        "act_product_id": "P007904440",
-        "act_qty": 2,
-        "act_price": 435.07,
-        "act_amount": 870.14,
-        "act_notes": null,
-        "_tags": [
-            "#Managers"
-        ]
-    },
-    {
-        "act_id": "DN61065441",
-        "act_item_no": "10",
-        "act_status": "0-Open",
-        "act_date": "2022-03-29",
-        "act_account_id": "Teknoplatz",
-        "act_product_id": "B022207660",
-        "act_qty": 1,
-        "act_price": 2800.00,
-        "act_amount": 2800.00,
-        "act_notes": "There are some missing items",
-        "_tags": [
-            "#Managers"
-        ]
-    },
-    {
-        "act_id": "DN87000320",
-        "act_item_no": "10",
-        "act_status": "0-Open",
-        "act_date": "2022-03-29",
-        "act_account_id": "Angoora",
-        "act_product_id": "R070000020",
-        "act_qty": 2,
-        "act_price": 900.00,
-        "act_amount": 1800.00,
-        "act_notes": null,
-        "_tags": [
-            "#Managers"
-        ]
-    },
-    {
-        "act_id": "DN87000320",
-        "act_item_no": "20",
-        "act_status": "0-Open",
-        "act_date": "2022-03-29",
-        "act_account_id": "Angoora",
-        "act_product_id": "R083000111",
-        "act_qty": 4,
-        "act_price": 90.00,
-        "act_amount": 360.00,
-        "act_notes": null,
-        "_tags": [
-            "#Managers"
-        ]
-    },
-    {
-        "act_id": "DN87000320",
-        "act_item_no": "30",
-        "act_status": "0-Open",
-        "act_date": "2022-03-29",
-        "act_account_id": "Angoora",
-        "act_product_id": "U400550007",
-        "act_qty": 1,
-        "act_price": 84.00,
-        "act_amount": 84.00,
-        "act_notes": null,
-        "_tags": [
-            "#Managers"
-        ]
-    },
-    {
-        "act_id": "AA54776100",
-        "act_item_no": "10",
-        "act_status": "0-Open",
-        "act_date": "2022-03-30",
-        "act_account_id": "Netherion",
-        "act_product_id": "KL70073001",
-        "act_qty": 2,
-        "act_price": 500.00,
-        "act_amount": 1000.00,
-        "act_notes": null,
-        "_tags": [
-            "#Managers"
-        ]
-    },
-    {
-        "act_id": "AA54776100",
-        "act_item_no": "20",
-        "act_status": "0-Open",
-        "act_date": "2022-03-30",
-        "act_account_id": "Netherion",
-        "act_product_id": "PT10293055",
-        "act_qty": 10,
-        "act_price": 5410.00,
-        "act_amount": 54100.00,
-        "act_notes": null,
-        "_tags": [
-            "#Managers"
-        ]
-    },
-    {
-        "act_id": "JU40020027",
-        "act_item_no": "10",
-        "act_status": "0-Open",
-        "act_date": "2022-03-30",
-        "act_account_id": "İmpsum",
-        "act_product_id": "A077780012",
-        "act_qty": 7,
-        "act_price": 70.00,
-        "act_amount": 490.00,
-        "act_notes": null,
-        "_tags": [
-            "#Managers"
-        ]
-    }
+  {
+    "tra_account_id": "Angoora",
+    "tra_amount": 360,
+    "tra_date": "2022-03-29 00:00:00",
+    "tra_id": "DN87000321",
+    "tra_item_no": 20,
+    "tra_notes": null,
+    "tra_price": 90,
+    "tra_product_id": "R083000111",
+    "tra_qty": 4,
+    "tra_status": "3-Closed"
+  },
+  {
+    "tra_account_id": "Teknoplatz",
+    "tra_amount": 8400,
+    "tra_date": "2022-03-29 00:00:00",
+    "tra_id": "DN87000322",
+    "tra_item_no": 30,
+    "tra_notes": null,
+    "tra_price": 840,
+    "tra_product_id": "U400550007",
+    "tra_qty": 10,
+    "tra_status": "1-InProcess"
+  },
+  {
+    "tra_account_id": "Netherion",
+    "tra_amount": 16000,
+    "tra_date": "2022-03-30 00:00:00",
+    "tra_id": "AA54776100",
+    "tra_item_no": 40,
+    "tra_notes": null,
+    "tra_price": 1000,
+    "tra_product_id": "KL70073001",
+    "tra_qty": 4,
+    "tra_status": "0-Open"
+  },
+  {
+    "tra_account_id": "Netherion",
+    "tra_amount": 14100,
+    "tra_date": "2022-03-30 00:00:00",
+    "tra_id": "AA54776101",
+    "tra_item_no": 20,
+    "tra_notes": "Should be canceled",
+    "tra_price": 5410,
+    "tra_product_id": "PT10293055",
+    "tra_qty": 10,
+    "tra_status": "1-InProcess"
+  },
+  {
+    "tra_account_id": "Teknoplatz",
+    "tra_amount": 12000,
+    "tra_date": "2022-03-29 00:00:00",
+    "tra_id": "DN01765005",
+    "tra_item_no": 10,
+    "tra_notes": null,
+    "tra_price": 140,
+    "tra_product_id": "P007904440",
+    "tra_qty": 300,
+    "tra_status": "0-Open"
+  },
+  {
+    "tra_account_id": "Impsum",
+    "tra_amount": 37000,
+    "tra_date": "2022-03-30 00:00:00",
+    "tra_id": "JU40020027",
+    "tra_item_no": 10,
+    "tra_notes": null,
+    "tra_price": 37000,
+    "tra_product_id": "A077780012",
+    "tra_qty": 1,
+    "tra_status": "0-Open"
+  },
+  {
+    "tra_account_id": "Impsum",
+    "tra_amount": 49000,
+    "tra_date": "2022-03-30 00:00:00",
+    "tra_id": "JU40020028",
+    "tra_item_no": 10,
+    "tra_notes": null,
+    "tra_price": 70,
+    "tra_product_id": "A077780012",
+    "tra_qty": 700,
+    "tra_status": "1-InProcess"
+  },
+  {
+    "tra_account_id": "Impsum",
+    "tra_amount": 11490,
+    "tra_date": "2022-03-30 00:00:00",
+    "tra_id": "JU40020029",
+    "tra_item_no": 10,
+    "tra_notes": null,
+    "tra_price": 70,
+    "tra_product_id": "A077780012",
+    "tra_qty": 7,
+    "tra_status": "1-InProcess"
+  },
+  {
+    "tra_account_id": "Teknoplatz",
+    "tra_amount": 22400,
+    "tra_date": "2022-03-29 00:00:00",
+    "tra_id": "DN87000328",
+    "tra_item_no": 30,
+    "tra_notes": null,
+    "tra_price": 840,
+    "tra_product_id": "U400550007",
+    "tra_qty": 10,
+    "tra_status": "2-Completed"
+  }
 ]

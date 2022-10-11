@@ -8,23 +8,13 @@
             "title": "ID",
             "description": "View ID",
             "required": true,
-            "permanent": true,
             "width": 230
-        },
-        "vie_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 1000,
-            "width": 120
         },
         "vie_collection_id": {
             "bsonType": "string",
             "minLength": 3,
-            "maxLength": 32,
-            "pattern": "^[a-z0-9-_]{3,32}$",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-_]{3,64}$",
             "title": "Collection ID",
             "description": "Collection ID",
             "collection": true,
@@ -40,6 +30,15 @@
             "description": "View title",
             "required": true,
             "width": 230
+        },
+        "vie_priority": {
+            "bsonType": "number",
+            "title": "Priority",
+            "description": "Priority 0-999999",
+            "minimum": 0,
+            "maximum": 999999,
+            "default": 1000,
+            "width": 120
         },
         "vie_enabled": {
             "bsonType": "bool",
@@ -68,8 +67,8 @@
                     "key": {
                         "bsonType": "string",
                         "minLength": 1,
-                        "maxLength": 32,
-                        "pattern": "^[a-z_]{1,32}$",
+                        "maxLength": 64,
+                        "pattern": "^[a-z_]{1,64}$",
                         "title": "key",
                         "description": "Collection key"
                     },
@@ -100,8 +99,8 @@
                     "value": {
                         "bsonType": "string",
                         "minLength": 1,
-                        "maxLength": 32,
-                        "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß.,;?*_/()! -]{1,32}$",
+                        "maxLength": 64,
+                        "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß.,;?*_/()! -]{1,64}$",
                         "title": "value",
                         "description": "Value"
                     }
@@ -125,8 +124,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 0,
-                "maxLength": 32,
-                "pattern": "^[a-z_]{1,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-z_]{0,64}$"
             },
             "title": "Selected Columns",
             "description": "Selected columns",
@@ -141,8 +140,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 0,
-                "maxLength": 32,
-                "pattern": "^[a-z_]{1,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-z_]{0,64}$"
             },
             "title": "Excluded Columns",
             "description": "Excluded columns",
@@ -158,7 +157,7 @@
         "vie_sched_timezone": {
             "bsonType": "string",
             "minLength": 0,
-            "maxLength": 32,
+            "maxLength": 64,
             "title": "Scheduled Time Zone",
             "description": "Scheduled time zone",
             "enum": [
@@ -221,8 +220,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 0,
-                "maxLength": 32,
-                "pattern": "^[a-z_]{1,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-z_]{1,64}$"
             },
             "title": "Pivot Rows",
             "description": "Pivot Rows",
@@ -237,8 +236,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 0,
-                "maxLength": 32,
-                "pattern": "^[a-z_]{1,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-z_]{1,64}$"
             },
             "title": "Pivot Columns",
             "description": "Pivot Columns",
@@ -259,16 +258,16 @@
                     "key": {
                         "bsonType": "string",
                         "minLength": 1,
-                        "maxLength": 32,
-                        "pattern": "^[a-z_]{1,32}$",
+                        "maxLength": 64,
+                        "pattern": "^[a-z_]{1,64}$",
                         "title": "Key",
                         "description": "Index key"
                     },
                     "value": {
                         "bsonType": "string",
                         "minLength": 1,
-                        "maxLength": 32,
-                        "pattern": "^[a-z]{1,32}$",
+                        "maxLength": 64,
+                        "pattern": "^[a-z]{1,64}$",
                         "enum": [
                             "sum",
                             "count",
@@ -430,8 +429,8 @@
             "items": {
                 "bsonType": "string",
                 "minLength": 3,
-                "maxLength": 32,
-                "pattern": "^[a-zA-Z0-9# ]{3,32}$"
+                "maxLength": 64,
+                "pattern": "^[a-zA-Z0-9# ]{3,64}$"
             },
             "title": "Colors",
             "description": "Color name or rgb code like #cc0000",
@@ -452,7 +451,7 @@
             "maxItems": 100,
             "items": {
                 "bsonType": "string",
-                "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$"
+                "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$"
             },
             "title": "Tags",
             "description": "Tags",
