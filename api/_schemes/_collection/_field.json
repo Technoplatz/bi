@@ -43,12 +43,11 @@
         "fie_priority": {
             "bsonType": "number",
             "title": "Priority",
-            "description": "Priority",
-            "minimum": 100,
+            "description": "Priority 0-999999",
+            "minimum": 0,
             "maximum": 999999,
-            "default": 999999,
-            "required": true,
-            "width": 110
+            "default": 1000,
+            "width": 120
         },
         "fie_title": {
             "bsonType": "string",

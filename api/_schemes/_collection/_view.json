@@ -14,11 +14,11 @@
         "vie_priority": {
             "bsonType": "number",
             "title": "Priority",
-            "description": "Priority 1-9999",
-            "minimum": 1,
-            "maximum": 9999,
-            "default": 9999,
-            "width": 100
+            "description": "Priority 0-999999",
+            "minimum": 0,
+            "maximum": 999999,
+            "default": 1000,
+            "width": 120
         },
         "vie_collection_id": {
             "bsonType": "string",

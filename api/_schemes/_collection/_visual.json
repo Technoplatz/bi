@@ -70,11 +70,11 @@
         "vis_priority": {
             "bsonType": "number",
             "title": "Priority",
-            "description": "Priority",
-            "minimum": 1000,
-            "maximum": 9999,
+            "description": "Priority 0-999999",
+            "minimum": 0,
+            "maximum": 999999,
             "default": 1000,
-            "width": 110
+            "width": 120
         },
         "vis_chart_xaxis": {
             "bsonType": "string",

@@ -946,6 +946,7 @@ class Crud():
                 "vie_id": id_,
                 "vie_collection_id": collection_,
                 "vie_title": vie_title_,
+                "vie_priority": 1000,
                 "vie_enabled": True,
                 "vie_filter": match_,
                 "vie_color": "dark",
