@@ -926,6 +926,11 @@ sup {
   --color: var(--ion-color-danger) !important;
 }
 
+.light {
+  color: var(--ion-color-medium) !important;
+  --color: var(--ion-color-medium) !important;
+}
+
 .success {
   color: var(--ion-color-success) !important;
   --color: var(--ion-color-success) !important;
@@ -1469,6 +1474,10 @@ ion-checkbox {
   padding: none !important;
 }
 
+.templates {
+  margin-bottom: 16px;
+}
+
 .banner-container {
   width: 100%;
   padding: 0px;
@@ -1478,44 +1487,38 @@ ion-checkbox {
 
 .banner-container .banner {
   position: relative;
-  width: 260px;
-  height: 180px;
+  max-width: 260px;
+  height: 160px;
   padding: 16px;
   margin-right: 8px;
-  margin-top: 8px;
-  border: 1px solid var(--ion-color-primary);
-  border-radius: 0px;
+  margin-bottom: 8px;
+  border: 4px solid var(--ion-color-light);
+  border-radius: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: small;
 }
 
-.banner-container .banner h5 {
+.banner-container .banner h4 {
   display: block !important;
   width: 80%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   margin: 0px;
-  margin-bottom: 4px !important;
+  margin-bottom: 8px !important;
 }
 
 .banner-container .banner .banner-icon {
   position: absolute;
-  font-size: 36px;
+  font-size: 28px;
   right: 0;
   top: 0;
   padding-top: 16px;
   padding-right: 16px;
+  margin-left: 16px;
+  margin-bottom: 16px;
   color: var(--ion-color-primary);
-}
-
-.banner-container .banner-buttons {
-  width: auto;
-  position: absolute;
-  bottom: 12px;
-}
-
-.banner-container .banner-buttons ion-button {
-  --background: var(--ion-color-primary) !important;
-  --color: #ffffff !important;
 }
 
 .add-button {

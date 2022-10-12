@@ -38,6 +38,7 @@ export class ConsolePage implements OnInit {
   public id: string = null;
   public sortstr: any;
   public ok: boolean = false;
+  public reconfig: boolean = false;
   public filter: any = [];
   public saved_filter: string = null;
   public selected_view: any;
@@ -334,7 +335,7 @@ export class ConsolePage implements OnInit {
             this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
             this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
           }).catch((error: any) => {
-            console.error("*** doGetViewMode", error);
+            console.error("*** view mode", error);
             this.misc.doMessage(error.error.message, "error");
           }).finally(() => {
             resolve(true);
@@ -440,6 +441,7 @@ export class ConsolePage implements OnInit {
                 this.page,
                 this.limit).then((res: any) => {
                   this.data = res.data;
+                  this.reconfig = res.reconfig;
                   this.structure = res.structure;
                   this.actions = this.structure && this.structure.actions ? this.structure.actions : [];
                   this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
@@ -1274,9 +1276,9 @@ export class ConsolePage implements OnInit {
     });
   }
 
-  doSetStructure() {
+  doReconfigure() {
     if (this.perm) {
-      this.crud.SetStructure(this.id).then((res: any) => {
+      this.crud.Reconfigure(this.id).then((res: any) => {
         if (res && res.result) {
           this.RefreshData(0);
           this.misc.doMessage("structure updated successfully", "success");

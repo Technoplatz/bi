@@ -25,8 +25,8 @@
               <p *ngIf="collections.length == 0">
                 <ion-text color="medium">{{ 'No collections found' | translate }}</ion-text>
               </p>
-              <p *ngFor="let item of collections"
-                (click)="goSection('collections', item.col_id, item.col_id)" class="clicked-item">
+              <p *ngFor="let item of collections" (click)="goSection('collections', item.col_id, item.col_id)"
+                class="clicked-item">
                 {{ item.col_title }}
               </p>
             </ion-label>
@@ -47,16 +47,13 @@
               <ion-button size="default" fill="clear" class="menu-button">
                 <ion-icon name="options-outline"></ion-icon>{{ 'Preferences' | translate }}
               </ion-button>
-              <p (click)="goSection('account', 'apikey', 'API Key')"
-                class="clicked-item">
+              <p (click)="goSection('account', 'apikey', 'API Key')" class="clicked-item">
                 {{ 'API Key' | translate }}
               </p>
-              <p (click)="goSection('account', 'settings', 'Account Settings')"
-                class="clicked-item">
+              <p (click)="goSection('account', 'settings', 'Account Settings')" class="clicked-item">
                 {{ 'Account Settings' | translate }}
               </p>
-              <p (click)="goSection('account', 'preferences', 'Preferences')"
-                class="clicked-item">
+              <p (click)="goSection('account', 'preferences', 'Preferences')" class="clicked-item">
                 {{ 'Preferences' | translate }}
               </p>
             </ion-label>
@@ -66,7 +63,6 @@
 
       <!-- RIGHT SIDE -->
       <ion-col class="console-right-side">
-
         <ion-grid class="ion-no-padding ion-no-border">
           <ion-row>
             <ion-col class="console-right-0">
@@ -78,23 +74,14 @@
               <!-- DASHBOARD -->
               <div *ngIf="menu=='dashboard'">
                 <div *ngIf="is_dash_ok; else dashloading">
+                  
                   <!-- TEMPLATES -->
-                  <div *ngIf="submenu=='templates'">
+                  <div *ngIf="submenu=='templates'" class="templates">
                     <div *ngIf="templates" class="banner-container ion-padding-bottom">
-                      <div *ngFor="let item of templates; let t = index" class="banner">
-                        <h5>{{ item.title }}</h5>
-                        <ion-text>
+                      <div *ngFor="let item of templates; let t = index" class="banner clicked-item" (click)="doInstallTemplate(item, t)">
+                        <h4>{{ item.title }}</h4>
                           {{ item.description }}
-                        </ion-text>
                         <ion-icon [name]="item.icon" class="banner-icon"></ion-icon>
-                        <div class="banner-buttons">
-                          <ion-button size="small" (click)="doInstallTemplate(item, t)">
-                            <ion-icon *ngIf="!item.processing" name="cloud-download"></ion-icon>
-                            <ion-spinner *ngIf="item.processing" name="dots" class="ion-margin-end"></ion-spinner>
-                            <span>{{ 'INSTALL' | translate }}</span>
-                            <!-- <span *ngIf="collections_[item.collection]">{{ 'INSTALLED' | translate }}</span> -->
-                          </ion-button>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -114,7 +101,7 @@
                             item.chart.kpi_target_value }}</span>
                           <ng-template #notargetv><br /></ng-template>
                         </div>
-                        <div class="hdr3" *ngIf="item.chart.kpi && item.chart.kpi_target_value; else notarget">
+                        <div class="hdr3">
                           <ion-icon
                             *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value"
                             name="thumbs-down" color="danger">
@@ -123,17 +110,14 @@
                             *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value <= item.chart.value"
                             name="thumbs-up" color="success">
                           </ion-icon>
-                          <!-- <ion-icon name="arrow-up"
-                            [color]="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value ? 'danger' : 'success'">
-                          </ion-icon> -->
                           {{ item.chart.value }}
                         </div>
-                        <ng-template #notarget>
+                        <!-- <ng-template #notarget>
                           <div class="hdr4">
                             <ion-icon name="golf" color="medium"></ion-icon>
                             &nbsp;
                           </div>
-                        </ng-template>
+                        </ng-template> -->
                         <div class="app-charts">
                           <app-charts *ngIf="item.chart.data && item.chart.data.length > 0; else nochartdata"
                             [chart]="item.chart" [width]="chcontainer.offsetWidth"></app-charts>
@@ -771,8 +755,7 @@
                     </span>
                   </ion-label>
                 </ion-item>
-                <ion-item class="pane-item cursored"
-                  (click)="goSection('dashboard', 'templates', 'Templates')">
+                <ion-item class="pane-item cursored" (click)="goSection('dashboard', 'templates', 'Templates')">
                   <ion-icon slot="end" name="documents-outline" size="small"></ion-icon>
                   <ion-label>
                     {{ 'Show Templates' | translate }}<br />
@@ -854,13 +837,6 @@
                     <span>{{ 'upload an excel file' | translate }}</span>
                   </ion-label>
                 </ion-item>
-                <ion-item (click)="doSetStructure()" class="pane-item cursored">
-                  <ion-icon slot="end" name="git-compare-outline" size="small"></ion-icon>
-                  <ion-label>
-                    {{ 'Reconfigure' | translate }}<br />
-                    <span>{{ 'initialize data structure from fields' | translate }}</span>
-                  </ion-label>
-                </ion-item>
                 <ion-item (click)="goFields()" class="pane-item cursored">
                   <ion-icon slot="end" name="list-outline" size="small"></ion-icon>
                   <ion-label>
@@ -868,6 +844,22 @@
                     <span>{{ 'collection fields' | translate }}</span>
                   </ion-label>
                 </ion-item>
+                <ion-item *ngIf="reconfig; else noreconfig" (click)="doReconfigure()" class="pane-item cursored danger">
+                  <ion-icon slot="end" name="warning" size="large" color="danger"></ion-icon>
+                  <ion-label>
+                    {{ 'Action Required' | translate }}<br />
+                    <span class="danger">{{ 'Re-initialize data structure' | translate }}</span>
+                  </ion-label>
+                </ion-item>
+                <ng-template #noreconfig>
+                  <ion-item class="pane-item light">
+                    <ion-icon slot="end" name="git-compare-outline" size="small" color="light"></ion-icon>
+                    <ion-label>
+                      {{ 'No action Required' | translate }}<br />
+                      <span class="light">{{ 'Structure is up to date' | translate }}</span>
+                    </ion-label>
+                  </ion-item>
+                </ng-template>
                 <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }}</ion-list-header>
                 <div *ngIf="views_pane.length > 0; else nopaneviewfound">
                   <ion-item *ngFor="let item of views_pane; let p = index" class="pane-item cursored"

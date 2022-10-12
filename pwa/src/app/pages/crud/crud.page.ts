@@ -231,6 +231,11 @@ export class CrudPage implements OnInit {
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then(() => {
           setTimeout(() => {
             this.doCancel({ op: this.op, modified: this.modified, filter: [] });
+            console.log("*** this.collection", this.collection);
+            // if(this.collection === "_field") {
+            //   this.storage.set("LSFILTER_" + this.collection, "").then(() => {
+            //   });
+            // }
           }, 500);
         }).catch((error: any) => {
           this.doShowError(error);

@@ -178,11 +178,11 @@ export class Crud {
     });
   }
 
-  SetStructure(collection_: string) {
+  Reconfigure(collection_: string) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         const posted: any = {
-          op: "setstructure",
+          op: "reconfigure",
           user: LSUSERMETA,
           collection: collection_
         }
@@ -190,7 +190,9 @@ export class Crud {
           headers: new HttpHeaders(this.crudHeaders)
         }).subscribe((res: any) => {
           if (res && res.result) {
-            resolve(res);
+            this.storage.remove("LSFILTER_" + collection_).then(() => {
+              resolve(res);
+            });
           } else {
             reject(res.msg);
           }
@@ -278,8 +280,6 @@ export class Crud {
               formData.append("token", LSUSERMETA.token);
               formData.append("file", file, file.name);
               formData.append("collection", doc_["sto_collection_id"]);
-              // formData.append("prefix", doc_["sto_prefix"]);
-              // formData.append("groupby", doc_["sto_group_by"]);
               formData.append("name", file.name);
               formData.append("size", file.size);
               formData.append("type", doc_["sto_file_type"]);

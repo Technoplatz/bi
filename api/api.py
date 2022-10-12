@@ -667,13 +667,13 @@ class Crud():
                             rec_["_modified_count"] = 0
                             session_db_["_action"].insert_one(rec_)
 
-                setstructure_f_ = self.setstructure_f({
+                reconfigure_f_ = self.reconfigure_f({
                     "userindb": userindb_,
                     "collection": col_id_
                 })
-                if not setstructure_f_["result"]:
-                    raise APIError(setstructure_f_["msg"])
-                col_structure_ = setstructure_f_["structure"]
+                if not reconfigure_f_["result"]:
+                    raise APIError(reconfigure_f_["msg"])
+                col_structure_ = reconfigure_f_["structure"]
 
                 # process data
                 path_ = f"/app/_schemes/templates/{data_file_}"
@@ -2267,6 +2267,7 @@ class Crud():
                 raise APIError(f"collection not found: {collection_id_}")
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
+            reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] == True else False
 
             if not match_:
                 match_ = []
@@ -2291,7 +2292,8 @@ class Crud():
                 "result": True,
                 "data": [],
                 "count": 0,
-                "structure": structure_
+                "structure": structure_,
+                "reconfig": reconfig_
             }
 
             # check if the user is allowed or not to do this operation
@@ -2314,7 +2316,8 @@ class Crud():
                 "result": True,
                 "data": docs_,
                 "count": count_,
-                "structure": structure_
+                "structure": structure_,
+                "reconfig": reconfig_
             }
 
         except pymongo.errors.PyMongoError as exc:
@@ -2467,7 +2470,7 @@ class Crud():
         finally:
             return res_
 
-    def setstructure_f(self, obj):
+    def reconfigure_f(self, obj):
         try:
             user_ = obj["userindb"] if "userindb" in obj else None
             cid_ = obj["collection"]
@@ -2628,13 +2631,21 @@ class Crud():
                 "_modified_by": user_["email"] if user_ and "email" in user_ else None
             }, "$inc": {"_modified_count": 1}})
 
+            reconfig_set_f_ = self.reconfig_set_f({
+                "op": "set",
+                "collection": cid_,
+                "user": user_
+            })
+            if not reconfig_set_f_["result"]:
+                raise APIError(reconfig_set_f_["msg"])
+
             res_ = {"result": True, "structure": structure_}
 
         except pymongo.errors.PyMongoError as exc:
             self.log_f({
                 "type": "Error",
                 "collection": cid_,
-                "op": "setstructure",
+                "op": "reconfigure",
                 "user": user_["email"] if user_ else None,
                 "document": exc.details
             })
@@ -2782,6 +2793,47 @@ class Crud():
         finally:
             return res_
 
+    def reconfig_set_f(self, obj):
+        try:
+            user_ = obj["user"] if "user" in obj else None
+            collection_id_ = obj["collection"]
+            op_ = obj["op"]
+            email_ = user_["email"] if user_ and "email" in user_ else user_["usr_id"] if user_ and "usr_id" in user_ else None
+
+            doc_ = {}
+            if op_ == "request":
+                doc_["_reconfig_req"] = True
+                doc_["_reconfig_req_at"] = datetime.now()
+                doc_["_reconfig_req_by"] = email_
+            else:
+                doc_["_reconfig_req"] = False
+                doc_["_reconfig_set_at"] = datetime.now()
+                doc_["_reconfig_set_by"] = email_
+
+            self.db["_collection"].update_one({
+                "col_id": collection_id_
+            }, {"$set": doc_, "$inc": {"_modified_count": 1}})
+            res_ = {"result": True}
+
+        except pymongo.errors.PyMongoError as exc:
+            self.log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": "reconfig",
+                "user": email_,
+                "document": exc.details
+            })
+            res_ = Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
     def upsert_f(self, obj):
         try:
             doc = obj["doc"]
@@ -2860,6 +2912,16 @@ class Crud():
                         raise APIError(schemevalidate_["msg"])
                     if datac_not_found_:
                         self.db[datac_].delete_one({})
+            elif collection_id_ in ["_field", "_action"]:
+                cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
+                if cid_:
+                    reconfig_set_f_ = self.reconfig_set_f({
+                        "op": "request",
+                        "collection": cid_,
+                        "user": user_
+                    })
+                    if not reconfig_set_f_["result"]:
+                        raise APIError(reconfig_set_f_["msg"])
 
             res_ = {"result": True}
 
@@ -4554,8 +4616,8 @@ def crud_f():
             crud_ = Crud().remove_f(input_)
         elif op == "setprop":
             crud_ = Crud().setprop_f(input_)
-        elif op == "setstructure":
-            crud_ = Crud().setstructure_f(input_)
+        elif op == "reconfigure":
+            crud_ = Crud().reconfigure_f(input_)
         elif op == "saveasview":
             crud_ = Crud().saveasview_f(input_)
         elif op == "purge":

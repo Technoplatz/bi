@@ -3,7 +3,7 @@
         "_id": "template-account",
         "name": "Accounts Template",
         "title": "Accounts",
-        "description": "Accounts Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "description": "Sample collection includes basic business data fields about customers, suppliers and partners. It can be linked from the other collections via Account ID.",
         "collection": "accounts",
         "prefix": "acc",
         "data": "accounts-data.json",
