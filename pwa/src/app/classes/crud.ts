@@ -398,7 +398,7 @@ export class Crud {
     });
   }
 
-  Visual(c: string, _id: string, apikey_: string) {
+  Visual(_id: string, apikey_: string) {
     return new Promise((resolve, reject) => {
       const url_ = this.apiHost + "/get/visual" + "/" + _id + "?k=" + apikey_;
       this.http.get(url_, {

@@ -1338,7 +1338,9 @@ class Crud():
 
             if "vie_order_by" in view_ and len(view_["vie_order_by"]) > 0:
                 sort_ = {}
-                sort_[view_["vie_order_by"][0]] = 1
+                vie_order_by_ = view_["vie_order_by"]
+                for ob_ in vie_order_by_:
+                    sort_[ob_] = 1
             elif "sort" in col_structure_ and col_structure_["sort"] != {}:
                 sort_ = col_structure_["sort"]
             else:
@@ -1815,31 +1817,24 @@ class Crud():
             series_ = []
             series_sub_ = []
             xaxis_ = None
+            legend_ = None
 
             if vie_chart_xaxis_:
-                if vie_p_kpi_ and vie_chart_style_ == "Line":
-                    for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[vie_chart_legend_] != xaxis_:
-                            series_.append({"name": xaxis_, "series": series_sub_})
-                            series_sub_ = []
-                        series_sub_.append({"name": item_[vie_chart_xaxis_], "value": item_[vie_chart_yaxis_]})
-                        xaxis_ = item_[vie_chart_legend_]
-                    if xaxis_:
-                        series_.append({"name": xaxis_, "series": series_sub_})
-                elif vie_chart_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
+                if vie_chart_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
                     for idx_, item_ in enumerate(dfj_):
                         xaxis_ = item_[vie_chart_xaxis_] if vie_chart_xaxis_ in item_ else None
-                        if xaxis_:
-                            series_.append({"name": xaxis_, "value": item_[vie_chart_yaxis_]})
+                        yaxis_ = item_[vie_chart_yaxis_] if vie_chart_yaxis_ in item_ else None
+                        if xaxis_ and yaxis_:
+                            series_.append({"name": xaxis_, "value": yaxis_})
                 elif vie_chart_style_ == "Line":
                     for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[vie_chart_legend_] != xaxis_:
-                            series_.append({"name": xaxis_, "series": series_sub_})
+                        if idx_ > 0 and item_[vie_chart_legend_] != legend_:
+                            series_.append({"name": legend_, "series": series_sub_})
                             series_sub_ = []
                         series_sub_.append({"name": item_[vie_chart_xaxis_], "value": item_[vie_chart_yaxis_]})
-                        xaxis_ = item_[vie_chart_legend_] if vie_chart_legend_ in item_ else None
-                    if xaxis_:
-                        series_.append({"name": xaxis_, "series": series_sub_})
+                        legend_ = item_[vie_chart_legend_] if vie_chart_legend_ in item_ else None
+                    if legend_:
+                        series_.append({"name": legend_, "series": series_sub_})
                 else:
                     for idx_, item_ in enumerate(dfj_):
                         if idx_ > 0 and item_[vie_chart_xaxis_] != xaxis_:

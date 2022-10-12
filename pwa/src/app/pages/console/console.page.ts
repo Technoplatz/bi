@@ -1118,19 +1118,19 @@ export class ConsolePage implements OnInit {
       this.templates[ix].processing = true;
       this.crud.Template("install", item_).then(() => {
         this.misc.doMessage("template installed successfully", "success");
-        this.templates[ix].processing = false;
         this.doRefreshDash().then(() => { }).catch((error: any) => { });
       }).catch((error: any) => {
-        this.templates[ix].processing = false;
         console.error(error);
         this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.templates[ix].processing = false;
       });
     }
   }
 
   doGetVisual(data: any, v_: number) {
     this.views[v_].loading = true;
-    this.crud.Visual("_visual", data._id, this.accountf_apikey).then((chart: any) => {
+    this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
       this.views[v_].chart = chart;
     }).catch((error: any) => {
       this.views[v_].chart = {};
