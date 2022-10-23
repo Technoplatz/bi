@@ -545,7 +545,7 @@ export class ConsolePage implements OnInit {
         "_modified_at": -1
       }
     }
-    this.doQuitViewMode();
+    this.view_mode[this.id] ? this.doQuitViewMode() : null;
     this.modal.create({
       component: CrudPage,
       backdropDismiss: false,
@@ -1292,11 +1292,13 @@ export class ConsolePage implements OnInit {
     }
   }
 
-  doResizeCharts(size: string) {
-    this.chart_size = size === "S" ? "small" : size === "M" ? "medium" : size === "L" ? "large" : "small";
-    this.storage.set("LSCHARTSIZE", this.chart_size).then(() => {
-      this.chart_css = "chart-sq " + this.chart_size;
-      this.is_show_resize = false;
+  doResizeCharts() {
+    this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: string) => {
+      this.chart_size = LSCHARTSIZE === "small" ? "medium" : LSCHARTSIZE === "medium" ? "large" : LSCHARTSIZE === "large" ? "small" : "small";
+      this.storage.set("LSCHARTSIZE", this.chart_size).then(() => {
+        this.chart_css = "chart-sq " + this.chart_size;
+        this.is_show_resize = false;
+      });
     });
   }
 

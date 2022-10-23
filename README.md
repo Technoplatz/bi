@@ -1,4 +1,5 @@
 ## Technoplatz BI Community Edition
+
 *It's time to get data-driven with your inner-cycle!*
 
 - [What is Technoplatz BI](#what-is-technoplatz-bi)
@@ -8,22 +9,51 @@
 - [Licensing Options](#licensing-options)
 - [About](#about)
 
-### What is Technoplatz BI
-Technoplatz BI (Brezel) is a low-code, multi-container data-driven application and sharing platform that provides many useful features to empower those who're trying to manage mission critical processes on spreadsheets, legacy software or completely manual methods.
+## What is Technoplatz BI
 
-BI provides you to;
+Technoplatz BI is a data application and sharing platform that provides many useful features to empower those who try to manage critical business processes on spreadsheets or legacy software. The system's flexible and pragmatic solution is under three main topics, considering that each business process has its own specific conditions;
 
-- Create an **inner-circle** of customers, suppliers and internal departments.
-- Use a data application without the need to develop a software from scratch.
-- Process data in a flexible database instead of spreadsheets.
-- Share data with the inner-cycle by using BI-directional methods.
-- Perform bulk actions to change the status of a data block from one state to another.
-- Make data announcements, receive responses and match them.
-- Visualize data on real-time charts without having to be an expert.
-- Build a data culture internally.
+- [Self-service Database](#self-service-database)
+- [Data Application](#data-application)
+- [API](#api)
 
-### Highlights
+### Self-service Database
 
+Technoplatz BI uses [MongoDB](https://www.mongodb.com/use-cases) which is an excellent choice for data-driven processes in terms of transaction support, flexible JSON schema, multi-node replication and scalability capabilities. The front-end allows you to manage your own database;
+
+- Data collections and fields
+- Unique and index constraints
+- Mandatory fields
+- Relationships between collections
+- Automated backups
+
+### Data Application
+
+It is a web-based application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, we have added 7 features to the data application where you can handle most of your workload;
+
+- Data transfer from Excel files
+- Basic data operations (CRUD)
+- Shared queries
+- Actions
+- Visualization
+- Data annoucements
+- Live data connectors
+
+### Data Sharing
+
+Share data with your inner-cycle by using BI-directional methods.
+
+- Data annoucements
+- Live data connectors
+
+### API
+
+- skjhfglsdhfglskdfg
+
+## Highlights
+
+- low-code
+- multi-container 
 - **Platform independent**: Runs on any cloud, on-premises or PCs.
 - **Flexible**: It has the sweet smell of JSON data structure.
 - **Scalable**: Starts small, grows when needed.
@@ -33,11 +63,13 @@ BI provides you to;
 - **ISO27001**: It supports the certification process, not a stopper.
 
 ## Installation
+
 There are four steps you need to complete to start using BI. In order to run the commands you must have [GiT](https://git-scm.com) installed on your computer and also have a certain level of experience with Terminal.
 
 ### Step 1
 
 #### Setting a Docker Platform
+
 Docker is an open platform for developing, shipping, and running applications. You can install it on your computer for free or buy a managed service from any of the leading providers. The links below will help you about how to establish a Docker environment on the cloud and on-premises;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)

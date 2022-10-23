@@ -276,10 +276,10 @@ ion-alert .alert-radio-group {
   font-weight: 600;
   color: var(--ion-color-primary);
   cursor: pointer;
-  border-radius: 0px;
+  border-radius: 2px;
   margin-right: 2px;
   margin-bottom: 8px;
-  background-color: #eee;
+  background-color: var(--ion-color-light);
 }
 
 .data-sq-button ion-text {
@@ -305,6 +305,15 @@ ion-alert .alert-radio-group {
 
 .data-sq-button.actions {
   color: var(--ion-color-success);
+}
+
+.data-icon {
+  margin-bottom: -3px;
+}
+
+.data-title {
+  padding-top: 6px;
+  font-size: 18px;
 }
 
 .actions-container ion-button[disabled] {
