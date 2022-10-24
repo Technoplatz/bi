@@ -296,7 +296,7 @@
                       </div>
                     </ion-col>
                     <ion-col *ngIf="!view_mode[id]" size="12">
-                      <div (click)="doImport()" class="data-sq-button">
+                      <div *ngIf="is_crud" (click)="doImport()" class="data-sq-button">
                         <ion-icon name="cloud-upload-outline"></ion-icon><br />
                         <span>{{ 'Import' | translate }}<br />{{ 'Excel' | translate }}</span>
                       </div>
@@ -334,17 +334,15 @@
                         <ion-icon name="trash-outline"></ion-icon><br />
                         <span>{{ 'Delete Selected' | translate }}</span>
                       </div>
-                      <div *ngIf="perm && filter.length > 0 && data.length > 0; else nopurge" (click)="doPurge()"
+                      <div *ngIf="perm && filter.length > 0 && data.length > 0 && is_crud" (click)="doPurge()"
                         class="data-sq-button">
-                        <ion-icon name="skull"></ion-icon><br />
-                        <span>{{ 'Purge Filtered' | translate }}</span>
+                        <ion-icon name="skull" color="danger"></ion-icon><br />
+                        <ion-text color="danger">{{ 'Purge Filtered' | translate }}</ion-text>
                       </div>
-                      <ng-template #nopurge>
-                        <div (click)="doPurge()" class="data-sq-button">
-                          <ion-icon name="skull-outline"></ion-icon><br />
-                          <span>{{ 'Purge Filtered' | translate }}</span>
-                        </div>
-                      </ng-template>
+                      <div *ngIf="perm && is_crud" (click)="goFields()" class="data-sq-button">
+                        <ion-icon name="list-outline"></ion-icon><br />
+                        {{ 'Data' | translate }}<br />{{ 'Fields' | translate }}
+                      </div>
                       <div *ngIf="perm" (click)="doCollectionSettings()" class="data-sq-button">
                         <ion-icon name="settings-outline"></ion-icon><br />
                         {{ 'Collection Settings' | translate }}

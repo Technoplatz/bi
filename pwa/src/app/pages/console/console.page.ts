@@ -837,7 +837,7 @@ export class ConsolePage implements OnInit {
   }
 
   doPurge() {
-    if (this.perm && this.filter.length > 0 && this.data.length > 0) {
+    if (this.perm && this.filter.length > 0 && this.data.length > 0 && this.is_crud) {
       this.alert.create({
         cssClass: "my-custom-class",
         header: "Delete ALL Filtered!",

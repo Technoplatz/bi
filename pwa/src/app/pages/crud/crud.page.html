@@ -1,16 +1,15 @@
 <ion-header class="ion-padding-start ion-padding-end ion-no-border ion-no-margin modal-header">
-    <ion-item class="ion-no-padding" lines="none">
+    <!-- <ion-item class="ion-no-padding" lines="none">
         <h4>
-            <!-- {{ collection }}  -->
             {{ op | translate }}
         </h4>
         <ion-button slot="end" size="large" class="ion-no-padding ion-no-margin" color="clear"
             (click)="doCancel({ modified: false, filter: [] })">
             <ion-icon color="dark" name="close-outline"></ion-icon>
         </ion-button>
-    </ion-item>
+    </ion-item> -->
     <ion-grid class="ion-no-padding">
-        <ion-row *ngIf="tab=='data'" class="ion-padding-bottom">
+        <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
                 <ion-button *ngIf="isInProgress" size="small">
                     {{ 'PROCESSING' | translate }}...
