@@ -2,7 +2,7 @@
   <ion-item *ngIf="!field.manualAdd && (!data[fieldname] || data[fieldname].length == 0)" lines="none" class="ion-no-margin ion-no-padding">
     <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
       <ion-icon name="add-circle-outline"></ion-icon>
-      {{ 'Click to add a new Item' | translate }}
+      {{ 'Add a new Item' | translate }}
     </ion-button>
   </ion-item>
   <ion-item *ngFor="let kv of data[fieldname]; let i = index" lines="full" class="ion-no-padding ion-no-margin">
