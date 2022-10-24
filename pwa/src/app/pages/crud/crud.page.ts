@@ -92,7 +92,6 @@ export class CrudPage implements OnInit {
   }
 
   ngOnInit() {
-    // console.log("*** shuttle", this.shuttle);
     this.modified = false;
     this.collection = this.shuttle.collection ? this.shuttle.collection : null;
     this.user = this.shuttle.user;
@@ -231,11 +230,6 @@ export class CrudPage implements OnInit {
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then(() => {
           setTimeout(() => {
             this.doCancel({ op: this.op, modified: this.modified, filter: [] });
-            console.log("*** this.collection", this.collection);
-            // if(this.collection === "_field") {
-            //   this.storage.set("LSFILTER_" + this.collection, "").then(() => {
-            //   });
-            // }
           }, 500);
         }).catch((error: any) => {
           this.doShowError(error);
@@ -614,9 +608,7 @@ export class CrudPage implements OnInit {
 
   doCopyToken() {
     this.is_token_copied = true;
-    this.misc.copyToClipboard(btoa(this._id)).then(() => {
-      console.log("*** copied");
-    }).catch((error: any) => {
+    this.misc.copyToClipboard(btoa(this._id)).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {
       this.is_token_copied = false;

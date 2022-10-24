@@ -48,6 +48,7 @@ export class ConsolePage implements OnInit {
   public selected: any = [];
   public announcements: any = [];
   public views: any = [];
+  public viewsx: any = [];
   public views_dash: any = [];
   public views_pane: any = [];
   public visuals: any = [];
@@ -191,8 +192,8 @@ export class ConsolePage implements OnInit {
   private sort: any = {};
   private properites_: any = {};
   private actionix: number = -1;
-  private visuals_structure: any;
   private views_structure: any;
+  private collections_structure: any;
   private apiHost: string;
 
   constructor(
@@ -253,6 +254,7 @@ export class ConsolePage implements OnInit {
             this.crud.getCollections().then((res: any) => {
               if (res && res.data) {
                 this.collections = res.data;
+                this.collections_structure = res.structure;
                 for (let item_ in res.data) {
                   this.collections_[res.data[item_].col_id] = true;
                 }
@@ -625,7 +627,7 @@ export class ConsolePage implements OnInit {
             views: this.views ? this.views : [],
             user: this.user,
             data: data_,
-            structure: collection_ === "_view" && this.views && this.views_structure ? this.views_structure : collection_ === "_visual" && this.visuals && this.visuals_structure ? this.visuals_structure : [],
+            structure: collection_ === "_view" && this.views && this.views_structure ? this.views_structure : collection_ === "_collection" && this.collections_structure ? this.collections_structure : [],
             direct: -1
           }
         }
@@ -1147,7 +1149,7 @@ export class ConsolePage implements OnInit {
   doGetViews() {
     this.crud.getViews().then((res: any) => {
       if (res && res.data && res.structure) {
-        this.views = res.data;
+        this.views = this.viewsx = res.data;
         this.views_structure = res.structure;
         this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard);
         this.views_pane = this.views.filter((obj: any) => obj.vie_collection_id === this.id);
@@ -1292,6 +1294,11 @@ export class ConsolePage implements OnInit {
         this.misc.doMessage(error, "error");
       });
     }
+  }
+
+  doStartSearch(e: any) {
+    this.viewsx = this.views;
+    this.viewsx = this.viewsx.filter((obj: any) => (obj["vie_id"] + obj["vie_title"]).toLowerCase().indexOf(e.toLowerCase()) > -1);
   }
 
   doResizeCharts() {

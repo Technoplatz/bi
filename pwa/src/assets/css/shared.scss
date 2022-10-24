@@ -319,6 +319,7 @@ ion-alert .alert-radio-group {
   font-size: 15px;
   font-weight: 600;
   color: var(--ion-color-primary);
+  text-transform: capitalize;
 }
 
 .actions-container ion-button[disabled] {

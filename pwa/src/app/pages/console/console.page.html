@@ -82,7 +82,7 @@
                 <ion-grid class="ion-no-padding">
                   <ion-row class="sub-menu-row sq-menu-row">
                     <ion-col size="12">
-                      <div (click)="doRefreshDash()" class="data-sq-button">
+                      <div (click)="Settings('_collection', 'insert', null, 0)" class="data-sq-button">
                         <ion-icon name="add-circle-outline"></ion-icon><br />
                         <span>{{ 'New' | translate }}<br />{{ 'Collection' | translate }}</span>
                       </div>
@@ -155,15 +155,16 @@
                         </div>
                         <div class="visual-buttons">
                           <ion-button size="small" fill="clear" (click)="doGetVisual(item, i)" class="clear-dark-button"
-                            color="dark">
+                            color="dark" mode="ios">
                             <ion-icon name="sync"></ion-icon>
                           </ion-button>
                           <ion-button *ngIf="perm" size="small" fill="clear"
-                            (click)="Settings('_view', 'update', item, i)" class="clear-dark-button" color="dark">
+                            (click)="Settings('_view', 'update', item, i)" class="clear-dark-button" color="dark"
+                            mode="ios">
                             <ion-icon name="settings-outline"></ion-icon>
                           </ion-button>
                           <ion-button *ngIf="perm" size="small" fill="clear" (click)="doEnterViewMode(item)"
-                            class="clear-dark-button" color="dark">
+                            class="clear-dark-button" color="dark" mode="ios">
                             <ion-icon name="open-outline"></ion-icon>
                           </ion-button>
                         </div>
@@ -173,10 +174,13 @@
 
                   <!-- SHARED VIEWS -->
                   <h5>{{ 'SHARED VIEWS' | translate }}</h5>
-                  <ion-grid *ngIf="views.length > 0; else nosharedviews" class="ion-no-padding data-grid">
+                  <ion-searchbar showCancelButton="never" debounce="500" placeholder="Search" animated="true"
+                    class="ion-no-padding ion-no-margin brz-searchbar" (ionChange)="doStartSearch($event.detail.value)">
+                  </ion-searchbar>
+                  <ion-grid *ngIf="viewsx.length > 0; else nosharedviews" class="ion-no-padding data-grid">
                     <ion-row>
                       <ion-col size="3">
-                        <span class="column-title">{{ 'ID' }}</span>
+                        <span class="column-title">{{ 'ID' }} / {{ 'View Title' | translate }}</span>
                       </ion-col>
                       <ion-col size="2">
                         <span class="column-title">{{ 'Collection' }}</span>
@@ -185,7 +189,7 @@
                         <span class="column-title">{{ 'Tags' }}</span>
                       </ion-col>
                     </ion-row>
-                    <ion-row *ngFor="let item of views; let a = index" (click)="doEnterViewMode(item)">
+                    <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)">
                       <ion-col size="3">
                         <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id }}<br />
                         <div class="data-title">{{ item.vie_title }}</div>
@@ -203,7 +207,8 @@
                     </ion-row>
                   </ion-grid>
                   <ng-template #nosharedviews>
-                    <ion-text class="pe">{{ 'No views found' | translate }}.</ion-text>
+                    <ion-text class="pe" class="ion-margin-bottom">{{ 'No views found' | translate }}.</ion-text>
+                    <br />
                   </ng-template>
                   <br />
 
@@ -212,7 +217,7 @@
                   <ion-grid *ngIf="announcements.length > 0; else noannouncement" class="ion-no-padding data-grid">
                     <ion-row>
                       <ion-col size="3">
-                        <span class="column-title">{{ 'Date' }}</span>
+                        <span class="column-title">{{ 'Date' }} / {{ 'View Title' | translate }}</span>
                       </ion-col>
                       <ion-col size="2">
                         <span class="column-title">{{ 'By' }}</span>
@@ -223,14 +228,15 @@
                     </ion-row>
                     <ion-row *ngFor="let item of announcements; let a = index">
                       <ion-col size="3">
-                        <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.log_date.replace(' ', 'T') | date:'dd.MM.yyyy
+                        <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.log_date.replace('
+                        ', 'T') | date:'dd.MM.yyyy
                         HH:mm' }}<br />
                         <div class="data-title">{{ item.log_document.view.vie_title }}</div>
                       </ion-col>
                       <ion-col size="2">
                         {{ item.log_user_id }}
                         <div class="data-title">
-                          {{ item.log_operation.toUpperCase() }}
+                          {{ item.log_operation }}
                         </div>
                       </ion-col>
                       <ion-col size="6">
@@ -342,7 +348,8 @@
                       </div>
                       <div *ngIf="perm && is_crud && reconfig" (click)="doReconfigure()" class="data-sq-button danger">
                         <ion-icon name="warning-outline" color="danger"></ion-icon><br />
-                        <ion-text color="danger">{{ 'Update' | translate }}<br />{{ 'Structure' | translate }}</ion-text>
+                        <ion-text color="danger">{{ 'Update' | translate }}<br />{{ 'Structure' | translate }}
+                        </ion-text>
                       </div>
                       <div *ngIf="perm" (click)="doCollectionSettings()" class="data-sq-button">
                         <ion-icon name="settings-outline"></ion-icon><br />
@@ -886,7 +893,8 @@
                 </ion-segment-button>
               </ion-segment> -->
               <ion-list *ngIf="pane_segval_colls=='collection'" class="ion-no-padding pane-list">
-                <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }} [{{ views_pane.length }}]</ion-list-header>
+                <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }} [{{ views_pane.length }}]
+                </ion-list-header>
                 <div *ngIf="views_pane.length > 0; else nopaneviewfound">
                   <ion-item *ngFor="let item of views_pane; let p = index" class="pane-item cursored"
                     (click)="doEnterViewMode(item)">
@@ -915,7 +923,7 @@
                     </ion-label>
                   </ion-item>
                 </ng-template>
-              <!-- </ion-list>
+                <!-- </ion-list>
               <ion-list *ngIf="pane_segval_colls=='actions'" class="ion-no-padding pane-list"> -->
                 <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }}</ion-list-header>
                 <div *ngIf="perm && actions && actions.length && actions.length > 0; else noaction">

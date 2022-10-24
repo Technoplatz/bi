@@ -631,7 +631,6 @@ export class Crud {
         op: "eq",
         value: "Announcement"
       }], { "log_date": -1 }, 1, 10).then((res: any) => {
-        console.log("*** log res", res);
         this.announcements.next(res);
       }).catch((error: any) => {
         console.error("*** announcements error", error);
