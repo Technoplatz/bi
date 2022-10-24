@@ -1593,6 +1593,8 @@ class Crud():
 
     def get_filtered_f(self, obj):
         match_ = obj["match"]
+        print("*** match_", match_, flush=True)
+
         properties_ = obj["properties"] if "properties" in obj else None
         fand_ = []
         filtered_ = {}
@@ -3172,11 +3174,6 @@ class Crud():
                     raise APIError(f"view not found {view_['vie_id']}")
                 match_ = cursor_["vie_filter"] + match_
 
-            get_filtered_ = self.get_filtered_f({
-                "match": match_,
-                "properties": structure_["properties"] if "properties" in structure_ else None
-            })
-
             # creates a cursor from the object ids
             doc_["_modified_at"] = datetime.now()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
@@ -3184,6 +3181,10 @@ class Crud():
             if ids_ and len(ids_) > 0:
                 self.db[collection_].update_many({"_id": {"$in": ids_}}, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
             else:
+                get_filtered_ = self.get_filtered_f({
+                    "match": match_,
+                    "properties": structure_["properties"] if "properties" in structure_ else None
+                })
                 self.db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
 
             # inserts a _log record for each operation ended successfully
