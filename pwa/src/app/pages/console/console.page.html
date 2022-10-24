@@ -83,12 +83,16 @@
                   <ion-row class="sub-menu-row sq-menu-row">
                     <ion-col size="12">
                       <div (click)="doRefreshDash()" class="data-sq-button">
+                        <ion-icon name="add"></ion-icon><br />
+                        <span>{{ 'New' | translate }}<br />{{ 'Collection' | translate }}</span>
+                      </div>
+                      <div (click)="doRefreshDash()" class="data-sq-button">
                         <ion-icon name="sync"></ion-icon><br />
-                        <span>{{ 'Refresh' | translate }}</span>
+                        <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
                       </div>
                       <div (click)="doResizeCharts()" class="data-sq-button">
                         <ion-icon name="expand-outline"></ion-icon><br />
-                        <span>{{ 'Resize' | translate }}</span>
+                        <span>{{ 'Resize' | translate }}<br />{{ 'Charts' | translate }}</span>
                       </div>
                     </ion-col>
                   </ion-row>
@@ -261,74 +265,89 @@
                 <!-- CRUD HEADER BUTTONS GRID -->
                 <ion-grid class="ion-no-padding">
                   <ion-row class="sub-menu-row sq-menu-row">
-                    <ion-col size="12">
+                    <ion-col *ngIf="view_mode[id]" size="12">
+                      <div (click)="doAnnounceNow(view, 'test')" class="data-sq-button">
+                        <ion-icon *ngIf="!in_otp_process_test" name="megaphone-outline"></ion-icon>
+                        <ion-icon *ngIf="in_otp_process_test" name="hourglass-outline"></ion-icon>
+                        <br />
+                        {{ 'Share' | translate }}<br />{{ 'TEST' | translate }}
+                      </div>
+                      <div (click)="doAnnounceNow(view, 'live')" class="data-sq-button">
+                        <ion-icon *ngIf="!in_otp_process" name="megaphone"></ion-icon>
+                        <ion-icon *ngIf="in_otp_process" name="hourglass-outline"></ion-icon>
+                        <br />
+                        {{ 'Share' | translate }}<br />{{ 'LIVE' | translate }}
+                      </div>
+                      <div (click)="doCopy('view')" class="data-sq-button">
+                        <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
+                        <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
+                        <br />
+                        <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data Url' | translate }}</span>
+                        <span *ngIf="is_url_copied">{{ 'Data Url' | translate }}<br />{{ 'Copied' | translate }}</span>
+                      </div>
+                      <div (click)="doQuitViewMode()" class="data-sq-button">
+                        <ion-icon name="exit-outline"></ion-icon>
+                        <br />
+                        {{ 'Quit View Mode' | translate }}
+                      </div>
+                      <div *ngIf="perm" (click)="Settings('_view', 'update', view, 0)" class="data-sq-button">
+                        <ion-icon name="settings-outline"></ion-icon><br />
+                        {{ 'View Settings' | translate }}
+                      </div>
+                    </ion-col>
+                    <ion-col *ngIf="!view_mode[id]" size="12">
                       <div (click)="doImport()" class="data-sq-button">
                         <ion-icon name="cloud-upload-outline"></ion-icon><br />
-                        <span>{{ 'Import' | translate }}</span>
+                        <span>{{ 'Import' | translate }}<br />{{ 'Excel' | translate }}</span>
                       </div>
                       <div (click)="goCrud(null, 'insert')" class="data-sq-button">
                         <ion-icon name="add-circle-outline"></ion-icon><br />
-                        <span>{{ 'Add' | translate }}</span>
+                        <span>{{ 'New' | translate }}<br />{{ 'Record' | translate }}</span>
                       </div>
                       <div (click)="RefreshData(0)" class="data-sq-button">
                         <ion-icon name="sync"></ion-icon><br />
-                        <span>{{ 'Refresh' | translate }}</span>
+                        <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
                       </div>
                       <div (click)="goCrud(null, 'filter')" class="data-sq-button {{ !filter ? 'disabled' : null }}">
                         <ion-icon *ngIf="filter.length==0" name="funnel-outline"></ion-icon>
                         <ion-icon *ngIf="filter.length>0" name="funnel" color="danger"></ion-icon>
                         <br />
-                        <ion-text *ngIf="filter.length==0">{{ 'Filter' | translate }}</ion-text>
-                        <ion-text *ngIf="filter.length>0" color="danger">{{ 'Filtered' | translate }}
+                        <ion-text *ngIf="filter.length==0">{{ 'Apply' | translate }}<br />{{ 'Filter' | translate }}
+                        </ion-text>
+                        <ion-text *ngIf="filter.length>0" color="danger">{{ 'Filter' | translate }}<br />{{ 'Applied' |
+                          translate }}
                         </ion-text>
                       </div>
                       <div (click)="doClearFilter()" class="data-sq-button">
                         <ion-icon name="close-circle-outline"></ion-icon><br />
-                        <span>{{ 'Clear' | translate }}</span>
+                        <span>{{ 'Clear' | translate }}<br />{{ 'Filter' | translate }}</span>
                       </div>
                       <div (click)="doSaveAsView()" class="data-sq-button">
                         <ion-icon name="save-outline"></ion-icon><br />
-                        <span>{{ 'Save' | translate }}</span>
+                        <span>{{ 'Save as View' | translate }}</span>
                       </div>
                       <div (click)="MultiCrud('clone')" class="data-sq-button">
                         <ion-icon name="duplicate-outline"></ion-icon><br />
-                        <span>{{ 'Clone' | translate }}</span>
+                        <span>{{ 'Clone Selected' | translate }}</span>
                       </div>
                       <div (click)="MultiCrud('delete')" class="data-sq-button">
                         <ion-icon name="trash-outline"></ion-icon><br />
-                        <span>{{ 'Delete' | translate }}</span>
+                        <span>{{ 'Delete Selected' | translate }}</span>
                       </div>
                       <div *ngIf="perm && filter.length > 0 && data.length > 0; else nopurge" (click)="doPurge()"
                         class="data-sq-button">
                         <ion-icon name="skull"></ion-icon><br />
-                        <span>{{ 'Purge' | translate }}</span>
+                        <span>{{ 'Purge Filtered' | translate }}</span>
                       </div>
                       <ng-template #nopurge>
                         <div (click)="doPurge()" class="data-sq-button">
                           <ion-icon name="skull-outline"></ion-icon><br />
-                          <span>{{ 'Purge' | translate }}</span>
+                          <span>{{ 'Purge Filtered' | translate }}</span>
                         </div>
                       </ng-template>
-                      <div *ngIf="view_mode[id]" (click)="doAnnounceNow(view, 'test')" class="data-sq-button">
-                        <ion-icon *ngIf="!in_otp_process_test" name="megaphone-outline"></ion-icon>
-                        <ion-icon *ngIf="in_otp_process_test" name="hourglass-outline"></ion-icon>
-                        <br />
-                        {{ 'Test' | translate }}
-                      </div>
-                      <div *ngIf="view_mode[id]" (click)="doAnnounceNow(view, 'live')" class="data-sq-button">
-                        <ion-icon *ngIf="!in_otp_process" name="megaphone"></ion-icon>
-                        <ion-icon *ngIf="in_otp_process" name="hourglass-outline"></ion-icon>
-                        <br />
-                        {{ 'Live' | translate }}!
-                      </div>
-                      <div *ngIf="perm && view_mode[id]" (click)="Settings('_view', 'update', view, 0)"
-                        class="data-sq-button">
+                      <div *ngIf="perm" (click)="doCollectionSettings()" class="data-sq-button">
                         <ion-icon name="settings-outline"></ion-icon><br />
-                        {{ 'Settings' | translate }}
-                      </div>
-                      <div *ngIf="perm && !view_mode[id]" (click)="doCollectionSettings()" class="data-sq-button">
-                        <ion-icon name="settings-outline"></ion-icon><br />
-                        {{ 'Settings' | translate }}
+                        {{ 'Collection Settings' | translate }}
                       </div>
                     </ion-col>
                   </ion-row>
@@ -354,10 +373,6 @@
                         <div *ngIf="view && !view.vie_scheduled" class="announce-sched">{{ 'Not scheduled' | translate
                           }}</div>
                         <div>
-                          <a href="javascript:void(0);" *ngIf="!is_url_copied" (click)="doCopy('view')">{{ 'Copy Data
-                            Connection URL'
-                            | translate }}</a>
-                          <span *ngIf="is_url_copied">{{ 'Copied' | translate }} &#10003;&nbsp;&nbsp;</span>
                           <a href="javascript:void(0);" (click)="doShowPivot()"><span *ngIf="!is_pivot_showed">{{ 'Show
                               Data Pivot'
                               | translate }}</span><span *ngIf="is_pivot_showed">{{ 'Hide Pivot'
@@ -871,26 +886,6 @@
                   <ion-label>{{ 'ACTIONS' | translate }}</ion-label>
                 </ion-segment-button>
               </ion-segment>
-              <ion-list class="ion-no-padding pane-list">
-                <ion-item *ngIf="view_mode[id]" class="pane-item">
-                  <ion-icon slot="end" name="radio-outline" size="small"></ion-icon>
-                  <ion-label>
-                    {{ 'Shared View Mode' | translate }}<br />
-                    <!-- <span slot="end" class="pane-stat-num">{{ 'click to quit' | translate }}
-                    </span> -->
-                    <ion-button size="small" color="danger" class="notfound-button" (click)="doQuitViewMode()">
-                      {{ 'Quit View Mode' | translate }}
-                    </ion-button>
-                  </ion-label>
-                </ion-item>
-                <ion-item *ngIf="!view_mode[id]" class="pane-item">
-                  <ion-icon slot="end" name="layers-outline" size="small"></ion-icon>
-                  <ion-label>
-                    {{ 'Raw Data Mode' | translate }}<br />
-                    <span slot="end" class="pane-stat-num">{{ 'select a view to share' | translate }}</span>
-                  </ion-label>
-                </ion-item>
-              </ion-list>
               <ion-list *ngIf="pane_segval_colls=='collection'" class="ion-no-padding pane-list">
                 <ion-list-header class="ion-no-padding">{{ 'Collection' | translate }}</ion-list-header>
                 <!-- <ion-item (click)="doImport()" class="pane-item cursored">

@@ -366,6 +366,8 @@ export class ConsolePage implements OnInit {
   }
 
   goSection(menu_: string, submenu_: any, header_: string) {
+    this.view_mode[this.id] = false;
+    this.view = null;
     if (!submenu_ || submenu_ !== this.submenu) {
       this.menu = menu_;
       this.submenu = submenu_;
