@@ -942,7 +942,8 @@ class Crud():
             collection_ = obj["collection"]
             user_ = obj["user"] if "user" in obj else None
             email_ = user_["email"] if user_ and "email" in user_ else None
-            match_ = obj["match"] if "match" in obj and obj["match"] != [] else [{"key": "_id", "op": "nnull", "value": None}]
+            # match_ = obj["match"] if "match" in obj and obj["match"] != [] else [{"key": "_id", "op": "nnull", "value": None}]
+            match_ = obj["match"] if "match" in obj and obj["match"] != [] else []
             TZ_ = os.environ.get("TZ")
 
             userindb_ = self.db["_user"].find_one({"usr_id": email_})
@@ -973,7 +974,7 @@ class Crud():
                 "vie_title": vie_title_,
                 "vie_priority": 1000,
                 "vie_enabled": True,
-                "vie_dashboard": True,
+                "vie_dashboard": False,
                 "vie_filter": match_,
                 "vie_sched_timezone": TZ_,
                 "vie_scheduled": False,
@@ -987,7 +988,6 @@ class Crud():
             doc_["_created_by"] = doc_["_modified_by"] = email_
             doc_["_modified_count"] = 0
 
-            # self.db["_view"].update_one({"vie_id": id_}, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
             self.db["_view"].insert_one(doc_)
 
             log_ = self.log_f({

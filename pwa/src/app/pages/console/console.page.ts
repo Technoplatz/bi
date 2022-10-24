@@ -822,7 +822,7 @@ export class ConsolePage implements OnInit {
   }
 
   doSaveAsView() {
-    if (this.perm && this.data.length > 0) {
+    if (this.perm && this.data.length > 0 && this.is_crud) {
       this.crud.SaveAsView(this.id, this.filter).then((res: any) => {
         this.doEnterViewMode(res.view).then(() => {
           this.doGetViews();

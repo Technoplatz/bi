@@ -325,7 +325,7 @@
                         <ion-icon name="close-circle-outline"></ion-icon><br />
                         <span>{{ 'Clear' | translate }}<br />{{ 'Filter' | translate }}</span>
                       </div>
-                      <div (click)="doSaveAsView()" class="data-sq-button">
+                      <div *ngIf="is_crud" (click)="doSaveAsView()" class="data-sq-button">
                         <ion-icon name="save-outline"></ion-icon><br />
                         <span>{{ 'Save as View' | translate }}</span>
                       </div>
@@ -351,7 +351,7 @@
                         <ion-text color="danger">{{ 'Update' | translate }}<br />{{ 'Structure' | translate }}
                         </ion-text>
                       </div>
-                      <div *ngIf="perm" (click)="doCollectionSettings()" class="data-sq-button">
+                      <div *ngIf="perm && is_crud" (click)="doCollectionSettings()" class="data-sq-button">
                         <ion-icon name="settings-outline"></ion-icon><br />
                         {{ 'Collection Settings' | translate }}
                       </div>
