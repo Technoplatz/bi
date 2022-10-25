@@ -878,17 +878,6 @@
               </ion-list>
             </ion-col> -->
             <ion-col *ngIf="menu=='collections' and is_pane_ok" class="console-right-1">
-              <!-- <ion-segment (ionChange)="doSegmentChanged($event)" color="primary" class="pane_segment"
-                [value]="pane_segval_colls">
-                <ion-segment-button value="collection" class="ion-no-padding">
-                  <ion-icon name="server-outline" size="small"></ion-icon>
-                  <ion-label>{{ 'DATA' | translate }}</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="actions" class="ion-no-padding">
-                  <ion-icon name="cube-outline" size="small"></ion-icon>
-                  <ion-label>{{ 'ACTIONS' | translate }}</ion-label>
-                </ion-segment-button>
-              </ion-segment> -->
               <ion-list *ngIf="pane_segval_colls=='collection'" class="ion-no-padding pane-list">
                 <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }} [{{ views_pane.length }}]
                 </ion-list-header>
@@ -920,9 +909,7 @@
                     </ion-label>
                   </ion-item>
                 </ng-template>
-                <!-- </ion-list>
-              <ion-list *ngIf="pane_segval_colls=='actions'" class="ion-no-padding pane-list"> -->
-                <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }}</ion-list-header>
+                <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]</ion-list-header>
                 <div *ngIf="perm && actions && actions.length && actions.length > 0; else noaction">
                   <ion-item *ngFor="let item of actions; let ac = index" class="ion-no-padding pane-item"
                     (click)="doAction(ac)">
@@ -932,11 +919,6 @@
                         <a href="javascript:void(0);">{{ 'RUN this action' | translate }}</a>
                       </div>
                     </ion-label>
-                  </ion-item>
-                  <ion-item class="pane-item pane-item-last" lines="none">
-                    <span>
-                      {{ actions.length }} {{ 'actions found' | translate }}
-                    </span>
                   </ion-item>
                 </div>
                 <ng-template #noaction>

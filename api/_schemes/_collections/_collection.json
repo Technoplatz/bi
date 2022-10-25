@@ -29,18 +29,6 @@
             "required": true,
             "width": 150
         },
-        "col_enabled": {
-            "bsonType": "bool",
-            "title": "Enabled?",
-            "description": "Enabled?",
-            "width": 110
-        },
-        "col_protected": {
-            "bsonType": "bool",
-            "title": "Protected?",
-            "description": "Protected?",
-            "width": 120
-        },
         "col_prefix": {
             "bsonType": "string",
             "minLength": 3,
@@ -51,13 +39,6 @@
             "required": true,
             "permanent": true,
             "width": 110
-        },
-        "col_bypass_fields": {
-            "bsonType": "bool",
-            "title": "Bypass Fields?",
-            "description": "Bypass Fields?",
-            "default": false,
-            "width": 150
         },
         "col_structure": {
             "bsonType": "object",
@@ -78,11 +59,7 @@
             "col_title"
         ],
         [
-            "col_id",
-            "col_enabled"
-        ],
-        [
-            "col_enabled"
+            "col_id"
         ]
     ],
     "unique": [

@@ -625,11 +625,8 @@ class Crud():
                 doc_ = {
                     "col_id": col_id_,
                     "col_title": col_title_,
-                    "col_enabled": True,
                     "col_priority": 1000,
-                    "col_protected": False,
                     "col_prefix": prefix_,
-                    "col_bypass_fields": False,
                     "col_structure": None,
                     "_created_at": datetime.now(),
                     "_created_by": email_,
@@ -799,10 +796,6 @@ class Crud():
                 raise APIError(col_check_["msg"])
 
             collection__ = col_check_["collection"] if "collection" in col_check_ else None
-
-            if "col_protected" in collection__ and collection__["col_protected"] == True:
-                raise APIError("collection is protected")
-
             structure_ = collection__["col_structure"] if is_crud_ else collection__
 
             # gets the properties
@@ -2210,7 +2203,7 @@ class Crud():
             structure_ = self.root_schemes_f("_collections/_collection")
 
             if Misc().permitted_user_f(user_):
-                data_ = list(self.db["_collection"].find(filter={"col_enabled": True}, sort=[("col_priority", 1)]))
+                data_ = list(self.db["_collection"].find(filter={}, sort=[("col_priority", 1)]))
             else:
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
                 for usr_tag_ in usr_tags_:
@@ -2221,8 +2214,7 @@ class Crud():
                     permissions_ = self.db["_permission"].find(filter=filter_, sort=[("per_col_id", 1)])
                     for permission_ in permissions_:
                         collection_ = self.db["_collection"].find_one({"col_id": permission_["per_col_id"]})
-                        if collection_ and "col_enabled" in collection_ and collection_["col_enabled"]:
-                            data_.append(collection_)
+                        data_.append(collection_)
 
             res_ = {
                 "result": True,
@@ -2486,9 +2478,6 @@ class Crud():
             if not doc_:
                 raise APIError("collection not found")
 
-            if "col_bypass_fields" in doc_ and doc_["col_bypass_fields"] == True:
-                raise APIError("fields to structure is bypassed")
-
             structure_ = {
                 "properties": {},
                 "required": [],
@@ -2672,9 +2661,6 @@ class Crud():
             collection_f_ = self.collection_f(cid_)
             if not collection_f_["result"]:
                 raise APIError("collection not found")
-            else:
-                if "collection" in collection_f_ and "col_protected" in collection_f_["collection"] and collection_f_["collection"]["col_protected"] == True:
-                    raise APIError("collection is protected")
 
             # check if the user is allowed or not to do this update
             permission_ = Auth().permission_check_f({"user": user_["email"], "collection": cid_, "op": "structure"})
@@ -2851,9 +2837,6 @@ class Crud():
 
             if not col_check_["result"]:
                 raise APIError("collection not found")
-            else:
-                if "collection" in col_check_ and "col_protected" in col_check_["collection"] and col_check_["collection"]["col_protected"] == True:
-                    raise APIError("collection is protected")
 
             # check if the user is allowed or not to do this update
             permission_ = Auth().permission_check_f({"user": user_["email"], "collection": collection_id_, "op": "upsert"})
@@ -3274,6 +3257,16 @@ class Crud():
                     if not schemevalidate_["result"]:
                         raise APIError(schemevalidate_["msg"])
                     self.db[datac_].delete_one({})
+            elif collection_id_ in ["_field", "_action"]:
+                cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
+                if cid_:
+                    reconfig_set_f_ = self.reconfig_set_f({
+                        "op": "request",
+                        "collection": cid_,
+                        "user": user_
+                    })
+                    if not reconfig_set_f_["result"]:
+                        raise APIError(reconfig_set_f_["msg"])
 
             res_ = {"result": True}
 
@@ -4515,8 +4508,6 @@ def storage_f():
             raise APIError(col_check_["msg"])
 
         collection__ = col_check_["collection"] if "collection" in col_check_ else None
-        if "col_protected" in collection__ and collection__["col_protected"] == True:
-            raise APIError("collection is protected")
 
         email_ = form_["email"] if "email" in form_ else None
         token_ = form_["token"] if "token" in form_ else None
@@ -4596,11 +4587,8 @@ def crud_f():
             col_check_ = Crud().collection_f(c_)
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
-            collection__ = col_check_["collection"] if "collection" in col_check_ else None
-            if "col_protected" in collection__ and collection__["col_protected"] == True:
-                raise APIError("collection is protected")
 
-            # distributes the operation to the right function
+        # distributes the operation to the right function
         if op == "find":
             crud_ = Crud().find_f(input_)
         elif op == "update":
