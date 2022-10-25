@@ -1593,8 +1593,6 @@ class Crud():
 
     def get_filtered_f(self, obj):
         match_ = obj["match"]
-        print("*** match_", match_, flush=True)
-
         properties_ = obj["properties"] if "properties" in obj else None
         fand_ = []
         filtered_ = {}

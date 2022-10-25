@@ -21,6 +21,7 @@ export class ConsolePage implements OnInit {
   @ViewChild("select0") selectRef: IonSelect;
   public now: any = Date.now();
   public version = environment.appVersion;
+  public release = environment.release;
   public loadingText: string = environment.misc.loadingText;
   public menu: string;
   public submenu: string;
