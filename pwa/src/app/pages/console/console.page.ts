@@ -570,19 +570,6 @@ export class ConsolePage implements OnInit {
       modal.onDidDismiss().then((res: any) => {
         if (res.data.modified) {
           this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
-          // if (collection_ === "_view") {
-          //   if (this.menu !== "dashboard") {
-          //     this.doEnterViewMode(data_).then(() => {
-          //       this.doGetViews();
-          //     });
-          //   } else {
-          //     this.doGetViews();
-          //   }
-          // } else if (collection_ === "_visual") {
-          //   if (data_) {
-          //     this.doGetVisual(data_, ix_);
-          //   }
-          // }
         }
       });
       return await modal.present();

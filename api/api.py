@@ -2489,8 +2489,7 @@ class Crud():
             }
 
             cursor_ = self.db["_field"].find(filter={
-                "fie_collection_id": cid_,
-                "fie_enabled": True
+                "fie_collection_id": cid_
             }, sort=[("fie_priority", 1)])
 
             required_ = []

@@ -75,19 +75,19 @@
             "description": "Default Value",
             "width": 120
         },
-        "fie_enabled": {
-            "bsonType": "bool",
-            "title": "Enabled?",
-            "description": "Enabled?",
-            "default": false,
-            "width": 110
-        },
         "fie_required": {
             "bsonType": "bool",
             "title": "Required?",
             "description": "Required?",
             "default": false,
             "width": 110
+        },
+        "fie_permanent": {
+            "bsonType": "bool",
+            "title": "Permanent?",
+            "description": "Permanent?",
+            "default": false,
+            "width": 120
         },
         "fie_unique": {
             "bsonType": "bool",
@@ -111,13 +111,6 @@
             "description": "Unique Additionals",
             "subType": "property",
             "width": 130
-        },
-        "fie_permanent": {
-            "bsonType": "bool",
-            "title": "Permanent?",
-            "description": "Permanent?",
-            "default": false,
-            "width": 120
         },
         "fie_indexed": {
             "bsonType": "bool",
@@ -306,8 +299,7 @@
             "fie_collection_id"
         ],
         [
-            "fie_collection_id",
-            "fie_enabled"
+            "fie_collection_id"
         ]
     ],
     "sort": {
