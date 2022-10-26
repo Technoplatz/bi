@@ -122,73 +122,10 @@ export class ConsolePage implements OnInit {
   public class_left_side: string = "console-left-side hide-scrollbar";
   public menu_toggle: boolean = false;
   public view_mode: any = {};
-  public show_banners: boolean = false;
-  public dummy_id: string = "f00000000000000000000000";
   public pane_segval_colls: string = "collection";
   public pane_segval_dash: string = "dash";
   public options: JsonEditorOptions;
   public options2: JsonEditorOptions;
-  public structure_array: any =
-    {
-      name: "tes_order_no",
-      bsonType: "string",
-      title: "Title1",
-      description: "Description1"
-    };
-  public structure_new: any = {
-    "properties": {
-      "_tags": {
-        "bsonType": "array",
-        "uniqueItems": true,
-        "minItems": 0,
-        "maxItems": 100,
-        "items": {
-          "bsonType": "string",
-          "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,32}$"
-        },
-        "title": "Tags",
-        "description": "Tags",
-        "subType": "tag",
-        "manualAdd": true,
-        "chips": true,
-        "width": 300
-      }
-    },
-    "required": [],
-    "unique": [],
-    "index": [
-      [
-        "_tags"
-      ]
-    ],
-    "parents": [
-      {
-        "key": "act_account_id",
-        "collection": "accounts",
-        "lookup": [
-          {
-            "local": "act_account_id",
-            "remote": "acc_id"
-          }
-        ]
-      }
-    ],
-    "sort": {
-      "act_id": 1
-    },
-    "actions": []
-  }
-  public customPopoverOptions: any = {
-    cssClass: "popover-select"
-  };
-  public structure1: any = {
-    "name": "tes_order_no",
-    "bsonType": "string",
-    "title": "Title1",
-    "description": "Description1",
-    "price": 0
-  };
-  public structure2: any;
   private sweeped: any = [];
   private sort: any = {};
   private properites_: any = {};
@@ -237,7 +174,9 @@ export class ConsolePage implements OnInit {
         this.doRefreshDash().then(() => {
           this.is_initialized = true;
           this.goSection(qstr1, qstr2, qstr2);
-        }).catch(() => {
+        }).catch((error: any) => {
+          console.error(error);
+        }).finally(() => {
           this.is_initialized = true;
         });
       });
@@ -250,39 +189,34 @@ export class ConsolePage implements OnInit {
       this.auth.Saas().then((res: any) => {
         this.saas_ = res ? res : {};
         this.doAccount("apikeyget").then(() => {
-          this.storage.get("LSDASHTOGGLE").then((LSDASHTOGGLE: boolean) => {
-            this.show_banners = LSDASHTOGGLE === true || LSDASHTOGGLE === false ? LSDASHTOGGLE : true;
-            this.crud.getCollections().then((res: any) => {
-              if (res && res.data) {
-                this.collections = res.data;
-                this.collections_structure = res.structure;
-                for (let item_ in res.data) {
-                  this.collections_[res.data[item_].col_id] = true;
-                }
-                this.doGetViews();
-                this.crud.Template("list", null).then((res: any) => {
-                  this.templates = res && res.data ? res.data : [];
-                  this.is_dash_ok = true;
-                  resolve(true);
-                }).catch((error: any) => {
-                  console.error(error);
-                  this.misc.doMessage(error, "error");
-                  this.is_dash_ok = true;
-                  reject(error);
-                });
-              } else {
-                const err_ = "no collection found";
-                console.error(err_);
-                this.misc.doMessage(err_, "error");
-                this.is_dash_ok = true;
-                reject(err_);
+          this.crud.getCollections().then((res: any) => {
+            if (res && res.data) {
+              this.collections = res.data;
+              this.collections_structure = res.structure;
+              for (let item_ in res.data) {
+                this.collections_[res.data[item_].col_id] = true;
               }
-            }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
-              this.is_dash_ok = true;
-              reject(error);
-            });
+              this.doGetViews();
+              this.crud.Template("list", null).then((res: any) => {
+                this.templates = res && res.data ? res.data : [];
+                resolve(true);
+              }).catch((error: any) => {
+                console.error(error);
+                this.misc.doMessage(error, "error");
+                reject(error);
+              });
+            } else {
+              const err_ = "no collection found";
+              console.error(err_);
+              this.misc.doMessage(err_, "error");
+              reject(err_);
+            }
+          }).catch((error: any) => {
+            console.error(error);
+            this.misc.doMessage(error, "error");
+            reject(error);
+          }).finally(() => {
+            this.is_dash_ok = true;
           });
         });
       });
@@ -735,7 +669,7 @@ export class ConsolePage implements OnInit {
             this.misc.doMessage(error, "error");
           });
         } else if (this.id === "_view") {
-          this.doRefreshDash().then(() => { }).catch((error: any) => { });
+          this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
         }
       }
       if (res.data.filters) {
@@ -1125,7 +1059,7 @@ export class ConsolePage implements OnInit {
       this.templates[ix].processing = true;
       this.crud.Template("install", item_).then(() => {
         this.misc.doMessage("template installed successfully", "success");
-        this.doRefreshDash().then(() => { }).catch((error: any) => { });
+        this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");

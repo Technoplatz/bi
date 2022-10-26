@@ -84,7 +84,9 @@
                         <span>{{ 'New' | translate }}<br />{{ 'Collection' | translate }}</span>
                       </div>
                       <div (click)="doRefreshDash()" class="data-sq-button">
-                        <ion-icon name="sync"></ion-icon><br />
+                        <ion-icon *ngIf="is_dash_ok" name="sync"></ion-icon>
+                        <ion-icon *ngIf="!is_dash_ok" name="time-outline"></ion-icon>
+                        <br />
                         <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
                       </div>
                       <div (click)="doResizeCharts()" class="data-sq-button">
@@ -95,83 +97,72 @@
                   </ion-row>
                 </ion-grid>
 
-
-                <div *ngIf="is_dash_ok; else dashloading">
-                  <!-- TEMPLATES -->
-                  <div *ngIf="submenu=='templates'" class="templates">
-                    <div *ngIf="templates" class="banner-container ion-padding-bottom">
-                      <div *ngFor="let item of templates; let t = index" class="banner clicked-item"
-                        (click)="doInstallTemplate(item, t)">
-                        <h4>{{ item.title }}</h4>
-                        {{ item.description }}
-                        <ion-icon [name]="item.icon" class="banner-icon"></ion-icon>
-                      </div>
+                <!-- TEMPLATES -->
+                <div *ngIf="submenu=='templates'" class="templates">
+                  <div *ngIf="templates" class="banner-container ion-padding-bottom">
+                    <div *ngFor="let item of templates; let t = index" class="banner clicked-item"
+                      (click)="doInstallTemplate(item, t)">
+                      <h4>{{ item.title }}</h4>
+                      {{ item.description }}
+                      <ion-icon [name]="item.icon" class="banner-icon"></ion-icon>
                     </div>
                   </div>
+                </div>
 
-                  <!-- VIEW SECTION -->
-                  <div *ngIf="views && views.length > 0" class="brz-visual-group">
-                    <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
-                      <div *ngIf="item && item.vie_dashboard && item.chart">
-                        <div class="hdr">{{ item.vie_title }}</div>
-                        <div class="hdr2">{{ item.vie_collection_id }} |
-                          <span *ngIf="item.chart.count" class="text-bold">{{ item.chart.count }}
-                            <span *ngIf="item.chart.count > 1">{{ 'rows' | translate }}</span>
-                            <span *ngIf="item.chart.count == 1">{{ 'row' | translate }}</span>
-                          </span><br />
-                          {{ item.chart.function }} {{ 'of' | translate }} {{ item.chart.yaxis }}
-                          <span *ngIf="item.chart.kpi_target_value; else notargetv">&rarr; {{
-                            item.chart.kpi_target_value }}</span>
-                          <ng-template #notargetv><br /></ng-template>
-                        </div>
-                        <div class="hdr3">
-                          <ion-icon
-                            *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value"
-                            name="thumbs-down" color="danger">
-                          </ion-icon>
-                          <ion-icon
-                            *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value <= item.chart.value"
-                            name="thumbs-up" color="success">
-                          </ion-icon>
-                          {{ item.chart.value }}
-                        </div>
-                        <!-- <ng-template #notarget>
-                          <div class="hdr4">
-                            <ion-icon name="golf" color="medium"></ion-icon>
-                            &nbsp;
+                <!-- VIEW SECTION -->
+                <div *ngIf="views && views.length > 0" class="brz-visual-group">
+                  <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
+                    <div *ngIf="item && item.vie_dashboard && item.chart">
+                      <div class="hdr">{{ item.vie_title }}</div>
+                      <div class="hdr2">{{ item.vie_collection_id }}
+                        <span *ngIf="item.chart.count" class="text-bold"> | {{ item.chart.count }}
+                          <span *ngIf="item.chart.count > 1">{{ 'rows' | translate }}</span>
+                          <span *ngIf="item.chart.count == 1">{{ 'row' | translate }}</span>
+                        </span><br />
+                        {{ item.chart.function }} {{ 'of' | translate }} {{ item.chart.yaxis }}
+                        <span *ngIf="item.chart.kpi_target_value; else notargetv">&rarr; {{
+                          item.chart.kpi_target_value }}</span>
+                        <ng-template #notargetv><br /></ng-template>
+                      </div>
+                      <div class="hdr3">
+                        <ion-icon
+                          *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value"
+                          name="thumbs-down" color="danger">
+                        </ion-icon>
+                        <ion-icon
+                          *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value <= item.chart.value"
+                          name="thumbs-up" color="success">
+                        </ion-icon>
+                        {{ item.chart.value }}
+                      </div>
+                      <div class="app-charts">
+                        <app-charts *ngIf="item.chart.data && item.chart.data.length > 0; else nochartdata"
+                          [chart]="item.chart" [width]="chcontainer.offsetWidth"></app-charts>
+                        <ng-template #nochartdata>
+                          <div class="visual-error">
+                            {{ 'No Data Found' | translate }}
                           </div>
-                        </ng-template> -->
-                        <div class="app-charts">
-                          <app-charts *ngIf="item.chart.data && item.chart.data.length > 0; else nochartdata"
-                            [chart]="item.chart" [width]="chcontainer.offsetWidth"></app-charts>
-                          <ng-template #nochartdata>
-                            <div class="visual-error">
-                              {{ 'No Data Found' | translate }}
-                            </div>
-                          </ng-template>
-                        </div>
-                        <div class="visual-buttons">
-                          <ion-button size="small" fill="clear" (click)="doGetVisual(item, i)" class="clear-dark-button"
-                            color="dark" mode="ios">
-                            <ion-icon name="sync"></ion-icon>
-                          </ion-button>
-                          <ion-button *ngIf="perm" size="small" fill="clear"
-                            (click)="Settings('_view', 'update', item, i)" class="clear-dark-button" color="dark"
-                            mode="ios">
-                            <ion-icon name="settings-outline"></ion-icon>
-                          </ion-button>
-                          <ion-button *ngIf="perm" size="small" fill="clear" (click)="doEnterViewMode(item)"
-                            class="clear-dark-button" color="dark" mode="ios">
-                            <ion-icon name="open-outline"></ion-icon>
-                          </ion-button>
-                        </div>
+                        </ng-template>
+                      </div>
+                      <div class="visual-buttons">
+                        <ion-button size="small" fill="clear" (click)="doGetVisual(item, i)" class="clear-dark-button"
+                          color="dark" mode="ios">
+                          <ion-icon name="sync"></ion-icon>
+                        </ion-button>
+                        <ion-button *ngIf="perm" size="small" fill="clear"
+                          (click)="Settings('_view', 'update', item, i)" class="clear-dark-button" color="dark"
+                          mode="ios">
+                          <ion-icon name="settings-outline"></ion-icon>
+                        </ion-button>
+                        <ion-button *ngIf="perm" size="small" fill="clear" (click)="doEnterViewMode(item)"
+                          class="clear-dark-button" color="dark" mode="ios">
+                          <ion-icon name="open-outline"></ion-icon>
+                        </ion-button>
                       </div>
                     </div>
                   </div>
-
                   <!-- SHARED VIEWS -->
-                  <h5>{{ 'SHARED VIEWS' | translate }}</h5>
-                  <ion-searchbar showCancelButton="never" debounce="500" placeholder="Search" animated="true"
+                  <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search views' }}" animated="true"
                     class="ion-no-padding ion-no-margin brz-searchbar" (ionChange)="doStartSearch($event.detail.value)">
                   </ion-searchbar>
                   <ion-grid *ngIf="viewsx.length > 0; else nosharedviews" class="ion-no-padding data-grid">
@@ -208,56 +199,47 @@
                     <br />
                   </ng-template>
                   <br />
-
-                  <!-- RECENT ANNOUNCEMENTS -->
-                  <h5>{{ 'RECENT ANNOUNCEMENTS' | translate }}</h5>
-                  <ion-grid *ngIf="announcements.length > 0; else noannouncement" class="ion-no-padding data-grid">
-                    <ion-row>
-                      <ion-col size="3">
-                        <span class="column-title">{{ 'Date' }} / {{ 'View Title' | translate }}</span>
-                      </ion-col>
-                      <ion-col size="2">
-                        <span class="column-title">{{ 'By' }}</span>
-                      </ion-col>
-                      <ion-col size="6">
-                        <span class="column-title">{{ 'Tags' }}</span>
-                      </ion-col>
-                    </ion-row>
-                    <ion-row *ngFor="let item of announcements; let a = index">
-                      <ion-col size="3">
-                        <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.log_date.replace('
-                        ', 'T') | date:'dd.MM.yyyy
-                        HH:mm' }}<br />
-                        <div class="data-title">{{ item.log_document.view.vie_title }}</div>
-                      </ion-col>
-                      <ion-col size="2">
-                        {{ item.log_user_id }}
-                        <div class="data-title">
-                          {{ item.log_operation }}
-                        </div>
-                      </ion-col>
-                      <ion-col size="6">
-                        {{ item.log_document.view._tags.join(' ') }}
-                      </ion-col>
-                    </ion-row>
-                  </ion-grid>
-                  <ng-template #noannouncement>
-                    <ion-text class="pe">{{ 'No Announcement found' | translate }}.</ion-text>
-                  </ng-template>
-                  <br />
-
-                  <ion-button size="small" href="/console/admin/_log" class="notfound-button">
-                    {{ 'Show Logs' | translate }}
-                  </ion-button>
                 </div>
-                <ng-template #dashloading>
-                  <ion-item lines="none">
-                    <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-                    <ion-label>
-                      {{ loadingText | translate }}
-                    </ion-label>
-                  </ion-item>
+
+                <!-- RECENT ANNOUNCEMENTS -->
+                <h4>{{ 'Announcements' | translate }}</h4>
+                <ion-grid *ngIf="announcements.length > 0; else noannouncement" class="ion-no-padding data-grid">
+                  <ion-row>
+                    <ion-col size="3">
+                      <span class="column-title">{{ 'Date' }} / {{ 'View Title' | translate }}</span>
+                    </ion-col>
+                    <ion-col size="2">
+                      <span class="column-title">{{ 'By' }}</span>
+                    </ion-col>
+                    <ion-col size="6">
+                      <span class="column-title">{{ 'Tags' }}</span>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row *ngFor="let item of announcements; let a = index">
+                    <ion-col size="3">
+                      <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.log_date.replace('
+                      ', 'T') | date:'dd.MM.yyyy
+                      HH:mm' }}<br />
+                      <div class="data-title">{{ item.log_document.view.vie_title }}</div>
+                    </ion-col>
+                    <ion-col size="2">
+                      {{ item.log_user_id }}
+                      <div class="data-title">
+                        {{ item.log_operation }}
+                      </div>
+                    </ion-col>
+                    <ion-col size="6">
+                      {{ item.log_document.view._tags.join(' ') }}
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+                <ng-template #noannouncement>
+                  <ion-text class="pe">{{ 'No Announcement found' | translate }}.</ion-text>
                 </ng-template>
+                <br />
+                <ion-button size="small" href="/console/admin/_log" class="notfound-button">
+                  {{ 'Show Logs' | translate }}
+                </ion-button>
               </div>
 
               <!-- CRUD -->
@@ -305,7 +287,8 @@
                         <span>{{ 'New' | translate }}<br />{{ 'Record' | translate }}</span>
                       </div>
                       <div (click)="RefreshData(0)" class="data-sq-button">
-                        <ion-icon name="sync"></ion-icon><br />
+                        <ion-icon name="sync"></ion-icon>
+                        <br />
                         <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
                       </div>
                       <div (click)="goCrud(null, 'filter')" class="data-sq-button {{ !filter ? 'disabled' : null }}">
@@ -579,11 +562,11 @@
                   <ion-row *ngIf="count>=0">
                     <ion-col size="12" class="ion-no-padding pages-col">
                       <!-- NO RECORD FOUND PAGING -->
-                      <div *ngIf="!count || count==0; else showpaging" class="ion-padding-top">
+                      <div *ngIf="!count || count==0; else showpaging">
                         <h6>{{ 'No records found' | translate }}</h6>
-                        {{ 'To create the first record click button below' | translate }}.<br />
+                        {{ 'Click the button below to add the first record' | translate }}.<br />
                         <ion-button size="small" (click)="goCrud(null, 'insert')" class="notfound-button">
-                          {{ 'Add record' | translate }}
+                          {{ 'New Record' | translate }}
                         </ion-button>
                       </div>
                       <!-- RECORDS FOUND PAGING -->
@@ -627,18 +610,6 @@
                       </ng-template>
                     </ion-col>
                   </ion-row>
-
-                  <ion-row *ngIf="!structure.properties && is_loaded">
-                    <div class="ion-padding-top">
-                      <h6>{{ 'NO DATA STRUCTURE FOUND' | translate }}</h6>
-                      To define a data structure on this collection please navigate to Data Strcuture section on the
-                      right menu.<br />
-                      <ion-button size="small" href="/console/admin/_log" class="notfound-button">
-                        {{ 'Data structure' | translate }}
-                      </ion-button>
-                    </div>
-                  </ion-row>
-
                 </ion-grid>
                 <ng-template #dataloading>
                   <ion-item lines="none">
@@ -809,74 +780,6 @@
                 </div>
               </div>
             </ion-col>
-
-            <!-- <ion-col *ngIf="menu=='dashboard'" class="console-right-1">
-              <ion-list *ngIf="pane_segval_dash=='dash'" class="ion-no-padding pane-list">
-                <ion-item class="pane-item">
-                  <ion-icon slot="end" name="business-outline" size="small"></ion-icon>
-                  <div *ngIf="saas_ && saas_.company" class="saas-company">
-                    {{ saas_.company }}
-                  </div>
-                </ion-item>
-                <ion-item class="pane-item cursored" (click)="doRefreshDash()">
-                  <ion-icon slot="end" name="sync" size="small"></ion-icon>
-                  <ion-label>
-                    {{ 'Reload' | translate }}<br />
-                    <span>{{ 'Refreshes Dashboard' | translate }}</span>
-                  </ion-label>
-                </ion-item>
-                <ion-item class="pane-item">
-                  <ion-icon slot="end" name="expand-outline" size="small"></ion-icon>
-                  <ion-label>
-                    {{ 'Set Visual Size' | translate }}<br />
-                    <span>
-                      <a href="javascript:void(0);" (click)="doResizeCharts()">{{ 'small' | translate }}</a>&nbsp;
-                      <a href="javascript:void(0);" (click)="doResizeCharts()">{{ 'medium' | translate }}</a>&nbsp;
-                      <a href="javascript:void(0);" (click)="doResizeCharts()">{{ 'large' | translate }}</a>
-                    </span>
-                  </ion-label>
-                </ion-item>
-                <ion-item class="pane-item cursored" (click)="goSection('dashboard', 'templates', 'Templates')">
-                  <ion-icon slot="end" name="documents-outline" size="small"></ion-icon>
-                  <ion-label>
-                    {{ 'Show Templates' | translate }}<br />
-                    <span>{{ 'Show Templates' | translate }}</span>
-                  </ion-label>
-                </ion-item>
-                <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }}</ion-list-header>
-                <div *ngIf="views.length > 0; else nopaneviewfound">
-                  <ion-item *ngFor="let item of views; let p = index" class="pane-item cursored"
-                    (click)="doEnterViewMode(item)">
-                    <ion-icon slot="end"
-                      [name]="item.vie_scheduled ? 'notifications-outline' : 'notifications-off-outline'" size="small">
-                    </ion-icon>
-                    <ion-label>
-                      {{ item.vie_title }}<br />
-                      <span>{{ item.vie_collection_id }} | <span *ngIf="item.chart && item.chart.count"
-                          class="text-bold">{{ item.chart.count }} <span *ngIf="item.chart.count > 1">{{ 'rows' |
-                            translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
-                            }}</span></span></span>
-                    </ion-label>
-                  </ion-item>
-                  <ion-item class="pane-item pane-item-last" lines="none">
-                    <span>
-                      {{ views.length }} {{ 'views found' | translate }}
-                    </span>
-                  </ion-item>
-                </div>
-                <ng-template #nopaneviewfound>
-                  <ion-item lines="none" class="ion-no-padding pane-item">
-                    <ion-label class="ion-text-wrap">
-                      {{ 'NO VIEW FOUND' | translate }}<br />
-                      <div>
-                        {{ 'You can create a shared view on a collection by saving a query' |
-                        translate }}.
-                      </div>
-                    </ion-label>
-                  </ion-item>
-                </ng-template>
-              </ion-list>
-            </ion-col> -->
             <ion-col *ngIf="menu=='collections' and is_pane_ok" class="console-right-1">
               <ion-list *ngIf="pane_segval_colls=='collection'" class="ion-no-padding pane-list">
                 <ion-list-header class="ion-no-padding">{{ 'Shared Views' | translate }} [{{ views_pane.length }}]
@@ -909,7 +812,8 @@
                     </ion-label>
                   </ion-item>
                 </ng-template>
-                <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]</ion-list-header>
+                <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]
+                </ion-list-header>
                 <div *ngIf="perm && actions && actions.length && actions.length > 0; else noaction">
                   <ion-item *ngFor="let item of actions; let ac = index" class="ion-no-padding pane-item"
                     (click)="doAction(ac)">

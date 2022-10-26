@@ -39,7 +39,8 @@
                 <ion-button *ngIf="op=='update'" color="danger" size="small" (click)="doRemove()" class="end-item">
                     {{ 'DELETE' | translate }}&nbsp;
                 </ion-button>
-                <ion-button *ngIf="collection=='_token' && op=='update' && !isInProgress" size="small" (click)="doCopyToken()">
+                <ion-button *ngIf="collection=='_token' && op=='update' && !isInProgress" size="small"
+                    (click)="doCopyToken()">
                     <span *ngIf="!is_token_copied">{{ 'COPY TOKEN' | translate }}</span>
                     <span *ngIf="is_token_copied">{{ 'COPIED' | translate }}</span>
                 </ion-button>
