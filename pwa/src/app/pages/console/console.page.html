@@ -434,8 +434,7 @@
                 </ion-grid>
 
                 <!-- CRUD GRID -->
-                <ion-grid class="ion-no-padding data-grid">
-
+                <ion-grid *ngIf="is_samecol; else dataloading" class="ion-no-padding data-grid">
                   <!-- CRUD HEADERS -->
                   <ion-row *ngIf="data && data.length >= 0" class="ion-nowrap search-row">
                     <ion-col class="ion-text-center check-column">

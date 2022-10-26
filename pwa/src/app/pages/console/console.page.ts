@@ -91,6 +91,7 @@ export class ConsolePage implements OnInit {
   public accountf_qrurl: string = null;
   public is_processing_account: boolean = false;
   public is_visuals_loading: boolean = false;
+  public is_samecol: boolean = false;
   public qr_exists: boolean = false;
   public qr_show: boolean = false;
   public otp_show: boolean = false;
@@ -306,6 +307,7 @@ export class ConsolePage implements OnInit {
     this.view_mode[this.id] = false;
     this.view = null;
     if (!submenu_ || submenu_ !== this.submenu) {
+      this.is_samecol = false;
       this.menu = menu_;
       this.submenu = submenu_;
       this.header = header_ ? header_ : "dashboard";
@@ -331,6 +333,7 @@ export class ConsolePage implements OnInit {
           });
         } else {
           this.is_loaded = true;
+          this.is_samecol = true;
         }
       } else if (menu_ === "dashboard") {
         this.is_loaded = true;
@@ -340,6 +343,8 @@ export class ConsolePage implements OnInit {
         this.options.mode = "code";
         this.options.statusBar = true;
       }
+    } else {
+      this.is_samecol = true;
     }
   }
 
@@ -398,6 +403,7 @@ export class ConsolePage implements OnInit {
                       this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
                       this.page_end = this.page_start + 10;
                       this.is_loaded = true;
+                      this.is_samecol = true;
                       this.is_pane_ok = true;
                       this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
                       for (let p = 0; p < this.paget.length; p++) {
@@ -408,11 +414,13 @@ export class ConsolePage implements OnInit {
                   } else {
                     console.error("*** no structure found");
                     this.is_loaded = true;
+                    this.is_samecol = true;
                   }
                 }).catch((error: any) => {
                   console.error(error);
                   this.misc.doMessage(error, "error");
                   this.is_loaded = true;
+                  this.is_samecol = true;
                   reject(error);
                 });
             });
@@ -420,6 +428,7 @@ export class ConsolePage implements OnInit {
             console.error(error);
             this.misc.doMessage(error, "error");
             this.is_loaded = true;
+            this.is_samecol = true;
             reject(error);
           });
         });
@@ -603,13 +612,14 @@ export class ConsolePage implements OnInit {
                   this.id,
                   this.sweeped[this.segment],
                   true).then(() => {
-                    this.is_loaded = true;
                     this.page = environment.misc.default_page;
                     this.RefreshData(0);
                   }).catch((error: any) => {
-                    this.is_loaded = true;
                     console.error(error);
                     this.misc.doMessage(error, "error");
+                  }).finally(() => {
+                    this.is_loaded = true;
+                    this.is_samecol = true;
                   });
               }
             }
