@@ -162,8 +162,9 @@
                     </div>
                   </div>
                   <!-- SHARED VIEWS -->
-                  <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search views' }}" animated="true"
-                    class="ion-no-padding ion-no-margin brz-searchbar" (ionChange)="doStartSearch($event.detail.value)">
+                  <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search views' }}"
+                    animated="true" class="ion-no-padding ion-no-margin brz-searchbar"
+                    (ionChange)="doStartSearch($event.detail.value)">
                   </ion-searchbar>
                   <ion-grid *ngIf="viewsx.length > 0; else nosharedviews" class="ion-no-padding data-grid">
                     <ion-row>
@@ -800,28 +801,24 @@
                   </ion-item>
                 </div>
                 <ng-template #nopaneviewfound>
-                  <ion-item lines="none" class="ion-no-padding action-item">
+                  <ion-item lines="none" class="ion-no-padding pane-item">
                     <ion-label class="ion-text-wrap">
-                      {{ 'NO VIEW FOUND' | translate }}<br />
-                      {{ 'You can create a shared view by saving the existing query' |
-                      translate }}.
-                      <br />
-                      <ion-button size="small" (click)="doSaveAsView()">
-                        {{ 'Save as View' | translate }}
-                      </ion-button>
+                      {{ 'No view found' | translate }}<br />
+                      <div>
+                        {{ 'You can create a shared view by saving the existing query' |
+                        translate }}.</div>
                     </ion-label>
                   </ion-item>
                 </ng-template>
                 <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]
                 </ion-list-header>
                 <div *ngIf="perm && actions && actions.length && actions.length > 0; else noaction">
-                  <ion-item *ngFor="let item of actions; let ac = index" class="ion-no-padding pane-item"
+                  <ion-item *ngFor="let item of actions; let ac = index" class="ion-no-padding clicked-item"
                     (click)="doAction(ac)">
+                    <ion-icon name="play-circle-outline" color="primary" size="large"></ion-icon>
                     <ion-label class="ion-text-wrap">
-                      {{ item.title }}<br />
-                      <div>{{ item.description }}<br />
-                        <a href="javascript:void(0);">{{ 'RUN this action' | translate }}</a>
-                      </div>
+                      <strong>{{ item.title }}</strong><br />
+                      {{ item.description }}
                     </ion-label>
                   </ion-item>
                 </div>

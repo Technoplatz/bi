@@ -64,6 +64,7 @@ export const environment = {
     { "name": "Glaucous", "color": "#6082B6" },
     { "name": "Marine", "color": "#1F51FF" },
     { "name": "Iris", "color": "#5D3FD3" },
-    { "name": "Sunshine", "color": "#FF5733" }
+    { "name": "Sunshine", "color": "#FF5733" },
+    { "name": "Rot", "color": "#CC0000" }
   ]
 }
