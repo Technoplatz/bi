@@ -1074,6 +1074,7 @@ class Crud():
             file_ = obj["file"]
             collection_ = obj["collection"]
             email_ = form_["email"]
+            API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 
             prefix_ = collection_["col_prefix"] if "col_prefix" in collection_ else None
             if not prefix_:
@@ -1100,15 +1101,15 @@ class Crud():
                 filesize_ = file_.tell()
                 if filesize_ == 0:
                     raise APIError("file is empty")
-                if filesize_ > 5242880:
-                    raise APIError("file size is greater than 5Mb limit")
+                if filesize_ > API_UPLOAD_LIMIT_BYTES_:
+                    raise APIError(f"file size is greater than {API_UPLOAD_LIMIT_BYTES_} bytes")
                 df_ = pd.read_excel(file_, sheet_name=collection_id_, header=0, engine="openpyxl")
             elif mimetype_ == "text/csv":
                 filetype_ = "csv"
                 filesize_ = file_.content_length
                 content_ = file_.read().decode("utf-8")
-                if filesize_ > 5242880 or len(content_) > 5242880:
-                    raise APIError("file size is greater than 5Mb")
+                if filesize_ > API_UPLOAD_LIMIT_BYTES_ or len(content_) > API_UPLOAD_LIMIT_BYTES_:
+                    raise APIError(f"file size is greater than {API_UPLOAD_LIMIT_BYTES_} bytes")
                 df_ = pd.read_csv(file_, encoding="utf-8", header=0)
             else:
                 raise APIError("file type is not excel or csv")
@@ -2528,7 +2529,7 @@ class Crud():
                         field_["minItems"] = int(doc_["fie_array_min_items"])
                     if "fie_array_max_items" in doc_ and doc_["fie_array_max_items"] is not None and doc_["fie_array_max_items"] > 0:
                         field_["maxItems"] = int(doc_["fie_array_max_items"])
-                    if "fie_array_manual_add" in doc_ and doc_["fie_array_manual_add"]:
+                    if "fie_array_manual_add" in doc_ and doc_["fie_array_manual_add"] == True:
                         field_["manualAdd"] = True
 
                     field_["items"] = {}
@@ -2547,7 +2548,7 @@ class Crud():
                 if "fie_unique" in doc_ and doc_["fie_unique"]:
                     uq_ = []
                     uq_.append(field_id_)
-                    if "fie_unique_add" in doc_ and len(doc_["fie_unique_add"]) > 0:
+                    if "fie_unique_add" in doc_ and doc_["fie_unique_add"] and len(doc_["fie_unique_add"]) > 0:
                         for uadd_ in doc_["fie_unique_add"]:
                             uq_.append(uadd_)
                     uq_ = Misc().make_array_unique_f(uq_)
@@ -2556,7 +2557,7 @@ class Crud():
                 if "fie_indexed" in doc_ and doc_["fie_indexed"]:
                     ix_ = []
                     ix_.append(field_id_)
-                    if "fie_indexed_add" in doc_ and len(doc_["fie_indexed_add"]) > 0:
+                    if "fie_indexed_add" in doc_ and doc_["fie_indexed_add"] and len(doc_["fie_indexed_add"]) > 0:
                         for ixadd_ in doc_["fie_indexed_add"]:
                             ix_.append(ixadd_)
                     ix_ = Misc().make_array_unique_f(ix_)
@@ -2821,6 +2822,105 @@ class Crud():
         finally:
             return res_
 
+    def reverse_structure_f(self, obj):
+        try:
+            collection_ = obj["collection"]
+            user_ = obj["user"] if "user" in obj else None
+            structure_ = obj["structure"] if "structure" in obj else None
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            sort_ = structure_["sort"] if "sort" in structure_ else None
+            index_ = structure_["index"] if "index" in structure_ else None
+            unique_ = structure_["unique"] if "unique" in structure_ else None
+            parents_ = structure_["parents"] if "parents" in structure_ else None
+            if properties_:
+                priority_ = 0
+                for prop_ in properties_:
+                    property_ = properties_[prop_]
+                    priority_ += 100
+                    fie_indexed_ = False
+                    fie_indexed_add_ = None
+                    fie_unique_ = False
+                    fie_unique_add_ = None
+                    fie_has_parent_ = False
+                    fie_parent_collection_id_ = None
+                    fie_parent_field_id_ = None
+                    if unique_ and len(unique_) > 0:
+                        for uq_ in unique_:
+                            if uq_[0] == prop_:
+                                fie_unique_ = True
+                                if len(uq_) > 1:
+                                    fie_unique_add_ = uq_[1:]
+                    if index_ and len(index_) > 0:
+                        for ix_ in index_:
+                            if ix_[0] == prop_:
+                                fie_indexed_ = True
+                                if len(ix_) > 1:
+                                    fie_indexed_add_ = ix_[1:]
+                    if parents_ and len(parents_) > 0:
+                        for parent_ in parents_:
+                            if "key" in parent_ and parent_["key"] == prop_:
+                                fie_has_parent_ = True
+                                fie_parent_collection_id_ = parent_["collection"]
+                                fie_parent_field_id_ = parent_["lookup"][0]["remote"] if "lookup" in parent_ and len(parent_["lookup"]) > 0 and parent_["lookup"][0]["remote"] else None
+
+                    doc_ = {
+                        "fie_collection_id": collection_,
+                        "fie_id": prop_,
+                        "fie_type": property_["bsonType"] if "bsonType" in property_ else None,
+                        "fie_title": property_["title"] if "title" in property_ else None,
+                        "fie_priority": priority_,
+                        "fie_description": property_["description"] if "description" in property_ else None,
+                        "fie_default": str(property_["default"]) if "default" in property_ else None,
+                        "fie_enabled": property_["enabled"] if "enabled" in property_ else False,
+                        "fie_required": property_["required"] if "required" in property_ else False,
+                        "fie_permanent": property_["permanent"] if "permanent" in property_ else False,
+                        "fie_indexed": fie_indexed_,
+                        "fie_indexed_add": fie_indexed_add_,
+                        "fie_unique": fie_unique_,
+                        "fie_unique_add": fie_unique_add_,
+                        "fie_min_length": property_["minLength"] if "minLength" in property_ else None,
+                        "fie_max_length": property_["maxLength"] if "maxLength" in property_ else None,
+                        "fie_minimum": property_["minimum"] if "minimum" in property_ else None,
+                        "fie_maximum": property_["maximum"] if "maximum" in property_ else None,
+                        "fie_array_unique_items": property_["uniqueItems"] if property_["bsonType"] == "array" and "uniqueItems" in property_ and property_["uniqueItems"] == True else None,
+                        "fie_array_manual_add": property_["manualAdd"] if property_["bsonType"] == "array" and "manualAdd" in property_ and property_["manualAdd"] == True else None,
+                        "fie_array_min_items": property_["minItems"] if property_["bsonType"] == "array" and "minItems" in property_ else None,
+                        "fie_array_max_items": property_["maxItems"] if property_["bsonType"] == "array" and "maxItems" in property_ else None,
+                        "fie_has_parent": fie_has_parent_,
+                        "fie_parent_collection_id": fie_parent_collection_id_ if fie_has_parent_ and fie_parent_collection_id_ else None,
+                        "fie_parent_field_id": fie_parent_field_id_ if fie_has_parent_ and fie_parent_collection_id_ and fie_parent_field_id_ else None,
+                        "fie_options": property_["enum"] if "enum" in property_ else None,
+                        "fie_width": property_["width"] if "width" in property_ else 100,
+                        "fie_sort": "ascending" if sort_ and prop_ in sort_ and sort_[prop_] > 0 else "descending" if sort_ and prop_ in sort_ and sort_[prop_] < 0 else "unsorted",
+                        "_modified_at": datetime.now(),
+                        "_modified_by": user_["email"] if user_ and "email" in user_ else None
+                    }
+                    self.db["_field"].update_one({
+                        "fie_collection_id": collection_,
+                        "fie_id": prop_
+                    }, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
+
+            res_ = {"result": True}
+
+        except pymongo.errors.PyMongoError as exc:
+            self.log_f({
+                "type": "Error",
+                "collection": collection_,
+                "op": "reverseinit",
+                "user": user_["email"] if user_ else None,
+                "document": exc.details
+            })
+            res_ = Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
     def upsert_f(self, obj):
         try:
             doc = obj["doc"]
@@ -2885,13 +2985,21 @@ class Crud():
                 col_structure_ = doc_["col_structure"] if "col_structure" in doc_ else None
                 datac_ = f"{col_id_}_data"
                 if col_structure_ and col_structure_ != {}:
+                    reverse_structure_f_ = self.reverse_structure_f({
+                        "collection": col_id_,
+                        "structure": col_structure_,
+                        "user": user_
+                    })
+                    if not reverse_structure_f_["result"]:
+                        raise APIError(reverse_structure_f_["msg"])
                     datac_not_found_ = False
                     if datac_ not in self.db.list_collection_names():
                         datac_not_found_ = True
                         self.db[datac_].insert_one({})
                     schemevalidate_ = self.crudscheme_validate_f({
                         "collection": datac_,
-                        "structure": col_structure_})
+                        "structure": col_structure_
+                    })
                     if not schemevalidate_["result"]:
                         raise APIError(schemevalidate_["msg"])
                     if datac_not_found_:

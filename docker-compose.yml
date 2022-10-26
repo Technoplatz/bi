@@ -205,6 +205,7 @@ services:
       - API_DUMP_HOURS=${API_DUMP_HOURS}
       - SECUR_MAX_AGE=${SECUR_MAX_AGE}
       - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
+      - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
     secrets:
       - mongo-password
       - bi-apikey

@@ -40,15 +40,6 @@
             "required": true,
             "width": 90
         },
-        "fie_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 1000,
-            "width": 120
-        },
         "fie_title": {
             "bsonType": "string",
             "minLength": 1,
@@ -57,6 +48,15 @@
             "description": "Title",
             "required": true,
             "width": 160
+        },
+        "fie_priority": {
+            "bsonType": "number",
+            "title": "Priority",
+            "description": "Priority 0-999999",
+            "minimum": 0,
+            "maximum": 999999,
+            "default": 1000,
+            "width": 120
         },
         "fie_description": {
             "bsonType": "string",

@@ -11,15 +11,6 @@
             "permanent": true,
             "width": 150
         },
-        "col_title": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "title": "Title",
-            "description": "Collection Title",
-            "required": true,
-            "width": 150
-        },
         "col_prefix": {
             "bsonType": "string",
             "minLength": 3,
@@ -30,6 +21,15 @@
             "required": true,
             "permanent": true,
             "width": 110
+        },
+        "col_title": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "Title",
+            "description": "Collection Title",
+            "required": true,
+            "width": 150
         },
         "col_priority": {
             "bsonType": "number",

@@ -766,10 +766,9 @@
 
                 <!-- PREFERENCES -->
                 <div *ngIf="submenu=='preferences'" class="header-row">
+                  <h4>{{ 'Theme' | translate }}</h4>
                   <ion-item lines="none">
-                    <ion-label class="ion-text-wrap descriptive">
-                      <h2>{{ 'Theme' | translate }}</h2>
-                      {{ 'You can select a primary color for GUI' | translate }}.
+                    <ion-label class="ion-text-wrap">
                       <div class="theme-button-container">
                         <div *ngFor="let item of themes" size="default" [style.background-color]="item.color"
                           class="theme-button" (click)="doTheme(item)">
