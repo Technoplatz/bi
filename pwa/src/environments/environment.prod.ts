@@ -47,7 +47,7 @@ export const environment = {
     { "id": "_action", "title": "Actions" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },
-    { "id": "_token", "title": "Access Tokens" },
+    { "id": "_token", "title": "API Tokens" },
     { "id": "_firewall", "title": "Firewall" },
     { "id": "_backup", "title": "Backups" },
     { "id": "_log", "title": "Log" }

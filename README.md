@@ -19,32 +19,38 @@ Technoplatz BI is a data application and sharing platform that provides many use
 
 ### Self-service Database
 
-Technoplatz BI uses [MongoDB](https://www.mongodb.com/use-cases) which is an excellent choice for data-driven processes in terms of transaction support, flexible JSON schema, multi-node replication and scalability capabilities. The front-end allows you to manage your own database;
+BI is an excellent choice for those who want to build a new system to manage a data-driven business process. With professional-grade features you can easily handle critical and intense tasks without needing to be a data expert;
 
-- Data collections and fields
-- Unique and index constraints
-- Mandatory fields
-- Relationships between collections
+- JSON based flexible structure
+- Unlimited data collections
+- Unique, indexed and mandatory fields
+- Parent-child relations
+- Three nodes replication
+- Transactions support
+- Scalability
 - Automated backups
 
 ### Data Application
 
-It is a web-based application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, we have added 7 features to the data application where you can handle most of your workload;
+It is a web-based application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
-- Data transfer from Excel files
+Main Features
+- Create and manage data collections
+- Data import from files
 - Basic data operations (CRUD)
-- Shared queries
 - Actions
 - Visualization
 - Data annoucements
 - Live data connectors
 
-### Data Sharing
-
-Share data with your inner-cycle by using BI-directional methods.
-
-- Data annoucements
-- Live data connectors
+Administration
+- Collection and field management
+- Inner-cycle management
+- Action management
+- Firewall and permission management
+- Backup and restore
+- API access management
+- Log tracking
 
 ### API
 
@@ -52,15 +58,13 @@ Share data with your inner-cycle by using BI-directional methods.
 
 ## Highlights
 
-- low-code
-- multi-container 
-- **Platform independent**: Runs on any cloud, on-premises or PCs.
-- **Flexible**: It has the sweet smell of JSON data structure.
-- **Scalable**: Starts small, grows when needed.
-- **Self service**: Your data is now under your control, completely.
-- **Open source**: Codes are public. Everyone can review them and learn from them a lot.
-- **Data sciences**: Accessibility from other BI tools, AI processes and Excel.
-- **ISO27001**: It supports the certification process, not a stopper.
+- Self service. Your data is now under your control, completely.
+- Platform independent. Containerized. Runs on any cloud, on-premises or PCs.
+- Flexible. It has the sweet smell of JSON data structure.
+- Scalable. Starts small, grows when needed.
+- Open source. Everyone can review codes, learn from them a lot.
+- Data sciences. Accessibility from other BI tools, AI processes and Excel.
+- ISO27001 Support. Empowers the certification process, not a stopper.
 
 ## Installation
 
@@ -209,27 +213,28 @@ Community Edition's default settings are provided for testing and local use. In 
 9. Get your Docker platform behind a cloud firewall and configure the access settings according to your corporate security policy.
 
 ## Licensing Options
-The system is offered in two different ways of use;
+The system is provided in two licensing options;
 
-- **Community Edition** is free under the [GNU Affero General Public License v3.0](https://github.com/Technoplatz/bi/blob/main/LICENSE) terms.
-- **Enterprise Edition (Brezel)** is supported version of BI.
+- Community Edition
+- Enterprise Edition
 
-#### COMPARISON CHART
+#### COMPARISON
 
 <div class="licensing">
 
-| | Community Edition | Enterprise Edition (Brezel) |
+| | Community Edition | Enterprise Edition |
 | :--- | :--- | :--- |
-|  Hosting | Self hosted | Managed SaaS |
-|  Cloud Options | Yes | Azure, GCP, DigitalOcean |
+|  Hosting | Self hosted | SaaS on Azure, GCP, DigitalOcean|
 |  Database | MongoDB 6 | MongoDB 6 |
-|  DB Replication | Yes [3 internal nodes] | Yes [3 regional nodes] |
+|  DB Replication | Yes [3 internal nodes] | Yes [3 nodes] |
+|  DB Transactions | Yes | Yes |
 |  External Security | No | Cloudflare |
-|  OTP Auth | Yes | Yes |
+|  2FA | Yes | Yes |
 |  Support | No | Yes |
 |  Custom Domain | Yes | Yes |
 |  Custom Branding | Not Allowed | Yes |
-|  Licensing | AGPL-3.0 | AGPL-3.0 + SLA |
+|  Licensing | GNU Affero General Public License v3.0 | GNU Affero General Public License v3.0 + SLA |
+|  Pricing | Free | [Get a Quote](#) |
 
 </div>
 
