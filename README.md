@@ -11,15 +11,16 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a data application and sharing platform that provides many useful features to empower those who try to manage critical business processes on spreadsheets or legacy software. The system's flexible and pragmatic solution is under three main topics, considering that each business process has its own specific conditions;
+Technoplatz BI is a data application and data sharing platform provides many useful features to empower those who try to manage critical business processes on spreadsheets or legacy software. The system's flexible and pragmatic solution is under three main topics;
 
 - [Self-service Database](#self-service-database)
 - [Data Application](#data-application)
+- [Data Sharing](#data-sharing)
 - [API](#api)
 
 ### Self-service Database
 
-BI is an excellent choice for those who want to build a new system to manage a data-driven business process. With professional-grade features you can easily handle critical and intense tasks without needing to be a data expert;
+Technoplatz BI is an excellent choice for those who want to build a new system to manage a data-driven business process. With professional-grade features you can easily handle critical and intense tasks without needing to be a data expert;
 
 - JSON based flexible structure
 - Unlimited data collections
@@ -35,6 +36,7 @@ BI is an excellent choice for those who want to build a new system to manage a d
 It is a web-based application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
 Main Features
+
 - Create and manage data collections
 - Data import from files
 - Basic data operations (CRUD)
@@ -44,6 +46,7 @@ Main Features
 - Live data connectors
 
 Administration
+
 - Collection and field management
 - Inner-cycle management
 - Action management
@@ -72,15 +75,14 @@ There are four steps you need to complete to start using BI. In order to run the
 
 ### Step 1
 
-#### Setting a Docker Platform
+#### Setting up a Docker Platform
 
-Docker is an open platform for developing, shipping, and running applications. You can install it on your computer for free or buy a managed service from any of the leading providers. The links below will help you about how to establish a Docker environment on the cloud and on-premises;
+Technoplatz BI runs on the Docker which is an open platform for developing, shipping, and running applications. You can install it on your computer for free or buy a managed service from any of the leading providers. The links below will help you about how to establish a Docker environment;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
-#### The first touch
-After the installation is complete, perform the recent updates and reboot. If you need an administrator right, add `sudo` to the beginning of the commands;
+After the installation is complete, perform the recent updates and reboot the platform. If you need administrator rights, add `sudo` to the beginning of the commands;
 
 ```bash
 apt update && apt upgrade -y
@@ -152,8 +154,7 @@ echo -n "your-sendgrid-apikey" > .secret-sendgrid-apikey
 
 ### Step 4
 
-#### Kick-Off
-Start the services and keep them up and running in the background. Installation may take 1-2 minutes depending on your internet speed;
+Start the containers by keeping them up and running at the background. This step may take 2-3 minutes depending on your bandwidth;
 
 ```bash
 docker-compose up --detach --remove-orphans

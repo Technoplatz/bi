@@ -5101,21 +5101,21 @@ def post_f():
                         break
         elif operation_ in ["insert", "update", "upsert", "delete"]:
             filter_ = {}
-            filter__ = {}
             if operation_ in ["update", "upsert", "delete"]:
                 if len(unique_) > 0:
                     for uq_ in unique_:
                         for uq__ in uq_:
                             filter_[uq__] = None
                 else:
-                    raise APIError(f"at leat one unique field must be defined for {operation_}")
-            for item_ in body_:
+                    raise APIError(f"at leat one unique field must be provided for {operation_}")
+            for ix_, item_ in enumerate(body_):
+                filter__ = {}
                 if operation_ in ["update", "upsert", "delete"]:
                     for key_ in filter_.keys():
                         if key_ in item_ and item_[key_] is not None:
                             filter__[key_] = item_[key_]
                     if filter__ == {}:
-                        continue
+                        raise APIError(f"at least one unique field must be provided for {operation_} index {ix_}")
                 # decode document
                 decode_crud_doc_f_ = Crud().decode_crud_doc_f(item_, properties_)
                 if not decode_crud_doc_f_["result"]:
@@ -5123,14 +5123,15 @@ def post_f():
                 doc__ = decode_crud_doc_f_["doc"]
                 doc__["_modified_at"] = datetime.now()
                 doc__["_modified_by"] = "API"
+
                 if operation_ == "upsert":
-                    session_db_[collection_data_].update_many(filter__, {"$set": doc__, "$inc": {"_modified_count": 1}}, upsert=True)
+                    session_db_[collection_data_].update_many(filter__, {"$set": doc__, "$inc": {"_modified_count": 1}}, upsert=True, session=session_)
                 if operation_ == "update":
-                    session_db_[collection_data_].update_many(filter__, {"$set": doc__, "$inc": {"_modified_count": 1}}, upsert=False)
+                    session_db_[collection_data_].update_many(filter__, {"$set": doc__, "$inc": {"_modified_count": 1}}, upsert=False, session=session_)
                 elif operation_ == "insert":
-                    session_db_[collection_data_].insert_one(doc__)
+                    session_db_[collection_data_].insert_one(doc__, session=session_)
                 elif operation_ == "delete":
-                    session_db_[collection_data_].delete_many(filter__)
+                    session_db_[collection_data_].delete_many(filter__, session=session_)
                 count_ += 1
                 if count_ >= int(API_OUTPUT_ROWS_LIMIT):
                     break
@@ -5146,12 +5147,12 @@ def post_f():
         if not log_["result"]:
             raise APIError(log_["msg"])
 
-        response_ = {
+        response_ = json.loads(JSONEncoder().encode({
             "collection": rh_collection_,
             "operation": operation_,
             "count": count_,
             "output": output_
-        }
+        }))
 
         session_.commit_transaction() if session_ else None
         code_ = 200
@@ -5177,8 +5178,8 @@ def post_f():
 
     finally:
         session_client_.close() if session_client_ else None
-        headers = {"Content-Type": "application/json; charset=utf-8"}
-        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers
+        headers_ = {"Content-Type": "application/json; charset=utf-8"}
+        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers_
 
 
 @app.route("/get/dump", methods=["POST", "OPTIONS"])
@@ -5278,27 +5279,27 @@ def get_data_f(id):
         if not generate_view_data_f_["result"]:
             raise APIError(generate_view_data_f_["msg"])
 
-        res = generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
-        code = 200
+        res_ = generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
+        code_ = 200
 
     except AuthError as exc:
         print("*** get/view auth error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res = {"message": str(exc)}
-        code = 401
+        res_ = {"message": str(exc)}
+        code_ = 401
 
     except APIError as exc:
         print("*** get/view api error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res = {"message": str(exc)}
-        code = 500
+        res_ = {"message": str(exc)}
+        code_ = 500
 
     except Exception as exc:
         print("*** get/view exception", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res = {"message": str(exc)}
-        code = 500
+        res_ = {"message": str(exc)}
+        code_ = 500
 
     finally:
-        headers = {"Content-Type": "application/json; charset=utf-8"}
-        return json.dumps(res, default=json_util.default, ensure_ascii=False, sort_keys=False), code, headers
+        headers_ = {"Content-Type": "application/json; charset=utf-8"}
+        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers_
 
 
 if __name__ == "__main__":
