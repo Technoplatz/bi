@@ -11,14 +11,15 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a data application and data sharing platform provides many useful features to empower those who try to manage critical business processes on spreadsheets or legacy software. The system's flexible and pragmatic solution is under three main topics;
+Technoplatz BI is a multi-container data application platform designed to build a new system to manage a mission critical business process without developing software from scratch.
 
-- [Self-service Database](#self-service-database)
-- [Data Application](#data-application)
-- [Data Sharing](#data-sharing)
-- [API](#api)
+- Self-service data management
+- Internal data application
+- Interactive data sharing with business partners
+- Data visualization
+- API
 
-### Self-service Database
+### Self-service data management
 
 Technoplatz BI is an excellent choice for those who want to build a new system to manage a data-driven business process. With professional-grade features you can easily handle critical and intense tasks without needing to be a data expert;
 
@@ -31,19 +32,19 @@ Technoplatz BI is an excellent choice for those who want to build a new system t
 - Scalability
 - Automated backups
 
-### Data Application
+### Internal data application
 
 It is a web-based application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
 Main Features
 
 - Create and manage data collections
-- Data import from files
+- Data import from Excel files
 - Basic data operations (CRUD)
-- Actions
-- Visualization
-- Data annoucements
-- Live data connectors
+- Data Actions
+- Data Visualization
+- Annoucements
+- Live Data Connectors
 
 Administration
 
@@ -54,6 +55,8 @@ Administration
 - Backup and restore
 - API access management
 - Log tracking
+
+### Interactive data sharing with business partners
 
 ### API
 
