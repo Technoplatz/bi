@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
   public swu_: boolean = false;
   public net_: boolean = true;
   private version_app = environment.appVersion;
-  private version_global = null;
+  private version_global: string = "";
 
   constructor(
     private translate: TranslateService,
@@ -93,7 +93,7 @@ export class AppComponent implements OnInit {
     });
 
     // set default language
-    this.misc.getLanguage().then((LSLANG: string) => {
+    this.misc.getLanguage().then((LSLANG: any) => {
       this.translate.setDefaultLang(LSLANG ? LSLANG : "en");
       this.translate.use(LSLANG ? LSLANG : "en");
     }).catch((error: any) => {

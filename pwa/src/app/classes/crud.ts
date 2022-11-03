@@ -16,7 +16,7 @@ export class Crud {
   public fields: any = [];
   public objectsListener = new BehaviorSubject([]);
   public objects = this.objectsListener.asObservable();
-  private apiHost: string;
+  private apiHost: string = "";
   private crudHeaders: any = {
     "Content-Type": "application/json",
     "X-Api-Key": environment.apiKey
@@ -31,7 +31,7 @@ export class Crud {
     private misc: Miscellaneous,
     private http: HttpClient
   ) {
-    this.misc.getAPIHost().then((apiHost: string) => {
+    this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;
     });
   }
@@ -640,11 +640,11 @@ export class Crud {
   getParents(obj: any) {
     return new Promise((resolve, reject) => {
       if (obj.parents) {
-        let parents = [];
+        let parents: any = [];
         for (let p = 0; p < obj.parents.length; p++) {
           let parent = obj.parents[p];
           const remote_fields = parent["remote_fields"];
-          let data = [];
+          let data: any = [];
           this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
             this.http.post<any>(this.apiHost + "/crud", {
               op: "parent",
@@ -661,7 +661,7 @@ export class Crud {
                   for (let j = 0; j < remote_fields.length; j++) {
                     id += res.data[i][remote_fields[j]] + " ";
                     if (j === remote_fields.length - 1) {
-                      let data_line = {};
+                      let data_line: any = {};
                       data_line["id"] = res.data[i]["_id"];
                       data_line[parent["local_field"]] = id.trim();
                       data.push(data_line);

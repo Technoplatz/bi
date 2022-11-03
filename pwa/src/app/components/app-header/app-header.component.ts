@@ -12,8 +12,8 @@ import { Auth } from "../../classes/auth";
 
 export class AppHeaderComponent implements OnInit {
   @Input() user: any;
-  @Input() swu: boolean;
-  @Input() net: boolean;
+  @Input() swu: boolean = false;
+  @Input() net: boolean = false;
   private userData: any;
   public color: any = "primary";
   public colorContrast: any = "white";
@@ -21,7 +21,7 @@ export class AppHeaderComponent implements OnInit {
   public name: any = null;
   public logo: string = environment.misc.logo;
   public swu_: boolean = false;
-  public net_: boolean;
+  public net_: boolean = false;
   public slideOpts = {
     initialSlide: 0,
     speed: 400,

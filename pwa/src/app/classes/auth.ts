@@ -11,7 +11,7 @@ import { environment } from "../../environments/environment";
 })
 
 export class Auth {
-  private apiHost: string;
+  private apiHost: string = "";
 
   private authHeaders: any = {
     "Content-Type": "application/json",
@@ -25,7 +25,7 @@ export class Auth {
     private misc: Miscellaneous,
     private http: HttpClient
   ) {
-    this.misc.getAPIHost().then((apiHost: string) => {
+    this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;
     });
   }

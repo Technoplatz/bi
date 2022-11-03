@@ -14,7 +14,7 @@ import { ClipboardPluginWeb } from "@capacitor/core";
 export class Miscellaneous {
   private loadin: any;
   private filter: any = [];
-  private apiHost: string;
+  private apiHost: string = "";
   private miscHeaders: any = {
     "Content-Type": "application/json",
     "X-Api-Key": environment.apiKey
@@ -151,7 +151,7 @@ export class Miscellaneous {
     await this.loadin.present();
   }
 
-  dismissLoading(loadin) {
+  dismissLoading(loadin: any) {
     loadin ? loadin.dismiss().then(() => { }) : null;
   }
 

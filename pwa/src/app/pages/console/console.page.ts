@@ -17,31 +17,31 @@ import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 })
 
 export class ConsolePage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false }) public strcutureEditor: JsonEditorComponent;
-  @ViewChild("select0") selectRef: IonSelect;
+  @ViewChild(JsonEditorComponent, { static: false }) public strcutureEditor?: JsonEditorComponent;
+  @ViewChild("select0") selectRef?: IonSelect;
   public now: any = Date.now();
   public version = environment.appVersion;
   public release = environment.release;
   public loadingText: string = environment.misc.loadingText;
-  public menu: string;
-  public submenu: string;
-  public header: string;
+  public menu: string = "";
+  public submenu: string = "";
+  public header: string = "";
   public segment = "data";
   public user: any = null;
   public segmentsadm: any;
   public themes: any = environment.themes;
   public limits: any = environment.misc.limits;
-  public perm: boolean;
-  public is_crud: boolean;
+  public perm: boolean = false;
+  public is_crud: boolean = false;
   public in_otp_process: boolean = false;
   public in_otp_process_test: boolean = false;
   public paget: any = [];
-  public id: string = null;
+  public id: string = "";
   public sortstr: any;
   public ok: boolean = false;
   public reconfig: boolean = false;
   public filter: any = [];
-  public saved_filter: string = null;
+  public saved_filter: string = "";
   public selected_view: any;
   public searched: any = null;
   public data: any = [];
@@ -70,8 +70,8 @@ export class ConsolePage implements OnInit {
   public is_show_resize: boolean = false;
   public is_pivot_showed: boolean = true;
   public is_pivot_loading: boolean = false;
-  public pivot_: string = null;
-  public statistics_key_: string = null;
+  public pivot_: string = "";
+  public statistics_key_: string = "";
   public statistics_: any = null;
   public multicheckbox: boolean = false;
   public clonok: number = -1;
@@ -85,35 +85,35 @@ export class ConsolePage implements OnInit {
   public is_url_copied: boolean = false;
   public is_apikey_copied: boolean = false;
   public is_apikey_enabled: boolean = false;
-  public accountf_apikey: string = null;
+  public accountf_apikey: string = "";
   public accountf_apikeydate: any = null;
-  public accountf_description: string = null;
-  public accountf_qrurl: string = null;
+  public accountf_description: string = "";
+  public accountf_qrurl: string = "";
   public is_processing_account: boolean = false;
   public is_visuals_loading: boolean = false;
   public is_samecol: boolean = false;
   public qr_exists: boolean = false;
   public qr_show: boolean = false;
   public otp_show: boolean = false;
-  public otp_qr: string = null;
+  public otp_qr: string = "";
   public dashmode: string = "card";
-  public viewurl_: string = null;
-  public viewurl_masked_: string = null;
+  public viewurl_: string = "";
+  public viewurl_masked_: string = "";
   public view: any = null;
   public visual: any = null;
-  public view_id: string = null;
-  public visual_id: string = null;
+  public view_id: string = "";
+  public visual_id: string = "";
   public view_data: any = [];
   public view_df: any = [];
   public view_count: number = 0;
   public view_properties: any = [];
   public view_properties_: any = [];
-  public subscribers: string;
-  public scheduled: boolean;
-  public sched_days: string;
-  public sched_hours: string;
-  public sched_minutes: string;
-  public sched_timezone: string;
+  public subscribers: string = "";
+  public scheduled: boolean = false;
+  public sched_days: string = "";
+  public sched_hours: string = "";
+  public sched_minutes: string = "";
+  public sched_timezone: string = "";
   public viewtab: string = "pivot";
   public saas_: any;
   public actions: any = [];
@@ -125,15 +125,15 @@ export class ConsolePage implements OnInit {
   public view_mode: any = {};
   public pane_segval_colls: string = "collection";
   public pane_segval_dash: string = "dash";
-  public options: JsonEditorOptions;
-  public options2: JsonEditorOptions;
+  public options?: JsonEditorOptions;
+  public options2?: JsonEditorOptions;
   private sweeped: any = [];
   private sort: any = {};
   private properites_: any = {};
   private actionix: number = -1;
   private views_structure: any;
   private collections_structure: any;
-  private apiHost: string;
+  private apiHost: string = "";
 
   constructor(
     private storage: Storage,
@@ -149,7 +149,7 @@ export class ConsolePage implements OnInit {
     this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];
     });
-    this.misc.getAPIHost().then((apiHost: string) => {
+    this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;
     });
   }
@@ -311,7 +311,7 @@ export class ConsolePage implements OnInit {
       this.menu = menu_;
       this.submenu = submenu_;
       this.header = header_ ? header_ : "dashboard";
-      this.pivot_ = null;
+      this.pivot_ = "";
       this.submenu ? this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu + "/" + this.submenu) : this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu);
       if (menu_ === "collections" || menu_ === "admin") {
         menu_ === "admin" ? this.view_mode[this.id] = false : null;
@@ -392,7 +392,7 @@ export class ConsolePage implements OnInit {
                   this.columns_ = [];
                   if (this.properites_) {
                     this.getColumns().then(() => {
-                      this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
+                      this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
                       this.count = res.count;
                       this.multicheckbox = false;
                       this.multicheckbox ? this.multicheckbox = false : null;
@@ -893,7 +893,7 @@ export class ConsolePage implements OnInit {
 
   doOTP(obj: any) {
     return new Promise((resolve, reject) => {
-      this.otp_qr = null;
+      this.otp_qr = "";
       const op_ = obj && obj.op ? obj.op : null;
       if (op_) {
         if (op_ === "hide") {
@@ -1025,7 +1025,7 @@ export class ConsolePage implements OnInit {
         this.storage.remove("LSSAVEDFILTER").then(() => {
           this.doResetSearch(true);
           this.sort = {};
-          this.saved_filter = null;
+          this.saved_filter = "";
           this.filter = [];
           this.sweeped[this.segment] = [];
           this.RefreshData(0);

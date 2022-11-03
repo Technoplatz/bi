@@ -1,9 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
     "outDir": "./out-tsc/app",
     "types": ["node"],
-    "strict": true
+    "strict": true,
   },
   "files": [
     "src/main.ts",

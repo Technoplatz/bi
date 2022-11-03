@@ -166,10 +166,10 @@
                 autocorrect="off" required [value]="email">
             </ion-input>
             <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signinForm.controls.email.valid">
+                *ngIf="signinForm?.controls?.email?.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signinForm.controls.email.invalid && (signinForm.controls.email.dirty || signinForm.controls.email.touched)">
+                *ngIf="signinForm?.controls?.email?.invalid && (signinForm?.controls?.email?.dirty || signinForm?.controls?.email?.touched)">
             </ion-icon>
         </ion-item>
         <ion-item lines="full">
@@ -180,10 +180,10 @@
             <ion-input #passwordfocus formControlName="password" type="password" required>
             </ion-input>
             <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signinForm.controls.password.valid">
+                *ngIf="signinForm?.controls?.password?.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signinForm.controls.password.invalid && (signinForm.controls.password.dirty || signinForm.controls.password.touched)">
+                *ngIf="signinForm?.controls?.password?.invalid && (signinForm?.controls?.password?.dirty || signinForm?.controls?.password?.touched)">
             </ion-icon>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">

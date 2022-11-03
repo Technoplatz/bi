@@ -12,12 +12,12 @@ export class KovComponent implements OnInit {
   @Input() keylist: any;
   @Input() data: any;
   @Input() field: any;
-  @Input() op: string;
+  @Input() op: string = "";
   public kovs: any = null;
-  public type: string;
+  public type: string = "";
 
   public filterops: any = environment.filterops;
-  public fieldname: string;
+  public fieldname: string = "";
   private hours_: any = [];
   private minutes_: any = [];
   private days_: any = [

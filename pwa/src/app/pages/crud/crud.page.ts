@@ -16,17 +16,17 @@ import { ItemReorderEventDetail } from '@ionic/core';
 export class CrudPage implements OnInit {
   @Input() shuttle: any = {};
   @Input() modified: boolean = false;
-  @ViewChild(JsonEditorComponent, { static: false }) public editor: JsonEditorComponent;
+  @ViewChild(JsonEditorComponent, { static: false }) public editor?: JsonEditorComponent;
   public novalue: any = null;
   public properties: any = {};
   public required: any = [];
   public property_list: any = [];
   public data_properties: any = [];
   public tab: string = "data";
-  public op: string;
-  public saved_filter: string;
+  public op: string = "";
+  public saved_filter: string = "";
   public saved_filters: any = [];
-  public collection: string;
+  public collection: string = "";
   public user: any;
   public data: any = {};
   public dataprev: any = {};
@@ -39,15 +39,15 @@ export class CrudPage implements OnInit {
   public fields: any = [];
   public isInProgress: boolean = false;
   public is_ready: boolean = false;
-  public _id: string;
+  public _id: string = "";
   public arrayitem: any = {};
-  public error: string = null;
-  public options: JsonEditorOptions;
+  public error: string = "";
+  public options?: JsonEditorOptions;
   public arrays: any = [];
   public visibility: string = "ion-padding-start ion-padding-end ion-hide";
   public parentkey: number = 0;
   public aktions: any = [];
-  public localfield: string = null;
+  public localfield: string = "";
   public showhide: string = "show-segment";
   public parents: any;
   public relact: boolean = false;
@@ -72,7 +72,7 @@ export class CrudPage implements OnInit {
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
     if (event.key === "Enter") {
       if (event.target.getAttribute("name") === "arrayitem") {
-        this.doAddItemToArray(event).then((item: string) => {
+        this.doAddItemToArray(event).then(() => {
         }).catch((error: any) => {
           console.error(error);
         });
@@ -179,11 +179,11 @@ export class CrudPage implements OnInit {
   }
 
   doAktionChange(ix: number) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const v = this.aktions[ix];
-      let structure_ = this.structure;
-      let controls_ = {};
-      let fields_ = {};
+      let structure_: any = this.structure;
+      let controls_: any = {};
+      let fields_: any = {};
       this.fieldsupd = this.fields.filter((obj: any) => v.fields.some((f: any) => obj.name === f.key));
       this.propertiesAktionFilter(v).then((properties_filter_: any) => {
         for (let j = 0; j < properties_filter_.length; j++) {
@@ -198,7 +198,7 @@ export class CrudPage implements OnInit {
                 for (let f = 0; f < v.fields.length; f++) {
                   v.fields[f].value === "$CURRENT_DATE" ? v.fields[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10) : null;
                   this.data[v.fields[f].key] = v.fields[f].value;
-                  this.crudForm.get(v.fields[f].key).setValue(v.fields[f].value);
+                  this.crudForm.get(v.fields[f].key)?.setValue(v.fields[f].value);
                   if (f === v.fields.length - 1) {
                     this.crudForm.controls = controls_;
                     this.showhide = "show-segment";
@@ -219,7 +219,7 @@ export class CrudPage implements OnInit {
   }
 
   doSubmit() {
-    this.error = null;
+    this.error = "";
     if (!this.isInProgress) {
       if (this.op !== "remove" && !this.crudForm.valid) {
         this.doShowError("form is not valid");
@@ -243,7 +243,7 @@ export class CrudPage implements OnInit {
   }
 
   doDump() {
-    this.error = null;
+    this.error = "";
     this.modified = true;
     this.isInProgress = true;
     this.crud.Dump().then(() => {
@@ -259,7 +259,7 @@ export class CrudPage implements OnInit {
   }
 
   doDownload() {
-    this.error = null;
+    this.error = "";
     this.modified = true;
     this.isInProgress = true;
     this.crud.Download({
@@ -349,7 +349,7 @@ export class CrudPage implements OnInit {
         this.data[this.parents.lookup[0].local].push(this.related[k][this.parents.lookup[0].remote]);
       }
       if (k === this.related.length - 1) {
-        this.crudForm.get(this.parents.lookup[0].local).setValue(this.data[this.parents.lookup[0].local]);
+        this.crudForm.get(this.parents.lookup[0].local)?.setValue(this.data[this.parents.lookup[0].local]);
       }
     }
   }
@@ -390,7 +390,7 @@ export class CrudPage implements OnInit {
       if (!view_) {
         resolve(true);
       } else {
-        this.crud.View(null, view_, "propsonly").then((res: any) => {
+        this.crud.View("", view_, "propsonly").then((res: any) => {
           if (res && res.properties) {
             let i = 0;
             for (let item in res.properties) {
@@ -505,7 +505,7 @@ export class CrudPage implements OnInit {
   doShowError(error: any) {
     this.error = error;
     setTimeout(() => {
-      this.error = null;
+      this.error = "";
     }, 7000);
   }
 
@@ -557,11 +557,11 @@ export class CrudPage implements OnInit {
             !this.data[this.parents.lookup[k].local] || typeof this.data[this.parents.lookup[k].local] === "string" ? this.data[this.parents.lookup[k].local] = [] : null;
             if (!this.data[this.parents.lookup[k].local] || !this.data[this.parents.lookup[k].local].find((obj: any) => obj === item[this.parents.lookup[k].remote])) {
               this.data[this.parents.lookup[k].local].push(item[this.parents.lookup[k].remote]);
-              this.crudForm.get(this.parents.lookup[k].local).setValue(this.data[this.parents.lookup[k].local]);
+              this.crudForm.get(this.parents.lookup[k].local)?.setValue(this.data[this.parents.lookup[k].local]);
             }
           } else {
             this.data[this.parents.lookup[k].local] = item[this.parents.lookup[k].remote];
-            this.crudForm.get(this.parents.lookup[k].local).setValue(item[this.parents.lookup[k].remote]);
+            this.crudForm.get(this.parents.lookup[k].local)?.setValue(item[this.parents.lookup[k].remote]);
           }
         }
         if (k === this.parents.lookup.length - 1) {
@@ -598,11 +598,11 @@ export class CrudPage implements OnInit {
 
   doReorder(ev: CustomEvent<ItemReorderEventDetail>, fn: string) {
     this.data[fn] = ev.detail.complete(this.data[fn]);
-    this.crudForm.get(fn).setValue(this.data[fn]);
+    this.crudForm.get(fn)?.setValue(this.data[fn]);
   }
 
   doFieldReset(fn: string) {
-    this.crudForm.get(fn).setValue(null);
+    this.crudForm.get(fn)?.setValue(null);
     this.data[fn] = null;
   }
 

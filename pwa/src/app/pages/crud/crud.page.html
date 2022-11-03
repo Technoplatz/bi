@@ -257,7 +257,7 @@
                             <json-editor *ngIf="field.bsonType=='object'" [id]="field.name" [options]="options"
                                 [formControlName]="field.name" class="ion-margin-top ion-margin-bottom"
                                 (change)="doJsonChangeLog($event)" [(ngModel)]="data[field.name]"></json-editor>
-                            <ion-icon *ngIf="crudForm.get(field.name).invalid" name="close" class="invalid-field">
+                            <ion-icon *ngIf="crudForm?.get(field.name)?.invalid" name="close" class="invalid-field">
                             </ion-icon>
                         </ion-item>
                     </ion-list>

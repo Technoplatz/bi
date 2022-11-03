@@ -11,40 +11,40 @@ import { Miscellaneous } from "../../classes/miscellaneous";
   styleUrls: ["./sign.page.scss"],
 })
 export class SignPage implements OnInit {
-  @Input() op: string;
+  @Input() op: string = "";
   @Input() user: any;
-  @Input() isSignedIn: boolean;
-  @ViewChild("emailfocus", { static: false }) emailfocus: IonInput;
-  @ViewChild("emailfocussignin", { static: false }) emailfocussignin: IonInput;
-  @ViewChild("emailfocussignup", { static: false }) emailfocussignup: IonInput;
-  @ViewChild("namefocus", { static: false }) namefocus: IonInput;
-  @ViewChild("passwordfocus", { static: false }) passwordfocus: IonInput;
-  @ViewChild("passcodefocus", { static: false }) passcodefocus: IonInput;
-  @ViewChild("tfacfocus", { static: false }) tfacfocus: IonInput;
+  @Input() isSignedIn: boolean = false;
+  @ViewChild("emailfocus", { static: false }) emailfocus?: IonInput;
+  @ViewChild("emailfocussignin", { static: false }) emailfocussignin?: IonInput;
+  @ViewChild("emailfocussignup", { static: false }) emailfocussignup?: IonInput;
+  @ViewChild("namefocus", { static: false }) namefocus?: IonInput;
+  @ViewChild("passwordfocus", { static: false }) passwordfocus?: IonInput;
+  @ViewChild("passcodefocus", { static: false }) passcodefocus?: IonInput;
+  @ViewChild("tfacfocus", { static: false }) tfacfocus?: IonInput;
 
-  public error: string = null;
-  public success_str: string = null;
-  public successMessage: string = null;
+  public error: string = "";
+  public success_str: string = "";
+  public successMessage: string = "";
   public signupForm: FormGroup;
   public forgotForm: FormGroup;
-  public signinForm: FormGroup;
+  public signinForm?: FormGroup;
   public resetForm: FormGroup;
   public TFACForm: FormGroup;
   public successForm: FormGroup;
-  public formtype: string;
+  public formtype: string = "";
   public isInProgress: boolean = false;
   public is_ready: boolean = false;
-  public isEuTaxRequired: boolean;
+  public isEuTaxRequired: boolean = false;
   public cart: any;
   public taxExcluded: boolean = false;
   public tax: Number = 0;
   public rate: number = 0;
   public total: any = 0;
   public grandtotal: any = 0;
-  public currency: string;
+  public currency: string = "";
   public isRememberMe: boolean = false;
   public showhide: string = "hide-segment";
-  public email: string = null;
+  public email: string = "";
   private focustime = 600;
   private passwordpttrn_: string = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_-]).{8,32}";
 
@@ -227,16 +227,15 @@ export class SignPage implements OnInit {
   doStartSignin() {
     return new Promise((resolve, reject) => {
       this.doSetFormType("signin").then(() => {
-        this.signinForm.get("email").value
-          ? setTimeout(() => {
+        this.signinForm?.get("email")?.value ? setTimeout(() => {
             this.showhide = "show-segment";
-            this.passwordfocus.setFocus().then(() => {
+            this.passwordfocus?.setFocus().then(() => {
               resolve(true);
             });
           }, this.focustime)
           : setTimeout(() => {
             this.showhide = "show-segment";
-            this.emailfocussignin.setFocus().then(() => {
+            this.emailfocussignin?.setFocus().then(() => {
               resolve(true);
             });
           }, this.focustime);
@@ -252,7 +251,7 @@ export class SignPage implements OnInit {
       this.doSetFormType("forgot").then(() => {
         setTimeout(() => {
           this.showhide = "show-segment";
-          this.emailfocus.setFocus().then(() => {
+          this.emailfocus?.setFocus().then(() => {
             resolve(true);
           });
         }, this.focustime);
@@ -268,7 +267,7 @@ export class SignPage implements OnInit {
       this.doSetFormType("signup").then(() => {
         setTimeout(() => {
           this.showhide = "show-segment";
-          this.emailfocussignup.setFocus().then(() => {
+          this.emailfocussignup?.setFocus().then(() => {
             resolve(true);
           });
         }, this.focustime);
@@ -289,25 +288,25 @@ export class SignPage implements OnInit {
 
   Signin() {
     this.isInProgress = true;
-    this.error = null;
-    this.success_str = null;
+    this.error = "";
+    this.success_str = "";
     const r = this.isRememberMe
       ? this.storage.set("LSREMEMBERME", this.isRememberMe).then(() => {
-        this.storage.set("LSUSEREMAIL", this.signinForm.get("email").value).then(() => { });
+        this.storage.set("LSUSEREMAIL", this.signinForm?.get("email")?.value).then(() => { });
       })
       : this.storage.set("LSUSEREMAIL", null).then(() => {
         this.storage.set("LSREMEMBERME", null).then(() => { });
       });
-    if (this.signinForm.get("email").valid && this.signinForm.get("password").valid) {
+    if (this.signinForm?.get("email")?.valid && this.signinForm?.get("password")?.valid) {
       this.auth.Signin({
-        email: this.signinForm.get("email").value,
-        password: this.signinForm.get("password").value
+        email: this.signinForm.get("email")?.value,
+        password: this.signinForm.get("password")?.value
       }).then(() => {
-        this.storage.set("LSREMEMBERME", this.signinForm.get("isRememberMe").value).then(() => {
-          this.storage.set("LSUSEREMAIL", this.signinForm.get("email").value).then(() => {
+        this.storage.set("LSREMEMBERME", this.signinForm?.get("isRememberMe")?.value).then(() => {
+          this.storage.set("LSUSEREMAIL", this.signinForm?.get("email")?.value).then(() => {
             this.doSetFormType("tfac").then(() => {
               setTimeout(() => {
-                this.tfacfocus.setFocus().then(() => {
+                this.tfacfocus?.setFocus().then(() => {
                   this.isInProgress = false;
                 });
               }, this.focustime);
@@ -318,12 +317,12 @@ export class SignPage implements OnInit {
         });
       }).catch((error: any) => {
         this.isInProgress = false;
-        this.signinForm.controls["password"].setValue(null);
+        this.signinForm?.controls["password"].setValue(null);
         this.error = error;
       });
     } else {
       this.isInProgress = false;
-      this.signinForm.controls["password"].setValue(null);
+      this.signinForm?.controls["password"].setValue(null);
       this.error = "invalid credentials";
     }
 
@@ -331,12 +330,12 @@ export class SignPage implements OnInit {
 
   TFAC() {
     this.isInProgress = true;
-    this.error = null;
-    this.success_str = null;
+    this.error = "";
+    this.success_str = "";
     this.auth.TFAC({
-      email: this.signinForm.get("email").value,
-      password: this.signinForm.get("password").value,
-      tfac: this.TFACForm.get("tfac").value
+      email: this.signinForm?.get("email")?.value,
+      password: this.signinForm?.get("password")?.value,
+      tfac: this.TFACForm.get("tfac")?.value
     }).then(() => {
       this.doDismissModal();
       this.isInProgress = false;
@@ -350,12 +349,12 @@ export class SignPage implements OnInit {
 
   Reset() {
     this.isInProgress = true;
-    this.error = null;
-    this.success_str = null;
+    this.error = "";
+    this.success_str = "";
     this.auth.Reset({
       email: this.email,
-      password: this.resetForm.get("password").value,
-      tfac: this.resetForm.get("tfac").value
+      password: this.resetForm.get("password")?.value,
+      tfac: this.resetForm.get("tfac")?.value
     }).then(() => {
       this.isInProgress = false;
       this.success_str = "password was reset successfully";
@@ -373,15 +372,15 @@ export class SignPage implements OnInit {
       console.error("*** form is not valid");
     } else {
       this.isInProgress = true;
-      this.error = null;
-      this.success_str = null;
+      this.error = "";
+      this.success_str = "";
       this.auth.Forgot({
-        email: this.forgotForm.get("email").value
+        email: this.forgotForm.get("email")?.value
       }).then(() => {
-        this.email = this.forgotForm.get("email").value
+        this.email = this.forgotForm.get("email")?.value
         this.doSetFormType("reset").then(() => {
           setTimeout(() => {
-            this.tfacfocus.setFocus().then(() => {
+            this.tfacfocus?.setFocus().then(() => {
               this.isInProgress = false;
             });
           }, this.focustime);
@@ -397,17 +396,17 @@ export class SignPage implements OnInit {
   }
 
   Signup() {
-    if (this.signupForm.get("email").valid && this.signupForm.get("name").valid && this.signupForm.get("password").valid && this.signupForm.get("passcode").valid) {
+    if (this.signupForm.get("email")?.valid && this.signupForm.get("name")?.valid && this.signupForm.get("password")?.valid && this.signupForm.get("passcode")?.valid) {
       this.isInProgress = true;
-      this.error = null;
-      this.success_str = null;
+      this.error = "";
+      this.success_str = "";
       this.auth.Signup({
-        name: this.signupForm.get("name").value,
-        email: this.signupForm.get("email").value,
-        password: this.signupForm.get("password").value,
-        passcode: this.signupForm.get("passcode").value
+        name: this.signupForm.get("name")?.value,
+        email: this.signupForm.get("email")?.value,
+        password: this.signupForm.get("password")?.value,
+        passcode: this.signupForm.get("passcode")?.value
       }).then((res: any) => {
-        this.storage.set("LSUSEREMAIL", this.signupForm.get("email").value).then(() => {
+        this.storage.set("LSUSEREMAIL", this.signupForm.get("email")?.value).then(() => {
           this.isInProgress = false;
           this.successMessage = res.msg;
           this.formtype = "success";
@@ -417,7 +416,7 @@ export class SignPage implements OnInit {
         });
       }).catch((error: any) => {
         this.isInProgress = false;
-        this.signinForm.controls["password"].setValue(null);
+        this.signinForm?.controls["password"].setValue(null);
         this.error = error;
       });
     }
