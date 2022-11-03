@@ -3,7 +3,7 @@ WORKDIR /app
 RUN npm install -g npm
 RUN npm install -g @ionic/cli
 COPY package*.json /app/
-RUN npm install --force
+RUN npm install
 COPY . /app/
 RUN ionic build --prod
 FROM nginx:alpine
