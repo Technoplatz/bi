@@ -11,66 +11,69 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a multi-container data application platform designed to build a new system to manage a mission critical business process without developing software from scratch.
+Technoplatz BI is a low-code multi-container data application and sharing platform designed to manage a mission critical business process without the need to develop software from scratch.
 
-- Self-service data management
-- Internal data application
-- Interactive data sharing with business partners
-- Data visualization
-- API
+It is designed for situations where business partners are an integral part of the processes in terms of the data they offer and the actions they need to take. For this reason, it provides pragmatic solutions especially for the following topics by addressing the issues in an [**Inner-Cycle**](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
 
-### Self-service data management
+- Building a new system for processes managed on spreadsheets or legacy software.
+- Cases where electronic announcements or data transfers are required for business partners to take the necessary actions.
+- Automation and integration requirements via a built-in [API](#api).
+- Descriptive statistics and data visualization requirements.
+
+The solution can be gathered under the three main topics;
+
+- [Self Service Data Management](#self-service-data-management)
+- [Internal Data Application & API](#internal-data-application--api)
+- [Bi-directional Data Sharing](#bi-directional-data-sharing)
+
+### Self-Service Data Management
 
 Technoplatz BI is an excellent choice for those who want to build a new system to manage a data-driven business process. With professional-grade features you can easily handle critical and intense tasks without needing to be a data expert;
 
-- JSON based flexible structure
-- Unlimited data collections
-- Unique, indexed and mandatory fields
+- Creating data collections and fields
+- Unique, indexed and mandatory field definitions
 - Parent-child relations
+
+Technoplatz BI MongoDB
+
+- JSON based flexible structure
 - Three nodes replication
 - Transactions support
 - Scalability
 - Automated backups
 
-### Internal data application
+### Internal Data Application & API
 
 It is a web-based application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
-Main Features
+App Features:
 
-- Create and manage data collections
 - Data import from Excel files
 - Basic data operations (CRUD)
 - Data Actions
 - Data Visualization
-- Annoucements
+- Data Annoucements
 - Live Data Connectors
-
-Administration
-
-- Collection and field management
-- Inner-cycle management
-- Action management
-- Firewall and permission management
-- Backup and restore
-- API access management
+- Administration
 - Log tracking
 
-### Interactive data sharing with business partners
+API Features:
 
-### API
+- asdfasdf
 
-- skjhfglsdhfglskdfg
+### Bi-directional Data Sharing
+
+It enables the processes to be completed end-to-end by interactively sharing data with an [inner-cycle](#) of customers, suppliers, distributors, service providers and other company departments.
 
 ## Highlights
 
-- Self service. Your data is now under your control, completely.
-- Platform independent. Containerized. Runs on any cloud, on-premises or PCs.
-- Flexible. It has the sweet smell of JSON data structure.
-- Scalable. Starts small, grows when needed.
-- Open source. Everyone can review codes, learn from them a lot.
-- Data sciences. Accessibility from other BI tools, AI processes and Excel.
-- ISO27001 Support. Empowers the certification process, not a stopper.
+- **Self service.** Your data is now under your control, completely.
+- **Platform independent.** Containerized. Runs on any cloud, on-premises or PCs.
+- **Flexible.** It has the sweet smell of JSON data structure.
+- **Scalable.** Starts small, grows when needed.
+- **Open source.** Everyone can review codes, learn from them a lot.
+- **Data sciences.** Accessibility from other BI tools, AI processes and Excel.
+- **ISO27001 Support.** Empowers the certification process, not a stopper.
 
 ## Installation
 
