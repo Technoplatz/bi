@@ -93,20 +93,60 @@
                         <ion-icon name="expand-outline"></ion-icon><br />
                         <span>{{ 'Resize' | translate }}<br />{{ 'Charts' | translate }}</span>
                       </div>
+                      <div class="data-sq-button" (click)="goSection('admin', '_log', 'Logs')">
+                        <ion-icon name="telescope-outline"></ion-icon><br />
+                        <span>{{ 'Show' | translate }}<br />{{ 'Logs' | translate }}</span>
+                      </div>
+                      <div *ngIf="!template_showed" class="data-sq-button" (click)="doTemplateShow()">
+                        <ion-icon name="albums-outline"></ion-icon><br />
+                        <span>{{ 'Show' | translate }}<br />{{ 'Templates' | translate }}</span>
+                      </div>
+                      <div *ngIf="template_showed" class="data-sq-button" (click)="doTemplateShow()">
+                        <ion-icon name="albums-outline"></ion-icon><br />
+                        <span>{{ 'Hide' | translate }}<br />{{ 'Templates' | translate }}</span>
+                      </div>
                     </ion-col>
                   </ion-row>
                 </ion-grid>
 
                 <!-- TEMPLATES -->
-                <div *ngIf="submenu=='templates'" class="templates">
-                  <div *ngIf="templates" class="banner-container ion-padding-bottom">
-                    <div *ngFor="let item of templates; let t = index" class="banner clicked-item"
-                      (click)="doInstallTemplate(item, t)">
-                      <h4>{{ item.title }}</h4>
-                      {{ item.description }}
-                      <ion-icon [name]="item.icon" class="banner-icon"></ion-icon>
-                    </div>
-                  </div>
+                <div *ngIf="template_showed" class="ion-margin-bottom">
+                  <!-- <h4>{{ 'Templates' | translate }}</h4> -->
+                  <ion-grid *ngIf="templates.length > 0; else notemplates" class="ion-no-padding data-grid">
+                    <ion-row class="text-bold">
+                      <ion-col size="3">
+                        <span class="column-title">{{ 'Template Name' | translate }}</span>
+                      </ion-col>
+                      <ion-col size="2">
+                        <span class="column-title">{{ 'By' }} / {{ 'Collection' }}</span>
+                      </ion-col>
+                      <ion-col size="6">
+                        <span class="column-title">{{ 'Description' }}</span>
+                      </ion-col>
+                    </ion-row>
+                    <ion-row *ngFor="let item of templates; let t = index" (click)="doInstallTemplate(item, t)">
+                      <ion-col size="3">
+                        <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ 'INSTALL' }}<br />
+                        <div class="data-title">{{ item.name }}</div>
+                      </ion-col>
+                      <ion-col size="2">
+                        {{ item.by }}
+                        <div class="data-title">
+                          {{ item.collection }}
+                        </div>
+                      </ion-col>
+                      <ion-col size="6" class="ion-text-wrap">
+                        {{ item.description }}
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                  <ng-template #notemplates>
+                    <ion-text class="pe">{{ 'No templates found' | translate }}.</ion-text>
+                  </ng-template>
+                  <ion-button size="small" class="notfound-button" (click)="doTemplateShow()">
+                    <ion-icon name="eye-off-outline"></ion-icon>
+                    {{ 'Hide Templates' | translate }}
+                  </ion-button>
                 </div>
 
                 <!-- VIEW SECTION -->
@@ -185,10 +225,16 @@
                       </ion-col>
                       <ion-col size="2">
                         {{ item.vie_collection_id }}
-                        <div *ngIf="item.chart && item.chart.count" class="data-title">{{ item.chart.count }} <span
-                            *ngIf="item.chart.count > 1">{{ 'rows' |
+                        <div *ngIf="item.chart && item.chart.count; else noviewrecords" class="data-title">{{
+                          item.chart.count }} <span *ngIf="item.chart.count > 1">{{ 'rows' |
                             translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
-                            }}</span></div>
+                            }}</span>
+                        </div>
+                        <ng-template #noviewrecords>
+                          <div class="data-title">{{ 'No matching records' |
+                            translate }}
+                          </div>
+                        </ng-template>
                       </ion-col>
                       <ion-col size="6">
                         {{ item._tags.join(' ') }}
@@ -235,12 +281,9 @@
                   </ion-row>
                 </ion-grid>
                 <ng-template #noannouncement>
-                  <ion-text class="pe">{{ 'No Announcement found' | translate }}.</ion-text>
+                  <ion-text class="pe">{{ 'No announcement found' | translate }}.</ion-text>
                 </ng-template>
-                <br />
-                <ion-button size="small" href="/console/admin/_log" class="notfound-button">
-                  {{ 'Show Logs' | translate }}
-                </ion-button>
+                <br /><br /><br />
               </div>
 
               <!-- CRUD -->

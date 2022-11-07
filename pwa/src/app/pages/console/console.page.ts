@@ -39,6 +39,7 @@ export class ConsolePage implements OnInit {
   public id: string = "";
   public sortstr: any;
   public ok: boolean = false;
+  public template_showed: boolean = false;
   public reconfig: boolean = false;
   public filter: any = [];
   public saved_filter: string = "";
@@ -1227,6 +1228,10 @@ export class ConsolePage implements OnInit {
         this.misc.doMessage(error, "error");
       });
     }
+  }
+
+  doTemplateShow() {
+    this.template_showed = !this.template_showed;
   }
 
   doStartSearch(e: any) {

@@ -11,109 +11,81 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a low-code multi-container data application and sharing platform designed to manage a mission critical business process without the need to develop software from scratch.
+Technoplatz BI is a low-code multi-container [Data Application](#data-application) and [API](#api) platform designed to manage a mission critical business process without the need to develop software from scratch.
 
-It is designed for situations where business partners are an integral part of the processes in terms of the data they offer and the actions they need to take. For this reason, it provides pragmatic solutions especially for the following topics by addressing the issues in an [**Inner-Cycle**](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
+It is also designed for situation where business partners are the integral part of a process in terms of the data source and the actions they need to take. For this reason, it provides pragmatic solutions especially for the following requirements by addressing the issues in the [Inner-Cycle](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
 
-- Building a new system for processes managed on spreadsheets or legacy software.
-- Cases where electronic announcements or data transfers are required for business partners to take the necessary actions.
-- Automation and integration requirements via a built-in [API](#api).
-- Descriptive statistics and data visualization requirements.
+### Data Application
+It is a progressive web application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
-The solution can be gathered under the three main topics;
+- **Self Service Administration.** Data Collections, Users, firewall and access management.
+- **Basic Data Operations and Actions (CRUD+).** Create, read, update and delete records, advanced search. Import data from Excel Files.
+- **Data Announcements.** Make data request to business partners and get responses.
+- **Process Management.** Defining automated tasks.
+- **Statistics and Data Visualization.** Descriptive statistics and chart definitions.
+- **Log Tracking**
 
-- [Self Service Data Management](#self-service-data-management)
-- [Internal Data Application & API](#internal-data-application--api)
-- [Bi-directional Data Sharing](#bi-directional-data-sharing)
+### API
+- **Internal and External Functions.** Core modules and remote data access.
+- **CronJobs.** Runnning automations tasks.
+- **BI-Directional Data Sharing.** Access shared views from external sources. Live data connectors.
 
-### Self-Service Data Management
+## Core Technologies
 
-Technoplatz BI is an excellent choice for those who want to build a new system to manage a data-driven business process. With professional-grade features you can easily handle critical and intense tasks without needing to be a data expert;
+The flexibility of business data meets the power of the multi-container platform.
 
-- Creating data collections and fields
-- Unique, indexed and mandatory field definitions
-- Parent-child relations
-
-Technoplatz BI MongoDB
-
-- JSON based flexible structure
-- Three nodes replication
-- Transactions support
-- Scalability
-- Automated backups
-
-### Internal Data Application & API
-
-It is a web-based application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
-
-App Features:
-
-- Data import from Excel files
-- Basic data operations (CRUD)
-- Data Actions
-- Data Visualization
-- Data Annoucements
-- Live Data Connectors
-- Administration
-- Log tracking
-
-API Features:
-
-- asdfasdf
-
-### Bi-directional Data Sharing
-
-It enables the processes to be completed end-to-end by interactively sharing data with an [inner-cycle](#) of customers, suppliers, distributors, service providers and other company departments.
+- **Docker Compose.** A powerful tool that was developed to help define and share 
+multi-container applications.
+- **Pandas.** A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.
+- **Ionic.** A platform and framework for building client applications using HTML and Microsoft TypeScript.
+- **MongoDB.** A document database used to build highly available and scalable internet applications. With its flexible schema approach, replication and transaction support it's popular with development teams using agile methodologies.
+- **Github.** An open source and distributed version control system designed to handle everything from small to very large projects with speed and efficiency.
 
 ## Highlights
 
-- **Self service.** Your data is now under your control, completely.
-- **Platform independent.** Containerized. Runs on any cloud, on-premises or PCs.
+- **Self service.** Your data is now totally under your control.
+- **Platform independent.** Runs on the cloud, on-premises or PCs.
 - **Flexible.** It has the sweet smell of JSON data structure.
-- **Scalable.** Starts small, grows when needed.
-- **Open source.** Everyone can review codes, learn from them a lot.
-- **Data sciences.** Accessibility from other BI tools, AI processes and Excel.
+- **Scalable.** Starts small and grows as needed.
+- **Open source.** Everyone can review codes and learn from them a lot.
+- **Data Sciences Ready.** Accessible from other BI tools and Excel.
 - **ISO27001 Support.** Empowers the certification process, not a stopper.
 
 ## Installation
 
-There are four steps you need to complete to start using BI. In order to run the commands you must have [GiT](https://git-scm.com) installed on your computer and also have a certain level of experience with Terminal.
+The installation of the system consists of three steps that must follow each other. In order to perform these steps [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience on Terminal is required.
 
-### Step 1
-
-#### Setting up a Docker Platform
-
-Technoplatz BI runs on the Docker which is an open platform for developing, shipping, and running applications. You can install it on your computer for free or buy a managed service from any of the leading providers. The links below will help you about how to establish a Docker environment;
+#### Choosing a Docker Environment
+Technoplatz BI runs on the Docker which is an open platform for developing, shipping, and running applications. You can buy a hosted system from the leading cloud providers or install Docker Desktop on your computer for free by following the instructions at the links below;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
-After the installation is complete, perform the recent updates and reboot the platform. If you need administrator rights, add `sudo` to the beginning of the commands;
+Connect to the platform via SSH and perform the recent OS updates.
 
 ```bash
 apt update && apt upgrade -y
 ```
+
+Reboot the platform immediately.
+
 ```bash
 reboot
 ```
 
-### Step 2
-#### Cloning the Official Repository
-The system uses Docker Compose technology to load, start, restart or stop services as well as the installation of required components. Download the official BI repository from Github;
+Reconnect to the platform and clone the official BI repository from Github.
 
 ```bash
 git clone https://github.com/technoplatz/bi.git
 ```
 
-Then go to `bi` folder which is going to be downloaded;
+Go to "bi" folder which is going to be created;
 
 ```bash
 cd bi
 ```
 
-### Step 3
-#### 3.1 Settings Required Parameters
-Before proceeding to the next steps, user parameters should be entered once. Please edit the `.env` file, replace the sample values with your own data and save the file.
+Edit the ".env" file, replace the sample values with your own data and save the file.
 
 ```bash
 # USER_PARAMETERS
@@ -135,38 +107,33 @@ FROM_NAME="Technoplatz BI"
 **COMPANY_NAME:** Enter legal business name of your organization.\
 **FROM_EMAIL:** This address appears as "From" in automatic e-mails sent by the system.\
 **FROM_NAME:** A name or nickname that appears next to the sender e-mail address.\
-**SENDGRID_API_KEY:** An API key used for sending automated emails over Sendgrid. Please find the detailed information about how to obtain an API key for Technoplatz BI. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key</sub>
 
-#### 3.2 Settings Secrets
-
-#### BI API Key
-Uygulamanın güvenliğini sağlayan anahtardır. İnternete açık olmayan lokal kullanım için anahtar belirlemeniz gerekmez, sistem jenerik bir anahtar kullanır ancak internet ortamında 24 karaktere kadar harf ve sayıdan oluşan karışık bir API anahtarı kullanılmalıdır. Güvenlik açısından [Production, Madde 10](#production) 'da belirtilen şekilde bir anahtar tanımlayarak aşağıdaki komut ile kaydediniz;
+Uygulamanın güvenliğini sağlayan API anahtarını set ediniz. Lokal kullanım için anahtar belirlemeniz gerekmez, sistem jenerik bir anahtar kullanır ancak internet ortamında 24 karaktere kadar harf ve sayıdan oluşan bir API anahtarı kullanılmalıdır. Güvenlik açısından [Production, Madde 10](#production) 'da belirtilen şekilde bir anahtar tanımlayarak aşağıdaki komut ile kaydediniz;
 
 ```bash
 echo -n "your-bi-apikey" > .secret-bi-apikey
 ```
 
-#### Database Password
+8. Set a database password
 
 ```bash
 echo -n "your-database-password" > .secret-mongo-password
 ```
 
-#### Sendgrid API key
+9. Sendgrid API key
 It is used for sending automated emails over the Twilio [Sendgrid](#https://sendgrid.com) which is one of the leading e-mail API service providers. Please find the detailed information about how to obtain an API key on Sendgrid. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key
+
 ```bash
 echo -n "your-sendgrid-apikey" > .secret-sendgrid-apikey
 ```
 
-### Step 4
-
-Start the containers by keeping them up and running at the background. This step may take 2-3 minutes depending on your bandwidth;
+10. Start the containers by keeping them up and running at the background. This step may take 2-3 minutes depending on your bandwidth;
 
 ```bash
 docker-compose up --detach --remove-orphans
 ```
 
-To open your first session go to the following address in your web browser, click the "Sign in" button and enter your email and password provided in the `.env` file.
+11. To open your first session go to the following address in your web browser, click the "Sign in" button and enter your email and password provided in the .env file.
 
 ```bash
 http://localhost:8100
@@ -224,8 +191,6 @@ The system is provided in two licensing options;
 
 - Community Edition
 - Enterprise Edition
-
-#### COMPARISON
 
 <div class="licensing">
 

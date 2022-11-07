@@ -70,21 +70,81 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-class Announcement():
+class Schedular():
     def __init__(self):
         self.db_ = Mongo().db_f()
         self.TZ = os.environ.get("TZ")
         self.API_SCHEDULE_INTERVAL_MIN = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 
-    def announce_view_f(self, view_, scope_):
+    def schedule_automation_f(self, doc_):
         try:
-            vie_title_ = view_["vie_title"] if "vie_title" in view_ else "view"
-            vie_id_ = view_["vie_id"] if "vie_id" in view_ else vie_title_
-            vie_attach_pivot_ = view_["vie_attach_pivot"] if "vie_attach_pivot" in view_ else False
-            vie_attach_csv_ = view_["vie_attach_csv"] if "vie_attach_csv" in view_ else False
-            vie_attach_excel_ = view_["vie_attach_excel"] if "vie_attach_excel" in view_ else False
-            user_id_ = view_["_created_by"] if "_created_by" in view_ else view_["_modified_by"] if "_modified_by" in view_ else None
-            vie_tags_ = view_["_tags"] if "_tags" in view_ else ["#Managers", "#Administrators"]
+            aut_id_ = doc_["aut_id"] if "aut_id" in doc_ else None
+            aut_collection_id_ = doc_["aut_collection_id"] if "aut_collection_id" in doc_ else None
+            aut_filter_ = doc_["aut_filter"] if "aut_filter" in doc_ and len(doc_["aut_filter"]) > 0 else None
+            aut_set_ = doc_["aut_set"] if "aut_set" in doc_ and len(doc_["aut_set"]) > 0 else None
+            aut_match_collection_id_ = doc_["aut_match_collection_id"] if "aut_match_collection_id" in doc_ else None
+            aut_match_fields_ = doc_["aut_match_fields"] if "aut_match_fields" in doc_ and len(doc_["aut_match_fields"]) > 0 else None
+            aut_matched_ = doc_["aut_matched"] if "aut_matched" in doc_ else False
+
+            print("*** schedule automation started", datetime.now(), aut_id_, aut_collection_id_, flush=True)
+
+            if not aut_id_ or not aut_collection_id_ or not aut_filter_ or not aut_set_:
+                raise APIError("automation info is missing")
+
+            if aut_matched_:
+                if not aut_match_fields_ or not aut_match_collection_id_:
+                    raise APIError("match info is missing")
+
+            collection_ = self.db_["_collection"].find_one({"col_id": aut_collection_id_})
+            if not collection_:
+                raise APIError(f"collection not found: {aut_collection_id_}")
+
+            structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+            if not structure_:
+                raise APIError(f"structure not found: {aut_collection_id_}")
+
+            get_filtered_ = Crud().get_filtered_f({
+                "match": aut_filter_,
+                "properties": structure_["properties"] if "properties" in structure_ else None
+            })
+
+            data_file_ = f"{aut_collection_id_}_data"
+            if data_file_ not in self.db_.list_collection_names():
+                raise APIError("collection data is missing")
+
+            find_ = self.db_[data_file_].find(get_filtered_)
+            set_ = {}
+            for set_ in aut_set_:
+                key_ = set_["key"]
+                value_ = set_["value"]
+                set_[key_] = value_
+            set_["_modified_by"] = "Automation"
+
+            for rec_ in find_:
+                id_ = rec_["_id"]
+                set_["_modified_at"] = datetime.now()
+                self.db_[data_file_].update_one({ "_id": id_}, { "$set": set_ })
+
+            res_ = {"result": True}
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
+    def schedule_view_f(self, doc_, scope_):
+        try:
+            vie_title_ = doc_["vie_title"] if "vie_title" in doc_ else "view"
+            vie_id_ = doc_["vie_id"] if "vie_id" in doc_ else vie_title_
+            vie_attach_pivot_ = doc_["vie_attach_pivot"] if "vie_attach_pivot" in doc_ else False
+            vie_attach_csv_ = doc_["vie_attach_csv"] if "vie_attach_csv" in doc_ else False
+            vie_attach_excel_ = doc_["vie_attach_excel"] if "vie_attach_excel" in doc_ else False
+            user_id_ = doc_["_created_by"] if "_created_by" in doc_ else doc_["_modified_by"] if "_modified_by" in doc_ else None
+            vie_tags_ = doc_["_tags"] if "_tags" in doc_ else ["#Managers", "#Administrators"]
 
             if not user_id_:
                 raise APIError(f"no owner user defined")
@@ -110,7 +170,7 @@ class Announcement():
 
             to_ = list(dict.fromkeys(to_))
 
-            _id = view_["_id"]
+            _id = doc_["_id"]
             view_to_pivot_f_ = Crud().view_to_dataset_f({
                 "id": _id,
                 "user": user_
@@ -184,7 +244,7 @@ class Announcement():
                 "object_id": vie_id_,
                 "document": {
                     "subscribers": ",".join(to_),
-                    "view": view_
+                    "view": doc_
                 }
             })
 
@@ -199,9 +259,30 @@ class Announcement():
         finally:
             return res_
 
-    def schedule_init_f(self, sched_):
+    def schedule_automations_f(self, sched_):
         try:
-            print("*** scheduler started", datetime.now(), flush=True)
+            print("*** schedule automations started", datetime.now(), flush=True)
+            find_ = self.db_["_automation"].find(filter={"aut_enabled": True}, sort=[("aut_priority", 1)])
+            for doc_ in find_:
+                aut_id_ = doc_["aut_id"]
+                if sched_.get_job(aut_id_):
+                    sched_.remove_job(aut_id_)
+                sched_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=self.TZ, replace_existing=True, args=[doc_])
+
+            res_ = {"result": True}
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
+    def schedule_views_f(self, sched_):
+        try:
+            print("*** schedule views started", datetime.now(), flush=True)
             view_find_ = self.db_["_view"].find({})
             for doc_ in view_find_:
                 vie_id_ = doc_["vie_id"]
@@ -219,7 +300,7 @@ class Announcement():
                     vie_sched_minutes_ = ",".join(vie_sched_minutes_c_)
                     vie_sched_hours_ = ",".join(vie_sched_hours_c_)
                     vie_sched_days_ = ",".join(doc_["vie_sched_days"]) if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0 else "mon"
-                    sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=self.TZ, replace_existing=True, args=[doc_, "live"])
+                    sched_.add_job(self.schedule_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=self.TZ, replace_existing=True, args=[doc_, "live"])
                     print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now(), flush=True)
 
             res_ = {"result": True}
@@ -237,12 +318,19 @@ class Announcement():
         try:
             sched_ = BackgroundScheduler(timezone=self.TZ, daemon=True)
             sched_.remove_all_jobs()
-            schedule_init_ = self.schedule_init_f(sched_)
-            if not schedule_init_["result"]:
-                raise APIError(schedule_init_["msg"])
 
-            # schedule init scheduler itself
-            sched_.add_job(self.schedule_init_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_init", timezone=self.TZ, replace_existing=True, args=[sched_])
+            # schedule automations initially
+            schedule_automations_f_ = self.schedule_automations_f(sched_)
+            if not schedule_automations_f_["result"]:
+                raise APIError(schedule_automations_f_["msg"])
+
+            # schedule views initially
+            schedule_views_f_ = self.schedule_views_f(sched_)
+            if not schedule_views_f_["result"]:
+                raise APIError(schedule_views_f_["msg"])
+
+            # reschedule views regularly
+            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_views", timezone=self.TZ, replace_existing=True, args=[sched_])
 
             # schedule database dumps
             API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
@@ -599,7 +687,7 @@ class Crud():
             data_ = json.loads(f_.read())
 
             if proc_ == "list":
-                data_ = [item_ for item_ in data_ if "enabled" in item_ and item_["enabled"] == True]
+                data_ = [item_ for item_ in data_]
                 data_.sort(key=operator.itemgetter("sort"), reverse=False)
 
             if proc_ == "install":
@@ -1252,7 +1340,7 @@ class Crud():
             if source_ not in ["internal", "external", "propsonly"]:
                 raise APIError("invalid source")
 
-            if _id is not None:
+            if _id not in [None, ""]:
                 view_ = self.db["_view"].find_one({"_id": ObjectId(_id)})
             else:
                 if vie_id_ is not None:
@@ -1493,9 +1581,9 @@ class Crud():
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
 
-            announce_view_f_ = Announcement().announce_view_f(view_, scope_)
-            if not announce_view_f_["result"]:
-                raise APIError(announce_view_f_["msg"])
+            schedule_view_f_ = Schedular().schedule_view_f(view_, scope_)
+            if not schedule_view_f_["result"]:
+                raise APIError(schedule_view_f_["msg"])
 
             res_ = {"result": True}
 
@@ -3512,6 +3600,8 @@ class RestAPI():
             if "X-Api-Key" not in request.headers:
                 raise APIError("invalid request")
 
+            # print("request.headers", request.headers, flush=True)
+
             origin_ = request.headers["Origin"].replace("https://", "").replace("http://", "").replace("/", "")
             origin_ = origin_.split(":")[0]
             DOMAIN_ = os.environ.get("DOMAIN")
@@ -5303,5 +5393,5 @@ def get_data_f(id):
 
 
 if __name__ == "__main__":
-    Announcement().main_f()
+    Schedular().main_f()
     app.run(host="0.0.0.0", port=80, debug=False)

@@ -45,12 +45,12 @@ export const environment = {
     { "id": "_field", "title": "Data Fields" },
     { "id": "_view", "title": "Views" },
     { "id": "_action", "title": "Actions" },
+    { "id": "_automation", "title": "Automation" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },
     { "id": "_token", "title": "API Tokens" },
     { "id": "_firewall", "title": "Firewall" },
-    { "id": "_backup", "title": "Backups" },
-    { "id": "_log", "title": "Log" }
+    { "id": "_backup", "title": "Backups" }
   ],
   charts: {
     colorScheme: {

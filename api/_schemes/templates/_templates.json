@@ -3,6 +3,7 @@
         "_id": "template-account",
         "name": "Accounts Template",
         "title": "Accounts",
+        "by": "Technoplatz",
         "description": "Sample collection includes basic business data fields about customers, suppliers and partners. It can be linked from the other collections via Account ID.",
         "collection": "accounts",
         "prefix": "acc",
@@ -11,13 +12,13 @@
         "actions": "accounts-actions.json",
         "views": "accounts-views.json",
         "sort": 10,
-        "enabled": true,
         "icon": "business-outline"
     },
     {
         "_id": "template-transactions",
         "name": "Transactions Template",
         "title": "Transactions",
+        "by": "Technoplatz",
         "description": "Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         "collection": "transactions",
         "prefix": "tra",
@@ -26,7 +27,6 @@
         "actions": "transactions-actions.json",
         "views": "transactions-views.json",
         "sort": 20,
-        "enabled": true,
         "icon": "qr-code-outline"
     }
 ]

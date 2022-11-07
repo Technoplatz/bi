@@ -86,5 +86,35 @@
         </ion-col>
       </ion-row>
     </ion-grid>
+    <ion-grid *ngIf="type=='matchfields'" class="kov-grid" fixed="true">
+      <ion-row>
+        <ion-col size="4">
+          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fieldname][i].key"
+            [ngModelOptions]="{standalone: true}" placeholder="{{ 'Remote Field' | translate }}">
+          </ion-input>
+        </ion-col>
+        <ion-col size="2">
+          <ion-select required="true" [(ngModel)]="data[fieldname][i].op" [ngModelOptions]="{standalone: true}"
+            mode="md" placeholder="{{ 'operator' | translate }}">
+            <ion-select-option *ngFor="let f of filterops" [value]="f.value">
+              {{ f.key | translate }}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col size="4.5">
+          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fieldname][i].value"
+            [ngModelOptions]="{standalone: true}" placeholder="{{ 'value' | translate }}">
+          </ion-input>
+        </ion-col>
+        <ion-col size="1.5" class="ion-no-padding ion-text-right">
+          <ion-button *ngIf="!field.manualAdd && i == data[fieldname].length - 1" fill="clear" size="default" (click)="doLineAdd(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="add-circle-outline"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="default" (click)="doLineRemove(i)" class="ion-no-padding ion-no-margin">
+            <ion-icon name="remove-circle-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ion-item>
 </ion-reorder-group>

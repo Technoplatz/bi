@@ -74,6 +74,8 @@ export class KovComponent implements OnInit {
         this.kovs = this.days_;
       } else if (this.field.subType === "tag") {
         this.kovs = this.tags_;
+      } else if (this.field.subType === "matchfields") {
+        this.type = "matchfields";
       }
     }
   }
@@ -82,7 +84,7 @@ export class KovComponent implements OnInit {
     if (i === -1 || !this.data[this.fieldname]) {
       this.data[this.fieldname] = [{ "key": null }];
     } else {
-      if (this.type === "keyopvalue") {
+      if (this.type === "keyopvalue" || this.type === "matchfields") {
         this.data[this.fieldname].push({
           key: null,
           op: null,
