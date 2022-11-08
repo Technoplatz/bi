@@ -217,10 +217,47 @@
                     "value"
                 ]
             },
-            "title": "Match Fields",
-            "description": "Match Fields",
+            "title": "Match Remote Fields",
+            "description": "Match Remote Fields",
             "subType": "matchfields",
-            "width": 150
+            "width": 160
+        },
+        "aut_set_remote": {
+            "bsonType": "array",
+            "minItems": 0,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "additionalProperties": false,
+            "kv": true,
+            "items": {
+                "bsonType": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "key": {
+                        "bsonType": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-z_]{1,64}$",
+                        "title": "Remote Field",
+                        "description": "Remote Field"
+                    },
+                    "value": {
+                        "bsonType": "string",
+                        "minLength": 0,
+                        "maxLength": 64,
+                        "title": "Remote Field Value",
+                        "description": "Remote Field Value"
+                    }
+                },
+                "required": [
+                    "key",
+                    "value"
+                ]
+            },
+            "title": "Set Remote Fields",
+            "description": "Set Remote Fields",
+            "subType": "setfields",
+            "width": 140
         },
         "aut_match_prefixes": {
             "bsonType": "array",

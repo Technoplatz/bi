@@ -36,6 +36,9 @@ export class KovComponent implements OnInit {
   private empty_ = [
     { "key": null }
   ]
+  private dual_ = [
+    { "key": null, "value": null }
+  ]
 
   // subTypes
   // - property
@@ -62,7 +65,7 @@ export class KovComponent implements OnInit {
     this.type = "key";
     if (this.field.subType) {
       if (this.field.subType === "keyvalue") {
-        this.type = "keyvalue";
+        this.type = this.field.subType;
         this.kovs = this.keylist;
       } else if (this.field.subType === "filter") {
         this.type = "keyopvalue";
@@ -78,10 +81,12 @@ export class KovComponent implements OnInit {
       } else if (this.field.subType === "tag") {
         this.kovs = this.tags_;
       } else if (this.field.subType === "matchfields") {
-        this.type = "matchfields";
+        this.type = this.field.subType;
       } else if (this.field.subType === "string") {
         this.kovs = this.empty_;
-        this.type = "key";
+      } else if (this.field.subType === "setfields") {
+        this.type = this.field.subType;
+        this.kovs = this.dual_;
       }
     }
   }
@@ -96,7 +101,7 @@ export class KovComponent implements OnInit {
           op: null,
           value: null
         });
-      } else if (this.type === "keyvalue") {
+      } else if (this.type === "keyvalue" || this.type === "setfields") {
         this.data[this.fieldname].push({
           key: null,
           value: null

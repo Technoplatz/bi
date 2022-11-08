@@ -30,7 +30,7 @@
     "fie_options": [
       "0-Open",
       "1-InProcess",
-      "2-Completed",
+      "2-Read",
       "3-Closed"
     ],
     "fie_sort": "unsorted"

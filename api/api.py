@@ -82,6 +82,7 @@ class Schedular():
             aut_collection_id_ = doc_["aut_collection_id"] if "aut_collection_id" in doc_ else None
             aut_filter_ = doc_["aut_filter"] if "aut_filter" in doc_ and len(doc_["aut_filter"]) > 0 else None
             aut_set_ = doc_["aut_set"] if "aut_set" in doc_ and len(doc_["aut_set"]) > 0 else None
+            aut_set_remote_ = doc_["aut_set_remote"] if "aut_set_remote" in doc_ and len(doc_["aut_set_remote"]) > 0 else None
             aut_match_collection_id_ = doc_["aut_match_collection_id"] if "aut_match_collection_id" in doc_ else None
             aut_match_fields_ = doc_["aut_match_fields"] if "aut_match_fields" in doc_ and len(doc_["aut_match_fields"]) > 0 else None
             aut_matched_ = doc_["aut_matched"] if "aut_matched" in doc_ else False
@@ -120,22 +121,36 @@ class Schedular():
                 remote_data_file_ = f"{aut_match_collection_id_}_data"
                 if remote_data_file_ not in self.db_.list_collection_names():
                     raise APIError("remote collection data is missing")
+                collection_ = self.db_["_collection"].find_one({"col_id": aut_match_collection_id_})
+                if not collection_:
+                    raise APIError(f"remote collection not found: {aut_match_collection_id_}")
+                remote_structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+                if not remote_structure_:
+                    raise APIError(f"remote structure not found: {aut_match_collection_id_}")
 
             find_ = self.db_[data_file_].find(get_filtered_)
             set_ = {}
-            for set_ in aut_set_:
-                key_ = set_["key"]
-                value_ = set_["value"]
-                set_[key_] = value_
+            set_remote_ = {}
+            if aut_set_:
+                for aut_set__ in aut_set_:
+                    key_ = aut_set__["key"]
+                    value_ = aut_set__["value"]
+                    set_[key_] = value_
+            if aut_set_remote_:
+                for aut_set_remote__ in aut_set_remote_:
+                    key_ = aut_set_remote__["key"]
+                    value_ = aut_set_remote__["value"]
+                    set_remote_[key_] = value_
 
-            set_["_modified_by"] = "Automation"
-            set_["_modified_at"] = datetime.now()
+            set_["_modified_by"] = set_remote_["_modified_by"] = "Automation"
+            set_["_modified_at"] = set_remote_["_modified_at"] = datetime.now()
 
             for rec_ in find_:
-                match_ = {}
+                match_ = []
                 matched_ = False
+                remoted_ = False
                 id_ = rec_["_id"]
-                if aut_matched_:
+                if aut_matched_ and remote_structure_:
                     for m_ in aut_match_fields_:
                         m_key_ = m_["key"]
                         m_op_ = m_["op"]
@@ -148,17 +163,27 @@ class Schedular():
                                     if m_value_.startswith(prefix_):
                                         m_value_ = m_value_[len(prefix_):]
                                         break
-                        match_[m_key_] = m_value_
-                    aggregate_ = self.db_[remote_data_file_].aggregate([{"$match": match_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
+                        match_.append({
+                            "key": m_key_,
+                            "op": m_op_,
+                            "value": m_value_
+                        })
+                    get_filtered_ = Crud().get_filtered_f({
+                        "match": match_,
+                        "properties": remote_structure_["properties"] if "properties" in remote_structure_ else None
+                    })
+                    aggregate_ = self.db_[remote_data_file_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
                     aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
                     if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
                         matched_ = True
+                        remoted_ = True
                 else:
                     matched_ = True
-                    match_["_id"] = id_
 
                 if matched_:
                     self.db_[data_file_].update_one({"_id": id_}, {"$set": set_})
+                    if remoted_:
+                        self.db_[remote_data_file_].update_many(get_filtered_, {"$set": set_remote_})
 
             res_ = {"result": True}
 
@@ -3375,7 +3400,10 @@ class Crud():
                 raise APIError("structure not found")
 
             if not match_:
-                match_ = []
+                if filter_ and len(filter_) > 0:
+                    match_ = filter_
+                else:
+                    match_ = []
 
             # combines view filter and user filter in view mode
             if view_ is not None:
@@ -3408,7 +3436,7 @@ class Crud():
                 "user": user_["email"] if user_ else None,
                 "document": {
                     "doc": doc_,
-                    "filter": filter_
+                    "match": match_
                 }
             })
             if not log_["result"]:
