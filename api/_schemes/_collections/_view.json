@@ -469,7 +469,7 @@
                 "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$"
             },
             "title": "Tags",
-            "description": "Tags",
+            "description": "Add a tag and Enter",
             "subType": "tag",
             "manualAdd": true,
             "width": 300

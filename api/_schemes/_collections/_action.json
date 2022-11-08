@@ -57,7 +57,7 @@
             "description": "Priority 0-999999",
             "minimum": 0,
             "maximum": 999999,
-            "default": 1000,
+            "default": 100,
             "width": 120
         },
         "act_filter": {
@@ -169,7 +169,7 @@
                 "pattern": "^[#@][a-zA-Z0-9]{0,64}$"
             },
             "title": "Tags",
-            "description": "Tags",
+            "description": "Add a tag and Enter",
             "subType": "tag",
             "manualAdd": true,
             "width": 300

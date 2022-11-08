@@ -262,9 +262,16 @@
                 "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß-]{1,64}$"
             },
             "title": "Enum Options",
-            "description": "Field select options",
+            "description": "Add an option and Enter",
             "manualAdd": true,
             "width": 200
+        },
+        "fie_barcoded": {
+            "bsonType": "bool",
+            "title": "Barcoded?",
+            "description": "Barcoded?",
+            "default": false,
+            "width": 120
         },
         "fie_sort": {
             "bsonType": "string",

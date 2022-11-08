@@ -221,6 +221,20 @@
             "description": "Match Fields",
             "subType": "matchfields",
             "width": 150
+        },
+        "aut_match_prefixes": {
+            "bsonType": "array",
+            "uniqueItems": true,
+            "minItems": 0,
+            "maxItems": 32,
+            "items": {
+                "bsonType": "string"
+            },
+            "title": "Prefixes",
+            "description": "Add a prefix and Enter",
+            "subType": "string",
+            "manualAdd": true,
+            "width": 180
         }
     },
     "required": [

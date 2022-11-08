@@ -34,7 +34,7 @@
         "name": "Serial Numbers",
         "title": "Serial Numbers",
         "by": "Technoplatz",
-        "description": "Serial Numbers Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "description": "This collection which contains serial numbers and other generic information of completed customer orders can be used in many areas such as distribution, delivery, inventory or barcode transactions.",
         "collection": "serials",
         "prefix": "ser",
         "data": "serials-data.json",

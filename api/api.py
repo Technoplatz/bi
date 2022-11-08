@@ -85,6 +85,7 @@ class Schedular():
             aut_match_collection_id_ = doc_["aut_match_collection_id"] if "aut_match_collection_id" in doc_ else None
             aut_match_fields_ = doc_["aut_match_fields"] if "aut_match_fields" in doc_ and len(doc_["aut_match_fields"]) > 0 else None
             aut_matched_ = doc_["aut_matched"] if "aut_matched" in doc_ else False
+            aut_match_prefixes_ = doc_["aut_match_prefixes"] if "aut_match_prefixes" in doc_ and len(doc_["aut_match_prefixes"]) > 0 else None
 
             print("*** schedule automation started", datetime.now(), aut_id_, aut_collection_id_, flush=True)
 
@@ -94,6 +95,8 @@ class Schedular():
             if aut_matched_:
                 if not aut_match_fields_ or not aut_match_collection_id_:
                     raise APIError("match info is missing")
+                if not len(aut_match_fields_) > 0:
+                    raise APIError("matched fields is missing")
 
             collection_ = self.db_["_collection"].find_one({"col_id": aut_collection_id_})
             if not collection_:
@@ -111,6 +114,12 @@ class Schedular():
             data_file_ = f"{aut_collection_id_}_data"
             if data_file_ not in self.db_.list_collection_names():
                 raise APIError("collection data is missing")
+            remote_data_file_ = None
+
+            if aut_matched_:
+                remote_data_file_ = f"{aut_match_collection_id_}_data"
+                if remote_data_file_ not in self.db_.list_collection_names():
+                    raise APIError("remote collection data is missing")
 
             find_ = self.db_[data_file_].find(get_filtered_)
             set_ = {}
@@ -118,12 +127,38 @@ class Schedular():
                 key_ = set_["key"]
                 value_ = set_["value"]
                 set_[key_] = value_
+
             set_["_modified_by"] = "Automation"
+            set_["_modified_at"] = datetime.now()
 
             for rec_ in find_:
+                match_ = {}
+                matched_ = False
                 id_ = rec_["_id"]
-                set_["_modified_at"] = datetime.now()
-                self.db_[data_file_].update_one({ "_id": id_}, { "$set": set_ })
+                if aut_matched_:
+                    for m_ in aut_match_fields_:
+                        m_key_ = m_["key"]
+                        m_op_ = m_["op"]
+                        m_value_ = m_["value"]
+                        if m_value_[:1] == "$":
+                            f_ = m_value_[1:]
+                            m_value_ = rec_[f_]
+                            if aut_match_prefixes_:
+                                for prefix_ in aut_match_prefixes_:
+                                    if m_value_.startswith(prefix_):
+                                        m_value_ = m_value_[len(prefix_):]
+                                        break
+                        match_[m_key_] = m_value_
+                    aggregate_ = self.db_[remote_data_file_].aggregate([{"$match": match_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
+                    aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
+                    if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
+                        matched_ = True
+                else:
+                    matched_ = True
+                    match_["_id"] = id_
+
+                if matched_:
+                    self.db_[data_file_].update_one({"_id": id_}, {"$set": set_})
 
             res_ = {"result": True}
 
@@ -355,7 +390,7 @@ class Misc():
         self.db = Mongo().db_f()
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
-                            "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd"]
+                            "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
 
     def exception_f(self, exc):
         print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
@@ -2595,6 +2630,8 @@ class Crud():
                 field_["title"] = doc_["fie_title"] if "fie_title" in doc_ else "Title"
                 field_["description"] = doc_["fie_description"] if "fie_description" in doc_ else doc_["fie_title"]
                 field_["width"] = doc_["fie_width"] if "fie_width" in doc_ else 110
+                if "fie_barcoded" in doc_ and doc_["fie_barcoded"] == True:
+                    field_["barcoded"] = True
 
                 if field_["bsonType"] in ["number", "int"]:
                     if "fie_minimum" in doc_ and doc_["fie_minimum"] is not None and doc_["fie_minimum"] > 0:

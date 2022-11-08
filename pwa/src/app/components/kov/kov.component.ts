@@ -33,6 +33,9 @@ export class KovComponent implements OnInit {
     { "key": "#Managers" },
     { "key": "#Administrators" }
   ]
+  private empty_ = [
+    { "key": null }
+  ]
 
   // subTypes
   // - property
@@ -76,6 +79,9 @@ export class KovComponent implements OnInit {
         this.kovs = this.tags_;
       } else if (this.field.subType === "matchfields") {
         this.type = "matchfields";
+      } else if (this.field.subType === "string") {
+        this.kovs = this.empty_;
+        this.type = "key";
       }
     }
   }
@@ -99,6 +105,8 @@ export class KovComponent implements OnInit {
         this.data[this.fieldname].push({
           key: null
         });
+      } else if (this.type === "other") {
+        this.data[this.fieldname].push(null);
       }
     }
   }
