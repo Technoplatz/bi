@@ -1,7 +1,7 @@
 [
     {
         "_id": "template-account",
-        "name": "Accounts Template",
+        "name": "Accounts",
         "title": "Accounts",
         "by": "Technoplatz",
         "description": "Sample collection includes basic business data fields about customers, suppliers and partners. It can be linked from the other collections via Account ID.",
@@ -16,7 +16,7 @@
     },
     {
         "_id": "template-transactions",
-        "name": "Transactions Template",
+        "name": "Transactions",
         "title": "Transactions",
         "by": "Technoplatz",
         "description": "Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
@@ -27,6 +27,36 @@
         "actions": "transactions-actions.json",
         "views": "transactions-views.json",
         "sort": 20,
+        "icon": "ticket-outline"
+    },
+    {
+        "_id": "template-serials",
+        "name": "Serial Numbers",
+        "title": "Serial Numbers",
+        "by": "Technoplatz",
+        "description": "Serial Numbers Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "collection": "serials",
+        "prefix": "ser",
+        "data": "serials-data.json",
+        "fields": "serials-fields.json",
+        "actions": "serials-actions.json",
+        "views": "serials-views.json",
+        "sort": 30,
         "icon": "qr-code-outline"
+    },
+    {
+        "_id": "template-barcode", 
+        "name": "Barcode Transactions",
+        "title": "Barcode Transactions",
+        "by": "Technoplatz",
+        "description": "Barcode Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "collection": "barcode",
+        "prefix": "bar",
+        "data": "barcode-data.json",
+        "fields": "barcode-fields.json",
+        "actions": "barcode-actions.json",
+        "views": "barcode-views.json",
+        "sort": 40,
+        "icon": "barcode-outline"
     }
 ]

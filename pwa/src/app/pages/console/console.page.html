@@ -113,30 +113,32 @@
                 <div *ngIf="template_showed" class="ion-margin-bottom">
                   <!-- <h4>{{ 'Templates' | translate }}</h4> -->
                   <ion-grid *ngIf="templates.length > 0; else notemplates" class="ion-no-padding data-grid">
-                    <ion-row class="text-bold">
+                    <ion-row>
                       <ion-col size="3">
                         <span class="column-title">{{ 'Template Name' | translate }}</span>
                       </ion-col>
-                      <ion-col size="2">
-                        <span class="column-title">{{ 'By' }} / {{ 'Collection' }}</span>
-                      </ion-col>
-                      <ion-col size="6">
+                      <ion-col size="4">
                         <span class="column-title">{{ 'Description' }}</span>
                       </ion-col>
-                    </ion-row>
-                    <ion-row *ngFor="let item of templates; let t = index" (click)="doInstallTemplate(item, t)">
-                      <ion-col size="3">
-                        <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ 'INSTALL' }}<br />
-                        <div class="data-title">{{ item.name }}</div>
+                      <ion-col size="1">
+                        &nbsp;
                       </ion-col>
-                      <ion-col size="2">
-                        {{ item.by }}
-                        <div class="data-title">
+                    </ion-row>
+                    <ion-row *ngFor="let item of templates; let t = index">
+                      <ion-col size="3" class="flex-container">
+                        <ion-icon [name]="item.icon" size="large" class="ion-margin-end"></ion-icon>
+                        <div>
+                          <div class="data-title temp">{{ item.name }}</div>
                           {{ item.collection }}
                         </div>
                       </ion-col>
-                      <ion-col size="6" class="ion-text-wrap">
+                      <ion-col size="4" class="ion-text-wrap">
                         {{ item.description }}
+                      </ion-col>
+                      <ion-col size="1">
+                        <ion-button size="small" size="small" (click)="doInstallTemplate(item, t)">
+                          {{ 'Install' | translate }}
+                        </ion-button>
                       </ion-col>
                     </ion-row>
                   </ion-grid>
@@ -201,6 +203,7 @@
                       </div>
                     </div>
                   </div>
+
                   <!-- SHARED VIEWS -->
                   <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search views' }}"
                     animated="true" class="ion-no-padding ion-no-margin brz-searchbar"
@@ -488,7 +491,7 @@
                     <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
                       [style]="'min-width: ' + item.value.width + 'px !important;'"
                       [class]="searched && searched[item.key] && searched[item.key].f ? 'filtered' : ''">
-                      <div (click)="doSetSearch(item.key)">
+                      <div (click)="doSetSearch(item.key)" class="clicked-item">
                         <span class="column-title">{{ item.value.title }}<br />
                         </span>
                         {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
@@ -567,7 +570,7 @@
                   </ion-row>
 
                   <!-- CRUD LIST -->
-                  <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap">
+                  <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item">
                     <ion-col class="ion-text-center check-column">
                       <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                         (ionChange)="SetSelectData(i,$event)" mode="md">
@@ -812,7 +815,7 @@
                   <h4>{{ 'Theme' | translate }}</h4>
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap">
-                      <div class="theme-button-container">
+                      <div class="flex-container">
                         <div *ngFor="let item of themes" size="default" [style.background-color]="item.color"
                           class="theme-button" (click)="doTheme(item)">
                           <p>{{ item.name }}</p>
@@ -858,7 +861,7 @@
                   <ion-item *ngFor="let item of actions; let ac = index" class="ion-no-padding clicked-item"
                     (click)="doAction(ac)">
                     <ion-icon name="play-circle-outline" color="primary" size="large"></ion-icon>
-                    <ion-label class="ion-text-wrap">
+                    <ion-label class="ion-text-wrap ion-padding-end">
                       <strong>{{ item.title }}</strong><br />
                       {{ item.description }}
                     </ion-label>

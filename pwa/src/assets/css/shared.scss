@@ -8,7 +8,7 @@
   border: none !important;
 }
 
-.theme-button-container {
+.flex-container {
   display: flex;
   flex-wrap: nowrap;
 }
@@ -318,6 +318,10 @@ ion-alert .alert-radio-group {
   font-weight: 600;
   color: var(--ion-color-primary);
   text-transform: capitalize;
+}
+
+.data-title.temp {
+  padding-top: 0px !important;
 }
 
 .actions-container ion-button[disabled] {
@@ -1562,7 +1566,6 @@ ion-checkbox {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  cursor: pointer;
 }
 
 .data-grid ion-row ion-col:last-child {
@@ -1574,14 +1577,9 @@ ion-checkbox {
   min-width: 30px !important;
 }
 
-/* .data-grid ion-row:hover {
-  background-color: var(--ion-color-light);
-} */
-
 .data-grid ion-row:first-child {
   max-height: 49px;
 }
-
 
 .data-grid ion-row:first-child ion-col {
   font-weight: 600;
@@ -1589,13 +1587,6 @@ ion-checkbox {
   border-top: 1px solid var(--ion-color-light);
   border-bottom: 2px solid var(--ion-color-dark);
 }
-
-/*
-.data-grid ion-row:last-child ion-col {
-  font-weight: 600;
-  border-bottom: none !important;
-}
-*/
 
 .data-grid ion-row:first-child:hover,
 .data-grid ion-row:last-child:hover {
