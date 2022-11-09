@@ -43,17 +43,17 @@ Track updates
 
 The flexibility of business data meets the power of the multi-container platform.
 
-- [**Docker Compose**](#)\
+- <span style="font-weight:500; color: blue">Docker Compose</span>\
 A powerful tool that was developed to help define and share multi-container applications.
-- [**MongoDB**](#)\
+- <span style="font-weight:500; color: blue">MongoDB</span>\
 A document database used to build highly available and scalable internet applications. With its flexible schema approach, replication and transaction support it's popular with development teams using agile methodologies.
-- [**Python Programming Language**](#)\
+- <span style="font-weight:500; color: blue">Python Programming Language</span>\
 Python is a high-level programming language which supports multiple programming paradigms including structured, object-oriented and functional programming.
-- [**Pandas Library**](#)\
+- <span style="font-weight:500; color: blue">Pandas Library</span>\
 A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.
-- [**Ionic Angular TS**](#)\
+- <span style="font-weight:500; color: blue">Ionic Angular TS</span>\
 A platform and framework for building client applications using HTML and Microsoft TypeScript.
-- [**GitHub**](#)\
+- <span style="font-weight:500; color: blue">Github</span>\
 An open source and distributed version control system designed to handle everything from small to very large projects with speed and efficiency.
 
 ## Highlights
