@@ -4,6 +4,7 @@
 
 - [What is Technoplatz BI](#what-is-technoplatz-bi)
 - [Highlights](#highlights)
+- [Technologies](#technologies)
 - [Installation](#installation)
 - [Management](#management)
 - [Licensing Options](#licensing-options)
@@ -32,7 +33,7 @@ It is a progressive web application that contains key functions to help complete
 - Log Tracking\
 <sup>Track updates</sup>
 
-### API
+### Application Programming Interface (API) 
 
 - Internal and External Functions\
 <sup>Core modules and remote data access.</sup>
@@ -41,22 +42,22 @@ It is a progressive web application that contains key functions to help complete
 - BI-Directional Data Sharing\
 <sup>Access shared views from external sources. Live data connectors.</sup>
 
-## Core Technologies
+## Technologies
 
-The flexibility of business data meets the power of the multi-container platform.
+Technoplatz BI is built on open source information technologies with proven power and reliability. This approach provides sustainability and significant cost advantages in the management of critical business processes.
 
-- Docker Compose\
+- [Docker Compose](#https://docs.docker.com/compose/)\
 <sup>A tool developed to help define and share multi-container applications.</sup>
-- MongoDB\
+- [MongoDB](#https://www.mongodb.com)\
 <sup>A document database used to build highly available and scalable internet applications.</sup>
-- Python Programming Language\
-<sup>A high-level language which supports multiple programming paradigms.</sup>
-- Pandas Library\
-<sup>An open source data analysis and manipulation tool built on top of the Python.</sup>
-- Ionic Angular TS\
-<sup>A framework for building client applications using HTML and TypeScript.</sup>
-- Github\
-<sup>The leading version control system designed to handle everything.</sup>
+- [Python](#https://www.python.org)\
+<sup>A high-level programming language supports multiple paradigms.</sup>
+- [Pandas Library](#https://pandas.pydata.org)\
+<sup>An open source data analysis and manipulation tool built on top of the Python language.</sup>
+- [Ionic Angular TS](#https://ionicframework.com)\
+<sup>A framework for building cross-platform client applications by using TypeScript.</sup>
+- [GitHub](#https://github.com)\
+<sup>The leading version control system designed to handle CI/CD.</sup>
 
 ## Highlights
 
