@@ -88,8 +88,6 @@ class Schedular():
             aut_matched_ = doc_["aut_matched"] if "aut_matched" in doc_ else False
             aut_match_prefixes_ = doc_["aut_match_prefixes"] if "aut_match_prefixes" in doc_ and len(doc_["aut_match_prefixes"]) > 0 else None
 
-            print("*** schedule automation started", datetime.now(), aut_id_, aut_collection_id_, flush=True)
-
             if not aut_id_ or not aut_collection_id_ or not aut_filter_ or not aut_set_:
                 raise APIError("automation info is missing")
 
@@ -324,7 +322,7 @@ class Schedular():
 
     def schedule_automations_f(self, sched_):
         try:
-            print("*** schedule automations started", datetime.now(), flush=True)
+            print("*** schedule automations restarted", datetime.now(), flush=True)
             find_ = self.db_["_automation"].find(filter={"aut_enabled": True}, sort=[("aut_priority", 1)])
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
@@ -345,7 +343,7 @@ class Schedular():
 
     def schedule_views_f(self, sched_):
         try:
-            print("*** schedule views started", datetime.now(), flush=True)
+            print("*** schedule views restarted", datetime.now(), flush=True)
             view_find_ = self.db_["_view"].find({})
             for doc_ in view_find_:
                 vie_id_ = doc_["vie_id"]

@@ -18,38 +18,58 @@ It is also designed for situation where business partners are the integral part 
 ### Data Application
 It is a progressive web application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
-- **Self Service Administration.** Data Collections, Users, firewall and access management.
-- **Basic Data Operations and Actions (CRUD+).** Create, read, update and delete records, advanced search. Import data from Excel Files.
-- **Data Announcements.** Make data request to business partners and get responses.
-- **Process Management.** Defining automated tasks.
-- **Statistics and Data Visualization.** Descriptive statistics and chart definitions.
-- **Log Tracking**
+- Self Service Administration\
+<sup>Data Collections, Users, firewall and access management.</sup>
+- Basic Data Operations and Actions (CRUD+)\
+<sup>Create, read, update and delete records, advanced search. Import data from Excel Files.</sup>
+- Data Announcements\
+<sup>Make data request to business partners and get responses.</sup>
+- Process Management\
+<sup>Defining automated tasks.</sup>
+- Statistics and Data Visualization\
+<sup>Descriptive statistics and chart definitions.</sup>
+- Log Tracking\
+<sup>Track updates</sup>
 
 ### API
-- **Internal and External Functions.** Core modules and remote data access.
-- **CronJobs.** Runnning automations tasks.
-- **BI-Directional Data Sharing.** Access shared views from external sources. Live data connectors.
+- Internal and External Functions\
+<sup>Core modules and remote data access.</sup>
+- CronJobs\
+<sup>Runnning automations tasks.</sup>
+- BI-Directional Data Sharing\
+<sup>Access shared views from external sources. Live data connectors.</sup>
 
 ## Core Technologies
 
 The flexibility of business data meets the power of the multi-container platform.
 
-- **Docker Compose.** A powerful tool that was developed to help define and share 
-multi-container applications.
-- **Pandas.** A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.
-- **Ionic.** A platform and framework for building client applications using HTML and Microsoft TypeScript.
-- **MongoDB.** A document database used to build highly available and scalable internet applications. With its flexible schema approach, replication and transaction support it's popular with development teams using agile methodologies.
-- **Github.** An open source and distributed version control system designed to handle everything from small to very large projects with speed and efficiency.
+- Docker Compose\
+<sup>A powerful tool that was developed to help define and share multi-container applications.</sup>
+- Pandas\
+<sup>A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.</sup>
+- Ionic\
+<sup>A platform and framework for building client applications using HTML and Microsoft TypeScript.</sup>
+- MongoDB\
+<sup>A document database used to build highly available and scalable internet applications. With its flexible schema approach, replication and transaction support it's popular with development teams using agile methodologies.</sup>
+- Github\
+<sup>An open source and distributed version control system designed to handle everything from small to very large projects with speed and efficiency.</sup>
 
 ## Highlights
 
-- **Self service.** Your data is now totally under your control.
-- **Platform independent.** Runs on the cloud, on-premises or PCs.
-- **Flexible.** It has the sweet smell of JSON data structure.
-- **Scalable.** Starts small and grows as needed.
-- **Open source.** Everyone can review codes and learn from them a lot.
-- **Data Sciences Ready.** Accessible from other BI tools and Excel.
-- **ISO27001 Support.** Empowers the certification process, not a stopper.
+- Self service\
+<sup>Your data is now totally under your control.</sup>
+- Platform independent\
+<sup>Runs on the cloud, on-premises or PCs.</sup>
+- Flexible\
+<sup>It has the sweet smell of JSON data structure.</sup>
+- Scalable\
+<sup>Starts small and grows as needed.</sup>
+- Open source\
+<sup>Everyone can review codes and learn from them a lot.</sup>
+- Data Sciences Ready\
+<sup>Accessible from other BI tools and Excel.</sup>
+- ISO27001 Support\
+<sup>Empowers the certification process, not a stopper.</sup>
 
 ## Installation
 
@@ -85,19 +105,16 @@ Go to "bi" folder which is going to be created;
 cd bi
 ```
 
-Edit the ".env" file, replace the sample values with your own data and save the file.
+Edit the ".env" file, replace the sample values in user parameters section with your own data and save the file.
 
 ```bash
-# USER_PARAMETERS
-# Replace sample values with yours before installation.
-# --------------------------------
-TZ="Europe/Berlin"
-DOMAIN="localhost"
-USER_EMAIL="bi@company.com"
-USER_NAME="John Doe"
-COMPANY_NAME="Acme Company Inc."
-FROM_EMAIL="bi@company.com"
-FROM_NAME="Technoplatz BI"
+TZ=Europe/Berlin
+DOMAIN=localhost
+USER_EMAIL=bi@company.com
+USER_NAME=John Doe
+COMPANY_NAME=Acme Company Inc.
+FROM_EMAIL=bi@company.com
+FROM_NAME=Technoplatz BI
 ```
 
 <sub>**TZ:** Time zone of your platform's location must be entered according to the official TZ format (eg. America/New_York). https://en.wikipedia.org/wiki/List_of_tz_database_time_zones is the link for more info about TZ.\
@@ -214,9 +231,17 @@ The system is provided in two licensing options;
 Official Web Site\
 [https://bi.technoplatz.com](https://bi.technoplatz.com)
 
-#### Author
+### Author
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
 Founder, Technoplatz IT Solutions GmbH\
 <sup>Senior Developer - Data Sciences, Statistics B.Sc.</sup>
 
+--
 <link rel="stylesheet" href=".github/md.css">
+<style>
+sup {
+    display: block;
+    line-height: 17px !important;
+    margin-top: 8px;
+}
+</style>
