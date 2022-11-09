@@ -28,7 +28,7 @@
             "title": "Title",
             "description": "Automation title",
             "required": true,
-            "width": 140
+            "width": 180
         },
         "aut_enabled": {
             "bsonType": "bool",

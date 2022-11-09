@@ -1,11 +1,11 @@
 [
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_id",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_id",
     "fie_type": "string",
     "fie_priority": 100,
-    "fie_title": "Serial ID",
-    "fie_description": "Serial ID",
+    "fie_title": "Barcode",
+    "fie_description": "Barcode",
     "fie_required": true,
     "fie_unique": true,
     "fie_permanent": true,
@@ -16,8 +16,8 @@
     "fie_sort": "ascending"
   },
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_status",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_status",
     "fie_type": "string",
     "fie_priority": 150,
     "fie_title": "Status",
@@ -30,14 +30,15 @@
     "fie_options": [
       "0-Open",
       "1-InProcess",
-      "2-Read",
-      "3-Closed"
+      "2-Input",
+      "3-Output",
+      "4-Closed"
     ],
     "fie_sort": "unsorted"
   },
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_product_id",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_product_id",
     "fie_type": "string",
     "fie_priority": 200,
     "fie_title": "Product ID",
@@ -54,8 +55,8 @@
     "fie_sort": "unsorted"
   },
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_lot_no",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_lot_no",
     "fie_type": "string",
     "fie_priority": 300,
     "fie_title": "Lot No",
@@ -69,8 +70,8 @@
     "fie_sort": "unsorted"
   },
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_order_no",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_order_no",
     "fie_type": "string",
     "fie_priority": 400,
     "fie_title": "Order No",
@@ -84,8 +85,8 @@
     "fie_sort": "unsorted"
   },
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_order_item",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_order_item",
     "fie_type": "string",
     "fie_priority": 500,
     "fie_title": "Order Item",
@@ -99,8 +100,8 @@
     "fie_sort": "unsorted"
   },
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_account_id",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_account_id",
     "fie_type": "string",
     "fie_priority": 600,
     "fie_title": "Account ID",
@@ -117,8 +118,8 @@
     "fie_sort": "unsorted"
   },
   {
-    "fie_collection_id": "serials",
-    "fie_id": "ser_customer_order_no",
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_customer_order_no",
     "fie_type": "string",
     "fie_priority": 700,
     "fie_title": "Customer Order No",
@@ -129,6 +130,62 @@
     "fie_min_length": 1,
     "fie_max_length": 128,
     "fie_width": 180,
+    "fie_sort": "unsorted"
+  },
+  {
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_input",
+    "fie_type": "bool",
+    "fie_priority": 800,
+    "fie_title": "Input?",
+    "fie_description": "Input?",
+    "fie_required": false,
+    "fie_unique": false,
+    "fie_permanent": false,
+    "fie_indexed": true,
+    "fie_width": 130,
+    "fie_sort": "unsorted"
+  },
+  {
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_input_date",
+    "fie_type": "date",
+    "fie_priority": 900,
+    "fie_title": "Input Date",
+    "fie_description": "Input Date",
+    "fie_required": false,
+    "fie_unique": false,
+    "fie_permanent": false,
+    "fie_indexed": false,
+    "fie_width": 130,
+    "fie_sort": "unsorted"
+  },
+  {
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_output",
+    "fie_type": "bool",
+    "fie_priority": 1000,
+    "fie_title": "Output?",
+    "fie_description": "Output?",
+    "fie_required": false,
+    "fie_unique": false,
+    "fie_permanent": false,
+    "fie_indexed": true,
+    "fie_width": 140,
+    "fie_sort": "unsorted"
+  },
+  {
+    "fie_collection_id": "barcodes",
+    "fie_id": "bar_output_date",
+    "fie_type": "date",
+    "fie_priority": 1100,
+    "fie_title": "Output Date",
+    "fie_description": "Output Date",
+    "fie_required": false,
+    "fie_unique": false,
+    "fie_permanent": false,
+    "fie_indexed": false,
+    "fie_width": 140,
     "fie_sort": "unsorted"
   }
 ]

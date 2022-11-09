@@ -1,7 +1,7 @@
 [
   {
-    "act_id": "act-serials-account-change",
-    "act_collection_id": "serials",
+    "act_id": "act-barcodes-account-change",
+    "act_collection_id": "barcodes",
     "act_title": "Account Change",
     "act_description": "You can change the Account IDs of the selected records.",
     "act_enabled": true,
@@ -10,7 +10,7 @@
     "act_filter": [],
     "act_fields": [
       {
-        "key": "ser_account_id",
+        "key": "bar_account_id",
         "value": null
       }
     ],
@@ -20,8 +20,8 @@
     ]
   },
   {
-    "act_id": "act-serials-open-to-inprocess",
-    "act_collection_id": "serials",
+    "act_id": "act-barcodes-open-to-inprocess",
+    "act_collection_id": "barcodes",
     "act_title": "Open to InProcess",
     "act_description": "0-Open records sets to 1-InProcess at once.",
     "act_enabled": true,
@@ -29,14 +29,14 @@
     "act_priority": 2000,
     "act_filter": [
       {
-        "key": "ser_status",
+        "key": "bar_status",
         "op": "eq",
         "value": "0-Open"
       }
     ],
     "act_fields": [
       {
-        "key": "ser_status",
+        "key": "bar_status",
         "value": "1-InProcess"
       }
     ],
@@ -46,8 +46,8 @@
     ]
   },
   {
-    "act_id": "act-serials-back-to-open",
-    "act_collection_id": "serials",
+    "act_id": "act-barcodes-back-to-open",
+    "act_collection_id": "barcodes",
     "act_title": "Back to Open",
     "act_description": "1-InProcess records backs to 0-Open at once.",
     "act_enabled": true,
@@ -55,14 +55,14 @@
     "act_priority": 3000,
     "act_filter": [
       {
-        "key": "ser_status",
+        "key": "bar_status",
         "op": "eq",
         "value": "1-InProcess"
       }
     ],
     "act_fields": [
       {
-        "key": "ser_status",
+        "key": "bar_status",
         "value": "0-Open"
       }
     ],

@@ -101,7 +101,7 @@ class Schedular():
 
             collection_ = self.db_["_collection"].find_one({"col_id": aut_collection_id_})
             if not collection_:
-                raise APIError(f"collection not found: {aut_collection_id_}")
+                raise APIError(f"collection not found to schedule {aut_collection_id_}")
 
             structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
             if not structure_:
@@ -120,7 +120,7 @@ class Schedular():
             if aut_matched_:
                 remote_data_file_ = f"{aut_match_collection_id_}_data"
                 if remote_data_file_ not in self.db_.list_collection_names():
-                    raise APIError("remote collection data is missing")
+                    raise APIError(f"remote collection data is missing {remote_data_file_}")
                 collection_ = self.db_["_collection"].find_one({"col_id": aut_match_collection_id_})
                 if not collection_:
                     raise APIError(f"remote collection not found: {aut_match_collection_id_}")
@@ -129,22 +129,6 @@ class Schedular():
                     raise APIError(f"remote structure not found: {aut_match_collection_id_}")
 
             find_ = self.db_[data_file_].find(get_filtered_)
-            set_ = {}
-            set_remote_ = {}
-            if aut_set_:
-                for aut_set__ in aut_set_:
-                    key_ = aut_set__["key"]
-                    value_ = aut_set__["value"]
-                    set_[key_] = value_
-            if aut_set_remote_:
-                for aut_set_remote__ in aut_set_remote_:
-                    key_ = aut_set_remote__["key"]
-                    value_ = aut_set_remote__["value"]
-                    set_remote_[key_] = value_
-
-            set_["_modified_by"] = set_remote_["_modified_by"] = "Automation"
-            set_["_modified_at"] = set_remote_["_modified_at"] = datetime.now()
-
             for rec_ in find_:
                 match_ = []
                 matched_ = False
@@ -181,8 +165,27 @@ class Schedular():
                     matched_ = True
 
                 if matched_:
-                    self.db_[data_file_].update_one({"_id": id_}, {"$set": set_})
-                    if remoted_:
+                    set_ = {}
+                    set_remote_ = {}
+                    set_["_modified_by"] = set_remote_["_modified_by"] = "Automation"
+                    set_["_modified_at"] = set_remote_["_modified_at"] = datetime.now()
+                    if aut_set_:
+                        for aut_set__ in aut_set_:
+                            key_ = aut_set__["key"]
+                            value_ = aut_set__["value"]
+                            value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
+                            set_[key_] = value_
+                        self.db_[data_file_].update_one({"_id": id_}, {"$set": set_})
+                    if remoted_ and aut_set_remote_:
+                        for aut_set_remote__ in aut_set_remote_:
+                            key_ = aut_set_remote__["key"]
+                            value_ = aut_set_remote__["value"]
+                            if value_[:1] == "$":
+                                f_ = value_[1:]
+                                value_ = rec_[f_] if f_ in rec_ else None
+                            else:
+                                value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
+                            set_remote_[key_] = value_
                         self.db_[remote_data_file_].update_many(get_filtered_, {"$set": set_remote_})
 
             res_ = {"result": True}
@@ -388,6 +391,9 @@ class Schedular():
             schedule_views_f_ = self.schedule_views_f(sched_)
             if not schedule_views_f_["result"]:
                 raise APIError(schedule_views_f_["msg"])
+
+            # reschedule views regularly
+            sched_.add_job(self.schedule_automations_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_automations", timezone=self.TZ, replace_existing=True, args=[sched_])
 
             # reschedule views regularly
             sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_views", timezone=self.TZ, replace_existing=True, args=[sched_])
@@ -794,9 +800,16 @@ class Crud():
                     if data_ and len(data_) > 0:
                         session_db_["_field"].delete_many({"fie_collection_id": col_id_})
                         for rec_ in data_:
+                            exists_ = session_db_["_field"].find_one({
+                                "fie_id": rec_["fie_id"]
+                            })
+                            if exists_:
+                                raise APIError(f"field is already exists {rec_['fie_id']}")
                             rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
                             rec_["_created_by"] = rec_["_modified_by"] = email_
                             rec_["_modified_count"] = 0
+                            if "fie_default" in rec_:
+                                rec_["fie_default"] = str(rec_["fie_default"])
                             session_db_["_field"].insert_one(rec_)
 
                 # process _action records
@@ -810,7 +823,9 @@ class Crud():
                             rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
                             rec_["_created_by"] = rec_["_modified_by"] = email_
                             rec_["_modified_count"] = 0
-                            session_db_["_action"].insert_one(rec_)
+                            session_db_["_action"].update_one({
+                                "act_id": rec_["act_id"]
+                            }, {"$set": rec_}, upsert=True)
 
                 reconfigure_f_ = self.reconfigure_f({
                     "userindb": userindb_,
@@ -956,27 +971,6 @@ class Crud():
                 raise APIError(decode_crud_doc_f_["msg"])
 
             d_ = decode_crud_doc_f_["doc"]
-
-            # # descodes the document data
-            # d = doc_
-            # for k in properties_:
-            #     property_ = properties_[k]
-            #     if "bsonType" in property_:
-            #         if k in doc_.keys():
-            #             if property_["bsonType"] == "date":
-            #                 if isinstance(doc_[k], str) and self.validate_iso8601_f(doc_[k]):
-            #                     d[k] = datetime.strptime(doc_[k][:10], "%Y-%m-%d")
-            #                 else:
-            #                     d[k] = datetime.strptime(doc_[k][:10], "%Y-%m-%d") if doc_[k] is not None else None
-            #             elif property_["bsonType"] == "string":
-            #                 d[k] = str(doc_[k]) if doc_[k] is not None else doc_[k]
-            #             elif property_["bsonType"] in ["number", "int", "float", "double"]:
-            #                 d[k] = doc_[k] * 1 if d[k] is not None else d[k]
-            #             elif property_["bsonType"] == "bool":
-            #                 d[k] = True if d[k] and d[k] in [True, "true", "True", "TRUE"] else False
-            #         else:
-            #             if property_["bsonType"] == "bool":
-            #                 d[k] = False
 
             res_ = {"result": True, "doc": d_}
 
@@ -2689,7 +2683,7 @@ class Crud():
                         field_["items"]["bsonType"] = "string"
 
                 if "fie_default" in doc_ and doc_["fie_default"]:
-                    field_["default"] = float(doc_["fie_default"]) if field_["bsonType"] == "number" else int(doc_["fie_default"]) if field_["bsonType"] == "int" else doc_["fie_default"]
+                    field_["default"] = float(doc_["fie_default"]) if field_["bsonType"] == "number" else int(doc_["fie_default"]) if field_["bsonType"] == "int" else str(doc_["fie_default"])
 
                 if "fie_required" in doc_ and doc_["fie_required"]:
                     field_["required"] = True

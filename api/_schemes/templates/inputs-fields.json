@@ -1,11 +1,11 @@
 [
   {
-    "fie_collection_id": "barcode",
-    "fie_id": "bar_id",
+    "fie_collection_id": "inputs",
+    "fie_id": "inp_id",
     "fie_type": "string",
     "fie_priority": 100,
     "fie_title": "Barcode",
-    "fie_description": "Barcode",
+    "fie_description": "Read a Barcode",
     "fie_required": true,
     "fie_unique": true,
     "fie_indexed": true,
@@ -16,8 +16,8 @@
     "fie_barcoded": true
   },
   {
-    "fie_collection_id": "barcode",
-    "fie_id": "bar_status",
+    "fie_collection_id": "inputs",
+    "fie_id": "inp_status",
     "fie_type": "string",
     "fie_priority": 200,
     "fie_title": "Status",

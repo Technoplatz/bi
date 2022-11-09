@@ -296,6 +296,10 @@
     "unique": [
         [
             "fie_id"
+        ],
+        [
+            "fie_collection_id",
+            "fie_id"
         ]
     ],
     "index": [
@@ -303,7 +307,7 @@
             "fie_type"
         ],
         [
-            "fie_collection_id"
+            "fie_id"
         ],
         [
             "fie_collection_id"

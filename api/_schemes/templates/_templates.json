@@ -1,7 +1,6 @@
 [
     {
         "_id": "template-account",
-        "name": "Accounts",
         "title": "Accounts",
         "by": "Technoplatz",
         "description": "Sample collection includes basic business data fields about customers, suppliers and partners. It can be linked from the other collections via Account ID.",
@@ -16,7 +15,6 @@
     },
     {
         "_id": "template-transactions",
-        "name": "Transactions",
         "title": "Transactions",
         "by": "Technoplatz",
         "description": "Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
@@ -30,33 +28,45 @@
         "icon": "ticket-outline"
     },
     {
-        "_id": "template-serials",
-        "name": "Serial Numbers",
-        "title": "Serial Numbers",
+        "_id": "template-barcodes",
+        "title": "Barcodes",
         "by": "Technoplatz",
         "description": "This collection which contains serial numbers and other generic information of completed customer orders can be used in many areas such as distribution, delivery, inventory or barcode transactions.",
-        "collection": "serials",
-        "prefix": "ser",
-        "data": "serials-data.json",
-        "fields": "serials-fields.json",
-        "actions": "serials-actions.json",
-        "views": "serials-views.json",
+        "collection": "barcodes",
+        "prefix": "bar",
+        "data": "barcodes-data.json",
+        "fields": "barcodes-fields.json",
+        "actions": "barcodes-actions.json",
+        "views": "barcodes-views.json",
         "sort": 30,
-        "icon": "qr-code-outline"
+        "icon": "barcode-outline"
     },
     {
-        "_id": "template-barcode", 
-        "name": "Barcode Transactions",
-        "title": "Barcode Transactions",
+        "_id": "template-inputs",
+        "title": "Input Transactions",
         "by": "Technoplatz",
         "description": "Barcode Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        "collection": "barcode",
-        "prefix": "bar",
-        "data": "barcode-data.json",
-        "fields": "barcode-fields.json",
-        "actions": "barcode-actions.json",
-        "views": "barcode-views.json",
+        "collection": "inputs",
+        "prefix": "inp",
+        "data": "inputs-data.json",
+        "fields": "inputs-fields.json",
+        "actions": "inputs-actions.json",
+        "views": "inputs-views.json",
         "sort": 40,
-        "icon": "barcode-outline"
+        "icon": "download-outline"
+    },
+    {
+        "_id": "template-outputs",
+        "title": "Output Transactions",
+        "by": "Technoplatz",
+        "description": "Barcode Transactions Template lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        "collection": "outputs",
+        "prefix": "out",
+        "data": "outputs-data.json",
+        "fields": "outputs-fields.json",
+        "actions": "outputs-actions.json",
+        "views": "outputs-views.json",
+        "sort": 50,
+        "icon": "share-outline"
     }
 ]

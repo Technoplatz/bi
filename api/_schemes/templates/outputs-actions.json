@@ -1,0 +1,54 @@
+[
+  {
+    "act_id": "act-outputs-open-to-inprocess",
+    "act_collection_id": "outputs",
+    "act_title": "Open to InProcess",
+    "act_description": "Changes statuses 0-Open to 1-InProcess at once.",
+    "act_enabled": true,
+    "act_one_click": true,
+    "act_priority": 100,
+    "act_filter": [
+      {
+        "key": "out_status",
+        "op": "eq",
+        "value": "0-Open"
+      }
+    ],
+    "act_fields": [
+      {
+        "key": "out_status",
+        "value": "1-InProcess"
+      }
+    ],
+    "_tags": [
+      "#Managers",
+      "#Administrators"
+    ]
+  },
+  {
+    "act_id": "act-outputs-back-to-open",
+    "act_collection_id": "outputs",
+    "act_title": "Back to Open",
+    "act_description": "Rollbacks statuses 0-Open from 1-InProcess at once.",
+    "act_enabled": true,
+    "act_one_click": true,
+    "act_priority": 200,
+    "act_filter": [
+      {
+        "key": "out_status",
+        "op": "eq",
+        "value": "1-InProcess"
+      }
+    ],
+    "act_fields": [
+      {
+        "key": "out_status",
+        "value": "0-Open"
+      }
+    ],
+    "_tags": [
+      "#Managers",
+      "#Administrators"
+    ]
+  }
+]

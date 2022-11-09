@@ -2,7 +2,7 @@ FROM node:16-alpine as build
 WORKDIR /app
 RUN npm install -g npm
 RUN npm install -g @ionic/cli
-COPY package*.json /app/
+COPY package.json /app/
 RUN npm install
 COPY . /app/
 RUN ionic build --prod
