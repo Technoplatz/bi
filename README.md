@@ -16,22 +16,24 @@ Technoplatz BI is a low-code multi-container [Data Application](#data-applicatio
 It is also designed for situation where business partners are the integral part of a process in terms of the data source and the actions they need to take. For this reason, it provides pragmatic solutions especially for the following requirements by addressing the issues in the [Inner-Cycle](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
 
 ### Data Application
+
 It is a progressive web application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
-- **Self Service Administration**\
-Data Collections, Users, firewall and access management.
-- **Basic Data Operations and Actions (CRUD+)**\
-Create, read, update and delete records, advanced search. Import data from Excel Files.
-- **Data Announcements**\
-Make data request to business partners and get responses.
-- **Process Management**\
-Defining automated tasks.
-- **Statistics and Data Visualization**\
-Descriptive statistics and chart definitions.
-- **Log Tracking**\
-Track updates
+- Self Service Administration\
+<sup>Data Collections, Users, firewall and access management.</sup>
+- Basic Data Operations and Actions (CRUD+)\
+<sup>Create, read, update and delete records, advanced search. Import data from Excel Files.</sup>
+- Data Announcements\
+<sup>Make data request to business partners and get responses.</sup>
+- Process Management\
+<sup>Defining automated tasks.</sup>
+- Statistics and Data Visualization\
+<sup>Descriptive statistics and chart definitions.</sup>
+- Log Tracking\
+<sup>Track updates</sup>
 
 ### API
+
 - Internal and External Functions\
 <sup>Core modules and remote data access.</sup>
 - CronJobs\
@@ -43,18 +45,18 @@ Track updates
 
 The flexibility of business data meets the power of the multi-container platform.
 
-- <span style="font-weight:500; color: blue">Docker Compose</span>\
-A powerful tool that was developed to help define and share multi-container applications.
-- <span style="font-weight:500; color: blue">MongoDB</span>\
-A document database used to build highly available and scalable internet applications. With its flexible schema approach, replication and transaction support it's popular with development teams using agile methodologies.
-- <span style="font-weight:500; color: blue">Python Programming Language</span>\
-Python is a high-level programming language which supports multiple programming paradigms including structured, object-oriented and functional programming.
-- <span style="font-weight:500; color: blue">Pandas Library</span>\
-A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.
-- <span style="font-weight:500; color: blue">Ionic Angular TS</span>\
-A platform and framework for building client applications using HTML and Microsoft TypeScript.
-- <span style="font-weight:500; color: blue">Github</span>\
-An open source and distributed version control system designed to handle everything from small to very large projects with speed and efficiency.
+- Docker Compose\
+<sup>A tool developed to help define and share multi-container applications.</sup>
+- MongoDB\
+<sup>A document database used to build highly available and scalable internet applications.</sup>
+- Python Programming Language\
+<sup>A high-level language which supports multiple programming paradigms.</sup>
+- Pandas Library\
+<sup>An open source data analysis and manipulation tool built on top of the Python.</sup>
+- Ionic Angular TS\
+<sup>A framework for building client applications using HTML and TypeScript.</sup>
+- Github\
+<sup>The leading version control system designed to handle everything.</sup>
 
 ## Highlights
 
