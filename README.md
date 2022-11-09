@@ -241,7 +241,7 @@ Founder, Technoplatz IT Solutions GmbH\
 <style>
 sup {
     display: block;
-    line-height: 17px !important;
+    line-height: normal !important;
     margin-top: 8px;
 }
 </style>
