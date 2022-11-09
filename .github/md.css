@@ -16,3 +16,9 @@
 .licensing td:nth-child(3) {
     width: 36%;
 }
+
+sup {
+    display: block;
+    line-height: normal !important;
+    margin-top: 8px;
+}

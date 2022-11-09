@@ -18,18 +18,18 @@ It is also designed for situation where business partners are the integral part 
 ### Data Application
 It is a progressive web application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
-- Self Service Administration\
-<sup>Data Collections, Users, firewall and access management.</sup>
-- Basic Data Operations and Actions (CRUD+)\
-<sup>Create, read, update and delete records, advanced search. Import data from Excel Files.</sup>
-- Data Announcements\
-<sup>Make data request to business partners and get responses.</sup>
-- Process Management\
-<sup>Defining automated tasks.</sup>
-- Statistics and Data Visualization\
-<sup>Descriptive statistics and chart definitions.</sup>
-- Log Tracking\
-<sup>Track updates</sup>
+- **Self Service Administration**\
+Data Collections, Users, firewall and access management.
+- **Basic Data Operations and Actions (CRUD+)**\
+Create, read, update and delete records, advanced search. Import data from Excel Files.
+- **Data Announcements**\
+Make data request to business partners and get responses.
+- **Process Management**\
+Defining automated tasks.
+- **Statistics and Data Visualization**\
+Descriptive statistics and chart definitions.
+- **Log Tracking**\
+Track updates
 
 ### API
 - Internal and External Functions\
@@ -43,18 +43,18 @@ It is a progressive web application that contains key functions to help complete
 
 The flexibility of business data meets the power of the multi-container platform.
 
-- Docker Compose\
-<sup>A powerful tool that was developed to help define and share multi-container applications.</sup>
-- MongoDB\
-<sup>A document database used to build highly available and scalable internet applications. With its flexible schema approach, replication and transaction support it's popular with development teams using agile methodologies.</sup>
-- Python\
-<sup>Python is a high-level programming language which supports multiple programming paradigms including structured, object-oriented and functional programming.</sup>
-- Pandas\
-<sup>A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.</sup>
-- Ionic Angular TS\
-<sup>A platform and framework for building client applications using **HTML** and **Microsoft TypeScript**.</sup>
-- Github\
-<sup>An open source and distributed version control system designed to handle everything from small to very large projects with speed and efficiency.</sup>
+- [**Docker Compose**](#)\
+A powerful tool that was developed to help define and share multi-container applications.
+- [**MongoDB**](#)\
+A document database used to build highly available and scalable internet applications. With its flexible schema approach, replication and transaction support it's popular with development teams using agile methodologies.
+- [**Python Programming Language**](#)\
+Python is a high-level programming language which supports multiple programming paradigms including structured, object-oriented and functional programming.
+- [**Pandas Library**](#)\
+A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, built on top of the Python programming language.
+- [**Ionic Angular TS**](#)\
+A platform and framework for building client applications using HTML and Microsoft TypeScript.
+- [**GitHub**](#)\
+An open source and distributed version control system designed to handle everything from small to very large projects with speed and efficiency.
 
 ## Highlights
 
@@ -239,10 +239,3 @@ Founder, Technoplatz IT Solutions GmbH\
 
 --
 <link rel="stylesheet" href="https://raw.githubusercontent.com/Technoplatz/bi/dev0/.github/md.css">
-<style>
-    sup {
-    display: block;
-    line-height: normal !important;
-    margin-top: 8px;
-}
-</style>
