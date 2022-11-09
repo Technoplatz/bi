@@ -279,6 +279,18 @@
                             <ion-input class="ion-no-padding" type="text" [value]="data['_modified_by']" disabled>
                             </ion-input>
                         </ion-item>
+                        <ion-item *ngIf="data['_created_at']" lines="full" class="ion-no-margin">
+                            <ion-label position="stacked">{{ 'Created At' }}</ion-label>
+                            <ion-datetime displayFormat="DD.MM.YYYY HH:mm:ss" class="ion-no-margin"
+                                [value]="data['_created_at'] && data['_created_at']?.replace(' ', 'T') | date:'yyyy-MM-ddTHH:mm:ssZ'"
+                                disabled>
+                            </ion-datetime>
+                        </ion-item>
+                        <ion-item *ngIf="data['_created_by']" lines="full" class="ion-no-margin">
+                            <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>
+                            <ion-input class="ion-no-padding" type="text" [value]="data['_created_by']" disabled>
+                            </ion-input>
+                        </ion-item>
                     </ion-list>
                 </form>
             </div>

@@ -582,7 +582,7 @@
                         {{ record[item.key] }}
                       </span>
                       <span *ngIf="item.value.bsonType=='date' && record[item.key]">
-                        {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy' }}
+                        {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
                       </span>
                       <span *ngIf="item.value.bsonType=='array'">
                         <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
