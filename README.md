@@ -31,11 +31,13 @@ It is a progressive web application that contains key functions to help complete
 - Statistics and Data Visualization\
 <sup>Descriptive statistics and chart definitions.</sup>
 - Log Tracking\
-<sup>Track updates</sup>
+<sup>All connections and transactions can be tracked on a record basis.</sup>
 
-### Application Programming Interface (API) 
+### Application Programming Interface (API)
 
-- Internal and External Functions\
+The internal API has been developed in a monolithic structure with the Python programming language. With its object-oriented structure, it runs multiple background functions asynchronously.
+
+- Internal Functions\
 <sup>Core modules and remote data access.</sup>
 - CronJobs\
 <sup>Runnning automations tasks.</sup>
@@ -46,17 +48,17 @@ It is a progressive web application that contains key functions to help complete
 
 Technoplatz BI is built on open source information technologies with proven power and reliability. This approach provides sustainability and significant cost advantages in the management of critical business processes.
 
-- [Docker Compose](#https://docs.docker.com/compose/)\
+- [Docker Compose](#https://docs.docker.com/compose/) \
 <sup>A tool developed to help define and share multi-container applications.</sup>
-- [MongoDB](#https://www.mongodb.com)\
+- [MongoDB](#https://www.mongodb.com) \
 <sup>A document database used to build highly available and scalable internet applications.</sup>
-- [Python](#https://www.python.org)\
+- [Python](#https://www.python.org) \
 <sup>A high-level programming language supports multiple paradigms.</sup>
-- [Pandas Library](#https://pandas.pydata.org)\
+- [Pandas Library](#https://pandas.pydata.org) \
 <sup>An open source data analysis and manipulation tool built on top of the Python language.</sup>
-- [Ionic Angular TS](#https://ionicframework.com)\
-<sup>A framework for building cross-platform client applications by using TypeScript.</sup>
-- [GitHub](#https://github.com)\
+- [Ionic Angular TS](#https://ionicframework.com) \
+<sup>A framework for building cross-platform client applications using HTML and TypeScript.</sup>
+- [GitHub](#https://github.com) \
 <sup>The leading version control system designed to handle CI/CD.</sup>
 
 ## Highlights
