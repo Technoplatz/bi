@@ -237,11 +237,4 @@ Founder, Technoplatz IT Solutions GmbH\
 <sup>Senior Developer - Data Sciences, Statistics B.Sc.</sup>
 
 --
-<link rel="stylesheet" href=".github/md.css">
-<style>
-sup {
-    display: block;
-    line-height: normal !important;
-    margin-top: 8px;
-}
-</style>
+<link rel="stylesheet" href="https://raw.githubusercontent.com/Technoplatz/bi/dev0/.github/md.css?token=GHSAT0AAAAAABZ67MQGLCMESJZFOAAVT5AKY3L646Q">

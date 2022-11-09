@@ -18,5 +18,7 @@
 }
 
 sup {
-    line-height: normal;
+    display: block;
+    line-height: normal !important;
+    margin-top: 8px;
 }
