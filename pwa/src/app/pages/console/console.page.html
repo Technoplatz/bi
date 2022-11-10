@@ -329,10 +329,16 @@
                         <ion-icon name="cloud-upload-outline"></ion-icon><br />
                         <span>{{ 'Import' | translate }}<br />{{ 'Excel' | translate }}</span>
                       </div>
-                      <div (click)="goCrud(null, 'insert')" class="data-sq-button">
-                        <ion-icon name="add-circle-outline"></ion-icon><br />
-                        <span>{{ 'New' | translate }}<br />{{ 'Record' | translate }}</span>
+                      <div *ngIf="barcoded_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
+                        <ion-icon name="barcode-outline"></ion-icon><br />
+                        <span>{{ 'Read' | translate }}<br />{{ 'Barcode' | translate }}</span>
                       </div>
+                      <ng-template #newrecord>
+                        <div (click)="goCrud(null, 'insert')" class="data-sq-button">
+                          <ion-icon name="add-circle-outline"></ion-icon><br />
+                          <span>{{ 'New' | translate }}<br />{{ 'Record' | translate }}</span>
+                        </div>
+                      </ng-template>
                       <div (click)="RefreshData(0)" class="data-sq-button">
                         <ion-icon *ngIf="is_loaded" name="sync"></ion-icon>
                         <ion-icon *ngIf="!is_loaded" name="time-outline"></ion-icon>

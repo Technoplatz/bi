@@ -55,6 +55,7 @@ export class CrudPage implements OnInit {
   public related: any = [];
   public actionix: number = -1;
   public is_token_copied: boolean = false;
+  public barcoded_: boolean = false;
   public filters: any = [{
     key: null,
     op: null,
@@ -104,6 +105,7 @@ export class CrudPage implements OnInit {
     this.views = this.shuttle.views;
     this.actionix = this.shuttle.actionix;
     this.view = this.shuttle.view;
+    this.barcoded_ = this.shuttle.barcoded;
     this.properties = this.structure.properties;
     this.doGetAllAktions(this.op).then((res: any) => {
       this.aktions = res;
@@ -112,45 +114,45 @@ export class CrudPage implements OnInit {
       this.options.mode = "code";
       this.options.statusBar = true;
       this.doGetFilters().then(() => {
-        this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
-          this.crudForm = res.form;
-          this.fields = res.fields;
-          this.fieldsupd = res.fields;
-          this.data = this.shuttle.data ? this.shuttle.data : res.init;
-          this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
-          this.visibility = "ion-padding-start ion-padding-end";
-          const view_ = this.collection === "_view" && this.data ? this.data.vie_id : null;
-          this.doGetViewProperties(view_).then(() => {
-            this.doGetCollectionProperties(this.collection).then(() => {
-              this.tab = "data";
-              this.showhide = this.op === "action" ? "hide-segment" : "show-segment";
-              if (this.actionix >= 0) {
-                this.doAktionChange(this.actionix).then(() => {
-                  setTimeout(() => {
-                    this.is_ready = true;
-                    this.cd.detectChanges();
-                  }, 500);
-                }).catch((error: any) => {
-                  console.error(error);
-                  this.misc.doMessage(error, "error");
-                  this.is_ready = true;
-                });
-              } else {
-                setTimeout(() => {
-                  this.is_ready = true;
-                  this.cd.detectChanges();
-                }, 500);
-              }
+        this.doInitForm();
+      }).catch((error: any) => {
+        console.error(error);
+        this.misc.doMessage(error, "error");
+        this.is_ready = true;
+      });
+    });
+  }
+
+  doInitForm() {
+    this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
+      this.crudForm = res.form;
+      this.fields = res.fields;
+      this.fieldsupd = res.fields;
+      this.data = this.shuttle.data ? this.shuttle.data : res.init;
+      this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
+      this.visibility = "ion-padding-start ion-padding-end";
+      const view_ = this.collection === "_view" && this.data ? this.data.vie_id : null;
+      this.doGetViewProperties(view_).then(() => {
+        this.doGetCollectionProperties(this.collection).then(() => {
+          this.tab = "data";
+          this.showhide = this.op === "action" ? "hide-segment" : "show-segment";
+          if (this.actionix >= 0) {
+            this.doAktionChange(this.actionix).then(() => {
+              setTimeout(() => {
+                this.is_ready = true;
+                this.cd.detectChanges();
+              }, 500);
             }).catch((error: any) => {
               console.error(error);
               this.misc.doMessage(error, "error");
               this.is_ready = true;
             });
-          }).catch((error: any) => {
-            console.error(error);
-            this.misc.doMessage(error, "error");
-            this.is_ready = true;
-          });
+          } else {
+            setTimeout(() => {
+              this.is_ready = true;
+              this.cd.detectChanges();
+            }, 500);
+          }
         }).catch((error: any) => {
           console.error(error);
           this.misc.doMessage(error, "error");
@@ -161,6 +163,10 @@ export class CrudPage implements OnInit {
         this.misc.doMessage(error, "error");
         this.is_ready = true;
       });
+    }).catch((error: any) => {
+      console.error(error);
+      this.misc.doMessage(error, "error");
+      this.is_ready = true;
     });
   }
 
@@ -228,9 +234,14 @@ export class CrudPage implements OnInit {
         this.modified = true;
         this.isInProgress = true;
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then(() => {
-          setTimeout(() => {
-            this.doCancel({ op: this.op, modified: this.modified, filter: [] });
-          }, 500);
+          this.crud.modalSubmitListener.next({ "result": true });
+          if (!this.barcoded_) {
+            setTimeout(() => {
+              this.doCancel({ op: this.op, modified: this.modified, filter: [] });
+            }, 500);
+          } else {
+            this.doInitForm();
+          }
         }).catch((error: any) => {
           this.doShowError(error);
           console.error(error);

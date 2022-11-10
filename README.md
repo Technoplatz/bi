@@ -4,7 +4,6 @@
 
 - [What is Technoplatz BI](#what-is-technoplatz-bi)
 - [Highlights](#highlights)
-- [Technologies](#technologies)
 - [Installation](#installation)
 - [Management](#management)
 - [Licensing Options](#licensing-options)
@@ -12,39 +11,61 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a low-code multi-container [Data Application](#data-application) and [API](#api) platform designed to manage a mission critical business process without the need to develop software from scratch.
+Technoplatz BI is a low-code multi-container [Data Application](#data-application) and [API](#api) platform designed to manage a mission critical business process without the need to develop software from scratch. Considering that every job has its own special conditions, it offers a pragmatic solution under three basic topics;
 
-It is also designed for situation where business partners are the integral part of a process in terms of the data source and the actions they need to take. For this reason, it provides pragmatic solutions especially for the following requirements by addressing the issues in the [Inner-Cycle](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
+- [Data Application](#data-application)
+- [BI-directional Data sharing](#bi-directional-data-sharing)
+- [API](#application-programming-interface-api)
 
 ### Data Application
 
 It is a progressive web application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
 
 - Self Service Administration\
-<sup>Data Collections, Users, firewall and access management.</sup>
+<sup>Management of data collections, users and security.</sup>
 - Basic Data Operations and Actions (CRUD+)\
-<sup>Create, read, update and delete records, advanced search. Import data from Excel Files.</sup>
-- Data Announcements\
-<sup>Make data request to business partners and get responses.</sup>
-- Process Management\
+<sup>Basic data operations, advanced search, import data from files and Actions.</sup>
+- Automation\
 <sup>Defining automated tasks.</sup>
 - Statistics and Data Visualization\
 <sup>Descriptive statistics and chart definitions.</sup>
 - Log Tracking\
 <sup>All connections and transactions can be tracked on a record basis.</sup>
 
-### Application Programming Interface (API)
+### BI-directional Data sharing
 
-The internal API has been developed in a monolithic structure with the Python programming language. With its object-oriented structure, it runs multiple background functions asynchronously.
+Technoplatz BI is designed for situation where business partners are the integral part of a process in terms of the data source and the actions they need to take. For this reason, it provides three pragmatic solutions especially for the following requirements by addressing the issues in the [Inner-Cycle](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
+
+- Data Announcements\
+<sup>Make data request to business partners and get responses through API.</sup>
+
+- Live Data Connectors\
+<sup>Secure and read-only access to shared data through Excel.</sup>
+
+### API
+
+The internal Application Programming Interface has been developed in a monolithic structure with the Python programming language. With its object-oriented structure it runs multiple background services asynchronously.
 
 - Internal Functions\
 <sup>Core modules and remote data access.</sup>
+- External Functions (Web Services)\
+<sup>Secure remote access ability.</sup>
 - CronJobs\
-<sup>Runnning automations tasks.</sup>
-- BI-Directional Data Sharing\
-<sup>Access shared views from external sources. Live data connectors.</sup>
+<sup>Runs scheduled Automation tasks.</sup>
 
-## Technologies
+## Highlights
+
+#### Advantageous
+
+- Your data is now totally under your control with Its **self service** approach.
+- Platform independent. Runs on the cloud, on-premises or PCs.
+- It has the sweet smell of **flexible** JSON data structure.
+- Scalable. Starts small and grows as needed.
+- It is **open source** so everyone can review codes and learn from them a lot.
+- Data Sciences Ready Accessible from other BI tools and Excel.
+- Empowers the **ISO27001** certification process, not a stopper.
+
+#### Technologies
 
 Technoplatz BI is built on open source information technologies with proven power and reliability. This approach provides sustainability and significant cost advantages in the management of critical business processes.
 
@@ -61,23 +82,6 @@ Technoplatz BI is built on open source information technologies with proven powe
 - [GitHub](#https://github.com) \
 <sup>The leading version control system designed to handle CI/CD.</sup>
 
-## Highlights
-
-- Self service\
-<sup>Your data is now totally under your control.</sup>
-- Platform independent\
-<sup>Runs on the cloud, on-premises or PCs.</sup>
-- Flexible\
-<sup>It has the sweet smell of JSON data structure.</sup>
-- Scalable\
-<sup>Starts small and grows as needed.</sup>
-- Open source\
-<sup>Everyone can review codes and learn from them a lot.</sup>
-- Data Sciences Ready\
-<sup>Accessible from other BI tools and Excel.</sup>
-- ISO27001 Support\
-<sup>Empowers the certification process, not a stopper.</sup>
-
 ## Installation
 
 The installation of the system consists of three steps that must follow each other. In order to perform these steps [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience on Terminal is required.
@@ -88,13 +92,13 @@ Technoplatz BI runs on the Docker which is an open platform for developing, ship
     - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
     - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
-2. Connect to the platform via SSH, perform the recent OS updates.
+2. Connect to the platform via SSH and perform the recent OS updates immediately.
 
     ```bash
     apt update && apt upgrade -y
     ```
 
-3. Reboot the platform immediately.
+3. Reboot the platform.
     ```bash
     reboot
     ```
@@ -103,7 +107,6 @@ Technoplatz BI runs on the Docker which is an open platform for developing, ship
 
     ```bash
     git clone https://github.com/technoplatz/bi.git
-    cd bi
     ```
 
 5. Go to "bi" folder which is going to be created.
@@ -121,15 +124,19 @@ Technoplatz BI runs on the Docker which is an open platform for developing, ship
     USER_NAME=John Doe
     COMPANY_NAME=Acme Company Inc.
     FROM_EMAIL=bi@company.com
-    FROM_NAME=Technoplatz BI
+    FROM_NAME=Technoplatz
     ```
-    <sup>**TZ:** Time zone of your platform's location must be entered according to the official TZ format (eg. America/New_York). https://en.wikipedia.org/wiki/List_of_tz_database_time_zones is the link for more info about TZ.\
+    
+    <sup>**TZ:** Time zone of your platform's location.\
     **DOMAIN:** Leave it "localhost" for testing or personal use.\
     **USER_EMAIL:** E-mail address of Administrator user.\
     **USER_NAME:** Name and surname of Administrator user (eg. John Doe).\
     **COMPANY_NAME:** Legal business name of your organization.\
-    **FROM_EMAIL:** This address appears as "From" in automatic e-mails sent by the system.\
-    **FROM_NAME:** A name or nickname that appears next to the sender e-mail address.</sup>
+    **FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.\
+    **FROM_NAME:** Name or nickname appears next to the sender address.</sup>
+
+    <sup>TZ must be entered according to the official TZ format (eg. America/New_York)\
+    https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</sup>
 
 
 7. Uygulamanın güvenliğini sağlayan API anahtarını set ediniz. Lokal kullanım için anahtar belirlemeniz gerekmez, sistem jenerik bir anahtar kullanır ancak internet ortamında 24 karaktere kadar harf ve sayıdan oluşan bir API anahtarı kullanılmalıdır. Güvenlik açısından [Production, Madde 10](#production) 'da belirtilen şekilde bir anahtar tanımlayarak aşağıdaki komut ile kaydediniz.
@@ -163,6 +170,8 @@ Technoplatz BI runs on the Docker which is an open platform for developing, ship
     ```
 
 ## Management
+
+
 To start or restart the system by keeping it up and running in the background;
 
 ```bash

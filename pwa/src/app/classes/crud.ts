@@ -688,6 +688,7 @@ export class Crud {
     });
   }
 
+  modalSubmitListener = new Subject<any>();
   updateListener = new Subject<any>();
   views = new Subject<any>();
   subjects = new Subject<any>();

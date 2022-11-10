@@ -92,6 +92,7 @@ export class ConsolePage implements OnInit {
   public accountf_qrurl: string = "";
   public is_processing_account: boolean = false;
   public is_visuals_loading: boolean = false;
+  public barcoded_: boolean = false;
   public is_samecol: boolean = false;
   public qr_exists: boolean = false;
   public qr_show: boolean = false;
@@ -393,6 +394,7 @@ export class ConsolePage implements OnInit {
                   this.columns_ = [];
                   if (this.properites_) {
                     this.getColumns().then(() => {
+                      this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
                       this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
                       this.count = res.count;
                       this.multicheckbox = false;
@@ -637,6 +639,11 @@ export class ConsolePage implements OnInit {
   }
 
   async goCrud(rec: any, op: string) {
+    this.crud.modalSubmitListener.subscribe((res: any) => {
+      if(res && res.result) {
+        this.RefreshData(0);
+      }
+    });
     const modal = await this.modal.create({
       component: CrudPage,
       backdropDismiss: false,
@@ -654,12 +661,14 @@ export class ConsolePage implements OnInit {
           filter: op === "action" ? this.filter : null,
           actions: this.actions && this.actions.length > 0 ? this.actions : [],
           actionix: op === "action" && this.actionix >= 0 ? this.actionix : -1,
-          view: this.view
+          view: this.view,
+          barcoded: this.barcoded_
         }
       },
       swipeToClose: true,
     });
     modal.onDidDismiss().then((res: any) => {
+      this.crud.modalSubmitListener.unsubscribe;
       if (res.data.modified) {
         op === "action" ? this.doClearFilter() : this.RefreshData(0);
         if (this.id === "_collection") {
