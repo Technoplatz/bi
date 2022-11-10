@@ -1,0 +1,53 @@
+[
+  {
+    "aut_id": "auto-output-match-barcode",
+    "aut_collection_id": "outputs",
+    "aut_title": "Outputs Barcodes Match",
+    "aut_enabled": true,
+    "aut_priority": 2000,
+    "aut_filter": [
+      {
+        "key": "out_status",
+        "op": "eq",
+        "value": "1-InProcess"
+      }
+    ],
+    "aut_set": [
+      {
+        "key": "out_status",
+        "value": "2-Read"
+      }
+    ],
+    "aut_matched": true,
+    "aut_match_collection_id": "barcodes",
+    "aut_match_fields": [
+      {
+        "key": "bar_id",
+        "value": "$out_id",
+        "op": "eq"
+      },
+      {
+        "key": "bar_status",
+        "op": "in",
+        "value": "2-Input,3-Output"
+      }
+    ],
+    "aut_match_prefixes": [
+      "1P"
+    ],
+    "aut_set_remote": [
+      {
+        "key": "bar_status",
+        "value": "3-Output"
+      },
+      {
+        "key": "bar_output",
+        "value": "true"
+      },
+      {
+        "key": "bar_output_date",
+        "value": "$_created_at"
+      }
+    ]
+  }
+]

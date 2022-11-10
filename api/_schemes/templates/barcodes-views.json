@@ -1,0 +1,42 @@
+[
+  {
+    "vie_id": "vie-barcodes-20221109170546",
+    "vie_collection_id": "barcodes",
+    "vie_title": "Barcodes View",
+    "vie_priority": 1000,
+    "vie_enabled": true,
+    "vie_dashboard": true,
+    "vie_filter": [],
+    "vie_sched_timezone": "Europe/Berlin",
+    "vie_scheduled": false,
+    "vie_attach_pivot": true,
+    "vie_attach_csv": true,
+    "vie_attach_excel": true,
+    "vie_pivot_totals": true,
+    "_tags": [
+      "#Managers",
+      "#Administrators",
+      "#Mat"
+    ],
+    "vie_chart_style": "Grouped Vertical Bar",
+    "vie_p_datalabel_show": true,
+    "vie_p_gradient": true,
+    "vie_p_grid_show": true,
+    "vie_p_kpi": true,
+    "vie_p_legend_show": false,
+    "vie_p_xaxis_show": true,
+    "vie_p_yaxis_show": true,
+    "vie_pivot_columns": [
+      "bar_status"
+    ],
+    "vie_pivot_index": [
+      "bar_account_id"
+    ],
+    "vie_pivot_values": [
+      {
+        "key": "bar_id",
+        "value": "count"
+      }
+    ]
+  }
+]

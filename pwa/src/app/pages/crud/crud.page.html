@@ -173,7 +173,7 @@
                             <div *ngIf="field.bsonType=='string' && !field.file" class="full-width">
                                 <div
                                     *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword">
-                                    <ion-input #barcodefocus *ngIf="!field.textarea" class="ion-no-padding barcode"
+                                    <ion-input #barcodefocus *ngIf="!field.textarea" [class]="barcoded_ ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                         [maxlength]="field.maxLength" [minlength]="field.minLength"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [placeholder]="field.description"

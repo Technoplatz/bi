@@ -774,6 +774,7 @@ class Crud():
                 data_file_ = template_["data"]
                 fields_ = template_["fields"]
                 actions_ = template_["actions"]
+                automations_ = template_["automations"]
                 views_ = template_["views"]
                 collection__ = f"{col_id_}_data"
 
@@ -833,7 +834,6 @@ class Crud():
                             session_db_["_action"].update_one({
                                 "act_id": rec_["act_id"]
                             }, {"$set": rec_}, upsert=True)
-
                 reconfigure_f_ = self.reconfigure_f({
                     "userindb": userindb_,
                     "collection": col_id_
@@ -880,6 +880,19 @@ class Crud():
                             rec_["_created_by"] = rec_["_modified_by"] = email_
                             rec_["_modified_count"] = 0
                             session_db_["_view"].insert_one(rec_)
+
+                # automations views
+                path_ = f"/app/_schemes/templates/{automations_}"
+                if os.path.isfile(path_):
+                    f_ = open(path_, "r")
+                    data_ = json.loads(f_.read())
+                    if data_ and len(data_) > 0:
+                        session_db_["_automation"].delete_many({"aut_collection_id": col_id_})
+                        for rec_ in data_:
+                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
+                            rec_["_created_by"] = rec_["_modified_by"] = email_
+                            rec_["_modified_count"] = 0
+                            session_db_["_automation"].insert_one(rec_)
 
                 session_.commit_transaction() if session_ else None
 

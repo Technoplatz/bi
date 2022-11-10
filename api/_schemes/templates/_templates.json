@@ -9,6 +9,7 @@
         "data": "accounts-data.json",
         "fields": "accounts-fields.json",
         "actions": "accounts-actions.json",
+        "automations": "accounts-automations.json",
         "views": "accounts-views.json",
         "sort": 10,
         "icon": "business-outline"
@@ -23,6 +24,7 @@
         "data": "transactions-data.json",
         "fields": "transactions-fields.json",
         "actions": "transactions-actions.json",
+        "automations": "transactions-automations.json",
         "views": "transactions-views.json",
         "sort": 20,
         "icon": "ticket-outline"
@@ -37,6 +39,7 @@
         "data": "barcodes-data.json",
         "fields": "barcodes-fields.json",
         "actions": "barcodes-actions.json",
+        "automations": "barcodes-automations.json",
         "views": "barcodes-views.json",
         "sort": 30,
         "icon": "barcode-outline"
@@ -51,6 +54,7 @@
         "data": "inputs-data.json",
         "fields": "inputs-fields.json",
         "actions": "inputs-actions.json",
+        "automations": "inputs-automations.json",
         "views": "inputs-views.json",
         "sort": 40,
         "icon": "download-outline"
@@ -65,6 +69,7 @@
         "data": "outputs-data.json",
         "fields": "outputs-fields.json",
         "actions": "outputs-actions.json",
+        "automations": "outputs-automations.json",
         "views": "outputs-views.json",
         "sort": 50,
         "icon": "share-outline"
