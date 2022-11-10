@@ -13,6 +13,7 @@
     "fie_min_length": 1,
     "fie_max_length": 128,
     "fie_width": 220,
+    "fie_barcoded": true,
     "fie_sort": "ascending"
   },
   {

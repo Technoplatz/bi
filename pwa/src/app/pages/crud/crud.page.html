@@ -25,19 +25,16 @@
                     (click)="doDownload()">
                     {{ 'DOWNLOAD' | translate }}
                 </ion-button>
-
-                <ion-button *ngIf="barcoded_; else nobarcoded" size="small" (click)="doSubmit()">
+                <ion-button *ngIf="barcoded_ && op=='insert'; else nobarcoded" size="small" (click)="doSubmit()">
                     <ion-icon name="barcode-outline"></ion-icon>
                     {{ 'READ' | translate }}
                 </ion-button>
-
                 <ng-template #nobarcoded>
                     <ion-button *ngIf="collection!='_backup' && collection!='_storage' && op!='filter' && !isInProgress"
                         size="small" (click)="doSubmit()">
                         {{ 'SAVE' | translate }}
                     </ion-button>
                 </ng-template>
-
                 <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" size="small"
                     (click)="doSubmit()">
                     {{ 'IMPORT' | translate }}
@@ -45,9 +42,6 @@
                 <ion-button size="small" (click)="doCancel({ modified: false, filter: [] })">
                     {{ 'CANCEL' | translate }}
                 </ion-button>
-
-
-
                 <ion-button *ngIf="op=='update'" color="danger" size="small" (click)="doRemove()" class="end-item">
                     {{ 'DELETE' | translate }}&nbsp;
                 </ion-button>
@@ -173,7 +167,7 @@
                             <div *ngIf="field.bsonType=='string' && !field.file" class="full-width">
                                 <div
                                     *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword">
-                                    <ion-input #barcodefocus *ngIf="!field.textarea" [class]="barcoded_ ? 'ion-no-padding barcode' : 'ion-no-padding'"
+                                    <ion-input #barcodefocus *ngIf="!field.textarea" [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                         [maxlength]="field.maxLength" [minlength]="field.minLength"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [placeholder]="field.description"
