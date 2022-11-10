@@ -235,7 +235,7 @@ export class CrudPage implements OnInit {
         this.isInProgress = true;
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then(() => {
           this.crud.modalSubmitListener.next({ "result": true });
-          if (!this.barcoded_) {
+          if (!this.barcoded_ || this.op !== "insert") {
             setTimeout(() => {
               this.doCancel({ op: this.op, modified: this.modified, filter: [] });
             }, 500);
