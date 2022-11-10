@@ -17,6 +17,7 @@ export class CrudPage implements OnInit {
   @Input() shuttle: any = {};
   @Input() modified: boolean = false;
   @ViewChild(JsonEditorComponent, { static: false }) public editor?: JsonEditorComponent;
+  @ViewChild("barcodefocus", { static: false }) barcodefocus: any;
   public novalue: any = null;
   public properties: any = {};
   public required: any = [];
@@ -118,7 +119,7 @@ export class CrudPage implements OnInit {
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");
-        this.is_ready = true;
+        // this.is_ready = true;
       });
     });
   }
@@ -138,35 +139,29 @@ export class CrudPage implements OnInit {
           this.showhide = this.op === "action" ? "hide-segment" : "show-segment";
           if (this.actionix >= 0) {
             this.doAktionChange(this.actionix).then(() => {
-              setTimeout(() => {
-                this.is_ready = true;
-                this.cd.detectChanges();
-              }, 500);
+              // setTimeout(() => { this.cd.detectChanges(); }, 500);
             }).catch((error: any) => {
               console.error(error);
               this.misc.doMessage(error, "error");
-              this.is_ready = true;
             });
           } else {
-            setTimeout(() => {
-              this.is_ready = true;
-              this.cd.detectChanges();
-            }, 500);
+            // setTimeout(() => { this.cd.detectChanges(); }, 500);
           }
         }).catch((error: any) => {
           console.error(error);
           this.misc.doMessage(error, "error");
-          this.is_ready = true;
+        }).finally(() => {
+          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, 500) : null;
         });
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");
-        this.is_ready = true;
       });
     }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "error");
-      this.is_ready = true;
+    }).finally(() => {
+      setTimeout(() => { this.is_ready = true; }, 300);
     });
   }
 

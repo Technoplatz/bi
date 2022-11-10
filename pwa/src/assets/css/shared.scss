@@ -329,6 +329,12 @@ ion-alert .alert-radio-group {
   color: var(--ion-color-light);
 }
 
+.barcode {
+  font-size: 22px !important;
+  letter-spacing: 0px !important;
+  font-family: monospace;
+}
+
 .data-at-column {
   min-width: 140px;
 }

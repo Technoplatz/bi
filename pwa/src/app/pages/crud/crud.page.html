@@ -33,11 +33,11 @@
 
                 <ng-template #nobarcoded>
                     <ion-button *ngIf="collection!='_backup' && collection!='_storage' && op!='filter' && !isInProgress"
-                    size="small" (click)="doSubmit()">
-                    {{ 'SAVE' | translate }}
-                </ion-button>
+                        size="small" (click)="doSubmit()">
+                        {{ 'SAVE' | translate }}
+                    </ion-button>
                 </ng-template>
-                
+
                 <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" size="small"
                     (click)="doSubmit()">
                     {{ 'IMPORT' | translate }}
@@ -46,7 +46,7 @@
                     {{ 'CANCEL' | translate }}
                 </ion-button>
 
-                
+
 
                 <ion-button *ngIf="op=='update'" color="danger" size="small" (click)="doRemove()" class="end-item">
                     {{ 'DELETE' | translate }}&nbsp;
@@ -173,7 +173,7 @@
                             <div *ngIf="field.bsonType=='string' && !field.file" class="full-width">
                                 <div
                                     *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword">
-                                    <ion-input *ngIf="!field.textarea" class="ion-no-padding"
+                                    <ion-input #barcodefocus *ngIf="!field.textarea" class="ion-no-padding barcode"
                                         [maxlength]="field.maxLength" [minlength]="field.minLength"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [placeholder]="field.description"
