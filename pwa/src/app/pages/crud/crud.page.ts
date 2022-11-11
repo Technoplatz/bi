@@ -138,19 +138,16 @@ export class CrudPage implements OnInit {
           this.tab = "data";
           this.showhide = this.op === "action" ? "hide-segment" : "show-segment";
           if (this.actionix >= 0) {
-            this.doAktionChange(this.actionix).then(() => {
-              // setTimeout(() => { this.cd.detectChanges(); }, 500);
-            }).catch((error: any) => {
+            this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
               console.error(error);
               this.misc.doMessage(error, "error");
             });
-          } else {
-            // setTimeout(() => { this.cd.detectChanges(); }, 500);
           }
         }).catch((error: any) => {
           console.error(error);
           this.misc.doMessage(error, "error");
         }).finally(() => {
+          setTimeout(() => { this.is_ready = true; }, 200);
           this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, 500) : null;
         });
       }).catch((error: any) => {
@@ -160,8 +157,6 @@ export class CrudPage implements OnInit {
     }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "error");
-    }).finally(() => {
-      setTimeout(() => { this.is_ready = true; }, 300);
     });
   }
 
