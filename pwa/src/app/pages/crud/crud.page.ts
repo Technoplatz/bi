@@ -57,6 +57,7 @@ export class CrudPage implements OnInit {
   public actionix: number = -1;
   public is_token_copied: boolean = false;
   public barcoded_: boolean = false;
+  public istrue_: boolean = true;
   public filters: any = [{
     key: null,
     op: null,

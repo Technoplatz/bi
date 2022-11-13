@@ -11,7 +11,7 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a low-code multi-container [Data Application](#data-application) and [API](#api) platform designed to manage a mission critical business process without the need to develop software from scratch. Considering that every job has its own special conditions, it offers a pragmatic solution under three basic topics;
+Technoplatz BI is a low-code multi-container Data Application platform designed to manage a mission critical business process without the need to develop software from scratch. Considering that each business has its own unique conditions a pragmatic solution which combined under three main topics is provided.
 
 - [Data Application](#data-application)
 - [BI-directional Data sharing](#bi-directional-data-sharing)
@@ -19,18 +19,18 @@ Technoplatz BI is a low-code multi-container [Data Application](#data-applicatio
 
 ### Data Application
 
-It is a progressive web application that contains key functions to help complete a business process end-to-end. Considering that every job has its own special conditions, it is equipped with features that offer optimal and pragmatic solutions;
+It is a cross-platform progressive web application contains the following basic functions required to manage a business process.
 
-- Self Service Administration\
-<sup>Management of data collections, users and security.</sup>
+- Administration\
+<sup>Self-service management of key system components.</sup>
 - Basic Data Operations and Actions (CRUD+)\
-<sup>Basic data operations, advanced search, import data from files and Actions.</sup>
+<sup>Four basic data operations search, import and actions.</sup>
 - Automation\
-<sup>Defining automated tasks.</sup>
-- Statistics and Data Visualization\
+<sup>Scheduled or one-click tasks executed on data blocks.</sup>
+- Data Visualization\
 <sup>Descriptive statistics and chart definitions.</sup>
 - Log Tracking\
-<sup>All connections and transactions can be tracked on a record basis.</sup>
+<sup>Transaction history tracking on a record basis.</sup>
 
 ### BI-directional Data sharing
 
@@ -98,7 +98,8 @@ Technoplatz BI runs on the Docker which is an open platform for developing, ship
     apt update && apt upgrade -y
     ```
 
-3. Reboot the platform.
+3. Reboot the platform after the update is complete.
+
     ```bash
     reboot
     ```

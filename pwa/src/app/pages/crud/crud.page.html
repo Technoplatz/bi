@@ -167,7 +167,8 @@
                             <div *ngIf="field.bsonType=='string' && !field.file" class="full-width">
                                 <div
                                     *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword">
-                                    <ion-input #barcodefocus *ngIf="!field.textarea" [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
+                                    <ion-input #barcodefocus *ngIf="!field.textarea"
+                                        [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                         [maxlength]="field.maxLength" [minlength]="field.minLength"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [placeholder]="field.description"
@@ -217,12 +218,19 @@
                                     type="file" [required]="field.required" (change)="onFileChange($event)">
                                 </ion-input>
                             </div>
-                            <ion-input *ngIf="field.bsonType=='date'" class="ion-no-padding"
+                            <!-- <ion-input *ngIf="field.bsonType=='date'" class="ion-no-padding"
                                 [formControlName]="field.name" type="date" [required]="field.required"
                                 [placeholder]="field.description"
-                                [ngModel]="data[field.name] && data[field.name]?.replace(' ', 'T') | date:'yyyy-MM-dd'"
+                                [ngModel]="data[field.name]?.replace(' ', 'T') | date:'yyyy-MM-dd'"
                                 [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
-                            </ion-input>
+                            </ion-input> -->
+                            <ion-datetime *ngIf="field.bsonType=='date'" presentation="date-time"
+                                [placeholder]="field.description" displayFormat="DD.MM.YYYY HH:mm:ss"
+                                pickerFormat="DD.MM.YYYY HH:mm:ss" [formControlName]="field.name"
+                                [(ngModel)]="data[field.name]"
+                                [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                showClearButton="true">
+                            </ion-datetime>
                             <ion-input
                                 *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='float'"
                                 class="ion-no-padding" [formControlName]="field.name" type="number"
@@ -230,11 +238,6 @@
                                 [(ngModel)]="data[field.name]"
                                 [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
                             </ion-input>
-                            <!-- <ion-input *ngIf="field.bsonType=='number'" class="ion-no-padding"
-                                [formControlName]="field.name" type="number" [required]="field.required"
-                                [placeholder]="field.description" [(ngModel)]="data[field.name]"
-                                [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
-                            </ion-input> -->
                             <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
                                 [(ngModel)]="data[field.name]">
                             </ion-checkbox>

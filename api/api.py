@@ -35,6 +35,7 @@ from random import randint
 from bson import json_util
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
+from dateutil import tz
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -943,10 +944,14 @@ class Crud():
                 if "bsonType" in property_:
                     if k in doc_.keys():
                         if property_["bsonType"] == "date":
+                            rgx_ = "%Y-%m-%d" if len(doc_[k]) == 10 else "%Y-%m-%dT%H:%M:%S"
+                            ln_ = 10 if len(doc_[k]) == 10 else 19
+                            # from_zone_ = tz.gettz("UTC")
                             if isinstance(doc_[k], str) and self.validate_iso8601_f(doc_[k]):
-                                d[k] = datetime.strptime(doc_[k][:10], "%Y-%m-%d")
+                                # d[k] = datetime.strptime(doc_[k][:ln_], rgx_).replace(tzinfo = from_zone_)
+                                d[k] = datetime.strptime(doc_[k][:ln_], rgx_)
                             else:
-                                d[k] = datetime.strptime(doc_[k][:10], "%Y-%m-%d") if doc_[k] is not None else None
+                                d[k] = datetime.strptime(doc_[k][:ln_], rgx_) if doc_[k] is not None else None
                         elif property_["bsonType"] == "string":
                             d[k] = str(doc_[k]) if doc_[k] is not None else doc_[k]
                         elif property_["bsonType"] in ["number", "int", "float", "double"]:
