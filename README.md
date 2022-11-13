@@ -11,10 +11,10 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a low-code multi-container Data Application platform designed to manage a mission critical business process without the need to develop software from scratch. Considering that each business has its own unique conditions a pragmatic solution which combined under three main topics is provided.
+Technoplatz BI is a low-code multi-container Data Application platform designed to manage mission critical business processes without the need to develop software from scratch. Considering that each business has its own unique conditions a pragmatic solution which combined under three main topics is provided.
 
 - [Data Application](#data-application)
-- [BI-directional Data sharing](#bi-directional-data-sharing)
+- [BI-directional Data Sharing](#bi-directional-data-sharing)
 - [API](#application-programming-interface-api)
 
 ### Data Application
@@ -24,7 +24,7 @@ It is a cross-platform progressive web application contains the following basic 
 - Administration\
 <sup>Self-service management of key system components.</sup>
 - Basic Data Operations and Actions (CRUD+)\
-<sup>Four basic data operations search, import and actions.</sup>
+<sup>Performing the basic data operations as well as search, import and Actions.</sup>
 - Automation\
 <sup>Scheduled or one-click tasks executed on data blocks.</sup>
 - Data Visualization\
@@ -32,12 +32,12 @@ It is a cross-platform progressive web application contains the following basic 
 - Log Tracking\
 <sup>Transaction history tracking on a record basis.</sup>
 
-### BI-directional Data sharing
+### BI-directional Data Sharing
 
-Technoplatz BI is designed for situation where business partners are the integral part of a process in terms of the data source and the actions they need to take. For this reason, it provides three pragmatic solutions especially for the following requirements by addressing the issues in the [Inner-Cycle](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
+Technoplatz BI is designed for situation where business partners are the integral part of a process in terms of the data source and the actions they need to take. For this reason, it provides two beneficial solutions about bi-directional data sharing by addressing the issues in the [Inner-Cycle](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
 
 - Data Announcements\
-<sup>Make data request to business partners and get responses through API.</sup>
+<sup>Making data request to business partners and get responses.</sup>
 
 - Live Data Connectors\
 <sup>Secure and read-only access to shared data through Excel.</sup>
