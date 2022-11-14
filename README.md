@@ -11,36 +11,27 @@
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a low-code multi-container Data Application platform designed to manage mission critical business processes without the need to develop software from scratch. Considering that each business has its own unique conditions a pragmatic solution which combined under three main topics is provided.
+Technoplatz BI is a low-code, multi-container data application and sharing platform designed to manage mission critical, data-driven business processes without the need to develop software from scratch. Considering that each business has its own unique conditions, it offers an optimized pragmatic solution under two main topics;
 
 - [Data Application](#data-application)
-- [BI-directional Data Sharing](#bi-directional-data-sharing)
 - [API](#application-programming-interface-api)
 
 ### Data Application
 
-It is a cross-platform progressive web application contains the following basic functions required to manage a business process.
+It is a cross-platform progressive web application contains the following basic functions required to manage data-driven business processes;
 
 - Administration\
-<sup>Self-service management of key system components.</sup>
-- Basic Data Operations and Actions (CRUD+)\
+<sup>Self-service management of administrative system components.</sup>
+- Basic Data Operations (CRUD+)\
 <sup>Performing the basic data operations as well as search, import and Actions.</sup>
+- Actions\
+<sup>One-click bulk operations</sup>
 - Automation\
-<sup>Scheduled or one-click tasks executed on data blocks.</sup>
+<sup>Scheduled tasks executed on data blocks.</sup>
 - Data Visualization\
 <sup>Descriptive statistics and chart definitions.</sup>
 - Log Tracking\
-<sup>Transaction history tracking on a record basis.</sup>
-
-### BI-directional Data Sharing
-
-Technoplatz BI is designed for situation where business partners are the integral part of a process in terms of the data source and the actions they need to take. For this reason, it provides two beneficial solutions about bi-directional data sharing by addressing the issues in the [Inner-Cycle](bi-directional-data-sharing) consisting of customers, suppliers, distributors, service providers and other internal company departments;
-
-- Data Announcements\
-<sup>Making data request to business partners and get responses.</sup>
-
-- Live Data Connectors\
-<sup>Secure and read-only access to shared data through Excel.</sup>
+<sup>Transaction history can be tracked on record basis.</sup>
 
 ### API
 
@@ -49,25 +40,36 @@ The internal Application Programming Interface has been developed in a monolithi
 - Internal Functions\
 <sup>Core modules and remote data access.</sup>
 - External Functions (Web Services)\
-<sup>Secure remote access ability.</sup>
+<sup>İş ortaklarının erişimi için Secure remote access ability.</sup>
 - CronJobs\
 <sup>Runs scheduled Automation tasks.</sup>
 
+## BI-directional Data Sharing
+
+Technoplatz BI is designed to provide unique solutions especially for situations where business partners are the integral part of business processes in terms of the data they need to share and the actions they need to take. For this reason, it provides complementary methods to share data bi-directionally within the **inner-cycle** of customers, suppliers, distributors and other internal departments;
+
+- Data Announcements\
+Auto-generated email messages supported with data files and pivot tables that inform business partners and internal departments regarding the data requested from them and the actions they need to take in order to complete a business process.
+
+- Data Connectors\
+Live and read-only links allow business partners to securely access and download raw data associated with them through Microsoft Excel or other business intelligence tools.
+
+- Web Services\
+BI backend enables business partners to securely perform basic data entry and updates over internal API connections to reply data requests announced to them.
+
 ## Highlights
 
-#### Advantageous
+Technoplatz BI is built on open source information technologies with proven power and reliability. This approach provides sustainability and significant cost advantages in the management of critical business processes;
 
-- Your data is now totally under your control with Its **self service** approach.
-- Platform independent. Runs on the cloud, on-premises or PCs.
-- It has the sweet smell of **flexible** JSON data structure.
-- Scalable. Starts small and grows as needed.
-- It is **open source** so everyone can review codes and learn from them a lot.
-- Data Sciences Ready Accessible from other BI tools and Excel.
-- Empowers the **ISO27001** certification process, not a stopper.
+- **Self Service**. Your data is now totally under your control.
+- **Platform independent**. Runs on the cloud, on-premises or PCs.
+- **Flexible**. It has the sweet smell of JSON data structure.
+- **Scalable**. Starts small and grows as needed.
+- **Open Source**. Everyone can review codes and learn from them a lot.
+- **Data Oriented**. Accessible from other BI tools and Excel.
+- **ISO Helper**. Empowers the **ISO27001** certification process, not a stopper.
 
 #### Technologies
-
-Technoplatz BI is built on open source information technologies with proven power and reliability. This approach provides sustainability and significant cost advantages in the management of critical business processes.
 
 - [Docker Compose](#https://docs.docker.com/compose/) \
 <sup>A tool developed to help define and share multi-container applications.</sup>
