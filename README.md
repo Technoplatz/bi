@@ -59,17 +59,17 @@ BI backend enables business partners to securely perform basic data entry and up
 
 ## Highlights
 
-Technoplatz BI is built on open source information technologies with proven power and reliability. This approach provides sustainability and significant cost advantages in the management of critical business processes;
+Technoplatz BI is designed as a self-service and containerized business application to be managed by companies of various sizes and users of all levels. Containerization means that an application runs in isolated runtime environments called "containers" with its dependencies, configuration files and operating system. This approach provides sustainability and significant cost advantages in the management of mission critical business processes;
 
 - **Self Service**. Your data is now totally under your control.
-- **Platform independent**. Runs on the cloud, on-premises or PCs.
+- **Platform Independent**. Runs on the cloud, on-premises or PCs.
 - **Flexible**. It has the sweet smell of JSON data structure.
 - **Scalable**. Starts small and grows as needed.
-- **Open Source**. Everyone can review codes and learn from them a lot.
-- **Data Oriented**. Accessible from other BI tools and Excel.
-- **ISO Helper**. Empowers the **ISO27001** certification process, not a stopper.
+- **Data Sciences Ready**. Accessible from other BI tools and Excel.
+- **ISO Friendly**. Empowers the **ISO 27001** certification process, not a stopper.
 
-#### Technologies
+**Open Source**\
+Technoplatz BI is built on open source information technologies. Everyone can review the codes and learn from them a lot.
 
 - [Docker Compose](#https://docs.docker.com/compose/) \
 <sup>A tool developed to help define and share multi-container applications.</sup>
@@ -77,7 +77,7 @@ Technoplatz BI is built on open source information technologies with proven powe
 <sup>A document database used to build highly available and scalable internet applications.</sup>
 - [Python](#https://www.python.org) \
 <sup>A high-level programming language supports multiple paradigms.</sup>
-- [Pandas Library](#https://pandas.pydata.org) \
+- [Pandas](#https://pandas.pydata.org) \
 <sup>An open source data analysis and manipulation tool built on top of the Python language.</sup>
 - [Ionic Angular TS](#https://ionicframework.com) \
 <sup>A framework for building cross-platform client applications using HTML and TypeScript.</sup>
