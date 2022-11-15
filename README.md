@@ -7,7 +7,7 @@ Technoplatz BI is a low-code, multi-container data application and sharing platf
 - [Community Edition](#community-edition)
 - [Highlights](#highlights)
 - [Installation](#installation)
-- [Management](#management)
+- [Troubleshooting](#troubleshooting)
 - [Licensing Options](#licensing-options)
 - [About](#about)
 
@@ -70,27 +70,28 @@ Technoplatz BI is designed as a self-service and containerized business applicat
 - **Dedicated**. Runs on your own cloud. Not shared.
 - **Self Service**. Management of your data is now totally under your control.
 - **Platform Independent**. It can be installed on Windows, Linux or Mac.
+- **Open Source**. Everyone can review the codes and learn from them a lot.
 - **Flexible**. It has the sweet smell of JSON data structure.
 - **Scalable**. Starts small and grows as needed.
 - **Data Sciences Ready**. Accessible from other BI tools and Excel.
 - **ISO Friendly**. Empowers the **ISO 27001** certification process, not a stopper.
 
-### Open Source
+### Used Technologies
 
-Technoplatz BI is built on the leading open source information technologies. Everyone can review the codes and learn from them a lot.
+Technoplatz BI is powered by the leading open source information technologies;
 
 - [Docker Compose](#https://docs.docker.com/compose/) \
-<sup>A tool developed to help define and share multi-container applications.</sup>
+<span style="font-size: small;">A tool developed to help define and share multi-container applications.</span>
 - [MongoDB](#https://www.mongodb.com) \
-<sup>A document database used to build highly available and scalable internet applications.</sup>
+<span style="font-size: small;">A document database used to build highly available and scalable internet applications.</span>
 - [Python](#https://www.python.org) \
-<sup>A high-level programming language supports multiple paradigms.</sup>
+<span style="font-size: small;">A high-level programming language supports multiple paradigms.</span>
 - [Pandas](#https://pandas.pydata.org) \
-<sup>An open source data analysis and manipulation tool built on top of the Python language.</sup>
+<span style="font-size: small;">An open source data analysis and manipulation tool built on top of the Python language.</span>
 - [Ionic Angular TS](#https://ionicframework.com) \
-<sup>A framework for building cross-platform client applications using HTML and TypeScript.</sup>
+<span style="font-size: small;">A framework for building cross-platform client applications using HTML and TypeScript.</span>
 - [GitHub](#https://github.com) \
-<sup>The leading version control system designed to handle CI/CD.</sup>
+<span style="font-size: small;">The leading version control system designed to handle CI/CD.</span>
 
 ## Installation
 
@@ -185,7 +186,7 @@ http://localhost:8100
 
 You can log out and exit the platform safely after the installation is complete. Technoplatz BI will continue to run in the background and restart automatically when the platform is rebooted.
 
-## Platform Management
+## Troubleshooting
 
 Unlike the Enterprise Edition the Community Edition does not provide any official support for platform maintenance and troubleshooting. As long as the system resources are not exceeded you are not expected to encounter a serious problem but the actions to be taken for certain situations are explained below;
 
