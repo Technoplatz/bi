@@ -80,18 +80,12 @@ Technoplatz BI is designed as a self-service and containerized business applicat
 
 Technoplatz BI is powered by the leading open source information technologies;
 
-- [Docker Compose](#https://docs.docker.com/compose/) \
-<span style="font-size: small;">A tool developed to help define and share multi-container applications.</span>
-- [MongoDB](#https://www.mongodb.com) \
-<span style="font-size: small;">A document database used to build highly available and scalable internet applications.</span>
-- [Python](#https://www.python.org) \
-<span style="font-size: small;">A high-level programming language supports multiple paradigms.</span>
-- [Pandas](#https://pandas.pydata.org) \
-<span style="font-size: small;">An open source data analysis and manipulation tool built on top of the Python language.</span>
-- [Ionic Angular TS](#https://ionicframework.com) \
-<span style="font-size: small;">A framework for building cross-platform client applications using HTML and TypeScript.</span>
-- [GitHub](#https://github.com) \
-<span style="font-size: small;">The leading version control system designed to handle CI/CD.</span>
+- [Docker Compose](#https://docs.docker.com/compose/)
+- [MongoDB](#https://www.mongodb.com)
+- [Python](#https://www.python.org)
+- [Pandas](#https://pandas.pydata.org)
+- [Ionic Angular TS](#https://ionicframework.com)
+- [GitHub](#https://github.com)
 
 ## Installation
 
