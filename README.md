@@ -1,37 +1,56 @@
-## Technoplatz BI Community Edition
+## Technoplatz BI
 
 *It's time to get data-driven with your inner-cycle!*
 
-- [What is Technoplatz BI](#what-is-technoplatz-bi)
+Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage a mission critical, data-driven business process without the need to develop software from scratch.
+
+- [Community Edition](#community-edition)
 - [Highlights](#highlights)
 - [Installation](#installation)
 - [Management](#management)
 - [Licensing Options](#licensing-options)
 - [About](#about)
 
-## What is Technoplatz BI
+## Community Edition
 
-Technoplatz BI is a low-code, multi-container data application and sharing platform designed to manage mission critical, data-driven business processes without the need to develop software from scratch. Considering that each business has its own unique conditions, it offers an optimized pragmatic solution under two main topics;
+ Considering that each business has its own unique conditions, it offers an optimized and pragmatic solution for three main requirements;
 
-- [Data Application](#data-application)
-- [API](#application-programming-interface-api)
+- Self-Service Data Management\
+<span style="font-size: small; font-weight: bold;">[DATA APPLICATION](#data-application)</span>
+- Complete a process with Business partner data\
+<span style="font-size: small; font-weight: bold;">[BI-DIRECTIONAL DATA SHARING](#bi-directional-data-sharing)</span>
+- Data Connections and Automation\
+<span style="font-size: small; font-weight: bold;">[INTERNAL API](#api)</span>
 
 ### Data Application
 
-It is a cross-platform progressive web application contains the following basic functions required to manage data-driven business processes;
+Technoplatz BI has a cross-platform progressive internal web application with the following modules to manage data-driven business processes in a unique interface instead of spreadsheets and legacy software.
 
-- Administration\
-<sup>Self-service management of administrative system components.</sup>
-- Basic Data Operations (CRUD+)\
-<sup>Performing the basic data operations as well as search, import and Actions.</sup>
+- System Administration\
+<sup>Management of the administrative components.</sup>
+- CRUD+\
+<sup>Performing basic data operations on a unique interface.</sup>
 - Actions\
-<sup>One-click bulk operations</sup>
+<sup>Running bulk data updates with one-click.</sup>
 - Automation\
 <sup>Scheduled tasks executed on data blocks.</sup>
 - Data Visualization\
-<sup>Descriptive statistics and chart definitions.</sup>
+<sup>Easy charts, pivot tables and descriptive statistics.</sup>
 - Log Tracking\
 <sup>Transaction history can be tracked on record basis.</sup>
+
+### BI-directional Data Sharing
+
+The product is designed to provide solutions especially for cases where business partners are the integral part of business processes in terms of the data they need to share and the actions they need to take. For this reason, it provides complementary methods to share data bi-directionally within the **inner-cycle** of customers, suppliers, distributors and other internal departments;
+
+- Data Announcements\
+Auto-generated email messages supported with data files and pivot tables that inform business partners and internal departments regarding the data requested from them and the actions they need to take in order to complete a business process.
+
+- Data Connectors\
+Live and read-only links allow business partners to securely access and download raw data associated with them through Microsoft Excel or other business intelligence tools.
+
+- Web Services\
+BI backend enables business partners to securely perform basic data entry and updates over internal API connections to reply data requests announced to them.
 
 ### API
 
@@ -44,32 +63,21 @@ The internal Application Programming Interface has been developed in a monolithi
 - CronJobs\
 <sup>Runs scheduled Automation tasks.</sup>
 
-## BI-directional Data Sharing
-
-Technoplatz BI is designed to provide unique solutions especially for situations where business partners are the integral part of business processes in terms of the data they need to share and the actions they need to take. For this reason, it provides complementary methods to share data bi-directionally within the **inner-cycle** of customers, suppliers, distributors and other internal departments;
-
-- Data Announcements\
-Auto-generated email messages supported with data files and pivot tables that inform business partners and internal departments regarding the data requested from them and the actions they need to take in order to complete a business process.
-
-- Data Connectors\
-Live and read-only links allow business partners to securely access and download raw data associated with them through Microsoft Excel or other business intelligence tools.
-
-- Web Services\
-BI backend enables business partners to securely perform basic data entry and updates over internal API connections to reply data requests announced to them.
-
 ## Highlights
 
-Technoplatz BI is designed as a self-service and containerized business application to be managed by companies of various sizes and users of all levels. Containerization means that an application runs in isolated runtime environments called "containers" with its dependencies, configuration files and operating system. This approach provides sustainability and significant cost advantages in the management of mission critical business processes;
+Technoplatz BI is designed as a self-service and containerized business application to be managed by companies of various sizes and users of all levels. Containerization means that an application runs in isolated runtime environments called containers with its dependencies, configuration files and operating system. This approach provides sustainability and significant cost advantages in the management of mission critical business processes;
 
-- **Self Service**. Your data is now totally under your control.
-- **Platform Independent**. Runs on the cloud, on-premises or PCs.
+- **Dedicated**. Runs on your own cloud. Not shared.
+- **Self Service**. Management of your data is now totally under your control.
+- **Platform Independent**. It can be installed on Windows, Linux or Mac.
 - **Flexible**. It has the sweet smell of JSON data structure.
 - **Scalable**. Starts small and grows as needed.
 - **Data Sciences Ready**. Accessible from other BI tools and Excel.
 - **ISO Friendly**. Empowers the **ISO 27001** certification process, not a stopper.
 
-**Open Source**\
-Technoplatz BI is built on open source information technologies. Everyone can review the codes and learn from them a lot.
+### Open Source
+
+Technoplatz BI is built on the leading open source information technologies. Everyone can review the codes and learn from them a lot.
 
 - [Docker Compose](#https://docs.docker.com/compose/) \
 <sup>A tool developed to help define and share multi-container applications.</sup>
@@ -86,39 +94,37 @@ Technoplatz BI is built on open source information technologies. Everyone can re
 
 ## Installation
 
-The installation of the system consists of three steps that must follow each other. In order to perform these steps [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience on Terminal is required.
+The installation of the product consists of steps must follow each other. In order to run the required commands [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience is required.
 
-1. Docker Environment\
-Technoplatz BI runs on the Docker which is an open platform for developing, shipping, and running applications. You can buy a hosted system from the leading cloud providers or install Docker Desktop on your computer for free by following the instructions at the links below;
+#### Setting up a Docker Environment
+Technoplatz BI runs on the Docker which is an open platform for developing, shipping, and running applications. You can install Docker Desktop on your computer for free or buy a hosted service from the leading cloud providers by following below instructions.
 
-    - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
-    - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
+- [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
+- [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
-2. Connect to the platform via SSH and perform the recent OS updates immediately.
+As your platform is ready, you can start to perform the installation steps;
+
+1. Establish an SSH connection to the platform to perform the latest OS updates.\
+Don't forget to reboot the system after the updates are complete.
 
     ```bash
     apt update && apt upgrade -y
     ```
 
-3. Reboot the platform after the update is complete.
-
     ```bash
     reboot
     ```
 
-4. Reconnect to the platform and clone the official BI repository from Github.
+2. Reconnect to the platform to clone the official product repository from Github. Then go to **bi** folder which is going to be clonned.
 
     ```bash
     git clone https://github.com/technoplatz/bi.git
     ```
-
-5. Go to "bi" folder which is going to be created.
-
     ```bash
     cd bi
     ```
 
-6. Edit the ".env" file, replace the sample values in user parameters section with your own data and save the file.
+3. Edit the ".env" file, replace the sample values with your own data and save the file. Changes should only be made in the "user parameters" section. It is recommended that changes in system parameters be made only by advanced users.
 
     ```bash
     TZ=Europe/Berlin
@@ -129,7 +135,7 @@ Technoplatz BI runs on the Docker which is an open platform for developing, ship
     FROM_EMAIL=bi@company.com
     FROM_NAME=Technoplatz
     ```
-    
+
     <sup>**TZ:** Time zone of your platform's location.\
     **DOMAIN:** Leave it "localhost" for testing or personal use.\
     **USER_EMAIL:** E-mail address of Administrator user.\
@@ -141,74 +147,83 @@ Technoplatz BI runs on the Docker which is an open platform for developing, ship
     <sup>TZ must be entered according to the official TZ format (eg. America/New_York)\
     https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</sup>
 
-
-7. Uygulamanın güvenliğini sağlayan API anahtarını set ediniz. Lokal kullanım için anahtar belirlemeniz gerekmez, sistem jenerik bir anahtar kullanır ancak internet ortamında 24 karaktere kadar harf ve sayıdan oluşan bir API anahtarı kullanılmalıdır. Güvenlik açısından [Production, Madde 10](#production) 'da belirtilen şekilde bir anahtar tanımlayarak aşağıdaki komut ile kaydediniz.
-
-    ```bash
-    echo -n "your-bi-apikey" > .secret-bi-apikey
-    ```
-
-8. Set a database password.
-
-    ```bash
-    echo -n "your-database-password" > .secret-mongo-password
-    ```
-
-9. It is used for sending automated emails over the Twilio [Sendgrid](#https://sendgrid.com) which is one of the leading e-mail API service providers. Please find the detailed information about how to obtain an API key on Sendgrid. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key
+4. Uygulamanın güvenliğini sağlayan anahtarları set ediniz.\
+\
+**API KEY (secret-bi-apikey)**\
+Lokal kullanım için anahtar belirlemeniz gerekmez, sistem jenerik bir anahtar kullanır ancak internet ortamında 24 karaktere kadar harf ve sayıdan oluşan bir API anahtarı kullanılmalıdır. Güvenlik açısından [Production, Madde 10](#production) 'da belirtilen şekilde bir anahtar tanımlayarak aşağıdaki komut ile kaydediniz.\
+\
+**Database Password (secret-mongo-password)**\
+\
+**Sendgrid Api Key (secret-sendgrid-apikey)**\
+It is used for sending automated emails over the Twilio [Sendgrid](#https://sendgrid.com) which is one of the leading e-mail API service providers. Please find the detailed information about how to obtain an API key on Sendgrid. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key\
+\
+--
 
     ```bash
-    echo -n "your-sendgrid-apikey" > .secret-sendgrid-apikey
+    echo -n "********" > .secret-bi-apikey
+    ```
+    ```bash
+    echo -n "********" > .secret-mongo-password
+    ```
+    ```bash
+    echo -n "********" > .secret-sendgrid-apikey
     ```
 
-10. Start the containers by keeping them up and running at the background. This step may take 2-3 minutes depending on your bandwidth;
+5. Start the containers by keeping them up and running at the background. This step may take a couple of minutes depending on your internet bandwidth;
 
     ```bash
     docker-compose up --detach --remove-orphans
     ```
 
-11. To open your first session go to the following address in your web browser, click the "Sign in" button and enter your email and password provided in the .env file.
+#### Kick-off
+
+In order to open your first session go to the following address in your web browser, click the "Sign in" button, enter your email and password which you provided in the .env file.
+
+```bash
+http://localhost:8100
+```
+
+You can log out and exit the platform safely after the installation is complete. Technoplatz BI will continue to run in the background and restart automatically when the platform is rebooted.
+
+## Platform Management
+
+Unlike the Enterprise Edition the Community Edition does not provide any official support for platform maintenance and troubleshooting. As long as the system resources are not exceeded you are not expected to encounter a serious problem but the actions to be taken for certain situations are explained below;
+
+- To restart BI by receiving the latest software updates;
 
     ```bash
-    http://localhost:8100
+    docker-compose pull && docker-compose up --detach --remove-orphans
     ```
 
-## Management
+- To stop the system;
 
+    ```bash
+    docker-compose down
+    ```
 
-To start or restart the system by keeping it up and running in the background;
+- To make room for resources when needed;
 
-```bash
-docker-compose up --detach --remove-orphans
-```
+    ```bash
+    docker system prune
+    ```
 
-To start or restart the system by receiving the latest software updates and keep it up and running in the background;
+- To track the system logs of a certain service;
 
-```bash
-docker-compose pull && docker-compose up --detach --remove-orphans
-```
+    ```bash
+    docker-compose logs -f | grep 'api'
+    ```
 
-To stop the system;
+- To perform operating system updates and reboot regularly;
 
-```bash
-docker-compose down
-```
-
-In order to make room for resources when needed;
-
-```bash
-docker system prune
-```
-
-To take a look at the logs;
-
-```bash
-# To display all, except db and only api logs.
-docker-compose logs -f
-docker-compose logs -f | grep -v 'mongo'
-docker-compose logs -f | grep 'api'
-```
+    ```bash
+    apt update && apt upgrade -y
+    ```
+    ```bash
+    reboot
+    ```
 
 ## Production
+
 Community Edition's default settings are provided for testing and local use. In case the system is used in a real business environment under your subdomain, e.g. **bi.company.com**, there is no stopper for this however the there are crucial security and system requirements recommended (including but not limited to) below must be fulfilled before making the system public. All responsibilities in this regard belongs to the user.
 
 1. Define **bi**.company.com and **api.bi**.company.com subdomains in your name server and forward them to the IP address of your [Docker platform](#step-1) by adding an "A" record for each.
@@ -222,6 +237,7 @@ Community Edition's default settings are provided for testing and local use. In 
 9. Get your Docker platform behind a cloud firewall and configure the access settings according to your corporate security policy.
 
 ## Licensing Options
+
 The system is provided in two licensing options;
 
 - Community Edition
@@ -230,17 +246,17 @@ The system is provided in two licensing options;
 <div class="licensing">
 
 | | Community Edition | Enterprise Edition |
-| :--- | :--- | :--- |
-|  Hosting | Self hosted | SaaS on Azure, GCP, DigitalOcean|
+| :--- | :---: | :---: |
+|  Hosting | Self Hosted | SaaS |
 |  Database | MongoDB 6 | MongoDB 6 |
 |  DB Replication | Yes [3 internal nodes] | Yes [3 nodes] |
 |  DB Transactions | Yes | Yes |
-|  External Security | No | Cloudflare |
-|  2FA | Yes | Yes |
+|  Web App Firewall | No | Yes |
+|  <span style="white-space: nowrap;">Two-Factor Authentication</span> | Yes | Yes |
 |  Support | No | Yes |
 |  Custom Domain | Yes | Yes |
 |  Custom Branding | Not Allowed | Yes |
-|  Licensing | GNU Affero General Public License v3.0 | GNU Affero General Public License v3.0 + SLA |
+|  Licensing | GNU AGPL v3.0 | GNU AGPL v3.0 + SLA |
 |  Pricing | Free | [Get a Quote](#) |
 
 </div>
