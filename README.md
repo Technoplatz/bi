@@ -6,6 +6,7 @@ Technoplatz BI is a low-code, multi-container data application and sharing platf
 
 - [Community Edition](#community-edition)
 - [Highlights](#highlights)
+- [Cloud Environment](#cloud-environment)
 - [Installation](#installation)
 - [Troubleshooting](#troubleshooting)
 - [Licensing Options](#licensing-options)
@@ -87,20 +88,28 @@ Technoplatz BI is powered by the leading open source information technologies;
 - [Ionic Angular TS](https://ionicframework.com)
 - [GitHub](https://github.com)
 
-## Installation
+## Cloud Environment
 
-The installation of the product consists of steps must follow each other. In order to run the required commands [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience is required.
-
-#### Setting up a Docker Environment
-Technoplatz BI runs on the Docker which is an open platform for developing, shipping, and running applications. You can install Docker Desktop on your computer for free or buy a hosted service from the leading cloud providers by following below instructions.
+Technoplatz BI runs on the Docker platform which is the leading open source virtualization software for developing, shipping and running applications. You can install Docker Desktop on your computer for free or buy a hosted service from many cloud providers by following below instructions;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
-As your platform is ready, you can start to perform the installation steps;
+#### System Requirements
 
-1. Establish an SSH connection to the platform to perform the latest OS updates.\
-Don't forget to reboot the system after the updates are complete.
+The minimum configuration recommended for the platform to work properly is;
+
+2 CPU\
+4GB Ram\
+10GB SSD Hard Disk
+
+## Installation
+
+The installation of the product consists of steps must follow each other. In order to run the necessary commands [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience is required.
+
+1. **The First Touch**\
+Establish an SSH connection to the platform to perform the latest updates.\
+The platform should be rebooted after the first operating system updates are complete.
 
     ```bash
     apt update && apt upgrade -y
@@ -110,16 +119,21 @@ Don't forget to reboot the system after the updates are complete.
     reboot
     ```
 
-2. Reconnect to the platform to clone the official product repository from Github. Then go to **bi** folder which is going to be clonned.
+2. **Downloading the Application**\
+Reconnect to the platform again to clone the official BI repository from Github.
 
     ```bash
     git clone https://github.com/technoplatz/bi.git
     ```
+
+    Then go to the new **bi** folder which is going to be created.
+
     ```bash
     cd bi
     ```
 
-3. Edit the ".env" file, replace the sample values with your own data and save the file. Changes should only be made in the "user parameters" section. It is recommended that changes in system parameters be made only by advanced users.
+3. **Setting the Environment Parameters**\
+Edit the ".env" file, replace the sample values with your own data and save the file. Changes should only be made in the user parameters section at the top of the file.
 
     ```bash
     TZ=Europe/Berlin
@@ -142,29 +156,38 @@ Don't forget to reboot the system after the updates are complete.
     <sup>TZ must be entered according to the official TZ format (eg. America/New_York)\
     https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</sup>
 
-4. Uygulamanın güvenliğini sağlayan anahtarları set ediniz.\
-\
-**API KEY (secret-bi-apikey)**\
-Lokal kullanım için anahtar belirlemeniz gerekmez, sistem jenerik bir anahtar kullanır ancak internet ortamında 24 karaktere kadar harf ve sayıdan oluşan bir API anahtarı kullanılmalıdır. Güvenlik açısından [Production, Madde 10](#production) 'da belirtilen şekilde bir anahtar tanımlayarak aşağıdaki komut ile kaydediniz.\
-\
-**Database Password (secret-mongo-password)**\
-\
-**Sendgrid Api Key (secret-sendgrid-apikey)**\
-It is used for sending automated emails over the Twilio [Sendgrid](#https://sendgrid.com) which is one of the leading e-mail API service providers. Please find the detailed information about how to obtain an API key on Sendgrid. https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key\
-\
---
+4. **Setting the Secrets**\
+There are three parameters that must be included in certain files in terms of system security. You can create the necessary parameters and files in accordance with the rules by using the commands below.
+
+    | Secret Name | File Name |
+    | :--- | :--- |
+    |  BI API Key | .secret-bi-apikey |
+    |  Database Password | .secret-mongo-password |
+    |  Sendgrid API Key | .secret-sendgrid-apikey |
+
+    **BI API Key**\
+    It is the internal API key that must be generated if the system is used in a real internet environment. The following command will generate a new random key and write it into the related file. The API key can be changed later but this operation requires [restarting the containers](#restarting-containers).
 
     ```bash
-    echo -n "********" > .secret-bi-apikey
+    echo $(date | sha256sum | base64 | head -c 24) > .secret-bi-apikey
     ```
+
+    **Database Password**\
+    It is the password of the authorized database user. The following command will generate a new random password and write it into the related file. Database password can be changed later but this operation requires [restarting the containers](#restarting-containers).
+
     ```bash
-    echo -n "********" > .secret-mongo-password
+    echo $(date | sha256sum | base64 | head -c 10) > .secret-mongo-password
     ```
+
+    **Sendgrid API Key**\
+    It is used for sending automated emails over the [Sendgrid](#https://sendgrid.com) which is the leading e-mail sender provider. Please find the further information about how to obtain an API key on Sendgrid at https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key. After creating an API key in the Sendgrid, copy this key, paste it into the starred area below and run the command.
+
     ```bash
     echo -n "********" > .secret-sendgrid-apikey
     ```
 
-5. Start the containers by keeping them up and running at the background. This step may take a couple of minutes depending on your internet bandwidth;
+5. **Starting the Containers**\
+Enter the command below to start the containers by keeping them up and running in the background. This step may take time up to a couple of minutes depending on your internet bandwidth;
 
     ```bash
     docker-compose up --detach --remove-orphans
@@ -182,40 +205,58 @@ You can log out and exit the platform safely after the installation is complete.
 
 ## Troubleshooting
 
-Unlike the Enterprise Edition the Community Edition does not provide any official support for platform maintenance and troubleshooting. As long as the system resources are not exceeded you are not expected to encounter a serious problem but the actions to be taken for certain situations are explained below;
+Unlike the enterprise edition the community edition doesn't provide any official support about maintenance and troubleshooting issues. As long as the system resources are not exceeded you are not expected to encounter a serious problem however the actions to be taken for certain situations are explained in below topics.
 
-- To restart BI by receiving the latest software updates;
+#### Getting the Latest BI Updates
 
-    ```bash
-    docker-compose pull && docker-compose up --detach --remove-orphans
-    ```
+```bash
+docker-compose pull && docker-compose up --detach --remove-orphans
+```
 
-- To stop the system;
+#### Restarting Containers
 
-    ```bash
-    docker-compose down
-    ```
+```bash
+docker-compose up --detach --remove-orphans
+```
 
-- To make room for resources when needed;
+#### Shutting down the Containers
 
-    ```bash
-    docker system prune
-    ```
+```bash
+docker-compose down
+```
 
-- To track the system logs of a certain service;
+#### Cleaning
 
-    ```bash
-    docker-compose logs -f | grep 'api'
-    ```
+Performing the system updates and frequent restarts of containers can create unnecessary files that may fill up your disk space over time. The command below helps you to remove all unused containers, networks and images to make more room for the platform;
 
-- To perform operating system updates and reboot regularly;
+```bash
+docker system prune
+```
 
-    ```bash
-    apt update && apt upgrade -y
-    ```
-    ```bash
-    reboot
-    ```
+#### Log Tracking
+
+To track all the system logs;
+
+```bash
+docker-compose logs -f
+```
+
+To track the system logs of a certain service;
+
+```bash
+docker-compose logs -f | grep 'api'
+```
+
+#### Operationg System Updates
+
+To perform operating system updates and reboot regularly.
+
+```bash
+apt update && apt upgrade -y
+```
+```bash
+reboot
+```
 
 ## Production
 
