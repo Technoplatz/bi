@@ -30,54 +30,53 @@ export function createTranslateLoader(http: HttpClient) {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    SignPage,
-    CrudPage
-  ],
-  entryComponents: [],
-  imports: [
-    PageComponentsModule,
-    BrowserModule,
-    HttpClientModule,
-    IonicModule.forRoot({
-      animated: false,
-      sanitizerEnabled: false
-    }),
-    FormsModule,
-    ReactiveFormsModule,
-    IonicStorageModule.forRoot({
-      name: "__bretzeldb",
-      driverOrder: ["indexeddb", "sqlite", "websql"]
-    }),
-    AppRoutingModule,
-    TranslateModule.forRoot({
-      defaultLanguage: "en",
-      loader: {
-        provide: TranslateLoader,
-        useFactory: (createTranslateLoader),
-        deps: [HttpClient]
-      }
-    }),
-    ServiceWorkerModule.register("ngsw-worker.js", {
-      enabled: environment.production
-      // registrationStrategy: "registerImmediately"
-    }),
-    NgJsonEditorModule
-  ],
-  providers: [
-    StatusBar,
-    SplashScreen,
-    DatePipe,
-    ClipboardPluginWeb,
-    {
-      provide: RouteReuseStrategy,
-      useClass: IonicRouteStrategy
-    }
-    // { provide: LocationStrategy, useClass: HashLocationStrategy }
-  ],
-  bootstrap: [
-    AppComponent
-  ]
+    declarations: [
+        AppComponent,
+        SignPage,
+        CrudPage
+    ],
+    imports: [
+        PageComponentsModule,
+        BrowserModule,
+        HttpClientModule,
+        IonicModule.forRoot({
+            animated: false,
+            sanitizerEnabled: false
+        }),
+        FormsModule,
+        ReactiveFormsModule,
+        IonicStorageModule.forRoot({
+            name: "__bretzeldb",
+            driverOrder: ["indexeddb", "sqlite", "websql"]
+        }),
+        AppRoutingModule,
+        TranslateModule.forRoot({
+            defaultLanguage: "en",
+            loader: {
+                provide: TranslateLoader,
+                useFactory: (createTranslateLoader),
+                deps: [HttpClient]
+            }
+        }),
+        ServiceWorkerModule.register("ngsw-worker.js", {
+            enabled: environment.production
+            // registrationStrategy: "registerImmediately"
+        }),
+        NgJsonEditorModule
+    ],
+    providers: [
+        StatusBar,
+        SplashScreen,
+        DatePipe,
+        ClipboardPluginWeb,
+        {
+            provide: RouteReuseStrategy,
+            useClass: IonicRouteStrategy
+        }
+        // { provide: LocationStrategy, useClass: HashLocationStrategy }
+    ],
+    bootstrap: [
+        AppComponent
+    ]
 })
 export class AppModule { }

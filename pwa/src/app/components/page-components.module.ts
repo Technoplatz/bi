@@ -14,42 +14,33 @@ import { IonicModule } from "@ionic/angular";
 import { NgxChartsModule } from "@swimlane/ngx-charts";
 
 @NgModule({
-  declarations: [
-    AppHeaderComponent,
-    FooterComponent,
-    FilterComponent,
-    KovComponent,
-    InnerFooterComponent,
-    ModalFooterComponent,
-    ChartsComponent
-  ],
-  imports: [
-    RouterModule,
-    CommonModule,
-    IonicModule,
-    TranslateModule.forChild(),
-    FormsModule,
-    ReactiveFormsModule,
-    NgxChartsModule
-  ],
-  exports: [
-    AppHeaderComponent,
-    FooterComponent,
-    FilterComponent,
-    KovComponent,
-    InnerFooterComponent,
-    ModalFooterComponent,
-    ChartsComponent
-  ],
-  entryComponents: [
-    AppHeaderComponent,
-    FooterComponent,
-    FilterComponent,
-    KovComponent,
-    InnerFooterComponent,
-    ModalFooterComponent,
-    ChartsComponent
-  ]
+    declarations: [
+        AppHeaderComponent,
+        FooterComponent,
+        FilterComponent,
+        KovComponent,
+        InnerFooterComponent,
+        ModalFooterComponent,
+        ChartsComponent
+    ],
+    imports: [
+        RouterModule,
+        CommonModule,
+        IonicModule,
+        TranslateModule.forChild(),
+        FormsModule,
+        ReactiveFormsModule,
+        NgxChartsModule
+    ],
+    exports: [
+        AppHeaderComponent,
+        FooterComponent,
+        FilterComponent,
+        KovComponent,
+        InnerFooterComponent,
+        ModalFooterComponent,
+        ChartsComponent
+    ]
 })
 
 export class PageComponentsModule { }
