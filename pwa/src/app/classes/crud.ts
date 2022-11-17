@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Storage } from "@ionic/storage";
 import { Subject, BehaviorSubject } from "rxjs";
-import { Validators, FormControl } from "@angular/forms";
+import { Validators, UntypedFormControl } from "@angular/forms";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Miscellaneous } from "./miscellaneous";
 import { environment } from "../../environments/environment";
@@ -115,7 +115,7 @@ export class Crud {
           value: null
         }];
         init[item] = default_ ? default_ : arrayInc_ ? kv_ ? kvval_ : [] : objectInc_ ? {} : null;
-        form.addControl(item, new FormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": item === "id" && op === "update" && (data[item] || init[item]) ? true : false }, Validators.compose(v)));
+        form.addControl(item, new UntypedFormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": item === "id" && op === "update" && (data[item] || init[item]) ? true : false }, Validators.compose(v)));
         if (i === Object.keys(structure.properties).length - 1) {
           resolve({
             form: form,

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, HostListener, Input } from "@angular/core";
 import { IonInput } from "@ionic/angular";
-import { Validators, FormBuilder, FormGroup } from "@angular/forms";
+import { Validators, UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { Storage } from "@ionic/storage";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/miscellaneous";
@@ -25,12 +25,12 @@ export class SignPage implements OnInit {
   public error: string = "";
   public success_str: string = "";
   public successMessage: string = "";
-  public signupForm: FormGroup;
-  public forgotForm: FormGroup;
-  public signinForm?: FormGroup;
-  public resetForm: FormGroup;
-  public TFACForm: FormGroup;
-  public successForm: FormGroup;
+  public signupForm: UntypedFormGroup;
+  public forgotForm: UntypedFormGroup;
+  public signinForm?: UntypedFormGroup;
+  public resetForm: UntypedFormGroup;
+  public TFACForm: UntypedFormGroup;
+  public successForm: UntypedFormGroup;
   public formtype: string = "";
   public isInProgress: boolean = false;
   public is_ready: boolean = false;
@@ -65,7 +65,7 @@ export class SignPage implements OnInit {
     }
   }
 
-  constructor(private formBuilder: FormBuilder, private auth: Auth, private misc: Miscellaneous, private storage: Storage) {
+  constructor(private formBuilder: UntypedFormBuilder, private auth: Auth, private misc: Miscellaneous, private storage: Storage) {
     this.resetForm = this.formBuilder.group(
       {
         password: [
