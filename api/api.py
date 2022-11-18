@@ -457,7 +457,8 @@ class Misc():
                 errInfo_ = excdetails_["errInfo"] if "errInfo" in excdetails_ else None
                 details_ = errInfo_["details"] if errInfo_ and "details" in errInfo_ else None
                 schemaRulesNotSatisfied_ = details_["schemaRulesNotSatisfied"][0] if details_ and "schemaRulesNotSatisfied" in details_ and len(details_["schemaRulesNotSatisfied"]) > 0 else None
-                propertiesNotSatisfied_ = schemaRulesNotSatisfied_["propertiesNotSatisfied"][0] if schemaRulesNotSatisfied_ and "propertiesNotSatisfied" in schemaRulesNotSatisfied_ and len(schemaRulesNotSatisfied_["propertiesNotSatisfied"]) > 0 else None
+                propertiesNotSatisfied_ = schemaRulesNotSatisfied_["propertiesNotSatisfied"][0] if schemaRulesNotSatisfied_ and "propertiesNotSatisfied" in schemaRulesNotSatisfied_ and len(schemaRulesNotSatisfied_[
+                                                                                                                                                                                             "propertiesNotSatisfied"]) > 0 else None
                 if propertiesNotSatisfied_:
                     err_property_name_ = propertiesNotSatisfied_["propertyName"] if "propertyName" in propertiesNotSatisfied_ else None
                     err_details_ = propertiesNotSatisfied_["details"][0] if "details" in propertiesNotSatisfied_ and len(propertiesNotSatisfied_["details"]) > 0 else None
@@ -2773,8 +2774,7 @@ class Crud():
                         "enabled": doc_["act_enabled"],
                         "filter": doc_["act_filter"],
                         "fields": doc_["act_fields"],
-                        "one_click": True,
-                        "index": index_
+                        "one_click": True if doc_["act_one_click"] and doc_["act_one_click"] == True else False
                     })
 
             structure_["required"] = Misc().make_array_unique_f(required_)
@@ -2994,9 +2994,13 @@ class Crud():
     def reverse_structure_f(self, obj):
         try:
             collection_ = obj["collection"]
+            doc_ = self.db["_collection"].find_one({"col_id": collection_})
+            if not doc_:
+                raise APIError("no collection found")
             user_ = obj["user"] if "user" in obj else None
             structure_ = obj["structure"] if "structure" in obj else None
             properties_ = structure_["properties"] if "properties" in structure_ else None
+            actions_ = structure_["actions"] if "actions" in structure_ else None
             sort_ = structure_["sort"] if "sort" in structure_ else None
             index_ = structure_["index"] if "index" in structure_ else None
             unique_ = structure_["unique"] if "unique" in structure_ else None
@@ -3068,6 +3072,44 @@ class Crud():
                         "fie_collection_id": collection_,
                         "fie_id": prop_
                     }, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
+
+            if actions_:
+                priority_ = 0
+                for action_ in actions_:
+                    act_id_ = action_["id"] if "id" in action_ else None
+                    act_collection_id_ = collection_
+                    act_title_ = action_["title"] if "title" in action_ else None
+                    act_description_ = action_["description"] if "description" in action_ else None
+                    act_enabled_ = True if "enabled" in action_ and action_["enabled"] == True else False
+                    act_one_click_ = True if "one_click" in action_ and action_["one_click"] == True else False
+                    act_filter_ = action_["filter"] if "filter" in action_ else None
+                    act_fields_ = action_["fields"] if "fields" in action_ else None
+                    if act_id_ and act_collection_id_ and act_title_ and len(act_filter_) >= 0 and act_fields_ and len(act_fields_) > 0:
+                        priority_ += 100
+                        doc_ = {
+                            "act_id": act_id_,
+                            "act_collection_id": act_collection_id_,
+                            "act_title": act_title_,
+                            "act_description": act_description_,
+                            "act_enabled": act_enabled_,
+                            "act_one_click": act_one_click_,
+                            "act_priority": priority_,
+                            "act_filter": act_filter_,
+                            "act_fields": act_fields_,
+                            "_modified_at": datetime.now(),
+                            "_modified_by": user_["email"] if user_ and "email" in user_ else None
+                        }
+                        self.db["_action"].update_one({
+                            "act_collection_id": act_collection_id_,
+                            "act_id": act_id_
+                        }, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
+                        self.log_f({
+                            "type": "Info",
+                            "collection": "_action",
+                            "op": "upsert",
+                            "user": user_["email"] if user_ else None,
+                            "document": doc_
+                        })
 
             res_ = {"result": True}
 

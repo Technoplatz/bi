@@ -158,21 +158,6 @@
             "description": "Field Values",
             "subType": "keyvalue",
             "width": 130
-        },
-        "_tags": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 100,
-            "items": {
-                "bsonType": "string",
-                "pattern": "^[#@][a-zA-Z0-9]{0,64}$"
-            },
-            "title": "Tags",
-            "description": "Add a tag and Enter",
-            "subType": "tag",
-            "manualAdd": true,
-            "width": 300
         }
     },
     "required": [
