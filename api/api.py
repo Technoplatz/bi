@@ -3000,7 +3000,7 @@ class Crud():
             user_ = obj["user"] if "user" in obj else None
             structure_ = obj["structure"] if "structure" in obj else None
             properties_ = structure_["properties"] if "properties" in structure_ else None
-            actions_ = structure_["actions"] if "actions" in structure_ else None
+            actions_ = structure_["actions"] if "actions" in structure_ and len(structure_["actions"]) > 0 else None
             sort_ = structure_["sort"] if "sort" in structure_ else None
             index_ = structure_["index"] if "index" in structure_ else None
             unique_ = structure_["unique"] if "unique" in structure_ else None
