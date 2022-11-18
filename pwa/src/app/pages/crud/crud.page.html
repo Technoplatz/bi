@@ -218,19 +218,9 @@
                                     type="file" [required]="field.required" (change)="onFileChange($event)">
                                 </ion-input>
                             </div>
-                            <!-- <ion-input *ngIf="field.bsonType=='date'" class="ion-no-padding"
-                                [formControlName]="field.name" type="date" [required]="field.required"
-                                [placeholder]="field.description"
-                                [ngModel]="data[field.name]?.replace(' ', 'T') | date:'yyyy-MM-dd'"
-                                [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
-                            </ion-input> -->
-                            <ion-datetime *ngIf="field.bsonType=='date'" presentation="date-time"
-                                [placeholder]="field.description" displayFormat="DD.MM.YYYY HH:mm:ss"
-                                pickerFormat="DD.MM.YYYY HH:mm:ss" [formControlName]="field.name"
-                                [(ngModel)]="data[field.name]"
-                                [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                showClearButton="true">
-                            </ion-datetime>
+                            <ion-datetime *ngIf="field.bsonType=='date'" presentation="date-time" [multiple]="false"
+                                [value]="data[field.name]?.replace(' ', 'T') | date:'yyyy-MM-ddTHH:mm'"
+                                showClearButton="true" (ionChange)="doDateAssign($event, field.name)"></ion-datetime>
                             <ion-input
                                 *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='float'"
                                 class="ion-no-padding" [formControlName]="field.name" type="number"
@@ -278,10 +268,10 @@
                         </ion-item>
                         <ion-item *ngIf="data['_modified_at']" lines="full" class="ion-no-margin">
                             <ion-label position="stacked">{{ 'Modified At' }}</ion-label>
-                            <ion-datetime displayFormat="DD.MM.YYYY HH:mm:ss" class="ion-no-margin"
-                                [value]="data['_modified_at'] && data['_modified_at']?.replace(' ', 'T') | date:'yyyy-MM-ddTHH:mm:ssZ'"
+                            <ion-input class="ion-no-margin"
+                                [value]="data['_modified_at'] && data['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
                                 disabled>
-                            </ion-datetime>
+                            </ion-input>
                         </ion-item>
                         <ion-item *ngIf="data['_modified_by']" lines="full" class="ion-no-margin">
                             <ion-label position="stacked">{{ 'Modified By' | translate }}</ion-label>
@@ -290,10 +280,10 @@
                         </ion-item>
                         <ion-item *ngIf="data['_created_at']" lines="full" class="ion-no-margin">
                             <ion-label position="stacked">{{ 'Created At' }}</ion-label>
-                            <ion-datetime displayFormat="DD.MM.YYYY HH:mm:ss" class="ion-no-margin"
-                                [value]="data['_created_at'] && data['_created_at']?.replace(' ', 'T') | date:'yyyy-MM-ddTHH:mm:ssZ'"
+                            <ion-input class="ion-no-margin"
+                                [value]="data['_created_at'] && data['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
                                 disabled>
-                            </ion-datetime>
+                            </ion-input>
                         </ion-item>
                         <ion-item *ngIf="data['_created_by']" lines="full" class="ion-no-margin">
                             <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>

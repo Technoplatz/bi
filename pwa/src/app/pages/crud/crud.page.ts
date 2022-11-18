@@ -18,6 +18,7 @@ export class CrudPage implements OnInit {
   @Input() modified: boolean = false;
   @ViewChild(JsonEditorComponent, { static: false }) public editor?: JsonEditorComponent;
   @ViewChild("barcodefocus", { static: false }) barcodefocus: any;
+  public dateExample: any = ['2022-11-20T22:00'];
   public novalue: any = null;
   public properties: any = {};
   public required: any = [];
@@ -615,6 +616,12 @@ export class CrudPage implements OnInit {
     }).finally(() => {
       this.is_token_copied = false;
     });
+  }
+
+  doDateAssign(event: any, fn: string) {
+    this.data[fn] = event.detail.value;
+    this.crudForm.get(fn)?.setValue(event.detail.value);
+    console.log("*** event", event);
   }
 
 }

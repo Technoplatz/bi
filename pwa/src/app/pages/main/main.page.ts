@@ -36,7 +36,7 @@ export class MainPage implements OnInit {
       componentProps: {
         op: "signup",
         user: this.user
-      }, swipeToClose: true
+      }
     });
     return await modal.present();
   }

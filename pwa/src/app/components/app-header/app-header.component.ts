@@ -56,8 +56,7 @@ export class AppHeaderComponent implements OnInit {
       componentProps: {
         op: op,
         user: this.userData,
-      },
-      swipeToClose: true,
+      }
     });
     return await modal.present();
   }

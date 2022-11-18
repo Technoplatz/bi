@@ -520,8 +520,7 @@ export class ConsolePage implements OnInit {
           actions: [],
           direct: -1
         }
-      },
-      swipeToClose: true,
+      }
     }).then((modal: any) => {
       modal.present();
       modal.onDidDismiss().then((res: any) => {
@@ -565,7 +564,6 @@ export class ConsolePage implements OnInit {
         component: CrudPage,
         backdropDismiss: false,
         cssClass: "crud-modal",
-        swipeToClose: true,
         componentProps: {
           shuttle: {
             op: op,
@@ -664,8 +662,7 @@ export class ConsolePage implements OnInit {
           view: this.view,
           barcoded: this.barcoded_
         }
-      },
-      swipeToClose: true,
+      }
     });
     modal.onDidDismiss().then((res: any) => {
       this.crud.modalSubmitListener.unsubscribe;
@@ -717,8 +714,7 @@ export class ConsolePage implements OnInit {
               structure: this.master.structure,
               direct: -1
             }
-          },
-          swipeToClose: true
+          }
         }).then((modal: any) => {
           modal.present();
           modal.onDidDismiss().then((res: any) => {
