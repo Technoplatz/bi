@@ -1,5 +1,5 @@
 import { Component, OnInit, HostListener, Input, ViewChild, ChangeDetectorRef } from "@angular/core";
-import { UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
+import { FormBuilder, FormGroup } from "@angular/forms";
 import { AlertController } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./../../classes/miscellaneous";
@@ -35,7 +35,7 @@ export class CrudPage implements OnInit {
   public pivotvalueops: any = environment.pivotvalueops;
   public loadingText: string = environment.misc.loadingText;
   public selected_: any = [];
-  public crudForm: UntypedFormGroup;
+  public crudForm: FormGroup;
   public fieldsupd: any = [];
   public fields: any = [];
   public isInProgress: boolean = false;
@@ -84,7 +84,7 @@ export class CrudPage implements OnInit {
   }
 
   constructor(
-    private formBuilder: UntypedFormBuilder,
+    private formBuilder: FormBuilder,
     public misc: Miscellaneous,
     private storage: Storage,
     private crud: Crud,
