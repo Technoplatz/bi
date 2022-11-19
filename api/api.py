@@ -947,9 +947,7 @@ class Crud():
                         if property_["bsonType"] == "date":
                             rgx_ = "%Y-%m-%d" if len(doc_[k]) == 10 else "%Y-%m-%dT%H:%M:%S"
                             ln_ = 10 if len(doc_[k]) == 10 else 19
-                            # from_zone_ = tz.gettz("UTC")
                             if isinstance(doc_[k], str) and self.validate_iso8601_f(doc_[k]):
-                                # d[k] = datetime.strptime(doc_[k][:ln_], rgx_).replace(tzinfo = from_zone_)
                                 d[k] = datetime.strptime(doc_[k][:ln_], rgx_)
                             else:
                                 d[k] = datetime.strptime(doc_[k][:ln_], rgx_) if doc_[k] is not None else None

@@ -219,7 +219,7 @@
                                 </ion-input>
                             </div>
                             <ion-datetime *ngIf="field.bsonType=='date'" presentation="date-time" [multiple]="false"
-                                [value]="data[field.name]?.replace(' ', 'T') | date:'yyyy-MM-ddTHH:mm'"
+                                [value]="data[field.name]?.replace(' ', 'T')"
                                 showClearButton="true" (ionChange)="doDateAssign($event, field.name)"></ion-datetime>
                             <ion-input
                                 *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='float'"

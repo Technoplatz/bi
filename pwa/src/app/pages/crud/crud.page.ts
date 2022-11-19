@@ -619,9 +619,12 @@ export class CrudPage implements OnInit {
   }
 
   doDateAssign(event: any, fn: string) {
-    this.data[fn] = event.detail.value;
-    this.crudForm.get(fn)?.setValue(event.detail.value);
-    console.log("*** event", event);
+    const tzoffset = new Date().getTimezoneOffset() * 60000;
+    console.log("*** event.detail.value", event.detail.value);
+    let date_ = event.detail.value ? event.detail.value : new Date(Date.now() - tzoffset).toISOString();
+    date_ = date_.substring(0, 19) + "Z";
+    this.data[fn] = date_;
+    this.crudForm.get(fn)?.setValue(date_);
   }
 
 }

@@ -305,6 +305,7 @@ export class Crud {
                 reject(error);
               });
             } else {
+              console.log("*** posted", posted_);
               this.http.post<any>(this.apiHost + "/crud", posted_, {
                 headers: new HttpHeaders(this.crudHeaders)
               }).subscribe((res: any) => {
