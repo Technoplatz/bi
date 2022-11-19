@@ -817,7 +817,7 @@ ion-list-header {
 ion-item {
   --border-color: var(--ion-color-light);
   --background: transparent;
-  --highlight-height: none !important;
+  --highlight-height: 0px !important;
   --padding-end: 0px !important;
   --padding-start: 0px !important;
   --inner-padding-bottom: 0 !important;

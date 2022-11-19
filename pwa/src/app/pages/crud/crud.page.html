@@ -219,8 +219,8 @@
                                 </ion-input>
                             </div>
                             <ion-datetime *ngIf="field.bsonType=='date'" presentation="date-time" [multiple]="false"
-                                [value]="data[field.name]?.replace(' ', 'T')"
-                                showClearButton="true" (ionChange)="doDateAssign($event, field.name)"></ion-datetime>
+                                [value]="data[field.name]?.replace(' ', 'T')" showClearButton="true"
+                                (ionChange)="doDateAssign($event, field.name)"></ion-datetime>
                             <ion-input
                                 *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='float'"
                                 class="ion-no-padding" [formControlName]="field.name" type="number"
@@ -256,8 +256,8 @@
                             <json-editor *ngIf="field.bsonType=='object'" [id]="field.name" [options]="options"
                                 [formControlName]="field.name" class="ion-margin-top ion-margin-bottom"
                                 (change)="doJsonChangeLog($event)" [(ngModel)]="data[field.name]"></json-editor>
-                            <ion-icon *ngIf="crudForm?.get(field.name)?.invalid" name="close" class="invalid-field">
-                            </ion-icon>
+                            <!-- <ion-icon *ngIf="crudForm?.get(field.name)?.invalid" name="close" class="invalid-field">
+                            </ion-icon> -->
                         </ion-item>
                     </ion-list>
                     <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
