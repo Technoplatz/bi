@@ -121,7 +121,7 @@
                                 [checked]="related[k].selected"></ion-checkbox>
                         </ion-col>
                         <ion-col *ngFor="let rel of parents.lookup; let i = index" [size]="12/parents.lookup.length"
-                            (click)="doSetRelated(item)">{{
+                            (click)="doSetRelated(item)" class="clicked-item">{{
                             item[rel.remote] }}</ion-col>
                     </ion-row>
                     <ion-row>
