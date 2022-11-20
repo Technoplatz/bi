@@ -945,9 +945,9 @@ class Crud():
                 if "bsonType" in property_:
                     if k in doc_.keys():
                         if property_["bsonType"] == "date":
-                            rgx_ = "%Y-%m-%d" if len(doc_[k]) == 10 else "%Y-%m-%dT%H:%M:%S"
-                            ln_ = 10 if len(doc_[k]) == 10 else 19
-                            if isinstance(doc_[k], str) and self.validate_iso8601_f(doc_[k]):
+                            rgx_ = "%Y-%m-%d" if doc_[k] and len(doc_[k]) == 10 else "%Y-%m-%dT%H:%M:%S"
+                            ln_ = 10 if doc_[k] and len(doc_[k]) == 10 else 19
+                            if doc_[k] and isinstance(doc_[k], str) and self.validate_iso8601_f(doc_[k]):
                                 d[k] = datetime.strptime(doc_[k][:ln_], rgx_)
                             else:
                                 d[k] = datetime.strptime(doc_[k][:ln_], rgx_) if doc_[k] is not None else None
