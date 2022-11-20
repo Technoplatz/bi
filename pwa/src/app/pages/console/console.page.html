@@ -74,7 +74,6 @@
               </ion-button>
               <!-- DASHBOARD -->
               <div *ngIf="menu=='dashboard'">
-
                 <!-- DASH HEADER BUTTONS GRID -->
                 <ion-grid class="ion-no-padding">
                   <ion-row class="sub-menu-row sq-menu-row">
@@ -85,7 +84,7 @@
                       </div>
                       <div (click)="doRefreshDash()" class="data-sq-button">
                         <ion-icon *ngIf="is_dash_ok" name="sync"></ion-icon>
-                        <ion-icon *ngIf="!is_dash_ok" name="time-outline"></ion-icon>
+                        <ion-icon *ngIf="!is_dash_ok" name="hourglass-outline"></ion-icon>
                         <br />
                         <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
                       </div>
@@ -341,7 +340,7 @@
                       </ng-template>
                       <div (click)="RefreshData(0)" class="data-sq-button">
                         <ion-icon *ngIf="is_loaded" name="sync"></ion-icon>
-                        <ion-icon *ngIf="!is_loaded" name="time-outline"></ion-icon>
+                        <ion-icon *ngIf="!is_loaded" name="hourglass-outline"></ion-icon>
                         <br />
                         <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
                       </div>
@@ -588,7 +587,7 @@
                         {{ record[item.key] }}
                       </span>
                       <span *ngIf="item.value.bsonType=='date' && record[item.key]">
-                        {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
+                        {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
                       </span>
                       <span *ngIf="item.value.bsonType=='array'">
                         <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
@@ -868,8 +867,7 @@
                     (click)="doAction(ac)">
                     <ion-icon name="play-circle-outline" color="primary" size="large"></ion-icon>
                     <ion-label class="ion-text-wrap ion-padding-end">
-                      <strong>{{ item.title }}</strong><br />
-                      {{ item.description }}
+                      {{ item.title }}
                     </ion-label>
                   </ion-item>
                 </div>

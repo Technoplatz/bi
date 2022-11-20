@@ -624,5 +624,4 @@ export class CrudPage implements OnInit {
     date_ = date_.substring(0, 19) + "Z";
     this.crudForm.get(fn)?.setValue(date_);
   }
-
 }

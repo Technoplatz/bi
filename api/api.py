@@ -2768,7 +2768,6 @@ class Crud():
                     actions_.append({
                         "id": doc_["act_id"],
                         "title": doc_["act_title"],
-                        "description": doc_["act_description"],
                         "enabled": doc_["act_enabled"],
                         "filter": doc_["act_filter"],
                         "fields": doc_["act_fields"],
@@ -3077,7 +3076,6 @@ class Crud():
                     act_id_ = action_["id"] if "id" in action_ else None
                     act_collection_id_ = collection_
                     act_title_ = action_["title"] if "title" in action_ else None
-                    act_description_ = action_["description"] if "description" in action_ else None
                     act_enabled_ = True if "enabled" in action_ and action_["enabled"] == True else False
                     act_one_click_ = True if "one_click" in action_ and action_["one_click"] == True else False
                     act_filter_ = action_["filter"] if "filter" in action_ else None
@@ -3088,7 +3086,6 @@ class Crud():
                             "act_id": act_id_,
                             "act_collection_id": act_collection_id_,
                             "act_title": act_title_,
-                            "act_description": act_description_,
                             "act_enabled": act_enabled_,
                             "act_one_click": act_one_click_,
                             "act_priority": priority_,

@@ -218,9 +218,17 @@
                                     type="file" [required]="field.required" (change)="onFileChange($event)">
                                 </ion-input>
                             </div>
-                            <ion-datetime *ngIf="field.bsonType=='date'" presentation="date-time" [multiple]="false"
-                                [value]="data[field.name]?.replace(' ', 'T')" showClearButton="true"
-                                (ionChange)="doDateAssign($event, field.name)"></ion-datetime>
+                            <ion-datetime-button *ngIf="field.bsonType=='date'" datetime="datetime">
+                            </ion-datetime-button>
+                            <ion-modal *ngIf="field.bsonType=='date'" [keepContentsMounted]="true">
+                                <ng-template>
+                                    <ion-datetime id="datetime" presentation="date-time" [multiple]="false"
+                                        [value]="data[field.name]?.replace(' ', 'T')" showClearButton="true"
+                                        (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
+                                        [showDefaultButtons]="true">
+                                    </ion-datetime>
+                                </ng-template>
+                            </ion-modal>
                             <ion-input
                                 *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='float'"
                                 class="ion-no-padding" [formControlName]="field.name" type="number"

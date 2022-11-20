@@ -29,12 +29,12 @@
             <ion-input #passwordfocus formControlName="password" type="password"
                 placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" class="ion-no-padding" required>
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="resetForm.controls.password.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="resetForm.controls.password.invalid && (resetForm.controls.password.dirty || resetForm.controls.password.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Two-Factor Access Code' | translate }}
@@ -76,7 +76,7 @@
     </form>
     <form [formGroup]="signupForm" *ngIf="formtype=='signup'">
         <ion-item class="section-header" lines="none">
-            <h1>{{ 'Sign Up' | translate }}</h1>
+            <h1>{{ 'Sign up' | translate }}</h1>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'E-mail' | translate }} <sup>
@@ -85,12 +85,12 @@
             <ion-input #emailfocussignup class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
                 autocorrect="off" required placeholder="{{ 'E-mail' | translate }}">
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="signupForm.controls.email.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="signupForm.controls.email.invalid && (signupForm.controls.email.dirty || signupForm.controls.email.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Full Name' | translate }} <sup>
@@ -99,12 +99,12 @@
             <ion-input #namefocus class="ion-no-padding" formControlName="name" type="text" spellcheck="false"
                 autocorrect="off" required placeholder="{{ 'Name and Surname' | translate }}">
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="signupForm.controls.name.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="signupForm.controls.name.invalid && (signupForm.controls.name.dirty || signupForm.controls.name.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Password' | translate }} <sup>
@@ -113,12 +113,12 @@
             <ion-input #passwordfocus formControlName="password" type="password"
                 placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" required>
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="signupForm.controls.password.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="signupForm.controls.password.invalid && (signupForm.controls.password.dirty || signupForm.controls.password.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Invitation code' | translate }} <sup>
@@ -128,12 +128,12 @@
                 autocorrect="off" required
                 placeholder="{{ 'You can get your code from site Administrator' | translate }}">
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="signupForm.controls.passcode.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="signupForm.controls.passcode.invalid && (signupForm.controls.passcode.dirty || signupForm.controls.passcode.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-button (click)="Signup()" size="default" class="no-hover">
@@ -155,7 +155,7 @@
     </form>
     <form [formGroup]="signinForm" *ngIf="formtype=='signin'">
         <ion-item class="section-header" lines="none">
-            <h1>{{ 'Sign In' | translate }}</h1>
+            <h1>{{ 'Sign in' | translate }}</h1>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'E-mail' | translate }} <sup>
@@ -165,12 +165,12 @@
             <ion-input #emailfocussignin class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
                 autocorrect="off" required [value]="email">
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="signinForm?.controls?.email?.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="signinForm?.controls?.email?.invalid && (signinForm?.controls?.email?.dirty || signinForm?.controls?.email?.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Password' | translate }} <sup>
@@ -179,12 +179,12 @@
             </ion-label>
             <ion-input #passwordfocus formControlName="password" type="password" required>
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="signinForm?.controls?.password?.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="signinForm?.controls?.password?.invalid && (signinForm?.controls?.password?.dirty || signinForm?.controls?.password?.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="Signin()" size="default">
@@ -192,7 +192,7 @@
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
             <ion-button slot="end" (click)="doSetOp('forgot')" size="default" class="ion-no-margin margin-l-24"
-                fill="outline">
+                fill="none">
                 <span>{{ 'Reset Password' | translate }}</span>
             </ion-button>
             <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset"
@@ -244,19 +244,19 @@
             <ion-input #emailfocus class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
                 autocorrect="off" required>
             </ion-input>
-            <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
+            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
                 *ngIf="forgotForm.controls.email.valid">
             </ion-icon>
             <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
                 *ngIf="forgotForm.controls.email.invalid && (forgotForm.controls.email.dirty || forgotForm.controls.email.touched)">
-            </ion-icon>
+            </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="doForgot()" size="default" class="sign-button">
                 <span *ngIf="!isInProgress">{{ 'Submit' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
-            <ion-button slot="end" fill="outline" (click)="doSetOp('signin')" size="default" type="reset"
+            <ion-button slot="end" fill="none" (click)="doSetOp('signin')" size="default" type="reset"
                 class="ion-no-margin">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>

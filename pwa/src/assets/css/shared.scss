@@ -801,6 +801,17 @@ ion-segment-button {
   margin-top: 8px;
 }
 
+ion-datetime-button {
+  margin-left: 0px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  --background-color: var(--ion-color-primary);
+}
+
+ion-datetime {
+  border: 1px solid var(--ion-color-primary);
+}
+
 ion-list {
   background: transparent !important;
   text-align: left;
