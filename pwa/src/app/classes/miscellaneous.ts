@@ -207,6 +207,12 @@ export class Miscellaneous {
     await alert.present();
   }
 
+  getFormattedDate(val: any) {
+    const tzoffset = new Date().getTimezoneOffset() * 60000;
+    let date_ = val ? val : new Date(Date.now() - tzoffset).toISOString();
+    return date_.substring(0, 19) + "Z";
+  }
+
   copyToClipboard(s: string) {
     return new Promise((resolve, reject) => {
       this.cb.write({ string: s }).then(() => {

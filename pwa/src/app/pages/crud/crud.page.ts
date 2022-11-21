@@ -194,7 +194,7 @@ export class CrudPage implements OnInit {
               controls_[form_ctrl_filter_[k][0]] = form_ctrl_filter_[k][1];
               if (k === form_ctrl_filter_.length - 1) {
                 for (let f = 0; f < v.fields.length; f++) {
-                  v.fields[f].value === "$CURRENT_DATE" ? v.fields[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 10) : null;
+                  v.fields[f].value === "$CURRENT_DATE" ? v.fields[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 19) : null;
                   this.data[v.fields[f].key] = v.fields[f].value;
                   this.crudForm.get(v.fields[f].key)?.setValue(v.fields[f].value);
                   if (f === v.fields.length - 1) {
@@ -619,9 +619,20 @@ export class CrudPage implements OnInit {
   }
 
   doDateAssign(event: any, fn: string) {
-    const tzoffset = new Date().getTimezoneOffset() * 60000;
-    let date_ = event.detail.value ? event.detail.value : new Date(Date.now() - tzoffset).toISOString();
-    date_ = date_.substring(0, 19) + "Z";
+    const date_ = this.misc.getFormattedDate(event.detail.value);
+    this.data[fn] = date_;
     this.crudForm.get(fn)?.setValue(date_);
   }
+
+  doInitDate(fn: string) {
+    const date_ = this.misc.getFormattedDate(null);
+    this.data[fn] = date_;
+    this.crudForm.get(fn)?.setValue(date_);
+  }
+
+  doCancelDate(fn: string) {
+    this.data[fn] = null;
+    this.crudForm.get(fn)?.setValue(null);
+  }
+
 }

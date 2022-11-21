@@ -326,27 +326,22 @@ export class ConsolePage implements OnInit {
                 this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
                 LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
                 this.actions = [];
-                this.RefreshData(0).then(() => { }).catch((error: any) => {
-                  console.error(error);
-                  this.misc.doMessage(error, "error");
+                this.doGetViewMode().then(() => {
+                  this.RefreshData(0).then(() => { }).catch((error: any) => {
+                    console.error(error);
+                    this.misc.doMessage(error, "error");
+                  });
                 });
               });
             });
           });
-        } else {
-          this.is_loaded = true;
-          this.is_samecol = true;
         }
-      } else if (menu_ === "dashboard") {
-        this.is_loaded = true;
       } else if (menu_ === "setup") {
         this.options = new JsonEditorOptions();
         this.options.modes = ["code", "tree"];
         this.options.mode = "code";
         this.options.statusBar = true;
       }
-    } else {
-      this.is_samecol = true;
     }
   }
 
@@ -370,70 +365,70 @@ export class ConsolePage implements OnInit {
       this.is_crud = this.id.charAt(0) === "_" ? false : true;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.storage.get("LSSAVEDFILTER").then((LSSAVEDFILTER: any) => {
-          this.doGetViewMode().then(() => {
-            this.views_pane = this.views.filter((obj: any) => obj.vie_collection_id === this.id);
-            this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
-            this.saved_filter = LSSAVEDFILTER ? LSSAVEDFILTER : null;
-            this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-              this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-              this.count = 0;
-              this.page = p === 0 ? 1 : p;
-              this.crud.Find(
-                "find",
-                this.id,
-                null,
-                this.filter && this.filter.length > 0 ? this.filter : [],
-                this.sort,
-                this.page,
-                this.limit).then((res: any) => {
-                  this.data = res.data;
-                  this.reconfig = res.reconfig;
-                  this.structure = res.structure;
-                  this.actions = this.structure && this.structure.actions ? this.structure.actions : [];
-                  this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
-                  this.columns_ = [];
-                  if (this.properites_) {
-                    this.getColumns().then(() => {
-                      this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
-                      this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
-                      this.count = res.count;
-                      this.multicheckbox = false;
-                      this.multicheckbox ? this.multicheckbox = false : null;
-                      this.selected = new Array(res.data.length).fill(false);
-                      this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
-                      const lmt = this.pages >= 10 ? 10 : this.pages;
-                      this.paget = new Array(lmt);
-                      this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
-                      this.page_end = this.page_start + 10;
-                      this.is_loaded = true;
-                      this.is_samecol = true;
-                      this.is_pane_ok = true;
-                      this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
-                      for (let p = 0; p < this.paget.length; p++) {
-                        this.paget[p] = this.page_start + p;
-                      }
-                      resolve(true);
-                    });
-                  } else {
-                    console.error("*** no structure found");
+          // this.doGetViewMode().then(() => {
+          this.views_pane = this.views.filter((obj: any) => obj.vie_collection_id === this.id);
+          this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
+          this.saved_filter = LSSAVEDFILTER ? LSSAVEDFILTER : null;
+          this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+            this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+            this.count = 0;
+            this.page = p === 0 ? 1 : p;
+            this.crud.Find(
+              "find",
+              this.id,
+              null,
+              this.filter && this.filter.length > 0 ? this.filter : [],
+              this.sort,
+              this.page,
+              this.limit).then((res: any) => {
+                this.data = res.data;
+                this.reconfig = res.reconfig;
+                this.structure = res.structure;
+                this.actions = this.structure && this.structure.actions ? this.structure.actions : [];
+                this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
+                this.columns_ = [];
+                if (this.properites_) {
+                  this.getColumns().then(() => {
+                    this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
+                    this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
+                    this.count = res.count;
+                    this.multicheckbox = false;
+                    this.multicheckbox ? this.multicheckbox = false : null;
+                    this.selected = new Array(res.data.length).fill(false);
+                    this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
+                    const lmt = this.pages >= 10 ? 10 : this.pages;
+                    this.paget = new Array(lmt);
+                    this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
+                    this.page_end = this.page_start + 10;
                     this.is_loaded = true;
                     this.is_samecol = true;
-                  }
-                }).catch((error: any) => {
-                  console.error(error);
-                  this.misc.doMessage(error, "error");
+                    this.is_pane_ok = true;
+                    this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
+                    for (let p = 0; p < this.paget.length; p++) {
+                      this.paget[p] = this.page_start + p;
+                    }
+                    resolve(true);
+                  });
+                } else {
+                  console.error("*** no structure found");
                   this.is_loaded = true;
                   this.is_samecol = true;
-                  reject(error);
-                });
-            });
-          }).catch((error: any) => {
-            console.error(error);
-            this.misc.doMessage(error, "error");
-            this.is_loaded = true;
-            this.is_samecol = true;
-            reject(error);
+                }
+              }).catch((error: any) => {
+                console.error(error);
+                this.misc.doMessage(error, "error");
+                this.is_loaded = true;
+                this.is_samecol = true;
+                reject(error);
+              });
           });
+          // }).catch((error: any) => {
+          //   console.error(error);
+          //   this.misc.doMessage(error, "error");
+          //   this.is_loaded = true;
+          //   this.is_samecol = true;
+          //   reject(error);
+          // });
         });
       });
     });
@@ -638,7 +633,7 @@ export class ConsolePage implements OnInit {
 
   async goCrud(rec: any, op: string) {
     this.crud.modalSubmitListener.subscribe((res: any) => {
-      if(res && res.result) {
+      if (res && res.result) {
         this.RefreshData(0);
       }
     });

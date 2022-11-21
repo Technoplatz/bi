@@ -61,7 +61,7 @@ export class Crud {
         const pattern_ = p.pattern ? p.pattern : null;
         const subType_ = p.subType ? p.subType : null;
         const tzoffset = new Date().getTimezoneOffset() * 60000;
-        const default_ = p.default ? p.default === '$CURRENT_DATE' ? new Date(Date.now() - tzoffset).toISOString().substring(0, 10) : p.default : null;
+        const default_ = p.default ? p.default === '$CURRENT_DATE' ? new Date(Date.now() - tzoffset).toISOString().substring(0, 19) : p.default : null;
         const file_ = p.file ? true : false;
         const filter_ = p.filter ? true : false;
         const property_ = p.property ? true : false;

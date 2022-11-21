@@ -801,11 +801,23 @@ ion-segment-button {
   margin-top: 8px;
 }
 
+.datetime-class {
+  display: flex;
+}
+
+.datetime-button {
+  margin-left: 4px;
+  margin-top: 10px !important;
+}
+
+.datetime-button ion-icon {
+  font-size: 22px;
+}
+
 ion-datetime-button {
-  margin-left: 0px;
-  margin-top: 12px;
-  margin-bottom: 8px;
-  --background-color: var(--ion-color-primary);
+  margin-left: 0px !important;
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 
 ion-datetime {

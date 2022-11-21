@@ -218,17 +218,30 @@
                                     type="file" [required]="field.required" (change)="onFileChange($event)">
                                 </ion-input>
                             </div>
-                            <ion-datetime-button *ngIf="field.bsonType=='date'" datetime="datetime">
-                            </ion-datetime-button>
-                            <ion-modal *ngIf="field.bsonType=='date'" [keepContentsMounted]="true">
-                                <ng-template>
-                                    <ion-datetime id="datetime" presentation="date-time" [multiple]="false"
-                                        [value]="data[field.name]?.replace(' ', 'T')" showClearButton="true"
-                                        (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
-                                        [showDefaultButtons]="true">
-                                    </ion-datetime>
+                            <div *ngIf="field.bsonType=='date'">
+                                <div *ngIf="data[field.name]; else nodatevalue" class="datetime-class">
+                                    <ion-datetime-button [datetime]="field.name">
+                                    </ion-datetime-button>
+                                    <ion-button (click)="doCancelDate(field.name)" fill="clear" class="ion-no-padding datetime-button">
+                                        <ion-icon name="close-circle-outline"></ion-icon>
+                                    </ion-button>
+                                    <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
+                                        <ng-template>
+                                            <ion-datetime [id]="field.name" presentation="date-time" [multiple]="false"
+                                                [value]="data[field.name]?.replace(' ', 'T')" [showClearButton]="true"
+                                                (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
+                                                [showDefaultButtons]="true">
+                                                <span slot="title">{{ field.title }}</span>
+                                            </ion-datetime>
+                                        </ng-template>
+                                    </ion-modal>
+                                </div>
+                                <ng-template #nodatevalue>
+                                    <ion-button (click)="doInitDate(field.name)" fill="clear" class="ion-no-padding datetime-button">
+                                        <ion-icon name="calendar-outline"></ion-icon>
+                                    </ion-button>
                                 </ng-template>
-                            </ion-modal>
+                            </div>
                             <ion-input
                                 *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='float'"
                                 class="ion-no-padding" [formControlName]="field.name" type="number"
