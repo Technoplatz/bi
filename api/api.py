@@ -2761,7 +2761,7 @@ class Crud():
             cursor_ = self.db["_action"].find(filter={
                 "act_collection_id": cid_,
                 "act_enabled": True
-            }, sort=[("act_priority", 1)])
+            }, sort=[("act_title", 1)])
 
             if cursor_:
                 for index_, doc_ in enumerate(cursor_, start=1):
@@ -3071,7 +3071,6 @@ class Crud():
                     }, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
 
             if actions_:
-                priority_ = 0
                 for action_ in actions_:
                     act_id_ = action_["id"] if "id" in action_ else None
                     act_collection_id_ = collection_
@@ -3081,14 +3080,12 @@ class Crud():
                     act_filter_ = action_["filter"] if "filter" in action_ else None
                     act_fields_ = action_["fields"] if "fields" in action_ else None
                     if act_id_ and act_collection_id_ and act_title_ and len(act_filter_) >= 0 and act_fields_ and len(act_fields_) > 0:
-                        priority_ += 100
                         doc_ = {
                             "act_id": act_id_,
                             "act_collection_id": act_collection_id_,
                             "act_title": act_title_,
                             "act_enabled": act_enabled_,
                             "act_one_click": act_one_click_,
-                            "act_priority": priority_,
                             "act_filter": act_filter_,
                             "act_fields": act_fields_,
                             "_modified_at": datetime.now(),

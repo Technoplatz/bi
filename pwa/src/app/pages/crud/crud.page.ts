@@ -121,7 +121,6 @@ export class CrudPage implements OnInit {
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");
-        // this.is_ready = true;
       });
     });
   }

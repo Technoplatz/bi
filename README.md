@@ -85,7 +85,7 @@ Technoplatz BI is powered by the leading open source information technologies;
 - [MongoDB](https://www.mongodb.com)
 - [Python](https://www.python.org)
 - [Pandas](https://pandas.pydata.org)
-- [Ionic Angular TS](https://ionicframework.com)
+- [Ionic Angular Ts](https://ionicframework.com)
 - [GitHub](https://github.com)
 
 ## Cloud Environment
@@ -97,7 +97,7 @@ Technoplatz BI runs on the Docker platform which is the leading open source virt
 
 #### System Requirements
 
-Below you can find the recommended minimum configuration for the system to work properly on a Docker platform. The configuration can be increased in proportion to the number of connections to be established, instant cpu load and the amount of data to be processed.
+Below you can find the minimum configuration for the system to work properly on a Docker platform. The configuration can be increased in proportion to the number of connections to be established, instant cpu load and the amount of data to be processed.
 
 2 CPU\
 4GB Ram\

@@ -42,15 +42,6 @@
             "description": "One Click",
             "width": 120
         },
-        "act_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 100,
-            "width": 120
-        },
         "act_filter": {
             "bsonType": "array",
             "minItems": 0,
@@ -171,6 +162,7 @@
         ]
     ],
     "sort": {
+        "act_collection_id": 1,
         "_modified_at": -1
     }
 }

@@ -365,7 +365,6 @@ export class ConsolePage implements OnInit {
       this.is_crud = this.id.charAt(0) === "_" ? false : true;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.storage.get("LSSAVEDFILTER").then((LSSAVEDFILTER: any) => {
-          // this.doGetViewMode().then(() => {
           this.views_pane = this.views.filter((obj: any) => obj.vie_collection_id === this.id);
           this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
           this.saved_filter = LSSAVEDFILTER ? LSSAVEDFILTER : null;
@@ -422,13 +421,6 @@ export class ConsolePage implements OnInit {
                 reject(error);
               });
           });
-          // }).catch((error: any) => {
-          //   console.error(error);
-          //   this.misc.doMessage(error, "error");
-          //   this.is_loaded = true;
-          //   this.is_samecol = true;
-          //   reject(error);
-          // });
         });
       });
     });
