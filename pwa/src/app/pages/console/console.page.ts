@@ -247,14 +247,16 @@ export class ConsolePage implements OnInit {
         this.view_mode["_tags"] = this.view ? this.view._tags : null;
         this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
         this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
-          this.RefreshData(0).then(() => {
-            this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
-            this.view_mode[this.id] = true;
-            resolve(true);
-          }).catch((error: any) => {
-            console.error(error);
-            this.misc.doMessage(error, "error");
-            reject(error);
+          this.doGetViewMode().then(() => {
+            this.RefreshData(0).then(() => {
+              this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
+              this.view_mode[this.id] = true;
+              resolve(true);
+            }).catch((error: any) => {
+              console.error(error);
+              this.misc.doMessage(error, "error");
+              reject(error);
+            });
           });
         });
       });
@@ -264,8 +266,8 @@ export class ConsolePage implements OnInit {
   doGetViewMode() {
     return new Promise((resolve) => {
       this.storage.get("LSVIEW-" + this.id).then((LSVIEW: any) => {
+        this.view = LSVIEW ? LSVIEW : this.views[0] ? this.views[0] : null;
         if (this.is_crud && this.view) {
-          this.view = LSVIEW ? LSVIEW : this.views[0] ? this.views[0] : null;
           this.view_mode[this.id] = LSVIEW ? true : false;
           this.view_mode["vie_title"] = LSVIEW ? LSVIEW.vie_title : null;
           this.view_mode["_tags"] = LSVIEW ? LSVIEW._tags : null;
@@ -326,12 +328,12 @@ export class ConsolePage implements OnInit {
                 this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
                 LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
                 this.actions = [];
-                this.doGetViewMode().then(() => {
-                  this.RefreshData(0).then(() => { }).catch((error: any) => {
-                    console.error(error);
-                    this.misc.doMessage(error, "error");
-                  });
+                // this.doGetViewMode().then(() => {
+                this.RefreshData(0).then(() => { }).catch((error: any) => {
+                  console.error(error);
+                  this.misc.doMessage(error, "error");
                 });
+                // });
               });
             });
           });
