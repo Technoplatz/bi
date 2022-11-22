@@ -237,7 +237,6 @@ export class ConsolePage implements OnInit {
 
   doEnterViewMode(view_: any) {
     return new Promise((resolve, reject) => {
-      this.is_loaded = false;
       this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
       this.menu = "collections";
       this.submenu = this.header = this.view.vie_collection_id;
@@ -250,6 +249,7 @@ export class ConsolePage implements OnInit {
           this.doGetViewMode().then(() => {
             this.RefreshData(0).then(() => {
               this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
+              this.view?.vie_filter ? this.filter = this.view.vie_filter : null;
               this.view_mode[this.id] = true;
               resolve(true);
             }).catch((error: any) => {
@@ -292,16 +292,22 @@ export class ConsolePage implements OnInit {
   }
 
   doQuitViewMode() {
-    return new Promise((resolve, reject) => {
-      this.storage.remove("LSVIEW-" + this.id).then(() => {
-        this.view_mode[this.id] = false;
-        this.view = null;
-        this.RefreshData(0).then(() => {
-          resolve(true);
-        }).catch((error: any) => {
-          console.error(error);
-          this.misc.doMessage(error, "error");
-          reject(error);
+    this.storage.remove("LSFILTER_" + this.id).then(() => {
+      this.storage.remove("LSSAVEDFILTER").then(() => {
+        this.storage.remove("LSSEARCHED_" + this.id).then(() => {
+          this.storage.remove("LSVIEW-" + this.id).then(() => {
+            this.view_mode[this.id] = false;
+            this.view = null;
+            this.doResetSearch(true);
+            this.sort = {};
+            this.saved_filter = "";
+            this.filter = [];
+            this.sweeped[this.segment] = [];
+            this.RefreshData(0).then(() => { }).catch((error: any) => {
+              console.error(error);
+              this.misc.doMessage(error, "error");
+            });
+          });
         });
       });
     });
@@ -319,7 +325,7 @@ export class ConsolePage implements OnInit {
       this.submenu ? this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu + "/" + this.submenu) : this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu);
       if (menu_ === "collections" || menu_ === "admin") {
         menu_ === "admin" ? this.view_mode[this.id] = false : null;
-        this.is_loaded = this.is_selected = false;
+        // this.is_loaded = this.is_selected = false;
         if (submenu_ !== this.id) {
           this.doSetCollectionID(submenu_).then(() => {
             this.is_crud = this.id.charAt(0) === "_" ? false : true;
@@ -328,12 +334,10 @@ export class ConsolePage implements OnInit {
                 this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
                 LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
                 this.actions = [];
-                // this.doGetViewMode().then(() => {
                 this.RefreshData(0).then(() => { }).catch((error: any) => {
                   console.error(error);
                   this.misc.doMessage(error, "error");
                 });
-                // });
               });
             });
           });
@@ -656,7 +660,7 @@ export class ConsolePage implements OnInit {
     modal.onDidDismiss().then((res: any) => {
       this.crud.modalSubmitListener.unsubscribe;
       if (res.data.modified) {
-        op === "action" ? this.doClearFilter() : this.RefreshData(0);
+        op === "action" ? this.doQuitViewMode() : this.RefreshData(0);
         if (this.id === "_collection") {
           this.crud.getCollections().then(() => { }).catch((error: any) => {
             console.error(error);
@@ -1011,21 +1015,6 @@ export class ConsolePage implements OnInit {
       ]
     }).then((alert: any) => {
       alert.present();
-    });
-  }
-
-  async doClearFilter() {
-    this.storage.remove("LSFILTER_" + this.id).then(() => {
-      this.storage.remove("LSSEARCHED_" + this.id).then(() => {
-        this.storage.remove("LSSAVEDFILTER").then(() => {
-          this.doResetSearch(true);
-          this.sort = {};
-          this.saved_filter = "";
-          this.filter = [];
-          this.sweeped[this.segment] = [];
-          this.RefreshData(0);
-        });
-      });
     });
   }
 
