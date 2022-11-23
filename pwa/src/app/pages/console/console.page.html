@@ -862,11 +862,10 @@
                 </ng-template>
                 <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]
                 </ion-list-header>
-                <div *ngIf="perm && actions && actions.length && actions.length > 0; else noaction">
-                  <ion-item *ngFor="let item of actions; let ac = index" class="ion-no-padding clicked-item"
-                    (click)="doAction(ac)">
-                    <ion-icon name="play-circle-outline" color="primary" size="large"></ion-icon>
-                    <ion-label class="ion-text-wrap ion-padding-end">
+                <div *ngIf="perm && actions?.length > 0; else noaction">
+                  <ion-item *ngFor="let item of actions; let ac = index" class="clicked-item" (click)="doAction(ac)">
+                    <ion-icon name="play-circle-outline" color="primary" size="large" class="action-icon"></ion-icon>
+                    <ion-label class="ion-padding-end">
                       {{ item.title }}
                     </ion-label>
                   </ion-item>

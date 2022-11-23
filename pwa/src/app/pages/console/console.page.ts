@@ -316,7 +316,8 @@ export class ConsolePage implements OnInit {
   goSection(menu_: string, submenu_: any, header_: string) {
     this.view_mode[this.id] = false;
     this.view = null;
-    if (!submenu_ || submenu_ !== this.submenu) {
+    const fromdash_ = this.submenu ? false : true;
+    if (!submenu_ || !this.submenu || submenu_ !== this.submenu) {
       this.is_samecol = false;
       this.menu = menu_;
       this.submenu = submenu_;
@@ -324,9 +325,8 @@ export class ConsolePage implements OnInit {
       this.pivot_ = "";
       this.submenu ? this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu + "/" + this.submenu) : this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu);
       if (menu_ === "collections" || menu_ === "admin") {
-        menu_ === "admin" ? this.view_mode[this.id] = false : null;
-        // this.is_loaded = this.is_selected = false;
-        if (submenu_ !== this.id) {
+        // menu_ === "admin" ? this.view_mode[this.id] = false : null;
+        if (fromdash_ || submenu_ !== this.id) {
           this.doSetCollectionID(submenu_).then(() => {
             this.is_crud = this.id.charAt(0) === "_" ? false : true;
             this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
