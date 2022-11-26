@@ -590,7 +590,12 @@
                         {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
                       </span>
                       <span *ngIf="item.value.bsonType=='array'">
-                        <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
+                        <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">
+                          {{ record[item.key]?.length }} {{ 'Line' | translate }}<span *ngIf="record[item.key]?.length > 1">{{ 's' }}</span>
+                        </span>
+                        <ng-template #noarrayobject>
+                          <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
+                        </ng-template>
                       </span>
                       <span *ngIf="item.value.bsonType=='object'">
                         <span>{{ 'Object' | translate }}</span>
@@ -875,7 +880,7 @@
                     <ion-label class="ion-text-wrap">
                       {{ 'No action found' | translate }}<br />
                       <div>
-                        {{ 'To create a new action you need to add an action item into this collection\'s structure' |
+                        {{ 'To create a new action you need to add an action item into the collection structure' |
                         translate }}.</div>
                     </ion-label>
                   </ion-item>

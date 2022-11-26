@@ -20,7 +20,7 @@
             "required": true,
             "width": 240
         },
-        "per_col_id": {
+        "per_collection_id": {
             "bsonType": "string",
             "minLength": 3,
             "maxLength": 64,
@@ -58,12 +58,74 @@
             "description": "Delete Permission",
             "default": false,
             "width": 110
+        },
+        "per_match": {
+            "bsonType": "array",
+            "minItems": 0,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "additionalProperties": false,
+            "filter": true,
+            "items": {
+                "bsonType": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "key": {
+                        "bsonType": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[a-z_]{1,64}$",
+                        "title": "key",
+                        "description": "Key"
+                    },
+                    "op": {
+                        "bsonType": "string",
+                        "minLength": 1,
+                        "maxLength": 8,
+                        "pattern": "^[a-z]{1,8}$",
+                        "enum": [
+                            "eq",
+                            "ne",
+                            "contains",
+                            "nc",
+                            "in",
+                            "nin",
+                            "gt",
+                            "gte",
+                            "lt",
+                            "lte",
+                            "null",
+                            "nnull",
+                            "true",
+                            "false"
+                        ],
+                        "title": "op",
+                        "description": "Operator"
+                    },
+                    "value": {
+                        "bsonType": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "title": "value",
+                        "description": "Value"
+                    }
+                },
+                "required": [
+                    "key",
+                    "op",
+                    "value"
+                ]
+            },
+            "title": "Match",
+            "description": "Match filter",
+            "subType": "filter",
+            "width": 120
         }
     },
     "required": [
         "per_id",
         "per_tag_id",
-        "per_col_id"
+        "per_collection_id"
     ],
     "unique": [
         [
@@ -71,7 +133,7 @@
         ],
         [
             "per_tag_id",
-            "per_col_id"
+            "per_collection_id"
         ]
     ],
     "index": [
@@ -79,7 +141,7 @@
             "per_tag_id"
         ],
         [
-            "per_col_id"
+            "per_collection_id"
         ]
     ],
     "sort": {

@@ -148,7 +148,7 @@ export class CrudPage implements OnInit {
           console.error(error);
           this.misc.doMessage(error, "error");
         }).finally(() => {
-          setTimeout(() => { this.is_ready = true; }, 200);
+          setTimeout(() => { this.is_ready = true; }, 500);
           this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, 500) : null;
         });
       }).catch((error: any) => {
@@ -415,7 +415,7 @@ export class CrudPage implements OnInit {
 
   doGetCollectionProperties(collection_: string) {
     return new Promise((resolve, reject) => {
-      const cid_ = collection_ === "_automation" ? this.data["aut_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
+      const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
       this.crud.Find("find", "_collection", null, [{
         key: "col_id",
         op: "eq",
