@@ -203,12 +203,13 @@ export class Crud {
     });
   }
 
-  AnnounceNow(view: string, tfac: string, scope: string) {
+  AnnounceNow(view: string, tfac: string, scope: string, collection: string) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         const posted_: any = {
-          op: "announcenow",
+          op: "announce",
           user: LSUSERMETA,
+          collection: collection,
           view: view,
           tfac: tfac,
           scope: scope
@@ -492,30 +493,6 @@ export class Crud {
           if (res && res.result) {
             // this.views.next(res);
             resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
-    });
-  }
-
-  getSubjects() {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "subjects",
-          user: LSUSERMETA,
-          dashboard: false
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            this.subjects.next(res);
-            resolve(true);
           } else {
             reject(res.msg);
           }

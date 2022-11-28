@@ -815,7 +815,7 @@ export class ConsolePage implements OnInit {
   }
 
   async doAnnounceNow(view: any, scope: string) {
-    if (this.perm && !this.in_otp_process) {
+    if (!this.in_otp_process) {
       scope === "live" ? this.in_otp_process = true : this.in_otp_process_test = true;
       this.doOTP({
         op: "request"
@@ -823,8 +823,8 @@ export class ConsolePage implements OnInit {
         this.in_otp_process = this.in_otp_process_test = false;
         this.alert.create({
           cssClass: "my-custom-class",
-          header: scope === "live" ? "Announce Now!" : "TEST Announcement: This will be sent to internal Managers and Administrators only!",
-          subHeader: scope === "live" ? "Please enter your OTP to confirm this announcement outside of the scheduled times." : "Please enter your OTP to confirm.",
+          header: scope === "live" ? "Announce Now!" : "TEST Announcement",
+          subHeader: "Please enter your Two-Factor Authorization Code",
           inputs: [
             {
               name: "id",
@@ -842,14 +842,13 @@ export class ConsolePage implements OnInit {
             }, {
               text: "CONFIRM",
               handler: (announceData: any) => {
-                this.crud.AnnounceNow(view, announceData && announceData.id ? announceData.id : null, scope).then(() => {
+                this.crud.AnnounceNow(view, announceData && announceData.id ? announceData.id : null, scope, this.id).then(() => {
                   this.crud.getAnnouncements();
-                  this.misc.doMessage("view was announced successfully", "success");
+                  this.misc.doMessage("announcement completed successfully", "success");
                 }).catch((error: any) => {
                   this.misc.doMessage(error, "error");
                   console.error(error);
                 });
-                // return false;
               }
             }
           ]

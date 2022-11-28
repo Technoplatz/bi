@@ -198,25 +198,25 @@ class Schedular():
         finally:
             return res_
 
-    def schedule_view_f(self, doc_, scope_):
+    def announce_view_f(self, doc_, scope_, email_):
         try:
             vie_title_ = doc_["vie_title"] if "vie_title" in doc_ else "view"
             vie_id_ = doc_["vie_id"] if "vie_id" in doc_ else vie_title_
             vie_attach_pivot_ = doc_["vie_attach_pivot"] if "vie_attach_pivot" in doc_ else False
             vie_attach_csv_ = doc_["vie_attach_csv"] if "vie_attach_csv" in doc_ else False
             vie_attach_excel_ = doc_["vie_attach_excel"] if "vie_attach_excel" in doc_ else False
-            user_id_ = doc_["_created_by"] if "_created_by" in doc_ else doc_["_modified_by"] if "_modified_by" in doc_ else None
-            vie_tags_ = doc_["_tags"] if "_tags" in doc_ else ["#Managers", "#Administrators"]
+            user_id_ = email_ if email_ else doc_["_created_by"] if "_created_by" in doc_ else doc_["_modified_by"] if "_modified_by" in doc_ else None
+            vie_tags_ = doc_["_tags"] if "_tags" in doc_ and scope_ == "live" else ["#Managers", "#Administrators"]
 
             if not user_id_:
-                raise APIError(f"no owner user defined")
+                raise APIError("no user provided")
 
             if len(vie_tags_) == 0:
-                raise APIError(f"no tags found")
+                raise APIError("no subscribers found")
 
             user_ = self.db_["_user"].find_one({"usr_id": user_id_})
             if not user_:
-                raise APIError(f"no owner user found")
+                raise APIError(f"user not found {user_id_}")
 
             personalizations_ = []
             to_ = []
@@ -229,6 +229,10 @@ class Schedular():
                         if member_:
                             personalizations_.append({"to": [{"email": member_["usr_id"], "name": member_["usr_name"]}]})
                             to_.append(member_["usr_id"])
+
+            if scope_ == "test" and user_id_ not in to_:
+                personalizations_.append({"to": [{"email": user_id_, "name": "Announcer"}]})
+                to_.append(member_["usr_id"])
 
             to_ = list(dict.fromkeys(to_))
 
@@ -362,7 +366,7 @@ class Schedular():
                     vie_sched_minutes_ = ",".join(vie_sched_minutes_c_)
                     vie_sched_hours_ = ",".join(vie_sched_hours_c_)
                     vie_sched_days_ = ",".join(doc_["vie_sched_days"]) if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0 else "mon"
-                    sched_.add_job(self.schedule_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=self.TZ, replace_existing=True, args=[doc_, "live"])
+                    sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=self.TZ, replace_existing=True, args=[doc_, "live", None])
                     print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now(), flush=True)
 
             res_ = {"result": True}
@@ -1625,7 +1629,7 @@ class Crud():
         finally:
             return res_
 
-    def announce_now_f(self, input_):
+    def announce_f(self, input_):
         try:
             # checks if user data in the input
             if not "user" in input_:
@@ -1659,9 +1663,9 @@ class Crud():
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
 
-            schedule_view_f_ = Schedular().schedule_view_f(view_, scope_)
-            if not schedule_view_f_["result"]:
-                raise APIError(schedule_view_f_["msg"])
+            announce_view_f_ = Schedular().announce_view_f(view_, scope_, email_)
+            if not announce_view_f_["result"]:
+                raise APIError(announce_view_f_["msg"])
 
             res_ = {"result": True}
 
@@ -4080,6 +4084,16 @@ class Auth():
             collection_id_ = input_["collection"] if "collection" in input_ else None
             op_ = input_["op"] if "op" in input_ else None
 
+            if not user_id_:
+                raise APIError(f"user not found {user_id_}")
+
+            if not op_:
+                raise APIError(f"operation is missing {op_}")
+
+            if not collection_id_:
+                res_ = {"result": True} if op_ in ["view", "views", "collections", "template", "dump", "version"] else {"result": False}
+                return
+
             # check user on _user collection
             auth_ = self.db["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
@@ -4090,28 +4104,26 @@ class Auth():
             if not user_:
                 raise APIError(f"user not found {user_id_}")
 
-            if collection_id_[:1] == "_":
-                if Misc().permitted_user_f(user_):
-                    res_ = {"result": True, "filter": None}
-                    return
-                else:
-                    res_ = {"result": True, "filter": None}
-                    return
-
             # set variabled related to user
             aut_root_ = True if "aut_root" in auth_ and auth_["aut_root"] else False
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
             if aut_root_:
-                res_ = {"result": True, "filter": None}
+                res_ = {"result": True}
+                return
+
+            # if collection_id_[:1] == "_":
+            #     if Misc().permitted_user_f(user_):
+            #         res_ = {"result": True}
+            #         return
+
+            if collection_id_[:1] == "_":
+                res_ = {"result": True}
                 return
 
             collection_ = self.db["_collection"].find_one({"col_id": collection_id_})
             if not collection_:
                 raise APIError(f"permitted collection not found {collection_id_}")
-            structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
-            if not structure_:
-                raise APIError(f"permitted structure not found {collection_id_}")
 
             # sets the default permission is not permitted
             permission_ = False  # default
@@ -4122,11 +4134,13 @@ class Auth():
                     "per_collection_id": collection_id_
                 })
                 if permission_check_ is not None:
-                    per_create_ = True if "per_create" in permission_check_ and permission_check_["per_create"] else False
-                    per_read_ = True if "per_read" in permission_check_ and permission_check_["per_read"] else False
-                    per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] else False
-                    per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] else False
-                    if (op_ == "find" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
+                    per_create_ = True if "per_create" in permission_check_ and permission_check_["per_create"] == True else False
+                    per_read_ = True if "per_read" in permission_check_ and permission_check_["per_read"] == True else False
+                    per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
+                    per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
+                    per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
+
+                    if (op_ == "announce" and per_share_) or (op_ == "find" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
                         permission_ = True
                         break
 
@@ -4134,13 +4148,7 @@ class Auth():
             if not permission_:
                 raise APIError(f"user is not allowed to {op_} on {collection_id_}")
 
-            match_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
-            get_filtered_ = Crud().get_filtered_f({
-                "match": match_,
-                "properties": structure_["properties"] if "properties" in structure_ else None
-            })
-
-            res_ = {"result": permission_, "filter": get_filtered_}
+            res_ = {"result": permission_}
 
         except pymongo.errors.PyMongoError as exc:
             # set the result as a database error
@@ -4864,10 +4872,9 @@ def crud_f():
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
 
         # check permission
-        if email_ and op_ and collection_:
-            permission_f_ = Auth().permission_f({"user": email_, "collection": collection_, "op": op_})
-            if not permission_f_["result"]:
-                raise APIError(permission_f_["msg"])
+        permission_f_ = Auth().permission_f({"user": email_, "collection": collection_, "op": op_})
+        if not permission_f_["result"]:
+            raise APIError(permission_f_["msg"])
 
         # injects the real user info into the user input
         input_["userindb"] = validate_["user"]
@@ -4914,8 +4921,8 @@ def crud_f():
             crud_ = Crud().view_f(input_)
         elif op_ == "views":
             crud_ = Crud().views_f(input_)
-        elif op_ == "announcenow":
-            crud_ = Crud().announce_now_f(input_)
+        elif op_ == "announce":
+            crud_ = Crud().announce_f(input_)
         elif op_ == "visuals":
             crud_ = Crud().visuals_f(input_)
         elif op_ == "collections":

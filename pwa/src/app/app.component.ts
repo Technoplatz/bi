@@ -44,7 +44,6 @@ export class AppComponent implements OnInit {
       }
     });
 
-    // this.doSwUpdateCheck();
     setInterval(() => {
       this.doSwUpdateCheck();
     }, 15 * 60 * 1000);
