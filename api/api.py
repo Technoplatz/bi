@@ -2378,9 +2378,9 @@ class Crud():
                         "per_tag_id": usr_tag_,
                         "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
                     }
-                    permissions_ = self.db["_permission"].find(filter=filter_, sort=[("per_col_id", 1)])
+                    permissions_ = self.db["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
                     for permission_ in permissions_:
-                        collection_ = self.db["_collection"].find_one({"col_id": permission_["per_col_id"]})
+                        collection_ = self.db["_collection"].find_one({"col_id": permission_["per_collection_id"]})
                         data_.append(collection_)
 
             res_ = {
@@ -2457,14 +2457,7 @@ class Crud():
                 "reconfig": reconfig_
             }
 
-            # check if the user is allowed or not to do this operation
-            # permission_ = Auth().permission_check_f({"user": user_["email"], "collection": collection_id_, "op": "read"})
-            # if not permission_["result"]:
-            #     raise APIError(permission_["msg"])
-
-            # sets the sort rule up to certain priority
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
-            # sort_ = [("_modified_at", -1)]
 
             # create cursor for the query
             cursor_ = self.db[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
@@ -2828,11 +2821,6 @@ class Crud():
             if not collection_f_["result"]:
                 raise APIError("collection not found")
 
-            # check if the user is allowed or not to do this update
-            permission_ = Auth().permission_check_f({"user": user_["email"], "collection": cid_, "op": "structure"})
-            if not permission_["result"]:
-                raise APIError(permission_["msg"])
-
             is_crud_ = True if cid_[:1] != "_" else False
             if not is_crud_:
                 raise APIError("collection is not allowed to update")
@@ -3140,11 +3128,6 @@ class Crud():
             if not col_check_["result"]:
                 raise APIError("collection not found")
 
-            # check if the user is allowed or not to do this update
-            permission_ = Auth().permission_check_f({"user": user_["email"], "collection": collection_id_, "op": "upsert"})
-            if not permission_["result"]:
-                raise APIError(permission_["msg"])
-
             is_crud_ = True if collection_id_[:1] != "_" else False
 
             if not is_crud_:
@@ -3255,11 +3238,6 @@ class Crud():
             if collection_id_ == "_user":
                 raise APIError("user collection is protected to delete")
 
-            # check if the user is allowed or not to do this update
-            permission_ = Auth().permission_check_f({"user": user_["email"], "collection": collection_id_, "op": "delete"})
-            if not permission_["result"]:
-                raise APIError(permission_["msg"])
-
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
@@ -3328,11 +3306,6 @@ class Crud():
             ids_ = []
             for _id in match_:
                 ids_.append(ObjectId(_id))
-
-            # check if the user is allowed or not to do this update
-            permission_ = Auth().permission_check_f({"user": user_["email"], "collection": collection_id_, "op": "upsert" if op_ == "clone" else "delete"})
-            if not permission_["result"]:
-                raise APIError(permission_["msg"])
 
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
@@ -3434,11 +3407,6 @@ class Crud():
             if not filter_ and len(ids_) == 0:
                 raise APIError("please make a row selection prior to apply an action")
 
-            # check if the user is allowed or not to do this update
-            permission_ = Auth().permission_check_f({"user": user_["email"], "collection": collection_id_, "op": "action"})
-            if not permission_["result"]:
-                raise APIError(permission_["msg"])
-
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
@@ -3523,11 +3491,6 @@ class Crud():
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
             doc_ = obj["doc"]
-
-            # check if the user is allowed or not to do this operation
-            permission_ = Auth().permission_check_f({"user": user_["email"], "collection": collection_id_, "op": "upsert"})
-            if not permission_["result"]:
-                raise APIError(permission_["msg"])
 
             # remove unnecesssary items from the document
             doc_.pop("_id", None) if "_id" in doc_ else None
@@ -4110,12 +4073,12 @@ class Auth():
         finally:
             return res_
 
-    def permission_check_f(self, input_):
+    def permission_f(self, input_):
         try:
             # gets the required parameters
-            user_id_ = input_["user"]
-            collection_id_ = input_["collection"]
-            op_ = input_["op"]
+            user_id_ = input_["user"] if "user" in input_ else None
+            collection_id_ = input_["collection"] if "collection" in input_ else None
+            op_ = input_["op"] if "op" in input_ else None
 
             # check user on _user collection
             auth_ = self.db["_auth"].find_one({"aut_id": user_id_})
@@ -4127,34 +4090,43 @@ class Auth():
             if not user_:
                 raise APIError(f"user not found {user_id_}")
 
+            if collection_id_[:1] == "_":
+                if Misc().permitted_user_f(user_):
+                    res_ = {"result": True, "filter": None}
+                    return
+                else:
+                    res_ = {"result": True, "filter": None}
+                    return
+
             # set variabled related to user
             aut_root_ = True if "aut_root" in auth_ and auth_["aut_root"] else False
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            # sets the default permission is not permitted
-            permission_ = False  # default
-
             if aut_root_:
-                res_ = {"result": True}
+                res_ = {"result": True, "filter": None}
                 return
 
-            if collection_id_[:1] == "_":
-                if Misc().permitted_user_f(user_):
-                    res_ = {"result": True}
-                    return
+            collection_ = self.db["_collection"].find_one({"col_id": collection_id_})
+            if not collection_:
+                raise APIError(f"permitted collection not found {collection_id_}")
+            structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+            if not structure_:
+                raise APIError(f"permitted structure not found {collection_id_}")
 
+            # sets the default permission is not permitted
+            permission_ = False  # default
             # checks if the permission level was defined in the collection
             for usr_tag_ in usr_tags_:
                 permission_check_ = self.db["_permission"].find_one({
                     "per_tag_id": usr_tag_,
-                    "per_col_id": collection_id_
+                    "per_collection_id": collection_id_
                 })
                 if permission_check_ is not None:
                     per_create_ = True if "per_create" in permission_check_ and permission_check_["per_create"] else False
                     per_read_ = True if "per_read" in permission_check_ and permission_check_["per_read"] else False
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] else False
-                    if (op_ == "read" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
+                    if (op_ == "find" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
                         permission_ = True
                         break
 
@@ -4162,7 +4134,13 @@ class Auth():
             if not permission_:
                 raise APIError(f"user is not allowed to {op_} on {collection_id_}")
 
-            res_ = {"result": permission_}
+            match_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
+            get_filtered_ = Crud().get_filtered_f({
+                "match": match_,
+                "properties": structure_["properties"] if "properties" in structure_ else None
+            })
+
+            res_ = {"result": permission_, "filter": get_filtered_}
 
         except pymongo.errors.PyMongoError as exc:
             # set the result as a database error
@@ -4869,7 +4847,7 @@ def crud_f():
         # checks and set if the operator exists in request
         if not "op" in input_:
             raise APIError("no operation found")
-        op = input_["op"]
+        op_ = input_["op"]
 
         # gets the email and user token
         user_ = input_["user"] if "user" in input_ else None
@@ -4878,17 +4856,24 @@ def crud_f():
 
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
+        collection_ = input_["collection"] if "collection" in input_ else None
 
         # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
 
+        # check permission
+        if email_ and op_ and collection_:
+            permission_f_ = Auth().permission_f({"user": email_, "collection": collection_, "op": op_})
+            if not permission_f_["result"]:
+                raise APIError(permission_f_["msg"])
+
         # injects the real user info into the user input
         input_["userindb"] = validate_["user"]
 
         # adds the document as decoded into the user input
-        if op in ["update", "import", "insert", "action"]:
+        if op_ in ["update", "import", "insert", "action"]:
             if not "doc" in input_:
                 raise APIError("document must be included in the request")
             decode_ = Crud().decode_crud_input_f(input_)
@@ -4896,55 +4881,55 @@ def crud_f():
                 raise APIError(decode_["msg"] if "msg" in decode_ else "decode error")
             input_["doc"] = decode_["doc"]
 
-        elif op in ["remove", "clone", "delete"]:
+        elif op_ in ["remove", "clone", "delete"]:
             c_ = input_["collection"]
             col_check_ = Crud().collection_f(c_)
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
 
         # distributes the operation to the right function
-        if op == "find":
+        if op_ == "find":
             crud_ = Crud().find_f(input_)
-        elif op == "update":
+        elif op_ == "update":
             crud_ = Crud().upsert_f(input_)
-        elif op == "import":
+        elif op_ == "import":
             crud_ = Crud().upsert_f(input_)
-        elif op == "insert":
+        elif op_ == "insert":
             crud_ = Crud().insert_f(input_)
-        elif op in ["clone", "delete"]:
+        elif op_ in ["clone", "delete"]:
             crud_ = Crud().multiple_f(input_)
-        elif op == "action":
+        elif op_ == "action":
             crud_ = Crud().action_f(input_)
-        elif op == "remove":
+        elif op_ == "remove":
             crud_ = Crud().remove_f(input_)
-        elif op == "setprop":
+        elif op_ == "setprop":
             crud_ = Crud().setprop_f(input_)
-        elif op == "reconfigure":
+        elif op_ == "reconfigure":
             crud_ = Crud().reconfigure_f(input_)
-        elif op == "saveasview":
+        elif op_ == "saveasview":
             crud_ = Crud().saveasview_f(input_)
-        elif op == "purge":
+        elif op_ == "purge":
             crud_ = Crud().purge_f(input_)
-        elif op == "view":
+        elif op_ == "view":
             crud_ = Crud().view_f(input_)
-        elif op == "views":
+        elif op_ == "views":
             crud_ = Crud().views_f(input_)
-        elif op == "announcenow":
+        elif op_ == "announcenow":
             crud_ = Crud().announce_now_f(input_)
-        elif op == "visuals":
+        elif op_ == "visuals":
             crud_ = Crud().visuals_f(input_)
-        elif op == "collections":
+        elif op_ == "collections":
             crud_ = Crud().collections_f(input_)
-        elif op == "parent":
+        elif op_ == "parent":
             crud_ = Crud().parent_f(input_)
-        elif op == "dump":
+        elif op_ == "dump":
             crud_ = Crud().dump_f(input_)
-        elif op == "version":
+        elif op_ == "version":
             crud_ = Crud().version_f()
-        elif op == "template":
+        elif op_ == "template":
             crud_ = Crud().template_f(input_)
         else:
-            raise APIError(f"operation not supported: {op}")
+            raise APIError(f"operation not supported: {op_}")
 
         # checks the crud result
         if not crud_["result"]:

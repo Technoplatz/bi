@@ -18,7 +18,7 @@
             "title": "Tag",
             "description": "Tag",
             "required": true,
-            "width": 240
+            "width": 140
         },
         "per_collection_id": {
             "bsonType": "string",
@@ -36,28 +36,35 @@
             "title": "Create",
             "description": "Create Permission",
             "default": false,
-            "width": 110
+            "width": 100
         },
         "per_read": {
             "bsonType": "bool",
             "title": "Read",
             "description": "Read Permission",
             "default": false,
-            "width": 110
+            "width": 100
         },
         "per_update": {
             "bsonType": "bool",
             "title": "Update",
             "description": "Update Permission",
             "default": false,
-            "width": 110
+            "width": 100
         },
         "per_delete": {
             "bsonType": "bool",
             "title": "Delete",
             "description": "Delete Permission",
             "default": false,
-            "width": 110
+            "width": 100
+        },
+        "per_share": {
+            "bsonType": "bool",
+            "title": "Share",
+            "description": "Sharing Permission",
+            "default": false,
+            "width": 100
         },
         "per_match": {
             "bsonType": "array",

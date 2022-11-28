@@ -580,7 +580,7 @@ export class ConsolePage implements OnInit {
   }
 
   MultiCrud(op: string) {
-    if (this.perm && this.data.length > 0 && this.is_selected) {
+    if (this.data.length > 0 && this.is_selected) {
       if (op === "action") {
         if (this.structure && this.structure.actions && this.structure.actions.length > 0) {
           this.goCrud(null, op);
@@ -1053,14 +1053,23 @@ export class ConsolePage implements OnInit {
 
   doGetVisual(data: any, v_: number) {
     this.views[v_].loading = true;
-    this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
-      this.views[v_].chart = chart;
-    }).catch((error: any) => {
+    this.views[v_].error = null;
+    if(this.accountf_apikey) {
+      this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
+        this.views[v_].chart = chart;
+      }).catch((error: any) => {
+        this.views[v_].chart = {};
+        this.visuals[v_].error = error;
+      }).finally(() => {
+        this.views[v_].loading = false;
+      });
+    } else {
+      const error_ = "Please create an API key in the Preferences section";
       this.views[v_].chart = {};
-      this.visuals[v_].error = error;
-    }).finally(() => {
-      this.views[v_].loading = false;
-    });
+      this.views[v_].error = error_;
+      console.error(error_);
+      this.misc.doMessage(error_, "error");
+    }
   }
 
   doGetViews() {

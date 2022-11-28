@@ -43,7 +43,7 @@
               </p>
             </ion-label>
           </ion-item>
-          <ion-item *ngIf="perm" lines="none">
+          <ion-item lines="none">
             <ion-label class="ion-text-wrap">
               <ion-button size="default" fill="clear" class="menu-button">
                 <ion-icon name="options-outline"></ion-icon>{{ 'Preferences' | translate }}
@@ -181,7 +181,8 @@
                           [chart]="item.chart" [width]="chcontainer.offsetWidth"></app-charts>
                         <ng-template #nochartdata>
                           <div class="visual-error">
-                            {{ 'No Data Found' | translate }}
+                            {{ 'No Data Found' | translate }}<br />
+                            {{ item?.error | translate }}
                           </div>
                         </ng-template>
                       </div>
@@ -745,16 +746,12 @@
                 <div *ngIf="submenu=='apikey'" class="header-row">
                   <ion-item lines="none">
                     <ion-label *ngIf="accountf_apikey; else noapikey" class="ion-text-wrap descriptive">
-                      {{ 'API key makes you enabled to connect your data from the Internet in a secure way' |
+                      {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI Tools' |
                       translate }}.
                       <ul>
-                        <li>{{ 'API keys should be kept secret so it is masked, not shown by default' | translate }}.
-                        </li>
-                        <li>{{ 'To see your api-key for 5 seconds click to "show" button below' | translate }}.</li>
-                        <li>{{ 'You can copy-paste your api-key into the clipboard' | translate }}.</li>
-                        <li>{{ 'You are always able to generate a new api-key every time you need to' | translate }}.
-                        </li>
-                        <li>{{ 'Once you generate a new one, previous key does not work anymore' | translate }}.</li>
+                        <li>{{ 'API Key is hidden by default. To see your API Key for 5 seconds click to show button below' | translate }}.</li>
+                        <li>{{ 'You can copy and paste your API Key to the clipboard' | translate }}.</li>
+                        <li>{{ 'Once you generate a new API Key previous one doesn\'t work anymore' | translate }}.</li>
                       </ul>
                       <ion-icon color="primary" name="key" size="large" class="ion-margin-end"></ion-icon>
                       <p *ngIf="is_apikey_enabled" class="fixed-font">{{ accountf_apikey }}</p>
@@ -784,15 +781,10 @@
                     </ion-label>
                     <ng-template #noapikey>
                       <ion-label class="ion-text-wrap descriptive">
-                        {{ 'API key makes you enabled to connect your data from the Internet in a secure way' |
+                        {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI Tools' |
                         translate }}.
                         <ul>
-                          <li>{{ 'You can connect your data from Microsft Excel or other data tools by using an
-                            api-key' |
-                            translate
-                            }}.</li>
-                          <li>{{ 'You have not created an api-key yet' | translate }}.</li>
-                          <li>{{ 'In order to create a new api-key click the button below' | translate }}.</li>
+                          <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one please click the button below' | translate }}.</li>
                         </ul>
                         <p>
                           <ion-button (click)="doAccount('apikeygen')" size="default" class="ion-margin-top">
@@ -802,21 +794,6 @@
                         </p>
                       </ion-label>
                     </ng-template>
-                  </ion-item>
-                  <ion-item lines="none" class="ion-padding-top">
-                    <div class="ion-text-wrap descriptive tips">
-                      {{ 'HOW TO' | translate }}
-                      <ul>
-                        <li>{{ 'use your api-key to connect and get your data into Microsoft Excel or other BI tools'
-                          |
-                          translate }}.
-                        </li>
-                        <li>{{ 'add data into your collections through the Technoplatz-BI API end-point by using your
-                          api-key'
-                          | translate }}.
-                        </li>
-                      </ul>
-                    </div>
                   </ion-item>
                 </div>
 

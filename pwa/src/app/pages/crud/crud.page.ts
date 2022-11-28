@@ -96,6 +96,7 @@ export class CrudPage implements OnInit {
   }
 
   ngOnInit() {
+    // console.log("*** shuttle", this.shuttle);
     this.modified = false;
     this.collection = this.shuttle.collection ? this.shuttle.collection : null;
     this.user = this.shuttle.user;
