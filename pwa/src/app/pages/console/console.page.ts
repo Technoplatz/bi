@@ -379,7 +379,7 @@ export class ConsolePage implements OnInit {
             this.count = 0;
             this.page = p === 0 ? 1 : p;
             this.crud.Find(
-              "find",
+              "read",
               this.id,
               null,
               this.filter && this.filter.length > 0 ? this.filter : [],
@@ -682,7 +682,7 @@ export class ConsolePage implements OnInit {
 
   doCollectionSettings() {
     if (this.perm && this.is_crud) {
-      this.crud.Find("find", "_collection", null, [{
+      this.crud.Find("read", "_collection", null, [{
         key: "col_id",
         op: "eq",
         value: this.id

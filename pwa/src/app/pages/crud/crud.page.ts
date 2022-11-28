@@ -417,7 +417,7 @@ export class CrudPage implements OnInit {
   doGetCollectionProperties(collection_: string) {
     return new Promise((resolve, reject) => {
       const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
-      this.crud.Find("find", "_collection", null, [{
+      this.crud.Find("read", "_collection", null, [{
         key: "col_id",
         op: "eq",
         value: cid_
@@ -453,7 +453,7 @@ export class CrudPage implements OnInit {
         this.storage.get("LSFILTER_" + this.collection).then((LSFILTER_: any) => {
           LSFILTER_ && LSFILTER_.length > 0 ? this.filters = LSFILTER_ : null;
           this.storage.get("LSSAVEDFILTER").then((LSSAVEDFILTER: any) => {
-            this.crud.Find("find", "_view", null, [{
+            this.crud.Find("read", "_view", null, [{
               key: "vie_collection_id",
               op: "eq",
               value: this.collection
@@ -527,7 +527,7 @@ export class CrudPage implements OnInit {
       f_.parents.match && f_.parents.match[m].lookup && this.crudForm.controls[f_.parents.match[m].lookup].value ? match_[m].value = this.crudForm.controls[f_.parents.match[m].lookup].value : null;
       if (m === match_.length - 1) {
         this.related = [];
-        this.crud.Find("find", collection_, null, match_, null, 1, 1000).then((res: any) => {
+        this.crud.Find("read", collection_, null, match_, null, 1, 1000).then((res: any) => {
           if (res && res.data) {
             this.related = res.data;
             for (let k = 0; k < this.related.length; k++) {

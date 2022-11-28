@@ -603,7 +603,7 @@ export class Crud {
 
   getAnnouncements() {
     this.Find(
-      "find", "_log", null, [{
+      "read", "_log", null, [{
         key: "log_type",
         op: "eq",
         value: "Announcement"

@@ -2405,7 +2405,7 @@ class Crud():
         finally:
             return res_
 
-    def find_f(self, input_):  # find_ function is used to generate a query from the database
+    def read_f(self, input_):  # find_ function is used to generate a query from the database
         try:
             # gets the parameters required
             user_ = input_["user"]
@@ -2483,7 +2483,7 @@ class Crud():
             self.log_f({
                 "type": "Error",
                 "collection": collection_,
-                "op": "find",
+                "op": "read",
                 "user": user_["email"] if user_ else None,
                 "document": exc.details
             })
@@ -4083,6 +4083,8 @@ class Auth():
             user_id_ = input_["user"] if "user" in input_ else None
             collection_id_ = input_["collection"] if "collection" in input_ else None
             op_ = input_["op"] if "op" in input_ else None
+            cudops_ = ["insert", "update", "upsert", "delete", "remove", "clone", "purge"]
+            collessops_ = ["view", "views", "collections", "template", "dump", "version"]
 
             if not user_id_:
                 raise APIError(f"user not found {user_id_}")
@@ -4091,7 +4093,7 @@ class Auth():
                 raise APIError(f"operation is missing {op_}")
 
             if not collection_id_:
-                res_ = {"result": True} if op_ in ["view", "views", "collections", "template", "dump", "version"] else {"result": False}
+                res_ = {"result": True} if op_ in collessops_ else {"result": False}
                 return
 
             # check user on _user collection
@@ -4112,18 +4114,21 @@ class Auth():
                 res_ = {"result": True}
                 return
 
-            # if collection_id_[:1] == "_":
-            #     if Misc().permitted_user_f(user_):
-            #         res_ = {"result": True}
-            #         return
-
-            if collection_id_[:1] == "_":
-                res_ = {"result": True}
-                return
+            if collection_id_:
+                if collection_id_[:1] == "_":
+                    if op_ == "read":
+                        res_ = {"result": True}
+                        return
+                    elif op_ in cudops_:
+                        if not Misc().permitted_user_f(user_):
+                            res_ = {"result": False}
+                            return
+            else:
+                raise APIError("no collection found for {op_}")
 
             collection_ = self.db["_collection"].find_one({"col_id": collection_id_})
             if not collection_:
-                raise APIError(f"permitted collection not found {collection_id_}")
+                raise APIError(f"permitted collection not found {collection_id_} for {op_}")
 
             # sets the default permission is not permitted
             permission_ = False  # default
@@ -4139,8 +4144,7 @@ class Auth():
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
-
-                    if (op_ == "announce" and per_share_) or (op_ == "find" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
+                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
                         permission_ = True
                         break
 
@@ -4895,8 +4899,8 @@ def crud_f():
                 raise APIError(col_check_["msg"])
 
         # distributes the operation to the right function
-        if op_ == "find":
-            crud_ = Crud().find_f(input_)
+        if op_ == "read":
+            crud_ = Crud().read_f(input_)
         elif op_ == "update":
             crud_ = Crud().upsert_f(input_)
         elif op_ == "import":
