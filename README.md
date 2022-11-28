@@ -16,9 +16,9 @@ Table of contents;
 
 Community Edition is a low-code, multi-container data application and sharing platform designed to establish and manage a mission critical data-driven business process without the need to develop software from scratch. Considering that each business has its own unique conditions it provides an optimized and pragmatic solution for main requirements;
 
-- Self-service data management\
+- Self-service Data Management\
 <span style="font-size: small; font-weight: bold;">[DATA APPLICATION](#data-application)</span>
-- Completing processes integrated with business partners.\
+- Completion of processes through Integration\
 <span style="font-size: small; font-weight: bold;">[BI-DIRECTIONAL DATA SHARING](#bi-directional-data-sharing)</span>
 - Web services and Automation\
 <span style="font-size: small; font-weight: bold;">[INTERNAL API](#api)</span>
@@ -192,8 +192,6 @@ Enter the command below to start the containers by keeping them up and running i
 ```bash
 docker-compose up --detach --remove-orphans
 ```
-
-#### 6. Kick-off
 
 In order to open your first session go to the following address in your web browser, click the "Sign in" button, enter your email and password which you provided in the .env file.
 
