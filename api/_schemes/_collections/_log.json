@@ -15,14 +15,14 @@
             ],
             "pattern": "^[a-zA-Z]{1,16}$",
             "required": true,
-            "width": 130
+            "width": 100
         },
         "log_date": {
             "bsonType": "date",
             "title": "Date",
             "description": "Log date",
             "required": true,
-            "width": 90
+            "width": 120
         },
         "log_user_id": {
             "bsonType": "string",

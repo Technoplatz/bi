@@ -110,7 +110,6 @@
 
                 <!-- TEMPLATES -->
                 <div *ngIf="template_showed" class="ion-margin-bottom">
-                  <!-- <h4>{{ 'Templates' | translate }}</h4> -->
                   <ion-grid *ngIf="templates.length > 0; else notemplates" class="ion-no-padding data-grid">
                     <ion-row>
                       <ion-col size="3">
@@ -196,8 +195,8 @@
                           mode="ios">
                           <ion-icon name="settings-outline"></ion-icon>
                         </ion-button>
-                        <ion-button size="small" fill="clear" (click)="doEnterViewMode(item)"
-                          class="clear-dark-button" color="dark" mode="ios">
+                        <ion-button size="small" fill="clear" (click)="doEnterViewMode(item)" class="clear-dark-button"
+                          color="dark" mode="ios">
                           <ion-icon name="open-outline"></ion-icon>
                         </ion-button>
                       </div>
@@ -205,80 +204,85 @@
                   </div>
 
                   <!-- SHARED VIEWS -->
-                  <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search views' }}"
-                    animated="true" class="ion-no-padding ion-no-margin brz-searchbar"
-                    (ionChange)="doStartSearch($event.detail.value)">
-                  </ion-searchbar>
-                  <ion-grid *ngIf="viewsx.length > 0; else nosharedviews" class="ion-no-padding data-grid">
-                    <ion-row>
-                      <ion-col size="3">
-                        <span class="column-title">{{ 'ID' }} / {{ 'View Title' | translate }}</span>
-                      </ion-col>
-                      <ion-col size="2">
-                        <span class="column-title">{{ 'Collection' }}</span>
-                      </ion-col>
-                      <ion-col size="6">
-                        <span class="column-title">{{ 'Tags' }}</span>
-                      </ion-col>
-                    </ion-row>
-                    <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)">
-                      <ion-col size="3">
-                        <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id }}<br />
-                        <div class="data-title">{{ item.vie_title }}</div>
-                      </ion-col>
-                      <ion-col size="2">
-                        {{ item.vie_collection_id }}
-                        <div *ngIf="item.chart && item.chart.count; else noviewrecords" class="data-title">{{
-                          item.chart.count }} <span *ngIf="item.chart.count > 1">{{ 'rows' |
-                            translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
-                            }}</span>
-                        </div>
-                        <ng-template #noviewrecords>
-                          <div class="data-title">{{ 'No matching records' |
-                            translate }}
+                  <div class="full-width">
+                    <h4>{{ 'Shared Views' | translate }}</h4>
+                    <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' }}"
+                      animated="true" class="ion-no-padding ion-no-margin brz-searchbar"
+                      (ionChange)="doStartSearch($event.detail.value)">
+                    </ion-searchbar>
+                    <ion-grid *ngIf="viewsx.length > 0; else nosharedviews" class="ion-no-padding data-grid">
+                      <ion-row>
+                        <ion-col size="3">
+                          <span class="column-title">{{ 'ID' }} / {{ 'View Title' | translate }}</span>
+                        </ion-col>
+                        <ion-col size="2">
+                          <span class="column-title">{{ 'Collection' }}</span>
+                        </ion-col>
+                        <ion-col size="6">
+                          <span class="column-title">{{ 'Subscribers' }}</span>
+                        </ion-col>
+                      </ion-row>
+                      <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)">
+                        <ion-col size="3">
+                          <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id }}<br />
+                          <div class="data-title">{{ item.vie_title }}</div>
+                        </ion-col>
+                        <ion-col size="2">
+                          {{ item.vie_collection_id }}
+                          <div *ngIf="item.chart && item.chart.count; else noviewrecords" class="data-title">{{
+                            item.chart.count }} <span *ngIf="item.chart.count > 1">{{ 'rows' |
+                              translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
+                              }}</span>
                           </div>
-                        </ng-template>
-                      </ion-col>
-                      <ion-col size="6">
-                        {{ item._tags.join(' ') }}
-                      </ion-col>
-                    </ion-row>
-                  </ion-grid>
-                  <ng-template #nosharedviews>
-                    <ion-text class="pe" class="ion-margin-bottom">{{ 'No views found' | translate }}.</ion-text>
+                          <ng-template #noviewrecords>
+                            <div class="data-title">{{ 'No matching records' |
+                              translate }}
+                            </div>
+                          </ng-template>
+                        </ion-col>
+                        <ion-col size="6">
+                          {{ item._tags.join(' ') }}
+                        </ion-col>
+                      </ion-row>
+                    </ion-grid>
+                    <ng-template #nosharedviews>
+                      <ion-text class="pe" class="ion-margin-bottom">{{ 'No views found' | translate }}.</ion-text>
+                      <br />
+                    </ng-template>
                     <br />
-                  </ng-template>
-                  <br />
+                  </div>
                 </div>
 
                 <!-- RECENT ANNOUNCEMENTS -->
-                <h4>{{ 'Announcements' | translate }}</h4>
+                <h4>{{ 'Recent Announcements' | translate }}</h4>
                 <ion-grid *ngIf="announcements.length > 0; else noannouncement" class="ion-no-padding data-grid">
                   <ion-row>
-                    <ion-col size="3">
-                      <span class="column-title">{{ 'Date' }} / {{ 'View Title' | translate }}</span>
+                    <ion-col size="2">
+                      <span class="column-title">{{ 'Date' }}</span>
                     </ion-col>
                     <ion-col size="2">
-                      <span class="column-title">{{ 'By' }}</span>
+                      <span class="column-title">{{ 'View Title' | translate }}</span>
                     </ion-col>
-                    <ion-col size="6">
+                    <ion-col size="2">
+                      <span class="column-title">{{ 'Announced By' }}</span>
+                    </ion-col>
+                    <ion-col size="5">
                       <span class="column-title">{{ 'Tags' }}</span>
                     </ion-col>
                   </ion-row>
                   <ion-row *ngFor="let item of announcements; let a = index">
-                    <ion-col size="3">
-                      <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.log_date.replace('
+                    <ion-col size="2">
+                      {{ item.log_date.replace('
                       ', 'T') | date:'dd.MM.yyyy
-                      HH:mm' }}<br />
-                      <div class="data-title">{{ item.log_document.view.vie_title }}</div>
+                      HH:mm' }}
+                    </ion-col>
+                    <ion-col size="2">
+                      {{ item.log_document.view.vie_title }} ({{ item.log_operation }})
                     </ion-col>
                     <ion-col size="2">
                       {{ item.log_user_id }}
-                      <div class="data-title">
-                        {{ item.log_operation }}
-                      </div>
                     </ion-col>
-                    <ion-col size="6">
+                    <ion-col size="5">
                       {{ item.log_document.view._tags.join(' ') }}
                     </ion-col>
                   </ion-row>
@@ -592,7 +596,8 @@
                       </span>
                       <span *ngIf="item.value.bsonType=='array'">
                         <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">
-                          {{ record[item.key]?.length }} {{ 'Line' | translate }}<span *ngIf="record[item.key]?.length > 1">{{ 's' }}</span>
+                          {{ record[item.key]?.length }} {{ 'Line' | translate }}<span
+                            *ngIf="record[item.key]?.length > 1">{{ 's' }}</span>
                         </span>
                         <ng-template #noarrayobject>
                           <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
@@ -749,7 +754,8 @@
                       {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI Tools' |
                       translate }}.
                       <ul>
-                        <li>{{ 'API Key is hidden by default. To see your API Key for 5 seconds click to show button below' | translate }}.</li>
+                        <li>{{ 'API Key is hidden by default. To see your API Key for 5 seconds click to show button
+                          below' | translate }}.</li>
                         <li>{{ 'You can copy and paste your API Key to the clipboard' | translate }}.</li>
                         <li>{{ 'Once you generate a new API Key previous one doesn\'t work anymore' | translate }}.</li>
                       </ul>
@@ -781,10 +787,12 @@
                     </ion-label>
                     <ng-template #noapikey>
                       <ion-label class="ion-text-wrap descriptive">
-                        {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI Tools' |
+                        {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI Tools'
+                        |
                         translate }}.
                         <ul>
-                          <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one please click the button below' | translate }}.</li>
+                          <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one please
+                            click the button below' | translate }}.</li>
                         </ul>
                         <p>
                           <ion-button (click)="doAccount('apikeygen')" size="default" class="ion-margin-top">

@@ -3402,7 +3402,7 @@ class Crud():
                     ids_.append(ObjectId(_id))
 
             if not filter_ and len(ids_) == 0:
-                raise APIError("please make a row selection prior to apply an action")
+                raise APIError("please select a row before performing an action")
 
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
