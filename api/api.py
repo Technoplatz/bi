@@ -1762,10 +1762,10 @@ class Crud():
         filtered_ = {}
         if properties_:
             for f in match_:
-                if f["key"] and f["op"] and f["key"] in properties_:
+                if f["key"] and f["op"] and (f["key"] == "_id" or f["key"] in properties_):
 
                     fres_ = None
-                    typ = properties_[f["key"]]["bsonType"]
+                    typ = properties_[f["key"]]["bsonType"] if f["key"] in properties_ else "string"
 
                     if f["op"] in ["eq", "contains"]:
                         if typ == "number":
@@ -1792,7 +1792,7 @@ class Crud():
 
                     elif f["op"] in ["in", "nin"]:
                         separated_ = re.split(",|;|\n", f["value"])
-                        list_ = [s.strip() for s in separated_]
+                        list_ = [s.strip() for s in separated_] if f["key"] != "_id" else [ObjectId(s.strip()) for s in separated_]
                         if f["op"] == "in":
                             fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
                         else:
@@ -2292,12 +2292,6 @@ class Crud():
                                 {"$and": [
                                     {"$eq": ["$$vid", "$vie_id"]},
                                     {"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}
-                                    # {"$or": [
-                                    #     {"$in": [user_["usr_id"], "$vie_subscribers"]},
-                                    #     {"$in": [user_["usr_group_id"], "$vie_subscribers"]},
-                                    #     {"$eq": [[], "$vie_subscribers"]}
-                                    #     ]
-                                    # }
                                 ]}
                              }
                          }
@@ -2445,7 +2439,7 @@ class Crud():
                 })
                 if not cursor_:
                     raise APIError(f"view not found {view_['vie_id']}")
-                match_ = cursor_["vie_filter"] + match_
+                match_ += cursor_["vie_filter"]
 
             get_filtered_ = self.get_filtered_f({
                 "match": match_,
@@ -4085,6 +4079,7 @@ class Auth():
             op_ = input_["op"] if "op" in input_ else None
             cudops_ = ["insert", "update", "upsert", "delete", "remove", "clone", "purge"]
             collessops_ = ["view", "views", "collections", "template", "dump", "version"]
+            allowmatch_ = []
 
             if not user_id_:
                 raise APIError(f"user not found {user_id_}")
@@ -4093,7 +4088,7 @@ class Auth():
                 raise APIError(f"operation is missing {op_}")
 
             if not collection_id_:
-                res_ = {"result": True} if op_ in collessops_ else {"result": False}
+                res_ = {"result": True, "allowmatch": allowmatch_} if op_ in collessops_ else {"result": False, "allowmatch": allowmatch_}
                 return
 
             # check user on _user collection
@@ -4111,17 +4106,17 @@ class Auth():
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
             if aut_root_:
-                res_ = {"result": True}
+                res_ = {"result": True, "allowmatch": allowmatch_}
                 return
 
             if collection_id_:
                 if collection_id_[:1] == "_":
                     if op_ == "read":
-                        res_ = {"result": True}
+                        res_ = {"result": True, "allowmatch": allowmatch_}
                         return
                     elif op_ in cudops_:
                         if not Misc().permitted_user_f(user_):
-                            res_ = {"result": False}
+                            res_ = {"result": False, "allowmatch": allowmatch_}
                             return
             else:
                 raise APIError("no collection found for {op_}")
@@ -4132,8 +4127,9 @@ class Auth():
 
             # sets the default permission is not permitted
             permission_ = False  # default
+
             # checks if the permission level was defined in the collection
-            for usr_tag_ in usr_tags_:
+            for ix_, usr_tag_ in enumerate(usr_tags_):
                 permission_check_ = self.db["_permission"].find_one({
                     "per_tag_id": usr_tag_,
                     "per_collection_id": collection_id_
@@ -4145,6 +4141,9 @@ class Auth():
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
                     if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
+                        # the first tag is getting to be considered for allowed matches
+                        if ix_ == 0:
+                            allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True
                         break
 
@@ -4152,7 +4151,7 @@ class Auth():
             if not permission_:
                 raise APIError(f"user is not allowed to {op_} on {collection_id_}")
 
-            res_ = {"result": permission_}
+            res_ = {"result": permission_, "allowmatch": allowmatch_}
 
         except pymongo.errors.PyMongoError as exc:
             # set the result as a database error
@@ -4879,6 +4878,14 @@ def crud_f():
         permission_f_ = Auth().permission_f({"user": email_, "collection": collection_, "op": op_})
         if not permission_f_["result"]:
             raise APIError(permission_f_["msg"])
+        allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else None
+
+        input_["allowmatch"] = allowmatch_
+        if allowmatch_:
+            if "match" in input_ and input_["match"] is not None:
+                input_["match"] = allowmatch_ + input_["match"]
+            else:
+                input_["match"] = allowmatch_
 
         # injects the real user info into the user input
         input_["userindb"] = validate_["user"]
