@@ -2403,7 +2403,6 @@ class Crud():
         try:
             # gets the parameters required
             user_ = input_["user"]
-            match_ = input_["match"]
             limit_ = input_["limit"]
             page = input_["page"]
             collection_id_ = input_["collection"]
@@ -2411,6 +2410,7 @@ class Crud():
             skip_ = limit_ * (page - 1)
             view_ = input_["view"]
             userindb_ = input_["userindb"]
+            match_ = input_["match"] if "match" in input_ and len(input_["match"]) > 0 else []
 
             # generates the data collection name according to the collection id
             is_crud_ = True if collection_id_[:1] != "_" else False
@@ -2427,9 +2427,6 @@ class Crud():
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] == True else False
-
-            if not match_:
-                match_ = []
 
             # combines view filter and user filter in view mode
             if view_ is not None and collection_id_ == view_["vie_collection_id"]:
@@ -3301,6 +3298,8 @@ class Crud():
                     raise APIError("user is protected to delete. please consider disabling user instead.")
 
             # collect object ids of the records to be processed
+            print("*** match_", match_, flush=True)
+
             ids_ = []
             for _id in match_:
                 ids_.append(ObjectId(_id))
@@ -4868,6 +4867,7 @@ def crud_f():
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
         collection_ = input_["collection"] if "collection" in input_ else None
+        match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
 
         # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
@@ -4878,20 +4878,18 @@ def crud_f():
         permission_f_ = Auth().permission_f({"user": email_, "collection": collection_, "op": op_})
         if not permission_f_["result"]:
             raise APIError(permission_f_["msg"])
-        allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else None
+        allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
 
-        input_["allowmatch"] = allowmatch_
-        if allowmatch_:
-            if "match" in input_ and input_["match"] is not None:
-                input_["match"] = allowmatch_ + input_["match"]
-            else:
-                input_["match"] = allowmatch_
+        if op_ in ["read", "update", "upsert", "delete", "action"]:
+            match_ = allowmatch_ + match_
 
         # injects the real user info into the user input
+        input_["match"] = match_
+        input_["allowmatch"] = allowmatch_
         input_["userindb"] = validate_["user"]
 
         # adds the document as decoded into the user input
-        if op_ in ["update", "import", "insert", "action"]:
+        if op_ in ["update", "upsert", "import", "insert", "action"]:
             if not "doc" in input_:
                 raise APIError("document must be included in the request")
             decode_ = Crud().decode_crud_input_f(input_)

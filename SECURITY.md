@@ -11,9 +11,10 @@ Each new application version may contain patches released for security vulnerabi
 
 | Version | Supported |
 | :--- | :---: |
-| >= 3.0.28, latest | :heavy_check_mark: |
-| < 3.0.27 | :x: |
+| >= 3.0.28, latest | Yes |
+| < 3.0.27 | No |
 
 ## Reporting a Vulnerability
 
 Please report security vulnerabilities or suspicious issues to support@technoplatz.de. Your notification will be investigated and replied as soon as possible. If the risk of the issue is confirmed, we will try to deploy a new version as soon as possible with the necessary patches depending on our workload and the complexity of the issue. Thanks in advance for your support.
+
