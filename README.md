@@ -1,11 +1,8 @@
-## Technoplatz BI
+# Technoplatz BI
 
-*It's time to get data-driven with your inner-cycle!*
-
-Table of contents;
+It's time to get data-driven with your inner-cycle!
 
 - [Community Edition](#community-edition)
-- [Highlights](#highlights)
 - [Cloud Environment](#cloud-environment)
 - [Installation](#installation)
 - [Troubleshooting](#troubleshooting)
@@ -14,7 +11,7 @@ Table of contents;
 
 ## Community Edition
 
-Community Edition is a low-code, multi-container data application and sharing platform designed to establish and manage a mission critical data-driven business process without the need to develop software from scratch. Considering that each business has its own unique conditions it provides an optimized and pragmatic solution for main requirements;
+Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage data-driven business process without the need to develop software from scratch. Considering that each business has its own unique conditions it provides an optimized and pragmatic solution for the main requirements below;
 
 - Self-service Data Management\
 <span style="font-size: small; font-weight: bold;">[DATA APPLICATION](#data-application)</span>
@@ -64,7 +61,7 @@ The internal Application Programming Interface has been developed in Python prog
 - CronJobs\
 <sup>Runs scheduled Automation tasks.</sup>
 
-## Highlights
+### Highlights
 
 Technoplatz BI is designed as a self-service and containerized business application that can be managed by companies of various sizes and users with different skills. Containerization means that applications run in isolated runtime environment called containers with their dependencies, configuration files and operating system. This approach provides advantage of sustainability and significant cost reduction in the management of mission critical business processes;
 
@@ -90,7 +87,7 @@ Technoplatz BI is powered by the leading open source information technologies;
 
 ## Cloud Environment
 
-Technoplatz BI runs on the Docker platform which is the leading open source virtualization technology for developing, shipping and running business grade applications. You can install Docker Desktop on your personal computer for free or buy a hosted service from many cloud providers. The links below will guide you to install on the correct platform;
+Technoplatz BI runs on the Docker platform which is the leading open source virtualization technology for developing, shipping and running business grade applications. You can install Docker on your personal computer for free or buy a hosted cloud service from many providers. The links below will guide you about how to install Docker on the platform you choose;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
 - [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
@@ -275,7 +272,7 @@ Community Edition's default settings are provided for testing and local use. In 
 The system is provided in two licensing options;
 
 - Community Edition
-- Enterprise Edition
+- Enterprise Edition (Brezel)
 
 <div class="licensing">
 
