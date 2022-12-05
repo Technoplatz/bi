@@ -265,7 +265,7 @@ ion-alert .alert-radio-group {
 .data-sq-button {
   min-width: 75px;
   max-width: 75px;
-  height: 80px;
+  height: 82px;
   vertical-align: top !important;
   text-align: center;
   padding: 4px;
@@ -399,13 +399,13 @@ form ion-item ion-label {
   border: 1px solid var(--ion-color-light);
 }
 
+.pivot .dataframe {
+  width: 100%;
+}
+
 .pivot .dataframe td,
 .pivot .dataframe th {
   padding: 8px;
-  /*
-  border: 1px solid #fff;
-  background: var(--ion-color-light);
-  */
   border: 1px solid var(--ion-color-light);
 }
 

@@ -40,12 +40,6 @@
             "default": 1000,
             "width": 120
         },
-        "vie_enabled": {
-            "bsonType": "bool",
-            "title": "Enabled",
-            "description": "Enabled or not",
-            "width": 110
-        },
         "vie_dashboard": {
             "bsonType": "bool",
             "title": "Dashboard",
@@ -353,33 +347,6 @@
             ],
             "width": 210
         },
-        "vie_p_xaxis_label": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
-            "title": "X Axis Label",
-            "description": "X Axis Label",
-            "width": 140
-        },
-        "vie_p_yaxis_label": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
-            "title": "Y Axis Label",
-            "description": "Y Axis Label",
-            "width": 140
-        },
-        "vie_p_legend_title": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
-            "title": "Legend Label",
-            "description": "Legend Label",
-            "width": 140
-        },
         "vie_p_kpi": {
             "bsonType": "bool",
             "title": "KPI",
@@ -401,11 +368,25 @@
             "description": "Show X Axis",
             "width": 140
         },
+        "vie_p_xaxis_label_show": {
+            "bsonType": "bool",
+            "title": "Show X Axis Label",
+            "default": true,
+            "description": "Show X Axis Label",
+            "width": 140
+        },
         "vie_p_yaxis_show": {
             "bsonType": "bool",
             "title": "Show Y Axis",
             "default": true,
             "description": "Show Y Axis",
+            "width": 140
+        },
+        "vie_p_yaxis_label_show": {
+            "bsonType": "bool",
+            "title": "Show Y Axis Label",
+            "default": true,
+            "description": "Show Y Axis Label",
             "width": 140
         },
         "vie_p_legend_show": {

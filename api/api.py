@@ -354,13 +354,12 @@ class Schedular():
                 vie_id_ = doc_["vie_id"]
                 if sched_.get_job(vie_id_):
                     sched_.remove_job(vie_id_)
-                vie_enabled_ = doc_["vie_enabled"] if "vie_enabled" in doc_ and doc_["vie_enabled"] else False
                 vie_scheduled_ = doc_["vie_scheduled"] if "vie_scheduled" in doc_ and doc_["vie_scheduled"] else False
                 vie_pivot_values_ = doc_["vie_pivot_values"] if "vie_pivot_values" in doc_ else []
                 vie_pivot_index_ = doc_["vie_pivot_index"] if "vie_pivot_index" in doc_ else []
                 _tags = doc_["_tags"] if "_tags" in doc_ else []
 
-                if vie_scheduled_ and vie_enabled_ and len(vie_pivot_values_) > 0 and len(vie_pivot_index_) > 0 and len(_tags) > 0:
+                if vie_scheduled_ and len(vie_pivot_values_) > 0 and len(vie_pivot_index_) > 0 and len(_tags) > 0:
                     vie_sched_minutes_c_ = [str(element) for element in doc_["vie_sched_minutes"]] if "vie_sched_minutes" in doc_ and len(doc_["vie_sched_minutes"]) > 0 else ["0"]
                     vie_sched_hours_c_ = [str(element) for element in doc_["vie_sched_hours"]] if "vie_sched_hours" in doc_ and len(doc_["vie_sched_hours"]) > 0 else ["12"]
                     vie_sched_minutes_ = ",".join(vie_sched_minutes_c_)
@@ -1136,7 +1135,6 @@ class Crud():
                 "vie_collection_id": collection_,
                 "vie_title": vie_title_,
                 "vie_priority": 1000,
-                "vie_enabled": True,
                 "vie_dashboard": False,
                 "vie_filter": match_,
                 "vie_sched_timezone": TZ_,
@@ -1882,7 +1880,7 @@ class Crud():
             user_ = obj["user"]
 
             # checks enabled visuals
-            doc_ = self.db["_view"].find_one({"_id": ObjectId(id_), "vie_enabled": True})
+            doc_ = self.db["_view"].find_one({"_id": ObjectId(id_), "vie_dashboard": True})
             if not doc_:
                 raise APIError("no view found")
 
@@ -1891,6 +1889,8 @@ class Crud():
             color_scheme_def_ = ["FireBrick", "DarkSeaGreen", "CornFlowerBlue", "LightSkyBlue"]
             vie_p_xaxis_show_ = True if "vie_p_xaxis_show" in doc_ and doc_["vie_p_xaxis_show"] in ["true", True] else False
             vie_p_yaxis_show_ = True if "vie_p_yaxis_show" in doc_ and doc_["vie_p_yaxis_show"] in ["true", True] else False
+            vie_p_xaxis_label_show_ = True if "vie_p_xaxis_label_show" in doc_ and doc_["vie_p_xaxis_label_show"] in ["true", True] else False
+            vie_p_yaxis_label_show_ = True if "vie_p_yaxis_label_show" in doc_ and doc_["vie_p_yaxis_label_show"] in ["true", True] else False
             vie_p_legend_show_ = True if "vie_p_legend_show" in doc_ and doc_["vie_p_legend_show"] in ["true", True] else False
             vie_p_gradient_ = True if "vie_p_gradient" in doc_ and doc_["vie_p_gradient"] in ["true", True] else False
             vie_p_datalabel_show_ = True if "vie_p_datalabel_show" in doc_ and doc_["vie_p_datalabel_show"] in ["true", True] else False
@@ -1898,9 +1898,6 @@ class Crud():
             vie_p_kpi_ = True if "vie_p_kpi" in doc_ and doc_["vie_p_kpi"] in ["true", True] else False
             vie_kpi_target_value_ = doc_["vie_kpi_target_value"] if "vie_kpi_target_value" in doc_ else 0
             vie_chart_style_ = doc_["vie_chart_style"] if "vie_chart_style" in doc_ else "Vertical Bar"
-            vie_p_xaxis_label_ = doc_["vie_p_xaxis_label"] if "vie_p_xaxis_label" in doc_ else None
-            vie_p_yaxis_label_ = doc_["vie_p_yaxis_label"] if "vie_p_yaxis_label" in doc_ else None
-            vie_p_legend_title_ = doc_["vie_p_legend_title"] if "vie_p_legend_title" in doc_ else None
             vie_chart_xaxis_ = doc_["vie_pivot_index"][0] if "vie_pivot_index" in doc_ and len(doc_["vie_pivot_index"]) > 0 else None
             vie_chart_yaxis_ = doc_["vie_pivot_values"][0]["key"] if "vie_pivot_values" in doc_ and len(doc_["vie_pivot_values"]) > 0 and "key" in doc_["vie_pivot_values"][0] else None
             vie_chart_function_ = doc_["vie_pivot_values"][0]["value"] if "vie_pivot_values" in doc_ and len(doc_["vie_pivot_values"]) > 0 and "value" in doc_["vie_pivot_values"][0] else "sum"
@@ -1924,6 +1921,10 @@ class Crud():
 
             view_data_ = generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
             view_properties_ = generate_view_data_f_["properties"] if generate_view_data_f_ and "properties" in generate_view_data_f_ else {}
+
+            vie_p_xaxis_label_ = view_properties_[vie_chart_xaxis_]["title"] if vie_chart_xaxis_ in view_properties_ and "title" in view_properties_[vie_chart_xaxis_] else vie_chart_xaxis_
+            vie_p_yaxis_label_ = view_properties_[vie_chart_yaxis_]["title"] if vie_chart_yaxis_ in view_properties_ and "title" in view_properties_[vie_chart_yaxis_] else vie_chart_yaxis_
+            vie_p_legend_title_ = view_properties_[vie_chart_legend_]["title"] if vie_chart_legend_ in view_properties_ and "title" in view_properties_[vie_chart_legend_] else vie_chart_legend_
 
             # convert view data to pandas df
             df_ = pd.DataFrame(list(view_data_)).fillna("")
@@ -2027,7 +2028,9 @@ class Crud():
                 "xaxis_label": vie_p_xaxis_label_,
                 "yaxis_label": vie_p_yaxis_label_,
                 "xaxis_show": vie_p_xaxis_show_,
+                "xaxis_label_show": vie_p_xaxis_label_show_,
                 "yaxis_show": vie_p_yaxis_show_,
+                "yaxis_label_show": vie_p_yaxis_label_show_,
                 "legend_show": vie_p_legend_show_,
                 "legend_title": vie_p_legend_title_,
                 "gradient": vie_p_gradient_,
@@ -2052,7 +2055,6 @@ class Crud():
 
             doc_ = self.db["_view"].find_one({
                 "_id": ObjectId(id_),
-                "vie_enabled": True,
                 "_tags": {"$elemMatch": {"$in": user_["_tags"]}}
             })
             if not doc_:
@@ -2331,7 +2333,6 @@ class Crud():
                 raise APIError("view structure not found")
 
             views_ = self.db["_view"].find(filter={
-                "vie_enabled": True,
                 "_tags": {"$elemMatch": {"$in": user_["_tags"]}}
             }, sort=[("vie_priority", 1)])
 
@@ -2434,9 +2435,8 @@ class Crud():
                     "vie_id": view_["vie_id"],
                     "_tags": {"$elemMatch": {"$in": userindb_["_tags"]}}
                 })
-                if not cursor_:
-                    raise APIError(f"view not found {view_['vie_id']}")
-                match_ += cursor_["vie_filter"]
+                if cursor_:
+                    match_ += cursor_["vie_filter"]
 
             get_filtered_ = self.get_filtered_f({
                 "match": match_,
@@ -3298,8 +3298,6 @@ class Crud():
                     raise APIError("user is protected to delete. please consider disabling user instead.")
 
             # collect object ids of the records to be processed
-            print("*** match_", match_, flush=True)
-
             ids_ = []
             for _id in match_:
                 ids_.append(ObjectId(_id))

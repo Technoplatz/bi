@@ -206,8 +206,8 @@
                   <!-- SHARED VIEWS -->
                   <div class="full-width">
                     <h4>{{ 'Shared Views' | translate }}</h4>
-                    <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' }}"
-                      animated="true" class="ion-no-padding ion-no-margin brz-searchbar"
+                    <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' }}" animated="true"
+                      class="ion-no-padding ion-no-margin brz-searchbar"
                       (ionChange)="doStartSearch($event.detail.value)">
                     </ion-searchbar>
                     <ion-grid *ngIf="viewsx.length > 0; else nosharedviews" class="ion-no-padding data-grid">
@@ -318,6 +318,11 @@
                         <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data Url' | translate }}</span>
                         <span *ngIf="is_url_copied">{{ 'Data Url' | translate }}<br />{{ 'Copied' | translate }}</span>
                       </div>
+                      <div class="data-sq-button" (click)="doOpenPivotModal()">
+                        <ion-icon name="easel-outline"></ion-icon>
+                        <br />
+                        {{ 'Pivot' | translate }}<br /> {{ 'Table' | translate }}
+                      </div>
                       <div (click)="doQuitViewMode()" class="data-sq-button">
                         <ion-icon name="exit-outline"></ion-icon>
                         <br />
@@ -395,100 +400,119 @@
                       </div>
                     </ion-col>
                   </ion-row>
-                  <ion-grid *ngIf="is_loaded && view_mode[id] && view" class="announce-grid ion-no-padding">
-                    <ion-row class="border-top-row">
-                      <ion-col size="12">
-                        <ion-text color="primary">{{ 'SHARED VIEW' | translate }}</ion-text><br />
-                        <span class="announce-grid-header">{{ view_mode["vie_title"] }}</span>
-                        <div class="announce-grid-tags">{{ view_mode["_tags"] && view_mode["_tags"].join(' ')
-                          }}</div>
-                        <div *ngIf="view && view.vie_scheduled" class="announce-sched">
-                          {{ 'Scheduled at' | translate }}
-                          <span *ngIf="view.vie_sched_days && view.vie_sched_days.length > 0">
-                            {{ view.vie_sched_days.join(',') }}&nbsp;
-                          </span>
-                          <span *ngIf="view.vie_sched_hours && view.vie_sched_hours.length > 0">
-                            hours: {{ view.vie_sched_hours.join(',') }}&nbsp;
-                          </span>
-                          <span *ngIf="view.vie_sched_minutes && view.vie_sched_minutes.length > 0">
-                            minutes: {{ view.vie_sched_minutes.join(',') }}&nbsp;
-                          </span>
-                        </div>
-                        <div *ngIf="view && !view.vie_scheduled" class="announce-sched">{{ 'Not scheduled' | translate
-                          }}</div>
-                        <div>
-                          <a href="javascript:void(0);" (click)="doShowPivot()"><span *ngIf="!is_pivot_showed">{{ 'Show
-                              Data Pivot'
-                              | translate }}</span><span *ngIf="is_pivot_showed">{{ 'Hide Pivot'
-                              | translate }}</span></a>
-                        </div>
-                        <div *ngIf="pivot_ && is_pivot_showed" lines="none" class="ion-no-padding">
-                          <div [innerHtml]="pivot_" class="pivot"></div>
-                          <table *ngIf="statistics_" class="stat">
-                            <tr>
-                              <th colspan="8">
-                                {{ 'Descriptive statistics of' | translate }} {{ statistics_key_ }}
-                              </th>
-                            </tr>
-                            <tr>
-                              <th>
-                                {{ 'count' }}
-                              </th>
-                              <th>
-                                {{ 'mean' }}
-                              </th>
-                              <th>
-                                {{ 'stdev' }}
-                              </th>
-                              <th>
-                                {{ 'min' }}
-                              </th>
-                              <th>
-                                {{ 'max' }}
-                              </th>
-                              <th>
-                                {{ 'top' }}
-                              </th>
-                              <th>
-                                {{ 'unique' }}
-                              </th>
-                              <th>
-                                {{ 'freq' }}
-                              </th>
-                            </tr>
-                            <tr>
-                              <td>
-                                {{ statistics_.count}}
-                              </td>
-                              <td>
-                                {{ statistics_.mean}}
-                              </td>
-                              <td>
-                                {{ statistics_.std}}
-                              </td>
-                              <td>
-                                {{ statistics_.min}}
-                              </td>
-                              <td>
-                                {{ statistics_.max}}
-                              </td>
-                              <td>
-                                {{ statistics_.top}}
-                              </td>
-                              <td>
-                                {{ statistics_.unique}}
-                              </td>
-                              <td>
-                                {{ statistics_.freq}}
-                              </td>
-                            </tr>
-                          </table>
-                        </div>
-                      </ion-col>
-                    </ion-row>
-                  </ion-grid>
                 </ion-grid>
-
+                <!-- <ion-grid *ngIf="is_loaded && view_mode[id] && view" class="announce-grid ion-no-padding">
+                  <ion-row class="border-top-row">
+                    <ion-col size="12">
+                      <ion-text color="primary">{{ 'SHARED VIEW' | translate }}</ion-text><br />
+                      <span class="announce-grid-header">{{ view_mode["vie_title"] }}</span>
+                      <div class="announce-grid-tags">{{ view_mode["_tags"] && view_mode["_tags"].join(' ')
+                        }}</div>
+                      <div *ngIf="view && view.vie_scheduled" class="announce-sched">
+                        {{ 'Scheduled at' | translate }}
+                        <span *ngIf="view.vie_sched_days && view.vie_sched_days.length > 0">
+                          {{ view.vie_sched_days.join(',') }}&nbsp;
+                        </span>
+                        <span *ngIf="view.vie_sched_hours && view.vie_sched_hours.length > 0">
+                          hours: {{ view.vie_sched_hours.join(',') }}&nbsp;
+                        </span>
+                        <span *ngIf="view.vie_sched_minutes && view.vie_sched_minutes.length > 0">
+                          minutes: {{ view.vie_sched_minutes.join(',') }}&nbsp;
+                        </span>
+                      </div>
+                      <div *ngIf="view && !view.vie_scheduled" class="announce-sched">{{ 'Not scheduled' | translate
+                        }}</div>
+                      <div>
+                        <a href="javascript:void(0);" (click)="doShowPivot()"><span *ngIf="!is_pivot_showed">{{ 'Show
+                            Data Pivot'
+                            | translate }}</span><span *ngIf="is_pivot_showed">{{ 'Hide Pivot'
+                            | translate }}</span></a>
+                      </div>
+                      <div *ngIf="pivot_ && is_pivot_showed" lines="none" class="ion-no-padding">
+                        <div [innerHtml]="pivot_" class="pivot"></div>
+                        <table *ngIf="statistics_" class="stat">
+                          <tr>
+                            <th colspan="8">
+                              {{ 'Descriptive statistics of' | translate }} {{ statistics_key_ }}
+                            </th>
+                          </tr>
+                          <tr>
+                            <th>
+                              {{ 'count' }}
+                            </th>
+                            <th>
+                              {{ 'mean' }}
+                            </th>
+                            <th>
+                              {{ 'stdev' }}
+                            </th>
+                            <th>
+                              {{ 'min' }}
+                            </th>
+                            <th>
+                              {{ 'max' }}
+                            </th>
+                            <th>
+                              {{ 'top' }}
+                            </th>
+                            <th>
+                              {{ 'unique' }}
+                            </th>
+                            <th>
+                              {{ 'freq' }}
+                            </th>
+                          </tr>
+                          <tr>
+                            <td>
+                              {{ statistics_.count}}
+                            </td>
+                            <td>
+                              {{ statistics_.mean}}
+                            </td>
+                            <td>
+                              {{ statistics_.std}}
+                            </td>
+                            <td>
+                              {{ statistics_.min}}
+                            </td>
+                            <td>
+                              {{ statistics_.max}}
+                            </td>
+                            <td>
+                              {{ statistics_.top}}
+                            </td>
+                            <td>
+                              {{ statistics_.unique}}
+                            </td>
+                            <td>
+                              {{ statistics_.freq}}
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid> -->
+                <ion-modal [isOpen]="openPivotModal">
+                  <ng-template>
+                    <ion-header>
+                      <ion-toolbar>
+                        <ion-buttons slot="start">
+                          <ion-button>Cancel</ion-button>
+                        </ion-buttons>
+                        <ion-title>Welcome</ion-title>
+                        <ion-buttons slot="end">
+                          <ion-button [strong]="true">Confirm</ion-button>
+                        </ion-buttons>
+                      </ion-toolbar>
+                    </ion-header>
+                    <ion-content class="ion-padding">
+                      <div *ngIf="pivot_ && is_pivot_showed" lines="none" class="ion-no-padding">
+                        <div [innerHtml]="pivot_" class="pivot"></div>
+                      </div>
+                    </ion-content>
+                  </ng-template>
+                </ion-modal>
                 <!-- CRUD GRID -->
                 <ion-grid *ngIf="is_samecol; else dataloading" class="ion-no-padding data-grid">
                   <!-- CRUD HEADERS -->

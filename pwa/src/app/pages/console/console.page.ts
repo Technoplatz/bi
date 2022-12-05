@@ -129,6 +129,7 @@ export class ConsolePage implements OnInit {
   public pane_segval_dash: string = "dash";
   public options?: JsonEditorOptions;
   public options2?: JsonEditorOptions;
+  public openPivotModal: boolean = false;
   private sweeped: any = [];
   private sort: any = {};
   private properites_: any = {};
@@ -1053,7 +1054,7 @@ export class ConsolePage implements OnInit {
   doGetVisual(data: any, v_: number) {
     this.views[v_].loading = true;
     this.views[v_].error = null;
-    if(this.accountf_apikey) {
+    if (this.accountf_apikey) {
       this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
         this.views[v_].chart = chart;
       }).catch((error: any) => {
@@ -1223,6 +1224,10 @@ export class ConsolePage implements OnInit {
 
   doTemplateShow() {
     this.template_showed = !this.template_showed;
+  }
+
+  doOpenPivotModal() {
+    this.openPivotModal = !this.openPivotModal;
   }
 
   doStartSearch(e: any) {
