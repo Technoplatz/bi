@@ -1,13 +1,4 @@
 <ion-header class="ion-padding-start ion-padding-end ion-no-border ion-no-margin modal-header">
-    <!-- <ion-item class="ion-no-padding" lines="none">
-        <h4>
-            {{ op | translate }}
-        </h4>
-        <ion-button slot="end" size="large" class="ion-no-padding ion-no-margin" color="clear"
-            (click)="doCancel({ modified: false, filter: [] })">
-            <ion-icon color="dark" name="close-outline"></ion-icon>
-        </ion-button>
-    </ion-item> -->
     <ion-grid class="ion-no-padding">
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
@@ -38,6 +29,10 @@
                 <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" size="small"
                     (click)="doSubmit()">
                     {{ 'IMPORT' | translate }}
+                </ion-button>
+                <ion-button *ngIf="collection=='_storage' && op=='upload' && !isInProgress" size="small"
+                    (click)="doSubmit()">
+                    {{ 'UPLOAD' | translate }}
                 </ion-button>
                 <ion-button size="small" (click)="doCancel({ modified: false, filter: [] })">
                     {{ 'CANCEL' | translate }}
@@ -91,7 +86,7 @@
         <div *ngIf="op=='filter'">
             <app-filter [filters]="filters" [property_list]="property_list"></app-filter>
         </div>
-        <div *ngIf="op=='insert' || op=='update' || op=='import' || op=='action'">
+        <div *ngIf="op=='insert' || op=='update' || op=='import' || op=='upload' || op=='action'">
             <div *ngIf="tab=='relation'" class="ion-padding-bottom ion-margin-top">
                 <ion-item *ngIf="reloading" class="clicked-item" lines="none">
                     <ion-spinner name="lines" class="ion-margin-end"></ion-spinner>

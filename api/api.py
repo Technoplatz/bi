@@ -1701,10 +1701,7 @@ class Crud():
                 "_modified_by": email_
             }
 
-            # The process remark will be located here
             self.db["_backup"].insert_one(doc_)
-
-            # remark will be added here
             res_ = {"result": True}
 
         except APIError as exc:
@@ -1880,7 +1877,7 @@ class Crud():
             user_ = obj["user"]
 
             # checks enabled visuals
-            doc_ = self.db["_view"].find_one({"_id": ObjectId(id_), "vie_dashboard": True})
+            doc_ = self.db["_view"].find_one({"_id": ObjectId(id_)})
             if not doc_:
                 raise APIError("no view found")
 
@@ -2470,7 +2467,6 @@ class Crud():
             }
 
         except pymongo.errors.PyMongoError as exc:
-            # The process remark will be located here
             self.log_f({
                 "type": "Error",
                 "collection": collection_,
@@ -2481,20 +2477,16 @@ class Crud():
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            # The process remark will be located here
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            # The process remark will be located here
             res_ = Misc().exception_f(exc)
 
         finally:
-            # The process remark will be located here
             return res_
 
-    def log_f(self, obj):  # The process remark will be located here
+    def log_f(self, obj):
         try:
-            # The process remark will be located here
             doc = {
                 "log_type": obj["type"],
                 "log_date": datetime.now(),
@@ -2508,22 +2500,16 @@ class Crud():
                 "_modified_by": obj["user"]
             }
 
-            # The process remark will be located here
             self.db["_log"].insert_one(doc)
-
-            # The process remark will be located here
             res_ = {"result": True}
 
         except APIError as exc:
-            # The process remark will be located here
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            # The process remark will be located here
             res_ = Misc().exception_f(exc)
 
         finally:
-            # The process remark will be located here
             return res_
 
     def crudscheme_validate_f(self, obj):
@@ -2595,19 +2581,16 @@ class Crud():
 
     def nocrudscheme_validate_f(self, obj):
         try:
-            # The process remark will be located here
             collection_ = obj["collection"]
 
             structure_ = self.root_schemes_f(f"_collections/{collection_}")
 
-            # The process remark will be located here
             schemevalidate_ = self.crudscheme_validate_f({
                 "collection": collection_,
                 "structure": structure_})
             if not schemevalidate_["result"]:
                 raise APIError(schemevalidate_["msg"])
 
-            # The process remark will be located here
             res_ = {"result": True}
 
         except APIError as exc:

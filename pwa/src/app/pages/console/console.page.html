@@ -82,6 +82,10 @@
                         <ion-icon name="add-circle-outline"></ion-icon><br />
                         <span>{{ 'New' | translate }}<br />{{ 'Collection' | translate }}</span>
                       </div>
+                      <div (click)="doImport('upload')" class="data-sq-button">
+                        <ion-icon name="server-outline"></ion-icon><br />
+                        <span>{{ 'Excel to' | translate }}<br />{{ 'Collection' | translate }}</span>
+                      </div>
                       <div (click)="doRefreshDash()" class="data-sq-button">
                         <ion-icon *ngIf="is_dash_ok" name="sync"></ion-icon>
                         <ion-icon *ngIf="!is_dash_ok" name="hourglass-outline"></ion-icon>
@@ -334,7 +338,7 @@
                       </div>
                     </ion-col>
                     <ion-col *ngIf="!view_mode[id]" size="12">
-                      <div *ngIf="is_crud" (click)="doImport()" class="data-sq-button">
+                      <div *ngIf="is_crud" (click)="doImport('import')" class="data-sq-button">
                         <ion-icon name="cloud-upload-outline"></ion-icon><br />
                         <span>{{ 'Import' | translate }}<br />{{ 'Excel' | translate }}</span>
                       </div>

@@ -14,6 +14,134 @@ export const environment = {
     limits: [20, 50, 100],
     loadingText: "Bitte warten Sie"
   },
+  import_structure: {
+    "properties": {
+      "sto_id": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 32,
+        "pattern": "^[a-z0-9-]{3,32}$",
+        "title": "ID",
+        "description": "Storage ID",
+        "permanent": true,
+        "required": true,
+        "width": 160
+      },
+      "sto_collection_id": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 32,
+        "pattern": "^[a-z0-9-_]{3,32}$",
+        "title": "Collection",
+        "description": "Collection ID",
+        "collection": true,
+        "required": true,
+        "width": 110
+      },
+      "sto_file": {
+        "bsonType": "string",
+        "minLength": 0,
+        "maxLength": 64,
+        "file": true,
+        "title": "File",
+        "description": "File name",
+        "width": 100
+      }
+    },
+    "required": [
+      "sto_id",
+      "sto_collection_id",
+      "sto_file"
+    ],
+    "unique": [
+      [
+        "sto_id"
+      ],
+      [
+        "sto_collection_id"
+      ]
+    ],
+    "index": [
+      [
+        "sto_collection_id"
+      ]
+    ],
+    "sort": {
+      "_modified_at": -1
+    }
+  },
+  upload_structure: {
+    "properties": {
+      "sto_id": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 32,
+        "pattern": "^[a-z0-9-]{3,32}$",
+        "title": "ID",
+        "description": "Storage ID",
+        "permanent": true,
+        "required": true,
+        "width": 160
+      },
+      "sto_collection_id": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 32,
+        "pattern": "^[a-z0-9-_]{3,32}$",
+        "title": "Collection",
+        "description": "Collection ID",
+        "required": true,
+        "width": 110
+      },
+      "sto_prefix": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 3,
+        "pattern": "^[a-z]{3,3}$",
+        "title": "Column Prefix",
+        "description": "Column Prefix",
+        "required": true,
+        "width": 90
+      },
+      "sto_file": {
+        "bsonType": "string",
+        "minLength": 0,
+        "maxLength": 64,
+        "file": true,
+        "title": "Excel File",
+        "description": "File name",
+        "width": 100
+      }
+    },
+    "required": [
+      "sto_id",
+      "sto_collection_id",
+      "sto_prefix",
+      "sto_file"
+    ],
+    "unique": [
+      [
+        "sto_id"
+      ],
+      [
+        "sto_collection_id"
+      ],
+      [
+        "sto_prefix"
+      ]
+    ],
+    "index": [
+      [
+        "sto_collection_id"
+      ],
+      [
+        "sto_prefix"
+      ]
+    ],
+    "sort": {
+      "_modified_at": -1
+    }
+  },
   pivotvalueops: [
     { "key": "sum", "value": "sum" },
     { "key": "count", "value": "count" },

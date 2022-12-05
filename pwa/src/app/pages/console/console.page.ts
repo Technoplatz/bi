@@ -433,63 +433,9 @@ export class ConsolePage implements OnInit {
     });
   }
 
-  doImport() {
-    const storage_structure_ = {
-      "properties": {
-        "sto_id": {
-          "bsonType": "string",
-          "minLength": 3,
-          "maxLength": 32,
-          "pattern": "^[a-z0-9-]{3,32}$",
-          "title": "ID",
-          "description": "Storage ID",
-          "permanent": true,
-          "required": true,
-          "width": 160
-        },
-        "sto_collection_id": {
-          "bsonType": "string",
-          "minLength": 3,
-          "maxLength": 32,
-          "pattern": "^[a-z0-9-_]{3,32}$",
-          "title": "Collection",
-          "description": "Collection ID",
-          "collection": true,
-          "required": true,
-          "width": 110
-        },
-        "sto_file": {
-          "bsonType": "string",
-          "minLength": 0,
-          "maxLength": 64,
-          "file": true,
-          "title": "File",
-          "description": "File name",
-          "width": 100
-        }
-      },
-      "required": [
-        "sto_id",
-        "sto_collection_id",
-        "sto_file"
-      ],
-      "unique": [
-        [
-          "sto_id"
-        ],
-        [
-          "sto_collection_id"
-        ]
-      ],
-      "index": [
-        [
-          "sto_collection_id"
-        ]
-      ],
-      "sort": {
-        "_modified_at": -1
-      }
-    }
+  doImport(type_: string) {
+    const import_structure_ = environment.import_structure;
+    const upload_structure_ = environment.upload_structure;
     this.view_mode[this.id] ? this.doQuitViewMode() : null;
     this.modal.create({
       component: CrudPage,
@@ -497,20 +443,20 @@ export class ConsolePage implements OnInit {
       cssClass: "crud-modal",
       componentProps: {
         shuttle: {
-          op: "import",
+          op: type_ === "import" ? "import" : "upload",
           collection: "_storage",
           collections: this.collections ? this.collections : [],
           views: this.views ? this.views : [],
           user: this.user,
           data: {
+            "sto_id": type_ === "import" ? "data-import" : "data-upload",
             "sto_collection_id": this.id,
-            "sto_file": null,
-            "sto_id": "data-import",
-            "sto_prefix": "ano"
+            "sto_prefix": type_ === "import" ? null : null,
+            "sto_file": null
           },
-          structure: storage_structure_,
+          structure: type_ === "import" ? import_structure_ : upload_structure_,
           sweeped: [],
-          filter: { "sto_collection_id": this.id },
+          filter: { "sto_collection_id": type_ === "import" ? this.id : null },
           actions: [],
           direct: -1
         }
