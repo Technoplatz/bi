@@ -115,6 +115,7 @@ class Schedular():
             if data_file_ not in self.db_.list_collection_names():
                 raise APIError("collection data is missing")
             remote_data_file_ = None
+            remote_structure_ = None
 
             if aut_matched_:
                 remote_data_file_ = f"{aut_match_collection_id_}_data"
@@ -122,7 +123,7 @@ class Schedular():
                     raise APIError(f"remote collection data is missing {remote_data_file_}")
                 collection_ = self.db_["_collection"].find_one({"col_id": aut_match_collection_id_})
                 if not collection_:
-                    raise APIError(f"remote collection not found: {aut_match_collection_id_}")
+                    raise APIError(f"remote collection not found to schedule: {aut_match_collection_id_}")
                 remote_structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
                 if not remote_structure_:
                     raise APIError(f"remote structure not found: {aut_match_collection_id_}")
@@ -692,7 +693,7 @@ class Crud():
             cursor_ = self.db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"_collections/{collection}")
 
             if not cursor_:
-                raise APIError("collection not found")
+                raise APIError("collection not found for properties")
 
             # gets the structure and its properties
             if "col_structure" not in cursor_:
@@ -924,7 +925,7 @@ class Crud():
             is_crud_ = True if c[:1] != "_" else False
             collection_ = self.db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"_collections/{c}")
             if not collection_:
-                raise APIError(f"collection not found: {c}")
+                raise APIError(f"collection not found to root: {c}")
             res_ = {"result": True, "collection": collection_}
 
         except pymongo.errors.PyMongoError as exc:
@@ -1049,7 +1050,7 @@ class Crud():
             # created a cursor for retrieve the collection structure will be added into the respone
             cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_}")
             if not cursor_:
-                raise APIError(f"collection not found: {collection_}")
+                raise APIError(f"collection not found to purge: {collection_}")
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
 
@@ -1128,7 +1129,7 @@ class Crud():
 
             ts_ = Misc().get_timestamp_f()
             id_ = f"vie-{collection_}-{ts_}"
-            vie_title_ = f"{collection_.capitalize()} View {next_}"
+            vie_title_ = f"{collection_.title()} View {next_}"
 
             doc_ = {
                 "vie_id": id_,
@@ -1240,18 +1241,12 @@ class Crud():
             # gets parameters and file from pwa
             form_ = obj["form"]
             file_ = obj["file"]
+            user_ = obj["user"]
             collection_ = obj["collection"]
+            prefix_ = obj["prefix"]
             email_ = form_["email"]
+            op_ = form_["op"]
             API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
-
-            prefix_ = collection_["col_prefix"] if "col_prefix" in collection_ else None
-            if not prefix_:
-                raise APIError("prefix is missing")
-            prefix_ += "_"
-
-            collection_id_ = collection_["col_id"]
-            collection__ = f"{collection_id_}_data"
-            collection_tmp_ = f"{collection_id_}_tmp"
 
             # start transaction
             session_client_ = MongoClient(self.connstr_)
@@ -1271,7 +1266,7 @@ class Crud():
                     raise APIError("file is empty")
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"file size is greater than {API_UPLOAD_LIMIT_BYTES_} bytes")
-                df_ = pd.read_excel(file_, sheet_name=collection_id_, header=0, engine="openpyxl")
+                df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl")
             elif mimetype_ == "text/csv":
                 filetype_ = "csv"
                 filesize_ = file_.content_length
@@ -1286,41 +1281,128 @@ class Crud():
             df_ = df_.rename(lambda column_: self.convert_cname_f(column_), axis="columns")
 
             # to add prefix to all columns
-            df_ = df_.add_prefix(prefix_)
+            prefix__ = f"{prefix_}_"
+            df_ = df_.add_prefix(prefix__)
             columns_ = []
             for column_ in df_.columns:
-                columns_.append(column_[4:] if column_[:8] == f"{prefix_}{prefix_}" else column_)
+                columns_.append(column_[4:] if column_[:8] == f"{prefix__}{prefix__}" else column_)
             df_.columns = df_.columns[:0].tolist() + columns_
 
-            get_properties_ = self.get_properties_f(collection_id_)
-            if not get_properties_["result"]:
-                raise APIError(get_properties_["msg"])
+            collection__ = f"{collection_}_data"
+            collection_tmp_ = f"{collection_}_tmp"
 
-            properties_ = get_properties_["properties"]
-            columns_tobe_deleted_ = []
-            # Convert dataset columns into related properties accordingly
+            find_one_ = self.db["_collection"].find_one({"col_id": collection_})
 
-            for column_ in df_.columns:
-                if column_ in properties_:
-                    property_ = properties_[column_]
-                    if "bsonType" in property_:
-                        if property_["bsonType"] == "date":
-                            df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
-                        elif property_["bsonType"] == "string":
-                            df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                        elif property_["bsonType"] == "number":
-                            df_[column_] = df_[column_].apply(self.frame_convert_number_f)
+            if find_one_:
+                get_properties_ = self.get_properties_f(collection_)
+                if not get_properties_["result"]:
+                    raise APIError(get_properties_["msg"])
+                properties_ = get_properties_["properties"]
+                columns_tobe_deleted_ = []
+                # Convert dataset columns into related properties accordingly
+                for column_ in df_.columns:
+                    if column_ in properties_:
+                        property_ = properties_[column_]
+                        if "bsonType" in property_:
+                            if property_["bsonType"] == "date":
+                                df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                            elif property_["bsonType"] == "string":
+                                df_[column_] = df_[column_].apply(self.frame_convert_string_f)
+                            elif property_["bsonType"] == "number":
+                                df_[column_] = df_[column_].apply(self.frame_convert_number_f)
+                        else:
+                            columns_tobe_deleted_.append(column_)
                     else:
                         columns_tobe_deleted_.append(column_)
-                else:
-                    columns_tobe_deleted_.append(column_)
-
-            # Remove unnecessary columns from dataset if they exist
-            if "_structure" in df_.columns:
-                columns_tobe_deleted_.append("_structure")
-
-            if len(columns_tobe_deleted_) > 0:
-                df_ = df_.drop(columns_tobe_deleted_, axis=1)
+                # Remove unnecessary columns from dataset if they exist
+                if "_structure" in df_.columns:
+                    columns_tobe_deleted_.append("_structure")
+                if len(columns_tobe_deleted_) > 0:
+                    df_ = df_.drop(columns_tobe_deleted_, axis=1)
+            else:
+                structure_ = {}
+                properties_ = {}
+                counter_ = 0
+                required_ = []
+                index_ = []
+                for column_ in df_.columns:
+                    counter_ += 1
+                    dtype_ = df_[column_].dtype
+                    dict_ = {}
+                    dict_["bsonType"] = "string"
+                    if dtype_ in ["int", "int64", "float", "float64"]:
+                        df_[column_] = df_[column_].apply(self.frame_convert_number_f)
+                        dict_["bsonType"] = "number"
+                        required_.append(column_)
+                    elif dtype_ in ["date", "datetime64", "datetime64[ns]"]:
+                        df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                        dict_["bsonType"] = "date"
+                        required_.append(column_)
+                    elif dtype_ == "bool":
+                        dict_["bsonType"] = "bool"
+                    elif dtype_ in ["object", "string"]:
+                        df_[column_] = df_[column_].apply(self.frame_convert_string_f)
+                        dict_["minLength"] = 1
+                        dict_["maxLength"] = 256
+                        required_.append(column_)
+                        index_.append([column_])
+                    dict_["title"] = column_[4:].replace("_", " ").title()
+                    dict_["description"] = column_
+                    dict_["width"] = 120
+                    properties_[column_] = dict_
+                structure_["properties"] = properties_
+                structure_["required"] = required_ if len(required_) > 0 else None
+                structure_["index"] = index_
+                structure_["unique"] = []
+                structure_["parents"] = []
+                structure_["sort"] = {"_created_at": -1}
+                structure_["actions"] = []
+                doc_ = {
+                    "col_id": collection_,
+                    "col_title": collection_.title(),
+                    "col_prefix": prefix_,
+                    "col_priority": 100,
+                    "col_structure": structure_,
+                    "_created_at": datetime.now(),
+                    "_modified_at": datetime.now(),
+                    "_created_by": email_,
+                    "_modified_by": email_,
+                    "_modified_count": 0
+                }
+                self.db["_collection"].insert_one(doc_)
+                self.db[collection__].insert_one({})
+                schemevalidate_ = self.crudscheme_validate_f({
+                    "collection": collection__,
+                    "structure": structure_})
+                if not schemevalidate_["result"]:
+                    raise APIError(schemevalidate_["msg"])
+                self.db[collection__].delete_one({})
+                reverse_structure_f_ = self.reverse_structure_f({
+                    "collection": collection_,
+                    "structure": structure_,
+                    "user": user_
+                })
+                if not reverse_structure_f_["result"]:
+                    raise APIError(reverse_structure_f_["msg"])
+                per_id_ = f"per-{collection_}-1"
+                self.db["_permission"].update_one({
+                    "per_id": per_id_,
+                }, {"$set": {
+                    "per_id": per_id_,
+                    "per_tag_id": user_["_tags"][0] if "_tags" in user_ and len(user_["_tags"]) > 0 else "#Managers",
+                    "per_collection_id": collection_,
+                    "per_create": True,
+                    "per_read": True,
+                    "per_update": True,
+                    "per_delete": True,
+                    "per_share": True,
+                    "per_match": [],
+                    "_created_at": datetime.now(),
+                    "_modified_at": datetime.now(),
+                    "_created_by": email_,
+                    "_modified_by": email_,
+                    "_modified_count": 0
+                }}, upsert=True)
 
             df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
 
@@ -1357,7 +1439,7 @@ class Crud():
 
             self.log_f({
                 "type": "Error",
-                "collection": collection_id_,
+                "collection": collection_,
                 "op": "import",
                 "user": email_,
                 "document": exc.details
@@ -1369,7 +1451,7 @@ class Crud():
                     "op": "importerr",
                     "to": email_,
                     "name": None,
-                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />FILE TYPE: {filetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_id_}<br />LINE COUNT: {count_tmp_}<br />ERROR COUNT: {res_['count']} (import)<br /><br />ERRORS:<br />{res_['msg']}"
+                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />FILE TYPE: {filetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />LINE COUNT: {count_tmp_}<br />ERROR COUNT: {res_['count']} (import)<br /><br />ERRORS:<br />{res_['msg']}"
                 })
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
@@ -2068,7 +2150,7 @@ class Crud():
             # starting pivot
             collection_find_one_ = self.db["_collection"].find_one({"col_id": vie_collection_id_})
             if is_crud_ and not collection_find_one_:
-                raise APIError(f"collection not found: {col_id_}")
+                raise APIError(f"collection not found to view: {col_id_}")
 
             generate_view_data_f_ = Crud().view_f({
                 "user": {
@@ -2421,7 +2503,7 @@ class Crud():
             cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
 
             if not cursor_:
-                raise APIError(f"collection not found: {collection_id_}")
+                raise APIError(f"collection not found to read: {collection_id_}")
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] == True else False
@@ -3127,7 +3209,7 @@ class Crud():
             if collection_id_ == "_field":
                 field_col_ = self.db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
                 if not field_col_:
-                    raise APIError(f"collection not found: {doc_['fie_collection_id']}")
+                    raise APIError(f"collection not found to upsert: {doc_['fie_collection_id']}")
                 if doc_["fie_id"][:3] != field_col_["col_prefix"]:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
 
@@ -3209,12 +3291,8 @@ class Crud():
             collection_id_ = obj["collection"]
 
             # protect _log collection from delete requests
-            if collection_id_ in ["_log", "_backup"]:
+            if collection_id_ in ["_log", "_backup", "_user"]:
                 raise APIError("this collection is protected to delete")
-
-            # protect _user collection from delete requests
-            if collection_id_ == "_user":
-                raise APIError("user collection is protected to delete")
 
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
@@ -3238,6 +3316,7 @@ class Crud():
                 c_ = doc_["col_id"]
                 self.db[f"{c_}_data"].aggregate([{"$match": {}}, {"$out": f"{c_}_data_removed"}])
                 self.db[f"{c_}_data"].drop()
+                self.db["_field"].delete_many({"fie_collection_id": c_})
 
             res_ = {"result": True}
 
@@ -3332,7 +3411,6 @@ class Crud():
                     bin = f"{collection_id_}_bin"
                     self.db[bin].insert_one(doc)
 
-                # inserts a _log record for each operation ended successfully
                 log_ = self.log_f({
                     "type": "Info",
                     "collection": collection_,
@@ -3343,11 +3421,9 @@ class Crud():
                 if not log_["result"]:
                     raise APIError(log_["msg"])
 
-            # sends a positive result if everything went fine
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            # inserts a _log record for the operation ended with db error
             self.log_f({
                 "type": "Error",
                 "collection": collection_id_,
@@ -3376,7 +3452,6 @@ class Crud():
             doc_ = obj["doc"] if "doc" in obj else None
             view_ = obj["view"] if "view" in obj else None
 
-            # collect object ids of the records to be processed
             ids_ = []
             if match_:
                 for _id in match_:
@@ -3388,8 +3463,6 @@ class Crud():
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            # retrieves the collection structure
-            # root collection's structures can be found at github
             structure__ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
@@ -3404,7 +3477,6 @@ class Crud():
                 else:
                     match_ = []
 
-            # combines view filter and user filter in view mode
             if view_ is not None:
                 cursor_ = self.db["_view"].find_one({
                     "vie_id": view_["vie_id"],
@@ -3414,7 +3486,6 @@ class Crud():
                     raise APIError(f"view not found {view_['vie_id']}")
                 match_ = cursor_["vie_filter"] + match_
 
-            # creates a cursor from the object ids
             doc_["_modified_at"] = datetime.now()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
@@ -3427,7 +3498,6 @@ class Crud():
                 })
                 self.db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
 
-            # inserts a _log record for each operation ended successfully
             log_ = self.log_f({
                 "type": "Info",
                 "collection": collection_,
@@ -3441,7 +3511,6 @@ class Crud():
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            # sends a positive result if everything went fine
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
@@ -3483,7 +3552,7 @@ class Crud():
             if collection_id_ == "_field":
                 field_col_ = self.db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
                 if not field_col_:
-                    raise APIError(f"collection not found: {doc_['fie_collection_id']}")
+                    raise APIError(f"collection not found to insert: {doc_['fie_collection_id']}")
                 if doc_["fie_id"][:3] != field_col_["col_prefix"]:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
             self.db[collection_].insert_one(doc_)
@@ -4105,10 +4174,8 @@ class Auth():
             if not collection_:
                 raise APIError(f"permitted collection not found {collection_id_} for {op_}")
 
-            # sets the default permission is not permitted
             permission_ = False  # default
 
-            # checks if the permission level was defined in the collection
             for ix_, usr_tag_ in enumerate(usr_tags_):
                 permission_check_ = self.db["_permission"].find_one({
                     "per_tag_id": usr_tag_,
@@ -4120,7 +4187,7 @@ class Auth():
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
-                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ == "insert" and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
+                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ in ["insert", "import", "upload"] and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
                         # the first tag is getting to be considered for allowed matches
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
@@ -4134,19 +4201,15 @@ class Auth():
             res_ = {"result": permission_, "allowmatch": allowmatch_}
 
         except pymongo.errors.PyMongoError as exc:
-            # set the result as a database error
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            # then set the result as an api error
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            # set the result as an exception
             res_ = Misc().exception_f(exc)
 
         finally:
-            # send result
             return res_
 
     def firewall_f(self, user_id):
@@ -4163,15 +4226,12 @@ class Auth():
             res_ = {"result": True}
 
         except APIError as exc:
-            # then set the result as an api error
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            # set the result as an exception
             res_ = Misc().exception_f(exc)
 
         finally:
-            # send result
             return res_
 
     def session_f(self, input_):
@@ -4206,15 +4266,12 @@ class Auth():
             if jdate_curr_ > jdate_exp_:
                 raise APIError(f"session expired")
 
-            # set the result
             res_ = {"result": True, "user": user_}
 
         except pymongo.errors.PyMongoError as exc:
-            # set the result as a database error
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            # first destroy user session
             self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_token": None,
                 "aut_tfac": None,
@@ -4222,20 +4279,16 @@ class Auth():
                 "_modified_by": "restapi"
             }, "$inc": {"_modified_count": 1}}, upsert=False)
 
-            # then set the result as an api error
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            # set the result as an exception
             res_ = Misc().exception_f(exc)
 
         finally:
-            # send result
             return res_
 
     def account_f(self, input_):
         try:
-            # gets the user and op
             user_ = input_["user"]
             op_ = input_["op"]
 
@@ -4283,7 +4336,6 @@ class Auth():
             else:
                 raise APIError("account operation not supported " + op_)
 
-            # sets the response
             res_ = {"result": True, "user": response_}
 
         except pymongo.errors.PyMongoError as exc:
@@ -4296,7 +4348,6 @@ class Auth():
             res_ = Misc().exception_f(exc)
 
         finally:
-            # sends the response
             return res_
 
     def forgot_f(self):
@@ -4378,7 +4429,6 @@ class Auth():
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            # sets the response
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
@@ -4391,7 +4441,6 @@ class Auth():
             res_ = Misc().exception_f(exc)
 
         finally:
-            # sends the response
             return res_
 
     def tfac_f(self):
@@ -4467,7 +4516,6 @@ class Auth():
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
 
-            # sets the response
             res_ = {"result": True, "user": user_}
 
         except pymongo.errors.PyMongoError as exc:
@@ -4480,7 +4528,6 @@ class Auth():
             res_ = Misc().exception_f(exc)
 
         finally:
-            # sends the response
             return res_
 
     def user_validate_by_basic_auth_f(self, input_, op_):
@@ -4706,66 +4753,6 @@ class Auth():
             return res_
 
 
-@app.route("/file", methods=["POST"])
-@cross_origin(origin="*")
-def file_f():
-    try:
-        # validates restapi request
-        validate_ = RestAPI().validate_pwa_f()
-        if not validate_["result"]:
-            raise APIError(validate_["msg"] if "msg" in validate_ else "app validation error")
-
-        # gets the posted values
-        form_ = request.form.to_dict(flat=True)
-
-        if not form_:
-            raise APIError("no form data found")
-
-        if "email" not in form_:
-            raise APIError("no email found")
-
-        if "token" not in form_:
-            raise APIError("not authenticated")
-
-        if "op" not in form_:
-            raise APIError("no operation found")
-
-        file_ = request.files["file"]
-        if not file_:
-            raise APIError("no file found")
-
-        op = form_["op"]
-        email_ = form_["email"] if "email" in form_ else None
-        token_ = form_["token"] if "token" in form_ else None
-
-        # validates restapi request
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, op)
-        if not validate_["result"]:
-            raise APIError(validate_["msg"] if "msg" in validate_ else "user not validated")
-
-        if op not in ["update", "insert", "download"]:
-            raise APIError(f"file operation not supported {op}")
-
-        save_file_f_ = Crud().save_file_f({"form": form_, "file": file_})
-        if not save_file_f_["result"]:
-            raise APIError(save_file_f_["msg"])
-
-        res_ = {
-            "result": True,
-            "filename": save_file_f_["filename"],
-            "mime": save_file_f_["mime"]
-        }
-
-    except APIError as exc:
-        res_ = Misc().api_error_f(exc)
-
-    except Exception as exc:
-        res_ = Misc().exception_f(exc)
-
-    finally:
-        return json.dumps(res_, default=json_util.default, sort_keys=False)
-
-
 @app.route("/import", methods=["POST"], endpoint="import")
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def storage_f():
@@ -4775,8 +4762,6 @@ def storage_f():
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
-        print("request", request, flush=True)
-
         form_ = request.form.to_dict(flat=True)
         if not form_:
             raise APIError("no form found")
@@ -4785,12 +4770,20 @@ def storage_f():
         if not file_:
             raise APIError("no file found")
 
-        c_ = form_["collection"]
-        col_check_ = Crud().collection_f(c_)
-        if not col_check_["result"]:
-            raise APIError(col_check_["msg"])
+        op_ = form_["op"]
+        if op_ not in ["import", "upload"]:
+            raise APIError(f"invalid import option {op_}")
 
-        collection__ = col_check_["collection"] if "collection" in col_check_ else None
+        collection__ = form_["collection"]
+        col_check_ = Crud().collection_f(collection__)
+        if not col_check_["result"]:
+            if op_ == "import":
+                raise APIError(col_check_["msg"])
+            prefix_ = form_["prefix"]
+        else:
+            if op_ != "import":
+                raise APIError("collection already exists")
+            prefix_ = col_check_["collection"]["col_prefix"]
 
         email_ = form_["email"] if "email" in form_ else None
         token_ = form_["token"] if "token" in form_ else None
@@ -4799,10 +4792,10 @@ def storage_f():
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "import")
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
+        user_ = validate_["user"]
 
         # endpoint_ = request.endpoint
-
-        import_f_ = Crud().import_f({"form": form_, "file": file_, "collection": collection__})
+        import_f_ = Crud().import_f({"form": form_, "file": file_, "collection": collection__, "user": user_, "prefix": prefix_ })
 
         if not import_f_["result"]:
             raise APIError(import_f_["msg"])
@@ -4854,42 +4847,37 @@ def crud_f():
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
+        input_["userindb"] = validate_["user"]
 
         # check permission
+        allowmatch_ = []
         permission_f_ = Auth().permission_f({"user": email_, "collection": collection_, "op": op_})
         if not permission_f_["result"]:
             raise APIError(permission_f_["msg"])
-        allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
 
+        allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ = allowmatch_ + match_
-
-        # injects the real user info into the user input
-        input_["match"] = match_
-        input_["allowmatch"] = allowmatch_
-        input_["userindb"] = validate_["user"]
-
-        # adds the document as decoded into the user input
-        if op_ in ["update", "upsert", "import", "insert", "action"]:
+        if op_ in ["update", "upsert", "insert", "action"]:
             if not "doc" in input_:
                 raise APIError("document must be included in the request")
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_["msg"] if "msg" in decode_ else "decode error")
             input_["doc"] = decode_["doc"]
-
         elif op_ in ["remove", "clone", "delete"]:
             c_ = input_["collection"]
             col_check_ = Crud().collection_f(c_)
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
 
+        input_["match"] = match_
+        input_["allowmatch"] = allowmatch_
+
         # distributes the operation to the right function
         if op_ == "read":
             crud_ = Crud().read_f(input_)
-        elif op_ == "update":
-            crud_ = Crud().upsert_f(input_)
-        elif op_ == "import":
+        elif op_ in ["update", "import", "upload"]:
             crud_ = Crud().upsert_f(input_)
         elif op_ == "insert":
             crud_ = Crud().insert_f(input_)
@@ -4928,7 +4916,6 @@ def crud_f():
         else:
             raise APIError(f"operation not supported: {op_}")
 
-        # checks the crud result
         if not crud_["result"]:
             raise APIError(crud_["msg"] if "msg" in crud_ else "crud error")
 
@@ -5121,7 +5108,6 @@ def get_visual_f(id):
         code_ = 500
 
     finally:
-        # return res_, code_, headers
         headers = {"Content-Type": "application/json; charset=utf-8"}
         return res_, code_, headers
 

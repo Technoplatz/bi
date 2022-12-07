@@ -212,8 +212,7 @@ export class CrudPage implements OnInit {
   }
 
   ngOnDestroy() {
-    this.storage.remove("LSOP").then(() => {
-    });
+    this.storage.remove("LSOP").then(() => { });
   }
 
   doSubmit() {
@@ -225,11 +224,11 @@ export class CrudPage implements OnInit {
       } else {
         this.modified = true;
         this.isInProgress = true;
-        this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then(() => {
+        this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then((res: any) => {
           this.crud.modalSubmitListener.next({ "result": true });
           if (!this.barcoded_ || this.op !== "insert") {
             setTimeout(() => {
-              this.doCancel({ op: this.op, modified: this.modified, filter: [] });
+              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null });
             }, 500);
           } else {
             this.doInitForm();
@@ -251,7 +250,7 @@ export class CrudPage implements OnInit {
     this.isInProgress = true;
     this.crud.Dump().then(() => {
       setTimeout(() => {
-        this.doCancel({ op: this.op, modified: this.modified, filter: [] });
+        this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
       }, 500);
     }).catch((error: any) => {
       this.doShowError(error);
@@ -270,7 +269,7 @@ export class CrudPage implements OnInit {
       "type": this.data.bak_type
     }).then(() => {
       setTimeout(() => {
-        this.doCancel({ op: this.op, modified: this.modified, filter: [] });
+        this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
       }, 500);
     }).catch((error: any) => {
       this.doShowError(error);
@@ -305,7 +304,7 @@ export class CrudPage implements OnInit {
 
   doRunFilter() {
     setTimeout(() => {
-      this.doCancel({ modified: false, filters: this.filters && this.filters.length > 0 ? this.filters : null });
+      this.doDismissModal({ modified: false, filters: this.filters && this.filters.length > 0 ? this.filters : null });
     }, 500);
   }
 
@@ -368,7 +367,7 @@ export class CrudPage implements OnInit {
     });
   }
 
-  doCancel(obj: any) {
+  doDismissModal(obj: any) {
     this.misc.dismissModal(obj ? obj : { modified: false, filter: [] }).then(() => { }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "error");

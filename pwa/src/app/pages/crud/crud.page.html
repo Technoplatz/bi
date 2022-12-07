@@ -34,7 +34,7 @@
                     (click)="doSubmit()">
                     {{ 'UPLOAD' | translate }}
                 </ion-button>
-                <ion-button size="small" (click)="doCancel({ modified: false, filter: [] })">
+                <ion-button size="small" (click)="doDismissModal({ modified: false, filter: [] })">
                     {{ 'CANCEL' | translate }}
                 </ion-button>
                 <ion-button *ngIf="op=='update'" color="danger" size="small" (click)="doRemove()" class="end-item">

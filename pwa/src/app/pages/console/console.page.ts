@@ -326,7 +326,6 @@ export class ConsolePage implements OnInit {
       this.pivot_ = "";
       this.submenu ? this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu + "/" + this.submenu) : this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu);
       if (menu_ === "collections" || menu_ === "admin") {
-        // menu_ === "admin" ? this.view_mode[this.id] = false : null;
         if (fromdash_ || submenu_ !== this.id) {
           this.doSetCollectionID(submenu_).then(() => {
             this.is_crud = this.id.charAt(0) === "_" ? false : true;
@@ -464,9 +463,15 @@ export class ConsolePage implements OnInit {
     }).then((modal: any) => {
       modal.present();
       modal.onDidDismiss().then((res: any) => {
-        if (res.data.modified) {
-          this.RefreshData(0);
-        }
+        this.doRefreshDash().then(() => {
+          if (type_ === "upload") {
+            if (res && res.data && res.data.cid) {
+              this.goSection('collections', res.data.cid, res.data.cid);
+            }
+          } else {
+            this.RefreshData(0);
+          }
+        }).catch((error: any) => { console.error(error); });
       });
     });
   }
@@ -659,16 +664,14 @@ export class ConsolePage implements OnInit {
           modal.present();
           modal.onDidDismiss().then((res: any) => {
             if (res.data.modified) {
-              if (this.master.collection === "_collection") {
-                this.crud.getCollections().then(() => { }).catch((error: any) => {
-                  console.error(error);
-                  this.misc.doMessage(error, "error");
-                });
-              }
-              res.data.op === "remove" ? this.nav.navigateRoot("/console").then(() => { }).catch((error: any) => {
-                console.error(error);
-                this.misc.doMessage(error, "error");
-              }) : this.RefreshData(0);
+              this.doRefreshDash().then(() => {
+                if (res.data.op === "remove") {
+                  this.goSection('dashboard', null, 'Dashboard');
+                  console.log("**** gşttş");
+                } else {
+                  this.RefreshData(0);
+                }
+              }).catch((error: any) => { console.error(error); });
             } else {
               if (res.data.filters) {
                 this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {

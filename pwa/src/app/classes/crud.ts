@@ -276,29 +276,22 @@ export class Crud {
             }
             if (file) {
               let formData: FormData = new FormData();
+              const sto_collection_id_ = doc_["sto_collection_id"];
               formData.append("op", op);
               formData.append("email", LSUSERMETA.email);
               formData.append("token", LSUSERMETA.token);
               formData.append("file", file, file.name);
-              formData.append("collection", doc_["sto_collection_id"]);
+              formData.append("collection", sto_collection_id_);
+              formData.append("prefix", doc_["sto_prefix"]);
               formData.append("name", file.name);
               formData.append("size", file.size);
               formData.append("type", doc_["sto_file_type"]);
               this.http.post<any>(this.apiHost + "/import", formData, {
                 headers: new HttpHeaders(this.uploadHeaders)
               }).subscribe((res: any) => {
+                res.cid = sto_collection_id_;
                 if (res && res.result) {
-                  this.http.post<any>(this.apiHost + "/crud", posted_, {
-                    headers: new HttpHeaders(this.crudHeaders)
-                  }).subscribe((res: any) => {
-                    if (res && res.result) {
-                      resolve(res);
-                    } else {
-                      reject(res.msg);
-                    }
-                  }, (error: any) => {
-                    reject(error);
-                  });
+                  resolve(res);
                 } else {
                   reject(res.msg);
                 }
