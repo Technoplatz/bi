@@ -374,9 +374,10 @@ export class Crud {
     });
   }
 
-  Pivot(_id: string, apikey_: string) {
+  Pivot(_id: any, apikey_: string) {
     return new Promise((resolve, reject) => {
-      const url_ = this.apiHost + "/get/pivot" + "/" + _id + "?k=" + apikey_;
+      const __id = typeof _id === 'object' && "$oid" in _id && _id["$oid"] ? _id["$oid"] : _id;
+      const url_ = this.apiHost + "/get/pivot" + "/" + __id + "?k=" + apikey_;
       this.http.get(url_, {
         headers: new HttpHeaders(this.crudHeaders)
       }).subscribe((res: any) => {

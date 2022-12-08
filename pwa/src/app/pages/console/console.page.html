@@ -869,14 +869,11 @@
                   </ion-item>
                 </div>
                 <ng-template #nopaneviewfound>
-                  <ion-item lines="none" class="ion-no-padding pane-item">
-                    <ion-label class="ion-text-wrap">
-                      {{ 'No view found' | translate }}<br />
-                      <div>
-                        {{ 'You can create a shared view by saving the existing query' |
-                        translate }}.</div>
-                    </ion-label>
-                  </ion-item>
+                  <h6>{{ 'No view found' | translate }}</h6>
+                  <div>
+                    {{ 'You can create a shared view by saving the existing query' |
+                    translate }}.</div>
+                  <ion-button size="small" class="ion-margin-top" (click)="doSaveAsView()">{{ 'Save as View' | translate }}</ion-button>
                 </ng-template>
                 <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]
                 </ion-list-header>
