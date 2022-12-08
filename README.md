@@ -2,14 +2,14 @@
 
 It's time to get data-driven with your inner-cycle!
 
-- [Community Edition](#community-edition)
-- [Cloud Environment](#cloud-environment)
+- [What Technoplatz BI does](#community-edition)
+- [Cloud Platform](#cloud-platform)
 - [Installation](#installation)
-- [Troubleshooting](#troubleshooting)
+- [Maintenance](#maintenance)
 - [Licensing Options](#licensing-options)
 - [About](#about)
 
-## Community Edition
+## What Technoplatz BI does
 
 Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage data-driven business process without the need to develop software from scratch. Considering that each business has its own unique conditions it provides an optimized and pragmatic solution for the main requirements below;
 
@@ -85,7 +85,7 @@ Technoplatz BI is powered by the leading open source information technologies;
 - [Ionic Angular Ts](https://ionicframework.com)
 - [GitHub](https://github.com)
 
-## Cloud Environment
+## Cloud Platform
 
 Technoplatz BI runs on the Docker platform which is the leading open source virtualization technology for developing, shipping and running business grade applications. You can install Docker on your personal computer for free or buy a hosted cloud service from many providers. The links below will guide you about how to install Docker on the platform you choose;
 
@@ -198,17 +198,17 @@ http://localhost:8100
 
 You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run in the background and restarts automatically when the platform is rebooted.
 
-## Troubleshooting
+## Maintenance
 
 Unlike the enterprise edition the community edition doesn't provide any official support about maintenance and troubleshooting issues. As long as the system resources are not exceeded you are not expected to encounter a serious problem however the actions to be taken for certain situations are explained in below topics.
 
-#### Getting the latest updates
+#### Getting the Latest Updates
 
 ```bash
 docker-compose pull && docker-compose up --detach --remove-orphans
 ```
 
-#### Restarting Containers
+#### Starting Containers
 
 ```bash
 docker-compose up --detach --remove-orphans
@@ -222,7 +222,7 @@ docker-compose down
 
 #### Cleaning
 
-Performing the system updates and restarting of containers frequently can create unnecessary files that may fill up your disk space over time. The command below helps you to remove all unused containers, networks and images to make more room for the platform;
+Performing the system updates and restarting of containers frequently can create unnecessary files that may fill up your disk space. The command below helps you to remove all unused resources to make more room for the BI;
 
 ```bash
 docker system prune
@@ -230,17 +230,17 @@ docker system prune
 
 #### Log Tracking
 
-To track all the system logs;
+- To track the container logs;
 
-```bash
-docker-compose logs -f
-```
+    ```bash
+    docker-compose logs -f
+    ```
 
-To track the system logs of a certain service;
+- To track the logs of a certain container;
 
-```bash
-docker-compose logs -f | grep 'api'
-```
+    ```bash
+    docker-compose logs -f | grep 'api'
+    ```
 
 #### Operationg System Updates
 
@@ -255,21 +255,11 @@ reboot
 
 ## Production
 
-Community Edition's default settings are provided for testing and local use. In case the system is used in a real business environment under your subdomain, e.g. **bi.company.com**, there is no stopper for this however the there are crucial security and system requirements recommended (including but not limited to) below must be fulfilled before making the system public. All responsibilities in this regard belongs to the user.
-
-1. Define **bi**.company.com and **api.bi**.company.com subdomains in your name server and forward them to the IP address of your [Docker platform](#step-1) by adding an "A" record for each.
-2. Change DOMAIN parameter to **bi**.company.com in .env file.
-3. Get subdomains behind a web application firewall (WAF) and make the required security settings in accordance with your corporate policy.
-4. Enable HTTPS access.
-5. Activate a "health check" procedure for the public ports of the Docker platform.
-6. Check for system updates of the Docker platform regularly.
-7. Schedule a regular backup procedure and keep the files in safe place.
-8. Complete the necessary SPF authorization and DMARC policy settings for FROM_EMAIL address defined in .env file so that posts are not rejected as Junk by recipients.
-9. Get your Docker platform behind a cloud firewall and configure the access settings according to your corporate security policy.
+Even though the Community Edition is provided for testing and local use, there is no stopper to using the system in a live business environment in terms of licensing. However, before starting to use the system in a real business environment, some recommended actions should be taken in terms of performance and security issues. You can access the electronic document prepared on this subject [here](#).
 
 ## Licensing Options
 
-The system is provided in two licensing options;
+Technoplatz BI is provided in two licensing options;
 
 - Community Edition
 - Enterprise Edition (Brezel)
@@ -279,6 +269,7 @@ The system is provided in two licensing options;
 | | Community Edition | Enterprise Edition |
 | :--- | :---: | :---: |
 |  Hosting | Self Hosted | SaaS |
+|  Integration | No | Yes |
 |  Database | MongoDB 6 | MongoDB 6 |
 |  DB Replication | Yes [3 internal nodes] | Yes [3 nodes] |
 |  DB Transactions | Yes | Yes |
@@ -296,7 +287,7 @@ The system is provided in two licensing options;
 Official Web Site\
 [https://bi.technoplatz.com](https://bi.technoplatz.com)
 
-### Author
+### Developer
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
 Founder, Technoplatz IT Solutions GmbH\
 <sup>Senior Developer - Data Sciences, Statistics B.Sc.</sup>
