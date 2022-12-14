@@ -2,16 +2,15 @@
 
 It's time to get data-driven with your inner-cycle!
 
-- [What Technoplatz BI does](#community-edition)
-- [Cloud Platform](#cloud-platform)
-- [Installation](#installation)
+- [What is Technoplatz BI](#what-is-technoplatz-bi)
+- [How to Get Started](#how-to-get-started)
 - [Maintenance](#maintenance)
 - [Licensing Options](#licensing-options)
 - [About](#about)
 
-## What Technoplatz BI does
+## What is Technoplatz BI
 
-Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage data-driven business process without the need to develop software from scratch. Considering that each business has its own unique conditions it provides an optimized and pragmatic solution for the main requirements below;
+Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage data-driven business processes without the need to develop software from scratch. Considering each business has its own unique conditions, it provides an optimized and pragmatic solution for the main requirements below;
 
 - Self-service Data Management\
 <span style="font-size: small; font-weight: bold;">[DATA APPLICATION](#data-application)</span>
@@ -65,63 +64,74 @@ The internal Application Programming Interface has been developed in Python prog
 
 Technoplatz BI is designed as a self-service and containerized business application that can be managed by companies of various sizes and users with different skills. Containerization means that applications run in isolated runtime environment called containers with their dependencies, configuration files and operating system. This approach provides advantage of sustainability and significant cost reduction in the management of mission critical business processes;
 
-- **Dedicated**. Runs on your own cloud. Not shared.
-- **Self Service**. Management of your data is now totally under your control.
-- **Platform Independent**. It can be installed on Windows, Linux or Mac.
-- **Open Source**. Everyone can review the codes and learn from them a lot.
-- **Flexible**. It has the sweet smell of JSON data structure.
-- **Scalable**. Starts small and expands as needed.
-- **Data Sciences Ready**. Accessible from other BI tools and Microsoft Excel.
-- **ISO Friendly**. Empowers ISO 27001 certification processes, it is not a stopper.
+- **Dedicated**\
+Runs on your own cloud. Not shared.
+- **Self Service**\
+Management of your data-driven processes is now totally under your control.
+- **Platform Independent**\
+It can be installed on Windows, Linux or Mac.
+- **Open Source**\
+Everyone can review the codes at GitHub and learn from them a lot.
+- **Flexible**\
+It has the sweet smell of flexible JSON data structure.
+- **Scalable**\
+Starts small and expands as needed.
+- **Data Sciences Ready**\
+Accessible from other BI tools and Microsoft Excel.
+- **Certification**\
+Empowers [ISO](#iso-27001) Certification processes, it is not a stopper.
+
+#### ISO 27001
+The open source structure of the system, the codes published on GitHub, the security policy and the use of modern CI/CD methods in the development process provide advantages in ISO 27001 audits in terms of the following topics;\
+Appendix A-8, A-9, A-10, A-11, A-12, A-13, A-17
 
 ### Used Technologies
 
 Technoplatz BI is powered by the leading open source information technologies;
 
 - [Docker Compose](https://docs.docker.com/compose)
-- [MongoDB](https://www.mongodb.com)
+- [MongoDB Replicaset](https://www.mongodb.com)
 - [Python](https://www.python.org)
 - [Pandas](https://pandas.pydata.org)
-- [Ionic Angular Ts](https://ionicframework.com)
+- [Angular Typescript](https://ionicframework.com)
 - [GitHub](https://github.com)
 
-## Cloud Platform
+## How to Get Started
 
-Technoplatz BI runs on the Docker platform which is the leading open source virtualization technology for developing, shipping and running business grade applications. You can install Docker on your personal computer for free or buy a hosted cloud service from many providers. The links below will guide you about how to install Docker on the platform you choose;
+Technoplatz BI runs on Docker platform which is the leading open source virtualization technology for developing, shipping and running business grade applications. You can install Docker on your personal computer for free or buy a hosted service from many cloud providers.
+
+Guides for installing Docker Platform on;
 
 - [Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
-- [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
+- [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OSX](https://docs.docker.com/desktop/install/mac-install)
 
-#### System Requirements
+<div style="font-size: 13px; line-height: normal;">
+System Requirements:<br />
+The minimum configuration for Technoplatz BI to work properly on the Docker platform is 2 CPU, 4GB Ram, 20GB Hard Disk. This configuration can be increased in proportion to the number of connections to be established, instant CPU load and the amount of data to be processed.</div>
 
-Below you can find the minimum configuration for the system to work properly on a Docker platform. The configuration can be increased in proportion to the number of connections to be established, instant cpu load and the amount of data to be processed.
-
-2 CPU\
-4GB Ram\
-20GB Hard Disk (SSD recommended)
-
-## Installation
+### Installation
 
 The installation of the product consists of steps must follow each other. In order to run the necessary commands [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience is required.
 
 #### 1. The First Touch
-Docker platforms which are available in the marketplaces of many cloud service providers may not be up to date in terms of operating system at the time of purchase. Therefore, in the first step it is recommended to establish an SSH connection to the platform and perform a system update immediately. The platform should be rebooted after the updates are complete.
+Docker platforms available in the ISP marketplaces may not be up-to-date initially. It is recommended to establish an SSH connection to the platform and perform a system update immediately. The platform should be rebooted after the updates are complete.
 
 ```bash
 apt update && apt upgrade -y
 ```
+
 ```bash
 reboot
 ```
 
 #### 2. Downloading the Application
-Reconnect to the platform again to clone the official BI repository from Github.
+Reconnect to the platform again to clone the official BI repository from GitHub.
 
 ```bash
 git clone https://github.com/technoplatz/bi.git
 ```
 
-Then go to the new **bi** folder which is going to be created.
+Go to **bi** folder created.
 
 ```bash
 cd bi
@@ -289,8 +299,10 @@ Official Web Site\
 
 ### Developer
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
-Founder, Technoplatz IT Solutions GmbH\
-<sup>Senior Developer - Data Sciences, Statistics B.Sc.</sup>
+Founder, Technoplatz IT Solutions GmbH<br />
+<span style="font-size: 12px;">
+Senior System Analist & Developer<br />
+Data Sciences, Statistics B.Sc.
+</span>
 
 --
-<link rel="stylesheet" href="https://raw.githubusercontent.com/Technoplatz/bi/dev0/.github/md.css">
