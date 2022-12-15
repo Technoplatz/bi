@@ -1,4 +1,4 @@
-# Technoplatz BI
+## Technoplatz BI - Community Edition
 
 It's time to get data-driven with your inner-cycle!
 
@@ -12,31 +12,31 @@ It's time to get data-driven with your inner-cycle!
 
 Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage data-driven business processes without the need to develop software from scratch. Considering each business has its own unique conditions, it provides an optimized and pragmatic solution for the main requirements below;
 
-- Self-service Data Management\
-<span style="font-size: small; font-weight: bold;">[DATA APPLICATION](#data-application)</span>
-- Completion of processes through Integration\
-<span style="font-size: small; font-weight: bold;">[BI-DIRECTIONAL DATA SHARING](#bi-directional-data-sharing)</span>
-- Web services and Automation\
-<span style="font-size: small; font-weight: bold;">[INTERNAL API](#api)</span>
+- [Data Application](#data-application)\
+<sup>Self-service Data Management</sup>
+- [BI-Directional Data Sharing](#bi-directional-data-sharing)\
+<sup>Completion of Processes through Integration</sup>
+- [Internal API](#internal-api)\
+<sup>Web Services and Automation</sup>
 
 ### Data Application
 
 Technoplatz BI's internal progressive web application module allows you to manage data-driven processes in a unique cross-platform interface. It is a powerful alternative for those who are trying to handle their data operations on spreadsheets or legacy software.
 
-- System Administration\
+- **System Administration**\
 <sup>Management of administrative components.</sup>
-- CRUD+\
+- **CRUD+**\
 <sup>Performing basic data operations.</sup>
-- Actions\
+- **Actions**\
 <sup>One-click conditional bulk data update.</sup>
-- Automation\
+- **Automation**\
 <sup>Scheduled smart tasks executed on data collections.</sup>
-- Data Visualization\
+- **Data Visualization**\
 <sup>Shareable charts, pivots and descriptive statistics.</sup>
-- Log Tracking\
+- **Log Tracking**\
 <sup>Traceable transaction history per record.</sup>
 
-### BI-directional Data Sharing
+### BI-Directional Data Sharing
 
 The product is designed to provide solutions especially for cases where business partners are the integral part of business processes in terms of the data they need to share and the actions they need to take. For this reason, it provides complementary methods to share data bi-directionally within the **inner-cycle** of customers, suppliers, distributors and other internal departments.
 
@@ -49,37 +49,37 @@ Live and secure data links allow business partners to access their own data read
 - **Web Services**\
 Web services is one of the features provided by internal API and allow partners to perform basic data operations on the system directly. Permissions can be given on operation basis and restricted by special filters.
 
-### API
+### Internal API
 
 The internal Application Programming Interface has been developed in Python programming language with a monolithic structure. Its object-oriented structure allows multiple background services to run simultaneously and asynchronously.
 
-- Internal Functions\
+- **Internal Functions**\
 <sup>Runs core modules and allow data sharing.</sup>
-- External Functions (Web Services)\
-<sup>Allows to perform data operations remotely.</sup>
-- CronJobs\
-<sup>Runs scheduled Automation tasks.</sup>
+- **External Functions (Web Services)**\
+<sup>Allow to perform data operations remotely.</sup>
+- **Cronjobs**\
+<sup>Run scheduled Automation tasks.</sup>
 
 ### Highlights
 
 Technoplatz BI is designed as a self-service and containerized business application that can be managed by companies of various sizes and users with different skills. Containerization means that applications run in isolated runtime environment called containers with their dependencies, configuration files and operating system. This approach provides advantage of sustainability and significant cost reduction in the management of mission critical business processes;
 
 - **Dedicated**\
-Runs on your own cloud. Not shared.
+<sup>Runs on your own cloud. Not shared.</sup>
 - **Self Service**\
-Management of your data-driven processes is now totally under your control.
+<sup>Management of your data-driven processes is now totally under your control.</sup>
 - **Platform Independent**\
-It can be installed on Windows, Linux or Mac.
+<sup>It can be installed on Windows, Linux or Mac.</sup>
 - **Open Source**\
-Everyone can review the codes at GitHub and learn from them a lot.
+<sup>Everyone can review the codes at GitHub and learn from them a lot.</sup>
 - **Flexible**\
-It has the sweet smell of flexible JSON data structure.
+<sup>It has the sweet smell of flexible JSON data structure.</sup>
 - **Scalable**\
-Starts small and expands as needed.
+<sup>Starts small and expands as needed.</sup>
 - **Data Sciences Ready**\
-Accessible from other BI tools and Microsoft Excel.
+<sup>Accessible from other BI tools and Microsoft Excel.</sup>
 - **Certification**\
-Empowers [ISO](#iso-27001) Certification processes, it is not a stopper.
+<sup>Empowers [ISO](#iso-27001) Certification processes, it is not a stopper.</sup>
 
 #### ISO 27001
 The open source structure of the system, the codes published on GitHub, the security policy and the use of modern CI/CD methods in the development process provide advantages in ISO 27001 audits in terms of the following topics;\
@@ -298,11 +298,10 @@ Official Web Site\
 [https://bi.technoplatz.com](https://bi.technoplatz.com)
 
 ### Developer
+
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
-Founder, Technoplatz IT Solutions GmbH<br />
-<span style="font-size: 12px;">
-Senior System Analist & Developer<br />
-Data Sciences, Statistics B.Sc.
-</span>
+Founder, Technoplatz IT Solutions GmbH\
+Senior System Analist & Developer\
+Data Sciences, Statistics B.Sc.\
 
 --
