@@ -529,7 +529,7 @@
                     <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
                       [style]="'min-width: ' + item.value.width + 'px !important;'"
                       [class]="searched && searched[item.key] && searched[item.key].f ? 'filtered' : ''">
-                      <div (click)="doSetSearch(item.key)" class="clicked-item">
+                      <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
                         <span class="column-title">{{ item.value.title }}<br />
                         </span>
                         {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>

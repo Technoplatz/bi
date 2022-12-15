@@ -272,13 +272,12 @@ ion-alert .alert-radio-group {
   font-size: 12px;
   letter-spacing: 0px;
   line-height: normal;
-  font-weight: 500;
-  color: var(--ion-color-primary);
   cursor: pointer;
   border-radius: 2px;
-  margin-right: 2px;
+  margin-right: 1px;
   margin-bottom: 8px;
   background-color: var(--ion-color-light);
+  color: var(--ion-color-dark);
 }
 
 .data-sq-button span,
@@ -993,6 +992,10 @@ sup {
 
 .clicked-item {
   cursor: pointer !important;
+}
+
+.overflow-hidden-item {
+  overflow: hidden;
 }
 
 .area-data-stable {
