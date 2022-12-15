@@ -3616,7 +3616,6 @@ class Email():
     def __init__(self):
         self.SENDGRID_API_KEY = get_docker_secret("sendgrid-apikey", default="")
         self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
-        self.FROM_NAME = os.environ.get("FROM_NAME")
         self.SG_TFA_SUBJECT = "Your Backup OTP"
         self.SG_SIGNUP_SUBJECT = "Welcome"
         self.SG_SIGNIN_SUBJECT = "New Sign-in"
@@ -3624,8 +3623,8 @@ class Email():
         self.SG_DEFAULT_SUBJECT = "Hello"
         self.sg_ = sendgrid.SendGridAPIClient(api_key=self.SENDGRID_API_KEY)
         self.COMPANY_NAME = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
-        self.disclaimer_ = f"<p>Sincerely,</p><p>{self.FROM_NAME}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
-        self.disclaimer_text_ = f"\n\nSincerely,\n\n{self.FROM_NAME}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
+        self.disclaimer_ = f"<p>Sincerely,</p><p>{self.COMPANY_NAME}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
+        self.disclaimer_text_ = f"\n\nSincerely,\n\n{self.COMPANY_NAME}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
 
     def sendEmail_f(self, msg):
         try:
@@ -3644,7 +3643,7 @@ class Email():
                 personalizations_ = [{
                     "from": {
                         "email": self.FROM_EMAIL,
-                        "name": self.FROM_NAME,
+                        "name": self.COMPANY_NAME,
                     },
                     "to": [{
                         "email": to_,
@@ -3676,7 +3675,7 @@ class Email():
                 "personalizations": personalizations_,
                 "from": {
                     "email": self.FROM_EMAIL,
-                    "name": self.FROM_NAME
+                    "name": self.COMPANY_NAME
                 },
                 "subject": subject_,
                 "content": [{

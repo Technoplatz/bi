@@ -1,7 +1,7 @@
 # Technoplatz BI - Docker Compose
 # Mustafa Mat @Technoplatz 2019-2023
 # docker-compose up --build --detach --remove-orphans
-version: "3.7"
+version: "3.9"
 services:
   traefik:
     container_name: traefik
@@ -30,8 +30,7 @@ services:
     environment:
       - TZ=${TZ}
     networks:
-      network0:
-        ipv4_address: ${SUBNET_TRAEFIK_IPV4}
+      - network0
 
   init:
     container_name: init
@@ -46,8 +45,7 @@ services:
     environment:
       - TZ=${TZ}
     networks:
-      network0:
-        ipv4_address: ${SUBNET_INIT_IPV4}
+      - network0
 
   mongo0:
     container_name: mongo0
@@ -75,8 +73,7 @@ services:
       - mongo1
       - mongo2
     networks:
-      network0:
-        ipv4_address: ${SUBNET_MONGO_IPV4}
+      - network0
 
   mongo1:
     container_name: mongo1
@@ -101,8 +98,7 @@ services:
       - TZ=${TZ}
     command: "/usr/bin/mongod --config /etc/mongod.conf"
     networks:
-      network0:
-        ipv4_address: ${SUBNET_MONGO_REPLICA1_IPV4}
+      - network0
 
   mongo2:
     container_name: mongo2
@@ -127,8 +123,7 @@ services:
       - TZ=${TZ}
     command: "/usr/bin/mongod --config /etc/mongod.conf"
     networks:
-      network0:
-        ipv4_address: ${SUBNET_MONGO_REPLICA2_IPV4}
+      - network0
 
   replicaset:
     container_name: replicaset
@@ -157,15 +152,14 @@ services:
       - MONGO_REPLICASET=${MONGO_REPLICASET}
       - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
       - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
-    extra_hosts:
-      - mongo0:${SUBNET_MONGO_IPV4}
-      - mongo1:${SUBNET_MONGO_REPLICA1_IPV4}
-      - mongo2:${SUBNET_MONGO_REPLICA2_IPV4}
+    links:
+      - mongo0
+      - mongo1
+      - mongo2
     secrets:
       - mongo-password
     networks:
-      network0:
-        ipv4_address: ${SUBNET_REPLICASET_IPV4}
+      - network0
 
   api:
     container_name: api
@@ -211,8 +205,7 @@ services:
       - bi-apikey
       - sendgrid-apikey
     networks:
-      network0:
-        ipv4_address: ${SUBNET_API_IPV4}
+      - network0
 
   pwa:
     container_name: pwa
@@ -230,11 +223,10 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`)
       - traefik.http.services.pwa.loadbalancer.server.port=80
-    extra_hosts:
-      - api:${SUBNET_API_IPV4}
+    links:
+      - api
     networks:
-      network0:
-        ipv4_address: ${SUBNET_PWA_IPV4}
+      - network0
 
   watchtower:
     container_name: watchtower
@@ -248,8 +240,7 @@ services:
     restart: always
     command: --interval 86400 api pwa watchtower traefik
     networks:
-      network0:
-        ipv4_address: ${SUBNET_WATCHTOWER_IPV4}
+      - network0
 
 volumes:
   bi-mongo0-volume:
@@ -268,10 +259,6 @@ volumes:
 networks:
   network0:
     name: network0
-    ipam:
-      driver: default
-      config:
-        - subnet: ${SUBNET}
 
 secrets:
   mongo-password:

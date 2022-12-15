@@ -147,7 +147,6 @@ USER_EMAIL=bi@company.com
 USER_NAME=John Doe
 COMPANY_NAME=Acme Company Inc.
 FROM_EMAIL=bi@company.com
-FROM_NAME=Technoplatz
 ```
 
 <sup>**TZ:** Time zone of your platform's location.\
@@ -155,8 +154,7 @@ FROM_NAME=Technoplatz
 **USER_EMAIL:** E-mail address of Administrator user.\
 **USER_NAME:** Name and surname of Administrator user (eg. John Doe).\
 **COMPANY_NAME:** Legal business name of your organization.\
-**FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.\
-**FROM_NAME:** Name or nickname appears next to the sender address.</sup>
+**FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.</sup>
 
 <sup>TZ must be entered according to the official TZ format (eg. America/New_York)\
 https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</sup>
