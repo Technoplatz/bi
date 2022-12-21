@@ -80,53 +80,53 @@ class Schedular():
     def schedule_automation_f(self, doc_):
         try:
             aut_id_ = doc_["aut_id"] if "aut_id" in doc_ else None
-            aut_collection_id_ = doc_["aut_collection_id"] if "aut_collection_id" in doc_ else None
-            aut_filter_ = doc_["aut_filter"] if "aut_filter" in doc_ and len(doc_["aut_filter"]) > 0 else None
-            aut_set_ = doc_["aut_set"] if "aut_set" in doc_ and len(doc_["aut_set"]) > 0 else None
-            aut_set_remote_ = doc_["aut_set_remote"] if "aut_set_remote" in doc_ and len(doc_["aut_set_remote"]) > 0 else None
-            aut_match_collection_id_ = doc_["aut_match_collection_id"] if "aut_match_collection_id" in doc_ else None
-            aut_match_fields_ = doc_["aut_match_fields"] if "aut_match_fields" in doc_ and len(doc_["aut_match_fields"]) > 0 else None
-            aut_matched_ = doc_["aut_matched"] if "aut_matched" in doc_ else False
-            aut_match_prefixes_ = doc_["aut_match_prefixes"] if "aut_match_prefixes" in doc_ and len(doc_["aut_match_prefixes"]) > 0 else None
+            aut_source_collection_id_ = doc_["aut_source_collection_id"] if "aut_source_collection_id" in doc_ else None
+            aut_source_filter_ = doc_["aut_source_filter"] if "aut_source_filter" in doc_ and len(doc_["aut_source_filter"]) > 0 else None
+            aut_source_set_ = doc_["aut_source_set"] if "aut_source_set" in doc_ and len(doc_["aut_source_set"]) > 0 else None
+            aut_target_set_ = doc_["aut_target_set"] if "aut_target_set" in doc_ and len(doc_["aut_target_set"]) > 0 else None
+            aut_target_collection_id_ = doc_["aut_target_collection_id"] if "aut_target_collection_id" in doc_ else None
+            aut_target_filter_ = doc_["aut_target_filter"] if "aut_target_filter" in doc_ and len(doc_["aut_target_filter"]) > 0 else None
+            aut_target_ = doc_["aut_target"] if "aut_target" in doc_ else False
+            aut_target_prefixes_ = doc_["aut_target_prefixes"] if "aut_target_prefixes" in doc_ and len(doc_["aut_target_prefixes"]) > 0 else None
 
-            if not aut_id_ or not aut_collection_id_ or not aut_filter_ or not aut_set_:
+            if not aut_id_ or not aut_source_collection_id_ or not aut_source_filter_ or not aut_source_set_:
                 raise APIError("automation info is missing")
 
-            if aut_matched_:
-                if not aut_match_fields_ or not aut_match_collection_id_:
+            if aut_target_:
+                if not aut_target_filter_ or not aut_target_collection_id_:
                     raise APIError("match info is missing")
-                if not len(aut_match_fields_) > 0:
+                if not len(aut_target_filter_) > 0:
                     raise APIError("matched fields is missing")
 
-            collection_ = self.db_["_collection"].find_one({"col_id": aut_collection_id_})
+            collection_ = self.db_["_collection"].find_one({"col_id": aut_source_collection_id_})
             if not collection_:
-                raise APIError(f"collection not found to schedule {aut_collection_id_}")
+                raise APIError(f"collection not found to schedule {aut_source_collection_id_}")
 
             structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
             if not structure_:
-                raise APIError(f"structure not found: {aut_collection_id_}")
+                raise APIError(f"structure not found: {aut_source_collection_id_}")
 
             get_filtered_ = Crud().get_filtered_f({
-                "match": aut_filter_,
+                "match": aut_source_filter_,
                 "properties": structure_["properties"] if "properties" in structure_ else None
             })
 
-            data_file_ = f"{aut_collection_id_}_data"
+            data_file_ = f"{aut_source_collection_id_}_data"
             if data_file_ not in self.db_.list_collection_names():
                 raise APIError("collection data is missing")
             remote_data_file_ = None
             remote_structure_ = None
 
-            if aut_matched_:
-                remote_data_file_ = f"{aut_match_collection_id_}_data"
+            if aut_target_:
+                remote_data_file_ = f"{aut_target_collection_id_}_data"
                 if remote_data_file_ not in self.db_.list_collection_names():
                     raise APIError(f"remote collection data is missing {remote_data_file_}")
-                collection_ = self.db_["_collection"].find_one({"col_id": aut_match_collection_id_})
+                collection_ = self.db_["_collection"].find_one({"col_id": aut_target_collection_id_})
                 if not collection_:
-                    raise APIError(f"remote collection not found to schedule: {aut_match_collection_id_}")
+                    raise APIError(f"remote collection not found to schedule: {aut_target_collection_id_}")
                 remote_structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
                 if not remote_structure_:
-                    raise APIError(f"remote structure not found: {aut_match_collection_id_}")
+                    raise APIError(f"remote structure not found: {aut_target_collection_id_}")
 
             find_ = self.db_[data_file_].find(get_filtered_)
             for rec_ in find_:
@@ -134,16 +134,16 @@ class Schedular():
                 matched_ = False
                 remoted_ = False
                 id_ = rec_["_id"]
-                if aut_matched_ and remote_structure_:
-                    for m_ in aut_match_fields_:
+                if aut_target_ and remote_structure_:
+                    for m_ in aut_target_filter_:
                         m_key_ = m_["key"]
                         m_op_ = m_["op"]
                         m_value_ = m_["value"]
                         if m_value_[:1] == "$":
                             f_ = m_value_[1:]
                             m_value_ = rec_[f_]
-                            if aut_match_prefixes_:
-                                for prefix_ in aut_match_prefixes_:
+                            if aut_target_prefixes_:
+                                for prefix_ in aut_target_prefixes_:
                                     if m_value_.startswith(prefix_):
                                         m_value_ = m_value_[len(prefix_):]
                                         break
@@ -169,17 +169,17 @@ class Schedular():
                     set_remote_ = {}
                     set_["_modified_by"] = set_remote_["_modified_by"] = "Automation"
                     set_["_modified_at"] = set_remote_["_modified_at"] = datetime.now()
-                    if aut_set_:
-                        for aut_set__ in aut_set_:
-                            key_ = aut_set__["key"]
-                            value_ = aut_set__["value"]
+                    if aut_source_set_:
+                        for aut_source_set__ in aut_source_set_:
+                            key_ = aut_source_set__["key"]
+                            value_ = aut_source_set__["value"]
                             value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
                             set_[key_] = value_
                         self.db_[data_file_].update_one({"_id": id_}, {"$set": set_})
-                    if remoted_ and aut_set_remote_:
-                        for aut_set_remote__ in aut_set_remote_:
-                            key_ = aut_set_remote__["key"]
-                            value_ = aut_set_remote__["value"]
+                    if remoted_ and aut_target_set_:
+                        for aut_target_set__ in aut_target_set_:
+                            key_ = aut_target_set__["key"]
+                            value_ = aut_target_set__["value"]
                             if value_[:1] == "$":
                                 f_ = value_[1:]
                                 value_ = rec_[f_] if f_ in rec_ else None
@@ -893,7 +893,7 @@ class Crud():
                     f_ = open(path_, "r")
                     data_ = json.loads(f_.read())
                     if data_ and len(data_) > 0:
-                        session_db_["_automation"].delete_many({"aut_collection_id": col_id_})
+                        session_db_["_automation"].delete_many({"aut_source_collection_id": col_id_})
                         for rec_ in data_:
                             rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
                             rec_["_created_by"] = rec_["_modified_by"] = email_
