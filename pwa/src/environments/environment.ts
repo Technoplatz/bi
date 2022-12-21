@@ -178,7 +178,8 @@ export const environment = {
     { "id": "_permission", "title": "Permissions" },
     { "id": "_token", "title": "API Tokens" },
     { "id": "_firewall", "title": "Firewall" },
-    { "id": "_backup", "title": "Backups" }
+    { "id": "_backup", "title": "Backups" },
+    { "id": "_log", "title": "Logs" }
   ],
   charts: {
     colorScheme: {

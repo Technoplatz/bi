@@ -7,7 +7,6 @@ services:
     container_name: traefik
     image: traefik:latest
     hostname: traefik
-    pull_policy: always
     restart: always
     command:
       - --log.level=INFO
@@ -51,7 +50,6 @@ services:
     container_name: mongo0
     image: mongo:latest
     hostname: ${MONGO_HOST}
-    pull_policy: always
     depends_on:
       - init
     restart: always
@@ -79,7 +77,6 @@ services:
     container_name: mongo1
     image: mongo:latest
     hostname: ${MONGO_REPLICA1_HOST}
-    pull_policy: always
     depends_on:
       - init
     restart: always
@@ -104,7 +101,6 @@ services:
     container_name: mongo2
     image: mongo:latest
     hostname: ${MONGO_REPLICA2_HOST}
-    pull_policy: always
     depends_on:
       - init
     restart: always
@@ -129,7 +125,6 @@ services:
     container_name: replicaset
     image: ghcr.io/technoplatz/bi-replicaset:latest
     hostname: replicaset
-    pull_policy: always
     depends_on:
       - mongo0
       - mongo1
@@ -164,7 +159,6 @@ services:
   api:
     container_name: api
     image: ghcr.io/technoplatz/bi-api:latest
-    pull_policy: always
     depends_on:
       - replicaset
     hostname: api
@@ -210,7 +204,6 @@ services:
   pwa:
     container_name: pwa
     image: ghcr.io/technoplatz/bi-pwa:latest
-    pull_policy: always
     hostname: pwa
     restart: always
     volumes:
@@ -231,7 +224,6 @@ services:
   watchtower:
     container_name: watchtower
     image: containrrr/watchtower:latest
-    pull_policy: always
     hostname: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

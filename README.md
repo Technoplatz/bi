@@ -51,7 +51,7 @@ Web services is one of the features provided by internal API and allow partners 
 
 ### Internal API
 
-The internal Application Programming Interface has been developed in Python programming language with a monolithic structure. Its object-oriented structure allows multiple background services to run simultaneously and asynchronously.
+The internal Application Programming Interface has been developed in Python programming language. Its object-oriented structure allows multiple background services to run simultaneously and asynchronously.
 
 - **Internal Functions**\
 <sup>Runs core modules and allow data sharing.</sup>
@@ -72,17 +72,15 @@ Technoplatz BI is designed as a self-service and containerized business applicat
 <sup>It can be installed on Windows, Linux or Mac.</sup>
 - **Open Source**\
 <sup>Everyone can review the codes at GitHub and learn from them a lot.</sup>
-- **Flexible**\
-<sup>It has the sweet smell of flexible JSON data structure.</sup>
-- **Scalable**\
-<sup>Starts small and expands as needed.</sup>
+- **Flexible Data Strcuture**\
+<sup>It has the sweet smell of JSON.</sup>
+- **Cloud Native**\
+<sup>Containerized scalable hybrid app developed with modern CI/CD methods.</sup>
 - **Data Sciences Ready**\
-<sup>Accessible from other BI tools and Microsoft Excel.</sup>
-- **Certification**\
-<sup>Empowers [ISO](#iso-27001) Certification processes, it is not a stopper.</sup>
+<sup>Data accessibility from other BI tools and Microsoft Excel.</sup>
 
 #### ISO 27001
-The open source structure of the system, the codes published on GitHub, the security policy and the use of modern CI/CD methods in the development process provide advantages in ISO 27001 audits in terms of the following topics;\
+Technoplatz BI empowers [ISO](#iso-27001) certification processes. The open source structure of the system, the codes published on GitHub, the security policy and the using of modern CI/CD methods provide advantages in ISO 27001 audits in terms of the following topics;\
 Appendix A-8, A-9, A-10, A-11, A-12, A-13, A-17
 
 ### Used Technologies
@@ -192,19 +190,19 @@ It is used for sending automated emails over the [Sendgrid](#https://sendgrid.co
 
 #### 5. Starting Containers
 
-Enter the command below to start the containers by keeping them up and running in the background. This step may take time up to a couple of minutes depending on your internet bandwidth;
+Enter the command below to start the containers by keeping them up and running in the background. It can take up to 30 seconds till after containers creation for Technoplatz BI to be functional. You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run at the background and restarts automatically as the platform is rebooted.
 
 ```bash
 docker-compose up --detach --remove-orphans
 ```
+
+#### 6. Signing In
 
 In order to open your first session go to the following address in your web browser, click the "Sign in" button, enter your email and password which you provided in the .env file.
 
 ```bash
 http://localhost:8100
 ```
-
-You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run in the background and restarts automatically when the platform is rebooted.
 
 ## Maintenance
 
@@ -295,11 +293,11 @@ Technoplatz BI is provided in two licensing options;
 Official Web Site\
 [https://bi.technoplatz.com](https://bi.technoplatz.com)
 
-### Developer
+### Author
 
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
 Founder, Technoplatz IT Solutions GmbH\
 Senior System Analist & Developer\
-Data Sciences, Statistics B.Sc.\
+Data Sciences, Statistics B.Sc.
 
 --

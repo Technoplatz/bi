@@ -96,10 +96,6 @@
                         <ion-icon name="expand-outline"></ion-icon><br />
                         <span>{{ 'Resize' | translate }}<br />{{ 'Charts' | translate }}</span>
                       </div>
-                      <div class="data-sq-button" (click)="goSection('admin', '_log', 'Logs')">
-                        <ion-icon name="telescope-outline"></ion-icon><br />
-                        <span>{{ 'Show' | translate }}<br />{{ 'Logs' | translate }}</span>
-                      </div>
                       <div *ngIf="!template_showed" class="data-sq-button" (click)="doTemplateShow()">
                         <ion-icon name="albums-outline"></ion-icon><br />
                         <span>{{ 'Show' | translate }}<br />{{ 'Templates' | translate }}</span>
@@ -861,10 +857,17 @@
                     </ion-icon>
                     <ion-label>
                       {{ item.vie_title }}<br />
-                      <span>{{ item.vie_collection_id }} | <span *ngIf="item.chart && item.chart.count"
-                          class="text-bold">{{ item.chart.count }} <span *ngIf="item.chart.count > 1">{{ 'rows' |
+                      <span>{{ item.vie_collection_id }} |
+                        <span *ngIf="item.chart && item.chart.count; else noviews" class="text-bold">{{ item.chart.count }}
+                          <span *ngIf="item.chart.count > 1">{{ 'rows' |
                             translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
-                            }}</span></span></span>
+                            }}
+                          </span>
+                        </span>
+                        <ng-template #noviews>
+                          {{ 'no records' | translate }}
+                        </ng-template>
+                      </span>
                     </ion-label>
                   </ion-item>
                 </div>
@@ -873,7 +876,8 @@
                   <div>
                     {{ 'You can create a shared view by saving the existing query' |
                     translate }}.</div>
-                  <ion-button size="small" class="ion-margin-top" (click)="doSaveAsView()">{{ 'Save as View' | translate }}</ion-button>
+                  <ion-button size="small" class="ion-margin-top" (click)="doSaveAsView()">{{ 'Save as View' | translate
+                    }}</ion-button>
                 </ng-template>
                 <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]
                 </ion-list-header>
