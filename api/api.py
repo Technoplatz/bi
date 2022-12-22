@@ -346,7 +346,7 @@ class Schedular():
     def schedule_automations_f(self, backgroundscheduler_):
         try:
             print("*** schedule automations started", datetime.now(), flush=True)
-            find_ = self.db_["_automation"].find(filter={"aut_enabled": True}, sort=[("aut_priority", 1)])
+            find_ = self.db_["_automation"].find({"aut_enabled": True})
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
                 if backgroundscheduler_.get_job(aut_id_):

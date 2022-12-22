@@ -25,15 +25,6 @@
             "description": "Enabled or not",
             "width": 110
         },
-        "aut_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 1000,
-            "width": 120
-        },
         "aut_source_collection_id": {
             "bsonType": "string",
             "minLength": 3,
@@ -43,7 +34,7 @@
             "description": "Source Collection ID",
             "required": true,
             "collection": true,
-            "width": 160
+            "width": 180
         },
         "aut_source_filter": {
             "bsonType": "array",
@@ -300,6 +291,6 @@
         ]
     ],
     "sort": {
-        "aut_priority": 1
+        "_modified_at": -1
     }
 }
