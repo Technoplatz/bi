@@ -582,11 +582,11 @@ export class ConsolePage implements OnInit {
   }
 
   async goCrud(rec: any, op: string) {
-    this.crud.modalSubmitListener.subscribe((res: any) => {
-      if (res && res.result) {
-        this.RefreshData(0);
-      }
-    });
+    // this.crud.modalSubmitListener.subscribe((res: any) => {
+    //   if (res && res.result) {
+    //     this.RefreshData(0);
+    //   }
+    // });
     const modal = await this.modal.create({
       component: CrudPage,
       backdropDismiss: false,
@@ -610,7 +610,7 @@ export class ConsolePage implements OnInit {
       }
     });
     modal.onDidDismiss().then((res: any) => {
-      this.crud.modalSubmitListener.unsubscribe;
+      // this.crud.modalSubmitListener.unsubscribe;
       if (res.data.modified) {
         op === "action" ? this.doQuitViewMode() : this.RefreshData(0);
         if (this.id === "_collection") {

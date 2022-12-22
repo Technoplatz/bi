@@ -43,7 +43,7 @@
             "description": "Source Collection ID",
             "required": true,
             "collection": true,
-            "width": 140
+            "width": 160
         },
         "aut_source_filter": {
             "bsonType": "array",
@@ -105,7 +105,7 @@
             "title": "Source Filter",
             "description": "Source Filter",
             "subType": "filter",
-            "width": 120
+            "width": 140
         },
         "aut_source_set": {
             "bsonType": "array",

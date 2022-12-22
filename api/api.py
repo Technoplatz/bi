@@ -87,9 +87,10 @@ class Schedular():
             aut_target_collection_id_ = doc_["aut_target_collection_id"] if "aut_target_collection_id" in doc_ else None
             aut_target_filter_ = doc_["aut_target_filter"] if "aut_target_filter" in doc_ and len(doc_["aut_target_filter"]) > 0 else None
             aut_target_ = doc_["aut_target"] if "aut_target" in doc_ else False
+            aut_target_upsert_ = True if "aut_target_upsert" in doc_ and doc_["aut_target_upsert"] == True else False
             aut_target_prefixes_ = doc_["aut_target_prefixes"] if "aut_target_prefixes" in doc_ and len(doc_["aut_target_prefixes"]) > 0 else None
 
-            if not aut_id_ or not aut_source_collection_id_ or not aut_source_filter_ or not aut_source_set_:
+            if not aut_id_ or not aut_source_collection_id_ or not aut_source_filter_:
                 raise APIError("automation info is missing")
 
             if aut_target_:
@@ -111,31 +112,32 @@ class Schedular():
                 "properties": structure_["properties"] if "properties" in structure_ else None
             })
 
-            data_file_ = f"{aut_source_collection_id_}_data"
-            if data_file_ not in self.db_.list_collection_names():
+            source_data_file_ = f"{aut_source_collection_id_}_data"
+            if source_data_file_ not in self.db_.list_collection_names():
                 raise APIError("collection data is missing")
-            remote_data_file_ = None
-            remote_structure_ = None
+            target_data_file_ = None
+            target_structure_ = None
 
             if aut_target_:
-                remote_data_file_ = f"{aut_target_collection_id_}_data"
-                if remote_data_file_ not in self.db_.list_collection_names():
-                    raise APIError(f"remote collection data is missing {remote_data_file_}")
+                target_data_file_ = f"{aut_target_collection_id_}_data"
+                if target_data_file_ not in self.db_.list_collection_names():
+                    raise APIError(f"remote collection data is missing {target_data_file_}")
                 collection_ = self.db_["_collection"].find_one({"col_id": aut_target_collection_id_})
                 if not collection_:
                     raise APIError(f"remote collection not found to schedule: {aut_target_collection_id_}")
-                remote_structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
-                if not remote_structure_:
+                target_structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+                if not target_structure_:
                     raise APIError(f"remote structure not found: {aut_target_collection_id_}")
 
-            find_ = self.db_[data_file_].find(get_filtered_)
+            find_ = self.db_[source_data_file_].find(get_filtered_)
             for rec_ in find_:
-                match_ = []
-                matched_ = False
-                remoted_ = False
+                target_filter_ = []
+                target_match_ = None
+                target_matched_ = False
+                target_exists_ = False
                 id_ = rec_["_id"]
-                if aut_target_ and remote_structure_:
-                    for m_ in aut_target_filter_:
+                if aut_target_ and target_structure_:
+                    for idx_, m_ in enumerate(aut_target_filter_):
                         m_key_ = m_["key"]
                         m_op_ = m_["op"]
                         m_value_ = m_["value"]
@@ -147,36 +149,47 @@ class Schedular():
                                     if m_value_.startswith(prefix_):
                                         m_value_ = m_value_[len(prefix_):]
                                         break
-                        match_.append({
+                                if idx_ == 0:
+                                    target_match_ = {}
+                                    target_match_[m_key_] = m_value_
+                        target_filter_.append({
                             "key": m_key_,
                             "op": m_op_,
                             "value": m_value_
                         })
+
+                    if target_match_ == None:
+                        raise APIError("The first item of automation target filter must be the matching field")
+
                     get_filtered_ = Crud().get_filtered_f({
-                        "match": match_,
-                        "properties": remote_structure_["properties"] if "properties" in remote_structure_ else None
+                        "match": target_filter_,
+                        "properties": target_structure_["properties"] if "properties" in target_structure_ else None
                     })
-                    aggregate_ = self.db_[remote_data_file_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
+                    aggregate_ = self.db_[target_data_file_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
                     aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
                     if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
-                        matched_ = True
-                        remoted_ = True
+                        target_matched_ = target_exists_ = True
+                    else:
+                        aggregate_ = self.db_[target_data_file_].aggregate([{"$match": target_match_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
+                        aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
+                        if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
+                            target_exists_ = True
                 else:
-                    matched_ = True
+                    target_matched_ = True
 
-                if matched_:
-                    set_ = {}
-                    set_remote_ = {}
-                    set_["_modified_by"] = set_remote_["_modified_by"] = "Automation"
-                    set_["_modified_at"] = set_remote_["_modified_at"] = datetime.now()
+                if target_matched_ or aut_target_upsert_:
+                    set_source_ = {}
+                    set_target_ = {}
+                    set_source_["_modified_by"] = set_target_["_modified_by"] = "Automation"
+                    set_source_["_modified_at"] = set_target_["_modified_at"] = datetime.now()
                     if aut_source_set_:
                         for aut_source_set__ in aut_source_set_:
                             key_ = aut_source_set__["key"]
                             value_ = aut_source_set__["value"]
                             value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
-                            set_[key_] = value_
-                        self.db_[data_file_].update_one({"_id": id_}, {"$set": set_})
-                    if remoted_ and aut_target_set_:
+                            set_source_[key_] = value_
+                        self.db_[source_data_file_].update_one({"_id": id_}, {"$set": set_source_})
+                    if aut_target_set_:
                         for aut_target_set__ in aut_target_set_:
                             key_ = aut_target_set__["key"]
                             value_ = aut_target_set__["value"]
@@ -185,8 +198,12 @@ class Schedular():
                                 value_ = rec_[f_] if f_ in rec_ else None
                             else:
                                 value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
-                            set_remote_[key_] = value_
-                        self.db_[remote_data_file_].update_many(get_filtered_, {"$set": set_remote_})
+                            set_target_[key_] = value_
+                        if target_matched_:
+                            self.db_[target_data_file_].update_many(get_filtered_, {"$set": set_target_})
+                        else:
+                            if aut_target_upsert_ and not target_exists_:
+                                self.db_[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=True)
 
             res_ = {"result": True}
 
@@ -326,15 +343,15 @@ class Schedular():
         finally:
             return res_
 
-    def schedule_automations_f(self, sched_):
+    def schedule_automations_f(self, backgroundscheduler_):
         try:
-            print("*** schedule automations restarted", datetime.now(), flush=True)
+            print("*** schedule automations started", datetime.now(), flush=True)
             find_ = self.db_["_automation"].find(filter={"aut_enabled": True}, sort=[("aut_priority", 1)])
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
-                if sched_.get_job(aut_id_):
-                    sched_.remove_job(aut_id_)
-                sched_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=self.TZ, replace_existing=True, args=[doc_])
+                if backgroundscheduler_.get_job(aut_id_):
+                    backgroundscheduler_.remove_job(aut_id_)
+                backgroundscheduler_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=self.TZ, replace_existing=True, args=[doc_])
 
             res_ = {"result": True}
 
@@ -4794,7 +4811,7 @@ def storage_f():
         user_ = validate_["user"]
 
         # endpoint_ = request.endpoint
-        import_f_ = Crud().import_f({"form": form_, "file": file_, "collection": collection__, "user": user_, "prefix": prefix_ })
+        import_f_ = Crud().import_f({"form": form_, "file": file_, "collection": collection__, "user": user_, "prefix": prefix_})
 
         if not import_f_["result"]:
             raise APIError(import_f_["msg"])
