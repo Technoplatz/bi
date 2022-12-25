@@ -400,6 +400,8 @@ form ion-item ion-label {
 
 .pivot .dataframe {
   width: 100%;
+  font-size: 13px;
+  margin-top: 16px;
 }
 
 .pivot .dataframe td,
@@ -410,11 +412,6 @@ form ion-item ion-label {
 
 .pivot .dataframe td {
   text-align: right;
-}
-
-.pivot .dataframe {
-  font-size: 13px;
-  margin-top: 16px;
 }
 
 .pivot-grid ion-list,
@@ -744,27 +741,6 @@ ion-select {
   font-size: 12px;
 }
 
-/*
-ion-segment {
-  border-bottom: 1px solid var(--ion-color-light) !important;
-}
-
-ion-segment-button {
-  --padding-top: 8px !important;
-  --indicator-height: 4px;
-  --indicator-color: var(--ion-color-danger);
-  --color: var(--ion-color-dark);
-  --color-checked: var(--ion-color-dark);
-  font-weight: 600;
-  white-space: nowrap;
-}
-*/
-
-.announce-sched {
-  margin-top: 8px;
-  font-weight: normal;
-}
-
 .announce-grid,
 .announce-grid ion-text {
   font-size: small;
@@ -796,13 +772,7 @@ ion-segment-button {
 }
 
 .announce-grid-header {
-  font-size: 18px;
-  font-weight: normal !important;
-}
-
-.announce-grid-tags {
-  font-weight: 600;
-  margin-top: 8px;
+  font-weight: bold;
 }
 
 .datetime-class {

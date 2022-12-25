@@ -12,12 +12,9 @@ It's time to get data-driven with your inner-cycle!
 
 Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage data-driven business processes without the need to develop software from scratch. Considering each business has its own unique conditions, it provides an optimized and pragmatic solution for the main requirements below;
 
-- [Data Application](#data-application)\
-<sup>Self-service Data Management</sup>
-- [BI-Directional Data Sharing](#bi-directional-data-sharing)\
-<sup>Completion of Processes through Integration</sup>
-- [Internal API](#internal-api)\
-<sup>Web Services and Automation</sup>
+- [Data Application](#data-application)
+- [BI-Directional Data Sharing](#bi-directional-data-sharing)
+- [Internal API](#internal-api)
 
 ### Data Application
 
@@ -55,10 +52,8 @@ The internal Application Programming Interface has been developed in Python prog
 
 - **Internal Functions**\
 <sup>Runs core modules and allow data sharing.</sup>
-- **External Functions (Web Services)**\
+- **Web Services**\
 <sup>Allow to perform data operations remotely.</sup>
-- **Cronjobs**\
-<sup>Run scheduled Automation tasks.</sup>
 
 ### Highlights
 

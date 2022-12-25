@@ -69,7 +69,6 @@ export class ConsolePage implements OnInit {
   public is_dash_ok: boolean = false;
   public is_selected: boolean = false;
   public is_show_resize: boolean = false;
-  public is_pivot_showed: boolean = true;
   public is_pivot_loading: boolean = false;
   public pivot_: string = "";
   public statistics_key_: string = "";
@@ -129,7 +128,6 @@ export class ConsolePage implements OnInit {
   public pane_segval_dash: string = "dash";
   public options?: JsonEditorOptions;
   public options2?: JsonEditorOptions;
-  public openPivotModal: boolean = false;
   private sweeped: any = [];
   private sort: any = {};
   private properites_: any = {};
@@ -238,6 +236,7 @@ export class ConsolePage implements OnInit {
 
   doEnterViewMode(view_: any) {
     return new Promise((resolve, reject) => {
+      this.is_loaded = false;
       this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
       this.menu = "collections";
       this.submenu = this.header = this.view.vie_collection_id;
@@ -247,47 +246,27 @@ export class ConsolePage implements OnInit {
         this.view_mode["_tags"] = this.view ? this.view._tags : null;
         this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
         this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
-          this.doGetViewMode().then(() => {
-            this.RefreshData(0).then(() => {
-              this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
-              this.view?.vie_filter ? this.filter = this.view.vie_filter : null;
-              this.view_mode[this.id] = true;
-              resolve(true);
+          this.view?.vie_filter ? this.filter = this.view.vie_filter : null;
+          this.view_data = [];
+          this.crud.View(this.view._id, this.view.vie_id, "internal").then((res: any) => {
+            this.view_data = res && res.data ? res.data : [];
+            this.view_count = res && res.count ? res.count : 0;
+            this.view_properties = res.properties;
+            this.view_properties_ = Object.keys(res.properties);
+            this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
+              this.pivot_ = res && res.pivot ? res.pivot : null;
+              const statistics_ = res && res.statistics ? res.statistics : null;
+              this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
+              this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
             }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
-              reject(error);
+              console.error("*** view mode", error);
+              this.misc.doMessage(error.error.message, "error");
+            }).finally(() => {
+              resolve(true);
+              this.is_loaded = true;
             });
           });
         });
-      });
-    });
-  }
-
-  doGetViewMode() {
-    return new Promise((resolve) => {
-      this.storage.get("LSVIEW-" + this.id).then((LSVIEW: any) => {
-        this.view = LSVIEW ? LSVIEW : this.views[0] ? this.views[0] : null;
-        if (this.is_crud && this.view) {
-          this.view_mode[this.id] = LSVIEW ? true : false;
-          this.view_mode["vie_title"] = LSVIEW ? LSVIEW.vie_title : null;
-          this.view_mode["_tags"] = LSVIEW ? LSVIEW._tags : null;
-          this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
-            this.pivot_ = res && res.pivot ? res.pivot : null;
-            const statistics_ = res && res.statistics ? res.statistics : null;
-            this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
-            this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
-          }).catch((error: any) => {
-            console.error("*** view mode", error);
-            this.misc.doMessage(error.error.message, "error");
-          }).finally(() => {
-            resolve(true);
-          });
-        } else {
-          this.view = null;
-          this.view_mode[this.id] = false;
-          resolve(true);
-        }
       });
     });
   }
@@ -667,7 +646,6 @@ export class ConsolePage implements OnInit {
               this.doRefreshDash().then(() => {
                 if (res.data.op === "remove") {
                   this.goSection('dashboard', null, 'Dashboard');
-                  console.log("**** gşttş");
                 } else {
                   this.RefreshData(0);
                 }
@@ -1038,10 +1016,6 @@ export class ConsolePage implements OnInit {
     });
   }
 
-  doShowPivot() {
-    this.is_pivot_showed = this.is_pivot_showed ? false : true;
-  }
-
   doSetSearch(k: string) {
     this.searched[k].setmode = false;
     let i = 0;
@@ -1173,10 +1147,6 @@ export class ConsolePage implements OnInit {
 
   doTemplateShow() {
     this.template_showed = !this.template_showed;
-  }
-
-  doOpenPivotModal() {
-    this.openPivotModal = !this.openPivotModal;
   }
 
   doStartSearch(e: any) {

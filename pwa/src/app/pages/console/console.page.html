@@ -318,11 +318,6 @@
                         <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data Url' | translate }}</span>
                         <span *ngIf="is_url_copied">{{ 'Data Url' | translate }}<br />{{ 'Copied' | translate }}</span>
                       </div>
-                      <div class="data-sq-button" (click)="doOpenPivotModal()">
-                        <ion-icon name="easel-outline"></ion-icon>
-                        <br />
-                        {{ 'Pivot' | translate }}<br /> {{ 'Table' | translate }}
-                      </div>
                       <div (click)="doQuitViewMode()" class="data-sq-button">
                         <ion-icon name="exit-outline"></ion-icon>
                         <br />
@@ -401,34 +396,44 @@
                     </ion-col>
                   </ion-row>
                 </ion-grid>
-                <!-- <ion-grid *ngIf="is_loaded && view_mode[id] && view" class="announce-grid ion-no-padding">
-                  <ion-row class="border-top-row">
-                    <ion-col size="12">
-                      <ion-text color="primary">{{ 'SHARED VIEW' | translate }}</ion-text><br />
-                      <span class="announce-grid-header">{{ view_mode["vie_title"] }}</span>
-                      <div class="announce-grid-tags">{{ view_mode["_tags"] && view_mode["_tags"].join(' ')
-                        }}</div>
-                      <div *ngIf="view && view.vie_scheduled" class="announce-sched">
-                        {{ 'Scheduled at' | translate }}
-                        <span *ngIf="view.vie_sched_days && view.vie_sched_days.length > 0">
-                          {{ view.vie_sched_days.join(',') }}&nbsp;
+
+                <!-- VIEW GRID SECTION -->
+                <div *ngIf="is_loaded && view_mode[id] && view">
+                  <span class="announce-grid-header">{{ view_mode["vie_title"] }}</span><br />
+                  {{ view_mode["_tags"] && view_mode["_tags"].join(' ') }}<br />
+                  <span *ngIf="view.vie_scheduled; else notscheduled">{{ 'Scheduled' | translate
+                    }}</span>
+                  <ng-template #notscheduled>
+                    {{ 'Not Scheduled' | translate }}
+                  </ng-template>
+                  <ion-grid class="data-grid ion-no-padding ion-margin-top">
+                    <ion-row class="ion-nowrap">
+                      <ion-col *ngFor="let item of view_properties_"
+                        [style]="'min-width: ' + view_properties[item].width + 'px !important;'">
+                        <span class="column-title">{{ view_properties[item].title }}<br />
                         </span>
-                        <span *ngIf="view.vie_sched_hours && view.vie_sched_hours.length > 0">
-                          hours: {{ view.vie_sched_hours.join(',') }}&nbsp;
-                        </span>
-                        <span *ngIf="view.vie_sched_minutes && view.vie_sched_minutes.length > 0">
-                          minutes: {{ view.vie_sched_minutes.join(',') }}&nbsp;
-                        </span>
-                      </div>
-                      <div *ngIf="view && !view.vie_scheduled" class="announce-sched">{{ 'Not scheduled' | translate
-                        }}</div>
-                      <div>
-                        <a href="javascript:void(0);" (click)="doShowPivot()"><span *ngIf="!is_pivot_showed">{{ 'Show
-                            Data Pivot'
-                            | translate }}</span><span *ngIf="is_pivot_showed">{{ 'Hide Pivot'
-                            | translate }}</span></a>
-                      </div>
-                      <div *ngIf="pivot_ && is_pivot_showed" lines="none" class="ion-no-padding">
+                        {{ item }}
+                      </ion-col>
+                    </ion-row>
+                    <ion-row *ngFor="let record of view_data; let i = index" class="ion-nowrap">
+                      <ion-col *ngFor="let item of view_properties_"
+                        [style]="'min-width: ' + view_properties[item].width + 'px !important;'">
+                        {{ record[item] }}
+                      </ion-col>
+                    </ion-row>
+                    <ion-row *ngIf="view_data && view_data.length==0" class="ion-nowrap">
+                      <ion-col size="12" class="ion-no-padding">
+                        {{ 'No view data found' | translate }}.
+                      </ion-col>
+                    </ion-row>
+                    <ion-row></ion-row>
+                    <ion-row *ngIf="view_count > 0" class="ion-nowrap">
+                      <ion-col size="12" class="ion-no-padding">
+                        {{ '10 sample rows displayed' | translate }}.
+                      </ion-col>
+                    </ion-row>
+                    <ion-row *ngIf="pivot_">
+                      <ion-col size="12" class="ion-no-padding">
                         <div [innerHtml]="pivot_" class="pivot"></div>
                         <table *ngIf="statistics_" class="stat">
                           <tr>
@@ -489,223 +494,207 @@
                             </td>
                           </tr>
                         </table>
-                      </div>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid> -->
-                <ion-modal [isOpen]="openPivotModal">
-                  <ng-template>
-                    <ion-header>
-                      <ion-toolbar>
-                        <ion-buttons slot="start">
-                          <ion-button>Cancel</ion-button>
-                        </ion-buttons>
-                        <ion-title>Welcome</ion-title>
-                        <ion-buttons slot="end">
-                          <ion-button [strong]="true">Confirm</ion-button>
-                        </ion-buttons>
-                      </ion-toolbar>
-                    </ion-header>
-                    <ion-content class="ion-padding">
-                      <div *ngIf="pivot_ && is_pivot_showed" lines="none" class="ion-no-padding">
-                        <div [innerHtml]="pivot_" class="pivot"></div>
-                      </div>
-                    </ion-content>
-                  </ng-template>
-                </ion-modal>
-                <!-- CRUD GRID -->
-                <ion-grid *ngIf="is_samecol; else dataloading" class="ion-no-padding data-grid">
-                  <!-- CRUD HEADERS -->
-                  <ion-row *ngIf="data && data.length >= 0" class="ion-nowrap search-row">
-                    <ion-col class="ion-text-center check-column">
-                      <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)"
-                        mode="md">
-                      </ion-checkbox>
-                    </ion-col>
-                    <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
-                      [style]="'min-width: ' + item.value.width + 'px !important;'"
-                      [class]="searched && searched[item.key] && searched[item.key].f ? 'filtered' : ''">
-                      <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
-                        <span class="column-title">{{ item.value.title }}<br />
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </div>
+
+                <!-- CRUD GRID SECTION -->
+                <div *ngIf="!view">
+                  <ion-grid *ngIf="is_samecol; else dataloading" class="ion-no-padding data-grid">
+                    <!-- CRUD HEADERS -->
+                    <ion-row *ngIf="data && data.length >= 0" class="ion-nowrap search-row">
+                      <ion-col class="ion-text-center check-column">
+                        <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)"
+                          mode="md">
+                        </ion-checkbox>
+                      </ion-col>
+                      <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
+                        [style]="'min-width: ' + item.value.width + 'px !important;'"
+                        [class]="searched && searched[item.key] && searched[item.key].f ? 'filtered' : ''">
+                        <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
+                          <span class="column-title">{{ item.value.title }}<br />
+                          </span>
+                          {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
+                        </div>
+                        <div *ngIf="searched && searched[item.key] && searched[item.key].actived" class="search-box">
+                          <div *ngIf="!searched[item.key].setmode">
+                            <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
+                            <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
+                              <ion-icon name="arrow-down"></ion-icon>
+                            </ion-button>
+                            <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
+                              <ion-icon name="arrow-up"></ion-icon>
+                            </ion-button>
+                            <ion-button color="light" size="small" (click)="goField(item.key)">
+                              <ion-icon name="settings-outline"></ion-icon>
+                            </ion-button>
+                            <br />
+                            <div *ngIf="item.value.bsonType!='bool'">
+                              <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'eq')">
+                                <ion-text>=</ion-text>
+                              </ion-button>
+                              <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'ne')">
+                                <ion-text>&ne;</ion-text>
+                              </ion-button>
+                              <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'gte')">
+                                <ion-text>&ge;</ion-text>
+                              </ion-button>
+                              <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'lte')">
+                                <ion-text>&le;</ion-text>
+                              </ion-button>
+                              <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'null')">
+                                <ion-text>&#9723;</ion-text>
+                              </ion-button>
+                              <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'nnull')">
+                                <ion-text>&#9724;</ion-text>
+                              </ion-button>
+                            </div>
+                            <div *ngIf="item.value.bsonType=='bool'">
+                              <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'true')">
+                                <ion-text>{{ 'True' | translate }}</ion-text>
+                              </ion-button>
+                              <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
+                                (click)="doSetSearchItemOp(item.key, 'false')">
+                                <ion-text>{{ 'False' | translate }}</ion-text>
+                              </ion-button>
+                            </div>
+                            <ion-input *ngIf="item.value.bsonType!='bool'"
+                              [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
+                              [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
+                              class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}">
+                            </ion-input>
+                            <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
+                              <ion-icon name="search"></ion-icon>{{ 'Search' | translate }}&nbsp;&nbsp;
+                            </ion-button>
+                            <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
+                              &nbsp;{{ 'Cancel' | translate }}&nbsp;&nbsp;
+                            </ion-button>
+                          </div>
+                        </div>
+                      </ion-col>
+                      <ion-col class="data-at-column" (click)="setSort('_modified_at', 1)">
+                        <span class="column-title">{{ 'Modified At' }}<br /></span>
+                        {{ '_modified_at' | translate }}
+                      </ion-col>
+                      <ion-col class="data-by-column" (click)="setSort('_modified_by', 1)">
+                        <span class="column-title">{{ 'Modified by' }}<br /></span>
+                        {{ '_modified_by' | translate }}
+                      </ion-col>
+                    </ion-row>
+  
+                    <!-- CRUD LIST -->
+                    <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item">
+                      <ion-col class="ion-text-center check-column">
+                        <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
+                          (ionChange)="SetSelectData(i,$event)" mode="md">
+                        </ion-checkbox>
+                      </ion-col>
+                      <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
+                        [style]="'min-width: ' + item.value.width + 'px;'">
+                        <span *ngIf="item.value.bsonType=='bool'">
+                          {{ record[item.key] }}
                         </span>
-                        {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
-                      </div>
-                      <div *ngIf="searched && searched[item.key] && searched[item.key].actived" class="search-box">
-                        <div *ngIf="!searched[item.key].setmode">
-                          <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
-                          <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
-                            <ion-icon name="arrow-down"></ion-icon>
-                          </ion-button>
-                          <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
-                            <ion-icon name="arrow-up"></ion-icon>
-                          </ion-button>
-                          <ion-button color="light" size="small" (click)="goField(item.key)">
-                            <ion-icon name="settings-outline"></ion-icon>
-                          </ion-button>
-                          <br />
-                          <div *ngIf="item.value.bsonType!='bool'">
-                            <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'eq')">
-                              <ion-text>=</ion-text>
-                            </ion-button>
-                            <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'ne')">
-                              <ion-text>&ne;</ion-text>
-                            </ion-button>
-                            <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'gte')">
-                              <ion-text>&ge;</ion-text>
-                            </ion-button>
-                            <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'lte')">
-                              <ion-text>&le;</ion-text>
-                            </ion-button>
-                            <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'null')">
-                              <ion-text>&#9723;</ion-text>
-                            </ion-button>
-                            <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'nnull')">
-                              <ion-text>&#9724;</ion-text>
-                            </ion-button>
-                          </div>
-                          <div *ngIf="item.value.bsonType=='bool'">
-                            <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'true')">
-                              <ion-text>{{ 'True' | translate }}</ion-text>
-                            </ion-button>
-                            <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
-                              (click)="doSetSearchItemOp(item.key, 'false')">
-                              <ion-text>{{ 'False' | translate }}</ion-text>
-                            </ion-button>
-                          </div>
-                          <ion-input *ngIf="item.value.bsonType!='bool'"
-                            [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
-                            [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
-                            class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}">
-                          </ion-input>
-                          <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
-                            <ion-icon name="search"></ion-icon>{{ 'Search' | translate }}&nbsp;&nbsp;
-                          </ion-button>
-                          <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
-                            &nbsp;{{ 'Cancel' | translate }}&nbsp;&nbsp;
+                        <span *ngIf="item.value.bsonType=='date' && record[item.key]">
+                          {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
+                        </span>
+                        <span *ngIf="item.value.bsonType=='array'">
+                          <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">
+                            {{ record[item.key]?.length }} {{ 'Line' | translate }}<span
+                              *ngIf="record[item.key]?.length > 1">{{ 's' }}</span>
+                          </span>
+                          <ng-template #noarrayobject>
+                            <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
+                          </ng-template>
+                        </span>
+                        <span *ngIf="item.value.bsonType=='object'">
+                          <span>{{ 'Object' | translate }}</span>
+                        </span>
+                        <span
+                          *ngIf="item.value.bsonType != 'array' && item.value.bsonType != 'date' && item.value.bsonType != 'object' && item.value.bsonType != 'bool'">
+                          <span *ngIf="record && item.key && record[item.key]">{{ record[item.key].toString()
+                            }}</span>
+                        </span>
+                      </ion-col>
+                      <ion-col class="data-at-column">
+                        {{ record._modified_at.replace(' ', 'T') | date:'dd.MM.yyyy
+                        HH:mm:ss' }}
+                      </ion-col>
+                      <ion-col class="data-by-column">
+                        {{ record._modified_by }}
+                      </ion-col>
+                    </ion-row>
+  
+                    <!-- CRUD LIST PAGINATION -->
+                    <ion-row *ngIf="count>=0">
+                      <ion-col size="12" class="ion-no-padding pages-col">
+                        <!-- NO RECORD FOUND PAGING -->
+                        <div *ngIf="is_loaded && (!count || count==0); else showpaging">
+                          <h6>{{ 'No records found' | translate }}</h6>
+                          {{ 'Click the button below to add the first record' | translate }}.<br />
+                          <ion-button size="small" (click)="goCrud(null, 'insert')" class="notfound-button">
+                            {{ 'New Record' | translate }}
                           </ion-button>
                         </div>
-                      </div>
-                    </ion-col>
-                    <ion-col class="data-at-column" (click)="setSort('_modified_at', 1)">
-                      <span class="column-title">{{ 'Modified At' }}<br /></span>
-                      {{ '_modified_at' | translate }}
-                    </ion-col>
-                    <ion-col class="data-by-column" (click)="setSort('_modified_by', 1)">
-                      <span class="column-title">{{ 'Modified by' }}<br /></span>
-                      {{ '_modified_by' | translate }}
-                    </ion-col>
-                  </ion-row>
-
-                  <!-- CRUD LIST -->
-                  <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item">
-                    <ion-col class="ion-text-center check-column">
-                      <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
-                        (ionChange)="SetSelectData(i,$event)" mode="md">
-                      </ion-checkbox>
-                    </ion-col>
-                    <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
-                      [style]="'min-width: ' + item.value.width + 'px;'">
-                      <span *ngIf="item.value.bsonType=='bool'">
-                        {{ record[item.key] }}
-                      </span>
-                      <span *ngIf="item.value.bsonType=='date' && record[item.key]">
-                        {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
-                      </span>
-                      <span *ngIf="item.value.bsonType=='array'">
-                        <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">
-                          {{ record[item.key]?.length }} {{ 'Line' | translate }}<span
-                            *ngIf="record[item.key]?.length > 1">{{ 's' }}</span>
-                        </span>
-                        <ng-template #noarrayobject>
-                          <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
-                        </ng-template>
-                      </span>
-                      <span *ngIf="item.value.bsonType=='object'">
-                        <span>{{ 'Object' | translate }}</span>
-                      </span>
-                      <span
-                        *ngIf="item.value.bsonType != 'array' && item.value.bsonType != 'date' && item.value.bsonType != 'object' && item.value.bsonType != 'bool'">
-                        <span *ngIf="record && item.key && record[item.key]">{{ record[item.key].toString()
-                          }}</span>
-                      </span>
-                    </ion-col>
-                    <ion-col class="data-at-column">
-                      {{ record._modified_at.replace(' ', 'T') | date:'dd.MM.yyyy
-                      HH:mm:ss' }}
-                    </ion-col>
-                    <ion-col class="data-by-column">
-                      {{ record._modified_by }}
-                    </ion-col>
-                  </ion-row>
-
-                  <!-- CRUD LIST PAGINATION -->
-                  <ion-row *ngIf="count>=0">
-                    <ion-col size="12" class="ion-no-padding pages-col">
-                      <!-- NO RECORD FOUND PAGING -->
-                      <div *ngIf="is_loaded && (!count || count==0); else showpaging">
-                        <h6>{{ 'No records found' | translate }}</h6>
-                        {{ 'Click the button below to add the first record' | translate }}.<br />
-                        <ion-button size="small" (click)="goCrud(null, 'insert')" class="notfound-button">
-                          {{ 'New Record' | translate }}
-                        </ion-button>
-                      </div>
-                      <!-- RECORDS FOUND PAGING -->
-                      <ng-template #showpaging>
-                        <ion-button size="small" fill="clear" (click)="RefreshData(0)"
-                          class="ion-no-padding ion-margin-end">
-                          <span *ngIf="count > limit">
-                            {{ (page - 1) * limit + 1 }} -
-                            <span *ngIf="(page - 1) * limit + limit <= count">{{ (page - 1) * limit + limit }}</span>
-                            <span *ngIf="(page - 1) * limit + limit > count">{{ count }}</span>
-                            {{ 'of' | translate }}&nbsp;
+                        <!-- RECORDS FOUND PAGING -->
+                        <ng-template #showpaging>
+                          <ion-button size="small" fill="clear" (click)="RefreshData(0)"
+                            class="ion-no-padding ion-margin-end">
+                            <span *ngIf="count > limit">
+                              {{ (page - 1) * limit + 1 }} -
+                              <span *ngIf="(page - 1) * limit + limit <= count">{{ (page - 1) * limit + limit }}</span>
+                              <span *ngIf="(page - 1) * limit + limit > count">{{ count }}</span>
+                              {{ 'of' | translate }}&nbsp;
+                            </span>
+                            {{ count }} {{ 'records' | translate }}
+                          </ion-button>
+                          <span *ngIf="page > 10">
+                            <ion-button size="small" fill="clear" (click)="RefreshData(1)" class="ion-no-padding">
+                              1 ...
+                            </ion-button>
+                            <ion-button size="small" fill="clear" (click)="RefreshData(page-1)" class="ion-no-padding">
+                              <ion-icon name="caret-back"></ion-icon>
+                            </ion-button>
                           </span>
-                          {{ count }} {{ 'records' | translate }}
-                        </ion-button>
-                        <span *ngIf="page > 10">
-                          <ion-button size="small" fill="clear" (click)="RefreshData(1)" class="ion-no-padding">
-                            1 ...
-                          </ion-button>
-                          <ion-button size="small" fill="clear" (click)="RefreshData(page-1)" class="ion-no-padding">
-                            <ion-icon name="caret-back"></ion-icon>
-                          </ion-button>
-                        </span>
-                        <span *ngFor="let in of paget; let i = index">
-                          <ion-button *ngIf="page != in" size="small" fill="clear" (click)="RefreshData(in)"
-                            class="ion-no-padding">
-                            <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-                          </ion-button>
-                          <ion-button *ngIf="page == in" size="small" fill="clear"
-                            class="ion-no-padding text-underlined">
-                            <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-                          </ion-button>
-                        </span>
-                        <span *ngIf="pages > 10 && page < pages">
-                          <ion-button size="small" fill="clear" (click)="RefreshData(page+1)" class="ion-no-padding">
-                            <ion-icon name="caret-forward"></ion-icon>
-                          </ion-button>
-                          <ion-button size="small" fill="clear" (click)="RefreshData(pages)" class="ion-no-padding">
-                            ... {{ pages }}
-                          </ion-button>
-                        </span>
-                      </ng-template>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-                <ng-template #dataloading>
-                  <ion-item lines="none">
-                    <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-                    <ion-label>
-                      {{ loadingText | translate }}
-                    </ion-label>
-                  </ion-item>
-                </ng-template>
+                          <span *ngFor="let in of paget; let i = index">
+                            <ion-button *ngIf="page != in" size="small" fill="clear" (click)="RefreshData(in)"
+                              class="ion-no-padding">
+                              <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
+                            </ion-button>
+                            <ion-button *ngIf="page == in" size="small" fill="clear"
+                              class="ion-no-padding text-underlined">
+                              <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
+                            </ion-button>
+                          </span>
+                          <span *ngIf="pages > 10 && page < pages">
+                            <ion-button size="small" fill="clear" (click)="RefreshData(page+1)" class="ion-no-padding">
+                              <ion-icon name="caret-forward"></ion-icon>
+                            </ion-button>
+                            <ion-button size="small" fill="clear" (click)="RefreshData(pages)" class="ion-no-padding">
+                              ... {{ pages }}
+                            </ion-button>
+                          </span>
+                        </ng-template>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                  <ng-template #dataloading>
+                    <ion-item lines="none">
+                      <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
+                      <ion-label>
+                        {{ loadingText | translate }}
+                      </ion-label>
+                    </ion-item>
+                  </ng-template>
+                </div>
+                
               </div>
 
               <!-- ACCOUNT SECTIONS -->
@@ -858,7 +847,8 @@
                     <ion-label>
                       {{ item.vie_title }}<br />
                       <span>{{ item.vie_collection_id }} |
-                        <span *ngIf="item.chart && item.chart.count; else noviews" class="text-bold">{{ item.chart.count }}
+                        <span *ngIf="item.chart && item.chart.count; else noviews" class="text-bold">{{ item.chart.count
+                          }}
                           <span *ngIf="item.chart.count > 1">{{ 'rows' |
                             translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
                             }}
