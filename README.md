@@ -10,18 +10,47 @@ It's time to get data-driven with your inner-cycle!
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a low-code, multi-container data application and sharing platform designed to establish and manage data-driven business processes without the need to develop software from scratch. Considering each business has its own unique conditions, it provides an optimized and pragmatic solution for the main requirements below;
+Technoplatz BI is a no-code, multi-container data application and sharing platform designed to manage data-driven business processes without the need to develop software from scratch. Considering each business has its own unique conditions, it provides an optimized and pragmatic solution for the main requirements below;
 
 - [Data Application](#data-application)
 - [BI-Directional Data Sharing](#bi-directional-data-sharing)
 - [Internal API](#internal-api)
 
+### The Inner-Cycle
+
+Technoplatz BI works for those whose strategy is to make their business **data-driven**. It also aims to establish a data culture in a circle that surrounding customers, suppliers, business partners and internal departments;
+
+- Organizations want to switch critical business processes managed on spreadsheets to a sustainable and flexible business tool without the need for software development from scratch.
+
+- Professionals who are trying to handle data-driven processes where customers, suppliers and internal departments need to take certain actions when they informed and two-way data sharing is required for everything to get finalized.
+
+- Companies looking for a third-party solution where a secure and cost-effective system can be built to share business data within the inner cycle.
+
+- Organizations who want to create their own API on the Cloud to get integrated with outer systems.
+
+### Highlights
+
+The tool is designed as a self-service and containerized business application that can be managed by companies of various sizes and users with different skills. Containerization means that applications run in isolated runtime environment called containers with their dependencies, configuration files and operating system. This approach provides advantage of sustainability and significant cost reduction in the management of mission critical business processes;
+
+- **Dedicated**\
+<sup>Runs on your own cloud. Not shared.</sup>
+- **Self Service**\
+<sup>Management of your data-driven processes is now totally under your control.</sup>
+- **Platform Independent**\
+<sup>It can be installed on Windows, Linux or Mac.</sup>
+- **Open Source**\
+<sup>Everyone can review the codes at GitHub and learn from them a lot.</sup>
+- **Flexible**\
+<sup>It has the sweet smell of flexible JSON data structure.</sup>
+- **Cloud Native**\
+<sup>Containerized scalable hybrid app developed with modern CI/CD methods.</sup>
+- **Data Sciences Ready**\
+<sup>Enables data transfer into other BI tools and Microsoft Excel.</sup>
+
 ### Data Application
 
 Technoplatz BI's internal progressive web application module allows you to manage data-driven processes in a unique cross-platform interface. It is a powerful alternative for those who are trying to handle their data operations on spreadsheets or legacy software.
 
-- **System Administration**\
-<sup>Management of administrative components.</sup>
 - **CRUD+**\
 <sup>Performing basic data operations.</sup>
 - **Actions**\
@@ -30,8 +59,8 @@ Technoplatz BI's internal progressive web application module allows you to manag
 <sup>Scheduled smart tasks executed on data collections.</sup>
 - **Data Visualization**\
 <sup>Shareable charts, pivots and descriptive statistics.</sup>
-- **Log Tracking**\
-<sup>Traceable transaction history per record.</sup>
+- **System Administration**\
+<sup>Management of administrative components.</sup>
 
 ### BI-Directional Data Sharing
 
@@ -54,25 +83,6 @@ The internal Application Programming Interface has been developed in Python prog
 <sup>Runs core modules and allow data sharing.</sup>
 - **Web Services**\
 <sup>Allow to perform data operations remotely.</sup>
-
-### Highlights
-
-Technoplatz BI is designed as a self-service and containerized business application that can be managed by companies of various sizes and users with different skills. Containerization means that applications run in isolated runtime environment called containers with their dependencies, configuration files and operating system. This approach provides advantage of sustainability and significant cost reduction in the management of mission critical business processes;
-
-- **Dedicated**\
-<sup>Runs on your own cloud. Not shared.</sup>
-- **Self Service**\
-<sup>Management of your data-driven processes is now totally under your control.</sup>
-- **Platform Independent**\
-<sup>It can be installed on Windows, Linux or Mac.</sup>
-- **Open Source**\
-<sup>Everyone can review the codes at GitHub and learn from them a lot.</sup>
-- **Flexible Data Strcuture**\
-<sup>It has the sweet smell of JSON.</sup>
-- **Cloud Native**\
-<sup>Containerized scalable hybrid app developed with modern CI/CD methods.</sup>
-- **Data Sciences Ready**\
-<sup>Data accessibility from other BI tools and Microsoft Excel.</sup>
 
 #### ISO 27001
 Technoplatz BI empowers [ISO](#iso-27001) certification processes. The open source structure of the system, the codes published on GitHub, the security policy and the using of modern CI/CD methods provide advantages in ISO 27001 audits in terms of the following topics;\
