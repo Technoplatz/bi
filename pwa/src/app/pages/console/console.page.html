@@ -399,8 +399,8 @@
 
                 <!-- VIEW GRID SECTION -->
                 <div *ngIf="is_loaded && view_mode[id] && view">
-                  <span class="announce-grid-header">{{ view_mode["vie_title"] }}</span><br />
-                  {{ view_mode["_tags"] && view_mode["_tags"].join(' ') }}<br />
+                  <div class="announce-grid-header">{{ view_mode["vie_title"] }}</div>
+                  {{ 'Shared with' | translate }} {{ view_mode["_tags"] && view_mode["_tags"].join(' ') }}<br />
                   <span *ngIf="view.vie_scheduled; else notscheduled">{{ 'Scheduled' | translate
                     }}</span>
                   <ng-template #notscheduled>
@@ -423,80 +423,78 @@
                     </ion-row>
                     <ion-row *ngIf="view_data && view_data.length==0" class="ion-nowrap">
                       <ion-col size="12" class="ion-no-padding">
-                        {{ 'No view data found' | translate }}.
+                        {{ 'No data found' | translate }}
                       </ion-col>
                     </ion-row>
                     <ion-row></ion-row>
                     <ion-row *ngIf="view_count > 0" class="ion-nowrap">
                       <ion-col size="12" class="ion-no-padding">
-                        {{ '10 sample rows displayed' | translate }}.
-                      </ion-col>
-                    </ion-row>
-                    <ion-row *ngIf="pivot_">
-                      <ion-col size="12" class="ion-no-padding">
-                        <div [innerHtml]="pivot_" class="pivot"></div>
-                        <table *ngIf="statistics_" class="stat">
-                          <tr>
-                            <th colspan="8">
-                              {{ 'Descriptive statistics of' | translate }} {{ statistics_key_ }}
-                            </th>
-                          </tr>
-                          <tr>
-                            <th>
-                              {{ 'count' }}
-                            </th>
-                            <th>
-                              {{ 'mean' }}
-                            </th>
-                            <th>
-                              {{ 'stdev' }}
-                            </th>
-                            <th>
-                              {{ 'min' }}
-                            </th>
-                            <th>
-                              {{ 'max' }}
-                            </th>
-                            <th>
-                              {{ 'top' }}
-                            </th>
-                            <th>
-                              {{ 'unique' }}
-                            </th>
-                            <th>
-                              {{ 'freq' }}
-                            </th>
-                          </tr>
-                          <tr>
-                            <td>
-                              {{ statistics_.count}}
-                            </td>
-                            <td>
-                              {{ statistics_.mean}}
-                            </td>
-                            <td>
-                              {{ statistics_.std}}
-                            </td>
-                            <td>
-                              {{ statistics_.min}}
-                            </td>
-                            <td>
-                              {{ statistics_.max}}
-                            </td>
-                            <td>
-                              {{ statistics_.top}}
-                            </td>
-                            <td>
-                              {{ statistics_.unique}}
-                            </td>
-                            <td>
-                              {{ statistics_.freq}}
-                            </td>
-                          </tr>
-                        </table>
+                        {{ view_data.length }} {{ 'of' | translate }} {{ view_count }} {{ 'rows displayed' | translate
+                        }}.
                       </ion-col>
                     </ion-row>
                   </ion-grid>
+                  
+                  <div [innerHtml]="pivot_" class="pivot"></div>
+                  <table *ngIf="statistics_" class="stat">
+                    <tr>
+                      <th colspan="8">
+                        {{ 'DESCRIPTIVE STATISTICS' | translate }}<br />{{ statistics_key_ }}
+                      </th>
+                    </tr>
+                    <tr>
+                      <th>
+                        {{ 'count' }}
+                      </th>
+                      <th>
+                        {{ 'mean' }}
+                      </th>
+                      <th>
+                        {{ 'stdev' }}
+                      </th>
+                      <th>
+                        {{ 'min' }}
+                      </th>
+                      <th>
+                        {{ 'max' }}
+                      </th>
+                      <th>
+                        {{ 'top' }}
+                      </th>
+                      <th>
+                        {{ 'unique' }}
+                      </th>
+                      <th>
+                        {{ 'freq' }}
+                      </th>
+                    </tr>
+                    <tr>
+                      <td>
+                        {{ statistics_.count}}
+                      </td>
+                      <td>
+                        {{ statistics_.mean}}
+                      </td>
+                      <td>
+                        {{ statistics_.std}}
+                      </td>
+                      <td>
+                        {{ statistics_.min}}
+                      </td>
+                      <td>
+                        {{ statistics_.max}}
+                      </td>
+                      <td>
+                        {{ statistics_.top}}
+                      </td>
+                      <td>
+                        {{ statistics_.unique}}
+                      </td>
+                      <td>
+                        {{ statistics_.freq}}
+                      </td>
+                    </tr>
+                  </table>
                 </div>
 
                 <!-- CRUD GRID SECTION -->
@@ -589,7 +587,7 @@
                         {{ '_modified_by' | translate }}
                       </ion-col>
                     </ion-row>
-  
+
                     <!-- CRUD LIST -->
                     <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item">
                       <ion-col class="ion-text-center check-column">
@@ -597,8 +595,8 @@
                           (ionChange)="SetSelectData(i,$event)" mode="md">
                         </ion-checkbox>
                       </ion-col>
-                      <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
-                        [style]="'min-width: ' + item.value.width + 'px;'">
+                      <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
+                        (click)="goCrud(record, 'update')" [style]="'min-width: ' + item.value.width + 'px;'">
                         <span *ngIf="item.value.bsonType=='bool'">
                           {{ record[item.key] }}
                         </span>
@@ -631,7 +629,7 @@
                         {{ record._modified_by }}
                       </ion-col>
                     </ion-row>
-  
+
                     <!-- CRUD LIST PAGINATION -->
                     <ion-row *ngIf="count>=0">
                       <ion-col size="12" class="ion-no-padding pages-col">
@@ -694,7 +692,7 @@
                     </ion-item>
                   </ng-template>
                 </div>
-                
+
               </div>
 
               <!-- ACCOUNT SECTIONS -->
@@ -842,7 +840,7 @@
                   <ion-item *ngFor="let item of views_pane; let p = index" class="pane-item cursored"
                     (click)="doEnterViewMode(item)">
                     <ion-icon slot="end"
-                      [name]="item.vie_scheduled ? 'notifications-outline' : 'notifications-off-outline'" size="small">
+                      [name]="item.vie_scheduled ? 'notifications' : 'notifications-off-outline'" size="small">
                     </ion-icon>
                     <ion-label>
                       {{ item.vie_title }}<br />

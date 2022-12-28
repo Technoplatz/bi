@@ -1,6 +1,6 @@
 ## Technoplatz BI - Community Edition
 
-It's time to get data-driven with your [Inner-Cycle](#the-inner-cycle)!
+It's time to get data-driven with your [Inner-Cycle](#business-highlights)!
 
 - [What is Technoplatz BI](#what-is-technoplatz-bi)
 - [How to Get Started](#how-to-get-started)
@@ -10,37 +10,56 @@ It's time to get data-driven with your [Inner-Cycle](#the-inner-cycle)!
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a no-code, multi-container data application and sharing platform designed to manage business processes without developing software from scratch. It provides three optimized and pragmatic solutions for the main requirements of any data-driven process by considering that each business has its own unique conditions;
+Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. It provides optimized and pragmatic solutions for the main requirements of any data-driven process by considering that each business has its own unique conditions;
 
-- [**Data Application**](#data-application)
-- [**BI-Directional Data Sharing**](#bi-directional-data-sharing)
-- [**Internal API**](#api)
+- [Data Application](#data-application)
+- [BI-Directional Data Sharing](#bi-directional-data-sharing)
+- [Internal API](#api)
 
-#### To build a data culture in the Inner-Cycle
+### Business Highlights
 
-Technoplatz BI is being developed for those whose strategy is to make their business **data-driven**. It allows organizations to establish their own cloud platform to manage and share data within the circle that surrounds customers, suppliers, business partners and internal departments.
+Technoplatz BI is being developed for those whose strategy is to make their business **data-driven**.
 
-- It works for the companies want to move critical business processes currently being managed on spreadsheets or legacy software to a sustainable, secure and cost-effective system without developing software from scratch.
+- **Cloud Platform on Solution Basis**\
+It works for the companies want to build a new system to move their mission critical processes currently being managed on spreadsheets or legacy software to a sustainable, secure and cost-effective Cloud platform without investing in hardware infrastructure and software development services.
 
-- It can be used as an "Interface" by Enterprises that can not open their online global business systems to local suppliers due to company policies.
+- **Sharing within an Inner-Cycle**\
+It allows organizations to share data within the circle that surrounds customers, suppliers, business partners and internal departments. It can also be used as an "interface" by Enterprises that can not open their online global systems to local suppliers due to company policies.
 
-- It provides a cloud based solution for those who are planning to create their own [API](#api) platform to get integrated with outer world.
+- **No-code Platform Empowers Its Users**\
+Technoplatz BI essentially designed for business users, not developers. Even though no coding skills required for the platform to use, users learn basics of JSON structure easily and naturally without having to study to become a data expert. This approach also creates a data culture within the company.
 
-#### Technical Highlights
+#### What is No-code?
+
+The widely accepted meaning of no-code term is an application development approach that does not require computer programming skills. No-code platforms use some visual interfaces to allow users to develop their own "App" without knowledge of any programming language. Unlike many no-code platforms, Technoplatz BI empowers users to create and publish their own "solution" run on their own platform.
+
+| No-code Platforms | Technoplatz BI |
+| :--- | :--- |
+|  Designed for business users | Designed for business professionals |
+|  For developing simple or medium Apps | For building solutions to be data-driven |
+|  Very easy to use | Very beneficial to use |
+|  Provide limited capabilities | Provide required capabilities |
+|  Customized by built-in cosmetic components | Customized by JSON structures |
+
+#### ISO 27001
+
+Technoplatz BI contributes positively to the certification processes of company information systems. Open source availability of codes and security policy on GitHub, user privileges, access rights, backup policy, logging features and the using of modern CI/CD methods in the development process provide advantages especially in ISO 27001 audits.
+
+### Highlights
 
 The main approach is to combine sustainability with quality and low cost;
 
-- **Dedicated**\
-<sup>Runs on your own Cloud.</sup>
-- **Self Service**\
-<sup>Makes data management possible without being a data expert.</sup>
+- **Open Source**\
+<sup>Everyone can review the codes on GitHub and learn from them a lot.</sup>
 - **Containerized**\
 <sup>Applications and OS run in an isolated environment together.</sup>
+- **Dedicated**\
+<sup>Runs in your own cloud, on-premise servers and even on your laptop.</sup>
 - **Platform Independent**\
 <sup>It can be installed on Windows, Linux or Mac.</sup>
-- **Open Source**\
-<sup>Everyone can review the codes at GitHub and learn from them a lot.</sup>
-- **Flexible**\
+- **Scalable**\
+<sup>You can start small and grow as needed.</sup>
+- **Flexible Data Structure**\
 <sup>It has the sweet smell of flexible JSON data structure.</sup>
 - **Cloud Native**\
 <sup>Scalable hybrid application is being developed with modern CI/CD methods.</sup>
@@ -55,7 +74,7 @@ Technoplatz BI includes an internal progressive web application that allows you 
 <sup>Performing basic data operations.</sup>
 - **Actions**\
 <sup>One-click conditional bulk data update.</sup>
-- **Automation**\
+- **Automations**\
 <sup>Scheduled smart tasks executed on data collections.</sup>
 - **Data Visualization**\
 <sup>Shareable charts, pivots and descriptive statistics.</sup>
@@ -74,16 +93,13 @@ Sharing a secure data URL instead of sending data itself can be more useful meth
 
 ### API
 
-The internal Application Programming Interface has been developed in Python programming language. Its object-oriented structure allows multiple background services to run simultaneously and asynchronously.
+It provides a solution for those who are planning to create their own [API](#api) platform to get integrated with outer world. The internal API has been developed in Python programming language with object-oriented approach allows multiple background services to run simultaneously and asynchronously.
 
 - **Internal Functions**\
-<sup>Runs core modules and allow data sharing.</sup>
+Runs core modules and allow data sharing.
+
 - **Web Services**\
 Web services allow users to perform data operations remotely. Permissions can be assigned on operation basis and restricted by special filters.
-
-#### ISO 27001
-
-Technoplatz BI empowers [ISO](#iso-27001) certification processes. The open source structure of the system, the codes published on GitHub, the security policy and the using of modern CI/CD methods provide advantages during the ISO 27001 audits.
 
 ### Used Technologies
 
@@ -98,7 +114,7 @@ Technoplatz BI Community Edition is powered by the leading open source informati
 
 ## How to Get Started
 
-The system runs on Docker platform which is the leading open source virtualization technology for developing, shipping and running business grade applications. Before to get started you can install Docker on your personal computer or server for free or buy a hosted service from many cloud providers.
+The system runs on Docker platform which is the leading open source virtualization technology for developing, shipping and running business grade applications. Before to get started you can install Docker on your personal computer or server for free or buy a hosted service from many Cloud providers.
 
 Guides for installing Docker on leading Platforms;
 
@@ -111,7 +127,11 @@ The minimum configuration for the system to work properly on the Docker platform
 
 ### Installation
 
-The installation of the product consists of steps must follow each other. In order to run the necessary commands [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience is required. Please note that since the installation steps requires root privileges, it may be necessary to add `sudo` in front of many commands below if the connected user does not have admin rights on the platform.
+The installation of the product consists of steps must follow each other. In order to run the necessary commands [GiT](https://git-scm.com) must be installed on your computer and a certain level of command line experience is required.
+
+<div style="font-size: 13px; line-height: normal;">
+NOTE<br />Please consider that since the installation steps requires root privileges, it is necessary to add <strong>sudo</strong> in front of many commands below if the connected user does not have admin rights.
+</div>
 
 #### 1. The First Touch
 
@@ -125,9 +145,9 @@ apt update && apt upgrade -y
 reboot
 ```
 
-#### 2. Downloading the Application
+#### 2. Clonning the Repository
 
-Reconnect to the platform again to clone the official BI repository from GitHub.
+Reconnect to the platform to download the official Technoplatz BI repository from [GitHub](https://github.com/technoplatz/bi.git).
 
 ```bash
 git clone https://github.com/technoplatz/bi.git
@@ -139,8 +159,8 @@ Go to **bi** folder created.
 cd bi
 ```
 
-#### 3. Setting the Environment Parameters
-Edit the ".env" file, replace the sample values with your own data and save the file. Changes should only be made in the user parameters section at the top of the file.
+#### 3. Setting Environment Parameters
+Edit the **.env** file, replace the sample values with your own and save the file. Changes should only be made in the user parameters section at the top of the file.
 
 ```bash
 TZ=Europe/Berlin
@@ -158,7 +178,7 @@ FROM_EMAIL=bi@company.com
 **COMPANY_NAME:** Legal business name of your organization.\
 **FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.</sup>
 
-<sup>TZ must be entered according to the official TZ format (eg. America/New_York)\
+<sup>TZ must be entered according to the official **TZ** format (eg. America/New_York)\
 https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</sup>
 
 #### 4. Setting the Secrets
@@ -171,8 +191,8 @@ There are three parameters that must be included in certain files in terms of sy
 |  Database Password | .secret-mongo-password |
 |  Sendgrid API Key | .secret-sendgrid-apikey |
 
-- BI API Key\
-It is the internal API key that must be generated if the system is used in a real internet environment. The following command will generate a new random key and write it into the related file. The API key can be changed later but this operation requires [restarting the containers](#restarting-containers).
+- API Key\
+It is the internal API key that must be generated if the system is used in a real internet environment. The following command will generate a new random key and write it into the related file. The API key can be changed later but this operation requires to [restart the containers](#restarting-containers).
 
     ```bash
     echo $(date | sha256sum | base64 | head -c 24) > .secret-bi-apikey

@@ -4272,7 +4272,7 @@ class Auth():
 
             # looks at if the session is valid by checking the user token
             if not token_db_ or token_ != token_db_:
-                raise APIError(f"session was closed for {email_}")
+                raise APIError(f"session closed for {email_}")
 
             if "jdate" not in user_:
                 user_["jdate"] = jdate_curr_
@@ -4590,7 +4590,7 @@ class Auth():
                     raise APIError("token must be provided")
                 else:
                     if token_db_ != token_:
-                        raise APIError("session was closed")
+                        raise APIError("session closed")
             else:
                 if not bcrypt.checkpw(password_.encode(), password_db_.encode()):
                     raise APIError("invalid email or password")

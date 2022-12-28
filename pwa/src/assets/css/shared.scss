@@ -390,6 +390,7 @@ form ion-item ion-label {
 
 .stat {
   margin-top: 16px;
+  font-size: small;
 }
 
 .stat th,
@@ -773,6 +774,7 @@ ion-select {
 
 .announce-grid-header {
   font-weight: bold;
+  padding-bottom: 8px;
 }
 
 .datetime-class {
@@ -1593,6 +1595,11 @@ ion-checkbox {
   color: var(--ion-color-primary);
   border-top: 1px solid var(--ion-color-light);
   border-bottom: 2px solid var(--ion-color-dark);
+}
+
+.data-grid ion-row:last-child ion-col {
+  font-weight: 600;
+  border: none !important;
 }
 
 .data-grid ion-row:first-child:hover,
