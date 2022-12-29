@@ -1,20 +1,15 @@
-### ide related files
 .vscode
 .DS_Store
 .cache
 tmp
 **/*.class
-### framework modules
 node_modules
-### git related files
 !README*.md
 README-secret.md
 *.md
 .git
 .gitignore
-### docker related files
 docker-compose.yml
 Dockerfile
 .dockerignore
-### local secrets
 *.env
