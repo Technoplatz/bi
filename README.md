@@ -10,7 +10,7 @@ It's time to get data-driven with your [Inner-Cycle](#business-highlights)!
 
 ## What is Technoplatz BI
 
-Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. It provides optimized and pragmatic solutions for the main requirements of any data-driven process by considering that each business has its own unique conditions;
+Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. It provides optimized and pragmatic solutions for the main requirements of many data-driven process by considering that each business has its own unique conditions;
 
 - [Data Application](#data-application)
 - [BI-Directional Data Sharing](#bi-directional-data-sharing)
@@ -41,10 +41,6 @@ The widely accepted meaning of no-code term is an application development approa
 |  Provide limited capabilities | Provide required capabilities |
 |  Customized by built-in cosmetic components | Customized by JSON structures |
 
-#### ISO 27001
-
-Technoplatz BI contributes positively to the certification processes of company information systems. Open source availability of codes and security policy on GitHub, user privileges, access rights, backup policy, logging features and the using of modern CI/CD methods in the development process provide advantages especially in ISO 27001 audits.
-
 ### Highlights
 
 The main approach is to combine sustainability with quality and low cost;
@@ -65,6 +61,10 @@ The main approach is to combine sustainability with quality and low cost;
 <sup>Scalable hybrid application is being developed with modern CI/CD methods.</sup>
 - **Data Sciences Ready**\
 <sup>Enables data transfer into BI tools and Microsoft Excel.</sup>
+
+#### ISO 27001
+
+Technoplatz BI contributes positively to the certification processes of company information systems. Open source availability of codes and security policy on GitHub, user privileges, access rights, backup policy, logging features and the using of modern CI/CD methods in the development process provide advantages especially in ISO 27001 audits.
 
 ### Data Application
 
@@ -295,7 +295,7 @@ Technoplatz BI is an open source platform provided with two licensing options;
 
 - **Community Edition**\
 <sup>Free to use under AGPL v3.0 License terms.</sup>
-- **SaaS Edition (Brezel)**\
+- **Commercial SaaS Edition (Brezel)**\
 <sup>Managed Hosted and Supported under SLA terms.</sup>
 
 | | Community Edition | SaaS Edition |
@@ -311,7 +311,6 @@ Technoplatz BI is an open source platform provided with two licensing options;
 |  Sendgrid E-mail API | Self Subscribed | Yes |
 |  License | Affero GPL v3.0 | Service Level Agreement |
 |  Pricing | Free | [Request a Quote](#) |
-
 
 ## About
 
