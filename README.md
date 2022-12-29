@@ -5,7 +5,7 @@ It's time to get data-driven with your [Inner-Cycle](#business-highlights)!
 - [What is Technoplatz BI](#what-is-technoplatz-bi)
 - [How to Get Started](#how-to-get-started)
 - [Maintenance](#maintenance)
-- [Licensing Options](#licensing-options)
+- [Licensing Options](#licensing)
 - [About](#about)
 
 ## What is Technoplatz BI
@@ -160,6 +160,7 @@ cd bi
 ```
 
 #### 3. Setting Environment Parameters
+
 Edit the **.env** file, replace the sample values with your own and save the file. Changes should only be made in the user parameters section at the top of the file.
 
 ```bash
@@ -279,49 +280,50 @@ To perform operating system updates and reboot regularly.
 ```bash
 apt update && apt upgrade -y
 ```
+
 ```bash
 reboot
 ```
 
 ## Production
 
-Even though the Community Edition is provided for testing and local use, there is no stopper to using the system in a live business environment in terms of licensing. However, before starting to use the system in a real business environment, some recommended actions should be taken in terms of performance and security issues. You can access the electronic document prepared on this subject [here](#).
+Although the Community Edition is provided for testing purposes or local use, it is also allowed to be published in a production environment as per the AGPL v3.0 license agreement. However, before getting started some actions should be taken in terms of performance and security issues. You can make a request for the free electronic document regarding this subject [here](#).
 
-## Licensing Options
+## Licensing
 
-Technoplatz BI is provided in two licensing options;
+Technoplatz BI is an open source platform provided with two licensing options;
 
-- Community Edition
-- Enterprise Edition (Brezel)
+- **Community Edition**\
+<sup>Free to use under AGPL v3.0 License terms.</sup>
+- **SaaS Edition (Brezel)**\
+<sup>Managed Hosted and Supported under SLA terms.</sup>
 
-<div class="licensing">
-
-| | Community Edition | Enterprise Edition |
+| | Community Edition | SaaS Edition |
 | :--- | :---: | :---: |
-|  Hosting | Self Hosted | SaaS |
-|  Integration | No | Yes |
+|  Hosting | Self Hosted | Managed |
 |  Database | MongoDB 6 | MongoDB 6 |
-|  DB Replication | Yes [3 internal nodes] | Yes [3 nodes] |
-|  DB Transactions | Yes | Yes |
+|  DB Cluster | Yes [3 internal nodes] | Yes [3 nodes] |
 |  Web App Firewall | No | Yes |
-|  <span style="white-space: nowrap;">Two-Factor Authentication</span> | Yes | Yes |
-|  Support | No | Yes |
-|  Custom Domain | Yes | Yes |
-|  Custom Branding | Not Allowed | Yes |
-|  Licensing | GNU AGPL v3.0 | GNU AGPL v3.0 + SLA |
-|  Pricing | Free | [Get a Quote](#) |
+|  Two-Factor Authentication | Yes | Yes |
+|  Technical Support | No | Yes |
+|  Custom Development Service | No | Paid |
+|  Custom Domain | Not Recommended | Yes |
+|  Sendgrid E-mail API | Self Subscribed | Yes |
+|  License | Affero GPL v3.0 | Service Level Agreement |
+|  Pricing | Free | [Request a Quote](#) |
 
-</div>
 
 ## About
+
 Official Web Site\
 [https://bi.technoplatz.com](https://bi.technoplatz.com)
 
-### Author
+## Author
 
-Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
-Founder, Technoplatz IT Solutions GmbH\
-Senior System Analist & Developer\
-Data Sciences, Statistics B.Sc.
-
+Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)
+<div style="font-size: 13px; line-height: normal;">
+Founder, Technoplatz IT Solutions GmbH<br />
+Senior System Analist Developer<br />
+Data Sciences & Statistics B.Sc.
+</div>
 --
