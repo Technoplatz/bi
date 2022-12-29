@@ -237,7 +237,7 @@ https://www.gnu.org/licenses.
 
                   <!-- SHARED VIEWS -->
                   <div class="full-width">
-                    <h4>{{ 'Shared Views' | translate }}</h4>
+                    <!-- <h4>{{ 'Shared Views' | translate }}</h4> -->
                     <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' }}" animated="true"
                       class="ion-no-padding ion-no-margin brz-searchbar"
                       (ionChange)="doStartSearch($event.detail.value)">
@@ -248,13 +248,14 @@ https://www.gnu.org/licenses.
                           <span class="column-title">{{ 'ID' }} / {{ 'View Title' | translate }}</span>
                         </ion-col>
                         <ion-col size="2">
-                          <span class="column-title">{{ 'Collection' }}</span>
+                          <span class="column-title">{{ 'Collection' | translate }} / {{ 'Row Count' | translate
+                            }}</span>
                         </ion-col>
                         <ion-col size="6">
                           <span class="column-title">{{ 'Subscribers' }}</span>
                         </ion-col>
                       </ion-row>
-                      <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)">
+                      <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)" class="clicked-item">
                         <ion-col size="3">
                           <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id }}<br />
                           <div class="data-title">{{ item.vie_title }}</div>
@@ -262,26 +263,26 @@ https://www.gnu.org/licenses.
                         <ion-col size="2">
                           {{ item.vie_collection_id }}
                           <div *ngIf="item.chart && item.chart.count; else noviewrecords" class="data-title">{{
-                            item.chart.count }} <span *ngIf="item.chart.count > 1">{{ 'rows' |
-                              translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
-                              }}</span>
+                            item.chart.count }}
                           </div>
                           <ng-template #noviewrecords>
-                            <div class="data-title">{{ 'No matching records' |
-                              translate }}
-                            </div>
+                            <div class="data-title">{{ '-' | translate }}</div>
                           </ng-template>
                         </ion-col>
                         <ion-col size="6">
                           {{ item._tags.join(' ') }}
                         </ion-col>
                       </ion-row>
+                      <ion-row>
+                        <ion-col size="12">
+                          {{ viewsx.length }} {{ 'rows displayed' | translate }}
+                        </ion-col>
+                      </ion-row>
                     </ion-grid>
                     <ng-template #nosharedviews>
-                      <ion-text class="pe" class="ion-margin-bottom">{{ 'No views found' | translate }}.</ion-text>
-                      <br />
+                      <ion-text class="pe" class="ion-margin-bottom">{{ 'No data found using these search criteria' |
+                        translate }}.</ion-text>
                     </ng-template>
-                    <br />
                   </div>
                 </div>
 
@@ -316,6 +317,12 @@ https://www.gnu.org/licenses.
                     </ion-col>
                     <ion-col size="5">
                       {{ item.log_document.view._tags.join(' ') }}
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="12">
+                      {{ announcements.length }} {{ 'rows displayed' | translate
+                      }}
                     </ion-col>
                   </ion-row>
                 </ion-grid>
@@ -430,7 +437,7 @@ https://www.gnu.org/licenses.
                 </ion-grid>
 
                 <!-- VIEW GRID SECTION -->
-                <div *ngIf="is_loaded && view_mode[id] && view">
+                <div *ngIf="is_loaded && view_mode[id] && view" class="ion-margin-bottom">
                   <div class="announce-grid-header">{{ view_mode["vie_title"] }}</div>
                   {{ 'Shared with' | translate }} {{ view_mode["_tags"] && view_mode["_tags"].join(' ') }}<br />
                   <span *ngIf="view.vie_scheduled; else notscheduled">{{ 'Scheduled' | translate
@@ -466,7 +473,6 @@ https://www.gnu.org/licenses.
                       </ion-col>
                     </ion-row>
                   </ion-grid>
-                  
                   <div [innerHtml]="pivot_" class="pivot"></div>
                   <table *ngIf="statistics_" class="stat">
                     <tr>
@@ -476,28 +482,35 @@ https://www.gnu.org/licenses.
                     </tr>
                     <tr>
                       <th>
-                        {{ 'count' }}
+                        <span>{{ 'Records' | translate }}<br />{{ 'Count' | translate }}</span>
                       </th>
                       <th>
-                        {{ 'mean' }}
+                        <span>{{ 'Aritmetic Mean' | translate }}<br /></span>
+                        [{{ 'numeric' | translate }}]
                       </th>
                       <th>
-                        {{ 'stdev' }}
+                        <span>{{ 'Standart Deviation' | translate }}<br /></span>
+                        [{{ 'numeric' | translate }}]
                       </th>
                       <th>
-                        {{ 'min' }}
+                        <span>{{ 'Minimum' | translate }}<br /></span>
+                        [{{ 'numeric' | translate }}]
                       </th>
                       <th>
-                        {{ 'max' }}
+                        <span>{{ 'Maximum' | translate }}<br /></span>
+                        [{{ 'numeric' | translate }}]
                       </th>
                       <th>
-                        {{ 'top' }}
+                        <span>{{ 'Top' | translate }}<br /></span>
+                        [{{ 'string' | translate }}]
                       </th>
                       <th>
-                        {{ 'unique' }}
+                        <span>{{ 'Unique' | translate }}<br /></span>
+                        [{{ 'string' | translate }}]
                       </th>
                       <th>
-                        {{ 'freq' }}
+                        <span>{{ 'Frequency' | translate }}<br /></span>
+                        [{{ 'string' | translate }}]
                       </th>
                     </tr>
                     <tr>
@@ -871,8 +884,8 @@ https://www.gnu.org/licenses.
                 <div *ngIf="views_pane.length > 0; else nopaneviewfound">
                   <ion-item *ngFor="let item of views_pane; let p = index" class="pane-item cursored"
                     (click)="doEnterViewMode(item)">
-                    <ion-icon slot="end"
-                      [name]="item.vie_scheduled ? 'notifications' : 'notifications-off-outline'" size="small">
+                    <ion-icon slot="end" [name]="item.vie_scheduled ? 'notifications' : 'notifications-off-outline'"
+                      size="small">
                     </ion-icon>
                     <ion-label>
                       {{ item.vie_title }}<br />

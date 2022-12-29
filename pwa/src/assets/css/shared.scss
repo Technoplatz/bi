@@ -387,7 +387,6 @@ ion-alert .alert-radio-group {
 }
 
 .popover-select .popover-content .sc-ion-popover-md {
-  /* border-radius: 0px; */
   border: 1px solid var(--ion-color-dark);
   --box-shadow: none !important;
 
@@ -422,25 +421,38 @@ form ion-item ion-label {
 
 .stat {
   margin-top: 16px;
+  margin-bottom: 32px;
   font-size: small;
+  background-color: #efefef;
+  width: 85%;
+}
+
+.stat th {
+  color: var(--ion-color-dark);
+}
+
+.stat th span {
+  color: var(--ion-color-primary) !important;
 }
 
 .stat th,
 .stat td {
-  padding: 16px;
-  border: 1px solid var(--ion-color-light);
+  padding: 12px;
+  border: 1px solid var(--ion-color-white);
+  text-align: center;
 }
 
 .pivot .dataframe {
-  width: 100%;
+  width: 85%;
   font-size: 13px;
   margin-top: 16px;
+  background-color: #efefef;
 }
 
 .pivot .dataframe td,
 .pivot .dataframe th {
-  padding: 8px;
-  border: 1px solid var(--ion-color-light);
+  padding: 12px;
+  border: 1px solid var(--ion-color-white);
 }
 
 .pivot .dataframe td {
@@ -1465,7 +1477,7 @@ ion-checkbox {
 }
 
 .column-title {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ion-color-dark);
 }
 
@@ -1914,5 +1926,6 @@ ion-checkbox {
 
 .brz-searchbar {
   --box-shadow: none;
-  margin-left: -8px;
+  margin-left: -16px;
+  font-weight: 600;
 }
