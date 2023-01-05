@@ -12,12 +12,29 @@
         },
         "usr_name": {
             "bsonType": "string",
-            "minLength": 1,
+            "minLength": 3,
             "maxLength": 64,
             "title": "Full Name",
-            "description": "User Full Name",
+            "description": "Full Name",
             "required": true,
             "width": 140
+        },
+        "usr_scope": {
+            "bsonType": "string",
+            "minLength": 7,
+            "maxLength": 13,
+            "title": "Scope",
+            "description": "User Scope",
+            "enum": [
+                "Internal",
+                "External",
+                "Manager",
+                "Administrator"
+            ],
+            "pattern": "^[a-zA-Z]{7,13}$",
+            "required": true,
+            "default": "External",
+            "width": 100
         },
         "usr_group_id": {
             "bsonType": "string",
@@ -56,6 +73,7 @@
     "required": [
         "usr_id",
         "usr_name",
+        "usr_scope",
         "usr_group_id"
     ],
     "unique": [

@@ -390,7 +390,8 @@ export class Crud {
           vie_id: vie_id_,
           op: "view",
           source: source_,
-          user: LSUSERMETA
+          user: LSUSERMETA,
+          email: LSUSERMETA.email
         }, {
           headers: new HttpHeaders(this.crudHeaders)
         }).subscribe((res: any) => {

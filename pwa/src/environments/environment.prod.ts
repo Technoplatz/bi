@@ -64,7 +64,7 @@ export const environment = {
         "minLength": 3,
         "maxLength": 32,
         "pattern": "^[a-z0-9-_]{3,32}$",
-        "title": "Collection",
+        "title": "Collection ID",
         "description": "Collection ID",
         "collection": true,
         "required": true,
@@ -203,15 +203,15 @@ export const environment = {
   segmentsadm: [
     { "id": "_collection", "title": "Collections" },
     { "id": "_field", "title": "Data Fields" },
-    { "id": "_view", "title": "Views" },
+    { "id": "_view", "title": "Shared Views" },
     { "id": "_action", "title": "Actions" },
-    { "id": "_automation", "title": "Automation" },
+    { "id": "_automation", "title": "Automations" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },
-    { "id": "_token", "title": "API Tokens" },
     { "id": "_firewall", "title": "Firewall" },
+    { "id": "_token", "title": "API Tokens" },
     { "id": "_backup", "title": "Backups" },
-    { "id": "_log", "title": "Logs" }
+    { "id": "_log", "title": "System Logs" }
   ],
   charts: {
     colorScheme: {

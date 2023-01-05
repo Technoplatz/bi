@@ -38,7 +38,7 @@ https://www.gnu.org/licenses.
                     {{ 'PROCESSING' | translate }}...
                 </ion-button>
                 <ion-button *ngIf="op=='filter' && !isInProgress" size="small" (click)="doRunFilter()">
-                    {{ 'RUN' | translate }}
+                    {{ 'SEARCH' | translate }}
                 </ion-button>
                 <ion-button *ngIf="collection=='_backup' && op=='insert' && !isInProgress" size="small"
                     (click)="doDump()">

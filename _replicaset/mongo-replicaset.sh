@@ -66,11 +66,11 @@ if [ ! -f /init/mongo-init.flag ]; then
         db.createCollection('_saas', { 'capped': false });
         db.getCollection('_saas').updateOne({ sas_id: 'saas' }, { \$set: {
             sas_id: 'saas',
-            sas_user_id: '${USER_EMAIL}',
-            sas_user_name: '${USER_NAME}',
+            sas_user_id: '${ADMIN_EMAIL}',
+            sas_user_name: '${ADMIN_USER_NAME}',
             sas_company_name: '${COMPANY_NAME}',
             _created_at: new Date(),
-            _created_by: '${USER_EMAIL}'
+            _created_by: '${ADMIN_EMAIL}'
         }}, { upsert: true });
         db.getCollection('_saas').createIndex({ 'sas_id': 1 }, { unique: true });
         db.getCollection('_saas').createIndex({ 'sas_id': 1, 'sas_user_id': 1 }, { unique: true });
@@ -82,7 +82,7 @@ if [ ! -f /init/mongo-init.flag ]; then
         db.getCollection('_auth').drop();
         db.createCollection('_auth', { 'capped': false });
         db.getCollection('_auth').insertOne({
-            aut_id: '${USER_EMAIL}',
+            aut_id: '${ADMIN_EMAIL}',
             aut_password: '\$2b\$08\$aSMAfk/MMV736M/jG3zHHeoMndfQURKfMBV02qOJ/K4Z/AOQuR8Vm',
             aut_token: null,
             aut_tfac: null,
@@ -92,12 +92,12 @@ if [ ! -f /init/mongo-init.flag ]; then
             aut_otp_validated: false,
             aut_otp_secret: null,
             _created_at: new Date(),
-            _created_by: '${USER_EMAIL}',
+            _created_by: '${ADMIN_EMAIL}',
             _modified_at: new Date(),
-            _modified_by: '${USER_EMAIL}',
+            _modified_by: '${ADMIN_EMAIL}',
             _modified_count: 0,
             _apikey_modified_at: new Date(),
-            _apikey_modified_by: '${USER_EMAIL}'
+            _apikey_modified_by: '${ADMIN_EMAIL}'
         });
         db.getCollection('_auth').createIndex({ 'aut_id': 1 }, { unique: true });
         print('_auth created');
@@ -105,15 +105,16 @@ if [ ! -f /init/mongo-init.flag ]; then
         db.getCollection('_user').drop();
         db.createCollection('_user', { 'capped': false });
         db.getCollection('_user').insertOne({
-            usr_id: '${USER_EMAIL}',
-            usr_name: '${USER_NAME}',
+            usr_id: '${ADMIN_EMAIL}',
+            usr_name: '${ADMIN_USER_NAME}',
+            usr_scope: 'Administrator',
             usr_enabled: true,
             usr_group_id: 'Managers',
             _tags: ['#Managers','#Administrators'],
             _created_at: new Date(),
-            _created_by: '${USER_EMAIL}',
+            _created_by: '${ADMIN_EMAIL}',
             _modified_at: new Date(),
-            _modified_by: '${USER_EMAIL}',
+            _modified_by: '${ADMIN_EMAIL}',
             _modified_count: 0
         });
         db.getCollection('_user').createIndex({ 'usr_id': 1 }, { unique: true });
@@ -123,13 +124,13 @@ if [ ! -f /init/mongo-init.flag ]; then
         db.createCollection('_firewall', { 'capped': false });
         db.getCollection('_firewall').insertOne({
             fwa_rule_id: 'manager-allow',
-            fwa_user_id: '${USER_EMAIL}',
+            fwa_user_id: '${ADMIN_EMAIL}',
             fwa_ip: '0.0.0.0',
             fwa_enabled: true,
             _created_at: new Date(),
-            _created_by: '${USER_EMAIL}',
+            _created_by: '${ADMIN_EMAIL}',
             _modified_at: new Date(),
-            _modified_by: '${USER_EMAIL}',
+            _modified_by: '${ADMIN_EMAIL}',
             _modified_count: 0
         });
         db.getCollection('_firewall').createIndex({ 'fwa_rule_id': 1, 'fwa_ip': 1, 'fwa_enabled':1 });
@@ -165,13 +166,13 @@ else
         db = db.getSiblingDB('${MONGO_DB}');
         var saas_ = db.getCollection('_saas').findOne({ sas_id: 'saas' });
         var sas_user_id_ = saas_.sas_user_id;
-        if(sas_user_id_ !== '${USER_EMAIL}') {
+        if(sas_user_id_ !== '${ADMIN_EMAIL}') {
             var u1 = Math.random().toString(36).slice(2);
             var u2 = Math.random().toString(36).slice(2);
             var u3 = Math.random().toString(36).slice(2);
             var apikey_ = (u1 + u2 + u3).slice(1);
-            var upsert_auth_ = db.getCollection('_auth').updateOne({ aut_id: '${USER_EMAIL}' }, { \$set: {
-                aut_id: '${USER_EMAIL}',
+            var upsert_auth_ = db.getCollection('_auth').updateOne({ aut_id: '${ADMIN_EMAIL}' }, { \$set: {
+                aut_id: '${ADMIN_EMAIL}',
                 aut_password: '\$2b\$08\$aSMAfk/MMV736M/jG3zHHeoMndfQURKfMBV02qOJ/K4Z/AOQuR8Vm',
                 aut_token: null,
                 aut_tfac: null,
@@ -189,11 +190,12 @@ else
                 _apikey_modified_by: 'saas'
             }}, { upsert: true });
             if(upsert_auth_) {
-                print('auth upserted', '${USER_EMAIL}');
+                print('auth upserted', '${ADMIN_EMAIL}');
             }
-            var upsert_user_ = db.getCollection('_user').updateOne({ usr_id: '${USER_EMAIL}' }, { \$set: {
-                usr_id: '${USER_EMAIL}',
-                usr_name: '${USER_NAME}',
+            var upsert_user_ = db.getCollection('_user').updateOne({ usr_id: '${ADMIN_EMAIL}' }, { \$set: {
+                usr_id: '${ADMIN_EMAIL}',
+                usr_name: '${ADMIN_USER_NAME}',
+                usr_scope: 'Administrator',
                 usr_enabled: true,
                 usr_group_id: 'Managers',
                 _tags: ['#Managers','#Administrators'],
@@ -204,11 +206,11 @@ else
                 _modified_count: 0
             }}, { upsert: true });
             if(upsert_user_) {
-                print('user upserted', '${USER_EMAIL}');
+                print('user upserted', '${ADMIN_EMAIL}');
             }
             var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_rule_id: 'manager-changed-allow' }, { \$set: {
                 fwa_rule_id: 'manager-changed-allow',
-                fwa_user_id: '${USER_EMAIL}',
+                fwa_user_id: '${ADMIN_EMAIL}',
                 fwa_ip: '0.0.0.0',
                 fwa_enabled: true,
                 _created_at: new Date(),
@@ -218,7 +220,7 @@ else
                 _modified_count: 0
             }}, { upsert: true });
             if(upsert_firewall_) {
-                print('firewall added', '${USER_EMAIL}');
+                print('firewall added', '${ADMIN_EMAIL}');
             }
             db.getCollection('_saas').updateOne({ sas_id: 'saas-ex' }, { \$set: {
                 sas_id: 'saas-ex',
@@ -232,11 +234,11 @@ else
             }}, { upsert: true });
             db.getCollection('_saas').updateOne({ sas_id: 'saas' }, { \$set: {
                 sas_id: 'saas',
-                sas_user_id: '${USER_EMAIL}',
-                sas_user_name: '${USER_NAME}',
+                sas_user_id: '${ADMIN_EMAIL}',
+                sas_user_name: '${ADMIN_USER_NAME}',
                 sas_company_name: '${COMPANY_NAME}',
                 _updated_at: new Date(),
-                _updated_by: '${USER_EMAIL}'
+                _updated_by: '${ADMIN_EMAIL}'
             }}, { upsert: true });
         }
     "

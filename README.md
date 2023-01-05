@@ -166,16 +166,16 @@ Edit the **.env** file, replace the sample values with your own and save the fil
 ```bash
 TZ=Europe/Berlin
 DOMAIN=localhost
-USER_EMAIL=bi@company.com
-USER_NAME=John Doe
+ADMIN_EMAIL=bi@company.com
+ADMIN_USER_NAME=John Doe
 COMPANY_NAME=Acme Company Inc.
 FROM_EMAIL=bi@company.com
 ```
 
 <sup>**TZ:** Time zone of your platform's location.\
 **DOMAIN:** Leave it "localhost" for testing or personal use.\
-**USER_EMAIL:** E-mail address of Administrator user.\
-**USER_NAME:** Name and surname of Administrator user (eg. John Doe).\
+**ADMIN_EMAIL:** E-mail address of Administrator user.\
+**ADMIN_USER_NAME:** Name and surname of Administrator user (eg. John Doe).\
 **COMPANY_NAME:** Legal business name of your organization.\
 **FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.</sup>
 

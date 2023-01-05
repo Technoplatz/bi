@@ -166,8 +166,8 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
-      - USER_EMAIL=${USER_EMAIL}
-      - USER_NAME=${USER_NAME}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_USER_NAME=${ADMIN_USER_NAME}
       - COMPANY_NAME=${COMPANY_NAME}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_DB=${MONGO_DB}

@@ -1517,15 +1517,10 @@ class Crud():
 
     def view_f(self, input_):
         try:
-            # checks if user data in the input
-            if not "user" in input_:
-                raise APIError("user not found in the object")
-
-            # checks if email in the user input
-            if "email" not in input_["user"]:
-                raise APIError("email not found in user")
-
-            email_ = input_["user"]["email"]
+            # checks if email exists in the input
+            email_ = input_["email"] if "email" in input_ else None
+            if not email_:
+                raise APIError("email not found in the object")
 
             user_ = self.db["_user"].find_one({"usr_id": email_})
             if not user_ or user_ is None:
@@ -2031,10 +2026,7 @@ class Crud():
             view_id_ = doc_["vie_id"]
 
             generate_view_data_f_ = Crud().view_f({
-                "user": {
-                    "email": user_["usr_id"],
-                    "usr_group_id": user_["usr_group_id"] if "usr_group_id" in user_ else None
-                },
+                "email": user_["usr_id"],
                 "source": "external",
                 "vie_id": view_id_,
                 "_id": None
@@ -2189,7 +2181,6 @@ class Crud():
             vie_excluded_columns_ = doc_["vie_excluded_columns"] if "vie_excluded_columns" in doc_ and doc_["vie_excluded_columns"] != [] and len(doc_["vie_excluded_columns"]) > 0 else []
 
             col_id_ = f"{vie_collection_id_}_data"
-
             is_crud_ = True if vie_collection_id_[:1] != "_" else False
 
             # starting pivot
@@ -2198,10 +2189,7 @@ class Crud():
                 raise APIError(f"collection not found to view: {col_id_}")
 
             generate_view_data_f_ = Crud().view_f({
-                "user": {
-                    "email": user_["usr_id"],
-                    "usr_group_id": user_["usr_group_id"] if "usr_group_id" in user_ else None
-                },
+                "email": user_["usr_id"],
                 "source": "external",
                 "vie_id": vie_id_,
                 "_id": None
@@ -4527,7 +4515,6 @@ class Auth():
 
             # generates a token an updates on db
             name_db_ = user_["usr_name"]
-            group_id_ = user_["usr_group_id"]
             perm_ = True if Misc().permitted_user_f(user_) else False
             jdate_ = Misc().get_jdate_f()
 
@@ -4544,7 +4531,6 @@ class Auth():
                 "token": token_,
                 "name": name_db_,
                 "email": email_,
-                "group": group_id_,
                 "perm": perm_,
                 "jdate": jdate_
             }
@@ -5486,10 +5472,7 @@ def get_data_f(id):
         email_ = user_["usr_id"]
 
         generate_view_data_f_ = Crud().view_f({
-            "user": {
-                "email": email_,
-                "usr_group_id": user_["usr_group_id"] if "usr_group_id" in user_ else None
-            },
+            "email": email_,
             "source": "external",
             "vie_id": None,
             "_id": id_
