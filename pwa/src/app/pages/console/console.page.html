@@ -159,7 +159,7 @@ https://www.gnu.org/licenses.
                         <ion-icon [name]="item.icon" size="large" class="ion-margin-end"></ion-icon>
                         <div>
                           <div class="data-title temp">{{ item.title }}</div>
-                          {{ item.collection }}
+                          <!-- {{ item.collection }} -->
                         </div>
                       </ion-col>
                       <ion-col size="4" class="ion-text-wrap">
@@ -171,14 +171,15 @@ https://www.gnu.org/licenses.
                         </ion-button>
                       </ion-col>
                     </ion-row>
+                    <ion-row>
+                      <ion-col size="8">
+                        {{ templates.length }} {{ 'templates found' | translate }}.
+                      </ion-col>
+                    </ion-row>
                   </ion-grid>
                   <ng-template #notemplates>
                     <ion-text class="pe">{{ 'No templates found' | translate }}.</ion-text>
                   </ng-template>
-                  <ion-button size="small" class="notfound-button" (click)="doTemplateShow()">
-                    <ion-icon name="eye-off-outline"></ion-icon>
-                    {{ 'Hide Templates' | translate }}
-                  </ion-button>
                 </div>
 
                 <!-- VIEW SECTION -->
@@ -255,7 +256,8 @@ https://www.gnu.org/licenses.
                           <span class="column-title">{{ 'Subscribers' }}</span>
                         </ion-col>
                       </ion-row>
-                      <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)" class="clicked-item">
+                      <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)"
+                        class="clicked-item">
                         <ion-col size="3">
                           <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id }}<br />
                           <div class="data-title">{{ item.vie_title }}</div>
