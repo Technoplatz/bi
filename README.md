@@ -170,6 +170,7 @@ ADMIN_EMAIL=bi@company.com
 ADMIN_USER_NAME=John Doe
 COMPANY_NAME=Acme Company Inc.
 FROM_EMAIL=bi@company.com
+SENDGRID_API_KEY=<please-add-your-sendgrid-api-key-here>
 ```
 
 <sup>**TZ:** Time zone of your platform's location.\
@@ -177,51 +178,25 @@ FROM_EMAIL=bi@company.com
 **ADMIN_EMAIL:** E-mail address of Administrator user.\
 **ADMIN_USER_NAME:** Name and surname of Administrator user (eg. John Doe).\
 **COMPANY_NAME:** Legal business name of your organization.\
-**FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.</sup>
+**FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.
+**SENDGRID_API_KEY:** Please read the information below.</sup>
 
-<sup>TZ must be entered according to the official **TZ** format (eg. America/New_York)\
-https://en.wikipedia.org/wiki/List_of_tz_database_time_zones</sup>
+#### TZ 
+Time zone information must be entered according to the official **TZ** format (eg. America/New_York)\
+https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-#### 4. Setting the Secrets
+#### Sendgrid API Key
+It is used for sending automated emails over [Sendgrid](#https://sendgrid.com). Please find the further information about how to obtain an API key on Sendgrid at https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key. After creating an API key in the Sendgrid, copy this key, paste it into the starred area below and run the command.
 
-There are three parameters that must be included in certain files in terms of system security. You can create the necessary parameters and files in accordance with the rules by using the commands below.
-
-| Secret Name | File Name |
-| :--- | :--- |
-|  BI API Key | .secret-bi-apikey |
-|  Database Password | .secret-mongo-password |
-|  Sendgrid API Key | .secret-sendgrid-apikey |
-
-- API Key\
-It is the internal API key that must be generated if the system is used in a real internet environment. The following command will generate a new random key and write it into the related file. The API key can be changed later but this operation requires to [restart the containers](#restarting-containers).
-
-    ```bash
-    echo $(date | sha256sum | base64 | head -c 24) > .secret-bi-apikey
-    ```
-
-- Database Password\
-It is the password of the authorized database user. The following command will generate a new random password and write it into the related file. Database password can be changed later but this operation requires [restarting the containers](#restarting-containers).
-
-    ```bash
-    echo $(date | sha256sum | base64 | head -c 10) > .secret-mongo-password
-    ```
-
-- Sendgrid API Key\
-It is used for sending automated emails over the [Sendgrid](#https://sendgrid.com) which is the leading e-mail sender provider. Please find the further information about how to obtain an API key on Sendgrid at https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key. After creating an API key in the Sendgrid, copy this key, paste it into the starred area below and run the command.
-
-    ```bash
-    echo -n "********" > .secret-sendgrid-apikey
-    ```
-
-#### 5. Starting Containers
+#### 4. Starting Containers
 
 Enter the command below to start the containers by keeping them up and running in the background. It can take up to 30 seconds till after containers creation for Technoplatz BI to be functional. You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run at the background and restarts automatically as the platform is rebooted.
 
 ```bash
-docker-compose up --detach --remove-orphans
+./start.sh
 ```
 
-#### 6. Signing In
+#### 5. Signing In
 
 In order to open your first session go to the following address in your web browser, click the "Sign in" button, enter your email and password which you provided in the .env file.
 

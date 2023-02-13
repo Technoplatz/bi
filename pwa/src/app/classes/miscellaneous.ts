@@ -49,7 +49,8 @@ export class Miscellaneous {
   private apiHost: string = "";
   private miscHeaders: any = {
     "Content-Type": "application/json",
-    "X-Api-Key": environment.apiKey
+    "X-Api-Key": environment.apiKey,
+    "X-Aux": "genauxa3"
   }
 
   constructor(

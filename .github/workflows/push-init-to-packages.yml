@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 # 
 
-name: Deploy init image to Github Packages
+name: Deploy init Image
 on:
   push:
     branches:
@@ -64,17 +64,17 @@ jobs:
           cd $INIT_FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
-      - name: Log in to Github registry
+      - name: Get logged in to registry
         run: |
-          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ${{ vars.IMAGE_REPO_DOMAIN }} -u $ --password-stdin
       - name: Push init image
         id: push-init-image
         run: |
           IMAGE_NAME=${{steps.build-init-image.outputs.oimagename}}
-          IMAGE_ID=ghcr.io/technoplatz/$IMAGE_NAME:$VERSION
+          IMAGE_ID=${{ vars.IMAGE_REPO_DOMAIN }}/${{ vars.IMAGE_REPO_NAME }}/$IMAGE_NAME:$VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
           docker tag $IMAGE_NAME $IMAGE_ID
           docker push $IMAGE_ID
       - name: Logout from Github
         run: |
-          docker logout ghcr.io
+          docker logout ${{ vars.IMAGE_REPO_DOMAIN }}

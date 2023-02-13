@@ -3647,7 +3647,7 @@ class Crud():
 
 class Email():
     def __init__(self):
-        self.SENDGRID_API_KEY = get_docker_secret("sendgrid-apikey", default="")
+        self.SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
         self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
         self.SG_TFA_SUBJECT = "Your Backup OTP"
         self.SG_SIGNUP_SUBJECT = "Welcome"
@@ -3759,16 +3759,14 @@ class RestAPI():
             if "X-Api-Key" not in request.headers:
                 raise APIError("invalid request")
 
-            # print("request.headers", request.headers, flush=True)
-
             origin_ = request.headers["Origin"].replace("https://", "").replace("http://", "").replace("/", "")
             origin_ = origin_.split(":")[0]
             DOMAIN_ = os.environ.get("DOMAIN")
 
             if origin_ != DOMAIN_:
-                raise APIError(f"invalid origin {origin_} - {DOMAIN_}")
+                raise APIError(f"invalid request {origin_} - {DOMAIN_}")
 
-            BI_API_KEY_ = get_docker_secret("bi-apikey", default="61c09da62f1f9ca9357796c9")
+            BI_API_KEY_ = os.environ.get("BI_API_KEY")
             api_key_header_ = request.headers["X-Api-Key"]
 
             if BI_API_KEY_ != api_key_header_:

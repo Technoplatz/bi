@@ -51,7 +51,7 @@ export class Crud {
   private apiHost: string = "";
   private crudHeaders: any = {
     "Content-Type": "application/json",
-    "X-Api-Key": environment.apiKey
+    "X-Api-Key":  environment.apiKey
   }
   private uploadHeaders: any = {
     "X-Api-Key": environment.apiKey
