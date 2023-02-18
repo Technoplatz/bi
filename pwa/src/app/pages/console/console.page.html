@@ -344,13 +344,13 @@ https://www.gnu.org/licenses.
                         <ion-icon *ngIf="!in_otp_process_test" name="megaphone-outline"></ion-icon>
                         <ion-icon *ngIf="in_otp_process_test" name="hourglass-outline"></ion-icon>
                         <br />
-                        {{ 'Share' | translate }}<br />{{ 'TEST' | translate }}
+                        <span>{{ 'Share' | translate }}<br />{{ 'TEST' | translate }}</span>
                       </div>
                       <div (click)="doAnnounceNow(view, 'live')" class="data-sq-button">
                         <ion-icon *ngIf="!in_otp_process" name="megaphone"></ion-icon>
                         <ion-icon *ngIf="in_otp_process" name="hourglass-outline"></ion-icon>
                         <br />
-                        {{ 'Share' | translate }}<br />{{ 'LIVE' | translate }}
+                        <span>{{ 'Share' | translate }}<br />{{ 'LIVE' | translate }}</span>
                       </div>
                       <div (click)="doCopy('view')" class="data-sq-button">
                         <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
@@ -362,11 +362,11 @@ https://www.gnu.org/licenses.
                       <div (click)="doQuitViewMode()" class="data-sq-button">
                         <ion-icon name="exit-outline"></ion-icon>
                         <br />
-                        {{ 'Quit View Mode' | translate }}
+                        <span>{{ 'Quit View Mode' | translate }}</span>
                       </div>
                       <div *ngIf="perm" (click)="Settings('_view', 'update', view, 0)" class="data-sq-button">
                         <ion-icon name="settings-outline"></ion-icon><br />
-                        {{ 'View Settings' | translate }}
+                        <span>{{ 'View Settings' | translate }}</span>
                       </div>
                     </ion-col>
                     <ion-col *ngIf="!view_mode[id]" size="12">

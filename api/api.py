@@ -54,6 +54,11 @@ import sendgrid
 import base64
 import magic
 import pyotp
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from get_docker_secret import get_docker_secret
 from pymongo import MongoClient, ASCENDING
 from werkzeug.utils import secure_filename
@@ -264,29 +269,27 @@ class Schedular():
             if not user_:
                 raise APIError(f"user not found {user_id_}")
 
-            personalizations_ = []
+            personalizations_to_ = []
             to_ = []
 
-            for tag_ in vie_tags_:
-                users_ = self.db_["_user"].find({"_tags": tag_})
-                if users_:
-                    for item_ in users_:
-                        member_ = self.db_["_user"].find_one({"usr_id": item_["usr_id"]})
-                        if member_:
-                            personalizations_.append({"to": [{"email": member_["usr_id"], "name": member_["usr_name"]}]})
-                            to_.append(member_["usr_id"])
+            users_ = self.db_["_user"].find({"_tags": {"$elemMatch": {"$in": vie_tags_}}})
+            if users_:
+                for member_ in users_:
+                    if member_["usr_id"] not in to_:
+                        to_.append(member_["usr_id"])
+                        personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
 
             if scope_ == "test" and user_id_ not in to_:
-                personalizations_.append({"to": [{"email": user_id_, "name": "Announcer"}]})
-                to_.append(member_["usr_id"])
-
-            to_ = list(dict.fromkeys(to_))
+                to_.append(user_id_)
+                personalizations_to_.append({"email": user_id_, "name": "Test"})
 
             _id = doc_["_id"]
             view_to_pivot_f_ = Crud().view_to_dataset_f({
                 "id": _id,
                 "user": user_
             })
+
+            personalizations_ = {"to": personalizations_to_}
 
             if not view_to_pivot_f_["result"]:
                 raise APIError(view_to_pivot_f_["msg"])
@@ -339,7 +342,6 @@ class Schedular():
             email_sent_ = Email().sendEmail_f({
                 "personalizations": personalizations_,
                 "op": "view",
-                "name": None,
                 "html": html_,
                 "subject": vie_title_ if scope_ == "live" else f"TEST: {vie_title_}",
                 "files": files_
@@ -1493,9 +1495,8 @@ class Crud():
             res_ = Misc().mongo_error_f(exc)
             if "notify" in res_ and res_["notify"]:
                 email_sent_ = Email().sendEmail_f({
+                    "personalizations": {"to": [{"email": email_, "name": None}]},
                     "op": "importerr",
-                    "to": email_,
-                    "name": None,
                     "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />FILE TYPE: {filetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />LINE COUNT: {count_tmp_}<br />ERROR COUNT: {res_['count']} (import)<br /><br />ERRORS:<br />{res_['msg']}"
                 })
                 if not email_sent_["result"]:
@@ -3647,7 +3648,13 @@ class Crud():
 
 class Email():
     def __init__(self):
+        self.EMAIL_METHOD = os.environ.get("EMAIL_METHOD")
         self.SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+        self.SMTP_SERVER = os.environ.get("SMTP_SERVER")
+        self.SMTP_SSL = os.environ.get("SMTP_SSL")
+        self.SMTP_PORT = os.environ.get("SMTP_PORT")
+        self.SMTP_USERID = os.environ.get("SMTP_USERID")
+        self.SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
         self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
         self.SG_TFA_SUBJECT = "Your Backup OTP"
         self.SG_SIGNUP_SUBJECT = "Welcome"
@@ -3659,37 +3666,67 @@ class Email():
         self.disclaimer_ = f"<p>Sincerely,</p><p>{self.COMPANY_NAME}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
         self.disclaimer_text_ = f"\n\nSincerely,\n\n{self.COMPANY_NAME}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
 
-    def sendEmail_f(self, msg):
+    def sendEmail_SMTP_f(self, msg):
         try:
-            op_ = msg["op"] if "op" in msg else None
-            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
-            html_ = f"{msg['html']}" if "html" in msg else ""
-            personalizations_ = msg["personalizations"] if "personalizations" in msg else None
-            to_ = msg["to"] if "to" in msg else None
-            name_ = msg["name"] if "name" in msg else None
+            email_from_ = f"{self.COMPANY_NAME} <{self.FROM_EMAIL}>"
+            html_ = f"{msg['html']} {self.disclaimer_}"
+            server_ = smtplib.SMTP_SSL(self.SMTP_SERVER, self.SMTP_PORT) if self.SMTP_SSL else smtplib.SMTP(self.SMTP_SERVER, self.SMTP_PORT)
+            server_.ehlo()
+            server_.login(self.SMTP_USERID, self.SMTP_PASSWORD)
+
+            message_ = MIMEMultipart()
+            message_["From"] = email_from_
+            message_["Subject"] = msg["subject"]
+            message_.attach(MIMEText(html_, "html"))
+
+            for file_ in msg["files"]:
+                filename_ = file_["filename"]
+                with open(f"/cron/{filename_}", "rb") as attachment_:
+                    part_ = MIMEBase("application", "octet-stream")
+                    part_.set_payload(attachment_.read())
+                encoders.encode_base64(part_)
+                part_.add_header(
+                    "Content-Disposition",
+                    f"attachment; filename= {filename_}",
+                )
+                message_.attach(part_)
+
+            recipients_ = []
+            recipients_str_ = ""
+            for recipient_ in msg["personalizations"]["to"]:
+                email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_['email']
+                recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
+                recipients_.append(recipient_["email"])
+
+            message_['To'] = recipients_str_
+            server_.sendmail(email_from_, recipients_, message_.as_string())
+            server_.close()
+            res_ = {"result": True}
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
+    def sendEmail_Sendgrid_f(self, msg):
+        try:
+            personalizations_ = msg["personalizations"]
 
             if not personalizations_:
-                if not to_:
-                    raise APIError("to is missing")
-                if not name_:
-                    raise APIError("name is missing")
-                personalizations_ = [{
-                    "from": {
-                        "email": self.FROM_EMAIL,
-                        "name": self.COMPANY_NAME,
-                    },
+                personalizations_ = {
                     "to": [{
-                        "email": to_,
-                        "name": name_
+                        "email": msg["to"],
+                        "name": msg["name"]
                     }]
-                }]
-
-            subject_ = self.SG_UPLOADERR_SUBJECT if op_ in [
-                "uploaderr", "importerr"] else self.SG_SIGNIN_SUBJECT if op_ == "signin" else self.SG_TFA_SUBJECT if op_ == "tfa" else self.SG_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.SG_DEFAULT_SUBJECT
+                }
 
             # read attachment into variable
             attachments_ = []
-            for file_ in files_:
+            for file_ in msg["files"]:
                 filename_ = file_["filename"]
                 filetype_ = file_["filetype"]
                 f_ = open(f"/cron/{filename_}", "rb")
@@ -3705,15 +3742,15 @@ class Email():
                 f_.close()
 
             req_ = {
-                "personalizations": personalizations_,
+                "personalizations": [personalizations_],
                 "from": {
                     "email": self.FROM_EMAIL,
                     "name": self.COMPANY_NAME
                 },
-                "subject": subject_,
+                "subject": msg["subject"],
                 "content": [{
                     "type": "text/html",
-                    "value": html_
+                    "value": msg["html"]
                 }],
                 "mail_settings": {
                     "footer": {
@@ -3731,6 +3768,63 @@ class Email():
                 req_["attachments"] = attachments_
 
             self.sg_.client.mail.send.post(request_body=req_)
+
+            res_ = {"result": True}
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
+    def sendEmail_f(self, msg):
+        try:
+            op_ = msg["op"] if "op" in msg else None
+            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
+            html_ = f"{msg['html']}" if "html" in msg else None
+            personalizations_ = msg["personalizations"] if "personalizations" in msg else None
+            subject_ = self.SG_UPLOADERR_SUBJECT if op_ in [
+                "uploaderr", "importerr"] else self.SG_SIGNIN_SUBJECT if op_ == "signin" else self.SG_TFA_SUBJECT if op_ == "tfa" else self.SG_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.SG_DEFAULT_SUBJECT
+
+            if op_ is None or op_ == "":
+                raise APIError("email operation is missing")
+
+            if html_ is None or html_ == "":
+                raise APIError("email message is missing")
+
+            if personalizations_ is None:
+                raise APIError("email personalizations is missing")
+
+            if "to" not in personalizations_ or len(personalizations_["to"]) == 0:
+                raise APIError("email to is missing")
+
+            if subject_ is None:
+                raise APIError("email subject is missing")
+
+            subject_ = self.SG_UPLOADERR_SUBJECT if op_ in [
+                "uploaderr", "importerr"] else self.SG_SIGNIN_SUBJECT if op_ == "signin" else self.SG_TFA_SUBJECT if op_ == "tfa" else self.SG_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.SG_DEFAULT_SUBJECT
+
+            msg_ = {
+                "op": op_,
+                "files": files_,
+                "personalizations": personalizations_,
+                "subject": subject_,
+                "html": html_
+            }
+
+            m_ = self.EMAIL_METHOD.lower()
+            if m_ == "sendgrid":
+                email_sent_ = self.sendEmail_Sendgrid_f(msg_)
+            elif m_ == "smtp":
+                email_sent_ = self.sendEmail_SMTP_f(msg_)
+            else:
+                raise APIError("email posting method is not valid")
+
+            if not email_sent_["result"]:
+                raise APIError(email_sent_["msg"])
 
             res_ = {"result": True}
 
@@ -3965,8 +4059,7 @@ class OTP():
             # sends TFAC to the user with an email
             email_sent_ = Email().sendEmail_f({
                 "op": "tfa",
-                "to": usr_id_,
-                "name": name_,
+                "personalizations": {"to": [{"email": usr_id_, "name": name_}]},
                 "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>"
             })
             if not email_sent_["result"]:
@@ -4537,8 +4630,7 @@ class Auth():
 
             email_sent_ = Email().sendEmail_f({
                 "op": "signin",
-                "to": email_,
-                "name": name_db_,
+                "personalizations": {"to": [{"email": email_, "name": name_db_}]},
                 "html": f"<p>Hi {name_db_},<br /><br />You have now signed-in from {ip_}.</p>"
             })
             if not email_sent_["result"]:
