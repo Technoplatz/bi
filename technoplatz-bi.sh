@@ -36,11 +36,17 @@ cat << EOF
 Technoplatz BI - Open Source Data Sharing Platform
 Copyright 2019-$(date +'%Y'), Technoplatz IT Solutions GmbH
 https://bi.technoplatz.com
-----------------------------
+
 EOF
 
 function listAllCommands() {
-    echo "Available commands: install,start,restart,stop"
+    echo "Available commands:"
+    echo "./technoplatz-bi.sh install [github-token]"
+    echo "./technoplatz-bi.sh start | restart"
+    echo "./technoplatz-bi.sh pull"
+    echo "./technoplatz-bi.sh stop"
+    echo "./technoplatz-bi.sh help"
+    echo
     echo "See more at https://bi.technoplatz.com/support#script-commands-reference"
 }
 
@@ -86,7 +92,17 @@ function installBI() {
 function startBI() {
     cd  $DIR
     if [ $1 ]; then
-        echo "Invalid parameter: $1"
+        echo "Invalid start parameter: $1"
+        return 0
+    fi
+    docker-compose up --detach --remove-orphans --no-build
+    return 1
+}
+
+function pullBI() {
+    cd  $DIR
+    if [ $1 ]; then
+        echo "Invalid pull parameter: $1"
         return 0
     fi
     docker-compose pull && docker-compose up --detach --remove-orphans --no-build
@@ -96,7 +112,7 @@ function startBI() {
 function stopBI() {
     cd  $DIR
     if [ $1 ]; then
-        echo "Invalid parameter: $1"
+        echo "Invalid stop parameter: $1"
         return 0
     fi
     docker-compose down
@@ -117,8 +133,14 @@ case $1 in
     "start" | "restart")
         startBI "$2"
         ;;
+    "pull")
+        pullBI "$2"
+        ;;
     "stop")
-        stopBI
+        stopBI "$2"
+        ;;
+    "help")
+        listAllCommands
         ;;
     *)
         echo "Command not found!"
