@@ -104,7 +104,7 @@ function stopBI() {
 }
 
 # Setup
-DIR="bii"
+DIR="bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 DBCONFF="_init/mongod.conf"
