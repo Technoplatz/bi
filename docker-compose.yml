@@ -63,7 +63,7 @@ services:
 
   init:
     container_name: init
-    image: ghcr.io/technoplatz/bi-init${REPO}:latest
+    image: ${HUB}technoplatz/bi-init${REPO}:latest
     build:
       context: _init/.
     hostname: init
@@ -155,7 +155,7 @@ services:
 
   replicaset:
     container_name: replicaset
-    image: ghcr.io/technoplatz/bi-replicaset${REPO}:latest
+    image: ${HUB}technoplatz/bi-replicaset${REPO}:latest
     build:
       context: _replicaset/.
     hostname: replicaset
@@ -192,7 +192,7 @@ services:
 
   api:
     container_name: api
-    image: ghcr.io/technoplatz/bi-api${REPO}:latest
+    image: ${HUB}technoplatz/bi-api${REPO}:latest
     build:
       context: api/.
     depends_on:
@@ -245,7 +245,7 @@ services:
 
   pwa:
     container_name: pwa
-    image: ghcr.io/technoplatz/bi-pwa${REPO}:latest
+    image: ${HUB}technoplatz/bi-pwa${REPO}:latest
     build:
       context: pwa/.
     hostname: pwa

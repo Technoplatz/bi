@@ -57,9 +57,10 @@ function installBI() {
         return 0
     else
         mkdir $DIR
-    fi
-    if [ ! -d $DIR/$DIRINIT ]; then
-        mkdir $DIR/$DIRINIT
+        mkdir $DIR/_init
+        mkdir $DIR/_replicaset
+        mkdir $DIR/pwa
+        mkdir $DIR/api
     fi
     echo "Installation started."
     curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV -o $DIR/$DBCONFF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONFF}
@@ -92,7 +93,7 @@ function startBI() {
         echo "Invalid parameter: $1"
         return 0
     fi
-    docker-compose up --detach --remove-orphans
+    docker-compose pull && docker-compose up --detach --remove-orphans --no-build
     return 1
 }
 
