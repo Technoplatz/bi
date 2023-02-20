@@ -52,16 +52,13 @@ function installBI() {
         echo "Process will continue without GitHub token."
     fi
     if [ -d $DIR ]; then
-        echo "Platform directory ($DIR) already exists."
-        echo "You can remove it manually to continue."
-        return 0
-    else
-        mkdir $DIR
-        mkdir $DIR/_init
-        mkdir $DIR/_replicaset
-        mkdir $DIR/pwa
-        mkdir $DIR/api
+        rm -rf $DIR
     fi
+    mkdir $DIR
+    mkdir $DIR/_init
+    mkdir $DIR/_replicaset
+    mkdir $DIR/pwa
+    mkdir $DIR/api
     echo "Installation started."
     curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV -o $DIR/$DBCONFF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONFF}
     cd  $DIR
@@ -81,9 +78,8 @@ function installBI() {
         echo $DBPWD > .secret-mongo-password
         echo "Database password was created successfully ($INC)."
     fi
-    echo
-    ls -lah $DIR
     echo "Installation completed successfully :)"
+    echo "Please do not forget to make the necessary changes on .env file!"
     return 1
 }
 
@@ -109,10 +105,9 @@ function stopBI() {
 
 # Setup
 DIR="bii"
-DIRINIT="_init"
 DCYML="docker-compose.yml"
 DOTENV=".env"
-DBCONFF="$DIRINIT/mongod.conf"
+DBCONFF="_init/mongod.conf"
 INC=0
 
 case $1 in
