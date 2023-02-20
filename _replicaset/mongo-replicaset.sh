@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 # 
-# Mustafa Mat @Technoplatz 2019-2023
-# 
 # Technoplatz BI
 # 
-# Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+# Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -34,10 +32,9 @@
 # 
 
 echo "DB REPLICASET STARTED"
-MONGO_PASSWORD=$(</run/secrets/mongo-password)
+sleep 10s
+
 if [ ! -f /init/mongo-init.flag ]; then
-    echo "replicaset will be initialized within 10 seconds"
-    sleep 10s
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --eval "
         rs_ = {
             _id: '${MONGO_REPLICASET}',
@@ -50,16 +47,43 @@ if [ ! -f /init/mongo-init.flag ]; then
         }
         rs.initiate(rs_, { force: true });
     "
-    echo "replicaset was initiated successfully"
+    echo "Replicaset was initiated successfully."
+else
+    mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --eval "
+        rs_ = {
+            _id: '${MONGO_REPLICASET}',
+            version: 1,
+            members: [
+                { _id: 0, host: '${MONGO_HOST}:${MONGO_PORT}', priority: 2 },
+                { _id: 1, host: '${MONGO_REPLICA1_HOST}:${MONGO_PORT}', priority: 0 },
+                { _id: 2, host: '${MONGO_REPLICA2_HOST}:${MONGO_PORT}', priority: 0 }
+            ]
+        }
+        rs.reconfig(rs_, { force: true });
+    "
+    echo "Replicaset was reconfigured successfully."
+fi
+sleep 5s
+
+MONGO_PASSWORD=$(</run/secrets/mongo-password)
+
+# CHECK WHETHER DB EXISTS OR NOT
+MONGO_INDEXOF_DB=$(mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --eval "
+    db.getMongo().getDBNames().indexOf('${MONGO_DB}');
+")
+echo "MONGO_INDEXOF_DB $MONGO_INDEXOF_DB"
+
+if [ $MONGO_INDEXOF_DB -eq "-1" ]; then
+    echo "DB does not exist."
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --eval "
-        print('db user creating...');
+        print('DB user creating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
         db.createUser({ user: '${MONGO_USERNAME}', pwd: '${MONGO_PASSWORD}', roles: [{ role: 'root', db: '${MONGO_AUTH_DB}' },{ role: 'dbOwner', db: '${MONGO_DB}' }] });
-        print('db user created');
+        print('DB user created.');
     "
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --eval "
-        print('db connected');
-        print('update started');
+        print('db connected.');
+        print('update started.');
         db = db.getSiblingDB('${MONGO_DB}');
         // SAAS
         db.getCollection('_saas').drop();
@@ -100,7 +124,7 @@ if [ ! -f /init/mongo-init.flag ]; then
             _apikey_modified_by: '${ADMIN_EMAIL}'
         });
         db.getCollection('_auth').createIndex({ 'aut_id': 1 }, { unique: true });
-        print('_auth created');
+        print('_auth created.');
         // USER
         db.getCollection('_user').drop();
         db.createCollection('_user', { 'capped': false });
@@ -118,7 +142,7 @@ if [ ! -f /init/mongo-init.flag ]; then
             _modified_count: 0
         });
         db.getCollection('_user').createIndex({ 'usr_id': 1 }, { unique: true });
-        print('_user created');
+        print('_user created.');
         // FIREWALL
         db.getCollection('_firewall').drop();
         db.createCollection('_firewall', { 'capped': false });
@@ -136,33 +160,18 @@ if [ ! -f /init/mongo-init.flag ]; then
         db.getCollection('_firewall').createIndex({ 'fwa_rule_id': 1, 'fwa_ip': 1, 'fwa_enabled':1 });
         db.getCollection('_firewall').createIndex({ 'fwa_rule_id': 1, 'fwa_user_id': 1 }, { unique: true });
         db.getCollection('_firewall').createIndex({ 'fwa_user_id': 1, 'fwa_ip': 1 }, { unique: true });
-        print('_firewall created');
-        print('update completed');
+        print('_firewall created.');
+        print('update completed.');
     "
     sh -c "echo 'replicaset initialized successfully' > /init/mongo-init.flag"
     echo "replicaset initialized successfully :)"
 else
-    echo "reconfiguration will be started in 10 seconds..."
-    sleep 10s
-    echo "primary node connecting..."
-    mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --eval "
-        rs_ = {
-            _id: '${MONGO_REPLICASET}',
-            version: 1,
-            members: [
-                { _id: 0, host: '${MONGO_HOST}:${MONGO_PORT}', priority: 2 },
-                { _id: 1, host: '${MONGO_REPLICA1_HOST}:${MONGO_PORT}', priority: 0 },
-                { _id: 2, host: '${MONGO_REPLICA2_HOST}:${MONGO_PORT}', priority: 0 }
-            ]
-        }
-        rs.reconfig(rs_, { force: true });
-    "
-    echo "replicaset reconfigured successfully"
+    echo "DB already exists."
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --eval "
         print('db user credentials updating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
         db.changeUserPassword('${MONGO_USERNAME}','${MONGO_PASSWORD}');
-        print('db user credentials updated');
+        print('db user credentials updated.');
         db = db.getSiblingDB('${MONGO_DB}');
         var saas_ = db.getCollection('_saas').findOne({ sas_id: 'saas' });
         var sas_user_id_ = saas_.sas_user_id;

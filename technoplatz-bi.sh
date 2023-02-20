@@ -58,8 +58,11 @@ function installBI() {
     else
         mkdir $DIR
     fi
-    echo "Installation started"
-    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV}
+    if [ ! -d $DIR/$DIRINIT ]; then
+        mkdir $DIR/$DIRINIT
+    fi
+    echo "Installation started."
+    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV -o $DIR/$DBCONFF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONFF}
     cd  $DIR
     CONTD=$(cat $DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* ]]; then
@@ -75,7 +78,7 @@ function installBI() {
             let "INC+=1"
         done
         echo $DBPWD > .secret-mongo-password
-        echo "Database password was created successfully ($INC)"
+        echo "Database password was created successfully ($INC)."
     fi
     echo
     ls -lah $DIR
@@ -84,13 +87,31 @@ function installBI() {
 }
 
 function startBI() {
-	echo "$1 selected"
+    cd  $DIR
+    if [ $1 ]; then
+        echo "Invalid parameter: $1"
+        return 0
+    fi
+    docker-compose up --detach --remove-orphans
+    return 1
+}
+
+function stopBI() {
+    cd  $DIR
+    if [ $1 ]; then
+        echo "Invalid parameter: $1"
+        return 0
+    fi
+    docker-compose down
+    return 1
 }
 
 # Setup
 DIR="bii"
+DIRINIT="_init"
 DCYML="docker-compose.yml"
 DOTENV=".env"
+DBCONFF="$DIRINIT/mongod.conf"
 INC=0
 
 case $1 in
@@ -98,7 +119,10 @@ case $1 in
 	    installBI "$2"
 	    ;;
     "start" | "restart")
-        startBI "$1"
+        startBI "$2"
+        ;;
+    "stop")
+        stopBI
         ;;
     *)
         echo "Command not found!"
