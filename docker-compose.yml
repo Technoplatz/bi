@@ -63,7 +63,9 @@ services:
 
   init:
     container_name: init
-    image: ghcr.io/technoplatz/bi-init:latest
+    image: ghcr.io/technoplatz/bi-init${REPO}:latest
+    build:
+      context: _init/.
     hostname: init
     volumes:
       - bi-storage-volume:/init
@@ -153,7 +155,9 @@ services:
 
   replicaset:
     container_name: replicaset
-    image: ghcr.io/technoplatz/bi-replicaset:latest
+    image: ghcr.io/technoplatz/bi-replicaset${REPO}:latest
+    build:
+      context: _replicaset/.
     hostname: replicaset
     depends_on:
       - mongo0
@@ -188,7 +192,9 @@ services:
 
   api:
     container_name: api
-    image: ghcr.io/technoplatz/bi-api:latest
+    image: ghcr.io/technoplatz/bi-api${REPO}:latest
+    build:
+      context: api/.
     depends_on:
       - replicaset
     hostname: api
@@ -239,7 +245,9 @@ services:
 
   pwa:
     container_name: pwa
-    image: ghcr.io/technoplatz/bi-pwa:latest
+    image: ghcr.io/technoplatz/bi-pwa${REPO}:latest
+    build:
+      context: pwa/.
     hostname: pwa
     restart: always
     volumes:
