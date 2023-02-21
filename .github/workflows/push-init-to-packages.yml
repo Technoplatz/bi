@@ -48,24 +48,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Variables
-        id: vars
+      - name: Build Image
+        id: build-image
         shell: bash
         run: |
           echo "GITHUB_REF: ${GITHUB_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
-          if [ ${{ github.event_name }} != "pull_request" ]; then echo "::set-output name=oref::$(echo ${GITHUB_REF#refs/heads/})"; else echo "::set-output name=oref::$(echo ${GITHUB_HEAD_REF})"; fi
-      - name: Build Image
-        id: build-image
-        run: |
-          IMAGE_NAME=$DOCKER_IMAGE
-          ref_=${{steps.vars.outputs.oref}}
-          if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
+          if [ ${{ github.event_name }} != "pull_request" ]; then REF=$(echo ${GITHUB_REF#refs/heads/}); else REF=$(echo ${GITHUB_HEAD_REF}); fi
+          if [ $REF != "main" ]; then IMAGE_NAME=$DOCKER_IMAGE-$REF; else IMAGE_NAME=$DOCKER_IMAGE; fi
+          IMAGE_NAME=$(echo $IMAGE_NAME:$VERSION | tr '[A-Z]' '[a-z]')
           cd $FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
-          IMAGE_ID=ghcr.io/${{ vars.IMAGE_REPO_NAME }}/$IMAGE_NAME:$VERSION
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          echo "::set-output name=IMAGE_NAME::$IMAGE_NAME"
+      - name: Push Image
+        id: push-image
+        run: |
+          IMAGE_ID=ghcr.io/technoplatz/${{steps.build-image.outputs.IMAGE_NAME}}
+          docker tag ${{steps.build-image.outputs.IMAGE_NAME}} $IMAGE_ID
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-          docker tag $IMAGE_NAME $IMAGE_ID
           docker push $IMAGE_ID
           docker logout ghcr.io
