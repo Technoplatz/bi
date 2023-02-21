@@ -42,7 +42,8 @@ EOF
 function listAllCommands() {
     echo "Available commands:"
     echo "./technoplatz-bi.sh install [github-token]"
-    echo "./technoplatz-bi.sh start | restart"
+    echo "./technoplatz-bi.sh start"
+    echo "./technoplatz-bi.sh restart (Pulls the latest images)"
     echo "./technoplatz-bi.sh build"
     echo "./technoplatz-bi.sh pull"
     echo "./technoplatz-bi.sh stop"
@@ -82,7 +83,6 @@ function installBI() {
     if [[ "$CONTD" == *"40"* ]]; then
         echo "Required files not found on GitHub ($CONTD)."
         echo "You may provide a token to get connected to the repository."
-        rm -rf bi/
         return 0
     fi
 
@@ -97,8 +97,9 @@ function installBI() {
         echo "Database password was created successfully ($INC)."
     fi
     
-    echo "Installation completed successfully :)"
-    echo "Please do not forget to make the necessary changes on .env file!"
+    echo "Required files were downloaded successfully :)"
+    echo "** PLEASE DO NOT FORGET TO MAKE THE NECESSARY CHANGES ON \".env\" FILE **"
+    echo "** THEN RUN ./technoplatz-bi start **"
     return 1
 }
 
@@ -111,6 +112,19 @@ function startBI() {
     docker-compose up --detach --remove-orphans --no-build
     echo
     echo "The platform has been started"
+    echo "** PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL **"
+    return 1
+}
+
+function restartBI() {
+    cd  $DIR
+    if [ $1 ]; then
+        echo "No parameter required: $1"
+        return 0
+    fi
+    docker-compose pull && docker-compose up --detach --remove-orphans --no-build
+    echo
+    echo "The platform has been restarted"
     echo "** PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL **"
     return 1
 }
@@ -132,8 +146,8 @@ function pullBI() {
         return 0
     fi
     docker-compose pull
-    echo "The latest software updates has been downloaded"
-    echo "** PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL **"
+    echo "The latest software updates have been received successfully"
+    echo "** RUN \"./technoplatz-bi.sh start | restart\" FOR CHANGES TO BE APPLIED **"
     return 1
 }
 
@@ -157,8 +171,11 @@ case $1 in
     "install")
 	    installBI "$2"
 	    ;;
-    "start" | "restart")
+    "start")
         startBI "$2"
+        ;;
+    "restart")
+        restartBI "$2"
         ;;
     "build")
         buildBI "$2"
