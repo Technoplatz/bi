@@ -8,7 +8,6 @@ pandas
 numpy
 openpyxl
 apscheduler
-sendgrid
 Jinja2
 xlsxwriter
 xlwt

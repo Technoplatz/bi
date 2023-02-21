@@ -1,21 +1,21 @@
-# 
+#
 # Technoplatz BI
-# 
-# Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
-# 
+#
+# Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
-# 
+#
 # If your software can interact with users remotely through a computer
 # network, you should also make sure that it provides a way for users to
 # get its source.  For example, if your program is a web application, its
@@ -23,12 +23,12 @@
 # of the code.  There are many ways you could offer source, and different
 # solutions will be better for different programs; see section 13 for the
 # specific requirements.
-# 
+#
 # You should also get your employer (if you work as a programmer) or school,
 # if any, to sign a "copyright disclaimer" for the program, if necessary.
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
-# 
+#
 
 name: Deploy replicaset Image
 on:
@@ -39,8 +39,8 @@ on:
     paths:
       - "_replicaset/**"
 env:
-  REPLICASET_IMAGE_NAME: bi-replicaset
-  REPLICASET_FOLDER: _replicaset
+  DOCKER_IMAGE: bi-replicaset
+  FOLDER: _replicaset
   DOCKERFILE: Dockerfile
   VERSION: latest
 jobs:
@@ -55,26 +55,17 @@ jobs:
           echo "GITHUB_REF: ${GITHUB_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           if [ ${{ github.event_name }} != "pull_request" ]; then echo "::set-output name=oref::$(echo ${GITHUB_REF#refs/heads/})"; else echo "::set-output name=oref::$(echo ${GITHUB_HEAD_REF})"; fi
-      - name: Build replicaset image
-        id: build-replicaset-image
+      - name: Build Image
+        id: build-image
         run: |
-          IMAGE_NAME=$REPLICASET_IMAGE_NAME
+          IMAGE_NAME=$DOCKER_IMAGE
           ref_=${{steps.vars.outputs.oref}}
           if [ $ref_ != "main" ]; then IMAGE_NAME=$IMAGE_NAME-$ref_; fi
-          cd $REPLICASET_FOLDER
+          cd $FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
-          echo "::set-output name=oimagename::$(echo $IMAGE_NAME)"
-      - name: Get logged in to registry
-        run: |
-          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ${{ vars.IMAGE_REPO_DOMAIN }} -u $ --password-stdin
-      - name: Push replicaset image
-        id: push-replicaset-image
-        run: |
-          IMAGE_NAME=${{steps.build-replicaset-image.outputs.oimagename}}
-          IMAGE_ID=${{ vars.IMAGE_REPO_DOMAIN }}/${{ vars.IMAGE_REPO_NAME }}/$IMAGE_NAME:$VERSION
+          IMAGE_ID=ghcr.io/${{ vars.IMAGE_REPO_NAME }}/$IMAGE_NAME:$VERSION
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
           docker tag $IMAGE_NAME $IMAGE_ID
           docker push $IMAGE_ID
-      - name: Logout from Github
-        run: |
-          docker logout ${{ vars.IMAGE_REPO_DOMAIN }}
+          docker logout ghcr.io

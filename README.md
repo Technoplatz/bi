@@ -170,7 +170,6 @@ ADMIN_EMAIL=bi@company.com
 ADMIN_USER_NAME=John Doe
 COMPANY_NAME=Acme Company Inc.
 FROM_EMAIL=bi@company.com
-SENDGRID_API_KEY=<please-add-your-sendgrid-api-key-here>
 ```
 
 <sup>**TZ:** Time zone of your platform's location.\
@@ -178,15 +177,14 @@ SENDGRID_API_KEY=<please-add-your-sendgrid-api-key-here>
 **ADMIN_EMAIL:** E-mail address of Administrator user.\
 **ADMIN_USER_NAME:** Name and surname of Administrator user (eg. John Doe).\
 **COMPANY_NAME:** Legal business name of your organization.\
-**FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.
-**SENDGRID_API_KEY:** Please read the information below.</sup>
+**FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.</sup>
 
 #### TZ 
 Time zone information must be entered according to the official **TZ** format (eg. America/New_York)\
 https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-#### Sendgrid API Key
-It is used for sending automated emails over [Sendgrid](#https://sendgrid.com). Please find the further information about how to obtain an API key on Sendgrid at https://docs.sendgrid.com/ui/account-and-settings/api-keys#creating-an-api-key. After creating an API key in the Sendgrid, copy this key, paste it into the starred area below and run the command.
+#### SMTP_PASSWORD
+It is used for sending automated emails over any SMTP server.
 
 #### 4. Starting Containers
 
@@ -283,7 +281,6 @@ Technoplatz BI is an open source platform provided with two licensing options;
 |  Technical Support | No | Yes |
 |  Custom Development Service | No | Paid |
 |  Custom Domain | Not Recommended | Yes |
-|  Sendgrid E-mail API | Self Subscribed | Yes |
 |  License | Affero GPL v3.0 | Service Level Agreement |
 |  Pricing | Free | [Request a Quote](#) |
 

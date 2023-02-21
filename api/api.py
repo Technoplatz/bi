@@ -50,7 +50,6 @@ import pymongo
 import requests
 import bleach
 import logging
-import sendgrid
 import base64
 import magic
 import pyotp
@@ -3648,20 +3647,17 @@ class Crud():
 
 class Email():
     def __init__(self):
-        self.EMAIL_METHOD = os.environ.get("EMAIL_METHOD")
-        self.SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
         self.SMTP_SERVER = os.environ.get("SMTP_SERVER")
         self.SMTP_SSL = os.environ.get("SMTP_SSL")
         self.SMTP_PORT = os.environ.get("SMTP_PORT")
         self.SMTP_USERID = os.environ.get("SMTP_USERID")
         self.SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
         self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
-        self.SG_TFA_SUBJECT = "Your Backup OTP"
-        self.SG_SIGNUP_SUBJECT = "Welcome"
-        self.SG_SIGNIN_SUBJECT = "New Sign-in"
-        self.SG_UPLOADERR_SUBJECT = "File Upload Result"
-        self.SG_DEFAULT_SUBJECT = "Hello"
-        self.sg_ = sendgrid.SendGridAPIClient(api_key=self.SENDGRID_API_KEY)
+        self.EMAIL_TFA_SUBJECT = "Your Backup OTP"
+        self.EMAIL_SIGNUP_SUBJECT = "Welcome"
+        self.EMAIL_SIGNIN_SUBJECT = "New Sign-in"
+        self.EMAIL_UPLOADERR_SUBJECT = "File Upload Result"
+        self.EMAIL_DEFAULT_SUBJECT = "Hello"
         self.COMPANY_NAME = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
         self.disclaimer_ = f"<p>Sincerely,</p><p>{self.COMPANY_NAME}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
         self.disclaimer_text_ = f"\n\nSincerely,\n\n{self.COMPANY_NAME}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
@@ -3712,82 +3708,14 @@ class Email():
         finally:
             return res_
 
-    def sendEmail_Sendgrid_f(self, msg):
-        try:
-            personalizations_ = msg["personalizations"]
-
-            if not personalizations_:
-                personalizations_ = {
-                    "to": [{
-                        "email": msg["to"],
-                        "name": msg["name"]
-                    }]
-                }
-
-            # read attachment into variable
-            attachments_ = []
-            for file_ in msg["files"]:
-                filename_ = file_["filename"]
-                filetype_ = file_["filetype"]
-                f_ = open(f"/cron/{filename_}", "rb")
-                data_ = f_.read()
-                encoded_ = base64.b64encode(data_).decode()
-                type_ = "text/csv" if filetype_ == "csv" else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                attachments_.append({
-                    "content": encoded_,
-                    "type": type_,
-                    "filename": filename_,
-                    "disposition": "attachment"
-                })
-                f_.close()
-
-            req_ = {
-                "personalizations": [personalizations_],
-                "from": {
-                    "email": self.FROM_EMAIL,
-                    "name": self.COMPANY_NAME
-                },
-                "subject": msg["subject"],
-                "content": [{
-                    "type": "text/html",
-                    "value": msg["html"]
-                }],
-                "mail_settings": {
-                    "footer": {
-                        "enable": True,
-                        "html": self.disclaimer_,
-                        "text": self.disclaimer_text_
-                    }
-                },
-                "categories": [
-                    "technoplatz-bi"
-                ]
-            }
-
-            if attachments_ and len(attachments_) > 0:
-                req_["attachments"] = attachments_
-
-            self.sg_.client.mail.send.post(request_body=req_)
-
-            res_ = {"result": True}
-
-        except APIError as exc:
-            res_ = Misc().api_error_f(exc)
-
-        except Exception as exc:
-            res_ = Misc().exception_f(exc)
-
-        finally:
-            return res_
-
     def sendEmail_f(self, msg):
         try:
             op_ = msg["op"] if "op" in msg else None
             files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
             html_ = f"{msg['html']}" if "html" in msg else None
             personalizations_ = msg["personalizations"] if "personalizations" in msg else None
-            subject_ = self.SG_UPLOADERR_SUBJECT if op_ in [
-                "uploaderr", "importerr"] else self.SG_SIGNIN_SUBJECT if op_ == "signin" else self.SG_TFA_SUBJECT if op_ == "tfa" else self.SG_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.SG_DEFAULT_SUBJECT
+            subject_ = self.EMAIL_UPLOADERR_SUBJECT if op_ in [
+                "uploaderr", "importerr"] else self.EMAIL_SIGNIN_SUBJECT if op_ == "signin" else self.EMAIL_TFA_SUBJECT if op_ == "tfa" else self.EMAIL_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.EMAIL_DEFAULT_SUBJECT
 
             if op_ is None or op_ == "":
                 raise APIError("email operation is missing")
@@ -3804,8 +3732,8 @@ class Email():
             if subject_ is None:
                 raise APIError("email subject is missing")
 
-            subject_ = self.SG_UPLOADERR_SUBJECT if op_ in [
-                "uploaderr", "importerr"] else self.SG_SIGNIN_SUBJECT if op_ == "signin" else self.SG_TFA_SUBJECT if op_ == "tfa" else self.SG_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.SG_DEFAULT_SUBJECT
+            subject_ = self.EMAIL_UPLOADERR_SUBJECT if op_ in [
+                "uploaderr", "importerr"] else self.EMAIL_SIGNIN_SUBJECT if op_ == "signin" else self.EMAIL_TFA_SUBJECT if op_ == "tfa" else self.EMAIL_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.EMAIL_DEFAULT_SUBJECT
 
             msg_ = {
                 "op": op_,
@@ -3815,13 +3743,7 @@ class Email():
                 "html": html_
             }
 
-            m_ = self.EMAIL_METHOD.lower()
-            if m_ == "sendgrid":
-                email_sent_ = self.sendEmail_Sendgrid_f(msg_)
-            elif m_ == "smtp":
-                email_sent_ = self.sendEmail_SMTP_f(msg_)
-            else:
-                raise APIError("email posting method is not valid")
+            email_sent_ = self.sendEmail_SMTP_f(msg_)
 
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
@@ -3860,10 +3782,10 @@ class RestAPI():
             if origin_ != DOMAIN_:
                 raise APIError(f"invalid request {origin_} - {DOMAIN_}")
 
-            BI_API_KEY_ = os.environ.get("BI_API_KEY")
+            API_KEY_ = os.environ.get("API_KEY")
             api_key_header_ = request.headers["X-Api-Key"]
 
-            if BI_API_KEY_ != api_key_header_:
+            if API_KEY_ != api_key_header_:
                 raise APIError(f"invalid api request")
 
             res_ = {"result": True, "data": request}

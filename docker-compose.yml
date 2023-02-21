@@ -225,14 +225,12 @@ services:
       - MONGO_REPLICASET=${MONGO_REPLICASET}
       - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
       - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
-      - BI_API_KEY=${BI_API_KEY}
-      - EMAIL_METHOD=${EMAIL_METHOD}
+      - API_KEY=${API_KEY}
       - SMTP_SSL=${SMTP_SSL}
       - SMTP_SERVER=${SMTP_SERVER}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USERID=${SMTP_USERID}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
       - API_SCHEDULE_INTERVAL_MIN=${API_SCHEDULE_INTERVAL_MIN}
       - API_DUMP_HOURS=${API_DUMP_HOURS}
       - SECUR_MAX_AGE=${SECUR_MAX_AGE}
@@ -260,7 +258,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`)
       - traefik.http.services.pwa.loadbalancer.server.port=80
-      - traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Api-Key=${BI_API_KEY}
+      - traefik.http.middlewares.https-redirect.headers.customrequestheaders.X-Api-Key=${API_KEY}
     links:
       - api
     networks:
