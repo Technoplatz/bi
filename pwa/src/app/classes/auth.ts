@@ -47,8 +47,7 @@ export class Auth {
 
   private authHeaders: any = {
     "Content-Type": "application/json",
-    "X-Api-Key": environment.apiKey,
-    "X-Aux": "genauxa5"
+    "X-Api-Key": environment.apiKey
   }
   authStateChange = new Subject();
 
