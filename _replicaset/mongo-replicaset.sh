@@ -63,7 +63,6 @@ else
     "
     echo "Replicaset was reconfigured successfully."
 fi
-
 sleep 10s
 
 RS_OK=""
