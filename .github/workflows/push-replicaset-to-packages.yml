@@ -63,6 +63,7 @@ jobs:
       - name: Push Image
         id: push-image
         run: |
+          $OIMAGE_NAME=$(echo "${{ env.OIMAGE_NAME }}")
           IMAGE_ID=ghcr.io/technoplatz/$OIMAGE_NAME
           docker tag $OIMAGE_NAME $IMAGE_ID
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
