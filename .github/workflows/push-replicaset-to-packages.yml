@@ -63,7 +63,7 @@ jobs:
       - name: Push Image
         id: push-image
         run: |
-          $OIMAGE_NAME=${{ steps.build-image.outputs.OIMAGE_NAME }}
+          OIMAGE_NAME=${{ steps.build-image.outputs.OIMAGE_NAME }}
           IMAGE_ID=ghcr.io/technoplatz/$OIMAGE_NAME
           docker tag $OIMAGE_NAME $IMAGE_ID
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
