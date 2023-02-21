@@ -59,12 +59,12 @@ jobs:
           IMAGE_NAME=$(echo $IMAGE_NAME:$VERSION | tr '[A-Z]' '[a-z]')
           cd $FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
-          echo "::set-output name=IMAGE_NAME::$IMAGE_NAME"
+          echo "OIMAGE_NAME=$IMAGE_NAME" >> $OIMAGE_NAME
       - name: Push Image
         id: push-image
         run: |
-          IMAGE_ID=ghcr.io/technoplatz/${{steps.build-image.outputs.IMAGE_NAME}}
-          docker tag ${{steps.build-image.outputs.IMAGE_NAME}} $IMAGE_ID
+          IMAGE_ID=ghcr.io/technoplatz/$OIMAGE_NAME
+          docker tag $OIMAGE_NAME $IMAGE_ID
           echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
           docker push $IMAGE_ID
           docker logout ghcr.io
