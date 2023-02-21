@@ -63,6 +63,7 @@ else
     "
     echo "Replicaset was reconfigured successfully."
 fi
+
 sleep 10s
 
 RS_OK=""
@@ -118,7 +119,7 @@ if [ $MONGO_INDEXOF_DB -eq "-1" ]; then
         db.createCollection('_auth', { 'capped': false });
         db.getCollection('_auth').insertOne({
             aut_id: '${ADMIN_EMAIL}',
-            aut_password: '\$2b\$08\$aSMAfk/MMV736M/jG3zHHeoMndfQURKfMBV02qOJ/K4Z/AOQuR8Vm',
+            aut_password: null,
             aut_token: null,
             aut_tfac: null,
             aut_expires: 0,
