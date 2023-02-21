@@ -45,6 +45,7 @@ function listAllCommands() {
     echo "./technoplatz-bi.sh start"
     echo "./technoplatz-bi.sh restart (Pulls the latest images)"
     echo "./technoplatz-bi.sh build"
+    echo "./technoplatz-bi.sh kill"
     echo "./technoplatz-bi.sh pull"
     echo "./technoplatz-bi.sh stop"
     echo "./technoplatz-bi.sh help"
@@ -160,6 +161,22 @@ function buildBI() {
     return 1
 }
 
+function killBI() {
+    if [ $1 ]; then
+        echo "No parameter required: $1"
+        return 0
+    fi
+    if [[ ! -z $(docker container ls -qa) ]]; then
+        docker container stop $(docker container ls -qa)
+        docker container rm $(docker container ls -qa)
+        echo "All containers have been stopped and removed successfully"
+    else
+        echo "No containers found!"
+    fi
+    
+    return 1
+}
+
 # Setup
 DIR="bi"
 DCYML="docker-compose.yml"
@@ -179,6 +196,9 @@ case $1 in
         ;;
     "build")
         buildBI "$2"
+        ;;
+    "kill")
+        killBI "$2"
         ;;
     "pull")
         pullBI "$2"
