@@ -63,7 +63,19 @@ else
     "
     echo "Replicaset was reconfigured successfully."
 fi
-sleep 5s
+
+sleep 10s
+
+RS_OK=""
+until [[ $RS_OK -eq "1" ]]; do
+    echo "Checking replicaset status..."
+    RS_STATUS=$(mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --eval "
+        JSON.stringify(rs.status());
+    ")
+    sleep 2s
+    RS_OK=$(echo "$RS_STATUS" | jq '.ok' -r)
+    echo "RS_OK: $RS_OK"
+done
 
 MONGO_PASSWORD=$(</run/secrets/mongo-password)
 
@@ -217,8 +229,8 @@ else
             if(upsert_user_) {
                 print('user upserted', '${ADMIN_EMAIL}');
             }
-            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_rule_id: 'manager-changed-allow' }, { \$set: {
-                fwa_rule_id: 'manager-changed-allow',
+            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_rule_id: 'manager-allow' }, { \$set: {
+                fwa_rule_id: 'manager-allow',
                 fwa_user_id: '${ADMIN_EMAIL}',
                 fwa_ip: '0.0.0.0',
                 fwa_enabled: true,

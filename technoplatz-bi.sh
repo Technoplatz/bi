@@ -43,6 +43,7 @@ function listAllCommands() {
     echo "Available commands:"
     echo "./technoplatz-bi.sh install [github-token]"
     echo "./technoplatz-bi.sh start | restart"
+    echo "./technoplatz-bi.sh build"
     echo "./technoplatz-bi.sh pull"
     echo "./technoplatz-bi.sh stop"
     echo "./technoplatz-bi.sh help"
@@ -50,30 +51,41 @@ function listAllCommands() {
     echo "See more at https://bi.technoplatz.com/support#script-commands-reference"
 }
 
-function installBI() {
+function getFiles() {
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $1 ]; then
         curlHeaders+=("-H" "Authorization: token $1")
     else
         echo "Process will continue without GitHub token."
     fi
+    curl "${curlHeaders[@]}" -Ls -o $DCYML -o $DOTENV -o $DBCONFF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONFF}
+    return 1
+}
+
+function installBI() {
+
     if [ -d $DIR ]; then
-        rm -rf $DIR
+        echo "Oops! \"$DIR\" directory already exists. You should remove it manually."
+        echo "Installation was canceled to avoid any data loss."
+        return 0
+    else
+        mkdir $DIR
+        mkdir $DIR/_init $DIR/_replicaset $DIR/pwa $DIR/api
     fi
-    mkdir $DIR
-    mkdir $DIR/_init
-    mkdir $DIR/_replicaset
-    mkdir $DIR/pwa
-    mkdir $DIR/api
-    echo "Installation started."
-    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV -o $DIR/$DBCONFF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONFF}
+    
     cd  $DIR
+
+    getFiles "$1"
+    
     CONTD=$(cat $DCYML | head -c 3)
+
     if [[ "$CONTD" == *"40"* ]]; then
         echo "Required files not found on GitHub ($CONTD)."
         echo "You may provide a token to get connected to the repository."
+        rm -rf bi/
         return 0
     fi
+
     if [ ! -f .secret-mongo-password ]; then
         re='^[a-zA-Z]+$'
         while ! [[ ${DBPWD:0:1} =~ $re ]]
@@ -84,6 +96,7 @@ function installBI() {
         echo $DBPWD > .secret-mongo-password
         echo "Database password was created successfully ($INC)."
     fi
+    
     echo "Installation completed successfully :)"
     echo "Please do not forget to make the necessary changes on .env file!"
     return 1
@@ -92,30 +105,44 @@ function installBI() {
 function startBI() {
     cd  $DIR
     if [ $1 ]; then
-        echo "Invalid start parameter: $1"
+        echo "No parameter required: $1"
         return 0
     fi
     docker-compose up --detach --remove-orphans --no-build
-    return 1
-}
-
-function pullBI() {
-    cd  $DIR
-    if [ $1 ]; then
-        echo "Invalid pull parameter: $1"
-        return 0
-    fi
-    docker-compose pull && docker-compose up --detach --remove-orphans --no-build
+    echo
+    echo "The platform has been started"
+    echo "** PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL **"
     return 1
 }
 
 function stopBI() {
     cd  $DIR
     if [ $1 ]; then
-        echo "Invalid stop parameter: $1"
+        echo "No parameter required: $1"
         return 0
     fi
     docker-compose down
+    return 1
+}
+
+function pullBI() {
+    cd  $DIR
+    if [ $1 ]; then
+        echo "No parameter required: $1"
+        return 0
+    fi
+    docker-compose pull
+    echo "The latest software updates has been downloaded"
+    echo "** PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL **"
+    return 1
+}
+
+function buildBI() {
+    if [ $1 ]; then
+        echo "No parameter required: $1"
+        return 0
+    fi
+    docker-compose build
     return 1
 }
 
@@ -132,6 +159,9 @@ case $1 in
 	    ;;
     "start" | "restart")
         startBI "$2"
+        ;;
+    "build")
+        buildBI "$2"
         ;;
     "pull")
         pullBI "$2"
