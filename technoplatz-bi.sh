@@ -55,15 +55,15 @@ function listAllCommands() {
 
 function getSuffixBI() {
     SUFFIX=""
-    BRANCH_=$(git branch --show-current)
-    if [[ ! -z $BRANCH_ ]]; then
+    BRANCH=$(git branch --show-current)
+    if [[ ! -z $BRANCH ]]; then
         if [ $1 ]; then
             if [ $1 != "--prod" ]; then
                 SUFFIX="-1"
             fi
         else
-            if [ $BRANCH_ != "main" ]; then
-                SUFFIX="-$BRANCH_"
+            if [ $BRANCH != "main" ]; then
+                SUFFIX="-$BRANCH"
             fi
         fi
     fi
@@ -122,12 +122,6 @@ function upBI() {
         echo "You need to install the platform by ./technoplatz-bi.sh install [token]"
         return 0
     fi
-    GETSUFFIX=$(getSuffixBI "$1")
-    if [ "$GETSUFFIX" == "-1" ]; then
-        echo "Invalid paramater: $1"
-        return 0
-    fi
-    echo "SUFFIX $GETSUFFIX"
     cd $DIR
     DEV_SUFFIX=$GETSUFFIX docker-compose up --detach --remove-orphans --no-build
     echo
@@ -142,17 +136,17 @@ function downBI() {
         echo "No parameter required: $1"
         return 0
     fi
-    docker-compose down
+    DEV_SUFFIX=$GETSUFFIX docker-compose down
     return 1
 }
 
 function pullBI() {
-    cd $DIR
-    if [ $1 ]; then
-        echo "No parameter required: $1"
+    if [ ! -d $DIR ]; then
+        echo "Oops! \"$DIR\" folder not found at the directory you are!"
         return 0
     fi
-    docker-compose pull
+    cd $DIR
+    DEV_SUFFIX=$GETSUFFIX docker-compose pull
     echo "The latest software updates have been received successfully"
     echo "RUN \"./technoplatz-bi.sh up\" FOR CHANGES TO BE APPLIED"
     return 1
@@ -169,13 +163,6 @@ function pruneBI() {
 }
 
 function buildBI() {
-    GETSUFFIX=$(getSuffixBI "$1")
-    if [ "$GETSUFFIX" == "-1" ]; then
-        echo "Invalid paramater: $1"
-        return 0
-    fi
-    echo "SUFFIX $GETSUFFIX"
-    BRANCH=$GETSUFFIX
     for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do
         _jq() {
             echo ${row} | base64 --decode | jq -r ${1}
@@ -184,7 +171,7 @@ function buildBI() {
     FOLDER=$(echo $(_jq '.folder'))
     TAG=$(echo $(_jq '.tag'))
     DOCKERFILE=$(echo $(_jq '.dockerfile'))
-    docker build --tag $NS/$IMAGE$BRANCH:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
+    docker build --tag $NS/$IMAGE$GETSUFFIX:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
     done
     return 1
 }
@@ -217,6 +204,13 @@ BUILDS='[
     {"folder":"api","image":"bi-api","tag":"latest","dockerfile":"Dockerfile"},
     {"folder":"pwa","image":"bi-pwa","tag":"latest","dockerfile":"Dockerfile"}
     ]'
+
+GETSUFFIX=$(getSuffixBI "$2")
+if [ "$GETSUFFIX" == "-1" ]; then
+    echo "Invalid paramater: $1"
+    return 0
+fi
+echo "SUFFIX $GETSUFFIX"
 
 case $1 in
     "install")
