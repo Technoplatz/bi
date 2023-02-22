@@ -30,6 +30,7 @@
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
 # 
+# 
 
 openssl rand -base64 756 > /init/replicaset.key
 chmod 400 /init/replicaset.key

@@ -74,10 +74,13 @@ jobs:
           docker logout ghcr.io
       - name: push-image-dockerhub
         id: push-image-dockerhub
-        if: ${{ steps.build-image.outputs.OBRANCH }} == "main"
         run: |
-          IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
-          docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
-          echo "$DOCKERHUB_TOKEN" | docker login -u $DOCKERHUB_USERNAME --password-stdin
-          docker push $IMAGE_ID
-          docker logout
+          if [ ${{ steps.build-image.outputs.OBRANCH }} == 'main' ]; then
+            IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
+            docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
+            echo "$DOCKERHUB_TOKEN" | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker push $IMAGE_ID
+            docker logout
+          else
+            echo "Branch ${{ steps.build-image.outputs.OBRANCH }} skipped"
+          fi
