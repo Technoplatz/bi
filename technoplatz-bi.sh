@@ -42,10 +42,10 @@ EOF
 function listAllCommands() {
     echo "Available commands:"
     echo "./technoplatz-bi.sh install [token]"
-    echo "./technoplatz-bi.sh up"
+    echo "./technoplatz-bi.sh up [--build] [--prod]"
     echo "./technoplatz-bi.sh down"
     echo "./technoplatz-bi.sh kill"
-    echo "./technoplatz-bi.sh pull"
+    echo "./technoplatz-bi.sh pull [--prod]"
     echo "./technoplatz-bi.sh build [--prod]"
     echo "./technoplatz-bi.sh prune"
     echo "./technoplatz-bi.sh help"
@@ -57,13 +57,20 @@ function getSuffixBI() {
     SUFFIX=""
     BRANCH=$(git branch --show-current)
     if [[ ! -z $BRANCH ]]; then
-        if [ $1 ]; then
-            if [ $1 != "--prod" ]; then
-                SUFFIX="-1"
-            fi
-        else
-            if [ $BRANCH != "main" ]; then
-                SUFFIX="-$BRANCH"
+        if [ $BRANCH != "main" ]; then
+            SUFFIX="-$BRANCH"
+        fi
+        if [ $2 ]; then
+            if [ $1 == "up" ]; then
+                if [ $2 != "--build" ]; then 
+                    SUFFIX="-1"
+                else
+                    if [ $3 ]; then
+                        if [ $3 != "--prod" ]; then SUFFIX="-1"; else SUFFIX=""; fi
+                    fi
+                fi
+            else
+                if [ $2 != "--prod" ]; then SUFFIX="-1"; else SUFFIX=""; fi
             fi
         fi
     fi
@@ -112,7 +119,7 @@ function installBI() {
     echo "Required files were downloaded successfully :)"
     echo
     echo "PLEASE MAKE THE NECESSARY CHANGES ON \"_bi/.env\" FILE"
-    echo "THEN RUN ./technoplatz-bi.sh up"
+    echo "THEN RUN ./technoplatz-bi.sh up [--build] [--prod]"
     return 1
 }
 
@@ -121,6 +128,14 @@ function upBI() {
         echo "Oops! \"$DIR\" folder not found at the directory you are!"
         echo "You need to install the platform by ./technoplatz-bi.sh install [token]"
         return 0
+    fi
+    if [ $1 ]; then
+        if [ $1 != "--build" ]; then
+            echo "Invalid parameter: $1"
+            return 0
+        else
+            BUILD=$(buildBI)
+        fi
     fi
     cd $DIR
     DEV_SUFFIX=$GETSUFFIX docker-compose up --detach --remove-orphans --no-build
@@ -148,7 +163,7 @@ function pullBI() {
     cd $DIR
     DEV_SUFFIX=$GETSUFFIX docker-compose pull
     echo "The latest software updates have been received successfully"
-    echo "RUN \"./technoplatz-bi.sh up\" FOR CHANGES TO BE APPLIED"
+    echo "RUN \"./technoplatz-bi.sh up [--build] [--prod]\" FOR CHANGES TO BE APPLIED"
     return 1
 }
 
@@ -205,10 +220,11 @@ BUILDS='[
     {"folder":"pwa","image":"bi-pwa","tag":"latest","dockerfile":"Dockerfile"}
     ]'
 
-GETSUFFIX=$(getSuffixBI "$2")
+GETSUFFIX=$(getSuffixBI "$1" "$2" "$3")
 if [ "$GETSUFFIX" == "-1" ]; then
-    echo "Invalid paramater: $1"
-    return 0
+    echo "Invalid command option: $1 $2 $3"
+    echo
+    exit 0
 fi
 echo "SUFFIX $GETSUFFIX"
 
