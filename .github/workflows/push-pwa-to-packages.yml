@@ -51,19 +51,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Build Image
+      - name: build-image
         id: build-image
         shell: bash
         run: |
           echo "GITHUB_REF: ${GITHUB_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
-          if [ ${{ github.event_name }} != "pull_request" ]; then REF=$(echo ${GITHUB_REF#refs/heads/}); else REF=$(echo ${GITHUB_HEAD_REF}); fi
-          if [ $REF != "main" ]; then IMAGE_NAME=$DOCKER_IMAGE-$REF:$VERSION; else IMAGE_NAME=$DOCKER_IMAGE:$VERSION; fi
+          if [ ${{ github.event_name }} != "pull_request" ]; then BRANCH=$(echo ${GITHUB_REF#refs/heads/}); else BRANCH=$(echo ${GITHUB_HEAD_REF}); fi
+          if [ $BRANCH != "main" ]; then IMAGE_NAME=$DOCKER_IMAGE-$BRANCH:$VERSION; else IMAGE_NAME=$DOCKER_IMAGE:$VERSION; fi
           IMAGE_NAME=$(echo $IMAGE_NAME | tr '[A-Z]' '[a-z]')
           cd $FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "OIMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
-      - name: Push Image GHCR
+          echo "OBRANCH=$BRANCH" >> $GITHUB_OUTPUT
+      - name: push-image-ghcr
         id: push-image-ghcr
         run: |
           IMAGE_ID=ghcr.io/technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
@@ -71,8 +72,9 @@ jobs:
           echo "$GHCR_TOKEN" | docker login ghcr.io -u $ --password-stdin
           docker push $IMAGE_ID
           docker logout ghcr.io
-      - name: Push Image DockerHub
+      - name: push-image-dockerhub
         id: push-image-dockerhub
+        if: ${{ steps.build-image.outputs.OBRANCH == "main"}}
         run: |
           IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
           docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
