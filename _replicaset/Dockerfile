@@ -32,7 +32,7 @@
 
 FROM mongo
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y jq
+RUN apt-get install jq
 RUN rm -rf /_replicaset
 RUN mkdir /_replicaset
 WORKDIR /_replicaset
