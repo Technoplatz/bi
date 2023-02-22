@@ -3769,7 +3769,7 @@ class RestAPI():
             api_key_header_ = request.headers["X-Api-Key"]
 
             if API_KEY_ != api_key_header_:
-                raise APIError(f"invalid api request")
+                raise APIError("invalid api request")
 
             res_ = {"result": True, "data": request}
 
