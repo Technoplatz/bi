@@ -43,6 +43,9 @@ env:
   FOLDER: _replicaset
   DOCKERFILE: Dockerfile
   VERSION: latest
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 jobs:
   push-to-packages:
     runs-on: ubuntu-latest
@@ -60,12 +63,19 @@ jobs:
           cd $FOLDER
           docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "OIMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
-      - name: Push Image
-        id: push-image
+      - name: Push Image GHCR
+        id: push-image-ghcr
         run: |
-          OIMAGE_NAME=${{ steps.build-image.outputs.OIMAGE_NAME }}
-          IMAGE_ID=ghcr.io/technoplatz/$OIMAGE_NAME
-          docker tag $OIMAGE_NAME $IMAGE_ID
-          echo "${{ secrets.ACCESS_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+          IMAGE_ID=ghcr.io/technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
+          docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
+          echo "$ACCESS_TOKEN" | docker login ghcr.io -u $ --password-stdin
           docker push $IMAGE_ID
           docker logout ghcr.io
+      - name: Push Image DockerHub
+        id: push-image-dockerhub
+        run: |
+          IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
+          docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
+          echo "$DOCKERHUB_TOKEN" | docker login -u $DOCKERHUB_USERNAME --password-stdin
+          docker push $IMAGE_ID
+          docker logout
