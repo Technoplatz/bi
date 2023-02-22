@@ -98,7 +98,7 @@ function installBI() {
     fi
     
     echo "Required files were downloaded successfully :)"
-    echo "** PLEASE DO NOT FORGET TO MAKE THE NECESSARY CHANGES ON \".env\" FILE **"
+    echo "** PLEASE DO NOT FORGET TO MAKE THE NECESSARY CHANGES ON \"_bi/.env\" FILE **"
     echo "** THEN RUN ./technoplatz-bi up **"
     return 1
 }
