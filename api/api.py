@@ -765,23 +765,6 @@ class Crud():
         finally:
             return res_
 
-    def version_f(self):
-        try:
-            versions_ = self.root_schemes_f("_version")
-            if not versions_:
-                raise APIError("versions not found")
-            versions_.sort(key=operator.itemgetter("version"), reverse=True)
-            res_ = {"result": True, "versions": versions_}
-
-        except APIError as exc:
-            res_ = Misc().api_error_f(exc)
-
-        except Exception as exc:
-            res_ = Misc().exception_f(exc)
-
-        finally:
-            return res_
-
     def template_f(self, input_):
         try:
             # start transaction
@@ -4172,7 +4155,7 @@ class Auth():
             collection_id_ = input_["collection"] if "collection" in input_ else None
             op_ = input_["op"] if "op" in input_ else None
             cudops_ = ["insert", "update", "upsert", "delete", "remove", "clone", "purge"]
-            collessops_ = ["view", "views", "collections", "template", "dump", "version"]
+            collessops_ = ["view", "views", "collections", "template", "dump"]
             allowmatch_ = []
 
             if not user_id_:
@@ -4951,8 +4934,6 @@ def crud_f():
             crud_ = Crud().parent_f(input_)
         elif op_ == "dump":
             crud_ = Crud().dump_f(input_)
-        elif op_ == "version":
-            crud_ = Crud().version_f()
         elif op_ == "template":
             crud_ = Crud().template_f(input_)
         else:

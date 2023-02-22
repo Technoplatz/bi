@@ -76,14 +76,9 @@ export class AppComponent implements OnInit {
       }
     });
 
-    setInterval(() => {
-      this.doSwUpdateCheck();
-    }, 15 * 60 * 1000);
-
     // get user
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user_ = LSUSERMETA;
-      this.doSwUpdateCheck();
     });
 
     // listen auth changes
@@ -131,22 +126,6 @@ export class AppComponent implements OnInit {
       console.error(error);
     });
 
-  }
-
-  doSwUpdateCheck() {
-    this.misc.getVersion().then((res: any) => {
-      if (res && res.result && res.versions) {
-        this.version_global = res.versions[0].version;
-        const version_local_ = this.version_app.replace("-dev", "").replace("-prod", "");
-        if (this.version_global !== version_local_ && this.version_global > version_local_) {
-          this.swu_ = true;
-        }
-      } else {
-        console.error("no version checked");
-      }
-    }).catch((error: any) => {
-      console.error(error);
-    });
   }
 
 }

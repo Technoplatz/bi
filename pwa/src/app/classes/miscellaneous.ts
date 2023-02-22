@@ -93,30 +93,6 @@ export class Miscellaneous {
     });
   }
 
-  getVersion() {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "version",
-          user: LSUSERMETA
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.miscHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      }).catch((error: any) => {
-        reject(error);
-      });
-    });
-  }
-
   setLanguage(l: string) {
     return new Promise((resolve, reject) => {
       if (l) {
