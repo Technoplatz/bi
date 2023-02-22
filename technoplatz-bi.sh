@@ -41,7 +41,7 @@ EOF
 
 function listAllCommands() {
     echo "Available commands:"
-    echo "./technoplatz-bi.sh install [github-token]"
+    echo "./technoplatz-bi.sh install [token]"
     echo "./technoplatz-bi.sh up"
     echo "./technoplatz-bi.sh down"
     echo "./technoplatz-bi.sh kill"
@@ -60,7 +60,7 @@ function getFiles() {
     else
         echo "Process will continue without GitHub token."
     fi
-    curl "${curlHeaders[@]}" -Ls -o $DCYML -o $DOTENV -o $DBCONFF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONFF}
+    curl "${curlHeaders[@]}" -Ls -o $DCYML -o $DOTENV -o $DBCONF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONF}
     return 1
 }
 
@@ -199,7 +199,7 @@ DIR="_bi"
 MAINBRANCH="main"
 DCYML="docker-compose.yml"
 DOTENV=".env"
-DBCONFF="_init/mongod.conf"
+DBCONF="_init/mongod.conf"
 BUILDS='[
     {"folder":"_init","image":"bi-init","tag":"latest","dockerfile":"Dockerfile"},
     {"folder":"_replicaset","image":"bi-replicaset","tag":"latest","dockerfile":"Dockerfile"},
