@@ -42,12 +42,12 @@ EOF
 function listAllCommands() {
     echo "Available commands:"
     echo "./technoplatz-bi.sh install [github-token]"
-    echo "./technoplatz-bi.sh start"
-    echo "./technoplatz-bi.sh restart (Pulls the latest images)"
-    echo "./technoplatz-bi.sh build"
+    echo "./technoplatz-bi.sh up"
+    echo "./technoplatz-bi.sh down"
     echo "./technoplatz-bi.sh kill"
     echo "./technoplatz-bi.sh pull"
-    echo "./technoplatz-bi.sh stop"
+    echo "./technoplatz-bi.sh build"
+    echo "./technoplatz-bi.sh prune"
     echo "./technoplatz-bi.sh help"
     echo
     echo "See more at https://bi.technoplatz.com/support#script-commands-reference"
@@ -65,14 +65,12 @@ function getFiles() {
 }
 
 function installBI() {
-
     if [ -d $DIR ]; then
         echo "Oops! \"$DIR\" directory already exists. You should remove it manually."
         echo "Installation was canceled to avoid any data loss."
         return 0
     else
         mkdir $DIR
-        mkdir $DIR/_init $DIR/_replicaset $DIR/pwa $DIR/api
     fi
     
     cd  $DIR
@@ -100,11 +98,11 @@ function installBI() {
     
     echo "Required files were downloaded successfully :)"
     echo "** PLEASE DO NOT FORGET TO MAKE THE NECESSARY CHANGES ON \".env\" FILE **"
-    echo "** THEN RUN ./technoplatz-bi start **"
+    echo "** THEN RUN ./technoplatz-bi up **"
     return 1
 }
 
-function startBI() {
+function upBI() {
     cd  $DIR
     if [ $1 ]; then
         echo "No parameter required: $1"
@@ -117,20 +115,7 @@ function startBI() {
     return 1
 }
 
-function restartBI() {
-    cd  $DIR
-    if [ $1 ]; then
-        echo "No parameter required: $1"
-        return 0
-    fi
-    docker-compose pull && docker-compose up --detach --remove-orphans --no-build
-    echo
-    echo "The platform has been restarted"
-    echo "** PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL **"
-    return 1
-}
-
-function stopBI() {
+function downBI() {
     cd  $DIR
     if [ $1 ]; then
         echo "No parameter required: $1"
@@ -148,7 +133,17 @@ function pullBI() {
     fi
     docker-compose pull
     echo "The latest software updates have been received successfully"
-    echo "** RUN \"./technoplatz-bi.sh start | restart\" FOR CHANGES TO BE APPLIED **"
+    echo "** RUN \"./technoplatz-bi.sh up\" FOR CHANGES TO BE APPLIED **"
+    return 1
+}
+
+function pruneBI() {
+    if [ $1 ]; then
+        echo "No parameter required: $1"
+        return 0
+    fi
+    docker system prune
+    echo "Unused resources have been removed"
     return 1
 }
 
@@ -157,7 +152,26 @@ function buildBI() {
         echo "No parameter required: $1"
         return 0
     fi
-    docker-compose build
+    BRANCH=$(git branch --show-current)
+    if [ -z $BRANCH ]; then
+        echo "No branch found $BRANCH"
+        return 0
+    fi
+    if [[ $BRANCH -eq "main" ]]; then BRANCH=""; else BRANCH="-$BRANCH"; fi
+
+    for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do
+        _jq() {
+            echo ${row} | base64 --decode | jq -r ${1}
+        }
+    IMAGE=$(echo $(_jq '.image'))
+    FOLDER=$(echo $(_jq '.folder'))
+    TAG=$(echo $(_jq '.tag'))
+    NS=$(echo $(_jq '.ns'))
+    DOCKERFILE=$(echo $(_jq '.dockerfile'))
+    echo "Building $IMAGE..."
+    docker build --tag ghcr.io/$NS/$IMAGE$BRANCH:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
+    done
+
     return 1
 }
 
@@ -178,21 +192,24 @@ function killBI() {
 }
 
 # Setup
+INC=0
 DIR="bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 DBCONFF="_init/mongod.conf"
-INC=0
+BUILDS='[
+    {"folder":"_init","image":"bi-init","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"},
+    {"folder":"_replicaset","image":"bi-replicaset","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"},
+    {"folder":"api","image":"bi-api","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"},
+    {"folder":"pwa","image":"bi-pwa","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"}
+    ]'
 
 case $1 in
     "install")
 	    installBI "$2"
 	    ;;
-    "start")
-        startBI "$2"
-        ;;
-    "restart")
-        restartBI "$2"
+    "up")
+        upBI "$2"
         ;;
     "build")
         buildBI "$2"
@@ -200,11 +217,14 @@ case $1 in
     "kill")
         killBI "$2"
         ;;
+    "prune")
+        pruneBI "$2"
+        ;;
     "pull")
         pullBI "$2"
         ;;
-    "stop")
-        stopBI "$2"
+    "down")
+        downBI "$2"
         ;;
     "help")
         listAllCommands
