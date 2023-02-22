@@ -158,7 +158,9 @@ function buildBI() {
         echo "No branch found $BRANCH"
         return 0
     fi
-    if [[ $BRANCH -eq "main" || $BRANCH -eq "master" ]]; then BRANCH=""; else BRANCH="-$BRANCH"; fi
+    
+    if [ $BRANCH == $MAINBRANCH ]; then BRANCH=""; else BRANCH="-$BRANCH"; fi
+    echo "BRANCH: $BRANCH"
 
     for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do
         _jq() {
@@ -168,7 +170,6 @@ function buildBI() {
     FOLDER=$(echo $(_jq '.folder'))
     TAG=$(echo $(_jq '.tag'))
     DOCKERFILE=$(echo $(_jq '.dockerfile'))
-    echo "Building $IMAGE..."
     docker build --tag $NS/$IMAGE$BRANCH:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
     done
 
@@ -195,6 +196,7 @@ function killBI() {
 INC=0
 NS="technoplatz"
 DIR="_bi"
+MAINBRANCH="main"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 DBCONFF="_init/mongod.conf"
