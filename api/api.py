@@ -3631,7 +3631,6 @@ class Crud():
 class Email():
     def __init__(self):
         self.SMTP_SERVER = os.environ.get("SMTP_SERVER")
-        self.SMTP_SSL = os.environ.get("SMTP_SSL")
         self.SMTP_PORT = os.environ.get("SMTP_PORT")
         self.SMTP_USERID = os.environ.get("SMTP_USERID")
         self.SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
@@ -3649,7 +3648,7 @@ class Email():
         try:
             email_from_ = f"{self.COMPANY_NAME} <{self.FROM_EMAIL}>"
             html_ = f"{msg['html']} {self.disclaimer_}"
-            server_ = smtplib.SMTP_SSL(self.SMTP_SERVER, self.SMTP_PORT) if self.SMTP_SSL else smtplib.SMTP(self.SMTP_SERVER, self.SMTP_PORT)
+            server_ = smtplib.SMTP_SSL(self.SMTP_SERVER, self.SMTP_PORT)
             server_.ehlo()
             server_.login(self.SMTP_USERID, self.SMTP_PASSWORD)
 

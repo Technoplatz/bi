@@ -46,7 +46,7 @@ function listAllCommands() {
     echo "./technoplatz-bi.sh down"
     echo "./technoplatz-bi.sh kill"
     echo "./technoplatz-bi.sh pull"
-    echo "./technoplatz-bi.sh build"
+    echo "./technoplatz-bi.sh build [--prod]"
     echo "./technoplatz-bi.sh prune"
     echo "./technoplatz-bi.sh help"
     echo
@@ -104,6 +104,11 @@ function installBI() {
 }
 
 function upBI() {
+    if [ ! -d $DIR ]; then
+        echo "Oops! \"$DIR\" folder not found at the directory you are!"
+        echo "You need to install the platform by ./technoplatz-bi.sh install [token]"
+        return 0
+    fi
     cd  $DIR
     if [ $1 ]; then
         echo "No parameter required: $1"
@@ -149,17 +154,29 @@ function pruneBI() {
 }
 
 function buildBI() {
-    if [ $1 ]; then
-        echo "No parameter required: $1"
+
+    if [[ -z $(git branch --show-current) ]]; then
+        echo "No branch found!"
         return 0
     fi
     BRANCH=$(git branch --show-current)
-    if [ -z $BRANCH ]; then
-        echo "No branch found $BRANCH"
-        return 0
+
+    if [ $1 ]; then
+        if [ $1 == "--prod" ]; then
+            BRANCH=""
+        else
+            echo "Invalid parameter: $1"
+            return 0
+        fi
+    else
+        if [ $BRANCH == "main" ]; then
+            echo "Main branches require to add --prod option"
+            return 0
+        else
+            BRANCH="-$BRANCH"
+        fi
     fi
-    
-    if [ $BRANCH == $MAINBRANCH ]; then BRANCH=""; else BRANCH="-$BRANCH"; fi
+
     echo "BRANCH: $BRANCH"
 
     for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do
@@ -196,7 +213,6 @@ function killBI() {
 INC=0
 NS="technoplatz"
 DIR="_bi"
-MAINBRANCH="main"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 DBCONF="_init/mongod.conf"
