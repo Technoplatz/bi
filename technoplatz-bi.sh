@@ -53,6 +53,24 @@ function listAllCommands() {
     echo "See more at https://bi.technoplatz.com/support#script-commands-reference"
 }
 
+function getSuffixBI() {
+    SUFFIX=""
+    BRANCH_=$(git branch --show-current)
+    if [[ ! -z $BRANCH_ ]]; then
+        if [ $1 ]; then
+            if [ $1 != "--prod" ]; then
+                SUFFIX="-1"
+            fi
+        else
+            if [ $BRANCH_ != "main" ]; then
+                SUFFIX="-$BRANCH_"
+            fi
+        fi
+    fi
+    echo $SUFFIX
+    return 1
+}
+
 function getFiles() {
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $1 ]; then
@@ -73,19 +91,14 @@ function installBI() {
         mkdir $DIR
         mkdir $DIR/_init
     fi
-    
-    cd  $DIR
-
+    cd $DIR
     getFiles "$1"
-    
     CONTD=$(cat $DCYML | head -c 3)
-
     if [[ "$CONTD" == *"40"* ]]; then
         echo "Required files not found on GitHub ($CONTD)."
         echo "You may provide a token to get connected to the repository."
         return 0
     fi
-
     if [ ! -f .secret-mongo-password ]; then
         re='^[a-zA-Z]+$'
         while ! [[ ${DBPWD:0:1} =~ $re ]]
@@ -96,10 +109,10 @@ function installBI() {
         echo $DBPWD > .secret-mongo-password
         echo "Database password was created successfully ($INC)."
     fi
-    
     echo "Required files were downloaded successfully :)"
-    echo "** PLEASE DO NOT FORGET TO MAKE THE NECESSARY CHANGES ON \"_bi/.env\" FILE **"
-    echo "** THEN RUN ./technoplatz-bi up **"
+    echo
+    echo "PLEASE MAKE THE NECESSARY CHANGES ON \"_bi/.env\" FILE"
+    echo "THEN RUN ./technoplatz-bi.sh up"
     return 1
 }
 
@@ -109,20 +122,22 @@ function upBI() {
         echo "You need to install the platform by ./technoplatz-bi.sh install [token]"
         return 0
     fi
-    cd  $DIR
-    if [ $1 ]; then
-        echo "No parameter required: $1"
+    GETSUFFIX=$(getSuffixBI "$1")
+    if [ "$GETSUFFIX" == "-1" ]; then
+        echo "Invalid paramater: $1"
         return 0
     fi
-    docker-compose up --detach --remove-orphans --no-build
+    echo "SUFFIX $GETSUFFIX"
+    cd $DIR
+    DEV_SUFFIX=$GETSUFFIX docker-compose up --detach --remove-orphans --no-build
     echo
     echo "The platform has been started"
-    echo "** PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL **"
+    echo "PLEASE BE PAITENT UP TO 20 SECONDS FOR THE PLATFORM TO BE FUNCTIONAL"
     return 1
 }
 
 function downBI() {
-    cd  $DIR
+    cd $DIR
     if [ $1 ]; then
         echo "No parameter required: $1"
         return 0
@@ -132,14 +147,14 @@ function downBI() {
 }
 
 function pullBI() {
-    cd  $DIR
+    cd $DIR
     if [ $1 ]; then
         echo "No parameter required: $1"
         return 0
     fi
     docker-compose pull
     echo "The latest software updates have been received successfully"
-    echo "** RUN \"./technoplatz-bi.sh up\" FOR CHANGES TO BE APPLIED **"
+    echo "RUN \"./technoplatz-bi.sh up\" FOR CHANGES TO BE APPLIED"
     return 1
 }
 
@@ -154,31 +169,13 @@ function pruneBI() {
 }
 
 function buildBI() {
-
-    if [[ -z $(git branch --show-current) ]]; then
-        echo "No branch found!"
+    GETSUFFIX=$(getSuffixBI "$1")
+    if [ "$GETSUFFIX" == "-1" ]; then
+        echo "Invalid paramater: $1"
         return 0
     fi
-    BRANCH=$(git branch --show-current)
-
-    if [ $1 ]; then
-        if [ $1 == "--prod" ]; then
-            BRANCH=""
-        else
-            echo "Invalid parameter: $1"
-            return 0
-        fi
-    else
-        if [ $BRANCH == "main" ]; then
-            echo "Main branches require to add --prod option"
-            return 0
-        else
-            BRANCH="-$BRANCH"
-        fi
-    fi
-
-    echo "BRANCH: $BRANCH"
-
+    echo "SUFFIX $GETSUFFIX"
+    BRANCH=$GETSUFFIX
     for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do
         _jq() {
             echo ${row} | base64 --decode | jq -r ${1}
@@ -189,7 +186,6 @@ function buildBI() {
     DOCKERFILE=$(echo $(_jq '.dockerfile'))
     docker build --tag $NS/$IMAGE$BRANCH:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
     done
-
     return 1
 }
 
@@ -205,7 +201,6 @@ function killBI() {
     else
         echo "No containers found!"
     fi
-    
     return 1
 }
 
