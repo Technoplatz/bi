@@ -63,7 +63,7 @@ services:
 
   init:
     container_name: init
-    image: ${HUB}technoplatz/bi-init${DEV_SUFFIX}:latest
+    image: technoplatz/bi-init${DEV_SUFFIX}:latest
     hostname: init
     volumes:
       - bi-storage-volume:/init
@@ -153,7 +153,7 @@ services:
 
   replicaset:
     container_name: replicaset
-    image: ${HUB}technoplatz/bi-replicaset${DEV_SUFFIX}:latest
+    image: technoplatz/bi-replicaset${DEV_SUFFIX}:latest
     hostname: replicaset
     depends_on:
       - mongo0
@@ -188,7 +188,7 @@ services:
 
   api:
     container_name: api
-    image: ${HUB}technoplatz/bi-api${DEV_SUFFIX}:latest
+    image: technoplatz/bi-api${DEV_SUFFIX}:latest
     depends_on:
       - replicaset
     hostname: api
@@ -237,7 +237,7 @@ services:
 
   pwa:
     container_name: pwa
-    image: ${HUB}technoplatz/bi-pwa${DEV_SUFFIX}:latest
+    image: technoplatz/bi-pwa${DEV_SUFFIX}:latest
     hostname: pwa
     restart: always
     volumes:

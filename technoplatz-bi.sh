@@ -71,6 +71,7 @@ function installBI() {
         return 0
     else
         mkdir $DIR
+        mkdir $DIR/_init
     fi
     
     cd  $DIR
@@ -157,7 +158,7 @@ function buildBI() {
         echo "No branch found $BRANCH"
         return 0
     fi
-    if [[ $BRANCH -eq "main" ]]; then BRANCH=""; else BRANCH="-$BRANCH"; fi
+    if [[ $BRANCH -eq "main" || $BRANCH -eq "master" ]]; then BRANCH=""; else BRANCH="-$BRANCH"; fi
 
     for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do
         _jq() {
@@ -166,10 +167,9 @@ function buildBI() {
     IMAGE=$(echo $(_jq '.image'))
     FOLDER=$(echo $(_jq '.folder'))
     TAG=$(echo $(_jq '.tag'))
-    NS=$(echo $(_jq '.ns'))
     DOCKERFILE=$(echo $(_jq '.dockerfile'))
     echo "Building $IMAGE..."
-    docker build --tag ghcr.io/$NS/$IMAGE$BRANCH:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
+    docker build --tag $NS/$IMAGE$BRANCH:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
     done
 
     return 1
@@ -193,15 +193,16 @@ function killBI() {
 
 # Setup
 INC=0
-DIR="bi"
+NS="technoplatz"
+DIR="_bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 DBCONFF="_init/mongod.conf"
 BUILDS='[
-    {"folder":"_init","image":"bi-init","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"},
-    {"folder":"_replicaset","image":"bi-replicaset","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"},
-    {"folder":"api","image":"bi-api","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"},
-    {"folder":"pwa","image":"bi-pwa","tag":"latest","ns":"technoplatz","dockerfile":"Dockerfile"}
+    {"folder":"_init","image":"bi-init","tag":"latest","dockerfile":"Dockerfile"},
+    {"folder":"_replicaset","image":"bi-replicaset","tag":"latest","dockerfile":"Dockerfile"},
+    {"folder":"api","image":"bi-api","tag":"latest","dockerfile":"Dockerfile"},
+    {"folder":"pwa","image":"bi-pwa","tag":"latest","dockerfile":"Dockerfile"}
     ]'
 
 case $1 in
