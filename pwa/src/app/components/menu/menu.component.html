@@ -1,0 +1,126 @@
+<!--
+Technoplatz BI
+
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see https://www.gnu.org/licenses.
+
+If your software can interact with users remotely through a computer
+network, you should also make sure that it provides a way for users to
+get its source.  For example, if your program is a web application, its
+interface could display a "Source" link that leads users to an archive
+of the code.  There are many ways you could offer source, and different
+solutions will be better for different programs; see section 13 for the
+specific requirements.
+
+You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU AGPL, see
+https://www.gnu.org/licenses.
+-->
+
+<ion-menu type="push" contentId="main-content">
+  <ion-header class="ion-no-border">
+    <ion-toolbar color="white">
+      <div class="flex-container ion-padding-start">
+        <ion-icon name="leaf-outline" size="large" class="flex-child"></ion-icon>
+        <ion-title class="ion-no-padding flex-child">
+          {{ 'Technoplatz BI' }}
+        </ion-title>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="ion-padding-start">
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col class="menu-side hide-scrollbar">
+          <ion-list lines="none">
+            <ion-item lines="none" class="pane-item">
+              <ion-label>
+                {{ 'Console' }}_<br />
+                <span>
+                  v {{ version }} ({{ release }})<br />
+                  {{ saas_ ? saas_.company : null }}
+                </span>
+              </ion-label>
+            </ion-item>
+            <ion-item lines="none">
+              <ion-label class="ion-text-wrap ion-no-margin">
+                <ion-button size="default" fill="clear" class="dash-button" (click)="doNavi('dashboard', null)">
+                  <ion-icon name="stats-chart-sharp"></ion-icon>
+                  {{ 'Dashboard' | translate }}
+                </ion-button>
+              </ion-label>
+            </ion-item>
+            <ion-item lines="none">
+              <ion-label class="ion-text-wrap ion-no-margin">
+                <ion-button size="default" fill="clear" class="menu-button">
+                  <ion-icon name="layers-outline"></ion-icon>{{ 'Collections' | translate }}
+                </ion-button>
+                <p *ngIf="collections.length == 0">
+                  <ion-text color="medium">{{ 'No collections found' | translate }}</ion-text>
+                </p>
+                <p *ngFor="let item of collections" (click)="doNavi('collections', item.col_id)"
+                  class="clicked-item dark">
+                  {{ item.col_title }}
+                </p>
+              </ion-label>
+            </ion-item>
+            <ion-item lines="none">
+              <ion-label class="ion-text-wrap ion-no-margin">
+                <ion-button size="default" fill="clear" class="menu-button">
+                  <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
+                </ion-button>
+                <p *ngIf="views.length == 0">
+                  <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
+                </p>
+                <p *ngFor="let item of views" (click)="goSection('views', item.col_id, item.col_id)"
+                  class="clicked-item dark">
+                  {{ item.vie_title }}
+                </p>
+              </ion-label>
+            </ion-item>
+            <ion-item *ngIf="segmentsadm" lines="none">
+              <ion-label class="ion-text-wrap ion-no-margin">
+                <ion-button size="default" fill="clear" class="menu-button">
+                  <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
+                </ion-button>
+                <p *ngFor="let item of segmentsadm" (click)="goSection('admin', item.id, item.title)"
+                  class="clicked-item dark">
+                  {{ item.title }}
+                </p>
+              </ion-label>
+            </ion-item>
+            <ion-item lines="none">
+              <ion-label class="ion-text-wrap">
+                <ion-button size="default" fill="clear" class="menu-button">
+                  <ion-icon name="options-outline"></ion-icon>{{ 'Preferences' | translate }}
+                </ion-button>
+                <p (click)="goSection('account', 'apikey', 'API Key')" class="clicked-item dark">
+                  {{ 'API Key' | translate }}
+                </p>
+                <p (click)="goSection('account', 'settings', 'Account Settings')" class="clicked-item dark">
+                  {{ 'Account Settings' | translate }}
+                </p>
+                <p (click)="doNavi('account', 'preferences')" class="clicked-item dark">
+                  {{ 'Preferences' | translate }}
+                </p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-content>
+</ion-menu>

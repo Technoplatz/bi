@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -32,13 +32,13 @@ https://www.gnu.org/licenses.
 
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
-import { MainPage } from "./main.page";
+import { CollectionsPage } from "./collections.page";
 
 const routes: Routes = [
   {
     path: "",
-    component: MainPage,
-  },
+    component: CollectionsPage
+  }
 ];
 
 @NgModule({
@@ -46,4 +46,4 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 
-export class MainPageRoutingModule {}
+export class CollectionsPageRoutingModule { }

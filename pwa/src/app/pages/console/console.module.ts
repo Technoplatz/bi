@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -38,7 +38,6 @@ import { IonicModule } from "@ionic/angular";
 import { ConsolePageRoutingModule } from "./console-routing.module";
 import { ConsolePage } from "./console.page";
 import { PageComponentsModule } from "../../components/page-components.module";
-import { CapitalizePipe } from "./../../pipes/capitalize-pipe";
 import { QRCodeModule } from 'angularx-qrcode';
 import { NgJsonEditorModule } from "ang-jsoneditor";
 
@@ -55,8 +54,7 @@ import { NgJsonEditorModule } from "ang-jsoneditor";
     NgJsonEditorModule
   ],
   declarations: [
-    ConsolePage,
-    CapitalizePipe
+    ConsolePage
   ],
   exports: [
     ConsolePage

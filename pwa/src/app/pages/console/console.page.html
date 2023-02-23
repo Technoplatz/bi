@@ -1,7 +1,7 @@
 <!--
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -30,81 +30,24 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-content class="ion-no-padding">
+<ion-content class="ion-no-padding" id="main-content">
+  <ion-header class="app-header ion-no-border ion-no-margin">
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-menu-button></ion-menu-button>
+      </ion-buttons>
+      <ion-title>
+        {{ header }}
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
   <ion-grid *ngIf="is_initialized" class="ion-no-padding">
     <ion-row>
-      <ion-col [class]="menu_toggle ? 'hide-segment' : 'console-left-side hide-scrollbar' ">
-        <ion-list class="ion-no-padding ion-padding-bottom ion-padding-bottom menu-list" lines="none">
-          <ion-item lines="none" class="pane-item">
-            <ion-label>
-              {{ 'Console' }}_<br />
-              <span>
-                v {{ version }} ({{ release }})<br />
-                {{ saas_.company }}
-              </span>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-button size="default" fill="clear" class="dash-button"
-              (click)="goSection('dashboard', null, 'Dashboard')">
-              <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Dashboard' | translate }}
-            </ion-button>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label class="ion-text-wrap">
-              <ion-button size="default" fill="clear" class="menu-button">
-                <ion-icon name="layers-outline"></ion-icon>{{ 'Collections' | translate }}
-              </ion-button>
-              <p *ngIf="collections.length == 0">
-                <ion-text color="medium">{{ 'No collections found' | translate }}</ion-text>
-              </p>
-              <p *ngFor="let item of collections" (click)="goSection('collections', item.col_id, item.col_id)"
-                class="clicked-item">
-                {{ item.col_title }}
-              </p>
-            </ion-label>
-          </ion-item>
-          <ion-item *ngIf="perm && segmentsadm && segmentsadm.length > 0" lines="none">
-            <ion-label class="ion-text-wrap">
-              <ion-button size="default" fill="clear" class="menu-button">
-                <ion-icon name="settings-outline"></ion-icon>{{ 'Administration' | translate }}
-              </ion-button>
-              <p *ngFor="let item of segmentsadm" (click)="goSection('admin', item.id, item.title)"
-                class="clicked-item">
-                {{ item.title }}
-              </p>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label class="ion-text-wrap">
-              <ion-button size="default" fill="clear" class="menu-button">
-                <ion-icon name="options-outline"></ion-icon>{{ 'Preferences' | translate }}
-              </ion-button>
-              <p (click)="goSection('account', 'apikey', 'API Key')" class="clicked-item">
-                {{ 'API Key' | translate }}
-              </p>
-              <p (click)="goSection('account', 'settings', 'Account Settings')" class="clicked-item">
-                {{ 'Account Settings' | translate }}
-              </p>
-              <p (click)="goSection('account', 'preferences', 'Preferences')" class="clicked-item">
-                {{ 'Preferences' | translate }}
-              </p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-      </ion-col>
-
       <!-- RIGHT SIDE -->
       <ion-col class="console-right-side">
         <ion-grid class="ion-no-padding ion-no-border">
           <ion-row>
             <ion-col class="console-right-0">
-              <!-- HEADER -->
-              <ion-button (click)="doMenuToggle()" size="large" fill="clear"
-                class="ion-no-padding ion-no-margin toggle-button">
-                <ion-icon name="menu-sharp" color="primary"></ion-icon> {{ header | capitalize }}
-              </ion-button>
-              <!-- DASHBOARD -->
               <div *ngIf="menu=='dashboard'">
                 <!-- DASH HEADER BUTTONS GRID -->
                 <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
@@ -259,7 +202,8 @@ https://www.gnu.org/licenses.
                       <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)"
                         class="clicked-item">
                         <ion-col size="3">
-                          <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id }}<br />
+                          <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id
+                          }}<br />
                           <div class="data-title">{{ item.vie_title }}</div>
                         </ion-col>
                         <ion-col size="2">
@@ -282,7 +226,8 @@ https://www.gnu.org/licenses.
                       </ion-row>
                     </ion-grid>
                     <ng-template #nosharedviews>
-                      <ion-text class="pe" class="ion-margin-bottom">{{ 'No data found using these search criteria' |
+                      <ion-text class="pe" class="ion-margin-bottom">{{ 'No data found using these search criteria'
+                        |
                         translate }}.</ion-text>
                     </ng-template>
                   </div>
@@ -356,8 +301,10 @@ https://www.gnu.org/licenses.
                         <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
                         <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
                         <br />
-                        <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data Url' | translate }}</span>
-                        <span *ngIf="is_url_copied">{{ 'Data Url' | translate }}<br />{{ 'Copied' | translate }}</span>
+                        <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data Url' | translate
+                          }}</span>
+                        <span *ngIf="is_url_copied">{{ 'Data Url' | translate }}<br />{{ 'Copied' | translate
+                          }}</span>
                       </div>
                       <div (click)="doQuitViewMode()" class="data-sq-button">
                         <ion-icon name="exit-outline"></ion-icon>
@@ -470,7 +417,8 @@ https://www.gnu.org/licenses.
                     <ion-row></ion-row>
                     <ion-row *ngIf="view_count > 0" class="ion-nowrap">
                       <ion-col size="12" class="ion-no-padding">
-                        {{ view_data.length }} {{ 'of' | translate }} {{ view_count }} {{ 'rows displayed' | translate
+                        {{ view_data.length }} {{ 'of' | translate }} {{ view_count }} {{ 'rows displayed' |
+                        translate
                         }}.
                       </ion-col>
                     </ion-row>
@@ -694,7 +642,8 @@ https://www.gnu.org/licenses.
                             class="ion-no-padding ion-margin-end">
                             <span *ngIf="count > limit">
                               {{ (page - 1) * limit + 1 }} -
-                              <span *ngIf="(page - 1) * limit + limit <= count">{{ (page - 1) * limit + limit }}</span>
+                              <span *ngIf="(page - 1) * limit + limit <= count">{{ (page - 1) * limit + limit
+                                }}</span>
                               <span *ngIf="(page - 1) * limit + limit > count">{{ count }}</span>
                               {{ 'of' | translate }}&nbsp;
                             </span>
@@ -759,11 +708,13 @@ https://www.gnu.org/licenses.
                   <ion-item lines="none">
                     <ion-label class="ion-text-wrap descriptive">
                       <h2>{{ 'Two-Factor Authentication' | translate }} (OTP)</h2>
-                      {{ 'OTP method supplements application password by producing one-time codes as a second layer of
+                      {{ 'OTP method supplements application password by producing one-time codes as a second layer
+                      of
                       security' | translate }}.<br />
                       {{ 'You must activate OTP to get signed in by following steps' | translate }};
                       <ul>
-                        <li>{{ 'Install an "OTP Authenticator App" into your Mobile Phone' | translate }}.<br />{{ 'We
+                        <li>{{ 'Install an "OTP Authenticator App" into your Mobile Phone' | translate }}.<br />{{
+                          'We
                           strongly recommend any of the below Apps' | translate }};
                           <ul>
                             <li>Authy</li>
@@ -771,7 +722,8 @@ https://www.gnu.org/licenses.
                             <li>Google Authenticator<br /><br /></li>
                           </ul>
                         </li>
-                        <li>{{ 'Click "Reset OTP" button below. A new QR code will be generated' | translate }}.</li>
+                        <li>{{ 'Click "Reset OTP" button below. A new QR code will be generated' | translate }}.
+                        </li>
                         <li>{{ 'Run the OTP App on Mobile Phone and select "Add Account"' | translate }}.</li>
                         <li>{{ 'Read the QR code' | translate }}.</li>
                         <li>{{ 'Validate the new QR code with "Validate OTP" button' | translate }}.</li>
@@ -809,13 +761,16 @@ https://www.gnu.org/licenses.
                 <div *ngIf="submenu=='apikey'" class="header-row">
                   <ion-item lines="none">
                     <ion-label *ngIf="accountf_apikey; else noapikey" class="ion-text-wrap descriptive">
-                      {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI Tools' |
+                      {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI
+                      Tools'
+                      |
                       translate }}.
                       <ul>
                         <li>{{ 'API Key is hidden by default. To see your API Key for 5 seconds click to show button
                           below' | translate }}.</li>
                         <li>{{ 'You can copy and paste your API Key to the clipboard' | translate }}.</li>
-                        <li>{{ 'Once you generate a new API Key previous one doesn\'t work anymore' | translate }}.</li>
+                        <li>{{ 'Once you generate a new API Key previous one doesn\'t work anymore' | translate }}.
+                        </li>
                       </ul>
                       <ion-icon color="primary" name="key" size="large" class="ion-margin-end"></ion-icon>
                       <p *ngIf="is_apikey_enabled" class="fixed-font">{{ accountf_apikey }}</p>
@@ -845,11 +800,13 @@ https://www.gnu.org/licenses.
                     </ion-label>
                     <ng-template #noapikey>
                       <ion-label class="ion-text-wrap descriptive">
-                        {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI Tools'
+                        {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI
+                        Tools'
                         |
                         translate }}.
                         <ul>
-                          <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one please
+                          <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one
+                            please
                             click the button below' | translate }}.</li>
                         </ul>
                         <p>
@@ -892,7 +849,8 @@ https://www.gnu.org/licenses.
                     <ion-label>
                       {{ item.vie_title }}<br />
                       <span>{{ item.vie_collection_id }} |
-                        <span *ngIf="item.chart && item.chart.count; else noviews" class="text-bold">{{ item.chart.count
+                        <span *ngIf="item.chart && item.chart.count; else noviews" class="text-bold">{{
+                          item.chart.count
                           }}
                           <span *ngIf="item.chart.count > 1">{{ 'rows' |
                             translate }}</span><span *ngIf="item.chart.count == 1">{{ 'row' | translate
@@ -911,7 +869,8 @@ https://www.gnu.org/licenses.
                   <div>
                     {{ 'You can create a shared view by saving the existing query' |
                     translate }}.</div>
-                  <ion-button size="small" class="ion-margin-top" (click)="doSaveAsView()">{{ 'Save as View' | translate
+                  <ion-button size="small" class="ion-margin-top" (click)="doSaveAsView()">{{ 'Save as View' |
+                    translate
                     }}</ion-button>
                 </ng-template>
                 <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]

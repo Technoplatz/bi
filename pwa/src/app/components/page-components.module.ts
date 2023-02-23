@@ -36,6 +36,7 @@ import { TranslateModule } from "@ngx-translate/core";
 import { RouterModule } from "@angular/router";
 import { AppHeaderComponent } from "./app-header/app-header.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { MenuComponent } from "./menu/menu.component";
 import { FooterComponent } from "./footer/footer.component";
 import { FilterComponent } from "./filter/filter.component";
 import { KovComponent } from "./kov/kov.component";
@@ -47,6 +48,7 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
 
 @NgModule({
     declarations: [
+        MenuComponent,
         AppHeaderComponent,
         FooterComponent,
         FilterComponent,
@@ -65,6 +67,7 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
         NgxChartsModule
     ],
     exports: [
+        MenuComponent,
         AppHeaderComponent,
         FooterComponent,
         FilterComponent,

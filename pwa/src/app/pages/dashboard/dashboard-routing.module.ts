@@ -32,13 +32,13 @@ https://www.gnu.org/licenses.
 
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
-import { MainPage } from "./main.page";
+import { DashboardPage } from "./dashboard.page";
 
 const routes: Routes = [
   {
     path: "",
-    component: MainPage,
-  },
+    component: DashboardPage
+  }
 ];
 
 @NgModule({
@@ -46,4 +46,4 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 
-export class MainPageRoutingModule {}
+export class DashboardPageRoutingModule { }

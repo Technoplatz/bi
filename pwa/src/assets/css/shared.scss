@@ -30,19 +30,18 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-.console-split-pane {
-  margin-top: 50px;
-}
-
-.console-split-pane.split-pane-visible>.split-pane-side {
-  min-width: 0px !important;
-  max-width: 260px !important;
-  border: none !important;
+.menu-content-open {
+  pointer-events: all !important;
+  cursor: default !important;
 }
 
 .flex-container {
-  display: flex;
-  flex-wrap: nowrap;
+  display: flex !important;
+}
+
+.flex-child {
+  align-content: flex-start;
+  margin-right: 4px;
 }
 
 .theme-button {
@@ -63,6 +62,10 @@ https://www.gnu.org/licenses.
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+ion-menu {
+  --max-width: 260px;
 }
 
 ion-router-outlet {
@@ -556,11 +559,6 @@ form ion-item ion-label {
   font-weight: 400;
 }
 
-.menu-list ion-label {
-  margin: 0px;
-  margin-bottom: 8px !important;
-}
-
 .menu-button {
   --padding-start: 0px !important;
   margin-bottom: -4px;
@@ -569,17 +567,18 @@ form ion-item ion-label {
   pointer-events: none !important;
 }
 
+.menu-button ion-icon {
+  max-width: 24px !important;
+}
+
 .dash-button {
   --padding-start: 0px !important;
   font-weight: 700;
   margin-bottom: -8px;
 }
 
-.menu-button ion-icon {
-  margin-right: 8px;
-}
-
 .dash-button ion-icon {
+  max-width: 24px !important;
   margin-right: 8px;
   margin-top: -8px;
 }
@@ -626,7 +625,7 @@ form ion-item ion-label {
 }
 
 .console-right-side {
-  width: calc(100% - 240px - 1px) !important;
+  width: calc(100% - 260px - 1px) !important;
   padding: 0px;
   padding-bottom: 16px;
 }
@@ -636,37 +635,29 @@ form ion-item ion-label {
   height: calc(100vh - 78px);
   overflow: scroll !important;
   padding-left: 16px;
+  position: sticky !important;
 }
 
 .console-right-1 {
   max-width: 240px !important;
-  font-size: small !important;
   border-left: 1px solid var(--ion-color-light);
 }
 
-.console-left-side {
-  border-right: 1px solid var(--ion-color-light);
-  max-width: 240px;
-  height: calc(100vh - 92px);
+.menu-side {
   overflow-y: scroll !important;
   overflow-x: hidden;
-  padding-left: 16px;
-  padding-top: 16px;
 }
 
-.console-left-side p {
-  margin-left: 28px;
-  color: var(--ion-color-dark);
-  font-weight: 400;
+.menu-side p {
+  margin-left: 23px;
 }
 
-.console-left-side p ion-icon {
+.menu-side p ion-icon {
   font-size: 11px !important;
   margin-bottom: -0.1em;
 }
 
-.console-left-side h3 {
-  color: var(--ion-color-dark);
+.menu-side h3 {
   font-weight: bold;
   margin-top: 6px;
 }
@@ -1008,6 +999,10 @@ sup {
 
 .clicked-item {
   cursor: pointer !important;
+}
+
+.dark {
+  color: var(--ion-color-dark) !important;
 }
 
 .overflow-hidden-item {

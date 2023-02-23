@@ -37,15 +37,15 @@ https://www.gnu.org/licenses.
       <ion-col size="11" class="ion-no-padding ion-padding-end">
         <ion-icon name="stats-chart-sharp" class="index-logo"></ion-icon>
         <h5>{{ 'No-code data management and sharing platform' | translate }}</h5>
-        <h1>{{ 'It\'s time to get data-driven with your Inner-Cycle' | translate }}</h1>
+        <h1>{{ 'It\'s time to get data-driven with your inner-cycle' | translate }}</h1>
       </ion-col>
     </ion-row>
     <ion-row class="ion-margin-top">
       <ion-col size="1"></ion-col>
       <ion-col size="11" class="ion-padding-top">
-        <ion-button *ngIf="user" href="/console" class="ion-margin-top">
+        <ion-button *ngIf="user" href="/dashboard" class="ion-margin-top">
           <ion-icon name="terminal-outline"></ion-icon>&nbsp;
-          {{ 'Console' | translate }}
+          {{ 'Dashboard' | translate }}
         </ion-button>
         <ion-button *ngIf="!user" (click)="doSignup()" class="ion-margin-top" size="default">
           <ion-icon name="person-outline"></ion-icon>

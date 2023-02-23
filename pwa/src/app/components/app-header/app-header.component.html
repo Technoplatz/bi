@@ -33,7 +33,7 @@ https://www.gnu.org/licenses.
 <ion-header class="app-header ion-no-padding ion-no-border ion-no-margin ion-padding-start ion-padding-end">
   <ion-item class="ion-no-padding" lines="none">
     <ion-button size="large" fill="clear" class="ion-no-margin ion-no-padding logo-button clear-dark-button"
-      href="/console">
+      href="/dashboard">
       <ion-icon [name]="logo" color="primary" class="logo-electron-small"></ion-icon>
       <ion-label>{{ 'Technoplatz BI' }}</ion-label>
     </ion-button>
@@ -50,7 +50,7 @@ https://www.gnu.org/licenses.
       class="ion-no-padding ion-margin-end clear-dark-button">
       <ion-label>{{ 'Sign out' | translate }}&nbsp;&nbsp;&nbsp;</ion-label>
     </ion-button>
-    <ion-button *ngIf="user" slot="end" size="default" fill="clear" href="/console/account/settings"
+    <ion-button *ngIf="user" slot="end" size="default" fill="clear" href="/dashboard/account/settings"
       class="ion-no-margin ion-no-padding clear-dark-button">
       <ion-label>{{ name }}&nbsp;&nbsp;</ion-label>
       <ion-icon name="person-circle-outline" color="primary"></ion-icon>

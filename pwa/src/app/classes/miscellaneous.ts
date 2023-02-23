@@ -32,10 +32,10 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { ModalController, ToastController, LoadingController, AlertController } from "@ionic/angular";
+import { Subject } from "rxjs";
 import { Storage } from "@ionic/storage";
 import { TranslateService } from "@ngx-translate/core";
 import { Navigation } from "./navigation";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { environment } from "../../environments/environment";
 import { ClipboardPluginWeb } from "@capacitor/core";
 
@@ -47,10 +47,6 @@ export class Miscellaneous {
   private loadin: any;
   private filter: any = [];
   private apiHost: string = "";
-  private miscHeaders: any = {
-    "Content-Type": "application/json",
-    "X-Api-Key": environment.apiKey
-  }
 
   constructor(
     private storage: Storage,
@@ -60,20 +56,11 @@ export class Miscellaneous {
     private loading: LoadingController,
     private nav: Navigation,
     private alert: AlertController,
-    private http: HttpClient,
     private cb: ClipboardPluginWeb
   ) { }
 
-  go(p: string) {
-    return new Promise((resolve, reject) => {
-      this.nav.navigateRoot(p).then(() => {
-        resolve(true);
-      }).catch((error: any) => {
-        reject(error);
-      });
-    });
-  }
-
+  navi = new Subject<any>();
+  
   getAPIHost() {
     return new Promise((resolve) => {
       this.apiHost = window.location.host.includes("8100") ? window.location.protocol + "//" + window.location.host.replace(/8100/gi, environment.apiPort) : window.location.host.includes("8101") ? window.location.protocol + "//" + window.location.host.replace(/8101/gi, environment.apiPort) : window.location.protocol + "//api." + window.location.hostname;

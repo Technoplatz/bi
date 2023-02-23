@@ -43,12 +43,12 @@ import { CrudPage } from "../crud/crud.page";
 import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 
 @Component({
-  selector: "app-console",
-  templateUrl: "./console.page.html",
-  styleUrls: ["./console.page.scss"]
+  selector: "app-collections",
+  templateUrl: "./collections.page.html",
+  styleUrls: ["./collections.page.scss"]
 })
 
-export class ConsolePage implements OnInit {
+export class CollectionsPage implements OnInit {
   @ViewChild(JsonEditorComponent, { static: false }) public strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
   public now: any = Date.now();
@@ -189,8 +189,8 @@ export class ConsolePage implements OnInit {
   }
 
   ngOnInit() {
-    const qstr1 = this.router.url.split("/")[2];
-    const qstr2 = this.router.url.split("/")[3];
+    const qstr1 = this.router.url.split("/")[1];
+    const qstr2 = this.router.url.split("/")[2];
     this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
       this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
       this.chart_css = "chart-sq " + this.chart_size;
@@ -332,7 +332,6 @@ export class ConsolePage implements OnInit {
       this.submenu = submenu_;
       this.header = header_ ? header_ : "dashboard";
       this.pivot_ = "";
-      this.submenu ? this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu + "/" + this.submenu) : this.location.replaceState("/" + this.router.url.split("/")[1] + "/" + this.menu);
       if (menu_ === "collections" || menu_ === "admin") {
         if (fromdash_ || submenu_ !== this.id) {
           this.doSetCollectionID(submenu_).then(() => {

@@ -34,13 +34,15 @@ import { NgModule, Injectable } from "@angular/core";
 import { PreloadAllModules, RouterModule, Routes, CanActivate, Resolve } from "@angular/router";
 import { Auth } from "./classes/auth";
 import { Miscellaneous } from "./classes/miscellaneous";
+import { Navigation } from "./classes/navigation";
 import { Storage } from "@ionic/storage";
 
 @Injectable()
 export class SessionGuard implements CanActivate {
   constructor(
     private auth: Auth,
-    private misc: Miscellaneous
+    private misc: Miscellaneous,
+    private nav: Navigation
   ) { }
   async canActivate() {
     return await this.auth.Session().then(() => {
@@ -48,7 +50,7 @@ export class SessionGuard implements CanActivate {
     }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "warning");
-      this.misc.go("/").then(() => { }).catch((error: any) => {
+      this.nav.navigateRoot("/").then(() => { }).catch((error: any) => {
         console.error(error);
       });
       return false;
@@ -59,10 +61,10 @@ export class SessionGuard implements CanActivate {
 @Injectable()
 export class ModalAccessGuard implements CanActivate {
   constructor(
-    private misc: Miscellaneous
+    private nav: Navigation,
   ) { }
   async canActivate() {
-    this.misc.go("/").then(() => { }).catch((error: any) => { console.error(error); });
+    this.nav.navigateRoot("/").then(() => { }).catch((error: any) => { console.error(error); });
     return false;
   }
 }
@@ -91,68 +93,54 @@ const routes: Routes = [
     }
   },
   {
-    path: "console",
-    redirectTo: "console/dashboard",
-    pathMatch: "full",
-  },
-  {
-    path: "console/dashboard",
+    path: "dashboard",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/console/console.module").then((m) => m.ConsolePageModule),
+    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,
     }
   },
   {
-    path: "console/dashboard/:p",
+    path: "collections/:p",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/console/console.module").then((m) => m.ConsolePageModule),
+    loadChildren: () => import("./pages/collections/collections.module").then((m) => m.CollectionsPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,
     }
   },
   {
-    path: "console/setup/:p",
+    path: "setup/:p",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/console/console.module").then((m) => m.ConsolePageModule),
+    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,
     }
   },
   {
-    path: "console/collections/:p",
+    path: "view/:p",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/console/console.module").then((m) => m.ConsolePageModule),
+    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,
     }
   },
   {
-    path: "console/view/:p",
+    path: "admin/:p",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/console/console.module").then((m) => m.ConsolePageModule),
+    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,
     }
   },
   {
-    path: "console/admin/:p",
+    path: "account/:p",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/console/console.module").then((m) => m.ConsolePageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
-  {
-    path: "console/account/:p",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/console/console.module").then((m) => m.ConsolePageModule),
+    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,

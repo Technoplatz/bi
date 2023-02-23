@@ -31,6 +31,8 @@ https://www.gnu.org/licenses.
 */
 
 export const environment = {
+  animated: true,
+  sanitizerEnabled: true,
   production: true,
   appVersion: require("../../package.json").version,
   release: "Brezel",

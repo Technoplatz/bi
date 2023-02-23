@@ -31,6 +31,6 @@ https://www.gnu.org/licenses.
 -->
 
 <ion-app>
-  <app-header *ngIf="index_ || console_" [user]="user_" [swu]="swu_" [net]="net_"></app-header>
-  <ion-router-outlet></ion-router-outlet>
+  <app-menu></app-menu>
+  <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>

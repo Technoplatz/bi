@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { NavController } from "@ionic/angular";
+import { Routes, RouterModule } from '@angular/router';
 
 @Injectable({
     providedIn: "root"
@@ -39,8 +40,10 @@ import { NavController } from "@ionic/angular";
 
 export class Navigation {
     constructor(
-        private nav: NavController
+        private nav: NavController,
+        private router: RouterModule
     ) { }
+
     navigateRoot(p: string) {
         return new Promise((resolve, reject) => {
             this.nav.navigateRoot([p]).then(() => {
@@ -50,6 +53,7 @@ export class Navigation {
             });
         });
     }
+
     navigateRootWithParams(p: any, params: any) {
         return new Promise((resolve, reject) => {
             this.nav.navigateRoot([p, params]).then(() => {
@@ -59,4 +63,5 @@ export class Navigation {
             });
         });
     }
+
 }

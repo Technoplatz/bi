@@ -72,8 +72,8 @@ export function createTranslateLoader(http: HttpClient) {
         BrowserModule,
         HttpClientModule,
         IonicModule.forRoot({
-            animated: false,
-            sanitizerEnabled: false
+            animated: environment.animated,
+            sanitizerEnabled: environment.sanitizerEnabled
         }),
         FormsModule,
         ReactiveFormsModule,

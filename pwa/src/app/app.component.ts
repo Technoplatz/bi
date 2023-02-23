@@ -35,6 +35,7 @@ import { TranslateService } from "@ngx-translate/core";
 import { Router, Event, NavigationError, NavigationEnd } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./classes/miscellaneous";
+import { Navigation } from "./classes/navigation";
 import { Auth } from "./classes/auth";
 import { Plugins } from "@capacitor/core";
 import { environment } from "../environments/environment";
@@ -53,18 +54,25 @@ export class AppComponent implements OnInit {
   public index_: boolean = false;
   public swu_: boolean = false;
   public net_: boolean = true;
-  private version_app = environment.appVersion;
-  private version_global: string = "";
 
   constructor(
     private translate: TranslateService,
     private router: Router,
     private auth: Auth,
     private misc: Miscellaneous,
-    private storage: Storage
+    private storage: Storage,
+    private nav: Navigation
   ) { }
 
   ngOnInit() {
+    
+    this.misc.navi.subscribe((res: any) => {
+      const p = res.sub ? res.s + "/" + res.sub : res.s;
+      this.nav.navigateRoot(p).then(() => {
+        console.log("nav:", res);
+      });
+    });
+
     this.storage.get("LSTHEME").then((LSTHEME: any) => {
       if (LSTHEME) {
         document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
@@ -87,7 +95,7 @@ export class AppComponent implements OnInit {
         this.user_ = user;
       } else {
         this.user_ = null;
-        this.misc.go("/").then(() => {
+        this.nav.navigateRoot("/").then(() => {
         }).catch((error: any) => {
           console.error(error);
         });
@@ -100,7 +108,7 @@ export class AppComponent implements OnInit {
         console.error("*** navigation error", event.url, event.error);
       } else if (event instanceof NavigationEnd) {
         this.index_ = event.url === "/" ? true : false;
-        this.console_ = ["/console"].includes(event.url.substring(0, 8)) ? true : false;
+        this.console_ = ["/dashboard"].includes(event.url.substring(0, 8)) ? true : false;
       }
     });
 

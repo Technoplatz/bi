@@ -518,7 +518,7 @@ export class Crud {
           headers: new HttpHeaders(this.crudHeaders)
         }).subscribe((res: any) => {
           if (res && res.result) {
-            // this.views.next(res);
+            this.views.next(res);
             resolve(res);
           } else {
             reject(res.msg);
@@ -617,6 +617,7 @@ export class Crud {
           headers: new HttpHeaders(this.crudHeaders)
         }).subscribe((res: any) => {
           if (res && res.result) {
+            this.collections.next(res);
             resolve(res);
           } else {
             reject(res.msg);

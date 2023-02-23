@@ -126,7 +126,7 @@ export class Auth {
         if (res && res.result) {
           this.storage.set("LSUSERMETA", res.user).then(() => {
             this.authStateChange.next(res.user);
-            this.navigation.navigateRoot("/console").then(() => {
+            this.navigation.navigateRoot("/dashboard").then(() => {
               resolve(true);
             }).catch((error: any) => {
               reject(error);
@@ -230,7 +230,7 @@ export class Auth {
             });
           });
         } else {
-          this.misc.go("/").then(() => {
+          this.navigation.navigateRoot("/").then(() => {
             resolve(true);
           }).catch((error: any) => {
             reject(error);
