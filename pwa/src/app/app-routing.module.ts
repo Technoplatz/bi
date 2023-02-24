@@ -116,6 +116,42 @@ const routes: Routes = [
     }
   },
   {
+    path: "account/signout",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
+    path: "account/preferences",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
+    path: "account/apikey",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
+    path: "account/settings",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
     path: "collections/:p",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/collections/collections.module").then((m) => m.CollectionsPageModule),
@@ -144,15 +180,6 @@ const routes: Routes = [
   },
   {
     path: "view/:p",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
-  {
-    path: "account/:p",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
     data: { preload: true },
