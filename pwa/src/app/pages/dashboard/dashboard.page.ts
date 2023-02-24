@@ -164,17 +164,7 @@ export class DashboardPage implements OnInit {
     private auth: Auth,
     private misc: Miscellaneous,
     private modal: ModalController
-  ) {
-    this.auth.user.subscribe((LSUSERMETA: any) => {
-      if(LSUSERMETA) {
-        this.user = LSUSERMETA;
-        this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-        this.accountf_apikey = LSUSERMETA.apikey;
-      } else {
-        console.error("*** no user found");
-      }
-    });
-  }
+  ) { }
 
   ngOnDestroy() {
     this.announcementso = null;
@@ -182,47 +172,43 @@ export class DashboardPage implements OnInit {
 
   ngOnInit() {
     this.header = "Dashboard";
-    this.is_dash_ok = false;
-
-    this.announcementso = this.crud.announcements.subscribe((res: any) => {
-      this.announcements = res && res.data ? res.data : [];
-    });
-
-    this.misc.getAPIHost().then((apiHost: any) => {
-      this.apiHost = apiHost;
-    });
-
-    this.viewso = this.crud.views.subscribe((res: any) => {
-      this.views = this.viewsx = res && res.data ? res.data : [];
-      this.views_structure = res && res.structure ? res.structure : null;
-      this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard);
-      this.visuals = [];
-      for (let v_ = 0; v_ < this.views.length; v_++) {
-        this.doGetVisual(this.views[v_], v_);
-      }
-    });
-
-    this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
-      this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
-      this.chart_css = "chart-sq " + this.chart_size;
-      this.templates = [];
-      this.data = [];
+    this.is_dash_ok = this.is_initialized = false;
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.user = LSUSERMETA;
+      this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
+      this.accountf_apikey = LSUSERMETA.apikey;
+      this.announcementso = this.crud.announcements.subscribe((res: any) => {
+        this.announcements = res && res.data ? res.data : [];
+      });
       this.crud.getAnnouncements();
-      this.crud.Template("list", null).then((res: any) => {
-        this.templates = res && res.data ? res.data : [];
-      }).catch((error: any) => {
-        console.error(error);
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.is_initialized = true;
-        this.is_dash_ok = true;
+      this.viewso = this.crud.views.subscribe((res: any) => {
+        this.views = this.viewsx = res && res.data ? res.data : [];
+        this.views_structure = res && res.structure ? res.structure : null;
+        this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard);
+        this.visuals = [];
+        this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
+          this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
+          this.chart_css = "chart-sq " + this.chart_size;
+          for (let v_ = 0; v_ < this.views.length; v_++) {
+            this.doGetVisual(this.views[v_], v_);
+          }
+          this.is_initialized = true;
+          this.is_dash_ok = true;
+        });
       });
     });
-
   }
 
-  doRefreshDash() {
-
+  doRefresh() {
+    this.is_dash_ok = false;
+    this.crud.getAll().then(() => {
+      console.log("*** got all");
+    }).catch((error: any) => {
+      console.error(error);
+      this.misc.doMessage(error, "error");
+    }).finally(() => {
+      this.is_dash_ok = true;
+    });
   }
 
   doEnterViewMode(view_: any) {
@@ -332,7 +318,13 @@ export class DashboardPage implements OnInit {
   }
 
   doTemplateShow() {
-    this.template_showed = !this.template_showed;
+    this.crud.Template("list", null).then((res: any) => {
+      this.templates = res && res.data ? res.data : [];
+      this.template_showed = !this.template_showed;
+    }).catch((error: any) => {
+      console.error(error);
+      this.misc.doMessage(error, "error");
+    });
   }
 
   doStartSearch(e: any) {

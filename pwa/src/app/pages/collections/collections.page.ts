@@ -114,14 +114,6 @@ export class CollectionsPage implements OnInit {
     private alert: AlertController,
     private router: Router
   ) {
-    this.usero = this.auth.user.subscribe((LSUSERMETA: any) => {
-      if (LSUSERMETA) {
-        this.user = LSUSERMETA;
-        this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-      } else {
-        console.error("*** no user found");
-      }
-    });
     this.collectionso = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
       this.collections_structure = res.structure;
@@ -138,16 +130,17 @@ export class CollectionsPage implements OnInit {
   }
 
   ngOnInit() {
-    const qstr1 = this.router.url.split("/")[1];
-    const qstr2 = this.router.url.split("/")[2];
-    this.filter = [];
-    this.data = [];
-    this.is_initialized = true;
-    this.storage.set("LSID", qstr2).then(() => {
-      this.id = qstr2;
-      this.goSection(qstr1, qstr2, qstr2);
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.user = LSUSERMETA;
+      this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
+      const qstr1 = this.router.url.split("/")[1];
+      const qstr2 = this.router.url.split("/")[2];
+      this.is_initialized = true;
+      this.storage.set("LSID", qstr2).then(() => {
+        this.id = qstr2;
+        this.goSection(qstr1, qstr2, qstr2);
+      });
     });
-
   }
 
   doSetCollectionID(id: string) {

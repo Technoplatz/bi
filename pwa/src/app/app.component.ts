@@ -50,7 +50,7 @@ const { Network } = Plugins;
 })
 
 export class AppComponent implements OnInit {
-  public user_: any;
+  public user_: any = null;
   public console_: boolean = false;
   public index_: boolean = false;
   public swu_: boolean = false;
@@ -73,13 +73,12 @@ export class AppComponent implements OnInit {
     // get user
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user_ = LSUSERMETA;
-      this.auth.user.next(LSUSERMETA);
     });
 
     // listen auth changes
-    this.auth.authStateChange.subscribe((user: any) => {
-      if (user) {
-        this.user_ = user;
+    this.auth.stateChange.subscribe((LSUSERMETA: any) => {
+      if (LSUSERMETA) {
+        this.user_ = LSUSERMETA;
       } else {
         this.user_ = null;
         this.nav.navigateRoot("/").then(() => {

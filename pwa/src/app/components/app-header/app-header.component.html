@@ -37,25 +37,25 @@ https://www.gnu.org/licenses.
       <ion-icon [name]="logo" color="primary" class="logo-electron-small"></ion-icon>
       <ion-label>{{ 'Technoplatz BI' }}</ion-label>
     </ion-button>
-    <ion-button *ngIf="swu_" slot="end" color="danger" (click)="doActivate()" size="small"
+    <ion-button *ngIf="swu_" color="danger" (click)="doActivate()" size="small"
       class="ion-no-margin ion-no-padding ion-margin-end notification-button">
       <ion-icon name="notifications-outline" class="ion-padding-start"></ion-icon>
       <ion-label class="ion-padding-end">{{ 'New Version Available' | translate }}</ion-label>
     </ion-button>
-    <ion-button *ngIf="!net_" slot="end" color="danger" size="small"
+    <ion-button *ngIf="!net_" color="danger" size="small"
       class="ion-no-margin ion-no-padding ion-margin-end notification-button no-cursor">
       <ion-label class="ion-padding-start ion-padding-end">{{ 'Internet connection is Lost' | translate }}</ion-label>
     </ion-button>
-    <ion-button *ngIf="user" slot="end" fill="clear" (click)="Signout()" size="default"
+    <ion-button *ngIf="user" fill="clear" (click)="Signout()" size="default"
       class="ion-no-padding ion-margin-end clear-dark-button">
       <ion-label>{{ 'Sign out' | translate }}&nbsp;&nbsp;&nbsp;</ion-label>
     </ion-button>
-    <ion-button *ngIf="user" slot="end" size="default" fill="clear" href="/dashboard/account/settings"
+    <ion-button *ngIf="user" size="default" fill="clear" href="/account/settings"
       class="ion-no-margin ion-no-padding clear-dark-button">
       <ion-label>{{ name }}&nbsp;&nbsp;</ion-label>
       <ion-icon name="person-circle-outline" color="primary"></ion-icon>
     </ion-button>
-    <ion-button *ngIf="!user" slot="end" fill="clear" (click)="doSign('signin')" size="default"
+    <ion-button *ngIf="!user" fill="clear" (click)="doSign('signin')" size="default"
       class="ion-no-margin ion-no-padding ion-margin-end clear-dark-button">
       <ion-icon name="log-in-outline"></ion-icon>
       <ion-label>{{ 'Sign in' | translate }}</ion-label>

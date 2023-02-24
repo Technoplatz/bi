@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -31,7 +31,6 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
 import { ModalController } from "@ionic/angular";
 import { Auth } from "../../classes/auth";
 import { SignPage } from "../sign/sign.page";
@@ -39,26 +38,26 @@ import { SignPage } from "../sign/sign.page";
 @Component({
   selector: "app-main",
   templateUrl: "./main.page.html",
-  styleUrls: ["./main.page.scss"],
+  styleUrls: ["./main.page.scss"]
 })
+
 export class MainPage implements OnInit {
-  public products: any = [];
   public user: any;
 
   constructor(
-    private route: ActivatedRoute,
     private auth: Auth,
     private modal: ModalController
-  ) { }
-
-  ngOnInit() {
-    this.route.data.subscribe((data: any) => {
-      this.user = data.user;
-    });
-    this.auth.authStateChange.subscribe((user: any) => {
-      this.user = user;
+  ) {
+    this.auth.stateChange.subscribe((LSUSERMETA: any) => {
+      if (LSUSERMETA) {
+        this.user = LSUSERMETA;
+      } else {
+        console.error("*** no user found");
+      }
     });
   }
+
+  ngOnInit() { }
 
   async doSignup() {
     const modal = await this.modal.create({

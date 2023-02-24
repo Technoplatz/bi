@@ -636,14 +636,16 @@ export class Crud {
   }
 
   getAll() {
-    this.getCollections().then(() => {
-      this.getViews().then(() => {
-        console.log("*** gets all");
+    return new Promise((resolve, reject) => {
+      this.getCollections().then(() => {
+        this.getViews().then(() => {
+          resolve(true);
+        }).catch((error: any) => {
+          reject(error);
+        });
       }).catch((error: any) => {
-        console.error("*** get views error", error);
+        reject(error);
       });
-    }).catch((error: any) => {
-      console.error("*** get collections error", error);
     });
   }
 

@@ -56,7 +56,7 @@ https://www.gnu.org/licenses.
                       <ion-icon name="server-outline"></ion-icon><br />
                       <span>{{ 'Excel to' | translate }}<br />{{ 'Collection' | translate }}</span>
                     </div>
-                    <div (click)="doRefreshDash()" class="data-sq-button">
+                    <div (click)="doRefresh()" class="data-sq-button">
                       <ion-icon *ngIf="is_dash_ok" name="sync"></ion-icon>
                       <ion-icon *ngIf="!is_dash_ok" name="hourglass-outline"></ion-icon>
                       <br />

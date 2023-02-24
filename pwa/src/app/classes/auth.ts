@@ -32,7 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { Storage } from "@ionic/storage";
-import { Subject, BehaviorSubject, NEVER } from "rxjs";
+import { Subject, BehaviorSubject } from "rxjs";
 import { Navigation } from "./navigation";
 import { Miscellaneous } from "./miscellaneous";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
@@ -44,13 +44,12 @@ import { environment } from "../../environments/environment";
 
 export class Auth {
   private apiHost: string = "";
-
   private authHeaders: any = {
     "Content-Type": "application/json",
     "X-Api-Key": environment.apiKey
   }
-  authStateChange = new Subject<any>();
-  public user = new BehaviorSubject<any>([]);
+  stateChange = new Subject<any>();
+  saas_ = new Subject<any>();
 
   constructor(
     private storage: Storage,
@@ -62,8 +61,6 @@ export class Auth {
       this.apiHost = apiHost;
     });
   }
-
-  saas_ = new Subject<any>();
 
   Saas() {
     return new Promise((resolve, reject) => {
@@ -126,7 +123,7 @@ export class Auth {
       }).subscribe((res: any) => {
         if (res && res.result) {
           this.storage.set("LSUSERMETA", res.user).then(() => {
-            this.authStateChange.next(res.user);
+            this.stateChange.next(res.user);
             this.navigation.navigateRoot("/dashboard").then(() => {
               resolve(true);
             }).catch((error: any) => {
@@ -221,7 +218,7 @@ export class Auth {
                 headers: new HttpHeaders(this.authHeaders)
               }).subscribe((res: any) => {
                 if (res && res.result) {
-                  this.authStateChange.next(null);
+                  this.stateChange.next(null);
                 } else {
                   reject(res.msg);
                 }
@@ -245,7 +242,7 @@ export class Auth {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         if (LSUSERMETA && LSUSERMETA.email && LSUSERMETA.token) {
-          this.user.next(LSUSERMETA);
+          this.stateChange.next(LSUSERMETA);
           const email_ = LSUSERMETA.email;
           const token_ = LSUSERMETA.token;
           const jdate_ = LSUSERMETA.jdate;
@@ -262,8 +259,7 @@ export class Auth {
               resolve(true);
             } else {
               this.storage.remove("LSUSERMETA").then(() => {
-                this.authStateChange.next(null);
-                this.user.next(null);
+                this.stateChange.next(null);
                 reject(res.msg);
               }).catch((error: any) => {
                 reject(error);
@@ -287,7 +283,7 @@ export class Auth {
           headers: new HttpHeaders(this.authHeaders)
         }).subscribe((res: any) => {
           if (res && res.result) {
-            this.authStateChange.next(null);
+            this.stateChange.next(null);
             resolve(true);
           } else {
             reject(res.msg);
@@ -308,7 +304,7 @@ export class Auth {
       }).subscribe((res: any) => {
         if (res) {
           if (res.successful) {
-            this.authStateChange.next(null);
+            this.stateChange.next(null);
             resolve({ message: res.msg });
           } else {
             reject({ message: res.msg });
