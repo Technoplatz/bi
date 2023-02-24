@@ -32,7 +32,6 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { ModalController, IonSelect } from "@ionic/angular";
-import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
@@ -153,89 +152,77 @@ export class DashboardPage implements OnInit {
   public pane_segval_dash: string = "dash";
   public options?: JsonEditorOptions;
   public options2?: JsonEditorOptions;
+  public announcementso: any;
   private views_structure: any;
   private collections_structure: any;
   private apiHost: string = "";
+  public viewso: any;
 
   constructor(
     private storage: Storage,
-    private auth: Auth,
     private crud: Crud,
+    private auth: Auth,
     private misc: Miscellaneous,
-    private modal: ModalController,
-    private router: Router
+    private modal: ModalController
   ) {
-    this.crud.announcements.subscribe((res: any) => {
-      this.announcements = res && res.data ? res.data : [];
+    this.auth.user.subscribe((LSUSERMETA: any) => {
+      if(LSUSERMETA) {
+        this.user = LSUSERMETA;
+        this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
+        this.accountf_apikey = LSUSERMETA.apikey;
+      } else {
+        console.error("*** no user found");
+      }
     });
-    this.misc.getAPIHost().then((apiHost: any) => {
-      this.apiHost = apiHost;
-    });
+  }
+
+  ngOnDestroy() {
+    this.announcementso = null;
   }
 
   ngOnInit() {
     this.header = "Dashboard";
+    this.is_dash_ok = false;
+
+    this.announcementso = this.crud.announcements.subscribe((res: any) => {
+      this.announcements = res && res.data ? res.data : [];
+    });
+
+    this.misc.getAPIHost().then((apiHost: any) => {
+      this.apiHost = apiHost;
+    });
+
+    this.viewso = this.crud.views.subscribe((res: any) => {
+      this.views = this.viewsx = res && res.data ? res.data : [];
+      this.views_structure = res && res.structure ? res.structure : null;
+      this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard);
+      this.visuals = [];
+      for (let v_ = 0; v_ < this.views.length; v_++) {
+        this.doGetVisual(this.views[v_], v_);
+      }
+    });
+
     this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
       this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
       this.chart_css = "chart-sq " + this.chart_size;
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.user = LSUSERMETA;
-        this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-        this.collections = [];
-        this.collections_ = {};
-        this.visuals = [];
-        this.views = this.views_dash = [];
-        this.templates = [];
-        this.filter = [];
-        this.data = [];
-        this.crud.getAnnouncements();
-        this.doRefreshDash().then(() => {
-          this.is_initialized = true;
-          // this.goSection(qstr1, qstr2, qstr2);
-        }).catch((error: any) => {
-          console.error(error);
-        }).finally(() => {
-          this.is_initialized = true;
-        });
+      this.templates = [];
+      this.data = [];
+      this.crud.getAnnouncements();
+      this.crud.Template("list", null).then((res: any) => {
+        this.templates = res && res.data ? res.data : [];
+      }).catch((error: any) => {
+        console.error(error);
+        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.is_initialized = true;
+        this.is_dash_ok = true;
       });
     });
+
   }
 
   doRefreshDash() {
-    return new Promise((resolve, reject) => {
-      this.is_dash_ok = false;
-      this.doAccount("apikeyget").then(() => {
-        this.crud.getCollections().then((res: any) => {
-          if (res && res.data) {
-            this.collections = res.data;
-            this.collections_structure = res.structure;
-            for (let item_ in res.data) {
-              this.collections_[res.data[item_].col_id] = true;
-            }
-            this.doGetViews();
-            this.crud.Template("list", null).then((res: any) => {
-              this.templates = res && res.data ? res.data : [];
-              resolve(true);
-            }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
-              reject(error);
-            });
-          } else {
-            const err_ = "no collection found";
-            console.error(err_);
-            this.misc.doMessage(err_, "error");
-            reject(err_);
-          }
-        }).catch((error: any) => {
-          console.error(error);
-          this.misc.doMessage(error, "error");
-          reject(error);
-        }).finally(() => {
-          this.is_dash_ok = true;
-        });
-      });
-    });
+
   }
 
   doEnterViewMode(view_: any) {
@@ -272,13 +259,9 @@ export class DashboardPage implements OnInit {
     }).then((modal: any) => {
       modal.present();
       modal.onDidDismiss().then((res: any) => {
-        this.doRefreshDash().then(() => {
-          if (type_ === "upload") {
-            if (res && res.data && res.data.cid) {
-              // go collection
-            }
-          }
-        }).catch((error: any) => { console.error(error); });
+        if (type_ === "upload") {
+          // go collection
+        }
       });
     });
   }
@@ -306,27 +289,11 @@ export class DashboardPage implements OnInit {
       });
       modal.onDidDismiss().then((res: any) => {
         if (res.data.modified) {
-          this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
+          // refresh
         }
       });
       return await modal.present();
     }
-  }
-
-  doAccount(s: string) {
-    return new Promise((resolve, reject) => {
-      this.auth.Account(s).then((res: any) => {
-        if (s === "apikeygen" || s === "apikeyget") {
-          this.accountf_apikey = res && res.user && res.user.apikey ? res.user.apikey : null;
-          this.accountf_apikeydate = res && res.user && res.user.apikey_modified_at ? res.user.apikey_modified_at.$date : null;
-        }
-        resolve(true);
-      }).catch((error: any) => {
-        this.qr_exists = false;
-        console.error(error);
-        this.misc.doMessage(error, "error");
-      });
-    });
   }
 
   doInstallTemplate(item_: any, ix: number) {
@@ -334,7 +301,6 @@ export class DashboardPage implements OnInit {
       this.templates[ix].processing = true;
       this.crud.Template("install", item_).then(() => {
         this.misc.doMessage("template installed successfully", "success");
-        this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");
@@ -363,23 +329,6 @@ export class DashboardPage implements OnInit {
       console.error(error_);
       this.misc.doMessage(error_, "error");
     }
-  }
-
-  doGetViews() {
-    this.crud.getViews().then((res: any) => {
-      if (res && res.data && res.structure) {
-        this.views = this.viewsx = res.data;
-        this.views_structure = res.structure;
-        this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard);
-        this.views_pane = this.views.filter((obj: any) => obj.vie_collection_id === this.id);
-        for (let v_ = 0; v_ < res.data.length; v_++) {
-          this.doGetVisual(res.data[v_], v_);
-        }
-      }
-    }).catch((error: any) => {
-      console.error(error);
-      this.misc.doMessage(error, "error");
-    });
   }
 
   doTemplateShow() {

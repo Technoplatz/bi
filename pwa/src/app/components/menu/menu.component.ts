@@ -52,6 +52,8 @@ export class MenuComponent implements OnInit {
   public segmentsadm: any;
   public init = false;
   public saas_: any;
+  public viewso: any;
+  private collectionso: any;
 
   constructor(
     private auth: Auth,
@@ -59,21 +61,19 @@ export class MenuComponent implements OnInit {
     private storage: Storage,
     public menu: MenuController,
     private misc: Miscellaneous
-  ) { 
-    console.log("000");
+  ) {
+    this.collectionso = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+    });
+    this.viewso = this.crud.views.subscribe((res: any) => {
+      this.views = res && res.data ? res.data : [];
+    });
   }
 
   ngOnInit() {
-    console.log("111");
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.auth.Saas().then((res: any) => {
         this.saas_ = res ? res : {};
-        this.crud.collections.subscribe((res: any) => {
-          this.collections = res && res.data ? res.data : [];
-        });
-        this.crud.views.subscribe((res: any) => {
-          this.views = res && res.data ? res.data : [];
-        });
         this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
         this.menu.open().then(() => {
           this.init = true;
@@ -82,14 +82,24 @@ export class MenuComponent implements OnInit {
     });
   }
 
-  goSection(menu_: string, submenu_: any, header_: string) {
-    return;
+  ngOnDestroy() {
+    this.collectionso = null;
+    this.viewso = null;
+    console.log("*** exit menu");
   }
 
   doNavi(s: string, sub: any) {
     this.misc.navi.next({
       s: s,
       sub: sub,
+    });
+  }
+
+  Signout() {
+    this.auth.Signout().then(() => {
+      console.log("*** signed out");
+    }).catch((error: any) => {
+      console.error("signout error", error.message);
     });
   }
 

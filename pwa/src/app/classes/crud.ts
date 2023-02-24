@@ -46,17 +46,23 @@ export class Crud {
   public cartitems = [];
   public productList: any = [];
   public fields: any = [];
-  public objectsListener = new BehaviorSubject([]);
-  public objects = this.objectsListener.asObservable();
   private apiHost: string = "";
   private crudHeaders: any = {
     "Content-Type": "application/json",
-    "X-Api-Key":  environment.apiKey
+    "X-Api-Key": environment.apiKey
   }
   private uploadHeaders: any = {
     "X-Api-Key": environment.apiKey
   }
-  announcements: any = new Subject<any>();
+
+  public announcements: any = new Subject<any>();
+  public modalSubmitListener = new Subject<any>();
+  public updateListener = new Subject<any>();
+  public objectsListener = new BehaviorSubject([]);
+  public objects = this.objectsListener.asObservable();
+  public collections = new BehaviorSubject([]);
+  public views = new BehaviorSubject([]);
+  public visuals = new BehaviorSubject([]);
 
   constructor(
     private storage: Storage,
@@ -506,30 +512,6 @@ export class Crud {
     });
   }
 
-  getViews() {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "views",
-          user: LSUSERMETA,
-          dashboard: false
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            this.views.next(res);
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
-    });
-  }
-
   Template(proc_: string, template_: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
@@ -629,6 +611,42 @@ export class Crud {
     });
   }
 
+  getViews() {
+    return new Promise((resolve, reject) => {
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        const posted: any = {
+          op: "views",
+          user: LSUSERMETA,
+          dashboard: false
+        }
+        this.http.post<any>(this.apiHost + "/crud", posted, {
+          headers: new HttpHeaders(this.crudHeaders)
+        }).subscribe((res: any) => {
+          if (res && res.result) {
+            this.views.next(res);
+            resolve(res);
+          } else {
+            reject(res.msg);
+          }
+        }, (error: any) => {
+          reject(error);
+        });
+      });
+    });
+  }
+
+  getAll() {
+    this.getCollections().then(() => {
+      this.getViews().then(() => {
+        console.log("*** gets all");
+      }).catch((error: any) => {
+        console.error("*** get views error", error);
+      });
+    }).catch((error: any) => {
+      console.error("*** get collections error", error);
+    });
+  }
+
   getAnnouncements() {
     this.Find(
       "read", "_log", null, [{
@@ -692,12 +710,5 @@ export class Crud {
       }
     });
   }
-
-  modalSubmitListener = new Subject<any>();
-  updateListener = new Subject<any>();
-  views = new Subject<any>();
-  subjects = new Subject<any>();
-  visuals = new Subject<any>();
-  collections = new Subject<any>();
 
 }

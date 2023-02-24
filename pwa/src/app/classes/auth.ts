@@ -32,7 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { Storage } from "@ionic/storage";
-import { Subject } from "rxjs";
+import { Subject, BehaviorSubject, NEVER } from "rxjs";
 import { Navigation } from "./navigation";
 import { Miscellaneous } from "./miscellaneous";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
@@ -49,7 +49,8 @@ export class Auth {
     "Content-Type": "application/json",
     "X-Api-Key": environment.apiKey
   }
-  authStateChange = new Subject();
+  authStateChange = new Subject<any>();
+  public user = new BehaviorSubject<any>([]);
 
   constructor(
     private storage: Storage,
@@ -244,6 +245,7 @@ export class Auth {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         if (LSUSERMETA && LSUSERMETA.email && LSUSERMETA.token) {
+          this.user.next(LSUSERMETA);
           const email_ = LSUSERMETA.email;
           const token_ = LSUSERMETA.token;
           const jdate_ = LSUSERMETA.jdate;
@@ -261,6 +263,7 @@ export class Auth {
             } else {
               this.storage.remove("LSUSERMETA").then(() => {
                 this.authStateChange.next(null);
+                this.user.next(null);
                 reject(res.msg);
               }).catch((error: any) => {
                 reject(error);

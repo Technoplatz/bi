@@ -73,4 +73,17 @@ export class MainPage implements OnInit {
     return await modal.present();
   }
 
+  async doSign(op: string) {
+    const modal = await this.modal.create({
+      component: SignPage,
+      backdropDismiss: false,
+      cssClass: "signin-modal",
+      componentProps: {
+        op: op,
+        user: null
+      }
+    });
+    return await modal.present();
+  }
+
 }

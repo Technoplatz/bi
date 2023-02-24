@@ -568,7 +568,7 @@ form ion-item ion-label {
 }
 
 .menu-button ion-icon {
-  max-width: 24px !important;
+  width: 24px !important;
 }
 
 .dash-button {
@@ -578,8 +578,8 @@ form ion-item ion-label {
 }
 
 .dash-button ion-icon {
-  max-width: 24px !important;
-  margin-right: 8px;
+  width: 24px !important;
+  margin-right: 4px;
   margin-top: -8px;
 }
 
@@ -649,7 +649,7 @@ form ion-item ion-label {
 }
 
 .menu-side p {
-  margin-left: 23px;
+  margin-left: 28px;
 }
 
 .menu-side p ion-icon {

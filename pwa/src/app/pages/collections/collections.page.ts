@@ -4,16 +4,16 @@ Technoplatz BI
 Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
+it under the terms of the GNU Affero General private License as published by
 the Free Software Foundation, either version 3 of the License, or
 any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
+GNU Affero General private License for more details.
 
-You should have received a copy of the GNU Affero General Public License
+You should have received a copy of the GNU Affero General private License
 along with this program.  If not, see https://www.gnu.org/licenses.
 
 If your software can interact with users remotely through a computer
@@ -33,7 +33,6 @@ https://www.gnu.org/licenses.
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { ModalController, AlertController, IonSelect, NavController } from "@ionic/angular";
 import { Router } from "@angular/router";
-import { Location } from "@angular/common";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
@@ -49,209 +48,106 @@ import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 })
 
 export class CollectionsPage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false }) public strcutureEditor?: JsonEditorComponent;
+  @ViewChild(JsonEditorComponent, { static: false }) private strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
-  public now: any = Date.now();
-  public version = environment.appVersion;
-  public release = environment.release;
   public loadingText: string = environment.misc.loadingText;
-  public menu: string = "";
-  public submenu: string = "";
+  private submenu: string = "";
   public header: string = "";
-  public segment = "data";
-  public user: any = null;
-  public themes: any = environment.themes;
-  public limits: any = environment.misc.limits;
+  private segment = "data";
+  private user: any = null;
   public perm: boolean = false;
   public is_crud: boolean = false;
-  public in_otp_process: boolean = false;
-  public in_otp_process_test: boolean = false;
   public paget: any = [];
   public id: string = "";
-  public sortstr: any;
-  public ok: boolean = false;
-  public template_showed: boolean = false;
+  private template_showed: boolean = false;
   public reconfig: boolean = false;
   public filter: any = [];
-  public saved_filter: string = "";
-  public selected_view: any;
   public searched: any = null;
   public data: any = [];
-  public structure: any = [];
+  private structure: any = [];
   public selected: any = [];
-  public announcements: any = [];
-  public views: any = [];
-  public viewsx: any = [];
-  public views_dash: any = [];
-  public views_pane: any = [];
-  public visuals: any = [];
-  public kpis: any = [];
-  public metrics: any = [];
-  public templates: any = [];
+  private views: any = [];
+  private viewsx: any = [];
   public pages: any = [];
   public limit: number = environment.misc.limit;
   public page: number = 1;
-  public page_start: number = 1;
-  public page_end: number = 1;
+  private page_start: number = 1;
   public count: number = 0;
-  public chart_size: string = "small";
-  public chart_css: string = "";
   public is_loaded: boolean = true;
-  public is_dash_ok: boolean = false;
-  public is_selected: boolean = false;
-  public is_show_resize: boolean = false;
-  public is_pivot_loading: boolean = false;
-  public pivot_: string = "";
-  public statistics_key_: string = "";
-  public statistics_: any = null;
+  private is_selected: boolean = false;
   public multicheckbox: boolean = false;
-  public clonok: number = -1;
-  public show_select: boolean = true;
-  public master: any = {};
-  public view_active: boolean = true;
-  public collections: any = [];
-  public collections_: any = {};
+  private master: any = {};
+  private collections: any = [];
+  private collections_: any = {};
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
-  public is_url_copied: boolean = false;
-  public is_apikey_copied: boolean = false;
-  public is_apikey_enabled: boolean = false;
-  public accountf_apikey: string = "";
-  public accountf_apikeydate: any = null;
-  public accountf_description: string = "";
-  public accountf_qrurl: string = "";
-  public is_processing_account: boolean = false;
-  public is_visuals_loading: boolean = false;
   public barcoded_: boolean = false;
   public is_samecol: boolean = false;
-  public qr_exists: boolean = false;
-  public qr_show: boolean = false;
-  public otp_show: boolean = false;
-  public otp_qr: string = "";
-  public dashmode: string = "card";
-  public viewurl_: string = "";
-  public viewurl_masked_: string = "";
-  public view: any = null;
-  public visual: any = null;
-  public view_id: string = "";
-  public visual_id: string = "";
-  public view_data: any = [];
-  public view_df: any = [];
-  public view_count: number = 0;
-  public view_properties: any = [];
-  public view_properties_: any = [];
-  public subscribers: string = "";
-  public scheduled: boolean = false;
-  public sched_days: string = "";
-  public sched_hours: string = "";
-  public sched_minutes: string = "";
-  public sched_timezone: string = "";
-  public viewtab: string = "pivot";
+  private view: any = null;
   public actions: any = [];
-  public vie_projection: any = [];
   public columns_: any;
-  public chart: any = null;
-  public class_left_side: string = "console-left-side hide-scrollbar";
-  public menu_toggle: boolean = false;
+  private menu_toggle: boolean = false;
   public view_mode: any = {};
   public pane_segval_colls: string = "collection";
-  public pane_segval_dash: string = "dash";
-  public options?: JsonEditorOptions;
-  public options2?: JsonEditorOptions;
+  private options?: JsonEditorOptions;
   private sweeped: any = [];
   private sort: any = {};
   private properites_: any = {};
   private actionix: number = -1;
   private views_structure: any;
   private collections_structure: any;
-  private apiHost: string = "";
+  private menu: string = "";
+  private pivot_: string = "";
+  private views_pane: any = [];
+  private saved_filter: string = "";
+  private page_end: number = 1;
+  private clonok: number = -1;
+  private collectionso: any;
+  private usero: any;
 
   constructor(
     private storage: Storage,
-    private auth: Auth,
     private crud: Crud,
+    private auth: Auth,
     private misc: Miscellaneous,
     private modal: ModalController,
     private alert: AlertController,
-    private nav: NavController,
-    private router: Router,
-    private location: Location
+    private router: Router
   ) {
-    this.crud.announcements.subscribe((res: any) => {
-      this.announcements = res && res.data ? res.data : [];
+    this.usero = this.auth.user.subscribe((LSUSERMETA: any) => {
+      if (LSUSERMETA) {
+        this.user = LSUSERMETA;
+        this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
+      } else {
+        console.error("*** no user found");
+      }
     });
-    this.misc.getAPIHost().then((apiHost: any) => {
-      this.apiHost = apiHost;
+    this.collectionso = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+      this.collections_structure = res.structure;
+      this.collections_ = {};
+      for (let item_ in res.data) {
+        this.collections_[res.data[item_].col_id] = true;
+      }
     });
-    this.misc.navi.subscribe((nav: any) => {
-      console.log("nav:", nav);
-    });
+  }
+
+  ngOnDestroy() {
+    this.collectionso = null;
+    this.usero = null;
   }
 
   ngOnInit() {
     const qstr1 = this.router.url.split("/")[1];
     const qstr2 = this.router.url.split("/")[2];
-    this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
-      this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
-      this.chart_css = "chart-sq " + this.chart_size;
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.user = LSUSERMETA;
-        this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-        this.collections = [];
-        this.collections_ = {};
-        this.visuals = [];
-        this.views = this.views_dash = [];
-        this.templates = [];
-        this.filter = [];
-        this.data = [];
-        this.crud.getAnnouncements();
-        this.doRefreshDash().then(() => {
-          this.is_initialized = true;
-          this.goSection(qstr1, qstr2, qstr2);
-        }).catch((error: any) => {
-          console.error(error);
-        }).finally(() => {
-          this.is_initialized = true;
-        });
-      });
+    this.filter = [];
+    this.data = [];
+    this.is_initialized = true;
+    this.storage.set("LSID", qstr2).then(() => {
+      this.id = qstr2;
+      this.goSection(qstr1, qstr2, qstr2);
     });
-  }
 
-  doRefreshDash() {
-    return new Promise((resolve, reject) => {
-      this.is_dash_ok = false;
-      this.doAccount("apikeyget").then(() => {
-        this.crud.getCollections().then((res: any) => {
-          if (res && res.data) {
-            this.collections = res.data;
-            this.collections_structure = res.structure;
-            for (let item_ in res.data) {
-              this.collections_[res.data[item_].col_id] = true;
-            }
-            this.doGetViews();
-            this.crud.Template("list", null).then((res: any) => {
-              this.templates = res && res.data ? res.data : [];
-              resolve(true);
-            }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
-              reject(error);
-            });
-          } else {
-            const err_ = "no collection found";
-            console.error(err_);
-            this.misc.doMessage(err_, "error");
-            reject(err_);
-          }
-        }).catch((error: any) => {
-          console.error(error);
-          this.misc.doMessage(error, "error");
-          reject(error);
-        }).finally(() => {
-          this.is_dash_ok = true;
-        });
-      });
-    });
   }
 
   doSetCollectionID(id: string) {
@@ -263,68 +159,7 @@ export class CollectionsPage implements OnInit {
     });
   }
 
-  doEnterViewMode(view_: any) {
-    return new Promise((resolve, reject) => {
-      this.is_loaded = false;
-      this.view = view_ ? view_ : this.views[0] ? this.views[0] : null;
-      this.menu = "collections";
-      this.submenu = this.header = this.view.vie_collection_id;
-      this.doSetCollectionID(this.view.vie_collection_id).then(() => {
-        this.view_mode[this.id] = true;
-        this.view_mode["vie_title"] = this.view ? this.view.vie_title : null;
-        this.view_mode["_tags"] = this.view ? this.view._tags : null;
-        this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
-        this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
-          this.view?.vie_filter ? this.filter = this.view.vie_filter : null;
-          this.view_data = [];
-          this.crud.View(this.view._id, this.view.vie_id, "internal").then((res: any) => {
-            this.view_data = res && res.data ? res.data : [];
-            this.view_count = res && res.count ? res.count : 0;
-            this.view_properties = res.properties;
-            this.view_properties_ = Object.keys(res.properties);
-            this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
-              this.pivot_ = res && res.pivot ? res.pivot : null;
-              const statistics_ = res && res.statistics ? res.statistics : null;
-              this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
-              this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
-            }).catch((error: any) => {
-              console.error("*** view mode", error);
-              this.misc.doMessage(error.error.message, "error");
-            }).finally(() => {
-              resolve(true);
-              this.is_loaded = true;
-            });
-          });
-        });
-      });
-    });
-  }
-
-  doQuitViewMode() {
-    this.storage.remove("LSFILTER_" + this.id).then(() => {
-      this.storage.remove("LSSAVEDFILTER").then(() => {
-        this.storage.remove("LSSEARCHED_" + this.id).then(() => {
-          this.storage.remove("LSVIEW-" + this.id).then(() => {
-            this.view_mode[this.id] = false;
-            this.view = null;
-            this.doResetSearch(true);
-            this.sort = {};
-            this.saved_filter = "";
-            this.filter = [];
-            this.sweeped[this.segment] = [];
-            this.RefreshData(0).then(() => { }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
-            });
-          });
-        });
-      });
-    });
-  }
-
   goSection(menu_: string, submenu_: any, header_: string) {
-    this.view_mode[this.id] = false;
-    this.view = null;
     const fromdash_ = this.submenu ? false : true;
     if (!submenu_ || !this.submenu || submenu_ !== this.submenu) {
       this.is_samecol = false;
@@ -442,7 +277,6 @@ export class CollectionsPage implements OnInit {
   doImport(type_: string) {
     const import_structure_ = environment.import_structure;
     const upload_structure_ = environment.upload_structure;
-    this.view_mode[this.id] ? this.doQuitViewMode() : null;
     this.modal.create({
       component: CrudPage,
       backdropDismiss: false,
@@ -470,15 +304,7 @@ export class CollectionsPage implements OnInit {
     }).then((modal: any) => {
       modal.present();
       modal.onDidDismiss().then((res: any) => {
-        this.doRefreshDash().then(() => {
-          if (type_ === "upload") {
-            if (res && res.data && res.data.cid) {
-              this.goSection('collections', res.data.cid, res.data.cid);
-            }
-          } else {
-            this.RefreshData(0);
-          }
-        }).catch((error: any) => { console.error(error); });
+        this.RefreshData(0);
       });
     });
   }
@@ -531,7 +357,7 @@ export class CollectionsPage implements OnInit {
       });
       modal.onDidDismiss().then((res: any) => {
         if (res.data.modified) {
-          this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
+          this.crud.getAll();
         }
       });
       return await modal.present();
@@ -589,11 +415,6 @@ export class CollectionsPage implements OnInit {
   }
 
   async goCrud(rec: any, op: string) {
-    // this.crud.modalSubmitListener.subscribe((res: any) => {
-    //   if (res && res.result) {
-    //     this.RefreshData(0);
-    //   }
-    // });
     const modal = await this.modal.create({
       component: CrudPage,
       backdropDismiss: false,
@@ -617,17 +438,9 @@ export class CollectionsPage implements OnInit {
       }
     });
     modal.onDidDismiss().then((res: any) => {
-      // this.crud.modalSubmitListener.unsubscribe;
       if (res.data.modified) {
-        op === "action" ? this.doQuitViewMode() : this.RefreshData(0);
-        if (this.id === "_collection") {
-          this.crud.getCollections().then(() => { }).catch((error: any) => {
-            console.error(error);
-            this.misc.doMessage(error, "error");
-          });
-        } else if (this.id === "_view") {
-          this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
-        }
+        this.crud.getAll();
+        this.RefreshData(0);
       }
       if (res.data.filters) {
         this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
@@ -671,13 +484,7 @@ export class CollectionsPage implements OnInit {
           modal.present();
           modal.onDidDismiss().then((res: any) => {
             if (res.data.modified) {
-              this.doRefreshDash().then(() => {
-                if (res.data.op === "remove") {
-                  this.goSection('dashboard', null, 'Dashboard');
-                } else {
-                  this.RefreshData(0);
-                }
-              }).catch((error: any) => { console.error(error); });
+              this.RefreshData(0);
             } else {
               if (res.data.filters) {
                 this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
@@ -705,17 +512,10 @@ export class CollectionsPage implements OnInit {
     }, []);
   }
 
-  doSegmentChanged(ev: any) {
-    this.menu === "collections" ? this.pane_segval_colls = ev.detail.value : this.pane_segval_dash = ev.detail.value;
-  }
-
   doSaveAsView() {
     if (this.perm && this.data.length > 0 && this.is_crud) {
       this.crud.SaveAsView(this.id, this.filter).then((res: any) => {
-        this.doEnterViewMode(res.view).then(() => {
-          this.doGetViews();
-          this.misc.doMessage("view saved successfully " + res.id, "success");
-        });
+        // goto view
       }).catch((error: any) => {
         this.misc.doMessage("filter not saved", "error");
         console.error(error);
@@ -770,132 +570,6 @@ export class CollectionsPage implements OnInit {
     }
   }
 
-  async doAnnounceNow(view: any, scope: string) {
-    if (!this.in_otp_process) {
-      scope === "live" ? this.in_otp_process = true : this.in_otp_process_test = true;
-      this.doOTP({
-        op: "request"
-      }).then(() => {
-        this.in_otp_process = this.in_otp_process_test = false;
-        this.alert.create({
-          cssClass: "my-custom-class",
-          header: scope === "live" ? "Announce Now!" : "TEST Announcement",
-          subHeader: "Please enter your Two-Factor Authorization Code",
-          inputs: [
-            {
-              name: "id",
-              value: null,
-              type: "text",
-              placeholder: "Enter your OTP"
-            }
-          ],
-          buttons: [
-            {
-              text: "Cancel",
-              role: "cancel",
-              cssClass: "primary",
-              handler: () => { }
-            }, {
-              text: "CONFIRM",
-              handler: (announceData: any) => {
-                this.crud.AnnounceNow(view, announceData && announceData.id ? announceData.id : null, scope, this.id).then(() => {
-                  this.crud.getAnnouncements();
-                  this.misc.doMessage("announcement completed successfully", "success");
-                }).catch((error: any) => {
-                  this.misc.doMessage(error, "error");
-                  console.error(error);
-                });
-              }
-            }
-          ]
-        }).then((alert: any) => {
-          alert.present();
-        });
-      }).catch((error: any) => {
-        this.in_otp_process = this.in_otp_process_test = false;
-        console.error(error);
-        this.misc.doMessage(error, "error");
-      });
-    }
-  }
-
-  doApiKeyEnabled() {
-    if (!this.is_apikey_enabled) {
-      this.is_apikey_enabled = true;
-      setTimeout(() => {
-        this.is_apikey_enabled = false;
-      }, 5000);
-    }
-  }
-
-  doAccount(s: string) {
-    return new Promise((resolve, reject) => {
-      this.auth.Account(s).then((res: any) => {
-        if (s === "apikeygen" || s === "apikeyget") {
-          this.accountf_apikey = res && res.user && res.user.apikey ? res.user.apikey : null;
-          this.accountf_apikeydate = res && res.user && res.user.apikey_modified_at ? res.user.apikey_modified_at.$date : null;
-          s === "apikeygen" ? this.doApiKeyEnabled() : null;
-        }
-        resolve(true);
-      }).catch((error: any) => {
-        this.qr_exists = false;
-        console.error(error);
-        this.misc.doMessage(error, "error");
-      });
-    });
-  }
-
-  doOTP(obj: any) {
-    return new Promise((resolve, reject) => {
-      this.otp_qr = "";
-      const op_ = obj && obj.op ? obj.op : null;
-      if (op_) {
-        if (op_ === "hide") {
-          this.otp_show = false;
-          resolve(true);
-        } else {
-          this.auth.OTP(obj).then((res: any) => {
-            if (res && res.result) {
-              this.otp_qr = res.qr;
-              if (op_ === "reset" || op_ === "show") {
-                this.otp_show = true;
-                resolve(true);
-              } else if (op_ === "validate") {
-                if (res.success) {
-                  this.otp_show = false;
-                  this.misc.doMessage("OTP validated successfully", "success");
-                  resolve(true);
-                } else {
-                  this.otp_show = false;
-                  const err_ = "OTP does not match";
-                  this.misc.doMessage(err_, "error");
-                  console.error(err_);
-                  reject(err_);
-                }
-              } else if (op_ === "request") {
-                this.misc.doMessage("Backup OTP was sent by email", "success");
-                resolve(true);
-              } else {
-                const err_ = "invalid operation";
-                console.error(err_);
-                this.misc.doMessage(err_, "error");
-                reject(err_);
-              }
-            } else {
-              this.misc.doMessage(res.msg, "error");
-              reject(res.msg);
-            }
-          }).catch((error: any) => {
-            this.otp_show = false;
-            console.error(error);
-            this.misc.doMessage(error, "error");
-            reject(error);
-          });
-        }
-      }
-    });
-  }
-
   SwitchSelectData(event: any) {
     this.selected = new Array(this.data.length).fill(event);
     this.GetIsSelectData();
@@ -912,136 +586,10 @@ export class CollectionsPage implements OnInit {
     return a.value.index < b.value.index ? -1 : (b.value.index > a.value.index ? 1 : 0);
   }
 
-  doResetOTP() {
-    this.alert.create({
-      header: "Warning",
-      subHeader: "One-Time Password Reset",
-      message: "Your current QR code will be removed and a new QR code will be generated. This means you will not be able to Login with the existing QR code until you activate the new code.",
-      buttons: [
-        {
-          text: "CANCEL",
-          role: "cancel",
-          cssClass: "allert",
-          handler: () => { }
-        }, {
-          text: "OKAY",
-          handler: () => {
-            this.doOTP({
-              op: "reset"
-            });
-          }
-        }
-      ]
-    }).then((alert: any) => {
-      alert.present();
-    });
-  }
-
-  doValidateOTP() {
-    this.alert.create({
-      cssClass: "my-custom-class",
-      subHeader: "Validate One-Time Password",
-      message: "Please enter the current one time password generated by App",
-      inputs: [
-        {
-          name: "id",
-          value: null,
-          type: "number",
-          placeholder: "Enter current OTP"
-        }
-      ],
-      buttons: [
-        {
-          text: "Cancel",
-          role: "cancel",
-          cssClass: "primary",
-          handler: () => {
-            console.warn("Confirm cancel");
-          }
-        }, {
-          text: "OK",
-          handler: (alertData: any) => {
-            this.doOTP({
-              op: "validate",
-              otp: alertData.id
-            });
-          }
-        }
-      ]
-    }).then((alert: any) => {
-      alert.present();
-    });
-  }
-
-  doCopy(w: string) {
-    const s = w === "apikey" ? this.accountf_apikey : w === "view" ? this.viewurl_ : "";
-    this.is_apikey_copied = w === "apikey" ? true : false;
-    this.is_url_copied = w === "view" || w === "collection" ? true : false;
-    this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
-      console.error("not copied", error);
-    }).finally(() => {
-      this.is_apikey_copied = false;
-      this.is_url_copied = false;
-    });
-  }
-
   setSort(key: string, d: number) {
     this.sort = {};
     this.sort[key] = d;
     this.RefreshData(0);
-  }
-
-  doInstallTemplate(item_: any, ix: number) {
-    if (!this.templates[ix].processing) {
-      this.templates[ix].processing = true;
-      this.crud.Template("install", item_).then(() => {
-        this.misc.doMessage("template installed successfully", "success");
-        this.doRefreshDash().then(() => { }).catch((error: any) => { console.error(error); });
-      }).catch((error: any) => {
-        console.error(error);
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.templates[ix].processing = false;
-      });
-    }
-  }
-
-  doGetVisual(data: any, v_: number) {
-    this.views[v_].loading = true;
-    this.views[v_].error = null;
-    if (this.accountf_apikey) {
-      this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
-        this.views[v_].chart = chart;
-      }).catch((error: any) => {
-        this.views[v_].chart = {};
-        this.visuals[v_].error = error;
-      }).finally(() => {
-        this.views[v_].loading = false;
-      });
-    } else {
-      const error_ = "Please create an API key in the Preferences section";
-      this.views[v_].chart = {};
-      this.views[v_].error = error_;
-      console.error(error_);
-      this.misc.doMessage(error_, "error");
-    }
-  }
-
-  doGetViews() {
-    this.crud.getViews().then((res: any) => {
-      if (res && res.data && res.structure) {
-        this.views = this.viewsx = res.data;
-        this.views_structure = res.structure;
-        this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard);
-        this.views_pane = this.views.filter((obj: any) => obj.vie_collection_id === this.id);
-        for (let v_ = 0; v_ < res.data.length; v_++) {
-          this.doGetVisual(res.data[v_], v_);
-        }
-      }
-    }).catch((error: any) => {
-      console.error(error);
-      this.misc.doMessage(error, "error");
-    });
   }
 
   doSetSearch(k: string) {
@@ -1128,12 +676,6 @@ export class CollectionsPage implements OnInit {
     }
   }
 
-  doTheme(LSTHEME: any) {
-    this.storage.set("LSTHEME", LSTHEME).then(() => {
-      document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
-    });
-  }
-
   doSetSearchItemOp(k: string, op: string) {
     this.searched[k].op = op;
   }
@@ -1153,7 +695,7 @@ export class CollectionsPage implements OnInit {
       "op": "eq",
       "value": this.id
     }]).then(() => {
-      this.goSection("admin", id_, "Data Fields");
+      // admin fields'e git
     });
   }
 
@@ -1180,16 +722,6 @@ export class CollectionsPage implements OnInit {
   doStartSearch(e: any) {
     this.viewsx = this.views;
     this.viewsx = this.viewsx.filter((obj: any) => (obj["vie_id"] + obj["vie_title"]).toLowerCase().indexOf(e.toLowerCase()) > -1);
-  }
-
-  doResizeCharts() {
-    this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: string) => {
-      this.chart_size = LSCHARTSIZE === "small" ? "medium" : LSCHARTSIZE === "medium" ? "large" : LSCHARTSIZE === "large" ? "small" : "small";
-      this.storage.set("LSCHARTSIZE", this.chart_size).then(() => {
-        this.chart_css = "chart-sq " + this.chart_size;
-        this.is_show_resize = false;
-      });
-    });
   }
 
 }

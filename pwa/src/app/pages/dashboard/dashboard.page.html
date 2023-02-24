@@ -172,58 +172,6 @@ https://www.gnu.org/licenses.
                     </div>
                   </div>
                 </div>
-
-                <!-- SHARED VIEWS -->
-                <div class="full-width">
-                  <!-- <h4>{{ 'Shared Views' | translate }}</h4> -->
-                  <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' }}" animated="true"
-                    class="ion-no-padding ion-no-margin brz-searchbar" (ionChange)="doStartSearch($event.detail.value)">
-                  </ion-searchbar>
-                  <ion-grid *ngIf="viewsx.length > 0; else nosharedviews" class="ion-no-padding data-grid">
-                    <ion-row>
-                      <ion-col size="3">
-                        <span class="column-title">{{ 'ID' }} / {{ 'View Title' | translate }}</span>
-                      </ion-col>
-                      <ion-col size="2">
-                        <span class="column-title">{{ 'Collection' | translate }} / {{ 'Row Count' | translate
-                          }}</span>
-                      </ion-col>
-                      <ion-col size="6">
-                        <span class="column-title">{{ 'Subscribers' }}</span>
-                      </ion-col>
-                    </ion-row>
-                    <ion-row *ngFor="let item of viewsx; let a = index" (click)="doEnterViewMode(item)"
-                      class="clicked-item">
-                      <ion-col size="3">
-                        <ion-icon name="play" class="data-icon" color="primary"></ion-icon> {{ item.vie_id
-                        }}<br />
-                        <div class="data-title">{{ item.vie_title }}</div>
-                      </ion-col>
-                      <ion-col size="2">
-                        {{ item.vie_collection_id }}
-                        <div *ngIf="item.chart && item.chart.count; else noviewrecords" class="data-title">{{
-                          item.chart.count }}
-                        </div>
-                        <ng-template #noviewrecords>
-                          <div class="data-title">{{ '-' | translate }}</div>
-                        </ng-template>
-                      </ion-col>
-                      <ion-col size="6">
-                        {{ item._tags.join(' ') }}
-                      </ion-col>
-                    </ion-row>
-                    <ion-row>
-                      <ion-col size="12">
-                        {{ viewsx.length }} {{ 'rows displayed' | translate }}
-                      </ion-col>
-                    </ion-row>
-                  </ion-grid>
-                  <ng-template #nosharedviews>
-                    <ion-text class="pe" class="ion-margin-bottom">{{ 'No data found using these search criteria'
-                      |
-                      translate }}.</ion-text>
-                  </ng-template>
-                </div>
               </div>
 
               <!-- RECENT ANNOUNCEMENTS -->

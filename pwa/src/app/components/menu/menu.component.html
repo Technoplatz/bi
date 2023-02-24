@@ -83,9 +83,9 @@ https://www.gnu.org/licenses.
                   <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
                 </ion-button>
                 <p *ngIf="views.length == 0">
-                  <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
+                  <ion-text color="medium">{{ 'No views found' | translate }}</ion-text>
                 </p>
-                <p *ngFor="let item of views" (click)="goSection('views', item.col_id, item.col_id)"
+                <p *ngFor="let item of views" (click)="doNavi('views', item.vie_id)"
                   class="clicked-item dark">
                   {{ item.vie_title }}
                 </p>
@@ -96,7 +96,7 @@ https://www.gnu.org/licenses.
                 <ion-button size="default" fill="clear" class="menu-button">
                   <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
                 </ion-button>
-                <p *ngFor="let item of segmentsadm" (click)="goSection('admin', item.id, item.title)"
+                <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)"
                   class="clicked-item dark">
                   {{ item.title }}
                 </p>
@@ -105,16 +105,19 @@ https://www.gnu.org/licenses.
             <ion-item lines="none">
               <ion-label class="ion-text-wrap">
                 <ion-button size="default" fill="clear" class="menu-button">
-                  <ion-icon name="options-outline"></ion-icon>{{ 'Preferences' | translate }}
+                  <ion-icon name="options-outline"></ion-icon>{{ 'Account' | translate }}
                 </ion-button>
-                <p (click)="goSection('account', 'apikey', 'API Key')" class="clicked-item dark">
+                <p (click)="doNavi('account', 'apikey')" class="clicked-item dark">
                   {{ 'API Key' | translate }}
                 </p>
-                <p (click)="goSection('account', 'settings', 'Account Settings')" class="clicked-item dark">
+                <p (click)="doNavi('account', 'settings')" class="clicked-item dark">
                   {{ 'Account Settings' | translate }}
                 </p>
                 <p (click)="doNavi('account', 'preferences')" class="clicked-item dark">
                   {{ 'Preferences' | translate }}
+                </p>
+                <p (click)="Signout()" class="clicked-item dark">
+                  {{ 'Sign out' | translate }}
                 </p>
               </ion-label>
             </ion-item>

@@ -32,11 +32,12 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
-import { Router, Event, NavigationError, NavigationEnd } from "@angular/router";
+import { Router, Event, NavigationError, NavigationEnd, NavigationStart } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./classes/miscellaneous";
 import { Navigation } from "./classes/navigation";
 import { Auth } from "./classes/auth";
+import { Crud } from "./classes/crud";
 import { Plugins } from "@capacitor/core";
 import { environment } from "../environments/environment";
 
@@ -59,34 +60,20 @@ export class AppComponent implements OnInit {
     private translate: TranslateService,
     private router: Router,
     private auth: Auth,
+    private crud: Crud,
     private misc: Miscellaneous,
     private storage: Storage,
     private nav: Navigation
-  ) { }
+  ) {
+    this.crud.getAll();
+  }
 
   ngOnInit() {
-    
-    this.misc.navi.subscribe((res: any) => {
-      const p = res.sub ? res.s + "/" + res.sub : res.s;
-      this.nav.navigateRoot(p).then(() => {
-        console.log("nav:", res);
-      });
-    });
-
-    this.storage.get("LSTHEME").then((LSTHEME: any) => {
-      if (LSTHEME) {
-        document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
-      } else {
-        const LSTHEME = environment.themes[2];
-        this.storage.set("LSTHEME", LSTHEME).then(() => {
-          document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
-        });
-      }
-    });
 
     // get user
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user_ = LSUSERMETA;
+      this.auth.user.next(LSUSERMETA);
     });
 
     // listen auth changes
@@ -102,10 +89,27 @@ export class AppComponent implements OnInit {
       }
     });
 
+    this.misc.navi.subscribe((res: any) => {
+      const p = res.sub ? res.s + "/" + res.sub : res.s;
+      this.nav.navigateRoot(p).then(() => { }).catch((err: any) => { });
+    });
+
+    this.storage.get("LSTHEME").then((LSTHEME: any) => {
+      if (LSTHEME) {
+        document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
+      } else {
+        const LSTHEME = environment.themes[2];
+        this.storage.set("LSTHEME", LSTHEME).then(() => {
+          document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
+        });
+      }
+    });
+
     // listen page changes
     this.router.events.subscribe((event: Event) => {
       if (event instanceof NavigationError) {
         console.error("*** navigation error", event.url, event.error);
+      } else if (event instanceof NavigationStart) {
       } else if (event instanceof NavigationEnd) {
         this.index_ = event.url === "/" ? true : false;
         this.console_ = ["/dashboard"].includes(event.url.substring(0, 8)) ? true : false;

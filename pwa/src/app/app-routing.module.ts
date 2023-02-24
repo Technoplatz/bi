@@ -83,6 +83,20 @@ export class UserResolver implements Resolve<any> {
   }
 }
 
+@Injectable()
+export class AdminResolver implements Resolve<any> {
+  constructor(private storage: Storage) { }
+  resolve() {
+    return new Promise((resolve, reject) => {
+      this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
+        resolve(LSUSERMETA && LSUSERMETA.perm ? true : false);
+      }).catch((error: any) => {
+        reject({ message: error.message });
+      });
+    });
+  }
+}
+
 const routes: Routes = [
   {
     path: "",
@@ -111,6 +125,15 @@ const routes: Routes = [
     }
   },
   {
+    path: "admin/:p",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/collections/collections.module").then((m) => m.CollectionsPageModule),
+    data: { preload: true },
+    resolve: {
+      user: AdminResolver,
+    }
+  },
+  {
     path: "setup/:p",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
@@ -121,15 +144,6 @@ const routes: Routes = [
   },
   {
     path: "view/:p",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
-  {
-    path: "admin/:p",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
     data: { preload: true },
@@ -156,6 +170,6 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule],
-  providers: [ModalAccessGuard, SessionGuard, UserResolver],
+  providers: [ModalAccessGuard, SessionGuard, UserResolver, AdminResolver],
 })
 export class AppRoutingModule { }
