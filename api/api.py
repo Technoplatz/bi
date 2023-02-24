@@ -4483,7 +4483,6 @@ class Auth():
             if not user_validate_["result"]:
                 raise APIError(user_validate_["msg"])
             user_ = user_validate_["user"] if "user" in user_validate_ else None
-            # auth_ = user_validate_["auth"] if "auth" in user_validate_ else None
 
             # verify OTP
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
@@ -4511,6 +4510,7 @@ class Auth():
             # generates a token an updates on db
             name_db_ = user_["usr_name"]
             perm_ = True if Misc().permitted_user_f(user_) else False
+            apikey_ = user_["aut_apikey"]
             jdate_ = Misc().get_jdate_f()
 
             # updates user token
@@ -4527,6 +4527,7 @@ class Auth():
                 "name": name_db_,
                 "email": email_,
                 "perm": perm_,
+                "apikey": apikey_,
                 "jdate": jdate_
             }
 
@@ -4582,6 +4583,8 @@ class Auth():
             user_ = self.db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError("user not found for validate")
+
+            user_["aut_apikey"] = auth_["aut_apikey"] if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None else None
 
             # checks if user is enabled or not
             enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
