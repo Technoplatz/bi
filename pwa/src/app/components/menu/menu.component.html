@@ -71,7 +71,7 @@ https://www.gnu.org/licenses.
                 <p *ngIf="collections.length == 0">
                   <ion-text color="medium">{{ 'No collections found' | translate }}</ion-text>
                 </p>
-                <p *ngFor="let item of collections" (click)="doNavi('collections', item.col_id)"
+                <p *ngFor="let item of collections" (click)="doNavi('collection', item.col_id)"
                   class="clicked-item dark">
                   {{ item.col_title }}
                 </p>
@@ -83,9 +83,9 @@ https://www.gnu.org/licenses.
                   <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
                 </ion-button>
                 <p *ngIf="views.length == 0">
-                  <ion-text color="medium">{{ 'No views found' | translate }}</ion-text>
+                  <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
                 </p>
-                <p *ngFor="let item of views" (click)="doNavi('views', item.vie_id)"
+                <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)"
                   class="clicked-item dark">
                   {{ item.vie_title }}
                 </p>

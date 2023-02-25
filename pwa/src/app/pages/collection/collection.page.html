@@ -36,7 +36,7 @@ https://www.gnu.org/licenses.
       <ion-buttons slot="start">
         <ion-menu-button></ion-menu-button>
       </ion-buttons>
-      <ion-title class="ion-no-padding">{{ header }}</ion-title>
+      <ion-title class="ion-no-padding">{{ 'Collection' }}</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-grid *ngIf="is_initialized" class="ion-no-padding">
@@ -46,6 +46,7 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding ion-no-border">
           <ion-row>
             <ion-col class="console-right-0">
+              <h1>{{ header }}</h1>
               <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
                 <ion-row class="sub-menu-row sq-menu-row">
                   <ion-col *ngIf="!view_mode[id]" size="12">
@@ -308,7 +309,7 @@ https://www.gnu.org/licenses.
               </ng-template>
             </ion-col>
             <ion-col *ngIf="is_pane_ok" class="console-right-1">
-              <ion-list *ngIf="pane_segval_colls=='collection'" class="ion-no-padding pane-list">
+              <ion-list class="ion-no-padding pane-list">
                 <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]
                 </ion-list-header>
                 <div *ngIf="perm && actions?.length > 0; else noaction">

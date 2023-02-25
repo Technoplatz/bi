@@ -1708,6 +1708,7 @@ class Crud():
 
             res_ = {
                 "result": True,
+                "record": view_ if source_ == "internal" else None,
                 "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:10],
                 "count": count_,
                 "properties": properties_master_

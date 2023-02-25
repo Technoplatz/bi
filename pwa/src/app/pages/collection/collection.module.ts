@@ -35,8 +35,8 @@ import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { TranslateModule } from "@ngx-translate/core";
 import { IonicModule } from "@ionic/angular";
-import { CollectionsPageRoutingModule } from "./collections-routing.module";
-import { CollectionsPage } from "./collections.page";
+import { CollectionPageRoutingModule } from "./collection-routing.module";
+import { CollectionPage } from "./collection.page";
 import { PageComponentsModule } from "../../components/page-components.module";
 import { QRCodeModule } from 'angularx-qrcode';
 import { NgJsonEditorModule } from "ang-jsoneditor";
@@ -47,17 +47,17 @@ import { NgJsonEditorModule } from "ang-jsoneditor";
     FormsModule,
     ReactiveFormsModule,
     IonicModule,
-    CollectionsPageRoutingModule,
+    CollectionPageRoutingModule,
     TranslateModule.forChild(),
     PageComponentsModule,
     QRCodeModule,
     NgJsonEditorModule
   ],
   declarations: [
-    CollectionsPage
+    CollectionPage
   ],
   exports: [
-    CollectionsPage
+    CollectionPage
   ]
 })
-export class CollectionsPageModule { }
+export class CollectionPageModule { }

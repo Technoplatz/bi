@@ -31,19 +31,33 @@ https://www.gnu.org/licenses.
 */
 
 import { NgModule } from "@angular/core";
-import { Routes, RouterModule } from "@angular/router";
-import { CollectionsPage } from "./collections.page";
-
-const routes: Routes = [
-  {
-    path: "",
-    component: CollectionsPage
-  }
-];
+import { CommonModule } from "@angular/common";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { TranslateModule } from "@ngx-translate/core";
+import { IonicModule } from "@ionic/angular";
+import { ViewPageRoutingModule } from "./view-routing.module";
+import { ViewPage } from "./view.page";
+import { PageComponentsModule } from "../../components/page-components.module";
+import { QRCodeModule } from 'angularx-qrcode';
+import { NgJsonEditorModule } from "ang-jsoneditor";
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    ViewPageRoutingModule,
+    TranslateModule.forChild(),
+    PageComponentsModule,
+    QRCodeModule,
+    NgJsonEditorModule
+  ],
+  declarations: [
+    ViewPage
+  ],
+  exports: [
+    ViewPage
+  ]
 })
-
-export class CollectionsPageRoutingModule { }
+export class ViewPageModule { }

@@ -35,19 +35,18 @@ import { ModalController, AlertController, IonSelect, NavController } from "@ion
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
-import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
 import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 
 @Component({
-  selector: "app-collections",
-  templateUrl: "./collections.page.html",
-  styleUrls: ["./collections.page.scss"]
+  selector: "app-collection",
+  templateUrl: "./collection.page.html",
+  styleUrls: ["./collection.page.scss"]
 })
 
-export class CollectionsPage implements OnInit {
+export class CollectionPage implements OnInit {
   @ViewChild(JsonEditorComponent, { static: false }) private strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
   public loadingText: string = environment.misc.loadingText;
@@ -88,7 +87,6 @@ export class CollectionsPage implements OnInit {
   public columns_: any;
   private menu_toggle: boolean = false;
   public view_mode: any = {};
-  public pane_segval_colls: string = "collection";
   private options?: JsonEditorOptions;
   private sweeped: any = [];
   private sort: any = {};
@@ -97,8 +95,6 @@ export class CollectionsPage implements OnInit {
   private views_structure: any;
   private collections_structure: any;
   private menu: string = "";
-  private pivot_: string = "";
-  private views_pane: any = [];
   private saved_filter: string = "";
   private page_end: number = 1;
   private clonok: number = -1;
@@ -108,7 +104,6 @@ export class CollectionsPage implements OnInit {
   constructor(
     private storage: Storage,
     private crud: Crud,
-    private auth: Auth,
     private misc: Miscellaneous,
     private modal: ModalController,
     private alert: AlertController,
@@ -133,57 +128,24 @@ export class CollectionsPage implements OnInit {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;
       this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-      const qstr1 = this.router.url.split("/")[1];
-      const qstr2 = this.router.url.split("/")[2];
-      this.is_initialized = true;
-      this.storage.set("LSID", qstr2).then(() => {
-        this.id = qstr2;
-        this.goSection(qstr1, qstr2, qstr2);
-      });
-    });
-  }
-
-  doSetCollectionID(id: string) {
-    return new Promise((resolve) => {
-      this.storage.set("LSID", id).then(() => {
-        this.id = id;
-        resolve(true);
-      });
-    });
-  }
-
-  goSection(menu_: string, submenu_: any, header_: string) {
-    const fromdash_ = this.submenu ? false : true;
-    if (!submenu_ || !this.submenu || submenu_ !== this.submenu) {
-      this.is_samecol = false;
-      this.menu = menu_;
-      this.submenu = submenu_;
-      this.header = header_ ? header_ : "dashboard";
-      this.pivot_ = "";
-      if (menu_ === "collections" || menu_ === "admin") {
-        if (fromdash_ || submenu_ !== this.id) {
-          this.doSetCollectionID(submenu_).then(() => {
-            this.is_crud = this.id.charAt(0) === "_" ? false : true;
-            this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-              this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-                this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-                LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-                this.actions = [];
-                this.RefreshData(0).then(() => { }).catch((error: any) => {
-                  console.error(error);
-                  this.misc.doMessage(error, "error");
-                });
-              });
+      this.menu = this.router.url.split("/")[1];
+      this.id = this.submenu = this.router.url.split("/")[2];
+      this.header = this.id;
+      this.storage.set("LSID", this.id).then(() => {
+        this.is_crud = this.id.charAt(0) === "_" ? false : true;
+        this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+          this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
+            this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+            LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+            this.actions = [];
+            this.RefreshData(0).then(() => { }).catch((error: any) => {
+              console.error(error);
+              this.misc.doMessage(error, "error");
             });
           });
-        }
-      } else if (menu_ === "setup") {
-        this.options = new JsonEditorOptions();
-        this.options.modes = ["code", "tree"];
-        this.options.mode = "code";
-        this.options.statusBar = true;
-      }
-    }
+        });
+      });
+    });
   }
 
   getColumns() {
@@ -203,10 +165,8 @@ export class CollectionsPage implements OnInit {
   RefreshData(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
-      this.is_crud = this.id.charAt(0) === "_" ? false : true;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.storage.get("LSSAVEDFILTER").then((LSSAVEDFILTER: any) => {
-          this.views_pane = this.views.filter((obj: any) => obj.vie_collection_id === this.id);
           this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
           this.saved_filter = LSSAVEDFILTER ? LSSAVEDFILTER : null;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -260,6 +220,8 @@ export class CollectionsPage implements OnInit {
                 this.is_loaded = true;
                 this.is_samecol = true;
                 reject(error);
+              }).finally(() => {
+                this.is_initialized = true;
               });
           });
         });
