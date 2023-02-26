@@ -1511,6 +1511,10 @@ class Crud():
 
             user_tags_ = user_["_tags"]
 
+            vie_structure_ = self.root_schemes_f("_collections/_view")
+            if not vie_structure_:
+                raise APIError("view structure not found")
+
             # id must be located in the input
             _id = None
             vie_id_ = None
@@ -1708,10 +1712,11 @@ class Crud():
 
             res_ = {
                 "result": True,
-                "record": view_ if source_ == "internal" else None,
+                "record": json.loads(JSONEncoder().encode(view_)) if source_ == "internal" else None,
                 "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:10],
                 "count": count_,
-                "properties": properties_master_
+                "properties": properties_master_,
+                "structure": vie_structure_
             }
 
         except pymongo.errors.PyMongoError as exc:

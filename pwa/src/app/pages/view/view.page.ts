@@ -64,7 +64,6 @@ export class ViewPage implements OnInit {
   public filter: any = [];
   public searched: any = null;
   public data: any = [];
-  private structure: any = [];
   public selected: any = [];
   private views: any = [];
   private viewsx: any = [];
@@ -92,8 +91,7 @@ export class ViewPage implements OnInit {
   private sort: any = {};
   private properites_: any = {};
   private actionix: number = -1;
-  private views_structure: any;
-  private collections_structure: any;
+  private view_structure: any;
   private menu: string = "";
   private saved_filter: string = "";
   private page_end: number = 1;
@@ -125,6 +123,8 @@ export class ViewPage implements OnInit {
   public viewurl_masked_: string = "";
   public is_apikey_copied: boolean = false;
   private apiHost: string = "";
+  private collectionso: any;
+  private collections_structure: any;
 
   constructor(
     private storage: Storage,
@@ -134,7 +134,16 @@ export class ViewPage implements OnInit {
     private modal: ModalController,
     private alert: AlertController,
     private router: Router
-  ) { }
+  ) {
+    this.collectionso = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+      this.collections_structure = res.structure;
+      this.collections_ = {};
+      for (let item_ in res.data) {
+        this.collections_[res.data[item_].col_id] = true;
+      }
+    });
+  }
 
   ngOnDestroy() { }
 
@@ -151,6 +160,7 @@ export class ViewPage implements OnInit {
         this.view_count = res && res.count ? res.count : 0;
         this.view_properties = res.properties;
         this.view_properties_ = Object.keys(res.properties);
+        this.view_structure = res.structure;
         this.header = this.view.vie_title;
         this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
         this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
@@ -174,7 +184,7 @@ export class ViewPage implements OnInit {
     });
   }
 
-  async Settings(collection_: any, op: string, data_: any, ix_: number) {
+  async Settings() {
     if (!this.perm) {
       console.error("*** no permission");
     } else {
@@ -184,13 +194,13 @@ export class ViewPage implements OnInit {
         cssClass: "crud-modal",
         componentProps: {
           shuttle: {
-            op: op,
-            collection: collection_,
+            op: "update",
+            collection: "_view",
             collections: this.collections ? this.collections : [],
             views: this.views ? this.views : [],
             user: this.user,
-            data: data_,
-            structure: collection_ === "_view" && this.views && this.views_structure ? this.views_structure : collection_ === "_collection" && this.collections_structure ? this.collections_structure : [],
+            data: this.view,
+            structure: this.view_structure,
             direct: -1
           }
         }
@@ -203,8 +213,6 @@ export class ViewPage implements OnInit {
       return await modal.present();
     }
   }
-
-  // VIEW REQ ///
 
   doOTP(obj: any) {
     return new Promise((resolve, reject) => {
@@ -287,7 +295,7 @@ export class ViewPage implements OnInit {
               handler: (announceData: any) => {
                 this.crud.AnnounceNow(view, announceData && announceData.id ? announceData.id : null, scope, this.id).then(() => {
                   this.crud.getAnnouncements();
-                  this.misc.doMessage("announcement completed successfully", "success");
+                  this.misc.doMessage("shared view was announced successfully", "success");
                 }).catch((error: any) => {
                   this.misc.doMessage(error, "error");
                   console.error(error);
