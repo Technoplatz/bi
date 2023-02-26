@@ -56,7 +56,7 @@ https://www.gnu.org/licenses.
                       <br />
                       <span>{{ 'Share' | translate }}<br />{{ 'TEST' | translate }}</span>
                     </div>
-                    <div (click)="doAnnounceNow(view, 'live')" class="data-sq-button">
+                    <div (click)="doAnnounceNow(view, 'live')" class="data-sq-button required">
                       <ion-icon *ngIf="!in_otp_process" name="megaphone"></ion-icon>
                       <ion-icon *ngIf="in_otp_process" name="hourglass-outline"></ion-icon>
                       <br />
@@ -125,35 +125,28 @@ https://www.gnu.org/licenses.
                   </tr>
                   <tr>
                     <th>
-                      <span>{{ 'Records' | translate }}<br />{{ 'Count' | translate }}</span>
+                      <span>{{ 'COUNT' | translate }}</span>
                     </th>
                     <th>
-                      <span>{{ 'Aritmetic Mean' | translate }}<br /></span>
-                      [{{ 'numeric' | translate }}]
+                      <span>{{ 'MEAN' | translate }}</span>
                     </th>
                     <th>
-                      <span>{{ 'Standart Deviation' | translate }}<br /></span>
-                      [{{ 'numeric' | translate }}]
+                      <span>{{ 'STDEV' | translate }}</span>
                     </th>
                     <th>
-                      <span>{{ 'Minimum' | translate }}<br /></span>
-                      [{{ 'numeric' | translate }}]
+                      <span>{{ 'MIN' | translate }}</span>
                     </th>
                     <th>
-                      <span>{{ 'Maximum' | translate }}<br /></span>
-                      [{{ 'numeric' | translate }}]
+                      <span>{{ 'MAX' | translate }}</span>
                     </th>
                     <th>
-                      <span>{{ 'Top' | translate }}<br /></span>
-                      [{{ 'string' | translate }}]
+                      <span>{{ 'TOP' | translate }}</span>
                     </th>
                     <th>
-                      <span>{{ 'Unique' | translate }}<br /></span>
-                      [{{ 'string' | translate }}]
+                      <span>{{ 'UNIQUE' | translate }}</span>
                     </th>
                     <th>
-                      <span>{{ 'Frequency' | translate }}<br /></span>
-                      [{{ 'string' | translate }}]
+                      <span>{{ 'FREQ' | translate }}</span>
                     </th>
                   </tr>
                   <tr>
