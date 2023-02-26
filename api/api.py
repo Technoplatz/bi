@@ -2519,8 +2519,6 @@ class Crud():
 
             if permitted_:
                 data_ = self.db["_collection"].find_one({"col_id": col_id_})
-                if not data_:
-                    raise APIError(f"no collection data found {col_id_}")
             else:
                 raise APIError(f"no permission for {col_id_}")
                 
