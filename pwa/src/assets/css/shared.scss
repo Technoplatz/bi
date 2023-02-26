@@ -423,11 +423,11 @@ form ion-item ion-label {
 }
 
 .stat {
+  max-width: 85%;
   margin-top: 16px;
   margin-bottom: 32px;
   font-size: small;
   background-color: #efefef;
-  width: 85%;
 }
 
 .stat th {
@@ -446,7 +446,7 @@ form ion-item ion-label {
 }
 
 .pivot .dataframe {
-  width: 85%;
+  max-width: 85%;
   font-size: 13px;
   margin-top: 16px;
   background-color: #efefef;

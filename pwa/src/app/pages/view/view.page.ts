@@ -77,7 +77,6 @@ export class ViewPage implements OnInit {
   public multicheckbox: boolean = false;
   private master: any = {};
   private collections: any = [];
-  private collections_: any = {};
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public barcoded_: boolean = false;
@@ -124,7 +123,6 @@ export class ViewPage implements OnInit {
   public is_apikey_copied: boolean = false;
   private apiHost: string = "";
   private collectionso: any;
-  private collections_structure: any;
 
   constructor(
     private storage: Storage,
@@ -137,11 +135,6 @@ export class ViewPage implements OnInit {
   ) {
     this.collectionso = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
-      this.collections_structure = res.structure;
-      this.collections_ = {};
-      for (let item_ in res.data) {
-        this.collections_[res.data[item_].col_id] = true;
-      }
     });
   }
 
