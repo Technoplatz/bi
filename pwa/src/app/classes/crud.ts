@@ -388,7 +388,7 @@ export class Crud {
     });
   }
 
-  View(_id: string, vie_id_: string, source_: string) {
+  getView(_id: string, vie_id_: string, source_: string) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.http.post<any>(this.apiHost + "/crud", {
@@ -600,6 +600,29 @@ export class Crud {
         }).subscribe((res: any) => {
           if (res && res.result) {
             this.collections.next(res);
+            resolve(res);
+          } else {
+            reject(res.msg);
+          }
+        }, (error: any) => {
+          reject(error);
+        });
+      });
+    });
+  }
+
+  getCollection(id: string) {
+    return new Promise((resolve, reject) => {
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        const posted: any = {
+          collection: id,
+          op: "collection",
+          user: LSUSERMETA
+        }
+        this.http.post<any>(this.apiHost + "/crud", posted, {
+          headers: new HttpHeaders(this.crudHeaders)
+        }).subscribe((res: any) => {
+          if (res && res.result) {
             resolve(res);
           } else {
             reject(res.msg);

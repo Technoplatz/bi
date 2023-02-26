@@ -145,7 +145,7 @@ export class ViewPage implements OnInit {
       this.accountf_apikey = LSUSERMETA && LSUSERMETA.apikey ? LSUSERMETA.apikey : "";
       this.menu = this.router.url.split("/")[1];
       this.id = this.submenu = this.router.url.split("/")[2];
-      this.crud.View("", this.id, "internal").then((res: any) => {
+      this.crud.getView("", this.id, "internal").then((res: any) => {
         this.view = res && res.record ? res.record : null;
         this.view_data = res && res.data ? res.data : [];
         this.view_count = res && res.count ? res.count : 0;

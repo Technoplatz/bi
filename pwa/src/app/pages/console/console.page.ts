@@ -277,7 +277,7 @@ export class ConsolePage implements OnInit {
         this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
           this.view?.vie_filter ? this.filter = this.view.vie_filter : null;
           this.view_data = [];
-          this.crud.View(this.view._id, this.view.vie_id, "internal").then((res: any) => {
+          this.crud.getView(this.view._id, this.view.vie_id, "internal").then((res: any) => {
             this.view_data = res && res.data ? res.data : [];
             this.view_count = res && res.count ? res.count : 0;
             this.view_properties = res.properties;

@@ -949,7 +949,7 @@ class Crud():
             session_client_.close()
             return res_
 
-    def collection_f(self, c):
+    def inner_collection_f(self, c):
         try:
             is_crud_ = True if c[:1] != "_" else False
             collection_ = self.db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"_collections/{c}")
@@ -1011,7 +1011,7 @@ class Crud():
             doc_ = input["doc"]
 
             # retrieves the collection structure and properties
-            col_check_ = self.collection_f(collection_id_)
+            col_check_ = self.inner_collection_f(collection_id_)
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
 
@@ -2496,6 +2496,51 @@ class Crud():
         finally:
             return res_
 
+    def collection_f(self, obj):
+        try:
+            user_ = obj["userindb"]
+            col_id_ = obj["collection"]
+            data_ = {}
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+
+            if Misc().permitted_user_f(user_):
+                permitted_ = True
+            else:
+                permitted_ = False
+                for usr_tag_ in usr_tags_:
+                    permissions_ = self.db["_permission"].find_one({
+                        "per_collection_id": col_id_,
+                        "per_tag_id": usr_tag_,
+                        "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
+                    })
+                    if permissions_:
+                        permitted_ = True
+                        break
+
+            if permitted_:
+                data_ = self.db["_collection"].find_one({"col_id": col_id_})
+                if not data_:
+                    raise APIError(f"no collection data found {col_id_}")
+            else:
+                raise APIError(f"no permission for {col_id_}")
+                
+            res_ = {
+                "result": True,
+                "data": data_
+            }
+
+        except pymongo.errors.PyMongoError as exc:
+            res_ = Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
     def read_f(self, input_):  # find_ function is used to generate a query from the database
         try:
             # gets the parameters required
@@ -2894,7 +2939,7 @@ class Crud():
             properties_ = obj["properties"]
             key_ = obj["key"]
 
-            collection_f_ = self.collection_f(cid_)
+            collection_f_ = self.inner_collection_f(cid_)
             if not collection_f_["result"]:
                 raise APIError("collection not found")
 
@@ -3196,7 +3241,7 @@ class Crud():
             match_ = {"_id": _id} if _id else obj["match"] if "match" in obj and obj["match"] is not None and len(obj["match"]) > 0 else obj["filter"] if "filter" in obj else None
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
-            col_check_ = self.collection_f(collection_id_)
+            col_check_ = self.inner_collection_f(collection_id_)
 
             # protect _log collection from clonning and deleting
             if collection_id_ in ["_log", "_backup"]:
@@ -4803,7 +4848,7 @@ def storage_f():
             raise APIError(f"invalid import option {op_}")
 
         collection__ = form_["collection"]
-        col_check_ = Crud().collection_f(collection__)
+        col_check_ = Crud().inner_collection_f(collection__)
         if not col_check_["result"]:
             if op_ == "import":
                 raise APIError(col_check_["msg"])
@@ -4870,7 +4915,7 @@ def crud_f():
         token_ = user_["token"] if "token" in user_ else None
         collection_ = input_["collection"] if "collection" in input_ else None
         match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
-
+        
         # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
         if not validate_["result"]:
@@ -4895,7 +4940,7 @@ def crud_f():
             input_["doc"] = decode_["doc"]
         elif op_ in ["remove", "clone", "delete"]:
             c_ = input_["collection"]
-            col_check_ = Crud().collection_f(c_)
+            col_check_ = Crud().inner_collection_f(c_)
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
 
@@ -4933,6 +4978,8 @@ def crud_f():
             crud_ = Crud().visuals_f(input_)
         elif op_ == "collections":
             crud_ = Crud().collections_f(input_)
+        elif op_ == "collection":
+            crud_ = Crud().collection_f(input_)
         elif op_ == "parent":
             crud_ = Crud().parent_f(input_)
         elif op_ == "dump":
@@ -4940,7 +4987,7 @@ def crud_f():
         elif op_ == "template":
             crud_ = Crud().template_f(input_)
         else:
-            raise APIError(f"operation not supported: {op_}")
+            raise APIError(f"{op_} operation is not supported")
 
         if not crud_["result"]:
             raise APIError(crud_["msg"] if "msg" in crud_ else "crud error")
@@ -5258,7 +5305,7 @@ def post_f():
         rh_collection_ = request.headers.get("collection", None) if "collection" in request.headers and request.headers["collection"] != "" else None
         if not rh_collection_:
             raise APIError("no collection found")
-        collection_f_ = Crud().collection_f(rh_collection_)
+        collection_f_ = Crud().inner_collection_f(rh_collection_)
         if not collection_f_["result"]:
             raise AuthError(collection_f_["msg"])
 

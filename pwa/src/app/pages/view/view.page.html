@@ -33,15 +33,12 @@ https://www.gnu.org/licenses.
 <ion-content class="ion-no-padding" id="main-content">
   <ion-header class="app-header ion-no-border ion-no-margin">
     <ion-toolbar>
-
         <ion-buttons slot="start">
           <ion-menu-button></ion-menu-button>
         </ion-buttons>
         <ion-title slot="start" class="ion-no-padding">
-          {{ 'Shared View' }}
+          {{ header }}
         </ion-title>
-        <ion-button slot="start" size="small" fill="clear" color="dark">Logout</ion-button>
-
     </ion-toolbar>
   </ion-header>
   <ion-grid *ngIf="is_initialized" class="ion-no-padding">
@@ -50,7 +47,6 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding ion-no-border">
           <ion-row>
             <ion-col class="console-right-0">
-              <h1>{{ header }}</h1>
               <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
                 <ion-row class="sub-menu-row sq-menu-row">
                   <ion-col size="12">

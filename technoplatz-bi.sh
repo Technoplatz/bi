@@ -46,7 +46,7 @@ function listAllCommands() {
     echo "./technoplatz-bi.sh down"
     echo "./technoplatz-bi.sh kill"
     echo "./technoplatz-bi.sh pull [--prod]"
-    echo "./technoplatz-bi.sh build [--prod]"
+    echo "./technoplatz-bi.sh build <image> [--prod]"
     echo "./technoplatz-bi.sh prune"
     echo "./technoplatz-bi.sh help"
     echo
@@ -68,6 +68,10 @@ function getSuffixBI() {
                     if [ $3 ]; then
                         if [ $3 != "--prod" ]; then SUFFIX="-1"; else SUFFIX=""; fi
                     fi
+                fi
+            elif [ $1 == "build" ]; then
+                if [ $3 ]; then
+                    if [ $3 != "--prod" ]; then SUFFIX="-1"; else SUFFIX=""; fi
                 fi
             else
                 if [ $2 != "--prod" ]; then SUFFIX="-1"; else SUFFIX=""; fi
@@ -186,7 +190,9 @@ function buildBI() {
     FOLDER=$(echo $(_jq '.folder'))
     TAG=$(echo $(_jq '.tag'))
     DOCKERFILE=$(echo $(_jq '.dockerfile'))
-    docker build --tag $NS/$IMAGE$GETSUFFIX:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
+    if [ $1 == $IMAGE ]; then
+        docker build --tag $NS/$IMAGE$GETSUFFIX:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
+    fi
     done
     return 1
 }

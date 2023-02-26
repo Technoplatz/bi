@@ -130,20 +130,27 @@ export class CollectionPage implements OnInit {
       this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
       this.menu = this.router.url.split("/")[1];
       this.id = this.submenu = this.router.url.split("/")[2];
-      this.header = this.id;
-      this.storage.set("LSID", this.id).then(() => {
-        this.is_crud = this.id.charAt(0) === "_" ? false : true;
-        this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-          this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-            this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-            LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-            this.actions = [];
-            this.RefreshData(0).then(() => { }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
+      this.crud.getCollection(this.id).then((res: any) => {
+        this.header = res && res.data ? res.data.col_title : this.id;
+        this.storage.set("LSID", this.id).then(() => {
+          this.is_crud = this.id.charAt(0) === "_" ? false : true;
+          this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+            this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
+              this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+              LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+              this.actions = [];
+              this.RefreshData(0).then(() => { }).catch((error: any) => {
+                console.error(error);
+                this.misc.doMessage(error, "error");
+              }).finally(() => {
+                this.is_initialized = true;
+              });
             });
           });
         });
+      }).catch((error: any) => {
+        console.error(error);
+        this.misc.doMessage(error, "error");
       });
     });
   }
@@ -220,8 +227,6 @@ export class CollectionPage implements OnInit {
                 this.is_loaded = true;
                 this.is_samecol = true;
                 reject(error);
-              }).finally(() => {
-                this.is_initialized = true;
               });
           });
         });

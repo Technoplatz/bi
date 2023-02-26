@@ -424,7 +424,7 @@ export class CrudPage implements OnInit {
       if (!view_) {
         resolve(true);
       } else {
-        this.crud.View("", view_, "propsonly").then((res: any) => {
+        this.crud.getView("", view_, "propsonly").then((res: any) => {
           if (res && res.properties) {
             let i = 0;
             for (let item in res.properties) {
