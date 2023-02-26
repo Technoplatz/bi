@@ -1801,27 +1801,34 @@ ion-checkbox {
   border-radius: 0px;
   padding-bottom: 8px;
   margin-right: 8px;
-  min-width: 290px !important;
+  align-content: flex-start;
 }
 
 .app-charts {
   width: 100%;
   height: auto;
+  top: auto;
+  display: flex;
+}
+
+app-charts {
+  position: absolute;
+  bottom: 8px;
 }
 
 .chart-sq.small {
-  width: calc((100vw - 555px) / 3);
-  min-height: calc((100vw - 555px) / 3 * 0.64);
+  width: 320px;
+  height: 320px;
 }
 
 .chart-sq.medium {
-  width: calc((100vw - 555px) / 2);
-  min-height: calc((100vw - 555px) / 2 * 0.69);
+  width: 640px;
+  height: 500px;
 }
 
 .chart-sq.large {
-  width: calc((100vw - 555px) / 1);
-  min-height: calc((100vw - 555px) / 1 * 0.62);
+  width: 1280px;
+  height: 840px;
 }
 
 .chart-sq .hdr {

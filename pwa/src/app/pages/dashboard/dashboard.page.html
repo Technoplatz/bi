@@ -127,8 +127,8 @@ https://www.gnu.org/licenses.
                     <div class="hdr">{{ item.vie_title }}</div>
                     <div class="hdr2">{{ item.vie_collection_id }}
                       <span *ngIf="item.chart.count" class="text-bold"> | {{ item.chart.count }}
-                        <span *ngIf="item.chart.count > 1">{{ 'rows' | translate }}</span>
-                        <span *ngIf="item.chart.count == 1">{{ 'row' | translate }}</span>
+                        <span *ngIf="item.chart.count > 1">{{ 'records' | translate }}</span>
+                        <span *ngIf="item.chart.count == 1">{{ 'record' | translate }}</span>
                       </span><br />
                       {{ item.chart.function }} {{ 'of' | translate }} {{ item.chart.yaxis }}
                       <span *ngIf="item.chart.kpi_target_value; else notargetv">&rarr; {{
@@ -165,8 +165,8 @@ https://www.gnu.org/licenses.
                         class="clear-dark-button" color="dark" mode="ios">
                         <ion-icon name="settings-outline"></ion-icon>
                       </ion-button>
-                      <ion-button size="small" fill="clear" (click)="doEnterViewMode(item)" class="clear-dark-button"
-                        color="dark" mode="ios">
+                      <ion-button size="small" fill="clear" class="clear-dark-button"
+                        color="dark" mode="ios" (click)="doEnterViewMode(item)">
                         <ion-icon name="open-outline"></ion-icon>
                       </ion-button>
                     </div>
@@ -209,7 +209,7 @@ https://www.gnu.org/licenses.
                 </ion-row>
                 <ion-row>
                   <ion-col size="12">
-                    {{ announcements.length }} {{ 'rows displayed' | translate
+                    {{ announcements.length }} {{ 'rows' | translate
                     }}
                   </ion-col>
                 </ion-row>

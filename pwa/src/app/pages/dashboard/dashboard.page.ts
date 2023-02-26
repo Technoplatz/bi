@@ -34,7 +34,6 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { ModalController, IonSelect } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
-import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
@@ -157,14 +156,18 @@ export class DashboardPage implements OnInit {
   private collections_structure: any;
   private apiHost: string = "";
   public viewso: any;
+  private collectionso: any;
 
   constructor(
     private storage: Storage,
     private crud: Crud,
-    private auth: Auth,
     private misc: Miscellaneous,
     private modal: ModalController
-  ) { }
+  ) {
+    this.collectionso = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+    });
+  }
 
   ngOnDestroy() {
     this.announcementso = null;
@@ -212,7 +215,10 @@ export class DashboardPage implements OnInit {
   }
 
   doEnterViewMode(view_: any) {
-    console.log("view mnode");
+    this.misc.navi.next({
+      s: "view",
+      sub: view_.vie_id,
+    });
   }
 
   doImport(type_: string) {
@@ -275,7 +281,7 @@ export class DashboardPage implements OnInit {
       });
       modal.onDidDismiss().then((res: any) => {
         if (res.data.modified) {
-          // refresh
+          this.doGetVisual(data_, ix_);
         }
       });
       return await modal.present();
