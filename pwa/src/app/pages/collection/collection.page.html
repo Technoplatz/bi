@@ -61,32 +61,35 @@ https://www.gnu.org/licenses.
                       <br />
                       {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
                     </div>
-                    <div (click)="goCrud(null, 'filter')" class="data-sq-button {{ !filter ? 'disabled' : null }}">
-                      <ion-icon *ngIf="filter.length==0" name="funnel-outline"></ion-icon>
-                      <ion-icon *ngIf="filter.length>0" name="funnel"></ion-icon>
+                    <div *ngIf="filter.length==0" (click)="goCrud(null, 'filter')" class="data-sq-button">
+                      <ion-icon name="funnel-outline"></ion-icon>
                       <br />
-                      <span *ngIf="filter.length==0">{{ 'Apply' | translate }}<br />{{ 'Filter' | translate }}
+                      <span>{{ 'Apply' | translate }}<br />{{ 'Filter' | translate }}
                       </span>
-                      <span *ngIf="filter.length>0">{{ 'Filter' | translate }}<br />{{ 'Applied' |
+                    </div>
+                    <div *ngIf="filter.length>0" (click)="doClearFilter()" class="data-sq-button required">
+                      <ion-icon name="close-circle-outline"></ion-icon>
+                      <br />
+                      <span>{{ 'Clear' | translate }}<br />{{ 'Filter' |
                         translate }}
                       </span>
                     </div>
                     <div *ngIf="is_crud" (click)="doSaveAsView()" class="data-sq-button">
                       <ion-icon name="save-outline"></ion-icon><br />
-                      {{ 'Save as View' | translate }}
+                      {{ 'Save' | translate }}<br />{{ 'as View' | translate }}
                     </div>
                     <div (click)="MultiCrud('clone')" class="data-sq-button">
                       <ion-icon name="duplicate-outline"></ion-icon><br />
-                      {{ 'Clone Selected' | translate }}
+                      {{ 'Clone' | translate }}<br />{{ 'Selected' | translate }}
                     </div>
                     <div (click)="MultiCrud('delete')" class="data-sq-button">
                       <ion-icon name="trash-outline"></ion-icon><br />
-                      {{ 'Delete Selected' | translate }}
+                      {{ 'Delete' | translate }}<br />{{ 'Selected' | translate }}
                     </div>
                     <div *ngIf="perm && filter.length > 0 && data.length > 0 && is_crud" (click)="doPurge()"
-                      class="data-sq-button required">
-                      <ion-icon name="skull" color="danger"></ion-icon><br />
-                      {{ 'Purge Filtered' | translate }}
+                      class="data-sq-button">
+                      <ion-icon name="skull"></ion-icon><br />
+                      {{ 'Purge' | translate }}<br />{{ 'Filtered' | translate }}
                     </div>
                     <div *ngIf="perm && is_crud" (click)="goFields()" class="data-sq-button">
                       <ion-icon name="list-outline"></ion-icon><br />
@@ -98,7 +101,7 @@ https://www.gnu.org/licenses.
                     </div>
                     <div *ngIf="perm && is_crud" (click)="doCollectionSettings()" class="data-sq-button">
                       <ion-icon name="settings-outline"></ion-icon><br />
-                      {{ 'Collection Settings' | translate }}
+                      {{ 'Collection' | translate }}<br />{{ 'Settings' | translate }}
                     </div>
                   </ion-col>
                 </ion-row>
@@ -114,8 +117,7 @@ https://www.gnu.org/licenses.
                     </ion-checkbox>
                   </ion-col>
                   <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
-                    [style]="'min-width: ' + item.value.width + 'px !important;'"
-                    [class]="searched && searched[item.key] && searched[item.key].f ? 'filtered' : ''">
+                    [style]="'min-width: ' + item.value.width + 'px !important;'">
                     <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
                       <span class="column-title">{{ item.value.title }}<br />
                       </span>
@@ -177,7 +179,6 @@ https://www.gnu.org/licenses.
                           class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
                         </ion-input>
                         </div>
-                        
                         <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)" class="ion-padding-start ion-padding-end">
                           {{ 'Search' | translate }}
                         </ion-button>

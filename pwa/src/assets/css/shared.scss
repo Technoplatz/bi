@@ -44,7 +44,7 @@ https://www.gnu.org/licenses.
 }
 
 .flex-header {
-  display: flex;
+  display: flex !important;
   align-items: center;
 }
 
@@ -886,7 +886,6 @@ ion-item {
 }
 
 .app-header {
-  height: 60px;
   border-bottom: 1px solid var(--ion-color-light);
 }
 
@@ -1215,6 +1214,11 @@ sup {
   padding: 0px !important;
   border-bottom: 0px !important;
   margin-bottom: 16px;
+}
+
+.object-underline {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ion-color-light);
 }
 
 .text-underlined {

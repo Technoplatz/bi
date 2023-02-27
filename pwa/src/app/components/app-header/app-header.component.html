@@ -30,20 +30,19 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-header class="app-header ion-no-padding ion-no-border flex-header">
-  <ion-title class="flex-header-start">{{ header }}</ion-title>
-  <ion-button *ngIf="user" fill="clear" (click)="doNavi('account', 'signout')" size="default"
-    class="flex-header-end">
-    <ion-label>{{ 'Sign Out' | translate }}</ion-label>
-  </ion-button>
-  <ion-button *ngIf="user" size="default" fill="clear" (click)="doNavi('account', 'settings')"
-    class="flex-header-end">
-    <ion-label>{{ name }}&nbsp;&nbsp;</ion-label>
-    <ion-icon name="person-circle-outline" color="primary" size="large"></ion-icon>
-  </ion-button>
-  <!-- <ion-button *ngIf="!user" fill="clear" (click)="doSign('signin')" size="default"
-    class="flex-header-end">
-    <ion-icon name="log-in-outline"></ion-icon>
-    <ion-label>{{ 'Sign in' | translate }}</ion-label>
-  </ion-button> -->
+<ion-header class="app-header ion-no-border">
+  <ion-toolbar color="white">
+    <div class="flex-container">
+      <ion-title class="flex-header-start">{{ header }}</ion-title>
+      <ion-button *ngIf="user" fill="clear" (click)="doNavi('account', 'signout')" size="default"
+        class="flex-header-end">
+        <ion-label>{{ 'Sign Out' | translate }}</ion-label>
+      </ion-button>
+      <ion-button *ngIf="user" size="default" fill="clear" (click)="doNavi('account', 'settings')"
+        class="flex-header-end">
+        <ion-label>{{ name }}&nbsp;&nbsp;</ion-label>
+        <ion-icon name="person-circle-outline" color="primary" size="large"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-toolbar>
 </ion-header>

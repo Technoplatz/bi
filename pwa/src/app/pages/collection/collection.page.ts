@@ -136,10 +136,9 @@ export class CollectionPage implements OnInit {
           this.is_crud = this.id.charAt(0) === "_" ? false : true;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
             this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-              // this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+              this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
               LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
               this.actions = [];
-              this.filter = [];
               this.RefreshData(0).then(() => { }).catch((error: any) => {
                 console.error(error);
                 this.misc.doMessage(error, "error");
@@ -409,7 +408,6 @@ export class CollectionPage implements OnInit {
           console.error(error);
           this.misc.doMessage(error, "error");
         });
-
       }
       if (res.data.filters) {
         this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
@@ -571,9 +569,26 @@ export class CollectionPage implements OnInit {
 
   doResetSearch(full: boolean) {
     full ? this.searched = {} : null;
-    for (let key_ in this.structure.properties) {
-      this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "eq", setmode: false } : { actived: false, kw: this.searched[key_] && this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_] && this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_] && this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_] && this.searched[key_].setmode ? this.searched[key_].setmode : null };
-    }
+    this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+      for (let key_ in this.structure.properties) {
+        this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "eq", setmode: false } : { actived: false, kw: this.searched[key_] && this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_] && this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_] && this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_] && this.searched[key_].setmode ? this.searched[key_].setmode : null };
+      }
+    });
+  }
+
+  doClearFilter() {
+    this.filter = [];
+    this.saved_filter = "";
+    this.storage.set("LSSFILTER_" + this.id, this.filter).then(() => {
+      this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
+        this.storage.set("LSSAVEDFILTER", "").then(() => {
+          this.doResetSearch(true);
+          
+          this.searched = {};
+          this.RefreshData(0);
+        });
+      });
+    });
   }
 
   doResetSearchItem(k: string) {

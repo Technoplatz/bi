@@ -30,12 +30,9 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<!-- <ion-menu type="push" contentId="main-content"> -->
-
-<ion-header class="ion-no-border">
+<ion-header class="ion-no-border app-header">
   <ion-toolbar color="white">
     <div class="flex-container ion-padding-start">
-      <ion-icon name="aperture" size="large" class="flex-child"></ion-icon>
       <ion-title class="ion-no-padding flex-child">
         {{ 'Technoplatz BI' }}
       </ion-title>
@@ -61,9 +58,6 @@ https://www.gnu.org/licenses.
               <ion-button size="default" fill="clear" class="dash-button" (click)="doNavi('dashboard', null)">
                 <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Dashboard' | translate }}
               </ion-button>
-              <p (click)="doNavi('dashboard', 'templates')" class="clicked-item dark">
-                {{ 'Templates' | translate }}
-              </p>
             </ion-label>
           </ion-item>
           <ion-item lines="none">
@@ -71,8 +65,8 @@ https://www.gnu.org/licenses.
               <ion-button size="default" fill="clear" class="menu-button">
                 <ion-icon name="layers-outline"></ion-icon>{{ 'Collections' | translate }}
               </ion-button>
-              <p *ngIf="collections.length == 0">
-                <ion-text color="medium">{{ 'No collections found' | translate }}</ion-text>
+              <p *ngIf="collections.length == 0" class="danger">
+                {{ 'No collections found' | translate }}
               </p>
               <p *ngFor="let item of collections" (click)="doNavi('collection', item.col_id)" class="clicked-item dark">
                 {{ item.col_title }}
@@ -97,6 +91,9 @@ https://www.gnu.org/licenses.
               <ion-button size="default" fill="clear" class="menu-button">
                 <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
               </ion-button>
+              <p (click)="doNavi('dashboard', 'templates')" class="clicked-item dark">
+                {{ 'Templates' | translate }}
+              </p>
               <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)" class="clicked-item dark">
                 {{ item.title }}
               </p>
@@ -126,5 +123,3 @@ https://www.gnu.org/licenses.
     </ion-row>
   </ion-grid>
 </ion-content>
-
-<!-- </ion-menu> -->
