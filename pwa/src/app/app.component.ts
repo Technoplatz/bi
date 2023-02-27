@@ -94,7 +94,7 @@ export class AppComponent implements OnInit {
 
     this.misc.navi.subscribe((res: any) => {
       const p = res.sub ? res.s + "/" + res.sub : res.s;
-      this.nav.navigateRoot(p).then(() => { }).catch((error: any) => {
+      this.nav.navigateRoot(res.sub ? res.s + "/" + res.sub : res.s).then(() => { }).catch((error: any) => {
         console.error(error);
       });
     });

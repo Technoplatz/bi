@@ -30,15 +30,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-content class="ion-no-padding" id="main-content">
-  <ion-header class="app-header ion-no-border ion-no-margin">
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-menu-button></ion-menu-button>
-      </ion-buttons>
-      <ion-title class="ion-no-padding">{{ 'Account' }}</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<app-header [header]="header" [user]="user"></app-header>
+<ion-content class="ion-no-padding">
   <div *ngIf="is_initialized" class="page-null">
     <div *ngIf="submenu=='signout'">
       <h4>{{ 'Sign Out' | translate }}</h4>
@@ -50,6 +43,65 @@ https://www.gnu.org/licenses.
       <ion-button (click)="doSignout()" class="ion-margin-top" size="default">
         {{ 'Sign out' | translate }}&nbsp;&nbsp;
       </ion-button>
+    </div>
+    <div *ngIf="submenu=='apikey'">
+      <h4>{{ 'API Key' | translate }}</h4>
+      <ion-label *ngIf="accountf_apikey; else noapikey" class="ion-text-wrap descriptive">
+        {{ 'API keys allow you to access your data from spreadsheets and other BI Tools'
+        |
+        translate }}.
+        <ul>
+          <li>{{ 'API Key is hidden by default' | translate }}.</li>
+          <li>{{ 'To see your API Key click the show button below. It will be shown for 5 seconds.' | translate }}.
+          </li>
+          <li>{{ 'You can copy your key to Clipboard' | translate }}.</li>
+          <li>{{ 'Once you generate a new API Key previous one won\'t be accepted anymore' | translate }}.
+          </li>
+        </ul>
+        <p *ngIf="is_apikey_enabled" class="fixed-font">{{ accountf_apikey }}</p>
+        <p *ngIf="!is_apikey_enabled">
+          &#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;
+        </p>
+        <p *ngIf="accountf_apikeydate">{{ 'Created at' | translate }} {{ accountf_apikeydate |
+          date:'dd.MM.yyyy HH:mm' }}&nbsp;</p>
+        <p class="ion-padding-top">
+          <ion-button (click)="doApiKeyEnabled()" size="default">
+            <ion-spinner *ngIf="is_apikey_enabled" name="dots"></ion-spinner>
+            <ion-icon *ngIf="!is_apikey_enabled" name="eye"></ion-icon>
+            <ion-label *ngIf="!is_apikey_enabled">{{ 'Show' | translate }}</ion-label>
+          </ion-button>
+          <ion-button (click)="doCopy('apikey')" size="default">
+            <ion-icon *ngIf="!is_apikey_copied" name="copy"></ion-icon>
+            <ion-label *ngIf="!is_apikey_copied">{{ 'Copy' | translate }}</ion-label>
+            <ion-icon *ngIf="is_apikey_copied" name="checkmark"></ion-icon>
+            <ion-label *ngIf="is_apikey_copied">{{ 'Copied' | translate }}</ion-label>
+          </ion-button>
+          <ion-button (click)="doAccount('apikeygen')" class="ion-margin-end" size="default">
+            <ion-spinner *ngIf="is_processing_account" name="dots"></ion-spinner>
+            <ion-icon *ngIf="!is_processing_account" name="refresh"></ion-icon>
+            <ion-label *ngIf="!is_processing_account">{{ 'Generate' | translate }}</ion-label>
+          </ion-button>
+        </p>
+      </ion-label>
+      <ng-template #noapikey>
+        <ion-label class="ion-text-wrap descriptive">
+          {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI
+          Tools'
+          |
+          translate }}.
+          <ul>
+            <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one
+              please
+              click the button below' | translate }}.</li>
+          </ul>
+          <p>
+            <ion-button (click)="doAccount('apikeygen')" size="default" class="ion-margin-top">
+              <ion-icon name="key"></ion-icon>
+              <ion-label>{{ 'Create an API key' | translate }}</ion-label>
+            </ion-button>
+          </p>
+        </ion-label>
+      </ng-template>
     </div>
   </div>
   <ion-grid *ngIf="is_initialized" class="ion-no-padding">

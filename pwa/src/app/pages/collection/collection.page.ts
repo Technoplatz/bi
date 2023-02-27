@@ -49,11 +49,11 @@ import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 export class CollectionPage implements OnInit {
   @ViewChild(JsonEditorComponent, { static: false }) private strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
+  public header: string = "";
   public loadingText: string = environment.misc.loadingText;
   private submenu: string = "";
-  public header: string = "";
   private segment = "data";
-  private user: any = null;
+  public user: any = null;
   public perm: boolean = false;
   public is_crud: boolean = false;
   public paget: any = [];
@@ -136,9 +136,10 @@ export class CollectionPage implements OnInit {
           this.is_crud = this.id.charAt(0) === "_" ? false : true;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
             this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-              this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+              // this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
               LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
               this.actions = [];
+              this.filter = [];
               this.RefreshData(0).then(() => { }).catch((error: any) => {
                 console.error(error);
                 this.misc.doMessage(error, "error");

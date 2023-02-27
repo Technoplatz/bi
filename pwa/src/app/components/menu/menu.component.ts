@@ -53,7 +53,7 @@ export class MenuComponent implements OnInit {
   public init = false;
   public saas_: any;
   public viewso: any;
-  private collectionso: any;
+  public collectionso: any;
 
   constructor(
     private auth: Auth,

@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -34,7 +34,7 @@ import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 import { environment } from "../../../environments/environment";
 import { SignPage } from "../../pages/sign/sign.page";
-import { Auth } from "../../classes/auth";
+import { Miscellaneous } from "../../classes/miscellaneous";
 
 @Component({
   selector: "app-header",
@@ -43,6 +43,7 @@ import { Auth } from "../../classes/auth";
 })
 
 export class AppHeaderComponent implements OnInit {
+  @Input() header: any;
   @Input() user: any;
   @Input() swu: boolean = false;
   @Input() net: boolean = false;
@@ -63,7 +64,7 @@ export class AppHeaderComponent implements OnInit {
 
   constructor(
     private modal: ModalController,
-    private auth: Auth
+    private misc: Miscellaneous
   ) { }
 
   ngOnInit() { }
@@ -97,11 +98,10 @@ export class AppHeaderComponent implements OnInit {
     window.location.reload();
   }
 
-  Signout() {
-    this.auth.Signout().then(() => {
-      console.log("*** signed out");
-    }).catch((error: any) => {
-      console.error("signout error", error.message);
+  doNavi(s: string, sub: any) {
+    this.misc.navi.next({
+      s: s,
+      sub: sub,
     });
   }
 

@@ -30,18 +30,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-content class="ion-no-padding" id="main-content">
-  <ion-header class="app-header ion-no-border ion-no-margin">
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-menu-button></ion-menu-button>
-      </ion-buttons>
-      <ion-title class="ion-no-padding">{{ header }}</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<app-header [header]="header" [user]="user"></app-header>
+<ion-content class="ion-no-padding">
   <ion-grid *ngIf="is_initialized" class="ion-no-padding">
     <ion-row>
-      <!-- RIGHT SIDE -->
       <ion-col class="console-right-side">
         <ion-grid class="ion-no-padding ion-no-border">
           <ion-row>
@@ -178,16 +170,19 @@ https://www.gnu.org/licenses.
                             <ion-text>{{ 'False' | translate }}</ion-text>
                           </ion-button>
                         </div>
-                        <ion-input *ngIf="item.value.bsonType!='bool'"
+                        <div>
+                          <ion-input *ngIf="item.value.bsonType!='bool'"
                           [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
                           [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
-                          class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}">
+                          class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
                         </ion-input>
-                        <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
-                          <ion-icon name="search"></ion-icon>{{ 'Search' | translate }}&nbsp;&nbsp;
+                        </div>
+                        
+                        <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)" class="ion-padding-start ion-padding-end">
+                          {{ 'Search' | translate }}
                         </ion-button>
-                        <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
-                          &nbsp;{{ 'Cancel' | translate }}&nbsp;&nbsp;
+                        <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)" class="ion-padding-start ion-padding-end">
+                          {{ 'Cancel' | translate }}
                         </ion-button>
                       </div>
                     </div>

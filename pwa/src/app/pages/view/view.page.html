@@ -30,17 +30,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-content class="ion-no-padding" id="main-content">
-  <ion-header class="app-header ion-no-border ion-no-margin">
-    <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-menu-button></ion-menu-button>
-        </ion-buttons>
-        <ion-title slot="start" class="ion-no-padding">
-          {{ header }}
-        </ion-title>
-    </ion-toolbar>
-  </ion-header>
+<app-header [header]="header" [user]="user"></app-header>
+<ion-content class="ion-no-padding">
   <ion-grid *ngIf="is_initialized" class="ion-no-padding">
     <ion-row>
       <ion-col class="console-right-side">

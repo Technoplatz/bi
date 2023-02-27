@@ -48,13 +48,13 @@ import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 export class DashboardPage implements OnInit {
   @ViewChild(JsonEditorComponent, { static: false }) public strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
+  public header: string = "Dashboard";
   public now: any = Date.now();
   public version = environment.appVersion;
   public release = environment.release;
   public loadingText: string = environment.misc.loadingText;
   public menu: string = "";
   public submenu: string = "";
-  public header: string = "";
   public segment = "data";
   public user: any = null;
   public themes: any = environment.themes;
@@ -174,7 +174,6 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit() {
-    this.header = "Dashboard";
     this.is_dash_ok = this.is_initialized = false;
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;

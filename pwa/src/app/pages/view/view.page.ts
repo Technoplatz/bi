@@ -54,7 +54,7 @@ export class ViewPage implements OnInit {
   private submenu: string = "";
   public header: string = "";
   private segment = "data";
-  private user: any = null;
+  public user: any = null;
   public perm: boolean = false;
   public is_crud: boolean = false;
   public paget: any = [];

@@ -41,7 +41,21 @@ https://www.gnu.org/licenses.
 
 .flex-child {
   align-content: flex-start;
-  margin-right: 4px;
+}
+
+.flex-header {
+  display: flex;
+  align-items: center;
+}
+
+.flex-header-start {
+  align-content: flex-start;
+  margin-left: 16px;
+}
+
+.flex-header-end {
+  align-content: flex-end;
+  color: var(--ion-color-dark) !important;
 }
 
 .theme-button {
@@ -64,8 +78,9 @@ https://www.gnu.org/licenses.
   transform: translate(-50%, -50%);
 }
 
-ion-menu {
-  --max-width: 260px;
+app-menu {
+  width: 260px !important;
+  border-right: 1px solid var(--ion-color-light) !important;;
 }
 
 ion-router-outlet {
@@ -83,6 +98,7 @@ ion-segment-button ion-label {
 
 ion-title {
   color: var(--ion-color-dark) !important;
+  padding: 0px;
 }
 
 ion-button {
@@ -871,8 +887,6 @@ ion-item {
 
 .app-header {
   height: 60px;
-  vertical-align: middle;
-  padding-top: 2px;
   border-bottom: 1px solid var(--ion-color-light);
 }
 
@@ -1439,7 +1453,7 @@ ion-checkbox {
 }
 
 .search-box {
-  position: absolute;
+  position: relative;
   padding: 8px;
   width: 240px;
   height: auto;
@@ -1447,7 +1461,7 @@ ion-checkbox {
   margin-top: 7px;
   border-top: 0px;
   border: 2px solid var(--ion-color-dark);
-  z-index: 999 !important;
+  z-index: 999999 !important;
   background-color: #FFFFFF;
   cursor: default;
 }

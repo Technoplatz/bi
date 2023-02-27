@@ -31,6 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
+import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { Crud } from "../../classes/crud";
 
@@ -41,23 +42,29 @@ import { Crud } from "../../classes/crud";
 })
 
 export class TemplatesPage implements OnInit {
+  public header: string = "Templates";
   public templates: any = [];
   public is_initialized: boolean = false;
+  public user: any = null;
 
   constructor(
     private misc: Miscellaneous,
-    private crud: Crud
+    private crud: Crud,
+    private storage: Storage
   ) { }
 
   ngOnDestroy() { }
 
   ngOnInit() {
-    this.crud.Template("list", null).then((res: any) => {
-      this.templates = res && res.data ? res.data : [];
-      this.is_initialized = true;
-    }).catch((error: any) => {
-      console.error(error);
-      this.misc.doMessage(error, "error");
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.user = LSUSERMETA;
+      this.crud.Template("list", null).then((res: any) => {
+        this.templates = res && res.data ? res.data : [];
+        this.is_initialized = true;
+      }).catch((error: any) => {
+        console.error(error);
+        this.misc.doMessage(error, "error");
+      });
     });
   }
 
