@@ -41,14 +41,14 @@ EOF
 
 function listAllCommands() {
     echo "Available commands:"
-    echo "./technoplatz-bi.sh install [token]"
-    echo "./technoplatz-bi.sh up [--build] [--prod]"
-    echo "./technoplatz-bi.sh down"
-    echo "./technoplatz-bi.sh kill"
-    echo "./technoplatz-bi.sh pull [--prod]"
-    echo "./technoplatz-bi.sh build <image | --all> [--prod]"
-    echo "./technoplatz-bi.sh prune"
-    echo "./technoplatz-bi.sh help"
+    echo "./bi.sh install [token]"
+    echo "./bi.sh up [--build] [--prod]"
+    echo "./bi.sh down"
+    echo "./bi.sh kill"
+    echo "./bi.sh pull [--prod]"
+    echo "./bi.sh build <image | --all> [--prod]"
+    echo "./bi.sh prune"
+    echo "./bi.sh help"
     echo
     echo "See more at https://bi.technoplatz.com/support#script-commands-reference"
 }
@@ -123,14 +123,14 @@ function installBI() {
     echo "Required files were downloaded successfully :)"
     echo
     echo "PLEASE MAKE THE NECESSARY CHANGES ON \"_bi/.env\" FILE"
-    echo "THEN RUN ./technoplatz-bi.sh up [--build] [--prod]"
+    echo "THEN RUN ./bi.sh up [--build] [--prod]"
     return 1
 }
 
 function upBI() {
     if [ ! -d $DIR ]; then
         echo "Oops! \"$DIR\" folder not found at the directory you are!"
-        echo "You need to install the platform by ./technoplatz-bi.sh install [token]"
+        echo "You need to install the platform by ./bi.sh install [token]"
         return 0
     fi
     if [ $1 ]; then
@@ -167,7 +167,7 @@ function pullBI() {
     cd $DIR
     DEV_SUFFIX=$GETSUFFIX docker-compose pull
     echo "The latest software updates have been received successfully"
-    echo "RUN \"./technoplatz-bi.sh up [--build] [--prod]\" FOR CHANGES TO BE APPLIED"
+    echo "RUN \"./bi.sh up [--build] [--prod]\" FOR CHANGES TO BE APPLIED"
     return 1
 }
 
@@ -183,7 +183,7 @@ function pruneBI() {
 
 function buildBI() {
     if [ ! $1 ]; then
-        echo "Please specify an image or add * to build all images"
+        echo "Please specify an image or add --all to build all images"
         return 0
     fi
     for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do

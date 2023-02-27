@@ -29,14 +29,14 @@
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
 #
-#  ./technoplatz-bi.sh install [token]
-#  ./technoplatz-bi.sh up [--build] [--prod]
-#  ./technoplatz-bi.sh down
-#  ./technoplatz-bi.sh kill
-#  ./technoplatz-bi.sh pull [--prod]
-#  ./technoplatz-bi.sh build <image> [--prod]
-#  ./technoplatz-bi.sh prune
-#  ./technoplatz-bi.sh help
+#  ./bi.sh install [token]
+#  ./bi.sh up [--build] [--prod]
+#  ./bi.sh down
+#  ./bi.sh kill
+#  ./bi.sh pull [--prod]
+#  ./bi.sh build <image | --all> [--prod]
+#  ./bi.sh prune
+#  ./bi.sh help
 
 version: "3.9"
 services:
