@@ -188,8 +188,17 @@ const routes: Routes = [
     }
   },
   {
+    path: "404",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/_404/_404.module").then((m) => m._404PageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
     path: "**",
-    redirectTo: "/",
+    redirectTo: "404",
     pathMatch: "full",
   }
 ];

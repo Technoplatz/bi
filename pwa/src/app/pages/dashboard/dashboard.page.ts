@@ -166,6 +166,7 @@ export class DashboardPage implements OnInit {
   ) {
     this.collectionso = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
+      this.collections_structure = res.structure;
     });
   }
 
@@ -274,7 +275,7 @@ export class DashboardPage implements OnInit {
             views: this.views ? this.views : [],
             user: this.user,
             data: data_,
-            structure: collection_ === "_view" && this.views && this.views_structure ? this.views_structure : collection_ === "_collection" && this.collections_structure ? this.collections_structure : [],
+            structure: this.collections_structure,
             direct: -1
           }
         }
