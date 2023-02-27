@@ -46,7 +46,7 @@ function listAllCommands() {
     echo "./technoplatz-bi.sh down"
     echo "./technoplatz-bi.sh kill"
     echo "./technoplatz-bi.sh pull [--prod]"
-    echo "./technoplatz-bi.sh build <image> [--prod]"
+    echo "./technoplatz-bi.sh build <image | --all> [--prod]"
     echo "./technoplatz-bi.sh prune"
     echo "./technoplatz-bi.sh help"
     echo
@@ -182,6 +182,10 @@ function pruneBI() {
 }
 
 function buildBI() {
+    if [ ! $1 ]; then
+        echo "Please specify an image or add * to build all images"
+        return 0
+    fi
     for row in $(echo "${BUILDS}" | jq -r '.[] | @base64'); do
         _jq() {
             echo ${row} | base64 --decode | jq -r ${1}
@@ -190,7 +194,7 @@ function buildBI() {
     FOLDER=$(echo $(_jq '.folder'))
     TAG=$(echo $(_jq '.tag'))
     DOCKERFILE=$(echo $(_jq '.dockerfile'))
-    if [ $1 == $IMAGE ]; then
+    if [[ $1 == "--all" || $1 == $IMAGE ]]; then
         docker build --tag $NS/$IMAGE$GETSUFFIX:$TAG --file $FOLDER/$DOCKERFILE $FOLDER/
     fi
     done
@@ -214,7 +218,7 @@ function killBI() {
 
 # Setup
 INC=0
-NS="technoplatz"
+NS="ghcr.io/technoplatz"
 DIR="_bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"

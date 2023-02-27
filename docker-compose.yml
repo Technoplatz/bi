@@ -1,7 +1,7 @@
 #
 # Technoplatz BI
 #
-# Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+# Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -29,7 +29,14 @@
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
 #
-# docker-compose up --build --detach --remove-orphans
+#  ./technoplatz-bi.sh install [token]
+#  ./technoplatz-bi.sh up [--build] [--prod]
+#  ./technoplatz-bi.sh down
+#  ./technoplatz-bi.sh kill
+#  ./technoplatz-bi.sh pull [--prod]
+#  ./technoplatz-bi.sh build <image> [--prod]
+#  ./technoplatz-bi.sh prune
+#  ./technoplatz-bi.sh help
 
 version: "3.9"
 services:
@@ -63,7 +70,7 @@ services:
 
   init:
     container_name: init
-    image: technoplatz/bi-init${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-init${DEV_SUFFIX}:latest
     hostname: init
     volumes:
       - bi-storage-volume:/init
@@ -153,7 +160,7 @@ services:
 
   replicaset:
     container_name: replicaset
-    image: technoplatz/bi-replicaset${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-replicaset${DEV_SUFFIX}:latest
     hostname: replicaset
     depends_on:
       - mongo0
@@ -188,7 +195,7 @@ services:
 
   api:
     container_name: api
-    image: technoplatz/bi-api${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-api${DEV_SUFFIX}:latest
     depends_on:
       - replicaset
     hostname: api
@@ -236,7 +243,7 @@ services:
 
   pwa:
     container_name: pwa
-    image: technoplatz/bi-pwa${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-pwa${DEV_SUFFIX}:latest
     hostname: pwa
     restart: always
     volumes:
