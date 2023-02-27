@@ -116,6 +116,15 @@ const routes: Routes = [
     }
   },
   {
+    path: "dashboard/templates",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/templates/templates.module").then((m) => m.TemplatesPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
     path: "account/signout",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),

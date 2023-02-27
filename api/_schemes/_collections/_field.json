@@ -45,7 +45,7 @@
             "minLength": 1,
             "maxLength": 64,
             "title": "Title",
-            "description": "Title",
+            "description": "Field Title",
             "required": true,
             "width": 160
         },

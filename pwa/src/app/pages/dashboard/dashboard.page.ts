@@ -84,7 +84,6 @@ export class DashboardPage implements OnInit {
   public visuals: any = [];
   public kpis: any = [];
   public metrics: any = [];
-  public templates: any = [];
   public pages: any = [];
   public limit: number = environment.misc.limit;
   public page: number = 1;
@@ -289,20 +288,6 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  doInstallTemplate(item_: any, ix: number) {
-    if (!this.templates[ix].processing) {
-      this.templates[ix].processing = true;
-      this.crud.Template("install", item_).then(() => {
-        this.misc.doMessage("template installed successfully", "success");
-      }).catch((error: any) => {
-        console.error(error);
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.templates[ix].processing = false;
-      });
-    }
-  }
-
   doGetVisual(data: any, v_: number) {
     this.views[v_].loading = true;
     this.views[v_].error = null;
@@ -322,16 +307,6 @@ export class DashboardPage implements OnInit {
       console.error(error_);
       this.misc.doMessage(error_, "error");
     }
-  }
-
-  doTemplateShow() {
-    this.crud.Template("list", null).then((res: any) => {
-      this.templates = res && res.data ? res.data : [];
-      this.template_showed = !this.template_showed;
-    }).catch((error: any) => {
-      console.error(error);
-      this.misc.doMessage(error, "error");
-    });
   }
 
   doStartSearch(e: any) {

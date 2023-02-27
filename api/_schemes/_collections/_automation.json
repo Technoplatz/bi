@@ -15,7 +15,7 @@
             "minLength": 1,
             "maxLength": 64,
             "title": "Title",
-            "description": "Automation title",
+            "description": "Automation Title",
             "required": true,
             "width": 180
         },

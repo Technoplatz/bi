@@ -27,7 +27,7 @@
             "minLength": 1,
             "maxLength": 64,
             "title": "Title",
-            "description": "View title",
+            "description": "View Title",
             "required": true,
             "width": 230
         },

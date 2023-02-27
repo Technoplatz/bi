@@ -26,7 +26,7 @@
             "minLength": 1,
             "maxLength": 64,
             "title": "Title",
-            "description": "Action title",
+            "description": "Action Title",
             "required": true,
             "width": 140
         },
