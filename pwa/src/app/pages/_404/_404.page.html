@@ -29,16 +29,8 @@ if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
-
+<app-header [header]="header" [user]="user"></app-header>
 <ion-content class="ion-no-padding">
-  <ion-header class="app-header ion-no-border ion-no-margin">
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-menu-button></ion-menu-button>
-      </ion-buttons>
-      <ion-title class="ion-no-padding">{{ 'Sorry' }}!</ion-title>
-    </ion-toolbar>
-  </ion-header>
   <div class="page-null">
     <h1>404</h1>
     {{ 'Page not found' | translate }}.

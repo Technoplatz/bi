@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { Miscellaneous } from "../../classes/miscellaneous";
+import { Storage } from "@ionic/storage";
 
 @Component({
   selector: "app-404",
@@ -40,15 +41,20 @@ import { Miscellaneous } from "../../classes/miscellaneous";
 })
 
 export class _404Page implements OnInit {
+  public header: string = "Sorry!";
+  public user: any = null;
 
   constructor(
-    private misc: Miscellaneous,
+    private misc: Miscellaneous, 
+    private storage: Storage
   ) { }
 
   ngOnDestroy() { }
 
   ngOnInit() {
-
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.user = LSUSERMETA;
+    });
   }
 
   doNavi(s: string, sub: any) {

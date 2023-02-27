@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 export const environment = {
-  animated: true,
+  animated: false,
   sanitizerEnabled: true,
   production: false,
   appVersion: require("../../package.json").version + "-dev",
