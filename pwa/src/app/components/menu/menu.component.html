@@ -57,12 +57,10 @@ https://www.gnu.org/licenses.
             </ion-item>
             <ion-item lines="none">
               <ion-label class="ion-text-wrap ion-no-margin">
-                <ion-button size="default" fill="clear" class="menu-button" (click)="doNavi('dashboard', null)">
-                  <ion-icon name="stats-chart-sharp"></ion-icon>
-                  {{ 'Dashboard' | translate }}
+                <ion-button size="default" fill="clear" class="dash-button" (click)="doNavi('dashboard', null)">
+                  <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Dashboard' | translate }}
                 </ion-button>
-                <p (click)="doNavi('dashboard', 'templates')"
-                  class="clicked-item dark">
+                <p (click)="doNavi('dashboard', 'templates')" class="clicked-item dark">
                   {{ 'Templates' | translate }}
                 </p>
               </ion-label>
@@ -89,8 +87,7 @@ https://www.gnu.org/licenses.
                 <p *ngIf="views.length == 0">
                   <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
                 </p>
-                <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)"
-                  class="clicked-item dark">
+                <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)" class="clicked-item dark">
                   {{ item.vie_title }}
                 </p>
               </ion-label>
@@ -100,8 +97,7 @@ https://www.gnu.org/licenses.
                 <ion-button size="default" fill="clear" class="menu-button">
                   <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
                 </ion-button>
-                <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)"
-                  class="clicked-item dark">
+                <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)" class="clicked-item dark">
                   {{ item.title }}
                 </p>
               </ion-label>

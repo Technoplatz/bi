@@ -132,7 +132,7 @@ ion-alert .alert-radio-group {
 }
 
 .page-404 {
-  padding-left: 48px;
+  padding-left: 36px;
   padding-top: 16px;
 }
 
@@ -567,28 +567,23 @@ form ion-item ion-label {
   font-weight: 400;
 }
 
-.menu-button {
+.menu-button,
+.dash-button {
   --padding-start: 0px !important;
   margin-bottom: -4px;
   font-weight: 700;
-  cursor: none !important;
-  pointer-events: none !important;
-}
-
-.menu-button ion-icon {
-  width: 24px !important;
+  cursor: none;
+  pointer-events: none;
 }
 
 .dash-button {
-  --padding-start: 0px !important;
-  font-weight: 700;
-  margin-bottom: -8px;
+  cursor: pointer !important;
+  pointer-events: initial !important;
 }
 
+.menu-button ion-icon,
 .dash-button ion-icon {
   width: 24px !important;
-  margin-right: 4px;
-  margin-top: -8px;
 }
 
 .pane_segment {
