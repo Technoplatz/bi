@@ -64,15 +64,19 @@ export class AppComponent implements OnInit {
     private misc: Miscellaneous,
     private storage: Storage,
     private nav: Navigation
-  ) {
-    this.crud.getAll();
-  }
+  ) { }
 
   ngOnInit() {
 
     // get user
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user_ = LSUSERMETA;
+      if (LSUSERMETA) {
+        this.crud.getAll().then(() => { }).catch((error: any) => {
+          console.error(error);
+          this.misc.doMessage(error, "error");
+        });
+      }
     });
 
     // listen auth changes
@@ -81,16 +85,18 @@ export class AppComponent implements OnInit {
         this.user_ = LSUSERMETA;
       } else {
         this.user_ = null;
-        this.nav.navigateRoot("/").then(() => {
-        }).catch((error: any) => {
-          console.error(error);
+        this.misc.navi.next({
+          s: "",
+          sub: null,
         });
       }
     });
 
     this.misc.navi.subscribe((res: any) => {
       const p = res.sub ? res.s + "/" + res.sub : res.s;
-      this.nav.navigateRoot(p).then(() => { }).catch((err: any) => { });
+      this.nav.navigateRoot(p).then(() => { }).catch((error: any) => {
+        console.error(error);
+      });
     });
 
     this.storage.get("LSTHEME").then((LSTHEME: any) => {

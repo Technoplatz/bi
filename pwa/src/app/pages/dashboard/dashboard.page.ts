@@ -204,9 +204,7 @@ export class DashboardPage implements OnInit {
 
   doRefresh() {
     this.is_dash_ok = false;
-    this.crud.getAll().then(() => {
-      console.log("*** got all");
-    }).catch((error: any) => {
+    this.crud.getAll().then(() => { }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "error");
     }).finally(() => {

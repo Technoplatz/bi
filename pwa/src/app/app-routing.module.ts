@@ -100,7 +100,7 @@ export class AdminResolver implements Resolve<any> {
 const routes: Routes = [
   {
     path: "",
-    loadChildren: () => import("./pages/main/main.module").then((m) => m.MainPageModule),
+    loadChildren: () => import("./pages/home/home.module").then((m) => m.HomePageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver

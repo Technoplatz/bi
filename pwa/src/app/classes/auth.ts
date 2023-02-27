@@ -32,7 +32,8 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { Storage } from "@ionic/storage";
-import { Subject, BehaviorSubject } from "rxjs";
+import { Subject } from "rxjs";
+import { Crud } from "./crud";
 import { Navigation } from "./navigation";
 import { Miscellaneous } from "./miscellaneous";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
@@ -55,6 +56,7 @@ export class Auth {
     private storage: Storage,
     private navigation: Navigation,
     private misc: Miscellaneous,
+    private crud: Crud,
     private http: HttpClient
   ) {
     this.misc.getAPIHost().then((apiHost: any) => {
@@ -123,11 +125,16 @@ export class Auth {
       }).subscribe((res: any) => {
         if (res && res.result) {
           this.storage.set("LSUSERMETA", res.user).then(() => {
-            this.stateChange.next(res.user);
-            this.navigation.navigateRoot("/dashboard").then(() => {
-              resolve(true);
+            this.crud.getAll().then(() => {
+              this.stateChange.next(res.user);
+              this.navigation.navigateRoot("/dashboard").then(() => {
+                resolve(true);
+              }).catch((error: any) => {
+                reject(error);
+              });
             }).catch((error: any) => {
-              reject(error);
+              console.error(error);
+              this.misc.doMessage(error, "error");
             });
           }).catch((error: any) => {
             reject(error);

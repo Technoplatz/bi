@@ -32,32 +32,39 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { ModalController } from "@ionic/angular";
-import { Auth } from "../../classes/auth";
+import { Storage } from "@ionic/storage";
+import { Miscellaneous } from "../../classes/miscellaneous";
 import { SignPage } from "../sign/sign.page";
 
 @Component({
-  selector: "app-main",
-  templateUrl: "./main.page.html",
-  styleUrls: ["./main.page.scss"]
+  selector: "app-home",
+  templateUrl: "./home.page.html",
+  styleUrls: ["./home.page.scss"]
 })
 
-export class MainPage implements OnInit {
+export class HomePage implements OnInit {
   public user: any;
+  public is_initialized: boolean = false;
 
   constructor(
-    private auth: Auth,
-    private modal: ModalController
-  ) {
-    this.auth.stateChange.subscribe((LSUSERMETA: any) => {
+    private modal: ModalController,
+    private misc: Miscellaneous,
+    private storage: Storage
+  ) { }
+
+  ngOnInit() {
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       if (LSUSERMETA) {
         this.user = LSUSERMETA;
+        this.misc.navi.next({
+          s: "dashboard",
+          sub: null,
+        });
       } else {
-        console.error("*** no user found");
+        this.is_initialized = true;
       }
     });
   }
-
-  ngOnInit() { }
 
   async doSignup() {
     const modal = await this.modal.create({

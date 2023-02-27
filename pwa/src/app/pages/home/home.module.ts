@@ -1,4 +1,4 @@
-<!--
+/*
 Technoplatz BI
 
 Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
@@ -28,35 +28,27 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
--->
+*/
 
-<ion-content>
-  <ion-grid class="sign-section">
-    <ion-row>
-      <ion-col size="1"></ion-col>
-      <ion-col size="11" class="ion-no-padding ion-padding-end">
-        <ion-icon name="stats-chart-sharp" class="index-logo"></ion-icon>
-        <h5>{{ 'No-code data management and sharing platform' | translate }}</h5>
-        <h1>{{ 'It\'s time to get data-driven with your inner-cycle' | translate }}</h1>
-      </ion-col>
-    </ion-row>
-    <ion-row class="ion-margin-top">
-      <ion-col size="1"></ion-col>
-      <ion-col size="11" class="ion-padding-top">
-        <ion-button *ngIf="user" href="/dashboard" class="ion-margin-top">
-          <ion-icon name="terminal-outline"></ion-icon>&nbsp;
-          {{ 'Dashboard' | translate }}
-        </ion-button>
-        <ion-button *ngIf="!user" (click)="doSignup()" class="ion-margin-top" size="default">
-          <ion-icon name="person-outline"></ion-icon>
-          {{ 'Sign up' | translate }}&nbsp;&nbsp;
-        </ion-button>
-        <ion-button *ngIf="!user" (click)="doSign('signin')" class="ion-margin-top" size="default">
-          <ion-icon name="person-outline"></ion-icon>
-          {{ 'Sign in' | translate }}&nbsp;&nbsp;
-        </ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
-</ion-content>
-<app-footer></app-footer>
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { TranslateModule } from "@ngx-translate/core";
+import { IonicModule } from "@ionic/angular";
+import { HomePageRoutingModule } from "./home-routing.module";
+import { HomePage } from "./home.page";
+import { PageComponentsModule } from "../../components/page-components.module";
+
+@NgModule({
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    IonicModule,
+    HomePageRoutingModule,
+    TranslateModule.forChild(),
+    PageComponentsModule
+  ],
+  declarations: [HomePage]
+})
+export class HomePageModule { }

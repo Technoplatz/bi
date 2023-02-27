@@ -200,7 +200,10 @@ export class ViewPage implements OnInit {
       });
       modal.onDidDismiss().then((res: any) => {
         if (res.data.modified) {
-          this.crud.getAll();
+          this.crud.getAll().then(() => { }).catch((error: any) => {
+            console.error(error);
+            this.misc.doMessage(error, "error");
+          });
         }
       });
       return await modal.present();

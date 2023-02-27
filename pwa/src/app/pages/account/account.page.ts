@@ -177,7 +177,7 @@ export class AccountPage implements OnInit {
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.submenu = this.router.url.split("/")[2];
-    this.header = "Account";
+    this.header = this.submenu === "signout" ? "Sign out" : "Account";
     this.is_dash_ok = this.is_initialized = false;
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;
@@ -193,9 +193,7 @@ export class AccountPage implements OnInit {
 
   doRefresh() {
     this.is_dash_ok = false;
-    this.crud.getAll().then(() => {
-      console.log("*** got all");
-    }).catch((error: any) => {
+    this.crud.getAll().then(() => { }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "error");
     }).finally(() => {

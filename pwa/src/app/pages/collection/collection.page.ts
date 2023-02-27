@@ -317,7 +317,10 @@ export class CollectionPage implements OnInit {
       });
       modal.onDidDismiss().then((res: any) => {
         if (res.data.modified) {
-          this.crud.getAll();
+          this.crud.getAll().then(() => { }).catch((error: any) => {
+            console.error(error);
+            this.misc.doMessage(error, "error");
+          });
         }
       });
       return await modal.present();
@@ -399,8 +402,13 @@ export class CollectionPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
-        this.crud.getAll();
-        this.RefreshData(0);
+        this.crud.getAll().then(() => {
+          this.RefreshData(0);
+        }).catch((error: any) => {
+          console.error(error);
+          this.misc.doMessage(error, "error");
+        });
+
       }
       if (res.data.filters) {
         this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {

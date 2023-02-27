@@ -183,9 +183,6 @@ export class ConsolePage implements OnInit {
     this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;
     });
-    this.misc.navi.subscribe((nav: any) => {
-      console.log("nav:", nav);
-    });
   }
 
   ngOnInit() {
