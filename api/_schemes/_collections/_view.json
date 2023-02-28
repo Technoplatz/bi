@@ -368,10 +368,12 @@
             "title": "Colors",
             "description": "Color name or rgb code like #cc0000",
             "default": [
-                "LightBlue",
-                "FireBrick",
-                "PaleGoldenRod",
-                "YellowGreen"
+                "#CCF1FF",
+                "#E0D7FF",
+                "#FFCCE1",
+                "#D7EEFF",
+                "#FAFFC7",
+                "#DDDDDD"
             ],
             "manualAdd": true,
             "color": true,

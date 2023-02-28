@@ -65,7 +65,7 @@ https://www.gnu.org/licenses.
 
               <!-- VIEW SECTION -->
               <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
-                <div *ngFor="let item of flashcards; let f = index" [class]="flash_css" #chcontainer>
+                <div *ngFor="let item of flashcards; let f = index" [class]="flash_css" [style.background-color]="item.vie_p_color_scheme[0] ? item.vie_p_color_scheme[0] : '#ccc'" #chcontainer>
                   <div class="hdr">{{ item.vie_title }}</div>
                   <div class="visual-buttons">
                     <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
@@ -90,10 +90,6 @@ https://www.gnu.org/licenses.
                 <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
                   <div class="hdr">{{ item.vie_title }}</div>
                   <div class="visual-buttons">
-                    <!-- <ion-button size="small" fill="clear" (click)="doGetVisual(item, i)" class="clear-dark-button"
-                      color="dark" mode="ios">
-                      <ion-icon name="sync"></ion-icon>
-                    </ion-button> -->
                     <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, i)"
                       class="clear-dark-button" color="dark" mode="ios">
                       <ion-icon name="settings-outline"></ion-icon>
