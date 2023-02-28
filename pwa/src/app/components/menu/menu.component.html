@@ -40,86 +40,80 @@ https://www.gnu.org/licenses.
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding-start ion-padding-end">
-  <ion-grid class="ion-no-padding">
-    <ion-row>
-      <ion-col class="menu-side hide-scrollbar">
-        <ion-list lines="none">
-          <ion-item lines="none" class="pane-item">
-            <ion-label>
-              {{ 'Console' }}_<br />
-              <span>
-                v {{ version }} ({{ release }})<br />
-                {{ saas_ ? saas_.company : null }}
-              </span>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label class="ion-text-wrap ion-no-margin">
-              <ion-button size="default" fill="clear" class="dash-button" (click)="doNavi('dashboard', null)">
-                <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Dashboard' | translate }}
-              </ion-button>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label class="ion-text-wrap ion-no-margin">
-              <ion-button size="default" fill="clear" class="menu-button">
-                <ion-icon name="layers-outline"></ion-icon>{{ 'Collections' | translate }}
-              </ion-button>
-              <p *ngIf="collections.length == 0" class="danger">
-                {{ 'No collections found' | translate }}
-              </p>
-              <p *ngFor="let item of collections" (click)="doNavi('collection', item.col_id)" class="clicked-item dark">
-                {{ item.col_title }}
-              </p>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label class="ion-text-wrap ion-no-margin">
-              <ion-button size="default" fill="clear" class="menu-button">
-                <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
-              </ion-button>
-              <p *ngIf="views.length == 0">
-                <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
-              </p>
-              <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)" class="clicked-item dark">
-                {{ item.vie_title }}
-              </p>
-            </ion-label>
-          </ion-item>
-          <ion-item *ngIf="segmentsadm" lines="none">
-            <ion-label class="ion-text-wrap ion-no-margin">
-              <ion-button size="default" fill="clear" class="menu-button">
-                <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
-              </ion-button>
-              <p (click)="doNavi('dashboard', 'templates')" class="clicked-item dark">
-                {{ 'Templates' | translate }}
-              </p>
-              <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)" class="clicked-item dark">
-                {{ item.title }}
-              </p>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none">
-            <ion-label class="ion-text-wrap">
-              <ion-button size="default" fill="clear" class="menu-button">
-                <ion-icon name="options-outline"></ion-icon>{{ 'Account' | translate }}
-              </ion-button>
-              <p (click)="doNavi('account', 'apikey')" class="clicked-item dark">
-                {{ 'API Key' | translate }}
-              </p>
-              <p (click)="doNavi('account', 'settings')" class="clicked-item dark">
-                {{ 'Account Settings' | translate }}
-              </p>
-              <p (click)="doNavi('account', 'preferences')" class="clicked-item dark">
-                {{ 'Preferences' | translate }}
-              </p>
-              <p (click)="doNavi('account', 'signout')" class="clicked-item dark">
-                {{ 'Sign out' | translate }}
-              </p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <ion-list lines="none" class="menu-side">
+    <ion-item lines="none" class="pane-item">
+      <ion-label>
+        {{ 'Console' }}_<br />
+        <span>
+          v{{ version }} ({{ release }})<br />
+          {{ saas_ ? saas_.company : null }}
+        </span>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="dash-button" (click)="doNavi('dashboard', null)">
+          <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Dashboard' | translate }}
+        </ion-button>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="layers-outline"></ion-icon>{{ 'Collections' | translate }}
+        </ion-button>
+        <p *ngIf="collections.length == 0" class="danger">
+          {{ 'No collections found' | translate }}
+        </p>
+        <p *ngFor="let item of collections" (click)="doNavi('collection', item.col_id)" class="clicked-item dark">
+          {{ item.col_title }}
+        </p>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
+        </ion-button>
+        <p *ngIf="views.length == 0">
+          <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
+        </p>
+        <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)" class="clicked-item dark">
+          {{ item.vie_title }}
+        </p>
+      </ion-label>
+    </ion-item>
+    <ion-item *ngIf="segmentsadm" lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
+        </ion-button>
+        <p (click)="doNavi('dashboard', 'templates')" class="clicked-item dark">
+          {{ 'Templates' | translate }}
+        </p>
+        <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)" class="clicked-item dark">
+          {{ item.title }}
+        </p>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="options-outline"></ion-icon>{{ 'Account' | translate }}
+        </ion-button>
+        <p (click)="doNavi('account', 'apikey')" class="clicked-item dark">
+          {{ 'API Key' | translate }}
+        </p>
+        <p (click)="doNavi('account', 'security')" class="clicked-item dark">
+          {{ 'Security' | translate }}
+        </p>
+        <p (click)="doNavi('account', 'preferences')" class="clicked-item dark">
+          {{ 'Preferences' | translate }}
+        </p>
+        <p (click)="doNavi('account', 'signout')" class="clicked-item dark">
+          {{ 'Sign out' | translate }}
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
 </ion-content>

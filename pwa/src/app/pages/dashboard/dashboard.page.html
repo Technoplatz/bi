@@ -66,7 +66,7 @@ https://www.gnu.org/licenses.
               <!-- VIEW SECTION -->
               <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
                 <div *ngFor="let item of flashcards; let f = index" [class]="flash_css" [style.background-color]="item.vie_p_color_scheme[0] ? item.vie_p_color_scheme[0] : '#ccc'" #chcontainer>
-                  <div class="hdr">{{ item.vie_title }}</div>
+                  <h6>{{ item.vie_title }}</h6>
                   <div class="visual-buttons">
                     <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
                       class="clear-dark-button" color="dark" mode="ios">
@@ -74,22 +74,19 @@ https://www.gnu.org/licenses.
                     </ion-button>
                   </div>
                   <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
-                    <div class="hdr2">{{ item.vie_collection_id }} | 
+                    {{ item.vie_collection_id }} | 
                       {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
                       <!-- <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
                         <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
                         <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
                       </span> -->
-                    </div>
-                    <div class="hdr4">
-                      {{ item.visual.value }}
-                    </div>
+                      <h2>{{ item.visual.value }}</h2>
                   </div>
                 </div>
               </div>
               <div *ngIf="views && views.length > 0" class="brz-visual-group">
                 <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
-                  <div class="hdr">{{ item.vie_title }}</div>
+                  <h5>{{ item.vie_title }}</h5>
                   <div class="visual-buttons">
                     <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, i)"
                       class="clear-dark-button" color="dark" mode="ios">

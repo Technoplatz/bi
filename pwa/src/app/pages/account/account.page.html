@@ -33,20 +33,33 @@ https://www.gnu.org/licenses.
 <app-header [header]="header" [user]="user"></app-header>
 <ion-content class="ion-no-padding">
   <div *ngIf="is_initialized" class="page-null">
+
     <div *ngIf="submenu=='signout'">
-      <h4>{{ 'Sign Out' | translate }}</h4>
       <p>
-        <span>{{ 'Please click the button below' | translate }},</span><br />
-        <span class="notes-item">{{ 'To close your current session
-          immediately' | translate }}.</span>
+        {{ 'Please click the button below' | translate }},<br />
+        {{ 'To close your current session
+        immediately' | translate }}.
       </p>
       <ion-button (click)="doSignout()" class="ion-margin-top" size="default">
         {{ 'Sign out' | translate }}&nbsp;&nbsp;
       </ion-button>
     </div>
+
+    <div *ngIf="submenu=='preferences'">
+      <p>
+        {{ 'Please press the button of the color of your choice' | translate }}.<br />
+        {{ 'Theme color will be changed accordingly' | translate }}.
+      </p>
+      <div class="flex-container">
+        <div *ngFor="let item of themes" size="default" [style.background-color]="item.color" class="theme-button"
+          (click)="doTheme(item)">
+          <p>{{ item.name }}</p>
+        </div>
+      </div>
+    </div>
+
     <div *ngIf="submenu=='apikey'">
-      <h4>{{ 'API Key' | translate }}</h4>
-      <ion-label *ngIf="accountf_apikey; else noapikey" class="ion-text-wrap descriptive">
+      <div *ngIf="accountf_apikey; else noapikey">
         {{ 'API keys allow you to access your data from spreadsheets and other BI Tools'
         |
         translate }}.
@@ -82,57 +95,79 @@ https://www.gnu.org/licenses.
             <ion-label *ngIf="!is_processing_account">{{ 'Generate' | translate }}</ion-label>
           </ion-button>
         </p>
-      </ion-label>
+      </div>
       <ng-template #noapikey>
-        <ion-label class="ion-text-wrap descriptive">
-          {{ 'The API key allows you to securely access your data from Microsoft Excel or other BI
-          Tools'
-          |
-          translate }}.
-          <ul>
-            <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one
-              please
-              click the button below' | translate }}.</li>
-          </ul>
-          <p>
-            <ion-button (click)="doAccount('apikeygen')" size="default" class="ion-margin-top">
-              <ion-icon name="key"></ion-icon>
-              <ion-label>{{ 'Create an API key' | translate }}</ion-label>
-            </ion-button>
-          </p>
-        </ion-label>
+        {{ 'API key allows you to securely access your database from Microsoft Excel or other BI
+        Tools'
+        |
+        translate }}.
+        <ul>
+          <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one
+            please
+            click the button below' | translate }}.</li>
+        </ul>
+        <p>
+          <ion-button (click)="doAccount('apikeygen')" size="default" class="ion-margin-top">
+            <ion-icon name="key"></ion-icon>
+            <ion-label>{{ 'Create an API key' | translate }}</ion-label>
+          </ion-button>
+        </p>
       </ng-template>
     </div>
+
+    <div *ngIf="submenu=='security'">
+      <h4>{{ 'Password change' | translate }} (OTP)</h4>
+      {{ 'You can reset your password anytime' | translate }}.
+      <ul>
+        <li>{{ 'Click to "Sign out" button in the header' | translate }}.</li>
+        <li>{{ 'Click "Sign In" button again and click "Reset Password" button afterwards' |
+          translate }}.</li>
+      </ul>
+
+      <h4>{{ 'Two-Factor Authentication' | translate }} (OTP)</h4>
+      {{ 'This method supplements password by producing one-time codes as a second layer
+      of
+      security' | translate }}.<br />
+      {{ 'You can activate your OTP with the following steps below' | translate }};
+      <ul>
+        <li>{{ 'Install an "OTP Authenticator App" on your Mobile Phone' | translate }}.
+          <ul>
+            <li>Authy</li>
+            <li>Microsoft Authenticator</li>
+            <li>Google Authenticator<br /><br /></li>
+          </ul>
+        </li>
+        <li>{{ 'Click "Reset OTP" button below. A new QR code will be generated' | translate }}.
+        </li>
+        <li>{{ 'Run the OTP App on Mobile Phone and select "Add Account"' | translate }}.</li>
+        <li>{{ 'Read the QR code' | translate }}.</li>
+        <li>{{ 'Validate the new QR code with "Validate OTP" button' | translate }}.</li>
+      </ul>
+
+      <ion-button *ngIf="!otp_show" size="default" class="ion-no-margin ion-margin-top" (click)="doResetOTP()">
+        <ion-icon name="refresh-outline"></ion-icon>
+        <ion-label>{{ 'Reset OTP' | translate }}</ion-label>
+      </ion-button>
+
+      <ion-button *ngIf="!otp_show" size="default" class="ion-no-margin ion-margin-top" (click)="doOTP({ op: 'show' })">
+        <ion-icon name="eye-outline"></ion-icon>
+        <ion-label>{{ 'Show QR Code' | translate }}</ion-label>
+      </ion-button>
+
+      <div *ngIf="otp_show">
+        <qrcode *ngIf="otp_qr" [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'" [allowEmptyString]="true">
+        </qrcode>
+        <ion-button size="default" class="ion-no-margin ion-margin-top" (click)="doValidateOTP()">
+          <ion-icon name="qr-code"></ion-icon>
+          <ion-label>{{ 'Validate OTP' | translate }}</ion-label>
+        </ion-button>
+        <ion-button size="default" class="ion-no-margin ion-margin-top" (click)="doOTP({ op: 'hide' })">
+          <ion-icon name="eye-off-outline"></ion-icon>
+          <ion-label>{{ 'Hide QR Code' | translate }}</ion-label>
+        </ion-button>
+      </div>
+    </div>
+
   </div>
-  <ion-grid *ngIf="is_initialized" class="ion-no-padding">
-    <ion-row>
-      <ion-col class="console-right-side">
-        <ion-grid class="ion-no-padding ion-no-border">
-          <ion-row>
-            <ion-col class="console-right-0">
-              <div *ngIf="submenu=='preferences'">
-                <h4>{{ 'Theme Color' | translate }}</h4>
-                <p>
-                  <span>{{ 'Please press the button of the color of your choice' | translate }}.</span><br />
-                  <span class="notes-item">{{ 'Theme color will be changed accordingly' | translate }}.</span>
-                </p>
-                <ion-item lines="none">
-                  <ion-label class="ion-text-wrap">
-                    <div class="flex-container">
-                      <div *ngFor="let item of themes" size="default" [style.background-color]="item.color"
-                        class="theme-button" (click)="doTheme(item)">
-                        <p>{{ item.name }}</p>
-                      </div>
-                    </div>
-                  </ion-label>
-                </ion-item>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
 </ion-content>
 <app-inner-footer></app-inner-footer>
-<!-- </ion-split-pane> -->

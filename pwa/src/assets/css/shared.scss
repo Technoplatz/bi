@@ -69,7 +69,6 @@ https://www.gnu.org/licenses.
 
 .theme-button p {
   color: #fff !important;
-  font-size: small;
   font-weight: 600;
   margin: 0;
   position: absolute;
@@ -78,9 +77,27 @@ https://www.gnu.org/licenses.
   transform: translate(-50%, -50%);
 }
 
+ion-content,
+ion-footer {
+  font-size: small;
+  line-height: normal !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+  font-weight: 500 !important;
+  line-height: normal !important;
+}
+
 app-menu {
   width: 260px !important;
-  border-right: 1px solid var(--ion-color-light) !important;;
+  border-right: 1px solid var(--ion-color-light) !important;
 }
 
 ion-router-outlet {
@@ -175,18 +192,8 @@ ion-alert .alert-radio-group {
   flex-wrap: nowrap;
 }
 
-.actions-container h6 {
-  margin: 0px;
-  margin-left: 8px !important;
-  font-size: 12px;
-  font-weight: bold;
-  padding-top: 5px !important;
-  padding-bottom: 5px !important;
-}
-
 .actions-container ion-icon {
   margin-bottom: -3px;
-  font-size: 14px;
 }
 
 .action-sq {
@@ -194,7 +201,6 @@ ion-alert .alert-radio-group {
   height: auto;
   vertical-align: top !important;
   padding: 12px;
-  font-size: small;
   text-overflow: ellipsis;
   overflow: hidden;
   margin-bottom: 6px;
@@ -239,24 +245,16 @@ ion-alert .alert-radio-group {
 }
 
 .pane-item {
-  font-weight: 600;
   cursor: default;
-}
-
-.pane-item.cursored {
-  cursor: pointer;
+  font-weight: 600;
 }
 
 .pane-item span,
 .pane-item div {
-  color: var(--ion-color-dark);
   font-size: small !important;
+  color: var(--ion-color-dark);
   font-weight: normal !important;
   line-height: normal !important;
-}
-
-.pane-item ion-label {
-  font-size: 14px !important;
 }
 
 .pane-item-last {
@@ -283,7 +281,6 @@ ion-alert .alert-radio-group {
 .pane-links a {
   display: inline-block;
   font-weight: 600;
-  font-size: small;
   margin-top: 4px !important;
   text-decoration: none;
 }
@@ -303,7 +300,6 @@ ion-alert .alert-radio-group {
   vertical-align: top !important;
   text-align: center;
   padding: 4px;
-  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0px;
   color: var(--ion-color-primary);
@@ -314,7 +310,6 @@ ion-alert .alert-radio-group {
 }
 
 .pane-sq-button ion-icon {
-  font-size: 14px;
   margin-top: 3px !important;
 }
 
@@ -325,14 +320,12 @@ ion-alert .alert-radio-group {
 .data-sq-button {
   min-width: 75px;
   max-width: 75px;
-  height: 82px;
+  height: 87px;
   vertical-align: top !important;
   text-align: center;
   padding: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0px;
-  line-height: normal;
+  font-weight: 500;
+  line-height: 16px;
   cursor: pointer;
   border-radius: 0px;
   margin-right: 4px;
@@ -347,7 +340,7 @@ ion-alert .alert-radio-group {
 
 .data-sq-button ion-icon {
   font-size: 22px;
-  margin-top: 8px !important;
+  margin-top: 10px !important;
   margin-bottom: 3px !important;
 }
 
@@ -370,7 +363,7 @@ ion-alert .alert-radio-group {
 
 .data-title {
   padding-top: 6px;
-  font-size: 15px;
+  font-size: medium;
   font-weight: 600;
   color: var(--ion-color-primary);
   text-transform: capitalize;
@@ -386,7 +379,7 @@ ion-alert .alert-radio-group {
 }
 
 .barcode {
-  font-size: 20px !important;
+  font-size: medium !important;
   letter-spacing: 0px !important;
   font-family: monospace;
 }
@@ -423,7 +416,6 @@ ion-alert .alert-radio-group {
   margin-top: 0px;
   padding-bottom: 0px;
   border: none !important;
-  font-size: small;
   font-weight: 600;
   --min-height: 12px;
 }
@@ -437,7 +429,6 @@ form ion-item ion-label {
 }
 
 .saas-company {
-  font-size: small;
   padding-top: 16px;
   padding-bottom: 12px;
   width: 80% !important;
@@ -449,7 +440,6 @@ form ion-item ion-label {
   max-width: 85%;
   margin-top: 16px;
   margin-bottom: 32px;
-  font-size: small;
   background-color: #efefef;
 }
 
@@ -471,7 +461,6 @@ form ion-item ion-label {
 .pivot .dataframe {
   min-width: 33%;
   max-width: 85%;
-  font-size: 13px;
   margin-top: 16px;
   background-color: #efefef;
 }
@@ -513,7 +502,6 @@ form ion-item ion-label {
 
 .pivot-grid ion-item ion-label {
   padding-left: 8px;
-  font-size: small !important;
   font-weight: 600;
 }
 
@@ -536,7 +524,6 @@ form ion-item ion-label {
 }
 
 .pivot_dash .dataframe {
-  font-size: 13px;
   width: 100%;
 }
 
@@ -553,7 +540,6 @@ form ion-item ion-label {
 }
 
 .descriptive {
-  font-size: 14px !important;
   line-height: 19px;
 }
 
@@ -566,7 +552,6 @@ form ion-item ion-label {
 }
 
 .ver-sion {
-  font-size: small;
   margin-top: 8px;
 }
 
@@ -579,7 +564,6 @@ form ion-item ion-label {
 .menu-badge {
   margin-bottom: -4px !important;
   margin-left: 4px;
-  font-size: small;
   font-weight: 400;
 }
 
@@ -602,13 +586,16 @@ form ion-item ion-label {
   width: 24px !important;
 }
 
+.dash-button ion-icon {
+  margin-top: -8px !important;
+}
+
 .pane_segment {
   padding: 0px;
   border-bottom: 1px solid var(--ion-color-light) !important;
 }
 
 .pane_segment ion-segment-button {
-  font-size: 11px;
   font-weight: 600 !important;
   --border-width: 2 !important;
   --padding-start: 0px !important;
@@ -626,7 +613,6 @@ form ion-item ion-label {
 }
 
 .pane-list ion-item {
-  font-size: small !important;
   --min-height: none !important;
 }
 
@@ -672,13 +658,7 @@ form ion-item ion-label {
 }
 
 .menu-side p ion-icon {
-  font-size: 11px !important;
   margin-bottom: -0.1em;
-}
-
-.menu-side h3 {
-  font-weight: bold;
-  margin-top: 6px;
 }
 
 .scroll-horizontal {
@@ -701,13 +681,8 @@ form ion-item ion-label {
   flex-wrap: nowrap;
 }
 
-.notes-item {
-  font-size: small;
-}
-
 .datacard-value {
   font-weight: bold;
-  font-size: 2rem;
 }
 
 .modal-wrapper {
@@ -793,12 +768,6 @@ ion-select {
   --padding-start: 0px !important;
   --padding-end: 0px !important;
   margin-right: 8px;
-  font-size: 12px;
-}
-
-.announce-grid,
-.announce-grid ion-text {
-  font-size: small;
 }
 
 .announce-button {
@@ -823,7 +792,6 @@ ion-select {
 
 .announce-grid a ion-icon {
   margin-bottom: -3px;
-  font-size: 16px;
 }
 
 .announce-grid-header {
@@ -838,10 +806,6 @@ ion-select {
 .datetime-button {
   margin-left: 4px;
   margin-top: 10px !important;
-}
-
-.datetime-button ion-icon {
-  font-size: 22px;
 }
 
 ion-datetime-button {
@@ -892,7 +856,6 @@ ion-item {
 .app-footer {
   position: fixed;
   bottom: 0px;
-  font-size: 0.8rem;
   font-weight: 500;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -961,7 +924,6 @@ ion-item {
 
 .modal-footer {
   background-color: var(--ion-color-light);
-  font-size: small;
   padding: 4px;
   padding-left: 16px !important;
 }
@@ -973,7 +935,6 @@ ion-item {
 }
 
 ion-text {
-  font-size: 14px;
   font-weight: normal;
 }
 
@@ -988,10 +949,6 @@ ion-card-header {
 sup {
   font-weight: 900;
   font-size: 9px;
-}
-
-.kpi-um {
-  font-size: small;
 }
 
 .danger {
@@ -1254,10 +1211,6 @@ sup {
   border: 1px solid var(--ion-color-primary);
 }
 
-.template-card ion-card-title {
-  font-size: medium !important;
-}
-
 .template-card ion-card-content {
   height: 64px;
   overflow: hidden;
@@ -1268,7 +1221,6 @@ sup {
 }
 
 .template-card ion-card-subtitle {
-  font-size: small !important;
   color: var(--ion-color-primary) !important;
 }
 
@@ -1282,7 +1234,6 @@ sup {
 }
 
 .data-col-select {
-  font-size: larger;
   font-weight: 600;
 }
 
@@ -1295,7 +1246,6 @@ sup {
   position: absolute;
   background-color: var(--ion-color-danger);
   color: #fff;
-  font-size: small;
   font-weight: 600;
   width: calc(100% - 32px);
   z-index: 999;
@@ -1309,14 +1259,12 @@ sup {
   position: absolute;
   background-color: var(--ion-color-success);
   color: #fff;
-  font-size: small;
   font-weight: 600;
   width: calc(100% - 32px);
   z-index: 999;
 }
 
 .synced-row {
-  font-size: 12px;
   font-weight: 600;
   color: var(--ion-color-medium);
   text-overflow: ellipsis;
@@ -1327,12 +1275,10 @@ sup {
 }
 
 .synced-row ion-icon {
-  font-size: 16px !important;
   margin-right: 4px;
 }
 
 .structure-item {
-  font-size: small;
   font-family: monospace;
 }
 
@@ -1481,7 +1427,6 @@ ion-checkbox {
   background-color: var(--ion-color-dark);
   color: var(--ion-color-light) !important;
   padding-bottom: 16px;
-  font-size: small;
 }
 
 .copyright {
@@ -1552,10 +1497,6 @@ ion-checkbox {
   clear: both;
 }
 
-.dash-toggle-container {
-  font-size: small;
-}
-
 .dash-toggle-container ion-label {
   padding: none !important;
 }
@@ -1582,17 +1523,6 @@ ion-checkbox {
   border-radius: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: small;
-}
-
-.banner-container .banner h4 {
-  display: block !important;
-  width: 80%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  margin: 0px;
-  margin-bottom: 8px !important;
 }
 
 .banner-container .banner .banner-icon {
@@ -1616,7 +1546,6 @@ ion-checkbox {
   max-width: 75%;
   max-height: 60px;
   overflow: hidden;
-  font-size: small;
 }
 
 .stat-grid ion-row {
@@ -1667,14 +1596,6 @@ ion-checkbox {
   background: none;
 }
 
-.data-grid {
-  font-size: small;
-}
-
-.pe {
-  font-size: 14px !important;
-}
-
 .pe a {
   text-decoration: none;
   font-weight: 600;
@@ -1709,10 +1630,6 @@ ion-checkbox {
   height: 22px;
 }
 
-.text-small {
-  font-size: small !important;
-}
-
 .custom-loading {
   --backdrop-opacity: 0;
   --background: var(--ion-color-warning);
@@ -1728,7 +1645,6 @@ ion-checkbox {
 
 .logo-electron-small {
   color: var(--ion-color-primary) !important;
-  font-size: 36px !important;
 }
 
 .info-field {
@@ -1738,7 +1654,6 @@ ion-checkbox {
   cursor: pointer !important;
   z-index: 99999;
   margin-top: 8px;
-  font-size: 20px;
 }
 
 .valid-field {
@@ -1747,8 +1662,6 @@ ion-checkbox {
   right: 25px !important;
   z-index: 99999;
   margin-top: 6px;
-  font-size: medium;
-  font-size: 24px;
 }
 
 .invalid-field {
@@ -1757,8 +1670,6 @@ ion-checkbox {
   right: 25px !important;
   z-index: 99999;
   margin-top: 6px;
-  font-size: medium;
-  font-size: 24px;
 }
 
 .brz-visual-group {
@@ -1771,13 +1682,7 @@ ion-checkbox {
   padding-top: 8px;
   margin-top: 8px;
   margin-left: 12px;
-  font-size: small;
   max-width: 70%;
-}
-
-.visual-error h6 {
-  margin-top: 0px;
-  margin-bottom: 0px;
 }
 
 .notfound-button {
@@ -1786,7 +1691,6 @@ ion-checkbox {
 }
 
 .header-desc {
-  font-size: small;
   margin-top: -12px;
   padding-left: 34px;
   padding-bottom: 16px;
@@ -1829,14 +1733,12 @@ app-charts {
   position: relative;
   margin-bottom: 8px;
   overflow: hidden;
-  padding: 8px;
-  padding-left: 0px !important;
-  background-color:  var(--ion-color-light);
-  padding-bottom: 8px;
+  padding: 16px;
+  background-color: var(--ion-color-light);
   margin-right: 8px;
   align-content: flex-start;
   width: 320px;
-  height: 110px;
+  max-height: 110px;
 }
 
 .chart-sq {
@@ -1844,10 +1746,8 @@ app-charts {
   margin-bottom: 8px;
   overflow: hidden;
   padding: 8px;
-  padding-left: 0px !important;
   border: 4px solid var(--ion-color-light);
   border-radius: 0px;
-  padding-bottom: 8px;
   margin-right: 8px;
   align-content: flex-start;
 }
@@ -1859,12 +1759,12 @@ app-charts {
 
 .chart-sq.medium {
   width: 648px;
-  height: 500px;
+  height: 580px;
 }
 
 .chart-sq.large {
   width: 1280px;
-  height: 840px;
+  height: 1080px;
 }
 
 .chart-sq .hdr,
@@ -1880,18 +1780,15 @@ app-charts {
 }
 
 .hdr2 {
-  font-size: small;
   width: 100%;
   padding-top: 4px;
   padding-bottom: 2px;
   margin-left: 12px;
 }
 
-.hdr3, .hdr4 {
-  font-size: 18px;
+.hdr3,
+.hdr4 {
   width: calc(100% - 100px);
-  margin-top: 4px;
-  margin-left: 12px;
   font-weight: 600 !important;
   border-bottom: 1px dotted var(--ion-color-medium);
   padding-bottom: 4px;
@@ -1901,11 +1798,9 @@ app-charts {
 .hdr4 {
   margin-top: 0px;
   border-bottom: none !important;
-  font-size: 32px !important;
 }
 
 .hdr3 ion-icon {
-  font-size: 18px;
   margin-bottom: -1px;
 }
 
@@ -1915,7 +1810,6 @@ app-charts {
 }
 
 .chart-target-container {
-  font-size: 16px;
   font-weight: bold;
   color: var(--ion-color-primary);
 }

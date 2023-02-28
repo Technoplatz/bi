@@ -61,18 +61,17 @@ export class MenuComponent implements OnInit {
     private storage: Storage,
     public menu: MenuController,
     private misc: Miscellaneous
-  ) {
-    this.collectionso = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
-    });
-    this.viewso = this.crud.views.subscribe((res: any) => {
-      this.views = res && res.data ? res.data : [];
-    });
-  }
+  ) { }
 
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.auth.Saas().then((res: any) => {
+        this.collectionso = this.crud.collections.subscribe((res: any) => {
+          this.collections = res && res.data ? res.data : [];
+        });
+        this.viewso = this.crud.views.subscribe((res: any) => {
+          this.views = res && res.data ? res.data : [];
+        });
         this.saas_ = res ? res : {};
         this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
         this.menu.open().then(() => {
@@ -85,7 +84,6 @@ export class MenuComponent implements OnInit {
   ngOnDestroy() {
     this.collectionso = null;
     this.viewso = null;
-    console.log("*** exit menu");
   }
 
   doNavi(s: string, sub: any) {
