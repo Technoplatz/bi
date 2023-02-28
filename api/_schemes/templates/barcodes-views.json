@@ -18,7 +18,7 @@
       "#Administrators",
       "#Mat"
     ],
-    "vie_chart_style": "Grouped Vertical Bar",
+    "vie_visual_style": "Grouped Vertical Bar",
     "vie_p_datalabel_show": true,
     "vie_p_gradient": true,
     "vie_p_grid_show": true,

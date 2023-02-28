@@ -81,6 +81,7 @@ export class DashboardPage implements OnInit {
   public viewsx: any = [];
   public views_dash: any = [];
   public views_pane: any = [];
+  public flashcards: any = [];
   public visuals: any = [];
   public kpis: any = [];
   public metrics: any = [];
@@ -92,8 +93,9 @@ export class DashboardPage implements OnInit {
   public count: number = 0;
   public chart_size: string = "small";
   public chart_css: string = "";
+  public flash_css: string = "";
   public is_loaded: boolean = true;
-  public is_dash_ok: boolean = false;
+  public is_refreshing: boolean = false;
   public is_selected: boolean = false;
   public is_show_resize: boolean = false;
   public is_pivot_loading: boolean = false;
@@ -162,52 +164,62 @@ export class DashboardPage implements OnInit {
     private crud: Crud,
     private misc: Miscellaneous,
     private modal: ModalController
-  ) {
-    this.collectionso = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
-      this.collections_structure = res.structure;
-    });
-  }
+  ) { }
 
   ngOnDestroy() {
     this.announcementso = null;
+    this.collectionso = null;
+    this.viewso = null;
   }
 
   ngOnInit() {
-    this.is_dash_ok = this.is_initialized = false;
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;
       this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
       this.accountf_apikey = LSUSERMETA.apikey;
+
+      // collections subscribe
+      this.collectionso = this.crud.collections.subscribe((res: any) => {
+        this.collections = res && res.data ? res.data : [];
+        this.collections_structure = res.structure;
+      });
+
+      // announcements subscribe
       this.announcementso = this.crud.announcements.subscribe((res: any) => {
         this.announcements = res && res.data ? res.data : [];
       });
-      this.crud.getAnnouncements();
+
+      // get announcements
+      this.crud.getAnnouncements().then(() => {});
+
       this.viewso = this.crud.views.subscribe((res: any) => {
         this.views = this.viewsx = res && res.data ? res.data : [];
         this.views_structure = res && res.structure ? res.structure : null;
-        this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard);
-        this.visuals = [];
-        this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
-          this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
-          this.chart_css = "chart-sq " + this.chart_size;
-          for (let v_ = 0; v_ < this.views.length; v_++) {
-            this.doGetVisual(this.views[v_], v_);
-          }
-          this.is_initialized = true;
-          this.is_dash_ok = true;
-        });
+        if (this.views.length > 0) {
+          this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style !== "Flashcard");
+          this.flashcards = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style === "Flashcard");
+          this.visuals = [];
+          this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
+            this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
+            this.flash_css = "flash-sq";
+            this.chart_css = "chart-sq " + this.chart_size;
+            for (let v_ = 0; v_ < this.views.length; v_++) {
+              this.doGetVisual(this.views[v_], v_);
+            }
+          });
+        }
       });
+
     });
   }
 
   doRefresh() {
-    this.is_dash_ok = false;
+    this.is_refreshing = true;
     this.crud.getAll().then(() => { }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "error");
     }).finally(() => {
-      this.is_dash_ok = true;
+      this.is_refreshing = false;
     });
   }
 
@@ -271,14 +283,14 @@ export class DashboardPage implements OnInit {
             views: this.views ? this.views : [],
             user: this.user,
             data: data_,
-            structure: this.collections_structure,
+            structure: this.views_structure,
             direct: -1
           }
         }
       });
       modal.onDidDismiss().then((res: any) => {
         if (res.data.modified) {
-          this.doGetVisual(data_, ix_);
+          this.doRefresh();
         }
       });
       return await modal.present();
@@ -290,16 +302,16 @@ export class DashboardPage implements OnInit {
     this.views[v_].error = null;
     if (this.accountf_apikey) {
       this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
-        this.views[v_].chart = chart;
+        this.views[v_].visual = chart;
       }).catch((error: any) => {
-        this.views[v_].chart = {};
+        this.views[v_].visual = {};
         this.visuals[v_].error = error;
       }).finally(() => {
         this.views[v_].loading = false;
       });
     } else {
       const error_ = "Please create an API key in the Preferences section";
-      this.views[v_].chart = {};
+      this.views[v_].visual = {};
       this.views[v_].error = error_;
       console.error(error_);
       this.misc.doMessage(error_, "error");

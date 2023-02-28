@@ -41,7 +41,7 @@ import * as shape from "d3-shape";
 })
 
 export class ChartsComponent implements OnInit {
-  @Input() chart: any;
+  @Input() visual: any;
   @Input() width: any;
   public data: any = [];
   public chartStyle: string = "";
@@ -74,22 +74,22 @@ export class ChartsComponent implements OnInit {
   }
 
   ngOnChanges() {
-    this.data = this.chart.data;
-    this.chartStyle = this.chart.style;
-    this.showXAxis = this.chart.xaxis_show;
-    this.showYAxis = this.chart.yaxis_show;
-    this.showXAxisLabel = this.chart.xaxis_label_show;
-    this.showYAxisLabel = this.chart.yaxis_label_show;
-    this.showLegend = this.chart.legend_show;
-    this.xAxisLabel = this.showXAxisLabel && this.chart.xaxis_label ? this.chart.xaxis_label : this.chart.xaxis;
-    this.yAxisLabel = this.showYAxisLabel && this.chart.yaxis_label ? this.chart.yaxis_label :  this.chart.yaxis;
-    this.legendTitle = this.showLegend && this.chart.legend_title ? this.chart.legend_title : this.chart.legend;
-    this.showDataLabel = this.chart.datalabel_show;
-    this.showGridLines = this.chart.grid_show;
-    this.gradient = this.chart.gradient;
+    this.data = this.visual.data;
+    this.chartStyle = this.visual.style;
+    this.showXAxis = this.visual.xaxis_show;
+    this.showYAxis = this.visual.yaxis_show;
+    this.showXAxisLabel = this.visual.xaxis_label_show;
+    this.showYAxisLabel = this.visual.yaxis_label_show;
+    this.showLegend = this.visual.legend_show;
+    this.xAxisLabel = this.showXAxisLabel && this.visual.xaxis_label ? this.visual.xaxis_label : this.visual.xaxis;
+    this.yAxisLabel = this.showYAxisLabel && this.visual.yaxis_label ? this.visual.yaxis_label :  this.visual.yaxis;
+    this.legendTitle = this.showLegend && this.visual.legend_title ? this.visual.legend_title : this.visual.legend;
+    this.showDataLabel = this.visual.datalabel_show;
+    this.showGridLines = this.visual.grid_show;
+    this.gradient = this.visual.gradient;
     this.curve = shape.curveCardinal;
     this.colorScheme = {
-      domain: this.chart.color_scheme
+      domain: this.visual.color_scheme
     }
     this.view = this.width > this.minWidth ? [this.width - 16, this.width * 0.55] : [];
     this.ok = true;

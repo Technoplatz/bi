@@ -42,7 +42,7 @@
         "value": "sum"
       }
     ],
-    "vie_chart_style": "Grouped Vertical Bar"
+    "vie_visual_style": "Grouped Vertical Bar"
   },
   {
     "vie_id": "vie-transactions-trend",
@@ -87,7 +87,7 @@
         "value": "sum"
       }
     ],
-    "vie_chart_style": "Line",
+    "vie_visual_style": "Line",
     "vie_order_by": [
       "tra_date"
     ]

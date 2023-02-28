@@ -1813,6 +1813,32 @@ ion-checkbox {
   position: absolute;
 }
 
+.app-charts {
+  width: 100%;
+  height: auto;
+  top: auto;
+  display: flex;
+}
+
+app-charts {
+  position: absolute;
+  bottom: 8px;
+}
+
+.flash-sq {
+  position: relative;
+  margin-bottom: 8px;
+  overflow: hidden;
+  padding: 8px;
+  padding-left: 0px !important;
+  background-color:  var(--ion-color-light);
+  padding-bottom: 8px;
+  margin-right: 8px;
+  align-content: flex-start;
+  width: 320px;
+  height: 110px;
+}
+
 .chart-sq {
   position: relative;
   margin-bottom: 8px;
@@ -1824,18 +1850,6 @@ ion-checkbox {
   padding-bottom: 8px;
   margin-right: 8px;
   align-content: flex-start;
-}
-
-.app-charts {
-  width: 100%;
-  height: auto;
-  top: auto;
-  display: flex;
-}
-
-app-charts {
-  position: absolute;
-  bottom: 8px;
 }
 
 .chart-sq.small {
@@ -1853,7 +1867,8 @@ app-charts {
   height: 840px;
 }
 
-.chart-sq .hdr {
+.chart-sq .hdr,
+.flash-sq .hdr {
   padding-top: 3px;
   width: calc(100% - 60px);
   font-weight: 600 !important;
@@ -1872,7 +1887,7 @@ app-charts {
   margin-left: 12px;
 }
 
-.hdr3 {
+.hdr3, .hdr4 {
   font-size: 18px;
   width: calc(100% - 16px);
   margin-top: 4px;
@@ -1880,25 +1895,16 @@ app-charts {
   font-weight: 600 !important;
   border-bottom: 1px dotted var(--ion-color-medium);
   padding-bottom: 4px;
-}
-
-.hdr3 ion-icon {
-  font-size: 18px;
-  margin-bottom: -1px;
+  overflow: hidden;
 }
 
 .hdr4 {
-  font-size: 18px;
-  width: calc(100% - 16px);
-  margin-top: 4px;
-  margin-left: 12px;
-  font-weight: 600 !important;
-  color: var(--ion-color-medium);
-  border-bottom: 1px dotted var(--ion-color-medium);
-  padding-bottom: 4px;
+  margin-top: 0px;
+  border-bottom: none !important;
+  font-size: 36px !important;
 }
 
-.hdr4 ion-icon {
+.hdr3 ion-icon {
   font-size: 18px;
   margin-bottom: -1px;
 }

@@ -141,70 +141,6 @@
             "subType": "property",
             "width": 170
         },
-        "vie_scheduled": {
-            "bsonType": "bool",
-            "title": "Scheduled",
-            "description": "Scheduled?",
-            "width": 120
-        },
-        "vie_sched_timezone": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 64,
-            "title": "Scheduled Time Zone",
-            "description": "Scheduled time zone",
-            "enum": [
-                "Europe/Berlin",
-                "Europe/Istanbul"
-            ],
-            "default": "Europe/Berlin",
-            "width": 170
-        },
-        "vie_sched_days": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 7,
-            "items": {
-                "bsonType": "string",
-                "minLength": 3,
-                "maxLength": 3
-            },
-            "title": "Scheduled Days",
-            "description": "Scheduled days",
-            "subType": "day",
-            "width": 140
-        },
-        "vie_sched_hours": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 8,
-            "items": {
-                "bsonType": "number",
-                "minimum": 0,
-                "maximum": 23
-            },
-            "title": "Scheduled Hours",
-            "description": "Scheduled hours",
-            "subType": "hour",
-            "width": 160
-        },
-        "vie_sched_minutes": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 8,
-            "items": {
-                "bsonType": "number",
-                "minimum": 0,
-                "maximum": 59
-            },
-            "title": "Scheduled minutes",
-            "description": "Scheduled Minutes",
-            "subType": "minute",
-            "width": 160
-        },
         "vie_pivot_index": {
             "bsonType": "array",
             "uniqueItems": true,
@@ -326,13 +262,14 @@
             "description": "Attach Excel?",
             "width": 140
         },
-        "vie_chart_style": {
+        "vie_visual_style": {
             "bsonType": "string",
             "minLength": 1,
             "maxLength": 64,
-            "title": "Chart Style",
-            "description": "Chart Style",
+            "title": "Visual Style",
+            "description": "Visual Style",
             "enum": [
+                "Flashcard",
                 "Vertical Bar",
                 "Normalized Vertical Bar",
                 "Stacked Vertical Bar",
@@ -439,6 +376,70 @@
             "manualAdd": true,
             "color": true,
             "width": 180
+        },
+        "vie_scheduled": {
+            "bsonType": "bool",
+            "title": "Scheduled",
+            "description": "Scheduled?",
+            "width": 120
+        },
+        "vie_sched_timezone": {
+            "bsonType": "string",
+            "minLength": 0,
+            "maxLength": 64,
+            "title": "Scheduled Time Zone",
+            "description": "Scheduled time zone",
+            "enum": [
+                "Europe/Berlin",
+                "Europe/Istanbul"
+            ],
+            "default": "Europe/Berlin",
+            "width": 170
+        },
+        "vie_sched_days": {
+            "bsonType": "array",
+            "uniqueItems": true,
+            "minItems": 0,
+            "maxItems": 7,
+            "items": {
+                "bsonType": "string",
+                "minLength": 3,
+                "maxLength": 3
+            },
+            "title": "Scheduled Days",
+            "description": "Scheduled days",
+            "subType": "day",
+            "width": 140
+        },
+        "vie_sched_hours": {
+            "bsonType": "array",
+            "uniqueItems": true,
+            "minItems": 0,
+            "maxItems": 8,
+            "items": {
+                "bsonType": "number",
+                "minimum": 0,
+                "maximum": 23
+            },
+            "title": "Scheduled Hours",
+            "description": "Scheduled hours",
+            "subType": "hour",
+            "width": 160
+        },
+        "vie_sched_minutes": {
+            "bsonType": "array",
+            "uniqueItems": true,
+            "minItems": 0,
+            "maxItems": 8,
+            "items": {
+                "bsonType": "number",
+                "minimum": 0,
+                "maximum": 59
+            },
+            "title": "Scheduled minutes",
+            "description": "Scheduled Minutes",
+            "subType": "minute",
+            "width": 160
         },
         "_tags": {
             "bsonType": "array",

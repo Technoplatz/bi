@@ -290,8 +290,7 @@ export class ViewPage implements OnInit {
               text: "CONFIRM",
               handler: (announceData: any) => {
                 this.crud.AnnounceNow(view, announceData && announceData.id ? announceData.id : null, scope, this.id).then(() => {
-                  this.crud.getAnnouncements();
-                  this.misc.doMessage("shared view was announced successfully", "success");
+                  this.misc.doMessage("view was announced successfully", "success");
                 }).catch((error: any) => {
                   this.misc.doMessage(error, "error");
                   console.error(error);

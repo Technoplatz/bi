@@ -276,7 +276,7 @@ export class Auth {
             reject("could not connect to the server");
           });
         } else {
-          reject("user session closed");
+          reject("session closed");
         }
       });
     });

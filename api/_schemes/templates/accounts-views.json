@@ -41,7 +41,7 @@
         "value": "count"
       }
     ],
-    "vie_chart_style": "Pie",
+    "vie_visual_style": "Pie",
     "vie_pivot_index": [
       "acc_country"
     ],

@@ -2005,7 +2005,7 @@ class Crud():
             vie_p_grid_show_ = True if "vie_p_grid_show" in doc_ and doc_["vie_p_grid_show"] == True else False
             vie_p_kpi_ = True if "vie_p_kpi" in doc_ and doc_["vie_p_kpi"] in ["true", True] else False
             vie_kpi_target_value_ = doc_["vie_kpi_target_value"] if "vie_kpi_target_value" in doc_ else 0
-            vie_chart_style_ = doc_["vie_chart_style"] if "vie_chart_style" in doc_ else "Vertical Bar"
+            vie_visual_style_ = doc_["vie_visual_style"] if "vie_visual_style" in doc_ else "Vertical Bar"
             vie_chart_xaxis_ = doc_["vie_pivot_index"][0] if "vie_pivot_index" in doc_ and len(doc_["vie_pivot_index"]) > 0 else None
             vie_chart_yaxis_ = doc_["vie_pivot_values"][0]["key"] if "vie_pivot_values" in doc_ and len(doc_["vie_pivot_values"]) > 0 and "key" in doc_["vie_pivot_values"][0] else None
             vie_chart_function_ = doc_["vie_pivot_values"][0]["value"] if "vie_pivot_values" in doc_ and len(doc_["vie_pivot_values"]) > 0 and "value" in doc_["vie_pivot_values"][0] else "sum"
@@ -2032,7 +2032,7 @@ class Crud():
             vie_p_legend_title_ = view_properties_[vie_chart_legend_]["title"] if vie_chart_legend_ in view_properties_ and "title" in view_properties_[vie_chart_legend_] else vie_chart_legend_
 
             # convert view data to pandas df
-            df_ = pd.DataFrame(list(view_data_)).fillna("")
+            df_ = pd.DataFrame(list(view_data_)).fillna(0)
 
             dropped_ = []
             dropped_.append(vie_chart_xaxis_)
@@ -2042,7 +2042,7 @@ class Crud():
             groupby_ = []
             sort_ = None
 
-            if vie_chart_style_ == "Line":
+            if vie_visual_style_ == "Line":
                 if vie_chart_legend_ in df_:
                     groupby_.append(vie_chart_legend_)
                 if vie_chart_xaxis_ in df_:
@@ -2090,13 +2090,13 @@ class Crud():
             legend_ = None
 
             if vie_chart_xaxis_:
-                if vie_chart_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
+                if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
                     for idx_, item_ in enumerate(dfj_):
                         xaxis_ = item_[vie_chart_xaxis_] if vie_chart_xaxis_ in item_ else None
                         yaxis_ = item_[vie_chart_yaxis_] if vie_chart_yaxis_ in item_ else None
                         if xaxis_ and yaxis_:
                             series_.append({"name": xaxis_, "value": yaxis_})
-                elif vie_chart_style_ == "Line":
+                elif vie_visual_style_ == "Line":
                     for idx_, item_ in enumerate(dfj_):
                         if idx_ > 0 and item_[vie_chart_legend_] != legend_:
                             series_.append({"name": legend_, "series": series_sub_})
@@ -2123,7 +2123,7 @@ class Crud():
                 "count": count_,
                 "perchange": perchange_,
                 "properties": view_properties_,
-                "style": vie_chart_style_,
+                "style": vie_visual_style_,
                 "xaxis": vie_chart_xaxis_,
                 "yaxis": vie_chart_yaxis_,
                 "function": vie_chart_function_,
@@ -5163,7 +5163,7 @@ def get_visual_f(id):
 
         res_ = {
             "result": True,
-            "chart": view_to_visual_f_
+            "visual": view_to_visual_f_
         }
 
         code_ = 200

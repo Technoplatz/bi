@@ -32,7 +32,7 @@ https://www.gnu.org/licenses.
 
 <app-header [header]="header" [user]="user"></app-header>
 <ion-content class="ion-no-padding">
-  <ion-grid *ngIf="is_initialized" class="ion-no-padding">
+  <ion-grid class="ion-no-padding">
     <ion-row>
       <ion-col class="console-right-side">
         <ion-grid class="ion-no-padding ion-no-border">
@@ -50,8 +50,8 @@ https://www.gnu.org/licenses.
                       <span>{{ 'Excel to' | translate }}<br />{{ 'Collection' | translate }}</span>
                     </div>
                     <div (click)="doRefresh()" class="data-sq-button">
-                      <ion-icon *ngIf="is_dash_ok" name="sync"></ion-icon>
-                      <ion-icon *ngIf="!is_dash_ok" name="hourglass-outline"></ion-icon>
+                      <ion-icon *ngIf="!is_refreshing" name="sync"></ion-icon>
+                      <ion-icon *ngIf="is_refreshing" name="hourglass-outline"></ion-icon>
                       <br />
                       <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
                     </div>
@@ -64,54 +64,73 @@ https://www.gnu.org/licenses.
               </ion-grid>
 
               <!-- VIEW SECTION -->
+              <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
+                <div *ngFor="let item of flashcards; let f = index" [class]="flash_css" #chcontainer>
+                  <div class="hdr">{{ item.vie_title }}</div>
+                  <div class="visual-buttons">
+                    <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
+                      class="clear-dark-button" color="dark" mode="ios">
+                      <ion-icon name="settings-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                  <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
+                    <div class="hdr2">{{ item.vie_collection_id }}
+                      <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
+                        <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
+                        <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
+                      </span>
+                    </div>
+                    <div class="hdr4">
+                      {{ item.visual.value }}
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div *ngIf="views && views.length > 0" class="brz-visual-group">
                 <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
-                  <div *ngIf="item && item.vie_dashboard && item.chart">
-                    <div class="hdr">{{ item.vie_title }}</div>
+                  <div class="hdr">{{ item.vie_title }}</div>
+                  <div class="visual-buttons">
+                    <!-- <ion-button size="small" fill="clear" (click)="doGetVisual(item, i)" class="clear-dark-button"
+                      color="dark" mode="ios">
+                      <ion-icon name="sync"></ion-icon>
+                    </ion-button> -->
+                    <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, i)"
+                      class="clear-dark-button" color="dark" mode="ios">
+                      <ion-icon name="settings-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                  <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
                     <div class="hdr2">{{ item.vie_collection_id }}
-                      <span *ngIf="item.chart.count" class="text-bold"> | {{ item.chart.count }}
-                        <span *ngIf="item.chart.count > 1">{{ 'records' | translate }}</span>
-                        <span *ngIf="item.chart.count == 1">{{ 'record' | translate }}</span>
-                      </span><br />
-                      {{ item.chart.function }} {{ 'of' | translate }} {{ item.chart.yaxis }}
-                      <span *ngIf="item.chart.kpi_target_value; else notargetv">&rarr; {{
-                        item.chart.kpi_target_value }}</span>
+                      <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
+                        <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
+                        <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
+                      </span>
+                      <br />
+                      {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
+                      <span *ngIf="item.visual.kpi_target_value; else notargetv">&rarr; {{
+                        item.visual.kpi_target_value }}</span>
                       <ng-template #notargetv><br /></ng-template>
                     </div>
                     <div class="hdr3">
                       <ion-icon
-                        *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value > item.chart.value"
+                        *ngIf="item.visual.kpi_target_value && item.visual.value && item.visual.kpi_target_value > item.visual.value"
                         name="thumbs-down" color="danger">
                       </ion-icon>
                       <ion-icon
-                        *ngIf="item.chart.kpi_target_value && item.chart.value && item.chart.kpi_target_value <= item.chart.value"
+                        *ngIf="item.visual.kpi_target_value && item.visual.value && item.visual.kpi_target_value <= item.visual.value"
                         name="thumbs-up" color="success">
                       </ion-icon>
-                      {{ item.chart.value }}
+                      {{ item.visual.value }}
                     </div>
                     <div class="app-charts">
-                      <app-charts *ngIf="item.chart.data && item.chart.data.length > 0; else nochartdata"
-                        [chart]="item.chart" [width]="chcontainer.offsetWidth"></app-charts>
+                      <app-charts *ngIf="item.visual.data && item.visual.data.length > 0; else nochartdata"
+                        [visual]="item.visual" [width]="chcontainer.offsetWidth"></app-charts>
                       <ng-template #nochartdata>
                         <div class="visual-error">
                           {{ 'No Data Found' | translate }}<br />
                           {{ item?.error | translate }}
                         </div>
                       </ng-template>
-                    </div>
-                    <div class="visual-buttons">
-                      <ion-button size="small" fill="clear" (click)="doGetVisual(item, i)" class="clear-dark-button"
-                        color="dark" mode="ios">
-                        <ion-icon name="sync"></ion-icon>
-                      </ion-button>
-                      <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, i)"
-                        class="clear-dark-button" color="dark" mode="ios">
-                        <ion-icon name="settings-outline"></ion-icon>
-                      </ion-button>
-                      <ion-button size="small" fill="clear" class="clear-dark-button"
-                        color="dark" mode="ios" (click)="doEnterViewMode(item)">
-                        <ion-icon name="open-outline"></ion-icon>
-                      </ion-button>
                     </div>
                   </div>
                 </div>

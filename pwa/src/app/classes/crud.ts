@@ -439,7 +439,7 @@ export class Crud {
         headers: new HttpHeaders(this.crudHeaders)
       }).subscribe((res: any) => {
         if (res && res.result) {
-          resolve(res.chart);
+          resolve(res.visual);
         } else {
           reject(res.msg);
         }
@@ -673,16 +673,20 @@ export class Crud {
   }
 
   getAnnouncements() {
-    this.Find(
-      "read", "_log", null, [{
-        key: "log_type",
-        op: "eq",
-        value: "Announcement"
-      }], { "log_date": -1 }, 1, 10).then((res: any) => {
-        this.announcements.next(res);
-      }).catch((error: any) => {
-        console.error("*** announcements error", error);
-      });
+    return new Promise((resolve, reject) => {
+      this.Find(
+        "read", "_log", null, [{
+          key: "log_type",
+          op: "eq",
+          value: "Announcement"
+        }], { "log_date": -1 }, 1, 10).then((res: any) => {
+          this.announcements.next(res);
+          resolve(true);
+        }).catch((error: any) => {
+          console.error("*** announcements error", error);
+          reject(error);
+        });
+    });
   }
 
   getParents(obj: any) {
