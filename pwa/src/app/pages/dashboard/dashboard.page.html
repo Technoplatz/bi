@@ -74,11 +74,12 @@ https://www.gnu.org/licenses.
                     </ion-button>
                   </div>
                   <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
-                    <div class="hdr2">{{ item.vie_collection_id }}
-                      <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
+                    <div class="hdr2">{{ item.vie_collection_id }} | 
+                      {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
+                      <!-- <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
                         <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
                         <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
-                      </span>
+                      </span> -->
                     </div>
                     <div class="hdr4">
                       {{ item.visual.value }}
@@ -96,18 +97,18 @@ https://www.gnu.org/licenses.
                     </ion-button>
                   </div>
                   <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
-                    <div class="hdr2">{{ item.vie_collection_id }}
-                      <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
+                    <div class="hdr2">{{ item.vie_collection_id }} | 
+                      <!-- <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
                         <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
                         <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
                       </span>
-                      <br />
+                      <br /> -->
                       {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
                       <span *ngIf="item.visual.kpi_target_value; else notargetv">&rarr; {{
                         item.visual.kpi_target_value }}</span>
                       <ng-template #notargetv><br /></ng-template>
                     </div>
-                    <div class="hdr3">
+                    <!-- <div class="hdr3">
                       <ion-icon
                         *ngIf="item.visual.kpi_target_value && item.visual.value && item.visual.kpi_target_value > item.visual.value"
                         name="thumbs-down" color="danger">
@@ -117,7 +118,7 @@ https://www.gnu.org/licenses.
                         name="thumbs-up" color="success">
                       </ion-icon>
                       {{ item.visual.value }}
-                    </div>
+                    </div> -->
                     <div class="app-charts">
                       <app-charts *ngIf="item.visual.data && item.visual.data.length > 0; else nochartdata"
                         [visual]="item.visual" [width]="chcontainer.offsetWidth"></app-charts>

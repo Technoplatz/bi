@@ -1889,7 +1889,7 @@ app-charts {
 
 .hdr3, .hdr4 {
   font-size: 18px;
-  width: calc(100% - 16px);
+  width: calc(100% - 100px);
   margin-top: 4px;
   margin-left: 12px;
   font-weight: 600 !important;
@@ -1901,7 +1901,7 @@ app-charts {
 .hdr4 {
   margin-top: 0px;
   border-bottom: none !important;
-  font-size: 36px !important;
+  font-size: 32px !important;
 }
 
 .hdr3 ion-icon {

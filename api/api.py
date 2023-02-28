@@ -2066,12 +2066,14 @@ class Crud():
                         value_ = int(len(df_[vie_chart_yaxis_]))
                     elif vie_chart_function_ == "unique":
                         value_ = int(df_[vie_chart_yaxis_].nunique())
-                    elif vie_chart_function_ == "mean":
+                    elif vie_chart_function_ in ["mean", "avg"]:
                         value_ = float(df_[vie_chart_yaxis_].mean())
-                    elif vie_chart_function_ == "stdev":
+                    elif vie_chart_function_ in ["stdev", "std"]:
                         value_ = float(df_[vie_chart_yaxis_].std())
                     elif vie_chart_function_ == "var":
                         value_ = float(df_[vie_chart_yaxis_].var())
+                    else:
+                        raise APIError("invalid visual function")
 
                 if value_ >= 0 and vie_kpi_target_value_ > 0:
                     perchange_ = float(((value_ - vie_kpi_target_value_) / vie_kpi_target_value_) * 100)
@@ -2272,7 +2274,7 @@ class Crud():
                     df_[nc_] = df_[key_]
                     pvs_.append(nc_)
 
-                    if value_ in ["sum", "mean", "average", "std", "max", "min"]:
+                    if value_ in ["sum", "mean", "average", "stdev", "var", "max", "min"]:
                         df_[nc_] = pd.to_numeric(df_[nc_], errors="coerce")
                     if value_ == "count":
                         aggfunc_[nc_] = "count"
@@ -2284,8 +2286,10 @@ class Crud():
                         aggfunc_[nc_] = np.mean
                     elif value_ == "average":
                         aggfunc_[nc_] = np.average
-                    elif value_ == "std":
+                    elif value_ == "stdev":
                         aggfunc_[nc_] = np.std
+                    elif value_ == "var":
+                        aggfunc_[nc_] = np.var
                     elif value_ == "unique":
                         aggfunc_[nc_] = lambda x: len(x.unique())
                     elif value_ == "max":
@@ -2526,7 +2530,7 @@ class Crud():
                 data_ = self.db["_collection"].find_one({"col_id": col_id_})
             else:
                 raise APIError(f"no permission for {col_id_}")
-                
+
             res_ = {
                 "result": True,
                 "data": data_
@@ -4918,7 +4922,7 @@ def crud_f():
         token_ = user_["token"] if "token" in user_ else None
         collection_ = input_["collection"] if "collection" in input_ else None
         match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
-        
+
         # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
         if not validate_["result"]:

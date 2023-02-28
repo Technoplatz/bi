@@ -91,7 +91,7 @@ export class ChartsComponent implements OnInit {
     this.colorScheme = {
       domain: this.visual.color_scheme
     }
-    this.view = this.width > this.minWidth ? [this.width - 16, this.width * 0.55] : [];
+    this.view = this.width > this.minWidth ? [this.width - 16, this.width * 0.75] : [];
     this.ok = true;
   }
 

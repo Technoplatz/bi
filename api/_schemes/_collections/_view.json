@@ -203,8 +203,11 @@
                             "size",
                             "unique",
                             "mean",
+                            "avg",
                             "average",
+                            "stdev",
                             "std",
+                            "var",
                             "min",
                             "max"
                         ],
