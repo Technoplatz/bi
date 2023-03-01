@@ -57,7 +57,11 @@ https://www.gnu.org/licenses.
 .flex-header-start {
   align-content: flex-start;
   margin: auto;
-  margin-left: 16px !important;
+  margin-left: 16px;
+}
+
+.flex-header-start.nomargin {
+  margin-left: 0px !important;
 }
 
 .flex-header-end {
@@ -164,6 +168,14 @@ ion-alert .sc-ion-alert-md {
 
 ion-alert .alert-radio-group {
   max-height: 100% !important;
+}
+
+.menu-on {
+  display: block !important;
+}
+
+.menu-off {
+  display: none !important;
 }
 
 .act-buttons-wrapper {
@@ -860,6 +872,12 @@ ion-item {
   --background-hover-opacity: transparent !important;
 }
 
+.action-button {
+  width: 180px;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+}
+
 .app-header {
   border-bottom: 1px solid var(--ion-color-light);
 }
@@ -1458,8 +1476,9 @@ ion-checkbox {
 }
 
 .search-box ion-button {
-  --padding-start: 4px !important;
-  --padding-end: 0px !important;
+  margin-right: 1px !important;
+  margin-bottom: 1px !important;
+  min-width: 32px;
 }
 
 .search-box ion-button ion-text {

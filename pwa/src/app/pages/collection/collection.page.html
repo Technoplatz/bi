@@ -109,7 +109,7 @@ https://www.gnu.org/licenses.
                   <ion-col *ngIf="perm && actions?.length > 0; else noaction">
                     {{ 'ACTIONS' | translate }} [{{ actions?.length }}]<br />
                     <div class="act-buttons-wrapper">
-                      <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" fill="outline">
+                      <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" fill="outline" class="action-button">
                         <ion-icon name="play-circle-outline"></ion-icon>
                         {{ item.title }}
                       </ion-button>
@@ -198,12 +198,10 @@ https://www.gnu.org/licenses.
                             disabled="false">
                           </ion-input>
                         </div>
-                        <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)"
-                          class="ion-padding-start ion-padding-end">
+                        <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
                           {{ 'Search' | translate }}
                         </ion-button>
-                        <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)"
-                          class="ion-padding-start ion-padding-end">
+                        <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
                           {{ 'Cancel' | translate }}
                         </ion-button>
                       </div>

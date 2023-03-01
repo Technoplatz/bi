@@ -55,6 +55,7 @@ export class AppComponent implements OnInit {
   public index_: boolean = false;
   public swu_: boolean = false;
   public net_: boolean = true;
+  public menutoggle: boolean = true;
 
   constructor(
     private translate: TranslateService,
@@ -64,7 +65,11 @@ export class AppComponent implements OnInit {
     private misc: Miscellaneous,
     private storage: Storage,
     private nav: Navigation
-  ) { }
+  ) {
+    this.misc.menutoggle.subscribe(() => {
+      this.menutoggle = this.menutoggle ? false : true;
+    });
+  }
 
   ngOnInit() {
 

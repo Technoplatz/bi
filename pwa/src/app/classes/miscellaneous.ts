@@ -60,6 +60,7 @@ export class Miscellaneous {
   ) { }
 
   navi = new Subject<any>();
+  menutoggle = new Subject<any>();
   
   getAPIHost() {
     return new Promise((resolve) => {
