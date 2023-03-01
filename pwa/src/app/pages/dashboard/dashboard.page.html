@@ -80,7 +80,7 @@ https://www.gnu.org/licenses.
                         <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
                         <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
                       </span> -->
-                      <h2>{{ item.visual.value }}</h2>
+                      <h1>{{ item.visual.value }}</h1>
                   </div>
                 </div>
               </div>
@@ -94,7 +94,7 @@ https://www.gnu.org/licenses.
                     </ion-button>
                   </div>
                   <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
-                    <div class="hdr2">{{ item.vie_collection_id }} | 
+                    <div>{{ item.vie_collection_id }} | 
                       <!-- <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
                         <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
                         <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>

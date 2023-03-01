@@ -80,8 +80,7 @@ https://www.gnu.org/licenses.
                 <span *ngIf="!isInProgress">{{ 'Reset Password' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
-            <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset"
-                class="ion-no-margin">
+            <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
@@ -168,18 +167,17 @@ https://www.gnu.org/licenses.
             </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
-            <ion-button (click)="Signup()" size="default" class="no-hover">
+            <ion-button (click)="Signup()" size="default" class="no-hover ion-margin-end">
                 <span *ngIf="!isInProgress">{{ 'Continue' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
-            <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset"
-                class="ion-no-margin">
+            <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding">
             <ion-button fill="clear" (click)="doDismissModal()" size="small"
-                class="no-hover ion-no-margin ion-no-padding clear-dark-button">
+                class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="newspaper-outline"></ion-icon>
                 <span>{{ 'By completing this form you accept the Terms and conditions' | translate }}.</span>
             </ion-button>
@@ -197,12 +195,6 @@ https://www.gnu.org/licenses.
             <ion-input #emailfocussignin class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
                 autocorrect="off" required [value]="email">
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signinForm?.controls?.email?.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signinForm?.controls?.email?.invalid && (signinForm?.controls?.email?.dirty || signinForm?.controls?.email?.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Password' | translate }} <sup>
@@ -211,25 +203,17 @@ https://www.gnu.org/licenses.
             </ion-label>
             <ion-input #passwordfocus formControlName="password" type="password" required>
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signinForm?.controls?.password?.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signinForm?.controls?.password?.invalid && (signinForm?.controls?.password?.dirty || signinForm?.controls?.password?.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button (click)="Signin()" size="default">
+            <ion-button (click)="Signin()" size="default" class="ion-margin-end">
                 <span *ngIf="!isInProgress">{{ 'Continue' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
-            <ion-button slot="end" (click)="doSetOp('forgot')" size="default" class="ion-no-margin margin-l-24"
-                fill="none">
-                <span>{{ 'Reset Password' | translate }}</span>
-            </ion-button>
-            <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset"
-                class="ion-no-margin">
+            <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
+            </ion-button>
+            <ion-button slot="end" (click)="doSetOp('forgot')" fill="outline"  size="default">
+                <span>{{ 'Set Password' | translate }}</span>
             </ion-button>
         </ion-item>
         <ion-item lines="none">
@@ -249,18 +233,17 @@ https://www.gnu.org/licenses.
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button (click)="TFAC()" size="default">
+            <ion-button (click)="TFAC()" size="default" class="ion-margin-end">
                 <span *ngIf="!isInProgress">{{ 'Verify' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
-            <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset"
-                class="ion-no-margin">
+            <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding">
             <ion-button fill="clear" (click)="doSetOp('signin')" size="small"
-                class="no-hover ion-no-margin ion-no-padding clear-dark-button">
+                class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="mail-outline"></ion-icon>
                 <span>{{ 'Your backup OTP has been sent by e-mail' | translate }}.</span>
             </ion-button>
@@ -284,12 +267,11 @@ https://www.gnu.org/licenses.
             </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button (click)="doForgot()" size="default" class="sign-button">
+            <ion-button (click)="doForgot()" size="default" class="ion-margin-end">
                 <span *ngIf="!isInProgress">{{ 'Submit' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
-            <ion-button slot="end" fill="none" (click)="doSetOp('signin')" size="default" type="reset"
-                class="ion-no-margin">
+            <ion-button fill="outline" (click)="doSetOp('signin')" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
@@ -310,7 +292,7 @@ https://www.gnu.org/licenses.
         </ion-item>
         <ion-item lines="none" class="ion-no-padding">
             <ion-button fill="clear" (click)="doSetOp('signin')" size="small"
-                class="no-hover ion-no-margin ion-no-padding clear-dark-button">
+                class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="log-in-outline"></ion-icon>
                 <span>{{ 'Please click the button above to get signed in' | translate }}.</span>
             </ion-button>

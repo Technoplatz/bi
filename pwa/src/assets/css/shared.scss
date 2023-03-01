@@ -91,8 +91,8 @@ h5,
 h6 {
   margin-top: auto !important;
   margin-bottom: auto !important;
-  font-weight: 500 !important;
   line-height: normal !important;
+  font-weight: bolder;
 }
 
 app-menu {
@@ -125,9 +125,7 @@ ion-button {
   --ripple-color: transparent;
   --background-hover: var(--background);
   --opacity: 1;
-  --border-radius: 2px;
-  margin-left: 0px;
-  margin-right: 4px !important;
+  --border-radius: 0px;
   letter-spacing: normal;
 }
 
@@ -725,6 +723,16 @@ ion-spinner {
   width: 100% !important;
 }
 
+.token {
+  font-size: x-large !important;
+  font-weight: 600;
+}
+
+.section-header span {
+  margin-top: -2px;
+  font-weight: 600;
+}
+
 .small-button {
   min-width: 100px;
   margin-right: 8px;
@@ -862,10 +870,6 @@ ion-item {
   background-color: var(--ion-color-light);
 }
 
-.inner-footer ion-button ion-label {
-  margin-bottom: -4px !important;
-}
-
 .margin-top-12 {
   margin-top: 12px;
 }
@@ -878,6 +882,11 @@ ion-item {
   border-top: 1px solid var(--ion-color-light);
   background-color: #fff !important;
 }
+
+.inner-footer ion-button ion-label {
+  margin-bottom: -4px !important;
+}
+
 
 .inner-footer ion-button {
   height: 1rem !important;
@@ -928,14 +937,14 @@ ion-item {
   padding-left: 16px !important;
 }
 
+.text-medium {
+  font-size: medium !important;
+}
+
 .logo-column {
   padding-bottom: 8px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--ion-color-primary);
-}
-
-ion-text {
-  font-weight: normal;
+  border-bottom: 1px solid var(--ion-color-dark);
 }
 
 ion-card-subtitle,
@@ -1738,14 +1747,14 @@ app-charts {
   margin-right: 8px;
   align-content: flex-start;
   width: 320px;
-  max-height: 110px;
+  height: 110px;
 }
 
 .chart-sq {
   position: relative;
   margin-bottom: 8px;
   overflow: hidden;
-  padding: 8px;
+  padding: 16px;
   border: 4px solid var(--ion-color-light);
   border-radius: 0px;
   margin-right: 8px;
