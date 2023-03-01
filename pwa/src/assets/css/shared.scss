@@ -30,64 +30,6 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-.menu-content-open {
-  pointer-events: all !important;
-  cursor: default !important;
-}
-
-.flex-container {
-  display: flex !important;
-}
-
-.flex-child {
-  align-content: flex-start;
-}
-
-.flex-child-start {
-  align-content: flex-start;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-left: 16px !important;
-}
-
-.flex-header {
-  display: flex !important;
-}
-
-.flex-header-start {
-  align-content: flex-start;
-  margin: auto;
-  margin-left: 16px;
-}
-
-.flex-header-start.nomargin {
-  margin-left: 0px !important;
-}
-
-.flex-header-end {
-  align-content: flex-end;
-  margin: auto;
-}
-
-.theme-button {
-  width: 100px;
-  position: relative;
-  height: 40px;
-  margin-right: 4px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.theme-button p {
-  color: #fff !important;
-  font-weight: 600;
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
 ion-content,
 ion-footer {
   font-size: small;
@@ -101,6 +43,7 @@ h4,
 h5,
 h6 {
   margin-top: auto !important;
+  margin-bottom: auto !important;
   line-height: normal !important;
   font-weight: bolder;
 }
@@ -168,6 +111,64 @@ ion-alert .sc-ion-alert-md {
 
 ion-alert .alert-radio-group {
   max-height: 100% !important;
+}
+
+.filler {
+  height: 8px;
+  width: 100%;
+}
+
+.flex-container {
+  display: flex !important;
+}
+
+.flex-child {
+  align-content: flex-start;
+}
+
+.flex-child-start {
+  align-content: flex-start;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 16px !important;
+}
+
+.flex-header {
+  display: flex !important;
+}
+
+.flex-header-start {
+  align-content: flex-start;
+  margin: auto;
+  margin-left: 16px;
+}
+
+.flex-header-start.nomargin {
+  margin-left: 0px !important;
+}
+
+.flex-header-end {
+  align-content: flex-end;
+  margin: auto;
+}
+
+.theme-button {
+  width: 100px;
+  position: relative;
+  height: 40px;
+  margin-right: 4px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.theme-button p {
+  color: #fff !important;
+  font-weight: 600;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .menu-on {
@@ -873,8 +874,7 @@ ion-item {
 }
 
 .action-button {
-  width: 180px;
-  text-overflow: ellipsis !important;
+  max-width: 180px;
   overflow: hidden !important;
 }
 

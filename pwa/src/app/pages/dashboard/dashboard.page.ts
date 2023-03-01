@@ -283,7 +283,7 @@ export class DashboardPage implements OnInit {
             views: this.views ? this.views : [],
             user: this.user,
             data: data_,
-            structure: this.views_structure,
+            structure: collection_ === "_view" ? this.views_structure : collection_ === "_collection" ? this.collections_structure : this.collections_structure,
             direct: -1
           }
         }

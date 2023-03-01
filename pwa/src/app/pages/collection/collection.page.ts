@@ -482,7 +482,10 @@ export class CollectionPage implements OnInit {
   doSaveAsView() {
     if (this.perm && this.data.length > 0 && this.is_crud) {
       this.crud.SaveAsView(this.id, this.filter).then((res: any) => {
-        // goto view
+        this.misc.navi.next({
+          s: "view",
+          sub: res.id
+        });
       }).catch((error: any) => {
         this.misc.doMessage("filter not saved", "error");
         console.error(error);

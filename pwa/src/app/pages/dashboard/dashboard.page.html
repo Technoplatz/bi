@@ -80,6 +80,7 @@ https://www.gnu.org/licenses.
                         <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
                         <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
                       </span> -->
+                      <div class="filler"></div>
                       <h1>{{ item.visual.value }}</h1>
                   </div>
                 </div>
@@ -132,6 +133,7 @@ https://www.gnu.org/licenses.
 
               <!-- RECENT ANNOUNCEMENTS -->
               <h4>{{ 'Recent Announcements' | translate }}</h4>
+              <div class="filler"></div>
               <ion-grid *ngIf="announcements.length > 0; else noannouncement" class="ion-no-padding data-grid">
                 <ion-row>
                   <ion-col size="2">
