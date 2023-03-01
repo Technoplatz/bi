@@ -41,7 +41,7 @@ https://www.gnu.org/licenses.
         immediately' | translate }}.
       </p>
       <ion-button (click)="doSignout()" class="ion-margin-top" size="default">
-        {{ 'Sign out' | translate }}&nbsp;&nbsp;
+        {{ 'SIGN OUT' | translate }}
       </ion-button>
     </div>
 
@@ -81,18 +81,18 @@ https://www.gnu.org/licenses.
           <ion-button (click)="doApiKeyEnabled()" size="default">
             <ion-spinner *ngIf="is_apikey_enabled" name="dots"></ion-spinner>
             <ion-icon *ngIf="!is_apikey_enabled" name="eye"></ion-icon>
-            <ion-label *ngIf="!is_apikey_enabled">{{ 'Show' | translate }}</ion-label>
+            <ion-label *ngIf="!is_apikey_enabled">{{ 'SHOW' | translate }}</ion-label>
           </ion-button>
           <ion-button (click)="doCopy('apikey')" size="default">
             <ion-icon *ngIf="!is_apikey_copied" name="copy"></ion-icon>
-            <ion-label *ngIf="!is_apikey_copied">{{ 'Copy' | translate }}</ion-label>
+            <ion-label *ngIf="!is_apikey_copied">{{ 'COPY' | translate }}</ion-label>
             <ion-icon *ngIf="is_apikey_copied" name="checkmark"></ion-icon>
-            <ion-label *ngIf="is_apikey_copied">{{ 'Copied' | translate }}</ion-label>
+            <ion-label *ngIf="is_apikey_copied">{{ 'COPIED' | translate }}</ion-label>
           </ion-button>
           <ion-button (click)="doAccount('apikeygen')" class="ion-margin-end" size="default">
             <ion-spinner *ngIf="is_processing_account" name="dots"></ion-spinner>
             <ion-icon *ngIf="!is_processing_account" name="refresh"></ion-icon>
-            <ion-label *ngIf="!is_processing_account">{{ 'Generate' | translate }}</ion-label>
+            <ion-label *ngIf="!is_processing_account">{{ 'GENERATE' | translate }}</ion-label>
           </ion-button>
         </p>
       </div>
@@ -109,7 +109,7 @@ https://www.gnu.org/licenses.
         <p>
           <ion-button (click)="doAccount('apikeygen')" size="default" class="ion-margin-top">
             <ion-icon name="key"></ion-icon>
-            <ion-label>{{ 'Create an API key' | translate }}</ion-label>
+            <ion-label>{{ 'CREATE AN API KEY' | translate }}</ion-label>
           </ion-button>
         </p>
       </ng-template>
