@@ -77,8 +77,8 @@ export const environment = {
         "minLength": 0,
         "maxLength": 64,
         "file": true,
-        "title": "Excel File",
-        "description": "Excel File",
+        "title": "File",
+        "description": "File",
         "width": 100
       }
     },
@@ -142,8 +142,8 @@ export const environment = {
         "minLength": 0,
         "maxLength": 64,
         "file": true,
-        "title": "Excel File",
-        "description": "Excel File",
+        "title": "File",
+        "description": "File",
         "width": 100
       }
     },

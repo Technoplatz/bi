@@ -126,6 +126,8 @@ ion-button {
   --background-hover: var(--background);
   --opacity: 1;
   --border-radius: 0px;
+  margin: 0px;
+  margin-right: 8px !important;
   letter-spacing: normal;
 }
 
@@ -156,6 +158,12 @@ ion-alert .sc-ion-alert-md {
 
 ion-alert .alert-radio-group {
   max-height: 100% !important;
+}
+
+.act-buttons-wrapper {
+  padding-top: 8px;
+  width: fit-content;
+  position: relative;
 }
 
 .ion-chip-group {
@@ -1747,7 +1755,7 @@ app-charts {
   margin-right: 8px;
   align-content: flex-start;
   width: 320px;
-  height: 110px;
+  height: 100px;
 }
 
 .chart-sq {
@@ -1831,7 +1839,7 @@ app-charts {
   top: 0;
   right: 0;
   margin: 0px;
-  padding-right: 4px !important;
+  padding-right: 8px !important;
   padding-top: 8px !important;
 }
 

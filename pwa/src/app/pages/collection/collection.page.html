@@ -43,7 +43,7 @@ https://www.gnu.org/licenses.
                   <ion-col *ngIf="!view_mode[id]" size="12">
                     <div *ngIf="is_crud" (click)="doImport('import')" class="data-sq-button">
                       <ion-icon name="cloud-upload-outline"></ion-icon><br />
-                      {{ 'Import' | translate }}<br />{{ 'Excel' | translate }}
+                      {{ 'Import' | translate }}<br />{{ 'File' | translate }}
                     </div>
                     <div *ngIf="barcoded_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
                       <ion-icon name="barcode-outline"></ion-icon><br />
@@ -104,6 +104,24 @@ https://www.gnu.org/licenses.
                       {{ 'Collection' | translate }}<br />{{ 'Settings' | translate }}
                     </div>
                   </ion-col>
+                </ion-row>
+                <ion-row *ngIf="is_pane_ok" class="ion-margin-top">
+                  <ion-col *ngIf="perm && actions?.length > 0; else noaction">
+                    {{ 'ACTIONS' | translate }} [{{ actions?.length }}]<br />
+                    <div class="act-buttons-wrapper">
+                      <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" fill="outline">
+                        <ion-icon name="play-circle-outline"></ion-icon>
+                        {{ item.title }}
+                      </ion-button>
+                    </div>
+                  </ion-col>
+                  <ng-template #noaction>
+                    <ion-col>
+                      {{ 'NO ACTION FOUND' | translate }}<br />
+                      {{ 'To create an action you need to add an "action item" into the collection structure' |
+                      translate }}.
+                    </ion-col>
+                  </ng-template>
                 </ion-row>
               </ion-grid>
 
@@ -174,15 +192,18 @@ https://www.gnu.org/licenses.
                         </div>
                         <div>
                           <ion-input *ngIf="item.value.bsonType!='bool'"
-                          [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
-                          [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
-                          class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
-                        </ion-input>
+                            [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
+                            [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
+                            class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}"
+                            disabled="false">
+                          </ion-input>
                         </div>
-                        <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)" class="ion-padding-start ion-padding-end">
+                        <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)"
+                          class="ion-padding-start ion-padding-end">
                           {{ 'Search' | translate }}
                         </ion-button>
-                        <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)" class="ion-padding-start ion-padding-end">
+                        <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)"
+                          class="ion-padding-start ion-padding-end">
                           {{ 'Cancel' | translate }}
                         </ion-button>
                       </div>
@@ -301,30 +322,6 @@ https://www.gnu.org/licenses.
                   </ion-label>
                 </ion-item>
               </ng-template>
-            </ion-col>
-            <ion-col *ngIf="is_pane_ok" class="console-right-1">
-              <ion-list class="ion-no-padding pane-list">
-                <ion-list-header class="ion-no-padding">{{ 'Actions' | translate }} [{{ actions.length }}]
-                </ion-list-header>
-                <div *ngIf="perm && actions?.length > 0; else noaction">
-                  <ion-item *ngFor="let item of actions; let ac = index" class="clicked-item" (click)="doAction(ac)">
-                    <ion-icon name="play-circle-outline" color="primary" size="large" class="action-icon"></ion-icon>
-                    <ion-label class="ion-padding-end">
-                      {{ item.title }}
-                    </ion-label>
-                  </ion-item>
-                </div>
-                <ng-template #noaction>
-                  <ion-item class="ion-no-padding pane-item">
-                    <ion-label class="ion-text-wrap">
-                      {{ 'No action found' | translate }}<br />
-                      <div>
-                        {{ 'To create a new action you need to add an action item into the collection structure' |
-                        translate }}.</div>
-                    </ion-label>
-                  </ion-item>
-                </ng-template>
-              </ion-list>
             </ion-col>
           </ion-row>
         </ion-grid>
