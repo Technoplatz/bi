@@ -583,7 +583,6 @@ export class CollectionPage implements OnInit {
       this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
         this.storage.set("LSSAVEDFILTER", "").then(() => {
           this.doResetSearch(true);
-          
           this.searched = {};
           this.RefreshData(0);
         });
@@ -679,7 +678,10 @@ export class CollectionPage implements OnInit {
       "op": "eq",
       "value": this.id
     }]).then(() => {
-      // admin fields'e git
+      this.misc.navi.next({
+        s: "admin",
+        sub: "_field"
+      });
     });
   }
 

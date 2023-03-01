@@ -43,19 +43,26 @@ https://www.gnu.org/licenses.
   align-content: flex-start;
 }
 
+.flex-child-start {
+  align-content: flex-start;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 16px !important;
+}
+
 .flex-header {
   display: flex !important;
-  align-items: center;
 }
 
 .flex-header-start {
   align-content: flex-start;
-  margin-left: 16px;
+  margin: auto;
+  margin-left: 16px !important;
 }
 
 .flex-header-end {
   align-content: flex-end;
-  color: var(--ion-color-dark) !important;
+  margin: auto;
 }
 
 .theme-button {
@@ -178,18 +185,6 @@ ion-alert .alert-radio-group {
   margin-left: 0px !important;
   padding-left: 0px !important;
   -webkit-padding-start: 0px !important;
-}
-
-.toggle-button {
-  --color: var(--ion-color-dark);
-}
-
-.toggle-button ion-icon {
-  margin-top: 2px;
-}
-
-.action-item ion-button {
-  margin-top: 8px;
 }
 
 .actions-container {
@@ -329,7 +324,7 @@ ion-alert .alert-radio-group {
   vertical-align: top !important;
   text-align: center;
   padding: 4px;
-  font-weight: 500;
+  font-weight: bold;
   line-height: 16px;
   cursor: pointer;
   border-radius: 0px;
@@ -430,7 +425,8 @@ ion-alert .alert-radio-group {
 }
 
 form ion-item ion-label {
-  font-weight: 600;
+  margin-bottom: 8px !important;
+  font-weight: bold;
 }
 
 .saas-company {
@@ -871,9 +867,6 @@ ion-item {
 .app-footer {
   position: fixed;
   bottom: 0px;
-  font-weight: 500;
-  padding-top: 4px;
-  padding-bottom: 4px;
   background-color: var(--ion-color-light);
 }
 
@@ -886,17 +879,18 @@ ion-item {
 }
 
 .inner-footer {
+  position: fixed;
+  bottom: 0px;
   border-top: 1px solid var(--ion-color-light);
   background-color: #fff !important;
+  height: 40px;
+  color: var(--ion-color-medium);
 }
 
-.inner-footer ion-button ion-label {
-  margin-bottom: -4px !important;
-}
-
-
-.inner-footer ion-button {
-  height: 1rem !important;
+.inner-footer a {
+  text-decoration: none;
+  font-weight: bold;
+  color: var(--ion-color-primary) !important;
 }
 
 .modal-header {
@@ -1121,6 +1115,11 @@ sup {
 
 .sign-section {
   margin-top: 16vh;
+}
+
+.sign-section a {
+  font-weight: bolder;
+  color: var(--ion-color-primary) !important;
 }
 
 .support-column {
@@ -1596,14 +1595,13 @@ ion-checkbox {
 }
 
 .data-grid ion-row:first-child ion-col {
-  font-weight: 600;
+  font-weight: bold;
   color: var(--ion-color-primary);
   border-top: 1px solid var(--ion-color-light);
   border-bottom: 2px solid var(--ion-color-dark);
 }
 
 .data-grid ion-row:last-child ion-col {
-  font-weight: 600;
   border: none !important;
 }
 
