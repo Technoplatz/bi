@@ -45,24 +45,25 @@ services:
     image: traefik:latest
     hostname: traefik
     restart: always
-    command:
-      - --log.level=INFO
-      - --api.insecure=true
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
       - traefik.http.routers.bi-traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.bi-traefik.service=api@internal
+      - com.centurylinklabs.watchtower.enable=true
+    command:
+      - --log.level=INFO
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - 443:443
-      - 8080:8080
-      - 80:80
+      - "443:443"
+      - "8080:8080"
+      - "80:80"
     environment:
       - TZ=${TZ}
     networks:
@@ -72,6 +73,8 @@ services:
     container_name: init
     image: ghcr.io/technoplatz/bi-init${DEV_SUFFIX}:latest
     hostname: init
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
     volumes:
       - bi-storage-volume:/init
       - bi-mongo0-volume:/data/db
@@ -87,13 +90,15 @@ services:
     container_name: mongo0
     image: mongo:latest
     hostname: ${MONGO_HOST}
+    restart: always
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     depends_on:
       - init
-    restart: always
     expose:
-      - ${MONGO_PORT}
+      - "${MONGO_PORT}"
     ports:
-      - ${MONGO_PORT}:${MONGO_PORT}
+      - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
       - bi-storage-volume:/init:ro
       - bi-mongo0-volume:/data/db
@@ -114,11 +119,13 @@ services:
     container_name: mongo1
     image: mongo:latest
     hostname: ${MONGO_REPLICA1_HOST}
+    restart: always
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     depends_on:
       - init
-    restart: always
     expose:
-      - ${MONGO_PORT}
+      - "${MONGO_PORT}"
     ports:
       - "${MONGO_REPLICA1_PORT}:${MONGO_PORT}"
     volumes:
@@ -138,11 +145,13 @@ services:
     container_name: mongo2
     image: mongo:latest
     hostname: ${MONGO_REPLICA2_HOST}
+    restart: always
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     depends_on:
       - init
-    restart: always
     expose:
-      - ${MONGO_PORT}
+      - "${MONGO_PORT}"
     ports:
       - "${MONGO_REPLICA2_PORT}:${MONGO_PORT}"
     volumes:
@@ -162,6 +171,8 @@ services:
     container_name: replicaset
     image: ghcr.io/technoplatz/bi-replicaset${DEV_SUFFIX}:latest
     hostname: replicaset
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
     depends_on:
       - mongo0
       - mongo1
@@ -200,6 +211,12 @@ services:
       - replicaset
     hostname: api
     restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=network0
+      - traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)
+      - traefik.http.services.api.loadbalancer.server.port=80
+      - com.centurylinklabs.watchtower.enable=false
     volumes:
       - bi-storage-volume:/cron
       - bi-storage-volume:/dump
@@ -207,12 +224,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - 5001:80
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=network0
-      - traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)
-      - traefik.http.services.api.loadbalancer.server.port=80
+      - "5001:80"
     environment:
       - TZ=${TZ}
       - DOMAIN=${DOMAIN}
@@ -246,16 +258,17 @@ services:
     image: ghcr.io/technoplatz/bi-pwa${DEV_SUFFIX}:latest
     hostname: pwa
     restart: always
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    ports:
-      - 8100:80
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`)
       - traefik.http.services.pwa.loadbalancer.server.port=80
+      - com.centurylinklabs.watchtower.enable=false
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "8100:80"
     links:
       - api
     networks:
@@ -265,12 +278,24 @@ services:
     container_name: watchtower
     image: containrrr/watchtower:latest
     hostname: watchtower
+    restart: always
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-    restart: always
-    command: --interval 86400 api pwa watchtower traefik
+    command: --interval 60
+    environment:
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=${FROM_EMAIL}
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=${ADMIN_EMAIL}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=${SMTP_SERVER}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=${SMTP_PORT}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=${SMTP_USERID}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${SMTP_PASSWORD}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SUBJECTTAG=${DOMAIN}
+      - WATCHTOWER_NOTIFICATION_EMAIL_DELAY=30
     networks:
       - network0
 
