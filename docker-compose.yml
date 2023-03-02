@@ -278,7 +278,7 @@ services:
     container_name: watchtower
     image: containrrr/watchtower:latest
     hostname: watchtower
-    restart: always
+    restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
     volumes:
@@ -287,7 +287,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
     command: --interval 60
     environment:
-      - WATCHTOWER_NOTIFICATIONS=email
+      - TZ=${TZ}
+      - WATCHTOWER_NOTIFICATIONS=${NOTIFICATIONS}
       - WATCHTOWER_NOTIFICATION_EMAIL_FROM=${FROM_EMAIL}
       - WATCHTOWER_NOTIFICATION_EMAIL_TO=${ADMIN_EMAIL}
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=${SMTP_SERVER}
@@ -296,6 +297,9 @@ services:
       - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${SMTP_PASSWORD}
       - WATCHTOWER_NOTIFICATION_EMAIL_SUBJECTTAG=${DOMAIN}
       - WATCHTOWER_NOTIFICATION_EMAIL_DELAY=30
+      - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${SLACK_HOOK_URL}
+      - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER=${SLACK_IDENTIFIER}
+      - WATCHTOWER_NOTIFICATION_SLACK_CHANNEL=${SLACK_CHANNEL}
     networks:
       - network0
 
