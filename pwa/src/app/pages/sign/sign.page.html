@@ -216,9 +216,9 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Set Password' | translate }}</span>
             </ion-button>
         </ion-item>
-        <ion-item lines="none">
-            <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe" mode="md">
-            </ion-checkbox>&nbsp;&nbsp;{{ 'Remember me' | translate }}
+        <ion-item lines="none" class="ion-margin-top">
+            <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe" mode="md" class="ion-margin-end">
+            </ion-checkbox>{{ 'Remember me' | translate }}
         </ion-item>
     </form>
     <form [formGroup]="TFACForm" *ngIf="formtype=='tfac'">

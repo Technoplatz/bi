@@ -47,10 +47,6 @@ https://www.gnu.org/licenses.
           <ion-icon name="terminal-outline"></ion-icon>&nbsp;
           {{ 'Dashboard' | translate }}
         </ion-button>
-        <!-- <ion-button *ngIf="!user" (click)="doSignup()" class="ion-margin-top" size="default">
-          <ion-icon name="person-outline"></ion-icon>
-          {{ 'Sign up' | translate }}
-        </ion-button> -->
         <ion-button *ngIf="!user" (click)="doSign('signin')" class="ion-margin-top text-medium" size="large">
           <ion-icon name="log-in-outline"></ion-icon>
           {{ 'Sign in' | translate }}
@@ -59,7 +55,7 @@ https://www.gnu.org/licenses.
     </ion-row>
     <ion-row class="ion-margin-top">
       <ion-col size="1"></ion-col>
-      <ion-col size="11">{{ 'Don\'t have an account?' | translate }}  <a href="#" (click)="doSignup()">{{ 'Click to request a new one' | translate }}</a>.</ion-col>
+      <ion-col size="11">{{ 'Don\'t have an account?' | translate }}  <a href="#" (click)="doSignup()">{{ 'Click to sign up' | translate }}</a>.</ion-col>
     </ion-row>
   </ion-grid>
 </ion-content>
