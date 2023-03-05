@@ -89,7 +89,7 @@ function getFiles() {
     else
         echo "Process will continue without GitHub token."
     fi
-    curl "${curlHeaders[@]}" -Ls -o $DCYML -o $DOTENV -o $DBCONF https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV,$DBCONF}
+    curl "${curlHeaders[@]}" -Ls -o $DCYML -o $DOTENV https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV}
     return 1
 }
 
@@ -110,15 +110,16 @@ function installBI() {
         echo "You may provide a token to get connected to the repository."
         return 0
     fi
-    if [ ! -f .secret-mongo-password ]; then
+    INC=0
+    if [ ! -f .secret-key-password ]; then
         re='^[a-zA-Z]+$'
         while ! [[ ${DBPWD:0:1} =~ $re ]]
         do
             DBPWD=$(openssl rand -hex 12)
             let "INC+=1"
         done
-        echo $DBPWD > .secret-mongo-password
-        echo "Database password was created successfully ($INC)."
+        echo $DBPWD > .secret-key-password
+        echo "Key password was created successfully ($INC)."
     fi
     echo "Required files were downloaded successfully :)"
     echo
@@ -217,12 +218,10 @@ function killBI() {
 }
 
 # Setup
-INC=0
 NS="ghcr.io/technoplatz"
 DIR="_bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
-DBCONF="_init/mongod.conf"
 BUILDS='[
     {"folder":"_init","image":"bi-init","tag":"latest","dockerfile":"Dockerfile"},
     {"folder":"_replicaset","image":"bi-replicaset","tag":"latest","dockerfile":"Dockerfile"},

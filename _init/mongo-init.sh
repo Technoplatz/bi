@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # 
 # Technoplatz BI
 # 
@@ -31,5 +30,42 @@
 # https://www.gnu.org/licenses.
 # 
 
-openssl rand -base64 756 > /init/replicaset.key
-chmod 400 /init/replicaset.key
+echo "COUNTRY_CODE=$COUNTRY_CODE"
+echo "STATE_NAME=$STATE_NAME"
+echo "CITY_NAME=$CITY_NAME"
+echo "COMPANY_NAME=$COMPANY_NAME"
+echo "DEPARTMENT_NAME=$DEPARTMENT_NAME"
+echo "ADMIN_EMAIL=$ADMIN_EMAIL"
+echo "MONGO_HOST=$MONGO_HOST"
+echo "MONGO_REPLICA1_HOST=$MONGO_REPLICA1_HOST"
+echo "MONGO_REPLICA2_HOST=$MONGO_REPLICA2_HOST"
+echo "MONGO_TLS_CA_COMBINED_FILE=$MONGO_TLS_CA_COMBINED_FILE"
+
+echo "step 1: Create the Root Certificate"
+openssl req -nodes -newkey rsa:4096 -out /init/ca.crt -new -x509 -keyout /init/ca.key -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST/emailAddress=$ADMIN_EMAIL"
+cat /init/ca.key /init/ca.crt > $MONGO_TLS_CA_COMBINED_FILE
+echo "step 1 is ok"
+echo
+
+echo "step 2: Generate the Certificate Requests and the Private Keys"
+openssl req -nodes -newkey rsa:4096 -sha256 -keyout /init/$MONGO_HOST.key -out /init/$MONGO_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST/emailAddress=$ADMIN_EMAIL"
+openssl req -nodes -newkey rsa:4096 -sha256 -keyout /init/$MONGO_REPLICA1_HOST.key -out /init/$MONGO_REPLICA1_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_REPLICA1_HOST/emailAddress=$ADMIN_EMAIL"
+openssl req -nodes -newkey rsa:4096 -sha256 -keyout /init/$MONGO_REPLICA2_HOST.key -out /init/$MONGO_REPLICA2_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_REPLICA2_HOST/emailAddress=$ADMIN_EMAIL"
+echo "step 2 is ok"
+echo
+
+echo "step 3: Sign your Certificate Requests"
+openssl x509 -req -in /init/$MONGO_HOST.csr -CA $MONGO_TLS_CA_COMBINED_FILE -CAkey /init/ca.key -set_serial 00 -out /init/$MONGO_HOST.crt
+openssl x509 -req -in /init/$MONGO_REPLICA1_HOST.csr -CA $MONGO_TLS_CA_COMBINED_FILE -CAkey /init/ca.key -set_serial 00 -out /init/$MONGO_REPLICA1_HOST.crt
+openssl x509 -req -in /init/$MONGO_REPLICA2_HOST.csr -CA $MONGO_TLS_CA_COMBINED_FILE -CAkey /init/ca.key -set_serial 00 -out /init/$MONGO_REPLICA2_HOST.crt
+echo "step 3 is ok"
+echo
+
+echo "step 4: Concat each Node Certificate with its key"
+cat /init/$MONGO_HOST.key /init/$MONGO_HOST.crt > /init/$MONGO_HOST.pem
+cat /init/$MONGO_REPLICA1_HOST.key /init/$MONGO_REPLICA1_HOST.crt > /init/$MONGO_REPLICA1_HOST.pem
+cat /init/$MONGO_REPLICA2_HOST.key /init/$MONGO_REPLICA2_HOST.crt > /init/$MONGO_REPLICA2_HOST.pem
+echo "step 4 is ok"
+echo
+
+echo "all steps are ok"

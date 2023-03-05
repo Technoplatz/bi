@@ -33,7 +33,6 @@ https://www.gnu.org/licenses.
 import os
 from pickle import TRUE
 import sys
-import urllib.parse
 import pandas as pd
 import numpy as np
 import openpyxl
@@ -54,6 +53,8 @@ import base64
 import magic
 import pyotp
 import smtplib
+import ssl
+import urllib
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -625,25 +626,33 @@ class Mongo():
         self.mongo_port_ = int(os.environ.get("MONGO_PORT"))
         self.mongo_db_ = os.environ.get("MONGO_DB")
         self.mongo_authdb_ = os.environ.get("MONGO_AUTH_DB")
-        self.mongo_username_ = os.environ.get("MONGO_USERNAME")
-        self.mongo_password_ = get_docker_secret("mongo-password", default="")
-
-        # static parameters
+        self.mongo_username_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
+        self.mongo_password_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
+        # self.mongo_password_ = get_docker_secret("mongo-password", default="")
         self.mongo_appname_ = "api"
         self.mongo_readpref_ = "primary"
-        self.mongo_ssl_ = False
-
+        self.mongo_tls_ = os.environ.get("MONGO_TLS")
+        self.mongo_tlsInsecure_ = os.environ.get("MONGO_TLS_INSECURE")
+        self.mongo_tlsCertificateKeyFile_ = os.environ.get("MONGO_TLS_CERT_COMBINED_FILE")
+        self.mongo_tlsCAFile_ = os.environ.get("MONGO_TLS_CA_COMBINED_FILE")
         authSource_ = f"authSource={self.mongo_authdb_}" if self.mongo_authdb_ else ""
         replicaset_ = f"&replicaSet={self.mongo_replicaset_}" if self.mongo_replicaset_ and self.mongo_replicaset_ != "" else ""
         readPreference_ = f"&readPreference={self.mongo_readpref_}" if self.mongo_readpref_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
-        ssl_ = f"&ssl={self.mongo_ssl_}" if self.mongo_ssl_ else ""
+        tls_ = f"&tls=true" if self.mongo_tls_ in ["true", True] else "&tls=false"
+        tlsInsecure_ = f"&tlsInsecure=true" if self.mongo_tlsInsecure_ in ["true", True] else "&tlsInsecure=false"
+        tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={self.mongo_tlsCertificateKeyFile_}" if self.mongo_tlsCertificateKeyFile_ else ""
+        tlsCAFile_ = f"&tlsCAFile={self.mongo_tlsCAFile_}" if self.mongo_tlsCAFile_ else ""
+        tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
 
-        self.connstr_ = f"mongodb://{self.mongo_username_}:{self.mongo_password_}@{self.mongo0_host_}:{self.mongo_port_},{self.mongo1_host_}:{self.mongo_port_},{self.mongo2_host_}:{self.mongo_port_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{ssl_}"
+        self.connstr_ = f"mongodb://{self.mongo_username_}:{self.mongo_password_}@{self.mongo0_host_}:{self.mongo_port_},{self.mongo1_host_}:{self.mongo_port_},{self.mongo2_host_}:{self.mongo_port_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
+
+        self.client = MongoClient(self.connstr_)
+
 
     def db_f(self):
         try:
-            mongo_client_ = MongoClient(self.connstr_)
+            mongo_client_ = self.client
             db_ = mongo_client_[self.mongo_db_]
 
         except APIError as exc:
@@ -663,7 +672,7 @@ class Mongo():
 
     def client_f(self):
         try:
-            mongo_client_ = MongoClient(self.connstr_)
+            mongo_client_ = self.client
 
         except APIError as exc:
             Misc().api_error_f(exc)
@@ -768,7 +777,7 @@ class Crud():
     def template_f(self, input_):
         try:
             # start transaction
-            session_client_ = MongoClient(self.connstr_)
+            session_client_ = self.client_
             session_db_ = session_client_[self.dbname_]
             session_ = session_client_.start_session(causal_consistency=True, default_transaction_options=None)
             session_.start_transaction()
@@ -1278,7 +1287,7 @@ class Crud():
             API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 
             # start transaction
-            session_client_ = MongoClient(self.connstr_)
+            session_client_ = Mongo().client
             session_db_ = session_client_[self.dbname_]
             session_ = session_client_.start_session(causal_consistency=True, default_transaction_options=None)
             session_.start_transaction()
@@ -5262,7 +5271,7 @@ def get_pivot_f(id):
 def post_f():
     try:
         # start transaction
-        session_client_ = MongoClient(Crud().connstr_)
+        session_client_ = Mongo().client
         session_db_ = session_client_[Crud().dbname_]
         session_ = session_client_.start_session(causal_consistency=True, default_transaction_options=None)
         session_.start_transaction()

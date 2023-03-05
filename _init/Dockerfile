@@ -1,3 +1,4 @@
+#!/bin/sh
 # 
 # Technoplatz BI
 # 
@@ -30,7 +31,9 @@
 # https://www.gnu.org/licenses.
 # 
 
-FROM mongo
+FROM mongo:latest
+RUN rm -rf /_init
+RUN mkdir /_init
 WORKDIR /_init
 COPY mongo-init.sh .
 RUN chmod +x mongo-init.sh

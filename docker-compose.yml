@@ -67,7 +67,8 @@ services:
     environment:
       - TZ=${TZ}
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_TRAEFIK_IPV4}
 
   init:
     image: ghcr.io/technoplatz/bi-init${DEV_SUFFIX}:latest
@@ -83,8 +84,21 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
+      - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - COMPANY_NAME=${COMPANY_NAME}
+      - DEPARTMENT_NAME=${DEPARTMENT_NAME}
+      - COUNTRY_CODE=${COUNTRY_CODE}
+      - STATE_NAME=${STATE_NAME}
+      - CITY_NAME=${CITY_NAME}
+      - MONGO_TLS_CA_COMBINED_FILE=${MONGO_TLS_CA_COMBINED_FILE}
+    secrets:
+      - key-password
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_INIT_IPV4}
 
   mongo0:
     image: mongo:latest
@@ -105,15 +119,15 @@ services:
       - bi-mongo0-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - ./_init/mongod.conf:/etc/mongod.conf
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --config /etc/mongod.conf"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_HOST}.pem --timeZoneInfo /usr/share/zoneinfo --tlsAllowInvalidCertificates"
     links:
       - mongo1
       - mongo2
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_MONGO_IPV4}
 
   mongo1:
     image: mongo:latest
@@ -134,12 +148,12 @@ services:
       - bi-mongo1-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - ./_init/mongod.conf:/etc/mongod.conf
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --config /etc/mongod.conf"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_REPLICA1_HOST}.pem --timeZoneInfo /usr/share/zoneinfo --tlsAllowInvalidCertificates"
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_MONGO_REPLICA1_IPV4}
 
   mongo2:
     image: mongo:latest
@@ -160,12 +174,12 @@ services:
       - bi-mongo2-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - ./_init/mongod.conf:/etc/mongod.conf
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --config /etc/mongod.conf"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_REPLICA2_HOST}.pem --timeZoneInfo /usr/share/zoneinfo --tlsAllowInvalidCertificates"
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_MONGO_REPLICA2_IPV4}
 
   replicaset:
     image: ghcr.io/technoplatz/bi-replicaset${DEV_SUFFIX}:latest
@@ -184,10 +198,12 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
+      - TZ=${TZ}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_USER_NAME=${ADMIN_USER_NAME}
       - COMPANY_NAME=${COMPANY_NAME}
       - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST=${MONGO_HOST}
@@ -195,14 +211,17 @@ services:
       - MONGO_REPLICASET=${MONGO_REPLICASET}
       - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
       - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
+      - MONGO_TLS=${MONGO_TLS}
+      - MONGO_TLS_INSECURE=${MONGO_TLS_INSECURE}
+      - MONGO_TLS_CERT_COMBINED_FILE=${MONGO_TLS_CERT_COMBINED_FILE}
+      - MONGO_TLS_CA_COMBINED_FILE=${MONGO_TLS_CA_COMBINED_FILE}
     links:
       - mongo0
       - mongo1
       - mongo2
-    secrets:
-      - mongo-password
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_REPLICASET_IPV4}
 
   api:
     image: ghcr.io/technoplatz/bi-api${DEV_SUFFIX}:latest
@@ -221,6 +240,7 @@ services:
       - bi-storage-volume:/cron
       - bi-storage-volume:/dump
       - bi-storage-volume:/vault
+      - bi-storage-volume:/init
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -231,6 +251,7 @@ services:
       - COMPANY_NAME=${COMPANY_NAME}
       - FROM_EMAIL=${FROM_EMAIL}
       - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST=${MONGO_HOST}
@@ -248,10 +269,15 @@ services:
       - SECUR_MAX_AGE=${SECUR_MAX_AGE}
       - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
       - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
-    secrets:
-      - mongo-password
+      - MONGO_TLS=${MONGO_TLS}
+      - MONGO_TLS_INSECURE=${MONGO_TLS_INSECURE}
+      - MONGO_TLS_CERT_COMBINED_FILE=${MONGO_TLS_CERT_COMBINED_FILE}
+      - MONGO_TLS_CA_COMBINED_FILE=${MONGO_TLS_CA_COMBINED_FILE}
+    links:
+      - pwa
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_API_IPV4}
 
   pwa:
     image: ghcr.io/technoplatz/bi-pwa${DEV_SUFFIX}:latest
@@ -269,31 +295,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "${PWA_PORT}:80"
-    links:
-      - api
+    extra_hosts:
+      - api:${SUBNET_API_IPV4}
     networks:
-      - network0
-
-  gotify:
-    image: gotify/server:latest
-    container_name: gotify
-    restart: unless-stopped
-    ports:
-      - ${GOTIFY_SERVER_PORT}:80
-    environment:
-      - TZ=${TZ}
-      - GOTIFY_DEFAULTUSER_NAME=${GOTIFY_USER_NAME}
-      - GOTIFY_DEFAULTUSER_PASS=${GOTIFY_PASSWORD}
-    labels:
-      - traefik.http.routers.gotify.rule=Host(`gotify.${DOMAIN}`)
-      - traefik.http.services.gotify.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=true
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-      - bi-storage-volume:/gotify
-    networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_PWA_IPV4}
 
   watchtower:
     image: containrrr/watchtower:latest
@@ -326,7 +332,8 @@ services:
       - WATCHTOWER_NOTIFICATION_MSTEAMS_HOOK_URL=${NOTIFICATION_MSTEAMS_HOOK_URL}
       - WATCHTOWER_NOTIFICATION_MSTEAMS_USE_LOG_DATA=${NOTIFICATION_MSTEAMS_USE_LOG_DATA}
     networks:
-      - network0
+      network0:
+        ipv4_address: ${SUBNET_WATCHTOWER_IPV4}
 
 volumes:
   bi-mongo0-volume:
@@ -345,7 +352,11 @@ volumes:
 networks:
   network0:
     name: network0
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET}
 
 secrets:
-  mongo-password:
-    file: .secret-mongo-password
+  key-password:
+    file: .secret-key-password

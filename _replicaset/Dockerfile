@@ -30,12 +30,9 @@
 # https://www.gnu.org/licenses.
 # 
 
-FROM mongo
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install jq
-RUN rm -rf /_replicaset
-RUN mkdir /_replicaset
-WORKDIR /_replicaset
+FROM mongo:latest
+RUN apt-get update && apt-get upgrade -y && apt-get install -y jq
+WORKDIR /app
 COPY mongo-replicaset.sh .
-RUN chmod +x /_replicaset/mongo-replicaset.sh
-CMD [ "bash", "-c", "/_replicaset/mongo-replicaset.sh"]
+RUN chmod +x mongo-replicaset.sh
+CMD [ "bash", "/app/mongo-replicaset.sh"]
