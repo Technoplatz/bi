@@ -103,7 +103,6 @@ class JSONEncoder(json.JSONEncoder):
 
 class Schedular():
     def __init__(self):
-        self.db_ = Mongo().db_f()
         self.TZ = os.environ.get("TZ")
         self.API_SCHEDULE_INTERVAL_MIN = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 
@@ -129,7 +128,7 @@ class Schedular():
                 if not len(aut_target_filter_) > 0:
                     raise APIError("matched fields is missing")
 
-            collection_ = self.db_["_collection"].find_one({"col_id": aut_source_collection_id_})
+            collection_ = Mongo().db["_collection"].find_one({"col_id": aut_source_collection_id_})
             if not collection_:
                 raise APIError(f"collection not found to schedule {aut_source_collection_id_}")
 
@@ -143,23 +142,23 @@ class Schedular():
             })
 
             source_data_file_ = f"{aut_source_collection_id_}_data"
-            if source_data_file_ not in self.db_.list_collection_names():
+            if source_data_file_ not in Mongo().db.list_collection_names():
                 raise APIError("collection data is missing")
             target_data_file_ = None
             target_structure_ = None
 
             if aut_target_:
                 target_data_file_ = f"{aut_target_collection_id_}_data"
-                if target_data_file_ not in self.db_.list_collection_names():
+                if target_data_file_ not in Mongo().db.list_collection_names():
                     raise APIError(f"remote collection data is missing {target_data_file_}")
-                collection_ = self.db_["_collection"].find_one({"col_id": aut_target_collection_id_})
+                collection_ = Mongo().db["_collection"].find_one({"col_id": aut_target_collection_id_})
                 if not collection_:
                     raise APIError(f"remote collection not found to schedule: {aut_target_collection_id_}")
                 target_structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
                 if not target_structure_:
                     raise APIError(f"remote structure not found: {aut_target_collection_id_}")
 
-            find_ = self.db_[source_data_file_].find(get_filtered_)
+            find_ = Mongo().db[source_data_file_].find(get_filtered_)
             for rec_ in find_:
                 target_filter_ = []
                 target_match_ = None
@@ -195,12 +194,12 @@ class Schedular():
                         "match": target_filter_,
                         "properties": target_structure_["properties"] if "properties" in target_structure_ else None
                     })
-                    aggregate_ = self.db_[target_data_file_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
+                    aggregate_ = Mongo().db[target_data_file_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
                     aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
                     if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
                         target_matched_ = target_exists_ = True
                     else:
-                        aggregate_ = self.db_[target_data_file_].aggregate([{"$match": target_match_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
+                        aggregate_ = Mongo().db[target_data_file_].aggregate([{"$match": target_match_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
                         aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
                         if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
                             target_exists_ = True
@@ -218,7 +217,7 @@ class Schedular():
                             value_ = aut_source_set__["value"]
                             value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
                             set_source_[key_] = value_
-                        self.db_[source_data_file_].update_one({"_id": id_}, {"$set": set_source_})
+                        Mongo().db[source_data_file_].update_one({"_id": id_}, {"$set": set_source_})
                     if aut_target_set_:
                         for aut_target_set__ in aut_target_set_:
                             key_ = aut_target_set__["key"]
@@ -230,10 +229,10 @@ class Schedular():
                                 value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
                             set_target_[key_] = value_
                         if target_matched_:
-                            self.db_[target_data_file_].update_many(get_filtered_, {"$set": set_target_})
+                            Mongo().db[target_data_file_].update_many(get_filtered_, {"$set": set_target_})
                         else:
                             if aut_target_upsert_ and not target_exists_:
-                                self.db_[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=True)
+                                Mongo().db[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=True)
 
             res_ = {"result": True}
 
@@ -262,14 +261,14 @@ class Schedular():
             if len(vie_tags_) == 0:
                 raise APIError("no subscribers found")
 
-            user_ = self.db_["_user"].find_one({"usr_id": user_id_})
+            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError(f"user not found {user_id_}")
 
             personalizations_to_ = []
             to_ = []
 
-            users_ = self.db_["_user"].find({"_tags": {"$elemMatch": {"$in": vie_tags_}}})
+            users_ = Mongo().db["_user"].find({"_tags": {"$elemMatch": {"$in": vie_tags_}}})
             if users_:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
@@ -373,7 +372,7 @@ class Schedular():
     def schedule_automations_f(self, backgroundscheduler_):
         try:
             print("*** schedule automations started", datetime.now(), flush=True)
-            find_ = self.db_["_automation"].find({"aut_enabled": True})
+            find_ = Mongo().db["_automation"].find({"aut_enabled": True})
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
                 if backgroundscheduler_.get_job(aut_id_):
@@ -394,7 +393,7 @@ class Schedular():
     def schedule_views_f(self, sched_):
         try:
             print("*** schedule views restarted", datetime.now(), flush=True)
-            view_find_ = self.db_["_view"].find({})
+            view_find_ = Mongo().db["_view"].find({})
             for doc_ in view_find_:
                 vie_id_ = doc_["vie_id"]
                 if sched_.get_job(vie_id_):
@@ -465,7 +464,6 @@ class Schedular():
 
 class Misc():
     def __init__(self):
-        self.db = Mongo().db_f()
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
@@ -563,7 +561,7 @@ class Misc():
 
     def token_validate_f(self, token_, operation_):
         try:
-            find_ = self.db["_token"].find_one({
+            find_ = Mongo().db["_token"].find_one({
                 "_id": ObjectId(base64.b64decode(token_).decode())
             })
             if not find_:
@@ -584,7 +582,7 @@ class Misc():
     def permitted_user_f(self, user_):
         # check user on _user collection
         user_id_ = user_["usr_id"]
-        auth_ = self.db["_auth"].find_one({"aut_id": user_id_})
+        auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
         if not auth_:
             return False
         if "aut_root" in auth_ and auth_["aut_root"] == True:
@@ -641,45 +639,10 @@ class Mongo():
         tlsCAFile_ = f"&tlsCAFile={self.mongo_tlsCAFile_}" if self.mongo_tlsCAFile_ else ""
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
 
-        self.connstr_ = f"mongodb://{self.mongo_username_}:{self.mongo_password_}@{self.mongo0_host_}:{self.mongo_port_},{self.mongo1_host_}:{self.mongo_port_},{self.mongo2_host_}:{self.mongo_port_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
-
-        self.client = MongoClient(self.connstr_)
-
-    def db_f(self):
-        try:
-            mongo_client_ = self.client
-            db_ = mongo_client_[self.mongo_db_]
-
-        except APIError as exc:
-            Misc().api_error_f(exc)
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().mongo_error_f(exc)
-
-        except Exception as exc:
-            Misc().exception_f(exc)
-
-        finally:
-            return db_
-
-    def connstr_f(self):
-        return self.connstr_
-
-    def client_f(self):
-        try:
-            mongo_client_ = self.client
-
-        except APIError as exc:
-            Misc().api_error_f(exc)
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().mongo_error_f(exc)
-
-        except Exception as exc:
-            Misc().exception_f(exc)
-
-        finally:
-            return mongo_client_
+        # mongo staff
+        self.connstr = f"mongodb://{self.mongo_username_}:{self.mongo_password_}@{self.mongo0_host_}:{self.mongo_port_},{self.mongo1_host_}:{self.mongo_port_},{self.mongo2_host_}:{self.mongo_port_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
+        self.client = MongoClient(self.connstr)
+        self.db = self.client[self.mongo_db_]
 
     def dump_f(self):
         try:
@@ -705,9 +668,6 @@ class Mongo():
 
 class Crud():
     def __init__(self):
-        self.db = Mongo().db_f()
-        self.client_ = Mongo().client_f()
-        self.connstr_ = Mongo().connstr_f()
         self.dbname_ = os.environ.get("MONGO_DB")
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
@@ -740,7 +700,7 @@ class Crud():
     def get_properties_f(self, collection):
         try:
             # gets the required collection
-            cursor_ = self.db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"_collections/{collection}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"_collections/{collection}")
 
             if not cursor_:
                 raise APIError("collection not found for properties")
@@ -772,9 +732,8 @@ class Crud():
     def template_f(self, input_):
         try:
             # start transaction
-            session_client_ = self.client_
-            session_db_ = session_client_[self.dbname_]
-            session_ = session_client_.start_session(causal_consistency=True, default_transaction_options=None)
+            session_db_ = Mongo().client[self.dbname_]
+            session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
             session_.start_transaction()
 
             proc_ = input_["proc"] if "proc" in input_ else None
@@ -817,10 +776,10 @@ class Crud():
                 views_ = template_["views"]
                 collection__ = f"{col_id_}_data"
 
-                find_one_ = self.db["_collection"].find_one({"col_id": col_id_})
+                find_one_ = Mongo().db["_collection"].find_one({"col_id": col_id_})
                 if find_one_:
                     raise APIError("collection is already exists")
-                if col_id_ in self.db.list_collection_names():
+                if col_id_ in Mongo().db.list_collection_names():
                     raise APIError("collection data is already exists")
 
                 doc_ = {
@@ -950,13 +909,12 @@ class Crud():
             res_ = Misc().exception_f(exc)
 
         finally:
-            session_client_.close()
             return res_
 
     def inner_collection_f(self, c):
         try:
             is_crud_ = True if c[:1] != "_" else False
-            collection_ = self.db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"_collections/{c}")
+            collection_ = Mongo().db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"_collections/{c}")
             if not collection_:
                 raise APIError(f"collection not found to root: {c}")
             res_ = {"result": True, "collection": collection_}
@@ -1067,7 +1025,7 @@ class Crud():
             tfac_ = obj["tfac"] if "tfac" in obj and obj["tfac"] else None
 
             # get user auth
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
@@ -1081,7 +1039,7 @@ class Crud():
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             # created a cursor for retrieve the collection structure will be added into the respone
-            cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_}")
             if not cursor_:
                 raise APIError(f"collection not found to purge: {collection_}")
 
@@ -1096,11 +1054,11 @@ class Crud():
             # backup records to be multi deleted
             ts_ = Misc().get_timestamp_f()
             bin_ = f"{collection_id_}_bin_{ts_}"
-            binned_ = self.db[collection_].find(get_filtered_)
-            self.db[bin_].insert_many(binned_)
+            binned_ = Mongo().db[collection_].find(get_filtered_)
+            Mongo().db[bin_].insert_many(binned_)
 
             # do delete
-            self.db[collection_].delete_many(get_filtered_)
+            Mongo().db[collection_].delete_many(get_filtered_)
 
             log_ = self.log_f({
                 "type": "Info",
@@ -1142,13 +1100,13 @@ class Crud():
             match_ = obj["match"] if "match" in obj and obj["match"] != [] else []
             TZ_ = os.environ.get("TZ")
 
-            userindb_ = self.db["_user"].find_one({"usr_id": email_})
+            userindb_ = Mongo().db["_user"].find_one({"usr_id": email_})
             if not userindb_:
                 raise APIError(f"no owner user found")
 
             _tags = userindb_["_tags"] if userindb_ and "_tags" in userindb_ else []
 
-            aggregate_ = self.db["_view"].aggregate([
+            aggregate_ = Mongo().db["_view"].aggregate([
                 {"$match": {"vie_collection_id": collection_}},
                 {"$group": {"_id": None, "count": {"$sum": 1}}},
                 {"$project": {"_id": 0}}])
@@ -1183,7 +1141,7 @@ class Crud():
             doc_["_created_by"] = doc_["_modified_by"] = email_
             doc_["_modified_count"] = 0
 
-            self.db["_view"].insert_one(doc_)
+            Mongo().db["_view"].insert_one(doc_)
 
             log_ = self.log_f({
                 "type": "Info",
@@ -1282,9 +1240,8 @@ class Crud():
             API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 
             # start transaction
-            session_client_ = Mongo().client
-            session_db_ = session_client_[self.dbname_]
-            session_ = session_client_.start_session(causal_consistency=True, default_transaction_options=None)
+            session_db_ = Mongo().client[self.dbname_]
+            session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
             session_.start_transaction()
 
             mimetype_ = file_.content_type
@@ -1324,7 +1281,7 @@ class Crud():
             collection__ = f"{collection_}_data"
             collection_tmp_ = f"{collection_}_tmp"
 
-            find_one_ = self.db["_collection"].find_one({"col_id": collection_})
+            find_one_ = Mongo().db["_collection"].find_one({"col_id": collection_})
 
             if find_one_:
                 get_properties_ = self.get_properties_f(collection_)
@@ -1402,14 +1359,14 @@ class Crud():
                     "_modified_by": email_,
                     "_modified_count": 0
                 }
-                self.db["_collection"].insert_one(doc_)
-                self.db[collection__].insert_one({})
+                Mongo().db["_collection"].insert_one(doc_)
+                Mongo().db[collection__].insert_one({})
                 schemevalidate_ = self.crudscheme_validate_f({
                     "collection": collection__,
                     "structure": structure_})
                 if not schemevalidate_["result"]:
                     raise APIError(schemevalidate_["msg"])
-                self.db[collection__].delete_one({})
+                Mongo().db[collection__].delete_one({})
                 reverse_structure_f_ = self.reverse_structure_f({
                     "collection": collection_,
                     "structure": structure_,
@@ -1418,7 +1375,7 @@ class Crud():
                 if not reverse_structure_f_["result"]:
                     raise APIError(reverse_structure_f_["msg"])
                 per_id_ = f"per-{collection_}-1"
-                self.db["_permission"].update_one({
+                Mongo().db["_permission"].update_one({
                     "per_id": per_id_,
                 }, {"$set": {
                     "per_id": per_id_,
@@ -1454,11 +1411,11 @@ class Crud():
             payload_ = df_.to_dict("records")
 
             # delete temporary collection
-            self.db[collection_tmp_].delete_many({})
+            Mongo().db[collection_tmp_].delete_many({})
 
             # insert many uploaded records into the new collection
             count_ = count_tmp_ = 0
-            insert_many_tmp_ = self.db[collection_tmp_].insert_many(payload_, ordered=False)
+            insert_many_tmp_ = Mongo().db[collection_tmp_].insert_many(payload_, ordered=False)
             count_tmp_ = len(insert_many_tmp_.inserted_ids)
             insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
             count_ = len(insert_many_.inserted_ids)
@@ -1499,7 +1456,6 @@ class Crud():
             res_ = Misc().exception_f(exc)
 
         finally:
-            session_client_.close()
             return res_
 
     def view_f(self, input_):
@@ -1509,7 +1465,7 @@ class Crud():
             if not email_:
                 raise APIError("email not found in the object")
 
-            user_ = self.db["_user"].find_one({"usr_id": email_})
+            user_ = Mongo().db["_user"].find_one({"usr_id": email_})
             if not user_ or user_ is None:
                 raise APIError("user not found for view")
 
@@ -1534,10 +1490,10 @@ class Crud():
                 raise APIError("invalid source")
 
             if _id not in [None, ""]:
-                view_ = self.db["_view"].find_one({"_id": ObjectId(_id)})
+                view_ = Mongo().db["_view"].find_one({"_id": ObjectId(_id)})
             else:
                 if vie_id_ is not None:
-                    view_ = self.db["_view"].find_one({"vie_id": vie_id_})
+                    view_ = Mongo().db["_view"].find_one({"vie_id": vie_id_})
                 else:
                     raise APIError(f"view is not recognized")
 
@@ -1570,7 +1526,7 @@ class Crud():
 
             is_crud_ = True if vie_collection_id_[:1] != "_" else False
 
-            vie_collection_ = self.db["_collection"].find_one({"col_id": vie_collection_id_})
+            vie_collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_})
 
             # Get the collection structure of the query
             if is_crud_ and not "col_structure" in vie_collection_:
@@ -1639,7 +1595,7 @@ class Crud():
             for parent_ in parents_:
                 if "lookup" in parent_ and "collection" in parent_:
                     parent_collection_ = parent_["collection"]
-                    find_one_ = self.db["_collection"].find_one({"col_id": parent_collection_})
+                    find_one_ = Mongo().db["_collection"].find_one({"col_id": parent_collection_})
                     if find_one_ and "col_structure" in find_one_ and "properties" in find_one_["col_structure"]:
                         for property_ in find_one_["col_structure"]["properties"]:
                             properties_master_[property_] = find_one_["col_structure"]["properties"][property_]
@@ -1706,7 +1662,7 @@ class Crud():
 
             # Run aggregation
             data_ = f"{vie_collection_id_}_data" if is_crud_ else vie_collection_id_
-            aggregate_ = list(self.db[data_].aggregate(pipe_))
+            aggregate_ = list(Mongo().db[data_].aggregate(pipe_))
 
             records_ = []
             if source_ != "propsonly":
@@ -1816,7 +1772,7 @@ class Crud():
                 "_modified_by": email_
             }
 
-            self.db["_backup"].insert_one(doc_)
+            Mongo().db["_backup"].insert_one(doc_)
             res_ = {"result": True}
 
         except APIError as exc:
@@ -1844,7 +1800,7 @@ class Crud():
                 projection_[field_] = 1
 
             # remark will be added here
-            cursor_ = self.db[data_collection_].find(filter={}, projection=projection_).limit(1000)
+            cursor_ = Mongo().db[data_collection_].find(filter={}, projection=projection_).limit(1000)
             docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
 
             # remark will be added here
@@ -1992,7 +1948,7 @@ class Crud():
             user_ = obj["user"]
 
             # checks enabled visuals
-            doc_ = self.db["_view"].find_one({"_id": ObjectId(id_)})
+            doc_ = Mongo().db["_view"].find_one({"_id": ObjectId(id_)})
             if not doc_:
                 raise APIError("no view found")
 
@@ -2164,7 +2120,7 @@ class Crud():
             id_ = obj["id"]
             user_ = obj["user"]
 
-            doc_ = self.db["_view"].find_one({
+            doc_ = Mongo().db["_view"].find_one({
                 "_id": ObjectId(id_),
                 "_tags": {"$elemMatch": {"$in": user_["_tags"]}}
             })
@@ -2179,7 +2135,7 @@ class Crud():
             is_crud_ = True if vie_collection_id_[:1] != "_" else False
 
             # starting pivot
-            collection_find_one_ = self.db["_collection"].find_one({"col_id": vie_collection_id_})
+            collection_find_one_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_})
             if is_crud_ and not collection_find_one_:
                 raise APIError(f"collection not found to view: {col_id_}")
 
@@ -2225,17 +2181,6 @@ class Crud():
             # checks properties to remove or non numeric to NaN
 
             view_properties_ = generate_view_data_f_["properties"] if generate_view_data_f_ and "properties" in generate_view_data_f_ else {}
-
-            # for prop_ in properties_:
-            #     property_ = properties_[prop_]
-            #     if "bsonType" in property_:
-            #         if property_["bsonType"] == "array":
-            #             df_[prop_] = df_[prop_].apply(",".join)
-            #         if property_["bsonType"] == "number":
-            #             if prop_ in df_:
-            #                 df_[prop_] = pd.to_numeric(df_[prop_], errors="coerce")
-            #         if property_["bsonType"] in ["object", "array"]:
-            #             dropped_.append(prop_)
 
             for prop_ in view_properties_:
                 property_ = view_properties_[prop_]
@@ -2302,8 +2247,6 @@ class Crud():
                         aggfunc_[nc_] = np.min
                     else:
                         aggfunc_[nc_] = "count"
-
-            # df_["prd_options"] = df_["prd_options"].apply(",".join)
 
             if dropped_ and len(dropped_) > 0:
                 df_ = df_.drop([x for x in dropped_ if x in df_.columns], axis=1)
@@ -2393,7 +2336,7 @@ class Crud():
                 raise APIError("structure of the visual is missing")
 
             # get the visuals which their view's subscribers list includes the requester user or group
-            visuals_ = self.db["_visual"].aggregate([
+            visuals_ = Mongo().db["_visual"].aggregate([
                 {"$lookup": {
                     "from": "_view",
                     "let": {"vid": "$vis_view_id"},
@@ -2441,14 +2384,14 @@ class Crud():
             if not vie_structure_:
                 raise APIError("view structure not found")
 
-            views_ = self.db["_view"].find(filter={
+            views_ = Mongo().db["_view"].find(filter={
                 "_tags": {"$elemMatch": {"$in": user_["_tags"]}}
             }, sort=[("vie_priority", 1)])
 
             for view_ in views_:
                 vie_collection_id_ = view_["vie_collection_id"]
                 is_crud_ = True if vie_collection_id_[:1] != "_" else False
-                collection_ = self.db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{vie_collection_id_}")
+                collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{vie_collection_id_}")
                 if not collection_:
                     continue
                 records_.append(view_)
@@ -2478,7 +2421,7 @@ class Crud():
             structure_ = self.root_schemes_f("_collections/_collection")
 
             if Misc().permitted_user_f(user_):
-                data_ = list(self.db["_collection"].find(filter={}, sort=[("col_priority", 1)]))
+                data_ = list(Mongo().db["_collection"].find(filter={}, sort=[("col_priority", 1)]))
             else:
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
                 for usr_tag_ in usr_tags_:
@@ -2486,9 +2429,9 @@ class Crud():
                         "per_tag_id": usr_tag_,
                         "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
                     }
-                    permissions_ = self.db["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
+                    permissions_ = Mongo().db["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
                     for permission_ in permissions_:
-                        collection_ = self.db["_collection"].find_one({"col_id": permission_["per_collection_id"]})
+                        collection_ = Mongo().db["_collection"].find_one({"col_id": permission_["per_collection_id"]})
                         data_.append(collection_)
 
             res_ = {
@@ -2521,7 +2464,7 @@ class Crud():
             else:
                 permitted_ = False
                 for usr_tag_ in usr_tags_:
-                    permissions_ = self.db["_permission"].find_one({
+                    permissions_ = Mongo().db["_permission"].find_one({
                         "per_collection_id": col_id_,
                         "per_tag_id": usr_tag_,
                         "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
@@ -2531,7 +2474,7 @@ class Crud():
                         break
 
             if permitted_:
-                data_ = self.db["_collection"].find_one({"col_id": col_id_})
+                data_ = Mongo().db["_collection"].find_one({"col_id": col_id_})
             else:
                 raise APIError(f"no permission for {col_id_}")
 
@@ -2573,7 +2516,7 @@ class Crud():
             collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
 
             # created a cursor for retrieve the collection structure will be added into the respone
-            cursor_ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
 
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
@@ -2583,7 +2526,7 @@ class Crud():
 
             # combines view filter and user filter in view mode
             if view_ is not None and collection_id_ == view_["vie_collection_id"]:
-                cursor_ = self.db["_view"].find_one({
+                cursor_ = Mongo().db["_view"].find_one({
                     "vie_id": view_["vie_id"],
                     "_tags": {"$elemMatch": {"$in": userindb_["_tags"]}}
                 })
@@ -2607,10 +2550,10 @@ class Crud():
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
             # create cursor for the query
-            cursor_ = self.db[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
+            cursor_ = Mongo().db[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
 
             docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
-            count_ = self.db[collection_].count_documents(get_filtered_)
+            count_ = Mongo().db[collection_].count_documents(get_filtered_)
 
             # sets the response object
             res_ = {
@@ -2655,7 +2598,7 @@ class Crud():
                 "_modified_by": obj["user"]
             }
 
-            self.db["_log"].insert_one(doc)
+            Mongo().db["_log"].insert_one(doc)
             res_ = {"result": True}
 
         except APIError as exc:
@@ -2682,7 +2625,7 @@ class Crud():
             structure_ = obj["structure"]
             collection_ = obj["collection"]
 
-            if collection_ in self.db.list_collection_names() and "properties" in structure_:
+            if collection_ in Mongo().db.list_collection_names() and "properties" in structure_:
                 properties_ = structure_["properties"]
                 properties_ = Misc().properties_cleaner_f(properties_)
 
@@ -2694,12 +2637,12 @@ class Crud():
                 validator_["$jsonSchema"].update({"properties": properties_}) if properties_ else None
                 validator_["$jsonSchema"].update({"required": required_}) if required_ else None
 
-                self.db.command({
+                Mongo().db.command({
                     "collMod": collection_,
                     "validator": validator_
                 })
 
-                self.db[collection_].drop_indexes()
+                Mongo().db[collection_].drop_indexes()
                 if "index" in structure_ and len(structure_["index"]) > 0:
                     for indexes in structure_["index"]:
                         ixs = []
@@ -2708,7 +2651,7 @@ class Crud():
                             ixs.append((ix, pymongo.ASCENDING))
                             ix_name_ += f"_{ix}"
                         ix_name_ = f"ix_{collection_}{ix_name_}"
-                        self.db[collection_].create_index(ixs, unique=False, name=ix_name_)
+                        Mongo().db[collection_].create_index(ixs, unique=False, name=ix_name_)
 
                 if "unique" in structure_ and len(structure_["unique"]) > 0:
                     for uniques in structure_["unique"]:
@@ -2718,7 +2661,7 @@ class Crud():
                             uqs.append((uq, pymongo.ASCENDING))
                             uq_name_ += f"_{uq}"
                         uq_name_ = f"uq_{collection_}{uq_name_}"
-                        self.db[collection_].create_index(uqs, unique=True, name=uq_name_)
+                        Mongo().db[collection_].create_index(uqs, unique=True, name=uq_name_)
 
             res_ = {"result": True}
 
@@ -2767,7 +2710,7 @@ class Crud():
                 raise APIError("not authorized")
 
             # read collection existing structure
-            doc_ = self.db["_collection"].find_one({"col_id": cid_})
+            doc_ = Mongo().db["_collection"].find_one({"col_id": cid_})
             if not doc_:
                 raise APIError("collection not found")
 
@@ -2781,7 +2724,7 @@ class Crud():
                 "sort": {}
             }
 
-            cursor_ = self.db["_field"].find(filter={
+            cursor_ = Mongo().db["_field"].find(filter={
                 "fie_collection_id": cid_
             }, sort=[("fie_priority", 1)])
 
@@ -2884,7 +2827,7 @@ class Crud():
                 sort_["_modified_at"] = -1
 
             # set actions
-            cursor_ = self.db["_action"].find(filter={
+            cursor_ = Mongo().db["_action"].find(filter={
                 "act_collection_id": cid_,
                 "act_enabled": True
             }, sort=[("act_title", 1)])
@@ -2908,7 +2851,7 @@ class Crud():
             structure_["actions"] = actions_
 
             # updates collection structure
-            self.db["_collection"].update_one({"col_id": cid_}, {"$set": {
+            Mongo().db["_collection"].update_one({"col_id": cid_}, {"$set": {
                 "col_structure": structure_,
                 "_modified_at": datetime.now(),
                 "_modified_by": user_["email"] if user_ and "email" in user_ else None
@@ -2958,7 +2901,7 @@ class Crud():
             if not is_crud_:
                 raise APIError("collection is not allowed to update")
 
-            doc_ = self.db["_collection"].find_one({"col_id": cid_})
+            doc_ = Mongo().db["_collection"].find_one({"col_id": cid_})
             if not doc_:
                 raise APIError("no collection found")
 
@@ -3021,7 +2964,7 @@ class Crud():
             doc_["_modified_at"] = datetime.now()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
-            self.db["_collection"].update_one({"col_id": cid_}, {"$set": doc_}, upsert=False)
+            Mongo().db["_collection"].update_one({"col_id": cid_}, {"$set": doc_}, upsert=False)
 
             log_ = self.log_f({
                 "type": "Info",
@@ -3035,9 +2978,9 @@ class Crud():
 
             datac_ = f"{cid_}_data"
             datac_not_found_ = False
-            if datac_ not in self.db.list_collection_names():
+            if datac_ not in Mongo().db.list_collection_names():
                 datac_not_found_ = True
-                self.db[datac_].insert_one({})
+                Mongo().db[datac_].insert_one({})
             schemevalidate_ = self.crudscheme_validate_f({
                 "collection": datac_,
                 "structure": doc_["col_structure"]
@@ -3045,7 +2988,7 @@ class Crud():
             if not schemevalidate_["result"]:
                 raise APIError(schemevalidate_["msg"])
             if datac_not_found_:
-                self.db[datac_].delete_one({})
+                Mongo().db[datac_].delete_one({})
 
             res_ = {"result": True}
 
@@ -3085,7 +3028,7 @@ class Crud():
                 doc_["_reconfig_set_at"] = datetime.now()
                 doc_["_reconfig_set_by"] = email_
 
-            self.db["_collection"].update_one({
+            Mongo().db["_collection"].update_one({
                 "col_id": collection_id_
             }, {"$set": doc_, "$inc": {"_modified_count": 1}})
             res_ = {"result": True}
@@ -3112,7 +3055,7 @@ class Crud():
     def reverse_structure_f(self, obj):
         try:
             collection_ = obj["collection"]
-            doc_ = self.db["_collection"].find_one({"col_id": collection_})
+            doc_ = Mongo().db["_collection"].find_one({"col_id": collection_})
             if not doc_:
                 raise APIError("no collection found")
             user_ = obj["user"] if "user" in obj else None
@@ -3186,7 +3129,7 @@ class Crud():
                         "_modified_at": datetime.now(),
                         "_modified_by": user_["email"] if user_ and "email" in user_ else None
                     }
-                    self.db["_field"].update_one({
+                    Mongo().db["_field"].update_one({
                         "fie_collection_id": collection_,
                         "fie_id": prop_
                     }, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
@@ -3212,7 +3155,7 @@ class Crud():
                             "_modified_at": datetime.now(),
                             "_modified_by": user_["email"] if user_ and "email" in user_ else None
                         }
-                        self.db["_action"].update_one({
+                        Mongo().db["_action"].update_one({
                             "act_collection_id": act_collection_id_,
                             "act_id": act_id_
                         }, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
@@ -3280,14 +3223,14 @@ class Crud():
 
             # add field prefix from the related collection
             if collection_id_ == "_field":
-                field_col_ = self.db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
+                field_col_ = Mongo().db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
                 if not field_col_:
                     raise APIError(f"collection not found to upsert: {doc_['fie_collection_id']}")
                 if doc_["fie_id"][:3] != field_col_["col_prefix"]:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            self.db[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
+            Mongo().db[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
 
             log_ = self.log_f({
                 "type": "Info",
@@ -3312,9 +3255,9 @@ class Crud():
                     if not reverse_structure_f_["result"]:
                         raise APIError(reverse_structure_f_["msg"])
                     datac_not_found_ = False
-                    if datac_ not in self.db.list_collection_names():
+                    if datac_ not in Mongo().db.list_collection_names():
                         datac_not_found_ = True
-                        self.db[datac_].insert_one({})
+                        Mongo().db[datac_].insert_one({})
                     schemevalidate_ = self.crudscheme_validate_f({
                         "collection": datac_,
                         "structure": col_structure_
@@ -3322,7 +3265,7 @@ class Crud():
                     if not schemevalidate_["result"]:
                         raise APIError(schemevalidate_["msg"])
                     if datac_not_found_:
-                        self.db[datac_].delete_one({})
+                        Mongo().db[datac_].delete_one({})
             elif collection_id_ in ["_field", "_action"]:
                 cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
                 if cid_:
@@ -3373,7 +3316,7 @@ class Crud():
             doc_["_removed_at"] = datetime.now()
             doc_["_removed_by"] = user_["email"] if user_ and "email" in user_ else None
 
-            self.db[collection_].delete_one(match_)
+            Mongo().db[collection_].delete_one(match_)
 
             log_ = self.log_f({
                 "type": "Info",
@@ -3387,9 +3330,9 @@ class Crud():
 
             if collection_ == "_collection":
                 c_ = doc_["col_id"]
-                self.db[f"{c_}_data"].aggregate([{"$match": {}}, {"$out": f"{c_}_data_removed"}])
-                self.db[f"{c_}_data"].drop()
-                self.db["_field"].delete_many({"fie_collection_id": c_})
+                Mongo().db[f"{c_}_data"].aggregate([{"$match": {}}, {"$out": f"{c_}_data_removed"}])
+                Mongo().db[f"{c_}_data"].drop()
+                Mongo().db["_field"].delete_many({"fie_collection_id": c_})
 
             res_ = {"result": True}
 
@@ -3442,7 +3385,7 @@ class Crud():
 
             # retrieves the collection structure
             # root collection's structures can be found at github
-            structure__ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
+            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:
@@ -3459,7 +3402,7 @@ class Crud():
                     raise APIError("unique in structure not found")
 
             # creates a cursor from the object ids proceed to be cloned or deleted
-            cursor = self.db[collection_].find({"_id": {"$in": ids_}})
+            cursor = Mongo().db[collection_].find({"_id": {"$in": ids_}})
             for index, doc in enumerate(cursor, start=1):
                 if op_ == "clone":
                     doc["_created_at"] = doc["_modified_at"] = datetime.now()
@@ -3475,14 +3418,14 @@ class Crud():
                                     # concat a suffix index no to field
                                     # doc[uq[0]] = f"{doc[uq[0]]}{index}"
                                     doc[uq[0]] = f"{doc[uq[0]]}_x" if "_" in doc[uq[0]] else f"{doc[uq[0]]}-{index}"
-                    self.db[collection_].insert_one(doc)
+                    Mongo().db[collection_].insert_one(doc)
 
                 elif op_ == "delete":
-                    self.db[collection_].delete_one({"_id": doc["_id"]})
+                    Mongo().db[collection_].delete_one({"_id": doc["_id"]})
                     doc["_deleted_at"] = datetime.now()
                     doc["_deleted_by"] = user_["email"] if user_ and "email" in user_ else None
                     bin = f"{collection_id_}_bin"
-                    self.db[bin].insert_one(doc)
+                    Mongo().db[bin].insert_one(doc)
 
                 log_ = self.log_f({
                     "type": "Info",
@@ -3536,7 +3479,7 @@ class Crud():
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            structure__ = self.db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
+            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:
@@ -3551,7 +3494,7 @@ class Crud():
                     match_ = []
 
             if view_ is not None:
-                cursor_ = self.db["_view"].find_one({
+                cursor_ = Mongo().db["_view"].find_one({
                     "vie_id": view_["vie_id"],
                     "_tags": {"$elemMatch": {"$in": userindb_["_tags"]}}
                 })
@@ -3563,13 +3506,13 @@ class Crud():
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
             if ids_ and len(ids_) > 0:
-                self.db[collection_].update_many({"_id": {"$in": ids_}}, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
+                Mongo().db[collection_].update_many({"_id": {"$in": ids_}}, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
             else:
                 get_filtered_ = self.get_filtered_f({
                     "match": match_,
                     "properties": structure_["properties"] if "properties" in structure_ else None
                 })
-                self.db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
+                Mongo().db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
 
             log_ = self.log_f({
                 "type": "Info",
@@ -3623,25 +3566,25 @@ class Crud():
 
             # add field prefix from the related collection
             if collection_id_ == "_field":
-                field_col_ = self.db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
+                field_col_ = Mongo().db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
                 if not field_col_:
                     raise APIError(f"collection not found to insert: {doc_['fie_collection_id']}")
                 if doc_["fie_id"][:3] != field_col_["col_prefix"]:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
-            self.db[collection_].insert_one(doc_)
+            Mongo().db[collection_].insert_one(doc_)
 
             if collection_id_ == "_collection":
                 col_id_ = doc_["col_id"] if "col_id" in doc_ else None
                 col_structure_ = doc_["col_structure"] if "col_structure" in doc_ else None
                 datac_ = f"{col_id_}_data"
-                if col_structure_ and col_structure_ != {} and datac_ not in self.db.list_collection_names():
-                    self.db[datac_].insert_one({})
+                if col_structure_ and col_structure_ != {} and datac_ not in Mongo().db.list_collection_names():
+                    Mongo().db[datac_].insert_one({})
                     schemevalidate_ = self.crudscheme_validate_f({
                         "collection": datac_,
                         "structure": col_structure_})
                     if not schemevalidate_["result"]:
                         raise APIError(schemevalidate_["msg"])
-                    self.db[datac_].delete_one({})
+                    Mongo().db[datac_].delete_one({})
             elif collection_id_ in ["_field", "_action"]:
                 cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
                 if cid_:
@@ -3801,7 +3744,7 @@ class Email():
 
 class RestAPI():
     def __init__(self):
-        self.db = Mongo().db_f()
+        self.TZ = os.environ.get("TZ")
 
     def validate_pwa_f(self):
         try:
@@ -3841,12 +3784,12 @@ class RestAPI():
 
 class OTP():
     def __init__(self):
-        self.db = Mongo().db_f()
+        self.TZ = os.environ.get("TZ")
 
     def reset_otp_f(self, email_):
         try:
             # read auth
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError("account not found")
 
@@ -3854,7 +3797,7 @@ class OTP():
 
             qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
 
-            self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+            Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_otp_secret": aut_otp_secret_,
                 "aut_otp_validated": False,
                 "_modified_at": datetime.now(),
@@ -3895,7 +3838,7 @@ class OTP():
     def validate_otp_f(self, email_, request_):
         try:
             # read auth
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError("account not found")
 
@@ -3916,7 +3859,7 @@ class OTP():
 
             if totp_.verify(otp_):
                 validated_ = True
-                self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+                Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                     "aut_otp_validated": validated_,
                     "_otp_validated_at": datetime.now(),
                     "_otp_validated_by": email_,
@@ -3924,7 +3867,7 @@ class OTP():
                 }, "$inc": {"_modified_count": 1}})
             else:
                 if not aut_otp_validated_:
-                    self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+                    Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                         "aut_otp_validated": validated_,
                         "_otp_not_validated_at": datetime.now(),
                         "_otp_not_validated_by": email_,
@@ -3966,7 +3909,7 @@ class OTP():
     def show_otp_f(self, email_):
         try:
             # read auth
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError("account not found")
 
@@ -3999,7 +3942,7 @@ class OTP():
     def request_otp_f(self, email_):
         try:
             # checks if the user was created already
-            user_ = self.db["_user"].find_one({"usr_id": email_})
+            user_ = Mongo().db["_user"].find_one({"usr_id": email_})
             if not user_ or user_ is None:
                 raise APIError("user not found for otp")
 
@@ -4012,7 +3955,7 @@ class OTP():
 
             # generates a random number
             tfac_ = randint(100001, 999999)
-            self.db["_auth"].update_one({"aut_id": usr_id_}, {"$set": {
+            Mongo().db["_auth"].update_one({"aut_id": usr_id_}, {"$set": {
                 "aut_tfac": tfac_,
                 "_tfac_modified_at": datetime.now(),
             }, "$inc": {"_modified_count": 1}})
@@ -4043,7 +3986,7 @@ class OTP():
 
 class Auth():
     def __init__(self):
-        self.db = Mongo().db_f()
+        self.TZ = os.environ.get("TZ")
 
     def saas_f(self):
         try:
@@ -4066,7 +4009,7 @@ class Auth():
     def verify_otp_f(self, email_, tfac_, op_):
         try:
 
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
@@ -4089,7 +4032,7 @@ class Auth():
                 else:
                     raise APIError("OTP codes do not match")
 
-            self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+            Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_tfac": None,
                 "aut_tfac_ex": aut_tfac_,
                 "_modified_at": datetime.now()
@@ -4184,7 +4127,7 @@ class Auth():
             email_ = input_["email"]
 
             # sets None to auth token and TFAC code
-            self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+            Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_token": None,
                 "aut_tfac": None,
                 "_modified_at": datetime.now()
@@ -4225,12 +4168,12 @@ class Auth():
                 return
 
             # check user on _user collection
-            auth_ = self.db["_auth"].find_one({"aut_id": user_id_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
                 raise APIError(f"invalid user id {user_id_}")
 
             # check user on _auth collection
-            user_ = self.db["_user"].find_one({"usr_id": user_id_})
+            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError(f"user not found {user_id_}")
 
@@ -4254,14 +4197,14 @@ class Auth():
             else:
                 raise APIError("no collection found for {op_}")
 
-            collection_ = self.db["_collection"].find_one({"col_id": collection_id_})
+            collection_ = Mongo().db["_collection"].find_one({"col_id": collection_id_})
             if not collection_:
                 raise APIError(f"permitted collection not found {collection_id_} for {op_}")
 
             permission_ = False  # default
 
             for ix_, usr_tag_ in enumerate(usr_tags_):
-                permission_check_ = self.db["_permission"].find_one({
+                permission_check_ = Mongo().db["_permission"].find_one({
                     "per_tag_id": usr_tag_,
                     "per_collection_id": collection_id_
                 })
@@ -4299,7 +4242,7 @@ class Auth():
     def firewall_f(self, user_id):
         try:
             ip_ = Misc().get_user_ip_f()
-            allowed_ = self.db["_firewall"].find_one({"$or": [
+            allowed_ = Mongo().db["_firewall"].find_one({"$or": [
                 {"fwa_user_id": user_id, "fwa_ip": ip_, "fwa_enabled": True},
                 {"fwa_user_id": user_id, "fwa_ip": "0.0.0.0", "fwa_enabled": True}
             ]})
@@ -4331,7 +4274,7 @@ class Auth():
                 raise APIError("invalid session parameters")
 
             # check user's auth information on the _auth collection
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
@@ -4356,7 +4299,7 @@ class Auth():
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+            Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_token": None,
                 "aut_tfac": None,
                 "_modified_at": datetime.now(),
@@ -4378,7 +4321,7 @@ class Auth():
 
             email_ = user_["email"]
 
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError("account not found")
 
@@ -4389,7 +4332,7 @@ class Auth():
 
                 apikey_ = secrets.token_hex(16)
 
-                self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+                Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                     "aut_apikey": apikey_,
                     "_apikey_modified_at": datetime.now(),
                     "_apikey_modified_by": email_
@@ -4444,7 +4387,7 @@ class Auth():
             email_ = bleach.clean(input_["email"])
 
             # checks if the user account was created already
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError("account not found")
 
@@ -4475,7 +4418,7 @@ class Auth():
             password_ = input_["password"]
             tfac_ = input_["tfac"]
 
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError("account not found")
 
@@ -4490,7 +4433,7 @@ class Auth():
                 raise APIError(encrypt_["msg"])
             salted_ = encrypt_["salted"]
 
-            self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+            Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_password": salted_,
                 "aut_token": None,
                 "aut_tfac": None,
@@ -4572,7 +4515,7 @@ class Auth():
 
             # updates user token
             token_ = self.token_f()
-            self.db["_auth"].update_one({"aut_id": email_}, {"$set": {
+            Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_token": token_,
                 "aut_tfac": None,
                 "_modified_at": datetime.now()
@@ -4628,16 +4571,13 @@ class Auth():
             if not re.search(pat, user_id_):
                 raise APIError("invalid e-mail address")
 
-            if self.db == None:
-                raise APIError("db connection error")
-
             # checks if user exists in the auth
-            auth_ = self.db["_auth"].find_one({"aut_id": user_id_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
                 raise APIError("account not found")
 
             # checks if user exists in the users
-            user_ = self.db["_user"].find_one({"usr_id": user_id_})
+            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError("user not found for validate")
 
@@ -4701,14 +4641,14 @@ class Auth():
                 raise APIError("api key must be provided")
 
             # checks if user exists in the auth
-            auth_ = self.db["_auth"].find_one({"aut_apikey": apikey_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_apikey": apikey_})
             if not auth_:
                 raise APIError("account or apikey not found")
 
             user_id_ = auth_["aut_id"]
 
             # checks if user exists in the users
-            user_ = self.db["_user"].find_one({"usr_id": user_id_})
+            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError("user not found for api")
 
@@ -4780,12 +4720,12 @@ class Auth():
             passcode_ = bleach.clean(input_["passcode"])
 
             # checks if the user account was created already
-            auth_ = self.db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if auth_:
                 raise APIError("account already exist")
 
             # checks if the user was created already
-            user_ = self.db["_user"].find_one({"usr_id": email_})
+            user_ = Mongo().db["_user"].find_one({"usr_id": email_})
             if not user_ or user_ is None:
                 raise APIError("user invitation not found")
 
@@ -4804,7 +4744,7 @@ class Auth():
             aut_otp_secret_ = pyotp.random_base32()
             qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
 
-            self.db["_auth"].insert_one({
+            Mongo().db["_auth"].insert_one({
                 "aut_id": email_,
                 "aut_password": salted_,
                 "aut_token": None,
@@ -4897,6 +4837,7 @@ def storage_f():
         res_ = Misc().exception_f(exc)
 
     finally:
+        Mongo().client.close() if Mongo().client else None
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
@@ -5010,6 +4951,7 @@ def crud_f():
         crud_ = Misc().exception_f(exc)
 
     finally:
+        Mongo().client.close() if Mongo().client else None
         return json.dumps(crud_, default=json_util.default, sort_keys=False)
 
 
@@ -5073,6 +5015,7 @@ def otp_f():
         res_ = Misc().exception_f(exc)
 
     finally:
+        Mongo().client.close() if Mongo().client else None
         return json.dumps(res_, default=json_util.default)
 
 
@@ -5134,6 +5077,7 @@ def auth_f():
         res_ = Misc().exception_f(exc)
 
     finally:
+        Mongo().client.close() if Mongo().client else None
         return json.dumps(res_, default=json_util.default, sort_keys=False)
 
 
@@ -5192,6 +5136,7 @@ def get_visual_f(id):
         code_ = 500
 
     finally:
+        Mongo().client.close() if Mongo().client else None
         headers = {"Content-Type": "application/json; charset=utf-8"}
         return res_, code_, headers
 
@@ -5257,6 +5202,7 @@ def get_pivot_f(id):
         code_ = 500
 
     finally:
+        Mongo().client.close() if Mongo().client else None
         headers = {"Content-Type": "application/json; charset=utf-8"}
         return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers
 
@@ -5266,9 +5212,8 @@ def get_pivot_f(id):
 def post_f():
     try:
         # start transaction
-        session_client_ = Mongo().client
-        session_db_ = session_client_[Crud().dbname_]
-        session_ = session_client_.start_session(causal_consistency=True, default_transaction_options=None)
+        session_db_ = Mongo().client[Crud().dbname_]
+        session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
         session_.start_transaction()
 
         if not request.headers:
@@ -5436,7 +5381,7 @@ def post_f():
         res_ = {"result": False, "response": str(exc)}
 
     finally:
-        session_client_.close() if session_client_ else None
+        Mongo().client.close() if Mongo().client else None
         headers_ = {"Content-Type": "application/json; charset=utf-8"}
         return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers_
 
