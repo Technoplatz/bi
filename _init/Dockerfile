@@ -1,4 +1,3 @@
-#!/bin/sh
 # 
 # Technoplatz BI
 # 
@@ -32,9 +31,7 @@
 # 
 
 FROM mongo:latest
-RUN rm -rf /_init
-RUN mkdir /_init
-WORKDIR /_init
+WORKDIR /init
 COPY mongo-init.sh .
 RUN chmod +x mongo-init.sh
-CMD [ "bash", "-c", "/_init/mongo-init.sh"]
+CMD [ "bash", "-c", "/init/mongo-init.sh"]

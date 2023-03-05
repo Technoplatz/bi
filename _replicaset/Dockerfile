@@ -35,4 +35,4 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y jq
 WORKDIR /app
 COPY mongo-replicaset.sh .
 RUN chmod +x mongo-replicaset.sh
-CMD [ "bash", "/app/mongo-replicaset.sh"]
+CMD [ "bash", "-c", "/app/mongo-replicaset.sh"]

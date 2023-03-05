@@ -53,7 +53,6 @@ import base64
 import magic
 import pyotp
 import smtplib
-import ssl
 import urllib
 from email import encoders
 from email.mime.base import MIMEBase
@@ -83,8 +82,6 @@ app.config["UPLOAD_FOLDER"] = "/vault/"
 # app.url_map.host_matching = True
 
 CORS(app, resources={r"/*": {"origins": "*"}})
-
-# logs for errors only
 log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
@@ -649,7 +646,6 @@ class Mongo():
 
         self.client = MongoClient(self.connstr_)
 
-
     def db_f(self):
         try:
             mongo_client_ = self.client
@@ -693,7 +689,7 @@ class Mongo():
             file_ = f"{id_}.gz"
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
-            command_ = f"mongodump --host {self.mongo1_host_} --port {self.mongo_port_} --db {self.mongo_db_} --authenticationDatabase {self.mongo_authdb_} --username {self.mongo_username_} --password {self.mongo_password_} --{type_} --archive={loc_}"
+            command_ = f"mongodump --host {self.mongo0_host_} --port {self.mongo_port_} --db {self.mongo_db_} --authenticationDatabase {self.mongo_authdb_} --username {self.mongo_username_} --password {self.mongo_password_} --{type_} --archive={loc_} --tlsMode requireTLS --tlsCertificateKeyFile {self.mongo_tlsCertificateKeyFile_} --tlsCAFile {self.mongo_tlsCAFile_} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
             os.system(command_)
             size_ = os.path.getsize(loc_)
             res_ = {"result": True, "id": id_, "type": type_, "size": size_}
