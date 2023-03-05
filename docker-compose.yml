@@ -121,7 +121,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_HOST}.pem --timeZoneInfo /usr/share/zoneinfo --tlsAllowInvalidCertificates"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - mongo1
       - mongo2
@@ -150,7 +150,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_REPLICA1_HOST}.pem --timeZoneInfo /usr/share/zoneinfo --tlsAllowInvalidCertificates"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     networks:
       network0:
         ipv4_address: ${SUBNET_MONGO_REPLICA1_IPV4}
@@ -176,7 +176,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_REPLICA2_HOST}.pem --timeZoneInfo /usr/share/zoneinfo --tlsAllowInvalidCertificates"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     networks:
       network0:
         ipv4_address: ${SUBNET_MONGO_REPLICA2_IPV4}

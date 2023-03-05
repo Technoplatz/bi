@@ -625,7 +625,6 @@ class Mongo():
         self.mongo_authdb_ = os.environ.get("MONGO_AUTH_DB")
         self.mongo_username_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
         self.mongo_password_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
-        # self.mongo_password_ = get_docker_secret("mongo-password", default="")
         self.mongo_appname_ = "api"
         self.mongo_readpref_ = "primary"
         self.mongo_tls_ = os.environ.get("MONGO_TLS")

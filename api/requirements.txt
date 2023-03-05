@@ -1,6 +1,6 @@
 Flask
 flask-cors
-pymongo[srv]
+pymongo[tls]
 bcrypt
 requests
 bleach

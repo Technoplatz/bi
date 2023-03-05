@@ -93,6 +93,10 @@
         ],
         [
             "log_collection_id"
+        ],
+        [
+            "log_type",
+            "log_date"
         ]
     ]
 }
