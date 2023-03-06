@@ -78,7 +78,7 @@ function installBI() {
     if [ $1 ]; then
         curlHeaders+=("-H" "Authorization: token $1")
     fi
-    curl "${curlHeaders[@]}" -Ls -o $DCYML -o $DOTENV https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV}
+    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV}
     CONTD=$(cat $DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* ]]; then
         echo "Required files were not received successfully ($CONTD)."
