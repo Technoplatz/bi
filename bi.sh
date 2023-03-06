@@ -108,12 +108,26 @@ function installBI() {
     return 1
 }
 
+function buildBI() {
+    docker build --tag $NS/bi-api$SUFFIX:$TAG api/
+    docker build --tag $NS/bi-pwa$SUFFIX:$TAG pwa/
+    docker build --tag $NS/bi-replicaset$SUFFIX:$TAG _replicaset/
+    docker build --tag $NS/bi-init$SUFFIX:$TAG _init/
+    return 1
+}
+
 function upBI() {
     if [ ! -d $DIR ]; then
         echo
         echo -e "Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
+    fi
+    if [ $1 == "--build" ]; then
+        docker build --tag $NS/bi-api$SUFFIX:$TAG api/
+        docker build --tag $NS/bi-pwa$SUFFIX:$TAG pwa/
+        docker build --tag $NS/bi-replicaset$SUFFIX:$TAG _replicaset/
+        docker build --tag $NS/bi-init$SUFFIX:$TAG _init/
     fi
     UP=$(SUFFIX=$SUFFIX docker-compose -f $DIR/$DCYML up --detach --remove-orphans --no-build)
     if [ ! $UP ]; then
@@ -141,8 +155,9 @@ function updateBI() {
 }
 
 function pruneBI() {
+    echo "Cleaning..."
     PRUNE=$(docker system prune --force)
-    echo $PRUNE
+    echo
     echo "✔ Dangling resources successfully removed."
     return 1
 }
@@ -163,6 +178,7 @@ function downBI() {
 # Setup
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
+TAG="latest"
 NS="ghcr.io/technoplatz"
 DIR="_bi"
 DCYML="docker-compose.yml"
@@ -190,6 +206,9 @@ case $1 in
         ;;
     "help")
         helpBI
+        ;;
+    "build")
+        buildBI
         ;;
     *)
         echo "Sorry! $1 is not an available command."
