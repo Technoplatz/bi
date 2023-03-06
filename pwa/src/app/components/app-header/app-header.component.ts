@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
 import { ModalController } from "@ionic/angular";
+import { Storage } from "@ionic/storage";
 import { environment } from "../../../environments/environment";
 import { SignPage } from "../../pages/sign/sign.page";
 import { Miscellaneous } from "../../classes/miscellaneous";
@@ -39,7 +40,7 @@ import { Miscellaneous } from "../../classes/miscellaneous";
 @Component({
   selector: "app-header",
   templateUrl: "./app-header.component.html",
-  styleUrls: ["./app-header.component.scss"],
+  styleUrls: ["./app-header.component.scss"]
 })
 
 export class AppHeaderComponent implements OnInit {
@@ -55,6 +56,7 @@ export class AppHeaderComponent implements OnInit {
   public logo: string = environment.misc.logo;
   public swu_: boolean = false;
   public net_: boolean = false;
+  public newVersion: boolean = false;
   public slideOpts = {
     initialSlide: 0,
     speed: 400,
@@ -64,10 +66,17 @@ export class AppHeaderComponent implements OnInit {
 
   constructor(
     private modal: ModalController,
-    private misc: Miscellaneous
+    private misc: Miscellaneous,
+    private storage: Storage
   ) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.misc.version.subscribe((res: any) => {
+      this.storage.set("LSVERSION", res[0]).then(() => {
+        this.newVersion = res ? res[0] : false;
+      });
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes["user"]) {
@@ -94,8 +103,11 @@ export class AppHeaderComponent implements OnInit {
     return await modal.present();
   }
 
-  doActivate() {
-    window.location.reload();
+  doSetVersion() {
+    this.storage.set("LSVERSION", [false]).then(() => {
+      this.misc.version.next([false]);
+      window.location.reload();
+    });
   }
 
   doNavi(s: string, sub: any) {

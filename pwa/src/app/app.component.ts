@@ -148,6 +148,10 @@ export class AppComponent implements OnInit {
       console.error(error);
     });
 
+    this.storage.get("LSVERSION").then((res: any) => {
+      this.misc.version.next([false]);
+    });
+
   }
 
 }

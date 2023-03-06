@@ -43,7 +43,6 @@ import operator
 import random
 import re
 import secrets
-import bcrypt
 import string
 import pymongo
 import requests
@@ -54,6 +53,7 @@ import magic
 import pyotp
 import smtplib
 import urllib
+import hashlib
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -4104,12 +4104,11 @@ class Auth():
         finally:
             return res_
 
-    def encrypt_f(self, password_):
+    def hash_f(self, password_, salted_):
         try:
-            salted_rounds_ = 8
-            gensalt_ = bcrypt.gensalt(rounds=salted_rounds_)
-            salted_ = bcrypt.hashpw(password_.encode(), gensalt_).decode()
-            res_ = {"result": True, "salted": salted_}
+            salt_ = os.urandom(32) if salted_ is None else salted_
+            key_ = hashlib.pbkdf2_hmac("sha512", password_.encode("utf-8"), salt_, 101010, dklen=128)
+            res_ = {"result": True, "salt": salt_, "key": key_}
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
@@ -4427,14 +4426,16 @@ class Auth():
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
 
-            # creates an encrypter password
-            encrypt_ = self.encrypt_f(password_)
-            if not encrypt_["result"]:
-                raise APIError(encrypt_["msg"])
-            salted_ = encrypt_["salted"]
+            hash_f_ = self.hash_f(password_, None)
+            if not hash_f_["result"]:
+                raise APIError(hash_f_["msg"])
+            
+            salt_ = hash_f_["salt"]
+            key_ = hash_f_["key"]
 
             Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
-                "aut_password": salted_,
+                "aut_salt": salt_,
+                "aut_key": key_,
                 "aut_token": None,
                 "aut_tfac": None,
                 "aut_expires": 0,
@@ -4557,50 +4558,47 @@ class Auth():
 
     def user_validate_by_basic_auth_f(self, input_, op_):
         try:
-            # sets the required variables
             user_id_ = bleach.clean(input_["userid"]) if "userid" in input_ else None
             password_ = bleach.clean(input_["password"]) if "password" in input_ else None
             token_ = bleach.clean(input_["token"]) if "token" in input_ else None
 
-            # user id must not be empty
             if not user_id_:
                 raise APIError("email must be provided")
 
-            # user id must not in email format
             pat = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
             if not re.search(pat, user_id_):
                 raise APIError("invalid e-mail address")
 
-            # checks if user exists in the auth
             auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
                 raise APIError("account not found")
 
-            # checks if user exists in the users
             user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError("user not found for validate")
 
             user_["aut_apikey"] = auth_["aut_apikey"] if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None else None
 
-            # checks if user is enabled or not
             enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
             if not enabled_:
                 raise APIError("user is disabled")
 
-            # sets the auth variables
-            password_db_ = auth_["aut_password"]
+            salt_ = auth_["aut_salt"]
+            key_ = auth_["aut_key"]
             token_db_ = auth_["aut_token"] if "aut_token" in auth_ else None
 
-            # check if the password not provided token must be provided
             if not password_:
                 if not token_:
-                    raise APIError("token must be provided")
+                    raise APIError("no credentials provided")
                 else:
                     if token_db_ != token_:
                         raise APIError("session closed")
             else:
-                if not bcrypt.checkpw(password_.encode(), password_db_.encode()):
+                hash_f_ = self.hash_f(password_, salt_)
+                if not hash_f_["result"]:
+                    raise APIError(hash_f_["msg"])
+                new_key_ = hash_f_["key"]
+                if new_key_ != key_:
                     raise APIError("invalid email or password")
 
             firewall_ = self.firewall_f(user_id_)
@@ -4678,12 +4676,10 @@ class Auth():
 
     def signin_f(self):
         try:
-            # gets the required parameters
             input_ = request.json
             email_ = input_["email"]
             password_ = input_["password"]
 
-            # validates user with basic auth
             user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_}, "signin")
             if not user_validate_["result"]:
                 raise APIError(user_validate_["msg"])
@@ -4736,17 +4732,20 @@ class Auth():
                 raise APIError("user status is disabled to get logged in")
 
             # creates an encrypter password
-            encrypt_ = self.encrypt_f(password_)
-            if not encrypt_["result"]:
-                raise APIError(encrypt_["msg"])
-            salted_ = encrypt_["salted"]
+            hash_f_ = self.hash_f(password_, None)
+            if not hash_f_["result"]:
+                raise APIError(hash_f_["msg"])
+            
+            salt_ = hash_f_["salt"]
+            key_ = hash_f_["key"]
 
             aut_otp_secret_ = pyotp.random_base32()
             qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
 
             Mongo().db["_auth"].insert_one({
                 "aut_id": email_,
-                "aut_password": salted_,
+                "aut_salt": salt_,
+                "aut_key": key_,
                 "aut_token": None,
                 "aut_tfac": None,
                 "aut_expires": 0,
@@ -5390,15 +5389,11 @@ def post_f():
 @cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_dump_f():
     try:
-        # validates restapi request
         validate_ = RestAPI().validate_pwa_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
-        # gets and cleans user input
         input_ = request.json
-
-        # gets the email and user token
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("invalid credentials")
@@ -5406,7 +5401,6 @@ def get_dump_f():
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
 
-        # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "dump")
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "request not validated")

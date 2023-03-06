@@ -56,6 +56,11 @@ https://www.gnu.org/licenses.
           <p>{{ item.name }}</p>
         </div>
       </div>
+      <div class="ion-margin-top">
+        <ion-button (click)="doVersion()" size="default">
+          {{ 'Version' | translate }}
+        </ion-button>
+      </div>
     </div>
 
     <div *ngIf="submenu=='apikey'">

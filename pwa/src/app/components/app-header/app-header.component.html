@@ -31,17 +31,21 @@ https://www.gnu.org/licenses.
 -->
 
 <ion-header class="app-header ion-no-border">
-  <ion-toolbar color="white">
+  <ion-toolbar *ngIf="user" color="white">
     <div class="flex-container ion-padding-start">
       <ion-button class="flex-header-start" (click)="menuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
         <ion-icon name="menu-outline"></ion-icon>
       </ion-button>
       <ion-title class="flex-header-start nomargin">{{ header }}</ion-title>
-      <ion-button *ngIf="user" fill="outline" (click)="doNavi('account', 'signout')" size="small"
+      <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small"
+        class="flex-header-end">
+        <ion-label>{{ 'New Version Available' | translate }}</ion-label>
+      </ion-button>
+      <ion-button fill="outline" (click)="doNavi('account', 'signout')" size="small"
         class="flex-header-end">
         <ion-label>{{ 'Sign Out' | translate }}</ion-label>
       </ion-button>
-      <ion-button *ngIf="user" fill="clear" (click)="doNavi('account', 'settings')"
+      <ion-button fill="clear" (click)="doNavi('account', 'settings')"
         class="flex-header-end ion-margin-start">
         <ion-label>{{ name }}&nbsp;&nbsp;</ion-label>
         <ion-icon name="person-circle-outline" color="primary" size="large"></ion-icon>

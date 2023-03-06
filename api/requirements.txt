@@ -1,7 +1,6 @@
 Flask
 flask-cors
 pymongo[tls]
-bcrypt
 requests
 bleach
 pandas

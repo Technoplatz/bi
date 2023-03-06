@@ -32,10 +32,9 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { ModalController, ToastController, LoadingController, AlertController } from "@ionic/angular";
-import { Subject } from "rxjs";
+import { Subject, BehaviorSubject } from "rxjs";
 import { Storage } from "@ionic/storage";
 import { TranslateService } from "@ngx-translate/core";
-import { Navigation } from "./navigation";
 import { environment } from "../../environments/environment";
 import { ClipboardPluginWeb } from "@capacitor/core";
 
@@ -54,13 +53,13 @@ export class Miscellaneous {
     private modal: ModalController,
     private toast: ToastController,
     private loading: LoadingController,
-    private nav: Navigation,
     private alert: AlertController,
     private cb: ClipboardPluginWeb
   ) { }
 
   navi = new Subject<any>();
   menutoggle = new Subject<any>();
+  version = new BehaviorSubject<any>([]);
   
   getAPIHost() {
     return new Promise((resolve) => {
