@@ -71,10 +71,9 @@ function installBI() {
         done
     fi
     mkdir -p $DIR
-    mkdir -p $DIR/_init && touch $DIR/_init/.secret-key-password
+    mkdir -p $DIR/_init
     echo
     echo "✔ System folder created successfuly."
-    cd $DIR
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $1 ]; then
         curlHeaders+=("-H" "Authorization: token $1")
@@ -89,6 +88,7 @@ function installBI() {
     echo "✔ Required files were received successfully."
     INC=0
     if [[ ! -f $DIR/_init/.secret-key-password ]]; then
+        touch $DIR/_init/.secret-key-password
         re='^[a-zA-Z]+$'
         while ! [[ ${DBPWD:0:1} =~ $re ]]
         do
