@@ -71,7 +71,7 @@ services:
         ipv4_address: ${SUBNET_TRAEFIK_IPV4}
 
   init:
-    image: ghcr.io/technoplatz/bi-init${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-init${SUFFIX}:latest
     container_name: init
     hostname: init
     labels:
@@ -182,7 +182,7 @@ services:
         ipv4_address: ${SUBNET_MONGO_REPLICA2_IPV4}
 
   replicaset:
-    image: ghcr.io/technoplatz/bi-replicaset${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-replicaset${SUFFIX}:latest
     container_name: replicaset
     hostname: replicaset
     labels:
@@ -224,7 +224,7 @@ services:
         ipv4_address: ${SUBNET_REPLICASET_IPV4}
 
   api:
-    image: ghcr.io/technoplatz/bi-api${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-api${SUFFIX}:latest
     container_name: api
     depends_on:
       - replicaset
@@ -280,7 +280,7 @@ services:
         ipv4_address: ${SUBNET_API_IPV4}
 
   pwa:
-    image: ghcr.io/technoplatz/bi-pwa${DEV_SUFFIX}:latest
+    image: ghcr.io/technoplatz/bi-pwa${SUFFIX}:latest
     container_name: pwa
     hostname: pwa
     restart: always
@@ -359,4 +359,4 @@ networks:
 
 secrets:
   key-password:
-    file: .secret-key-password
+    file: _init/.secret-key-password
