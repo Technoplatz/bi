@@ -143,7 +143,7 @@ function updateBI() {
     if [ ! $PULL ]; then
         echo
         echo "✔ The latest version received successfully."
-        echo -e "Please restart the platform with ${COLOR}./bi.sh up${NOCOLOR} command for the new version to be activated."
+        echo -e "Please restart the platform with ${COLOR}./bi.sh start${NOCOLOR} command for the new version to be activated."
     fi
     return 1
 }
