@@ -29,12 +29,10 @@
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
 #
-#  ./bi.sh install [token]
-#  ./bi.sh up [--build] [--prod]
-#  ./bi.sh down
-#  ./bi.sh kill
-#  ./bi.sh pull [--prod]
-#  ./bi.sh build <image | --all> [--prod]
+#  ./bi.sh install
+#  ./bi.sh start
+#  ./bi.sh stop
+#  ./bi.sh update
 #  ./bi.sh prune
 #  ./bi.sh help
 
