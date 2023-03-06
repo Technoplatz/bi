@@ -44,8 +44,8 @@ function helpBI() {
     echo "Available commands;"
     echo
     echo "./bi.sh install"
-    echo "./bi.sh up"
-    echo "./bi.sh down"
+    echo "./bi.sh start"
+    echo "./bi.sh stop"
     echo "./bi.sh update"
     echo "./bi.sh prune"
     echo "./bi.sh help"
@@ -116,18 +116,12 @@ function buildBI() {
     return 1
 }
 
-function upBI() {
+function startBI() {
     if [ ! -d $DIR ]; then
         echo
         echo -e "Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
-    fi
-    if [ $1 == "--build" ]; then
-        docker build --tag $NS/bi-api$SUFFIX:$TAG api/
-        docker build --tag $NS/bi-pwa$SUFFIX:$TAG pwa/
-        docker build --tag $NS/bi-replicaset$SUFFIX:$TAG _replicaset/
-        docker build --tag $NS/bi-init$SUFFIX:$TAG _init/
     fi
     UP=$(SUFFIX=$SUFFIX docker-compose -f $DIR/$DCYML up --detach --remove-orphans --no-build)
     if [ ! $UP ]; then
@@ -162,13 +156,13 @@ function pruneBI() {
     return 1
 }
 
-function downBI() {
+function stopBI() {
     if [[ ! -z $(docker container ls -qa) ]]; then
         echo "Stopping and removing containers..."
         docker container stop $(docker container ls -qa)
         docker container rm $(docker container ls -qa)
         echo
-        echo "✔ All containers stopped and removed successfully."
+        echo "✔ All containers stopped successfully."
     else
         echo "No active container found!"
     fi
@@ -192,17 +186,17 @@ case $1 in
     "install")
 	    installBI "$2"
 	    ;;
-    "up")
-        upBI "$2"
+    "start")
+        startBI "$2"
+        ;;
+    "stop")
+        stopBI "$2"
         ;;
     "prune")
         pruneBI "$2"
         ;;
     "update")
         updateBI "$2"
-        ;;
-    "down")
-        downBI "$2"
         ;;
     "help")
         helpBI
