@@ -49,8 +49,8 @@ h6 {
 }
 
 h1 {
-  font-size: 2.2rem !important;
-  letter-spacing: -0.04rem !important;
+  font-size: 2.4rem !important;
+  letter-spacing: -0.02rem !important;
 }
 
 app-menu {
@@ -651,8 +651,8 @@ form ion-item ion-label {
   width: 100% !important;
   height: calc(100vh - 78px);
   overflow: scroll !important;
-  padding-left: 24px;
-  padding-top: 16px;
+  padding-left: 20px;
+  padding-top: 10px;
   position: sticky !important;
 }
 
@@ -1172,6 +1172,11 @@ sup {
   font-size: 180px !important;
   color: var(--ion-color-primary);
   margin-left: -16px;
+}
+
+.bi-logo {
+  height: 36px;
+  width: auto;
 }
 
 .footer-button {
