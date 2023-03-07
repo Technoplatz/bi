@@ -1713,7 +1713,6 @@ ion-checkbox {
 .visual-error {
   padding-top: 8px;
   margin-top: 8px;
-  margin-left: 12px;
   max-width: 70%;
 }
 
@@ -1750,15 +1749,15 @@ ion-checkbox {
 }
 
 .app-charts {
-  width: 100%;
+  position: absolute;
+  bottom: 8px;
   height: auto;
   top: auto;
   display: flex;
 }
 
 app-charts {
-  position: absolute;
-  bottom: 8px;
+  margin-left: -14px;
 }
 
 .flash-sq {

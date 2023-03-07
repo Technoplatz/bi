@@ -120,12 +120,6 @@ export class DashboardPage implements OnInit {
   public accountf_qrurl: string = "";
   public is_processing_account: boolean = false;
   public is_visuals_loading: boolean = false;
-  public barcoded_: boolean = false;
-  public is_samecol: boolean = false;
-  public qr_exists: boolean = false;
-  public qr_show: boolean = false;
-  public otp_show: boolean = false;
-  public otp_qr: string = "";
   public dashmode: string = "card";
   public viewurl_: string = "";
   public viewurl_masked_: string = "";
@@ -137,10 +131,6 @@ export class DashboardPage implements OnInit {
   public view_df: any = [];
   public view_count: number = 0;
   public view_properties: any = [];
-  public view_properties_: any = [];
-  public subscribers: string = "";
-  public scheduled: boolean = false;
-  public viewtab: string = "pivot";
   public actions: any = [];
   public vie_projection: any = [];
   public columns_: any;
@@ -155,7 +145,6 @@ export class DashboardPage implements OnInit {
   public announcementso: any;
   private views_structure: any;
   private collections_structure: any;
-  private apiHost: string = "";
   public viewso: any;
   private collectionso: any;
 

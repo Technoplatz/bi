@@ -66,18 +66,18 @@ export class MenuComponent implements OnInit {
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.auth.Saas().then((res: any) => {
-        this.collectionso = this.crud.collections.subscribe((res: any) => {
-          this.collections = res && res.data ? res.data : [];
-        });
-        this.viewso = this.crud.views.subscribe((res: any) => {
-          this.views = res && res.data ? res.data : [];
-        });
         this.saas_ = res ? res : {};
-        this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
-        this.menu.open().then(() => {
-          this.init = true;
-        });
       });
+      this.collectionso = this.crud.collections.subscribe((res: any) => {
+        this.collections = res && res.data ? res.data : [];
+      });
+      this.viewso = this.crud.views.subscribe((res: any) => {
+        this.views = res && res.data ? res.data : [];
+      });
+      this.menu.open().then(() => {
+        this.init = true;
+      });
+      this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
     });
   }
 

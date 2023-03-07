@@ -76,10 +76,6 @@ https://www.gnu.org/licenses.
                   <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
                     {{ item.vie_collection_id }} | 
                       {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
-                      <!-- <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
-                        <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
-                        <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
-                      </span> -->
                       <div class="filler"></div>
                       <h1>{{ item.visual.value }}</h1>
                   </div>
@@ -95,34 +91,21 @@ https://www.gnu.org/licenses.
                     </ion-button>
                   </div>
                   <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
-                    <div>{{ item.vie_collection_id }} | 
-                      <!-- <span *ngIf="item.visual.count" class="text-bold"> | {{ item.visual.count }}
-                        <span *ngIf="item.visual.count > 1">{{ 'records' | translate }}</span>
-                        <span *ngIf="item.visual.count == 1">{{ 'record' | translate }}</span>
-                      </span>
-                      <br /> -->
+                    <div class="full-width">{{ item.vie_collection_id }}
+                      <span *ngIf="item.visual && item.visual.function && item.visual.yaxis"> | 
                       {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
+                      </span>
                       <span *ngIf="item.visual.kpi_target_value; else notargetv">&rarr; {{
                         item.visual.kpi_target_value }}</span>
                       <ng-template #notargetv><br /></ng-template>
                     </div>
-                    <!-- <div class="hdr3">
-                      <ion-icon
-                        *ngIf="item.visual.kpi_target_value && item.visual.value && item.visual.kpi_target_value > item.visual.value"
-                        name="thumbs-down" color="danger">
-                      </ion-icon>
-                      <ion-icon
-                        *ngIf="item.visual.kpi_target_value && item.visual.value && item.visual.kpi_target_value <= item.visual.value"
-                        name="thumbs-up" color="success">
-                      </ion-icon>
-                      {{ item.visual.value }}
-                    </div> -->
                     <div class="app-charts">
                       <app-charts *ngIf="item.visual.data && item.visual.data.length > 0; else nochartdata"
                         [visual]="item.visual" [width]="chcontainer.offsetWidth"></app-charts>
                       <ng-template #nochartdata>
                         <div class="visual-error">
-                          {{ 'No Data Found' | translate }}<br />
+                          {{ 'CHART NOT GENERATED' | translate }}<br />
+                          {{ 'Check your filter or selected fields' | translate }}.<br />
                           {{ item?.error | translate }}
                         </div>
                       </ng-template>

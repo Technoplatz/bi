@@ -51,52 +51,31 @@ export class ViewPage implements OnInit {
   @ViewChild(JsonEditorComponent, { static: false }) private strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
   public loadingText: string = environment.misc.loadingText;
-  private submenu: string = "";
+  
   public header: string = "";
-  private segment = "data";
   public user: any = null;
   public perm: boolean = false;
   public is_crud: boolean = false;
   public paget: any = [];
   public id: string = "";
-  private template_showed: boolean = false;
   public reconfig: boolean = false;
   public filter: any = [];
   public searched: any = null;
   public data: any = [];
   public selected: any = [];
-  private views: any = [];
-  private viewsx: any = [];
   public pages: any = [];
   public limit: number = environment.misc.limit;
   public page: number = 1;
-  private page_start: number = 1;
   public count: number = 0;
   public is_loaded: boolean = true;
-  private is_selected: boolean = false;
   public multicheckbox: boolean = false;
-  private master: any = {};
-  private collections: any = [];
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public barcoded_: boolean = false;
   public is_samecol: boolean = false;
   public actions: any = [];
   public columns_: any;
-  private menu_toggle: boolean = false;
   public view_mode: any = {};
-  private options?: JsonEditorOptions;
-  private sweeped: any = [];
-  private sort: any = {};
-  private properites_: any = {};
-  private actionix: number = -1;
-  private view_structure: any;
-  private menu: string = "";
-  private saved_filter: string = "";
-  private page_end: number = 1;
-  private clonok: number = -1;
-  private usero: any;
-
   public qr_exists: boolean = false;
   public qr_show: boolean = false;
   public otp_show: boolean = false;
@@ -121,8 +100,27 @@ export class ViewPage implements OnInit {
   public viewurl_: string = "";
   public viewurl_masked_: string = "";
   public is_apikey_copied: boolean = false;
+  public collectionso: any;
+  private segment = "data";
+  private menu_toggle: boolean = false;
+  private page_start: number = 1;
+  private is_selected: boolean = false;
+  private views: any = [];
+  private viewsx: any = [];
+  private template_showed: boolean = false;
+  private submenu: string = "";
+  private master: any = {};
+  private collections: any = [];
   private apiHost: string = "";
-  private collectionso: any;
+  private options?: JsonEditorOptions;
+  private sweeped: any = [];
+  private sort: any = {};
+  private properites_: any = {};
+  private actionix: number = -1;
+  private view_structure: any;
+  private menu: string = "";
+  private saved_filter: string = "";
+  private page_end: number = 1;
 
   constructor(
     private storage: Storage,
@@ -133,8 +131,11 @@ export class ViewPage implements OnInit {
     private alert: AlertController,
     private router: Router
   ) {
-    this.collectionso = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
+    this.misc.getAPIHost().then((apiHost: any) => {
+      this.apiHost = apiHost;
+      this.collectionso = this.crud.collections.subscribe((res: any) => {
+        this.collections = res && res.data ? res.data : [];
+      });
     });
   }
 
@@ -309,10 +310,10 @@ export class ViewPage implements OnInit {
     }
   }
 
-  doCopy(w: string) {
-    const s = w === "apikey" ? this.accountf_apikey : w === "view" ? this.viewurl_ : "";
-    this.is_apikey_copied = w === "apikey" ? true : false;
-    this.is_url_copied = w === "view" || w === "collection" ? true : false;
+  doCopy(v: string) {
+    const s = v === "apikey" ? this.accountf_apikey : v === "view" ? this.viewurl_ : "";
+    this.is_apikey_copied = v === "apikey" ? true : false;
+    this.is_url_copied = v === "view" || v === "collection" ? true : false;
     this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {

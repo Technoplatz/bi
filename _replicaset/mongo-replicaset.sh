@@ -95,7 +95,7 @@ MONGO_INDEXOF_DB=$(mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HO
 echo "MONGO_INDEXOF_DB $MONGO_INDEXOF_DB"
 
 if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
-    echo "DB does not exist."
+    echo "Database ${MONGO_DB} does not exist."
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_COMBINED_FILE --tlsCAFile $MONGO_TLS_CA_COMBINED_FILE --tlsAllowInvalidCertificates --eval "
         print('DB user creating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
@@ -187,7 +187,7 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
     sh -c "echo 'replicaset initialized successfully' > /init/mongo-init.flag"
     echo "replicaset initialized successfully :)"
 else
-    echo "DB already exists."
+    echo "Database ${MONGO_DB} already exists."
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_COMBINED_FILE --tlsCAFile $MONGO_TLS_CA_COMBINED_FILE --tlsAllowInvalidCertificates --eval "
         print('db user credentials updating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
@@ -203,7 +203,7 @@ else
             var apikey_ = (u1 + u2 + u3).slice(1);
             var upsert_auth_ = db.getCollection('_auth').updateOne({ aut_id: '${ADMIN_EMAIL}' }, { \$set: {
                 aut_id: '${ADMIN_EMAIL}',
-                aut_password: '\$2b\$08\$aSMAfk/MMV736M/jG3zHHeoMndfQURKfMBV02qOJ/K4Z/AOQuR8Vm',
+                aut_password: null,
                 aut_token: null,
                 aut_tfac: null,
                 aut_expires: 0,
