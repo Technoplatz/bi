@@ -32,8 +32,8 @@ https://www.gnu.org/licenses.
 
 <app-header [header]="header" [user]="user"></app-header>
 <ion-content class="ion-no-padding">
-  <ion-grid *ngIf="is_initialized" class="ion-no-padding ion-no-border">
-    <ion-row>
+  <ion-grid class="ion-no-padding ion-no-border">
+    <ion-row *ngIf="is_initialized; else dataloading">
       <ion-col class="console-right">
         <h1>{{ subheader }}</h1>
         <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
@@ -168,6 +168,18 @@ https://www.gnu.org/licenses.
         </div>
       </ion-col>
     </ion-row>
+    <ng-template #dataloading>
+      <ion-row>
+        <ion-col class="console-right">
+          <ion-item lines="none">
+            <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
+            <ion-label>
+              {{ loadingText | translate }}
+            </ion-label>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ng-template>
   </ion-grid>
 </ion-content>
 <app-inner-footer></app-inner-footer>
