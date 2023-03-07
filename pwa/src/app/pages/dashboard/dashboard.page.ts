@@ -178,9 +178,7 @@ export class DashboardPage implements OnInit {
         this.announcements = res && res.data ? res.data : [];
       });
 
-      // get announcements
-      this.crud.getAnnouncements().then(() => {});
-
+      // views subscription
       this.viewso = this.crud.views.subscribe((res: any) => {
         this.views = this.viewsx = res && res.data ? res.data : [];
         this.views_structure = res && res.structure ? res.structure : null;
@@ -198,7 +196,6 @@ export class DashboardPage implements OnInit {
           });
         }
       });
-
     });
   }
 

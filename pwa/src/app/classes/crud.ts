@@ -55,7 +55,6 @@ export class Crud {
     "X-Api-Key": environment.apiKey
   }
 
-  public announcements: any = new Subject<any>();
   public modalSubmitListener = new Subject<any>();
   public updateListener = new Subject<any>();
   public objectsListener = new BehaviorSubject([]);
@@ -63,6 +62,7 @@ export class Crud {
   public collections = new BehaviorSubject([]);
   public views = new BehaviorSubject([]);
   public visuals = new BehaviorSubject([]);
+  public announcements = new BehaviorSubject([]);
 
   constructor(
     private storage: Storage,

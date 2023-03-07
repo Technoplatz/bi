@@ -65,6 +65,7 @@ export class MenuComponent implements OnInit {
 
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
       this.auth.Saas().then((res: any) => {
         this.saas_ = res ? res : {};
       });
@@ -77,7 +78,6 @@ export class MenuComponent implements OnInit {
       this.menu.open().then(() => {
         this.init = true;
       });
-      this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
     });
   }
 
@@ -89,7 +89,7 @@ export class MenuComponent implements OnInit {
   doNavi(s: string, sub: any) {
     this.misc.navi.next({
       s: s,
-      sub: sub,
+      sub: sub
     });
   }
 
