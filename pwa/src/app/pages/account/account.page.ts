@@ -46,6 +46,7 @@ import { Router } from "@angular/router";
 
 export class AccountPage implements OnInit {
   public header: string = "Account";
+  public subheader: string = "";
   public user: any = null;
   public is_initialized: boolean = false;
   public menu: string = "";
@@ -77,7 +78,7 @@ export class AccountPage implements OnInit {
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.submenu = this.router.url.split("/")[2];
-    this.header = this.submenu === "apikey" ? "API Key" : this.submenu === "preferences" ? "Preferences" : this.submenu === "signout" ? "Sign Out" : this.submenu === "security" ? "Security" : this.submenu;
+    this.subheader = this.submenu === "apikey" ? "API Key" : this.submenu === "preferences" ? "Preferences" : this.submenu === "signout" ? "Sign Out" : this.submenu === "security" ? "Security" : this.submenu;
     this.is_initialized = false;
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;

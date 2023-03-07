@@ -49,7 +49,8 @@ import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 export class CollectionPage implements OnInit {
   @ViewChild(JsonEditorComponent, { static: false }) private strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
-  public header: string = "";
+  public header: string = "Collections";
+  public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
   private submenu: string = "";
   private segment = "data";
@@ -131,7 +132,7 @@ export class CollectionPage implements OnInit {
       this.menu = this.router.url.split("/")[1];
       this.id = this.submenu = this.router.url.split("/")[2];
       this.crud.getCollection(this.id).then((res: any) => {
-        this.header = res && res.data ? res.data.col_title : this.id;
+        this.subheader = res && res.data ? res.data.col_title : this.id;
         this.storage.set("LSID", this.id).then(() => {
           this.is_crud = this.id.charAt(0) === "_" ? false : true;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {

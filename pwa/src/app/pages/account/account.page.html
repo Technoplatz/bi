@@ -33,8 +33,10 @@ https://www.gnu.org/licenses.
 <app-header [header]="header" [user]="user"></app-header>
 <ion-content class="ion-no-padding">
   <div *ngIf="is_initialized" class="page-null">
+    <h1>{{ subheader }}</h1>
 
-    <div *ngIf="submenu=='signout'">
+    <!-- SIGN OUT -->
+    <div *ngIf="submenu=='signout'" class="ion-margin-top">
       <p>
         {{ 'Please click the button below' | translate }},<br />
         {{ 'To close your current session
@@ -44,7 +46,6 @@ https://www.gnu.org/licenses.
         {{ 'SIGN OUT' | translate }}
       </ion-button>
     </div>
-
     <div *ngIf="submenu=='preferences'">
       <p>
         {{ 'Please press the button of the color of your choice' | translate }}.<br />
@@ -63,7 +64,8 @@ https://www.gnu.org/licenses.
       </div>
     </div>
 
-    <div *ngIf="submenu=='apikey'">
+    <!-- API KEY -->
+    <div *ngIf="submenu=='apikey'" class="ion-margin-top">
       <div *ngIf="accountf_apikey; else noapikey">
         {{ 'API keys allow you to access your data from spreadsheets and other BI Tools'
         |
@@ -120,16 +122,16 @@ https://www.gnu.org/licenses.
       </ng-template>
     </div>
 
-    <div *ngIf="submenu=='security'">
-      <h4>{{ 'Password change' | translate }} (OTP)</h4>
+    <!-- SECURITY -->
+    <div *ngIf="submenu=='security'" class="ion-margin-top">
+      <h5>{{ 'Password change' | translate }} (OTP)</h5>
       {{ 'You can reset your password anytime' | translate }}.
       <ul>
         <li>{{ 'Click to "Sign out" button in the header' | translate }}.</li>
         <li>{{ 'Click "Sign In" button again and click "Reset Password" button afterwards' |
           translate }}.</li>
       </ul>
-
-      <h4>{{ 'Two-Factor Authentication' | translate }} (OTP)</h4>
+      <h5>{{ 'Two-Factor Authentication' | translate }} (OTP)</h5>
       {{ 'This method supplements password by producing one-time codes as a second layer
       of
       security' | translate }}.<br />
@@ -148,17 +150,14 @@ https://www.gnu.org/licenses.
         <li>{{ 'Read the QR code' | translate }}.</li>
         <li>{{ 'Validate the new QR code with "Validate OTP" button' | translate }}.</li>
       </ul>
-
       <ion-button *ngIf="!otp_show" size="default" class="ion-no-margin ion-margin-top" (click)="doResetOTP()">
         <ion-icon name="refresh-outline"></ion-icon>
         <ion-label>{{ 'Reset OTP' | translate }}</ion-label>
       </ion-button>
-
       <ion-button *ngIf="!otp_show" size="default" class="ion-no-margin ion-margin-top" (click)="doOTP({ op: 'show' })">
         <ion-icon name="eye-outline"></ion-icon>
         <ion-label>{{ 'Show QR Code' | translate }}</ion-label>
       </ion-button>
-
       <div *ngIf="otp_show">
         <qrcode *ngIf="otp_qr" [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'" [allowEmptyString]="true">
         </qrcode>
@@ -172,7 +171,6 @@ https://www.gnu.org/licenses.
         </ion-button>
       </div>
     </div>
-
   </div>
 </ion-content>
 <app-inner-footer></app-inner-footer>

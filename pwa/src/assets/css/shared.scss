@@ -642,23 +642,13 @@ form ion-item ion-label {
   margin-bottom: 6px;
 }
 
-.console-right-side {
-  width: calc(100% - 260px - 1px) !important;
-  padding: 0px;
-  padding-bottom: 16px;
-}
-
-.console-right-0 {
+.console-right {
   width: 100% !important;
   height: calc(100vh - 78px);
   overflow: scroll !important;
   padding-left: 16px;
+  padding-top: 16px;
   position: sticky !important;
-}
-
-.console-right-1 {
-  max-width: 240px !important;
-  border-left: 1px solid var(--ion-color-light);
 }
 
 .menu-side {
@@ -688,8 +678,7 @@ form ion-item ion-label {
 }
 
 .scroll-horizontal ion-col,
-.scroll-vertical ion-col,
-.console-right-side ion-col {
+.scroll-vertical ion-col {
   flex-wrap: nowrap;
 }
 

@@ -32,9 +32,10 @@ https://www.gnu.org/licenses.
 
 <app-header [header]="header" [user]="user"></app-header>
 <ion-content class="ion-no-padding">
-  <ion-grid *ngIf="is_initialized" class="ion-no-padding ion-no-border">
-    <ion-row>
-      <ion-col class="console-right-0">
+  <ion-grid class="ion-no-padding ion-no-border">
+    <ion-row *ngIf="is_initialized; else dataloading">
+      <ion-col class="console-right">
+        <h1>{{ subheader }}</h1>
         <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12">
@@ -122,7 +123,6 @@ https://www.gnu.org/licenses.
             </ng-template>
           </ion-row>
         </ion-grid>
-
         <!-- CRUD GRID SECTION -->
         <ion-grid *ngIf="is_samecol; else dataloading" class="ion-no-padding data-grid">
           <!-- CRUD HEADERS -->
@@ -307,16 +307,20 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
-        <ng-template #dataloading>
+      </ion-col>
+    </ion-row>
+    <ng-template #dataloading>
+      <ion-row>
+        <ion-col class="console-right">
           <ion-item lines="none">
             <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
             <ion-label>
               {{ loadingText | translate }}
             </ion-label>
           </ion-item>
-        </ng-template>
-      </ion-col>
-    </ion-row>
+        </ion-col>
+      </ion-row>
+    </ng-template>
   </ion-grid>
 </ion-content>
 <app-inner-footer></app-inner-footer>

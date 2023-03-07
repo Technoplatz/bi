@@ -52,7 +52,8 @@ export class ViewPage implements OnInit {
   @ViewChild("select0") selectRef?: IonSelect;
   public loadingText: string = environment.misc.loadingText;
   
-  public header: string = "";
+  public header: string = "Views";
+  public subheader: string = "";
   public user: any = null;
   public perm: boolean = false;
   public is_crud: boolean = false;
@@ -155,7 +156,7 @@ export class ViewPage implements OnInit {
         this.view_properties = res.properties;
         this.view_properties_ = Object.keys(res.properties);
         this.view_structure = res.structure;
-        this.header = this.view.vie_title;
+        this.subheader = this.view.vie_title;
         this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
         this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
           this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
