@@ -61,12 +61,6 @@ https://www.gnu.org/licenses.
             <ion-input #passwordfocus formControlName="password" type="password"
                 placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" class="ion-no-padding" required>
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="resetForm.controls.password.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="resetForm.controls.password.invalid && (resetForm.controls.password.dirty || resetForm.controls.password.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Two-Factor Access Code' | translate }}
@@ -114,57 +108,31 @@ https://www.gnu.org/licenses.
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #emailfocussignup class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required placeholder="{{ 'E-mail' | translate }}">
+                autocorrect="off" required>
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signupForm.controls.email.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signupForm.controls.email.invalid && (signupForm.controls.email.dirty || signupForm.controls.email.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Full Name' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #namefocus class="ion-no-padding" formControlName="name" type="text" spellcheck="false"
-                autocorrect="off" required placeholder="{{ 'Name and Surname' | translate }}">
+                autocorrect="off" required>
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signupForm.controls.name.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signupForm.controls.name.invalid && (signupForm.controls.name.dirty || signupForm.controls.name.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Password' | translate }} <sup>
+            <ion-label position="stacked">{{ 'Password [8+ chars. mixed]' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
-            <ion-input #passwordfocus formControlName="password" type="password"
-                placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" required>
+            <ion-input #passwordfocus formControlName="password" type="password" required>
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signupForm.controls.password.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signupForm.controls.password.invalid && (signupForm.controls.password.dirty || signupForm.controls.password.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Invitation code' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #namefocus class="ion-no-padding" formControlName="passcode" type="text" spellcheck="false"
-                autocorrect="off" required
-                placeholder="{{ 'You can get your code from site Administrator' | translate }}">
+                autocorrect="off" required>
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="signupForm.controls.passcode.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="signupForm.controls.passcode.invalid && (signupForm.controls.passcode.dirty || signupForm.controls.passcode.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-button (click)="Signup()" size="default" class="no-hover ion-margin-end">
@@ -175,7 +143,7 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
-        <ion-item lines="none" class="ion-no-padding">
+        <ion-item lines="none" class="ion-no-padding ion-padding-top">
             <ion-button fill="clear" (click)="doDismissModal()" size="small"
                 class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="newspaper-outline"></ion-icon>
@@ -212,8 +180,8 @@ https://www.gnu.org/licenses.
             <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
-            <ion-button slot="end" (click)="doSetOp('forgot')" fill="outline"  size="default">
-                <span>{{ 'Set Password' | translate }}</span>
+            <ion-button slot="end" (click)="doSetOp('forgot')" fill="outline" size="default">
+                <span>{{ 'SET PASSWORD' | translate }}</span>
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
@@ -223,13 +191,13 @@ https://www.gnu.org/licenses.
     </form>
     <form [formGroup]="TFACForm" *ngIf="formtype=='tfac'">
         <ion-item class="section-header" lines="none">
-            <h1>{{ '2FA'' | translate }}</h1>
+            <h1>{{ 'OTP' | translate }}</h1>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'One Time Password' | translate }} (OTP)
+            <ion-label position="stacked">{{ 'Enter 2FA Code' | translate }} (OTP)
             </ion-label>
-            <ion-input #tfacfocus class="ion-no-padding token" formControlName="tfac" type="text"
-                required minlength="6" maxlength="6" size="8" autofocus="true" required="true">
+            <ion-input #tfacfocus class="ion-no-padding token" formControlName="tfac" type="text" required minlength="6"
+                maxlength="6" size="8" autofocus="true" required="true">
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
@@ -245,7 +213,7 @@ https://www.gnu.org/licenses.
             <ion-button fill="clear" (click)="doSetOp('signin')" size="small"
                 class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="mail-outline"></ion-icon>
-                <span>{{ 'Your backup OTP has been sent by e-mail' | translate }}.</span>
+                <span>{{ 'Your backup OTP has been sent by Email' | translate }}.</span>
             </ion-button>
         </ion-item>
     </form>
@@ -259,12 +227,6 @@ https://www.gnu.org/licenses.
             <ion-input #emailfocus class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
                 autocorrect="off" required>
             </ion-input>
-            <!-- <ion-icon slot="end" name="checkmark-circle-outline" class="valid-field"
-                *ngIf="forgotForm.controls.email.valid">
-            </ion-icon>
-            <ion-icon slot="end" name="close-circle-outline" class="invalid-field"
-                *ngIf="forgotForm.controls.email.invalid && (forgotForm.controls.email.dirty || forgotForm.controls.email.touched)">
-            </ion-icon> -->
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="doForgot()" size="default" class="ion-margin-end">
@@ -299,5 +261,4 @@ https://www.gnu.org/licenses.
         </ion-item>
     </form>
 </ion-content>
-<modal-footer class="ion-no-margin" *ngIf="is_ready">
-    <modal-footer>
+<modal-footer class="ion-no-margin" *ngIf="is_ready"><modal-footer>

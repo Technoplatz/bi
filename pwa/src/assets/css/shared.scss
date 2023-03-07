@@ -706,7 +706,7 @@ ion-spinner {
 }
 
 .signup-modal {
-  --height: 450px !important;
+  --height: 480px !important;
 }
 
 .sign-modal {
@@ -878,6 +878,8 @@ ion-item {
   position: fixed;
   bottom: 0px;
   background-color: var(--ion-color-light);
+  padding-top: 32px;
+  padding-bottom: 32px;
 }
 
 .margin-top-12 {
