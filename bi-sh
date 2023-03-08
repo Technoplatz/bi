@@ -103,7 +103,7 @@ function installBI() {
     echo ">>> NEXT STEPS:"
     echo -e ">>> 1. Open ${COLOR}_bi/.env${NOCOLOR} file with any text editor."
     echo ">>> 2. Apply the necessary changes on the file and save it."
-    echo -e ">>> 3. Run ${COLOR}./bi.sh up${NOCOLOR} to start containers."
+    echo -e ">>> 3. Run ${COLOR}./bi.sh start${NOCOLOR} to start containers."
     echo "Here you go!"
     return 1
 }
@@ -123,7 +123,7 @@ function startBI() {
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
-    UP=$(SUFFIX=$SUFFIX docker-compose -f $DIR/$DCYML up --detach --remove-orphans --no-build)
+    UP=$(SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build)
     if [ ! $UP ]; then
         echo
         echo "✔ Platform was started successfully."
@@ -139,7 +139,7 @@ function updateBI() {
         echo -e "Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         return 0
     fi
-    PULL=$(SUFFIX=$SUFFIX docker-compose -f $DIR/$DCYML pull)
+    PULL=$(SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML pull)
     if [ ! $PULL ]; then
         echo
         echo "✔ The latest version received successfully."
