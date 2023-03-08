@@ -63,14 +63,15 @@ export class AppComponent implements OnInit {
     private misc: Miscellaneous,
     private storage: Storage,
     private nav: Navigation
-  ) {
-    this.misc.menutoggle.subscribe(() => {
-      this.menutoggle = this.menutoggle ? false : true;
-    });
-  }
+  ) { }
 
   ngOnInit() {
-    // get user
+
+    this.misc.menutoggle.subscribe((LSMENUTOGGLE: boolean) => {
+      this.menutoggle = LSMENUTOGGLE;
+      this.storage.set("LSMENUTOGGLE", LSMENUTOGGLE).then(() => { });
+    });
+
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user_ = LSUSERMETA;
       if (LSUSERMETA) {
@@ -120,9 +121,8 @@ export class AppComponent implements OnInit {
       } else if (event instanceof NavigationStart) {
       } else if (event instanceof NavigationEnd) {
         const urlpart_ = event.url.split("/")[1];
-        console.log("*** urlpart", event.url);
         if (!urlpart_) {
-          this.misc.menutoggle.next(true);
+          this.misc.menutoggle.next(false);
         }
       }
     });

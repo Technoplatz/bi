@@ -118,7 +118,9 @@ export class AppHeaderComponent implements OnInit {
   }
 
   menuToggle() {
-    this.misc.menutoggle.next();
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      this.misc.menutoggle.next(LSMENUTOGGLE ? false : true);
+    });
   }
 
 }

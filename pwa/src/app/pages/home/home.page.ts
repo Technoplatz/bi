@@ -44,7 +44,6 @@ import { SignPage } from "../sign/sign.page";
 
 export class HomePage implements OnInit {
   public user: any;
-  public is_initialized: boolean = false;
 
   constructor(
     private modal: ModalController,
@@ -56,13 +55,6 @@ export class HomePage implements OnInit {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       if (LSUSERMETA) {
         this.user = LSUSERMETA;
-        // this.misc.navi.next({
-        //   s: "dashboard",
-        //   sub: null,
-        // });
-        this.is_initialized = true;
-      } else {
-        this.is_initialized = true;
       }
     });
   }
