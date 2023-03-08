@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
       <ion-row>
         <ion-col size="1"></ion-col>
         <ion-col size="11">
-            <img class="ion-no-padding bi-logo" src="../../../assets/images/logo.png">
+          <img class="ion-no-padding bi-logo" src="../../../assets/images/logo.png" />
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -51,23 +51,32 @@ https://www.gnu.org/licenses.
         <h1>{{ 'It\'s time to get data-driven with your inner-cycle' | translate }}.</h1>
       </ion-col>
     </ion-row>
-    <ion-row class="ion-margin-top">
+    <ion-row *ngIf="user; else nouser" class="ion-margin-top">
       <ion-col size="1"></ion-col>
       <ion-col size="11" class="ion-padding-top">
-        <ion-button *ngIf="user" href="/dashboard" class="ion-margin-top">
-          <ion-icon name="terminal-outline"></ion-icon>&nbsp;
-          {{ 'Dashboard' | translate }}
-        </ion-button>
-        <ion-button *ngIf="!user" (click)="doSign('signin')" class="ion-margin-top text-medium" size="large">
-          <ion-icon name="log-in-outline"></ion-icon>
-          {{ 'Sign in' | translate }}
+        <ion-button href="/dashboard" class="ion-margin-top">
+          <ion-icon name="terminal-outline"></ion-icon>&nbsp; {{ 'Dashboard' | translate }}
         </ion-button>
       </ion-col>
     </ion-row>
-    <ion-row class="ion-margin-top">
-      <ion-col size="1"></ion-col>
-      <ion-col size="11">{{ 'Don\'t have an account?' | translate }}  <a href="#" (click)="doSignup()">{{ 'Click to Sign up' | translate }}.</a></ion-col>
-    </ion-row>
+    <ng-template #nouser>
+      <ion-row class="ion-margin-top">
+        <ion-col size="1"></ion-col>
+        <ion-col size="11" class="ion-padding-top">
+          <ion-button (click)="doSign('signin')" class="ion-margin-top text-medium" size="large">
+            <ion-icon name="log-in-outline"></ion-icon>
+            {{ 'Sign in' | translate }}&nbsp;&nbsp;&nbsp;
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row class="ion-margin-top">
+        <ion-col size="1"></ion-col>
+        <ion-col size="11"
+          >{{ 'Don\'t have an account?' | translate }}
+          <a href="#" (click)="doSignup()">{{ 'Click to Sign up' | translate }}.</a></ion-col
+        >
+      </ion-row>
+    </ng-template>
   </ion-grid>
 </ion-content>
 <app-footer *ngIf="is_initialized"></app-footer>

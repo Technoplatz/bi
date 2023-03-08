@@ -51,8 +51,6 @@ const { Network } = Plugins;
 
 export class AppComponent implements OnInit {
   public user_: any = null;
-  public console_: boolean = false;
-  public index_: boolean = false;
   public swu_: boolean = false;
   public net_: boolean = true;
   public menutoggle: boolean = true;
@@ -72,12 +70,11 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-
     // get user
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user_ = LSUSERMETA;
       if (LSUSERMETA) {
-        this.crud.getAnnouncements().then(() => {});
+        this.crud.getAnnouncements().then(() => { });
         this.crud.getAll().then(() => { }).catch((error: any) => {
           console.error(error);
           this.misc.doMessage(error, "error");
@@ -122,8 +119,11 @@ export class AppComponent implements OnInit {
         console.error("*** navigation error", event.url, event.error);
       } else if (event instanceof NavigationStart) {
       } else if (event instanceof NavigationEnd) {
-        this.index_ = event.url === "/" ? true : false;
-        this.console_ = ["/dashboard"].includes(event.url.substring(0, 8)) ? true : false;
+        const urlpart_ = event.url.split("/")[1];
+        console.log("*** urlpart", event.url);
+        if (!urlpart_) {
+          this.misc.menutoggle.next(true);
+        }
       }
     });
 

@@ -4077,9 +4077,6 @@ class Auth():
                 raise APIError("Invalid e-mail address")
             if not "password" in input or input["password"] is None:
                 raise APIError("Invalid email or password")
-            pat = re.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*.-_?&]{8,16}$")
-            if not re.search(pat, input["password"]):
-                raise APIError("Password must be entered as 8-16 characters and mixed")
             res = {"result": True}
 
         except APIError as exc:
@@ -4104,8 +4101,11 @@ class Auth():
         finally:
             return res_
 
-    def hash_f(self, password_, salted_):
+    def password_hash_f(self, password_, salted_):
         try:
+            pat = re.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*.-_?&]{8,32}$")
+            if not re.search(pat, password_):
+                raise APIError("Invalid password")
             salt_ = os.urandom(32) if salted_ is None else salted_
             key_ = hashlib.pbkdf2_hmac("sha512", password_.encode("utf-8"), salt_, 101010, dklen=128)
             res_ = {"result": True, "salt": salt_, "key": key_}
@@ -4426,7 +4426,7 @@ class Auth():
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
 
-            hash_f_ = self.hash_f(password_, None)
+            hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
                 raise APIError(hash_f_["msg"])
             
@@ -4594,7 +4594,7 @@ class Auth():
                     if token_db_ != token_:
                         raise APIError("session closed")
             else:
-                hash_f_ = self.hash_f(password_, salt_)
+                hash_f_ = self.password_hash_f(password_, salt_)
                 if not hash_f_["result"]:
                     raise APIError(hash_f_["msg"])
                 new_key_ = hash_f_["key"]
@@ -4732,7 +4732,7 @@ class Auth():
                 raise APIError("user status is disabled to get logged in")
 
             # creates an encrypter password
-            hash_f_ = self.hash_f(password_, None)
+            hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
                 raise APIError(hash_f_["msg"])
             

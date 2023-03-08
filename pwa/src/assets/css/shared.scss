@@ -53,6 +53,11 @@ h1 {
   letter-spacing: -0.02rem !important;
 }
 
+h2 {
+  font-size: 2rem !important;
+  letter-spacing: -0.02rem !important;
+}
+
 app-menu {
   width: 260px !important;
   border-right: 1px solid var(--ion-color-light) !important;
@@ -877,10 +882,15 @@ ion-item {
 .app-footer {
   position: fixed;
   bottom: 0px;
-  background-color: var(--ion-color-light);
+  background-color: #efefef;
   padding-top: 32px;
   padding-bottom: 32px;
 }
+
+.app-footer ion-icon {
+  color: var(--ion-color-primary) !important;
+}
+
 
 .margin-top-12 {
   margin-top: 12px;
@@ -955,9 +965,25 @@ ion-item {
 }
 
 .logo-column {
+  display: flex !important;
   padding-bottom: 8px;
+  margin-top: 16px;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--ion-color-dark);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ion-color-medium);
+}
+
+.logo-container {
+  align-content: flex-start;
+  display: flex !important;
+  width: 32px;
+  height: 32px;
+  margin-right: 16px;
+  vertical-align: middle;
+}
+
+.logo-container svg {
+  margin: auto !important;
 }
 
 ion-card-subtitle,
