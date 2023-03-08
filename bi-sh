@@ -34,7 +34,6 @@
 cat << EOF
 
 Technoplatz BI
-Data Management and Sharing Platform
 Copyright 2019-$(date +'%Y'), Technoplatz IT Solutions GmbH
 https://bi.technoplatz.com
 
@@ -70,7 +69,6 @@ function installBI() {
             esac
         done
     fi
-    mkdir -p $DIR
     mkdir -p $DIR/_init
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $1 ]; then
@@ -85,7 +83,6 @@ function installBI() {
         echo -e "You may try to add your token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
     fi
-    echo "✔ Required files were received successfully."
     INC=0
     if [[ ! -f $DIR/_init/.secret-key-password ]]; then
         touch $DIR/_init/.secret-key-password
@@ -101,10 +98,12 @@ function installBI() {
     echo "✔ Installation completed successfully."
     echo
     echo ">>> NEXT STEPS:"
-    echo -e ">>> 1. Open ${COLOR}_bi/.env${NOCOLOR} file with any text editor."
-    echo ">>> 2. Apply the necessary changes on the file and save it."
+    echo -e "${COLOR}>>> Please note that your project folder is $(pwd)/$DIR${NOCOLOR}"
+    echo -e ">>> 1. Go to ${COLOR}$DIR${NOCOLOR} folder and open ${COLOR}.env${NOCOLOR} file with any text editor."
+    echo ">>> 2. Apply the necessary changes and save it."
     echo -e ">>> 3. Run ${COLOR}./bi.sh start${NOCOLOR} to start containers."
-    echo "Here you go!"
+    echo
+    echo "Here you go :)"
     return 1
 }
 
@@ -174,7 +173,7 @@ COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 TAG="latest"
 NS="ghcr.io/technoplatz"
-DIR="_bi"
+DIR="technoplatz/_bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 SUFFIX=""
