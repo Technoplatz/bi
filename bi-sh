@@ -72,17 +72,17 @@ function installBI() {
     fi
     mkdir -p $DIR
     mkdir -p $DIR/_init
-    echo
-    echo "✔ System folder created successfuly."
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $1 ]; then
         curlHeaders+=("-H" "Authorization: token $1")
     fi
     curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV}
-    CONTD=$(cat $DCYML | head -c 3)
+    CONTD=$(cat $DIR/$DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* ]]; then
-        echo "Required files were not received successfully ($CONTD)."
-        echo -e "You may try to add your token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get privately connected."
+        echo
+        echo "Sorry :("
+        echo "Required files not received successfully ($CONTD)."
+        echo -e "You may try to add your token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
     fi
     echo "✔ Required files were received successfully."

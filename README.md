@@ -150,10 +150,13 @@ reboot
 Reconnect to the platform to download the official Technoplatz BI repository from [GitHub](https://github.com/technoplatz/bi.git).
 
 ```bash
-git clone https://github.com/technoplatz/bi.git
+curl -Lso bi.sh \
+"https://raw.githubusercontent.com/Technoplatz/bi/main/bi-sh" \
+&& chmod +x bi.sh
+./bi.sh install
 ```
 
-Go to **bi** folder created.
+Go to **_bi** folder created.
 
 ```bash
 cd bi
@@ -179,11 +182,13 @@ FROM_EMAIL=bi@company.com
 **COMPANY_NAME:** Legal business name of your organization.\
 **FROM_EMAIL:** Sender address (From) of the e-mails sent by the system.</sup>
 
-#### TZ 
+#### TZ
+
 Time zone information must be entered according to the official **TZ** format (eg. America/New_York)\
-https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+<https://en.wikipedia.org/wiki/List_of_tz_database_time_zones>
 
 #### SMTP_PASSWORD
+
 It is used for sending automated emails over any SMTP server.
 
 #### 4. Starting Containers
