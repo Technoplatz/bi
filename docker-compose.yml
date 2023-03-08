@@ -29,12 +29,6 @@
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
 #
-#  ./bi.sh install
-#  ./bi.sh start
-#  ./bi.sh stop
-#  ./bi.sh update
-#  ./bi.sh prune
-#  ./bi.sh help
 
 version: "3.9"
 services:
@@ -184,7 +178,7 @@ services:
     container_name: replicaset
     hostname: replicaset
     labels:
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     depends_on:
       - mongo0
       - mongo1
@@ -233,7 +227,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)
       - traefik.http.services.api.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - bi-storage-volume:/cron
       - bi-storage-volume:/dump
@@ -287,7 +281,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`)
       - traefik.http.services.pwa.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -305,7 +299,7 @@ services:
     hostname: watchtower
     restart: always
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro

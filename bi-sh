@@ -43,9 +43,11 @@ function helpBI() {
     echo "Available commands:"
     echo -e "\n./bi.sh install"
     echo "./bi.sh start"
+    echo "./bi.sh restart"
     echo "./bi.sh stop"
     echo "./bi.sh update"
     echo "./bi.sh prune"
+    echo "./bi.sh logs api|pwa|init|replicaset [num of records]"
     echo "./bi.sh help"
 }
 
@@ -122,12 +124,13 @@ function startBI() {
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
-    UP=$(SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build)
-    if [ ! -z $UP ]; then
+    echo -e "\nStarting containers...\n"
+    SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
+    if [ $? -eq 0 ]; then
         echo -e "\n✔ Platform was started successfully."
         echo -e "Please be patient up to 20 seconds for the system to be functional."
     else
-        echo -e "\n✘ Sorry!"
+        echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
     fi
     return 1
@@ -138,12 +141,27 @@ function updateBI() {
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         return 0
     fi
-    PULL=$(SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML pull)
-    if [ ! -z $PULL ]; then
-        echo -e "\n✔ The latest version received successfully."
-        echo -e "Please restart the platform with ${COLOR}./bi.sh start${NOCOLOR} command for the new version to be activated."
+    declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
+    if [ $1 ]; then
+        curlHeaders+=("-H" "Authorization: token $1")
+    fi
+    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML}
+    CONTD=$(cat $DIR/$DCYML | head -c 3)
+    if [[ "$CONTD" == *"40"* ]]; then
+        echo -e "✘ Sorry! Configuration file not received successfully ($CONTD)."
+        echo -e "You may try to add your token ${COLOR}./bi.sh update [token]${NOCOLOR} as the way to get connected privately."
+        return 0
     else
-        echo -e "\n✘ Sorry!"
+        echo -e "✔ Configuration file received successfully.\n"
+    fi
+    SUFFIX=""
+    SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML pull
+    if [ $? -eq 0 ]; then
+        stopBI
+        startBI
+        echo -e "\n✔ The latest version received successfully."
+    else
+        echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
     fi
     return 1
@@ -151,20 +169,45 @@ function updateBI() {
 
 function pruneBI() {
     echo -e "Cleaning..."
-    PRUNE=$(docker system prune --force)
-    echo -e "✔ Dangling resources successfully removed."
+    docker system prune --force
+    if [ $? -eq 0 ]; then
+        echo -e "✔ Dangling resources successfully removed."
+    else
+        echo -e "\n✘ Sorry! Process was terminated ($?)."
+        return 0
+    fi
     return 1
 }
 
 function stopBI() {
-    echo -e "Stopping and removing containers..."
+    echo -e "Stopping containers...\n"
     if [[ ! -z $(docker container ls -qa) ]]; then
         docker container stop $(docker container ls -qa)
         docker container rm $(docker container ls -qa)
-        echo -e "\n✔ All containers stopped successfully."
+        if [ $? -eq 0 ]; then
+            echo -e "\n✔ Running containers stopped and removed successfully."
+        else
+            echo -e "\n✘ Sorry! Process was terminated ($?)."
+            return 0
+        fi
     else
         echo -e "✘ No active container found!"
     fi
+    return 1
+}
+
+function logsBI() {
+    if [ ! $1 ]; then
+        echo -e "\n✘ Sorry! You need to provide a docker service ID."
+        echo -e "Command should be given like ./bi.sh logs api|pwa|init|replicaset"
+        return 0
+    fi
+    TAIL=$LOGTAIL
+    if [[ ! -z $2 ]]; then
+        TAIL=$2
+    fi
+    echo -e "Getting the last $TAIL records from $1 log...\n"
+    docker logs --tail $TAIL $1
     return 1
 }
 
@@ -177,6 +220,7 @@ DIR="_bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 SUFFIX=""
+LOGTAIL=20
 
 if [ $2 ]; then
     SUFFIX=$2
@@ -187,16 +231,23 @@ case $1 in
 	    installBI "$2"
 	    ;;
     "start")
-        startBI "$2"
+        startBI
+        ;;
+    "restart")
+        stopBI
+        startBI
         ;;
     "stop")
-        stopBI "$2"
+        stopBI
         ;;
     "prune")
         pruneBI "$2"
         ;;
     "update")
         updateBI "$2"
+        ;;
+    "logs")
+        logsBI "$2" "$3"
         ;;
     "help")
         helpBI
