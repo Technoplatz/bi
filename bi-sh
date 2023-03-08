@@ -40,9 +40,8 @@ https://bi.technoplatz.com
 EOF
 
 function helpBI() {
-    echo "Available commands;"
-    echo
-    echo "./bi.sh install"
+    echo "Available commands:"
+    echo -e "\n./bi.sh install"
     echo "./bi.sh start"
     echo "./bi.sh stop"
     echo "./bi.sh update"
@@ -53,22 +52,27 @@ function helpBI() {
 function installBI() {
     if [ -d $DIR ]; then
         while true; do
-            read -p "$(echo -e "Oops! An existing installation found in ${COLOR}$DIR${NOCOLOR} folder. Do you want to remove it? (Y/n) ")" yn
+            read -p "$(echo -e "Oops! An existing ${COLOR}$(pwd)/$DIR${NOCOLOR} folder found. Do you want to remove it? (Y/n) ")" yn
             case $yn in
                 [Y]* )
+                    if [[ -f $DIR/$DOTENV ]]; then
+                        BKFILE=$DOTENV-backup-$(date '+%Y%m%d%H%M%S')
+                        cp $DIR/$DOTENV $BKFILE
+                        echo -e "\n✔ Existing parameter file ${COLOR}$DOTENV${NOCOLOR} has been backed up as ${COLOR}$(pwd)/$BKFILE${NOCOLOR}."
+                    fi
                     rm -rf $DIR
                     break;;
                 [Nn]* )
-                    echo
-                    echo "Installation canceled."
+                    echo -e "\n✘ Installation canceled."
                     return 0
                     ;;
                 * ) 
-                    echo; echo "Please enter Y or n!"; echo
+                    echo -e "\n✘ Please enter ${COLOR}Y${NOCOLOR} or ${COLOR}n${NOCOLOR}.\n"
                     ;;
             esac
         done
     fi
+    echo -e "\n✔ Installation started."
     mkdir -p $DIR/_init
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $1 ]; then
@@ -77,11 +81,11 @@ function installBI() {
     curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV}
     CONTD=$(cat $DIR/$DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* ]]; then
-        echo
-        echo "Sorry :("
-        echo "Required files not received successfully ($CONTD)."
+        echo -e "✘ Sorry! Required files not received successfully ($CONTD)."
         echo -e "You may try to add your token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
+    else
+        echo -e "✔ Required files received successfully."
     fi
     INC=0
     if [[ ! -f $DIR/_init/.secret-key-password ]]; then
@@ -94,16 +98,13 @@ function installBI() {
         done
         echo $DBPWD > $DIR/_init/.secret-key-password
     fi
-    echo
-    echo "✔ Installation completed successfully."
-    echo
-    echo ">>> NEXT STEPS:"
+    echo -e "✔ Installation completed successfully."
+    echo -e "\n>>> NEXT STEPS:"
     echo -e "${COLOR}>>> Please note that your project folder is $(pwd)/$DIR${NOCOLOR}"
     echo -e ">>> 1. Go to ${COLOR}$DIR${NOCOLOR} folder and open ${COLOR}.env${NOCOLOR} file with any text editor."
     echo ">>> 2. Apply the necessary changes and save it."
-    echo -e ">>> 3. Run ${COLOR}./bi.sh start${NOCOLOR} to start containers."
-    echo
-    echo "Here you go :)"
+    echo -e ">>> 3. Run ${COLOR}./bi.sh start${NOCOLOR} to make containers up and keep them running."
+    echo -e "\nHere you go :)"
     return 1
 }
 
@@ -117,53 +118,52 @@ function buildBI() {
 
 function startBI() {
     if [ ! -d $DIR ]; then
-        echo
-        echo -e "Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
+        echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
     UP=$(SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build)
-    if [ ! $UP ]; then
-        echo
-        echo "✔ Platform was started successfully."
-        echo
-        echo "Please be patient up to 20 seconds for the system to be functional."
+    if [ ! -z $UP ]; then
+        echo -e "\n✔ Platform was started successfully."
+        echo -e "Please be patient up to 20 seconds for the system to be functional."
+    else
+        echo -e "\n✘ Sorry!"
+        return 0
     fi
     return 1
 }
 
 function updateBI() {
     if [ ! -d $DIR ]; then
-        echo
-        echo -e "Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
+        echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         return 0
     fi
     PULL=$(SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML pull)
-    if [ ! $PULL ]; then
-        echo
-        echo "✔ The latest version received successfully."
+    if [ ! -z $PULL ]; then
+        echo -e "\n✔ The latest version received successfully."
         echo -e "Please restart the platform with ${COLOR}./bi.sh start${NOCOLOR} command for the new version to be activated."
+    else
+        echo -e "\n✘ Sorry!"
+        return 0
     fi
     return 1
 }
 
 function pruneBI() {
-    echo "Cleaning..."
+    echo -e "Cleaning..."
     PRUNE=$(docker system prune --force)
-    echo
-    echo "✔ Dangling resources successfully removed."
+    echo -e "✔ Dangling resources successfully removed."
     return 1
 }
 
 function stopBI() {
+    echo -e "Stopping and removing containers..."
     if [[ ! -z $(docker container ls -qa) ]]; then
-        echo "Stopping and removing containers..."
         docker container stop $(docker container ls -qa)
         docker container rm $(docker container ls -qa)
-        echo
-        echo "✔ All containers stopped successfully."
+        echo -e "\n✔ All containers stopped successfully."
     else
-        echo "No active container found!"
+        echo -e "✘ No active container found!"
     fi
     return 1
 }
@@ -205,7 +205,7 @@ case $1 in
         buildBI
         ;;
     *)
-        echo "Sorry! $1 is not an available command."
+        echo "✘ Sorry. $1 is not an available command."
         helpBI
 esac
 

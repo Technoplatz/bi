@@ -1,23 +1,21 @@
 # Technoplatz BI
 
-It's time to get data-driven with your [inner-cycle!](#business-highlights)
+It's time to get data-driven with your [inner-cycle!](#highlights)
+Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. 
 
-- [What is Technoplatz BI](#what-is-technoplatz-bi)
 - [How to Get Started](#get-started)
 - [Installation](#installation)
 - [Maintenance](#maintenance)
 - [Licensing Options](#licensing)
 - [About](#about)
 
-## What is Technoplatz BI
+## Highlights
 
-Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. It provides optimized and pragmatic solutions for the main requirements of many data-driven process by considering that each business has its own unique conditions;
+It provides optimized and pragmatic solutions for the main requirements of many data-driven process by considering that each business has its own unique conditions;
 
 - [Data Application](#data-application)
 - [BI-Directional Data Sharing](#bi-directional-data-sharing)
 - [Internal API](#api)
-
-## Business Highlights
 
 Technoplatz BI is being developed for those whose strategy is to make their business **data-driven**.
 
@@ -127,11 +125,11 @@ Installing Guides for On-premises:
 System Requirements:
 The minimum configuration for the system to work properly on the Docker platform is 2 CPU, 4GB Ram, 20GB Hard Disk. This configuration should be increased in proportion to workload and the number of connections to be established.
 
-## Installation
+### Installation
 
 The installation steps described below must be performed in the order given. Please consider that a certain level of command line skill is required and it may be necessary to add `sudo` in case connected user does not have root privileges.
 
-### 1. The First Touch
+#### 1. The First Touch
 
 Docker platforms sold on ISP marketplaces might be a couple of updates behind in terms of the operating system as of the date you purchase. Therefore, it is highly recommended to run a system update initially and reboot the system. Please reconnect to the platform after the system reboots.
 
@@ -139,11 +137,11 @@ Docker platforms sold on ISP marketplaces might be a couple of updates behind in
 apt update && apt upgrade -y && reboot
 ```
 
-### 2. Download and Install
+#### 2. Download and Install
 
 Open a Terminal session, copy paste and run the first command below to download the service script from the official [GitHub](https://github.com/technoplatz/bi.git) repository and get the installation started with the second command afterwards. Follow the messages coming to the console for the required actions and the result of the operation.
 
-#### Linux and Mac OS
+**Linux and Mac OS**
 
 ```bash
 curl -Lso technoplatz/bi.sh --create-dirs \
@@ -156,7 +154,7 @@ curl -Lso technoplatz/bi.sh --create-dirs \
 ./bi.sh install
 ```
 
-### 3. Setting Parameters
+#### 3. Setting Parameters
 
 Edit `.env` file, replace the sample values with your own and save the file.
 
@@ -206,7 +204,7 @@ FROM_EMAIL=bi@yourcompany.com
 API_KEY=61c09da62f1f9ca9357796c9
 ```
 
-### 4. Starting Containers
+#### 4. Starting Containers
 
 Enter the command below to start the containers by keeping them up and running in the background. It can take up to 20 seconds till after containers creation for Technoplatz BI to be fully functional. You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run at the background and restarts automatically as the platform is rebooted.
 
@@ -226,51 +224,17 @@ http://localhost:8100
 
 Unlike the enterprise edition the community edition doesn't provide any official support about maintenance and troubleshooting issues. As long as the system resources are not exceeded you are not expected to encounter a serious problem however the actions to be taken for certain situations are explained in below topics.
 
-### BI Maintenance
-
-You can take over your system by controlling the Docker containers.
-
-Getting the latest updates;
-
-```bash
-./bi.sh update
-```
-
-Starting or restarting the containers;
-
-```bash
-./bi.sh start
-```
-
-Stopping containers;
-
-```bash
-./bi.sh stop
-```
-
-Cleaning dangling system resources;
-
-```bash
-./bi.sh prune
-```
-
-Log Tracking
-
-```bash
-./bi.sh logs api
-```
-
-### Operating System Maintenance
-
-To perform operating system updates and reboot regularly.
-
-```bash
-apt update && apt upgrade -y
-```
-
-```bash
-reboot
-```
+| Operation | Command to Run |
+| :--- | :--- |
+| To install the system from stratch | `./bi.sh install` |
+| To receive the latest BI updates | `./bi.sh update` |
+| To start the system or restart the running containers | `./bi.sh start` |
+| To stop the running containers | `./bi.sh stop` |
+| To clean dangling system sources | `./bi.sh prune` |
+| To track the system logs | `./bi.sh logs [service]` |
+| OS ||
+| OS Maintenance | `apt update && apt upgrade -y` |
+| To reboot the Platform | `reboot` |
 
 ## Production
 
