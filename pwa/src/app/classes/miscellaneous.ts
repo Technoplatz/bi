@@ -60,7 +60,7 @@ export class Miscellaneous {
   navi = new Subject<any>();
   menutoggle = new Subject<any>();
   version = new BehaviorSubject<any>([]);
-  
+
   getAPIHost() {
     return new Promise((resolve) => {
       this.apiHost = window.location.host.includes("8100") ? window.location.protocol + "//" + window.location.host.replace(/8100/gi, environment.apiPort) : window.location.host.includes("8101") ? window.location.protocol + "//" + window.location.host.replace(/8101/gi, environment.apiPort) : window.location.protocol + "//api." + window.location.hostname;
@@ -160,9 +160,7 @@ export class Miscellaneous {
         side: "end",
         icon: "close-outline",
         role: "cancel",
-        handler: () => {
-          console.info("alert canceled");
-        }
+        handler: () => { }
       }]
     };
     this.toast.dismiss().then(() => { }).catch((error: any) => { });

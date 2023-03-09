@@ -161,7 +161,7 @@ Edit `.env` file, replace the sample values with your own and save the file.
 ```bash
 ...
 TZ=#time-zone
-DOMAIN=#localhost
+DOMAIN=#localhost-or-ip-address-of-the-platform
 ADMIN_EMAIL=#admin-user-business-email
 ADMIN_USER_NAME=#admin-user-fullname
 COMPANY_NAME=#company-legal-name-for-ssl
@@ -178,7 +178,7 @@ API_KEY=#platform-apikey
 ...
 ```
 
-- Domain must be `localhost` for local use.
+- Domain must be `localhost` or IP address for local use.
 - Time zone must be entered according to the official format (eg. America/New_York)\
 <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones>
 - Community edition generates self signed TLS certificates with the company information to be provided above for the internal communication of the database cluster to be encrypted.
@@ -187,6 +187,7 @@ API_KEY=#platform-apikey
 A sample configuration;
 
 ```bash
+...
 TZ=Europe/Berlin
 DOMAIN=localhost
 ADMIN_EMAIL=john@yourcompany.com
@@ -202,6 +203,7 @@ SMTP_USERID=apikey
 SMTP_PASSWORD=SG.****.****
 FROM_EMAIL=bi@yourcompany.com
 API_KEY=61c09da62f1f9ca9357796c9
+...
 ```
 
 #### 4. Starting Containers

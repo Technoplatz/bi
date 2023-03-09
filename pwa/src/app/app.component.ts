@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -68,8 +68,13 @@ export class AppComponent implements OnInit {
   ngOnInit() {
 
     this.misc.menutoggle.subscribe((LSMENUTOGGLE: boolean) => {
+      console.log("*** LSMENUTOGGLE0", LSMENUTOGGLE);
       this.menutoggle = LSMENUTOGGLE;
       this.storage.set("LSMENUTOGGLE", LSMENUTOGGLE).then(() => { });
+    });
+
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      this.menutoggle = LSMENUTOGGLE;
     });
 
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
@@ -91,7 +96,7 @@ export class AppComponent implements OnInit {
         this.user_ = null;
         this.misc.navi.next({
           s: "",
-          sub: null,
+          sub: null
         });
       }
     });
@@ -120,9 +125,15 @@ export class AppComponent implements OnInit {
         console.error("*** navigation error", event.url, event.error);
       } else if (event instanceof NavigationStart) {
       } else if (event instanceof NavigationEnd) {
-        const urlpart_ = event.url.split("/")[1];
-        if (!urlpart_) {
-          this.misc.menutoggle.next(false);
+        const urlpart1_ = event.url.split("/")[1];
+        if (!urlpart1_) {
+          this.menutoggle = false;
+        } else {
+          if(!this.menutoggle) {
+            this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+              this.menutoggle = LSMENUTOGGLE;
+            });
+          }
         }
       }
     });

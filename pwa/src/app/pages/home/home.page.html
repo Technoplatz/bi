@@ -65,16 +65,15 @@ https://www.gnu.org/licenses.
         <ion-col size="11" class="ion-padding-top">
           <ion-button (click)="doSign('signin')" class="ion-margin-top text-medium" size="large">
             <ion-icon name="log-in-outline"></ion-icon>
-            {{ 'Sign in' | translate }}&nbsp;&nbsp;&nbsp;
+            {{ 'Sign in' | translate }}&nbsp;&nbsp;
           </ion-button>
         </ion-col>
       </ion-row>
       <ion-row class="ion-margin-top">
         <ion-col size="1"></ion-col>
-        <ion-col size="11"
-          >{{ 'Don\'t have an account?' | translate }}
-          <a href="#" (click)="doSignup()">{{ 'Click to Sign up' | translate }}.</a></ion-col
-        >
+        <ion-col size="11">{{ 'Don\'t have an account?' | translate }}
+          <a href="#" (click)="doSignup()">{{ 'Click to Sign up' | translate }}.</a>
+        </ion-col>
       </ion-row>
     </ng-template>
   </ion-grid>

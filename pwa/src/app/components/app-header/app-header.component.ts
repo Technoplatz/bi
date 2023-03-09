@@ -113,13 +113,13 @@ export class AppHeaderComponent implements OnInit {
   doNavi(s: string, sub: any) {
     this.misc.navi.next({
       s: s,
-      sub: sub,
+      sub: sub
     });
   }
 
   menuToggle() {
     this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.misc.menutoggle.next(LSMENUTOGGLE ? false : true);
+      this.misc.menutoggle.next(!LSMENUTOGGLE);
     });
   }
 

@@ -58,15 +58,6 @@ h2 {
   letter-spacing: -0.02rem !important;
 }
 
-app-menu {
-  width: 260px !important;
-  border-right: 1px solid var(--ion-color-light) !important;
-}
-
-ion-router-outlet {
-  margin-top: 0px !important;
-}
-
 ion-reorder {
   margin-top: 4px !important;
   margin-inline-end: 8px !important;
@@ -657,11 +648,12 @@ form ion-item ion-label {
   height: calc(100vh - 78px);
   overflow: scroll !important;
   padding-left: 20px;
-  padding-top: 10px;
+  padding-top: 20px;
   position: sticky !important;
 }
 
 .menu-side {
+  padding-left: 16px;
   overflow-y: scroll !important;
 }
 
@@ -868,6 +860,12 @@ ion-item {
   --background-focused-opacity: transparent !important;
   --background-hover: transparent !important;
   --background-hover-opacity: transparent !important;
+}
+
+app-menu {
+  margin-top: 0px;
+  width: 260px;
+  border-right: 1px solid var(--ion-color-light) !important;
 }
 
 .action-button {
