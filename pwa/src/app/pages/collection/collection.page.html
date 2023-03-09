@@ -30,11 +30,12 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<app-header [header]="header" [user]="user"></app-header>
+<!-- <app-header [header]="header" [user]="user"></app-header> -->
 <ion-content class="ion-no-padding">
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row *ngIf="is_initialized; else dataloading">
       <ion-col class="console-right">
+        <h6>{{ 'COLLECTIONS' | translate }}</h6>
         <h1>{{ subheader }}</h1>
         <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="sub-menu-row sq-menu-row">

@@ -30,12 +30,14 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<app-header [header]="header" [user]="user"></app-header>
+<!-- <app-header [header]="header" [user]="user"></app-header> -->
 <ion-content class="ion-no-padding">
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
-        <ion-grid class="ion-no-padding ion-margin-bottom">
+        <h6>{{ 'DASHBOARD' | translate }}</h6>
+        <h1>{{ 'Welcome' | translate }}</h1>
+        <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12">
               <div (click)="Settings('_collection', 'insert', null, 0)" class="data-sq-button">
