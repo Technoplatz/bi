@@ -13,7 +13,7 @@
         "value": "0-Open"
       }
     ],
-    "act_fields": [
+    "act_set": [
       {
         "key": "inp_status",
         "value": "1-InProcess"
@@ -38,7 +38,7 @@
         "value": "1-InProcess"
       }
     ],
-    "act_fields": [
+    "act_set": [
       {
         "key": "inp_status",
         "value": "0-Open"

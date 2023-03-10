@@ -100,11 +100,9 @@ ion-chip {
 
 ion-alert .alert-wrapper {
   --min-width: 600px !important;
-  /* --border-radius: 0px; */
 }
 
 ion-alert .sc-ion-alert-md {
-  /* border-radius: 0px !important; */
   --min-width: 600px;
   --min-height: 600px !important;
   --max-height: 600px !important;
@@ -119,13 +117,19 @@ ion-alert .alert-radio-group {
   display: flex;
   right: 24px;
   top: 16px;
-  cursor: pointer !important;
   z-index: 99;
+  border-bottom: 1px solid var(--ion-color-light);;
 }
 
 .top-tools * {
   align-content: flex-end;
   margin: auto;
+  cursor: pointer !important;
+}
+
+.top-tools ion-button {
+  --padding-start: none;
+  --padding-end: none;
 }
 
 .filler {

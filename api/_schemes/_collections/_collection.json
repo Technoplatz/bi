@@ -31,15 +31,6 @@
             "permanent": true,
             "width": 110
         },
-        "col_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 1000,
-            "width": 120
-        },
         "col_structure": {
             "bsonType": "object",
             "title": "Structure",
@@ -71,6 +62,6 @@
         ]
     ],
     "sort": {
-        "col_priority": 1
+        "_updated_at": -1
     }
 }

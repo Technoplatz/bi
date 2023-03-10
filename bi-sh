@@ -115,6 +115,8 @@ function buildBI() {
     docker build --tag $NS/bi-pwa$SUFFIX:$TAG pwa/
     docker build --tag $NS/bi-replicaset$SUFFIX:$TAG _replicaset/
     docker build --tag $NS/bi-init$SUFFIX:$TAG _init/
+    echo -e "\n✔ Images were built successfully."
+    startBI
     return 1
 }
 

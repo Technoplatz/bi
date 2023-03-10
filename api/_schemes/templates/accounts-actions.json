@@ -7,7 +7,7 @@
     "act_one_click": false,
     "act_priority": 1000,
     "act_filter": [],
-    "act_fields": [
+    "act_set": [
       {
         "key": "acc_status",
         "value": "0-Open"
@@ -32,7 +32,7 @@
         "value": "0-Open"
       }
     ],
-    "act_fields": [
+    "act_set": [
       {
         "key": "acc_status",
         "value": "1-Active"

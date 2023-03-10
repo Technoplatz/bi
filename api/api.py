@@ -785,7 +785,6 @@ class Crud():
                 doc_ = {
                     "col_id": col_id_,
                     "col_title": col_title_,
-                    "col_priority": 1000,
                     "col_prefix": prefix_,
                     "col_structure": None,
                     "_created_at": datetime.now(),
@@ -1351,7 +1350,6 @@ class Crud():
                     "col_id": collection_,
                     "col_title": collection_.title(),
                     "col_prefix": prefix_,
-                    "col_priority": 100,
                     "col_structure": structure_,
                     "_created_at": datetime.now(),
                     "_modified_at": datetime.now(),
@@ -2421,7 +2419,7 @@ class Crud():
             structure_ = self.root_schemes_f("_collections/_collection")
 
             if Misc().permitted_user_f(user_):
-                data_ = list(Mongo().db["_collection"].find(filter={}, sort=[("col_priority", 1)]))
+                data_ = list(Mongo().db["_collection"].find(filter={}, sort=[("_updated_at", -1)]))
             else:
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
                 for usr_tag_ in usr_tags_:
@@ -2839,7 +2837,7 @@ class Crud():
                         "title": doc_["act_title"],
                         "enabled": doc_["act_enabled"],
                         "filter": doc_["act_filter"],
-                        "fields": doc_["act_fields"],
+                        "set": doc_["act_set"],
                         "one_click": True if doc_["act_one_click"] and doc_["act_one_click"] == True else False
                     })
 
@@ -3142,8 +3140,8 @@ class Crud():
                     act_enabled_ = True if "enabled" in action_ and action_["enabled"] == True else False
                     act_one_click_ = True if "one_click" in action_ and action_["one_click"] == True else False
                     act_filter_ = action_["filter"] if "filter" in action_ else None
-                    act_fields_ = action_["fields"] if "fields" in action_ else None
-                    if act_id_ and act_collection_id_ and act_title_ and len(act_filter_) >= 0 and act_fields_ and len(act_fields_) > 0:
+                    act_set_ = action_["set"] if "set" in action_ else None
+                    if act_id_ and act_collection_id_ and act_title_ and len(act_filter_) >= 0 and act_set_ and len(act_set_) > 0:
                         doc_ = {
                             "act_id": act_id_,
                             "act_collection_id": act_collection_id_,
@@ -3151,7 +3149,7 @@ class Crud():
                             "act_enabled": act_enabled_,
                             "act_one_click": act_one_click_,
                             "act_filter": act_filter_,
-                            "act_fields": act_fields_,
+                            "act_set": act_set_,
                             "_modified_at": datetime.now(),
                             "_modified_by": user_["email"] if user_ and "email" in user_ else None
                         }

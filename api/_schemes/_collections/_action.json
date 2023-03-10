@@ -104,7 +104,7 @@
             "subType": "filter",
             "width": 120
         },
-        "act_fields": {
+        "act_set": {
             "bsonType": "array",
             "minItems": 0,
             "maxItems": 16,

@@ -260,12 +260,9 @@ https://www.gnu.org/licenses.
           <ion-row *ngIf="count>=0">
             <ion-col size="12" class="ion-no-padding pages-col">
               <!-- NO RECORD FOUND PAGING -->
-              <div *ngIf="is_loaded && (!count || count==0); else showpaging">
-                <h6>{{ 'No records found' | translate }}</h6>
-                {{ 'Click the button below to add the first record' | translate }}.<br />
-                <ion-button size="small" (click)="goCrud(null, 'insert')" class="notfound-button">
-                  {{ 'New Record' | translate }}
-                </ion-button>
+              <div *ngIf="is_loaded && (!count || count==0); else showpaging" class="ion-padding-top">
+                <h6>{{ 'No records found' | translate }}!</h6>
+                {{ 'Click the button above to add a new record' | translate }}.
               </div>
               <!-- RECORDS FOUND PAGING -->
               <ng-template #showpaging>
