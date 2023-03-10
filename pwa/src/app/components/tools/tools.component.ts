@@ -1,4 +1,4 @@
-<!--
+/*
 Technoplatz BI
 
 Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
@@ -28,28 +28,45 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
--->
+*/
 
-<ion-header class="app-header ion-no-border">
-  <ion-toolbar *ngIf="user" color="white">
-    <div class="flex-container ion-padding-start">
-      <ion-button class="flex-header-start" (click)="menuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
-        <ion-icon name="menu-outline"></ion-icon>
-      </ion-button>
-      <ion-title class="flex-header-start nomargin">{{ header }}</ion-title>
-      <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small"
-        class="flex-header-end">
-        <ion-label>{{ 'NEW VERSION' | translate }}</ion-label>
-      </ion-button>
-      <ion-button fill="outline" (click)="doNavi('account', 'signout')" size="small"
-        class="flex-header-end" color="dark">
-        <ion-label>{{ 'SIGN OUT' | translate }}</ion-label>
-      </ion-button>
-      <ion-button fill="clear" (click)="doNavi('account', 'settings')"
-        class="flex-header-end ion-margin-start" color="dark" size="small">
-        <ion-label>{{ name }}&nbsp;&nbsp;</ion-label>
-        <ion-icon name="person-circle-outline" size="large"></ion-icon>
-      </ion-button>
-    </div>
-  </ion-toolbar>
-</ion-header>
+import { Component, OnInit } from "@angular/core";
+import { Miscellaneous } from "../../classes/miscellaneous";
+import { Storage } from "@ionic/storage";
+import { Auth } from "../../classes/auth";
+
+@Component({
+  selector: "app-tools",
+  templateUrl: "./tools.component.html",
+  styleUrls: ["./tools.component.scss"]
+})
+
+export class ToolsComponent implements OnInit {
+  public newVersion: boolean = false;
+  public name: string = "";
+
+  constructor(
+    private auth: Auth,
+    public misc: Miscellaneous,
+    private storage: Storage
+  ) { }
+
+  ngOnInit() {
+    this.misc.version.subscribe((res: any) => {
+      this.storage.set("LSVERSION", res[0]).then(() => {
+        this.newVersion = res ? res[0] : false;
+      });
+    });
+    this.auth.user.subscribe((user: any) => {
+      this.name = user.name;
+    });
+  }
+
+  doSetVersion() {
+    this.storage.set("LSVERSION", [false]).then(() => {
+      this.misc.version.next([false]);
+      window.location.reload();
+    });
+  }
+
+}

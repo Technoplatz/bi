@@ -34,11 +34,11 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslateModule } from "@ngx-translate/core";
 import { RouterModule } from "@angular/router";
-import { AppHeaderComponent } from "./app-header/app-header.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MenuComponent } from "./menu/menu.component";
 import { FooterComponent } from "./footer/footer.component";
 import { FilterComponent } from "./filter/filter.component";
+import { ToolsComponent } from "./tools/tools.component";
 import { KovComponent } from "./kov/kov.component";
 import { InnerFooterComponent } from "./inner-footer/inner-footer.component";
 import { ModalFooterComponent } from "./modal-footer/modal-footer.component";
@@ -49,9 +49,9 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
 @NgModule({
     declarations: [
         MenuComponent,
-        AppHeaderComponent,
         FooterComponent,
         FilterComponent,
+        ToolsComponent,
         KovComponent,
         InnerFooterComponent,
         ModalFooterComponent,
@@ -68,9 +68,9 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
     ],
     exports: [
         MenuComponent,
-        AppHeaderComponent,
         FooterComponent,
         FilterComponent,
+        ToolsComponent,
         KovComponent,
         InnerFooterComponent,
         ModalFooterComponent,

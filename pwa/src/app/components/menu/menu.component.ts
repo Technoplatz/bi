@@ -31,7 +31,6 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { MenuController } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
 import { environment } from "../../../environments/environment";
 import { Miscellaneous } from "../../classes/miscellaneous";
@@ -59,25 +58,21 @@ export class MenuComponent implements OnInit {
     private auth: Auth,
     private crud: Crud,
     private storage: Storage,
-    public menu: MenuController,
     private misc: Miscellaneous
   ) { }
 
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
-      this.auth.Saas().then((res: any) => {
-        this.saas_ = res ? res : {};
-      });
-      this.collectionso = this.crud.collections.subscribe((res: any) => {
-        this.collections = res && res.data ? res.data : [];
-      });
-      this.viewso = this.crud.views.subscribe((res: any) => {
-        this.views = res && res.data ? res.data : [];
-      });
-      this.menu.open().then(() => {
-        this.init = true;
-      });
+    });
+    this.collectionso = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+    });
+    this.viewso = this.crud.views.subscribe((res: any) => {
+      this.views = res && res.data ? res.data : [];
+    });
+    this.crud.saas.subscribe((res: any) => {
+      this.saas_ = res ? res : {};
     });
   }
 

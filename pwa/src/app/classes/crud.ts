@@ -62,6 +62,7 @@ export class Crud {
   public collections = new BehaviorSubject([]);
   public views = new BehaviorSubject([]);
   public visuals = new BehaviorSubject([]);
+  public saas = new BehaviorSubject([]);
   public announcements = new BehaviorSubject([]);
 
   constructor(
@@ -660,13 +661,35 @@ export class Crud {
 
   getAll() {
     return new Promise((resolve, reject) => {
-      this.getCollections().then(() => {
-        this.getViews().then(() => {
-          resolve(true);
+      this.getSaas().then(() => {
+        this.getCollections().then(() => {
+          this.getViews().then(() => {
+            resolve(true);
+          }).catch((error: any) => {
+            reject(error);
+          });
         }).catch((error: any) => {
           reject(error);
         });
-      }).catch((error: any) => {
+      });
+    });
+  }
+
+  getSaas() {
+    return new Promise((resolve, reject) => {
+      const posted: any = {
+        op: "saas"
+      }
+      this.http.post<any>(this.apiHost + "/auth", posted, {
+        headers: new HttpHeaders(this.crudHeaders)
+      }).subscribe((res: any) => {
+        if (res && res.result) {
+          this.saas.next(res.saas);
+          resolve(res.saas);
+        } else {
+          reject(res.msg);
+        }
+      }, (error: any) => {
         reject(error);
       });
     });

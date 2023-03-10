@@ -49,7 +49,7 @@ h6 {
 }
 
 h1 {
-  font-size: 2.8rem !important;
+  font-size: 2.4rem !important;
   letter-spacing: -0.02rem !important;
 }
 
@@ -112,6 +112,20 @@ ion-alert .sc-ion-alert-md {
 
 ion-alert .alert-radio-group {
   max-height: 100% !important;
+}
+
+.top-tools {
+  position: fixed;
+  display: flex;
+  right: 24px;
+  top: 16px;
+  cursor: pointer !important;
+  z-index: 99;
+}
+
+.top-tools * {
+  align-content: flex-end;
+  margin: auto;
 }
 
 .filler {
@@ -648,7 +662,7 @@ form ion-item ion-label {
   height: calc(100vh - 78px);
   overflow: scroll !important;
   padding-left: 20px;
-  padding-top: 26px;
+  padding-top: 24px;
   position: sticky !important;
 }
 
@@ -875,10 +889,6 @@ app-menu {
 .action-button {
   max-width: 180px;
   overflow: hidden !important;
-}
-
-.app-header {
-  border-bottom: 1px solid var(--ion-color-light);
 }
 
 .app-footer {

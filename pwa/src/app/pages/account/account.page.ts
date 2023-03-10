@@ -69,8 +69,8 @@ export class AccountPage implements OnInit {
     private storage: Storage,
     private auth: Auth,
     private router: Router,
-    private misc: Miscellaneous,
-    private alert: AlertController
+    private alert: AlertController,
+    public misc: Miscellaneous
   ) { }
 
   ngOnDestroy() { }

@@ -127,10 +127,10 @@ export class ViewPage implements OnInit {
     private storage: Storage,
     private crud: Crud,
     private auth: Auth,
-    private misc: Miscellaneous,
     private modal: ModalController,
     private alert: AlertController,
-    private router: Router
+    private router: Router,
+    public misc: Miscellaneous,
   ) {
     this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;

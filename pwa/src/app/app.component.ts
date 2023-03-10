@@ -89,7 +89,7 @@ export class AppComponent implements OnInit {
     });
 
     // listen auth changes
-    this.auth.stateChange.subscribe((LSUSERMETA: any) => {
+    this.auth.user.subscribe((LSUSERMETA: any) => {
       if (LSUSERMETA) {
         this.user_ = LSUSERMETA;
       } else {

@@ -30,16 +30,17 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-content class="ion-no-padding">
-  <app-tools></app-tools>
-  <div class="page-null">
-    <h1>404</h1>
-    {{ 'Page not found' | translate }}.
-    <p>
-      <ion-button (click)="doNavi('dashboard', null)">
-        {{ 'Go to Dashboard' | translate }}
-      </ion-button>
-    </p>
-  </div>
-</ion-content>
-<app-inner-footer></app-inner-footer>
+<div class="top-tools">
+  <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small">
+    <ion-label>{{ 'NEW VERSION' | translate }}</ion-label>
+  </ion-button>
+  <ion-button size="large" fill="clear" (click)="misc.doMenuToggle()" class="ion-no-padding ion-no-margin">
+    <ion-icon *ngIf="misc.toggle" name="expand" size="large"></ion-icon>
+    <ion-icon *ngIf="!misc.toggle" name="contract" size="large"></ion-icon>
+  </ion-button>
+  <ion-button fill="clear" (click)="misc.navi.next({ s: 'account', sub: 'preferences' })"
+  class="ion-no-padding ion-no-margin">
+  <ion-icon name="person-circle-outline" size="large"></ion-icon>
+  <ion-label>&nbsp;{{ name }}</ion-label>
+</ion-button>
+</div>

@@ -105,10 +105,10 @@ export class CollectionPage implements OnInit {
   constructor(
     private storage: Storage,
     private crud: Crud,
-    private misc: Miscellaneous,
     private modal: ModalController,
     private alert: AlertController,
-    private router: Router
+    private router: Router,
+    public misc: Miscellaneous
   ) {
     this.collectionso = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
@@ -665,10 +665,6 @@ export class CollectionPage implements OnInit {
 
   doSetSearchItemOp(k: string, op: string) {
     this.searched[k].op = op;
-  }
-
-  doMenuToggle() {
-    this.menu_toggle = !this.menu_toggle;
   }
 
   goField(f_: string) {

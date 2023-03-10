@@ -151,8 +151,8 @@ export class DashboardPage implements OnInit {
   constructor(
     private storage: Storage,
     private crud: Crud,
-    private misc: Miscellaneous,
-    private modal: ModalController
+    private modal: ModalController,
+    public misc: Miscellaneous
   ) { }
 
   ngOnDestroy() {

@@ -46,6 +46,7 @@ export class Miscellaneous {
   private loadin: any;
   private filter: any = [];
   private apiHost: string = "";
+  public toggle: boolean = true;
 
   constructor(
     private storage: Storage,
@@ -60,6 +61,14 @@ export class Miscellaneous {
   navi = new Subject<any>();
   menutoggle = new Subject<any>();
   version = new BehaviorSubject<any>([]);
+
+  doMenuToggle() {
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      console.log("*** toogle", LSMENUTOGGLE);
+      this.toggle = !LSMENUTOGGLE;
+      this.menutoggle.next(this.toggle);
+    });
+  }
 
   getAPIHost() {
     return new Promise((resolve) => {
