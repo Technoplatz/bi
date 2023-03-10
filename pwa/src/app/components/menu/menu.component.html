@@ -83,9 +83,6 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
         </ion-button>
-        <p (click)="doNavi('dashboard', 'templates')" class="clicked-item dark">
-          {{ 'Templates' | translate }}
-        </p>
         <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)" class="clicked-item dark">
           {{ item.title }}
         </p>

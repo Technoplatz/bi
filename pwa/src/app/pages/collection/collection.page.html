@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row *ngIf="is_initialized; else dataloading">
       <ion-col class="console-right">
-        <h6>{{ 'COLLECTIONS' | translate }}</h6>
+        <h6>{{ header | translate }}</h6>
         <h1>{{ subheader }}</h1>
         <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -104,7 +104,7 @@ https://www.gnu.org/licenses.
               </div>
             </ion-col>
           </ion-row>
-          <ion-row *ngIf="is_pane_ok" class="ion-margin-top">
+          <ion-row *ngIf="is_pane_ok && is_crud" class="ion-margin-top">
             <ion-col *ngIf="perm && actions?.length > 0; else noaction">
               {{ 'ACTIONS' | translate }} [{{ actions?.length }}]<br />
               <div class="act-buttons-wrapper">
