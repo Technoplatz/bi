@@ -90,10 +90,10 @@ https://www.gnu.org/licenses.
                 <ion-icon name="skull"></ion-icon><br />
                 {{ 'Purge' | translate }}<br />{{ 'Filtered' | translate }}
               </div>
-              <div *ngIf="perm && is_crud" (click)="goFields()" class="data-sq-button">
+              <!-- <div *ngIf="perm && is_crud" (click)="goFields()" class="data-sq-button">
                 <ion-icon name="list-outline"></ion-icon><br />
                 {{ 'Data' | translate }}<br />{{ 'Fields' | translate }}
-              </div>
+              </div> -->
               <div *ngIf="perm && is_crud && reconfig" (click)="doReconfigure()" class="data-sq-button required">
                 <ion-icon name="warning-outline"></ion-icon><br />
                 {{ 'Update' | translate }}<br />{{ 'Required' | translate }}
@@ -133,7 +133,7 @@ https://www.gnu.org/licenses.
               </ion-checkbox>
             </ion-col>
             <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
-              [style]="'min-width: ' + item.value.width + 'px !important;'">
+              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + misc.defaultWidth + 'px !important;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
                 <span class="column-title">{{ item.value.title }}<br />
                 </span>
@@ -222,7 +222,7 @@ https://www.gnu.org/licenses.
               </ion-checkbox>
             </ion-col>
             <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
-              [style]="'min-width: ' + item.value.width + 'px;'">
+            [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + misc.defaultWidth + 'px !important;'">
               <span *ngIf="item.value.bsonType=='bool'">
                 {{ record[item.key] }}
               </span>

@@ -38,7 +38,6 @@ import { Crud } from "../../classes/crud";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
-import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 
 @Component({
   selector: "app-collection",
@@ -47,7 +46,6 @@ import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 })
 
 export class CollectionPage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false }) private strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
   public header: string = "Collections";
   public subheader: string = "";
@@ -88,7 +86,6 @@ export class CollectionPage implements OnInit {
   public columns_: any;
   private menu_toggle: boolean = false;
   public view_mode: any = {};
-  private options?: JsonEditorOptions;
   private sweeped: any = [];
   private sort: any = {};
   private properites_: any = {};

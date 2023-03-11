@@ -46,7 +46,8 @@ export const environment = {
     default_icon: "medical-outline",
     limit: 30,
     limits: [20, 50, 100],
-    loadingText: "Bitte warten Sie"
+    loadingText: "Bitte warten Sie",
+    defaultColumnWidth: 140
   },
   import_structure: {
     "properties": {

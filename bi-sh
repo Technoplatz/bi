@@ -111,12 +111,25 @@ function installBI() {
 }
 
 function buildBI() {
-    docker build --tag $NS/bi-api$SUFFIX:$TAG api/
-    docker build --tag $NS/bi-pwa$SUFFIX:$TAG pwa/
-    docker build --tag $NS/bi-replicaset$SUFFIX:$TAG _replicaset/
-    docker build --tag $NS/bi-init$SUFFIX:$TAG _init/
-    echo -e "\n✔ Images were built successfully."
-    startBI
+    if [[ -z $2 || $2 = "bi-api" ]]; then
+        docker build --tag $NS/bi-api$SUFFIX:$TAG api/
+    fi
+    if [[ -z $2 || $2 = "bi-pwa" ]]; then
+        docker build --tag $NS/bi-pwa$SUFFIX:$TAG pwa/
+    fi
+    if [[ -z $2 || $2 = "bi-replicaset" ]]; then
+        docker build --tag $NS/bi-replicaset$SUFFIX:$TAG _replicaset/
+    fi
+    if [[ -z $2 || $2 = "bi-init" ]]; then
+        docker build --tag $NS/bi-init$SUFFIX:$TAG _init/
+    fi
+    if [ $? -eq 0 ]; then
+        echo -e "\n✔ Images were built successfully."
+        startBI
+    else
+        echo -e "\n✘ Sorry! Process was terminated ($?)."
+        return 0
+    fi
     return 1
 }
 
@@ -255,7 +268,7 @@ case $1 in
         helpBI
         ;;
     "build")
-        buildBI
+        buildBI "$2" "$3"
         ;;
     *)
         echo "✘ Sorry. $1 is not an available command."

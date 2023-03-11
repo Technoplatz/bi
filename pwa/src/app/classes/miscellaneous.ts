@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Injectable } from "@angular/core";
-import { ModalController, ToastController, LoadingController, AlertController } from "@ionic/angular";
+import { ModalController, ToastController } from "@ionic/angular";
 import { Subject, BehaviorSubject } from "rxjs";
 import { Storage } from "@ionic/storage";
 import { TranslateService } from "@ngx-translate/core";
@@ -43,8 +43,7 @@ import { ClipboardPluginWeb } from "@capacitor/core";
 })
 
 export class Miscellaneous {
-  private loadin: any;
-  private filter: any = [];
+  public defaultWidth: number = environment.misc.defaultColumnWidth;
   private apiHost: string = "";
   public toggle: boolean = true;
 
@@ -53,8 +52,6 @@ export class Miscellaneous {
     private translate: TranslateService,
     private modal: ModalController,
     private toast: ToastController,
-    private loading: LoadingController,
-    private alert: AlertController,
     private cb: ClipboardPluginWeb
   ) { }
 
@@ -64,7 +61,6 @@ export class Miscellaneous {
 
   doMenuToggle() {
     this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      console.log("*** toogle", LSMENUTOGGLE);
       this.toggle = !LSMENUTOGGLE;
       this.menutoggle.next(this.toggle);
     });
@@ -72,20 +68,8 @@ export class Miscellaneous {
 
   getAPIHost() {
     return new Promise((resolve) => {
-      this.apiHost = window.location.host.includes("8100") ? window.location.protocol + "//" + window.location.host.replace(/8100/gi, environment.apiPort) : window.location.host.includes("8101") ? window.location.protocol + "//" + window.location.host.replace(/8101/gi, environment.apiPort) : window.location.protocol + "//api." + window.location.hostname;
+      this.apiHost = window.location.host.includes("8100") ? window.location.protocol + "//" + window.location.host.replace(/8100/gi, environment.apiPort) : window.location.protocol + "//api." + window.location.hostname;
       resolve(this.apiHost);
-    });
-  }
-
-  getRandomString(length: number) {
-    return new Promise((resolve, reject) => {
-      let result = "";
-      const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      const charactersLength = characters.length;
-      for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        const q = i === length - 1 ? resolve(result) : null;
-      }
     });
   }
 
@@ -131,34 +115,6 @@ export class Miscellaneous {
     });
   }
 
-  isJson(j: any) {
-    try {
-      JSON.parse(j);
-    } catch (e) {
-      return false;
-    }
-    return true;
-  }
-
-  async presentLoading(message: string) {
-    this.loadin = await this.loading.create({
-      spinner: "crescent",
-      duration: 5000,
-      message: message,
-      translucent: true,
-      cssClass: "custom-loading",
-      backdropDismiss: false,
-      showBackdrop: true,
-      mode: "md",
-      keyboardClose: false,
-    });
-    await this.loadin.present();
-  }
-
-  dismissLoading(loadin: any) {
-    loadin ? loadin.dismiss().then(() => { }) : null;
-  }
-
   async doMessage(msg: string, type: string) {
     const typed: any = {
       message: msg,
@@ -175,38 +131,6 @@ export class Miscellaneous {
     this.toast.dismiss().then(() => { }).catch((error: any) => { });
     const toast = await this.toast.create(typed);
     toast.present();
-  }
-
-  getFilterString(id: string) {
-    return new Promise((resolve, reject) => {
-      let filterstr = "";
-      this.storage.get("LSFILTER_" + id).then((LSFILTER: any) => {
-        this.filter = LSFILTER ? LSFILTER : [];
-        if (this.filter && this.filter.length > 0) {
-          for (let f = 0; f <= this.filter.length - 1; f++) {
-            filterstr += f > 0 ? " and " : "";
-            filterstr += this.filter[f].key + " ";
-            filterstr += environment.filterops.filter((obj: any) => this.filter[f].op === obj.value)[0].value + " ";
-            filterstr += this.filter[f].value + " ";
-            if (f === this.filter.length - 1) {
-              resolve(filterstr);
-            }
-          }
-        } else {
-          resolve(filterstr);
-        }
-      });
-    });
-  }
-
-  async doInfoAlert(d: any) {
-    const alert = await this.alert.create({
-      header: "Info",
-      message: d + ".",
-      buttons: ["OK"],
-    });
-    alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
-    await alert.present();
   }
 
   getFormattedDate(val: any) {

@@ -58,7 +58,7 @@ export class ToolsComponent implements OnInit {
       });
     });
     this.auth.user.subscribe((user: any) => {
-      this.name = user.name;
+      this.name = user ? user.name : "";
     });
   }
 

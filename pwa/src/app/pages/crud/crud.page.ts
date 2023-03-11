@@ -163,6 +163,10 @@ export class CrudPage implements OnInit {
       this.crudForm = res.form;
       this.fields = res.fields;
       this.fieldsupd = res.fields;
+      if(this.op === "insert" && this.collection === "_collection") {
+        this.fieldsupd = this.fields.filter((obj: any) => obj.name !== "col_structure");
+        console.log("*** fields", this.fields);
+      }
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
       this.visibility = "ion-padding-start ion-padding-end";

@@ -3546,6 +3546,93 @@ class Crud():
         finally:
             return res_
 
+    def set_generic_collection_f(self, doc_):
+        try:
+            prefix_ = doc_["col_prefix"]
+
+            structure_ = {
+                "properties": {},
+                "required": [],
+                "index": [],
+                "unique": [],
+                "parents": [],
+                "actions": [],
+                "sort": {}
+            }
+
+            field_id_ = f"{prefix_}_id"
+            field_id_json_ = {
+                "bsonType": "string",
+                "title": "ID",
+                "description": "Record ID",
+                "pattern": "^[a-z0-9-_]{3,64}$",
+                "minLength": 3,
+                "maxLength": 64
+            }
+
+            field_no_ = f"{prefix_}_no"
+            field_no_json_ = {
+                "bsonType": "string",
+                "title": "No",
+                "description": "Record No",
+                "minLength": 1,
+                "maxLength": 128
+            }
+
+            field_date_ = f"{prefix_}_date"
+            field_date_json_ = {
+                "bsonType": "date",
+                "title": "Date",
+                "description": "Record Date",
+                "default": "$CURRENT_DATE"
+            }
+
+            field_status_ = f"{prefix_}_status"
+            field_status_json_ = {
+                "bsonType": "string",
+                "title": "Status",
+                "description": "Record Status",
+                "enum": [
+                    "0-Open",
+                    "1-InProgress",
+                    "2-Closed",
+                    "3-Finalized"
+                ],
+                "default": "0-Open"
+            }
+
+            field_bool_ = f"{prefix_}_is_active"
+            field_bool_json_ = {
+                "bsonType": "bool",
+                "title": "Is Active?",
+                "description": "Is Active?",
+                "default": False
+            }
+
+            structure_["properties"][field_id_] = field_id_json_
+            structure_["properties"][field_no_] = field_no_json_
+            structure_["properties"][field_date_] = field_date_json_
+            structure_["properties"][field_status_] = field_status_json_
+            structure_["properties"][field_bool_] = field_bool_json_
+
+            structure_["required"] = [field_id_, field_no_]
+            structure_["unique"] = [[field_id_]]
+            structure_["index"] = [[field_no_], [field_id_, field_no_], [field_status_]]
+            structure_["parents"] = []
+            structure_["actions"] = []
+            structure_["sort"] = {"_modified_at": -1}
+
+            res_ = {"result": True, "structure": structure_}
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
     def insert_f(self, obj):
         try:
             # gets the required parameters
@@ -3569,6 +3656,13 @@ class Crud():
                     raise APIError(f"collection not found to insert: {doc_['fie_collection_id']}")
                 if doc_["fie_id"][:3] != field_col_["col_prefix"]:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
+
+            if collection_id_ == "_collection":
+                set_generic_collection_f_ = self.set_generic_collection_f(doc_)
+                if not set_generic_collection_f_["result"]:
+                    raise APIError(set_generic_collection_f_["msg"])
+                doc_["col_structure"] = set_generic_collection_f_["structure"]
+
             Mongo().db[collection_].insert_one(doc_)
 
             if collection_id_ == "_collection":
@@ -4427,7 +4521,7 @@ class Auth():
             hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
                 raise APIError(hash_f_["msg"])
-            
+
             salt_ = hash_f_["salt"]
             key_ = hash_f_["key"]
 
@@ -4733,7 +4827,7 @@ class Auth():
             hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
                 raise APIError(hash_f_["msg"])
-            
+
             salt_ = hash_f_["salt"]
             key_ = hash_f_["key"]
 

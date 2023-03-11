@@ -192,31 +192,6 @@ export class Crud {
     });
   }
 
-  SaveProperty(collection: string, properties: any, key: string) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "setprop",
-          user: LSUSERMETA,
-          collection: collection,
-          properties: properties,
-          key: key
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
-    });
-  }
-
   Reconfigure(collection_: string) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
@@ -447,33 +422,6 @@ export class Crud {
       }, (error: any) => {
         console.error("*** error", error);
         reject(error);
-      });
-    });
-  }
-
-  Match(id: string) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.http.post<any>(this.apiHost + "/crud", {
-          op: "match",
-          user: LSUSERMETA,
-          collection: id
-        }, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            if (res.result) {
-              const resp = JSON.parse(res.result);
-              resolve(resp);
-            } else {
-              resolve(true);
-            }
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
       });
     });
   }
@@ -709,57 +657,6 @@ export class Crud {
           console.error("*** announcements error", error);
           reject(error);
         });
-    });
-  }
-
-  getParents(obj: any) {
-    return new Promise((resolve, reject) => {
-      if (obj.parents) {
-        let parents: any = [];
-        for (let p = 0; p < obj.parents.length; p++) {
-          let parent = obj.parents[p];
-          const remote_fields = parent["remote_fields"];
-          let data: any = [];
-          this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-            this.http.post<any>(this.apiHost + "/crud", {
-              op: "parent",
-              user: LSUSERMETA,
-              match: [],
-              fields: parent["remote_fields"],
-              collection: parent["collection"]
-            }, {
-              headers: new HttpHeaders(this.crudHeaders)
-            }).subscribe((res: any) => {
-              if (res && res.result && res.data) {
-                for (let i = 0; i < res.data.length; i++) {
-                  let id = "";
-                  for (let j = 0; j < remote_fields.length; j++) {
-                    id += res.data[i][remote_fields[j]] + " ";
-                    if (j === remote_fields.length - 1) {
-                      let data_line: any = {};
-                      data_line["id"] = res.data[i]["_id"];
-                      data_line[parent["local_field"]] = id.trim();
-                      data.push(data_line);
-                    }
-                  }
-                  if (i === res.data.length - 1) {
-                    parents.push({ "title": parent["title"], "collection": parent["collection"], "local_field": parent["local_field"], "data": data });
-                  }
-                }
-                if (p === obj.parents.length - 1) {
-                  resolve(parents);
-                }
-              } else {
-                reject(res.msg);
-              }
-            }, (error: any) => {
-              reject(error);
-            });
-          });
-        }
-      } else {
-        resolve([]);
-      }
     });
   }
 

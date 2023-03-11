@@ -68,7 +68,6 @@ export class AppComponent implements OnInit {
   ngOnInit() {
 
     this.misc.menutoggle.subscribe((LSMENUTOGGLE: boolean) => {
-      console.log("*** LSMENUTOGGLE0", LSMENUTOGGLE);
       this.menutoggle = LSMENUTOGGLE;
       this.storage.set("LSMENUTOGGLE", LSMENUTOGGLE).then(() => { });
     });
