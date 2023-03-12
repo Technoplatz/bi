@@ -73,7 +73,7 @@ export class AppComponent implements OnInit {
     });
 
     this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = LSMENUTOGGLE;
+      this.menutoggle = LSMENUTOGGLE === undefined ? true : LSMENUTOGGLE;
     });
 
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {

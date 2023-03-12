@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, HostListener, Input, ViewChild, ChangeDetectorRef } from "@angular/core";
+import { Component, OnInit, HostListener, Input, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import { AlertController } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
@@ -50,7 +50,6 @@ export class CrudPage implements OnInit {
   @Input() modified: boolean = false;
   @ViewChild(JsonEditorComponent, { static: false }) public editor?: JsonEditorComponent;
   @ViewChild("barcodefocus", { static: false }) barcodefocus: any;
-  public dateExample: any = ['2022-11-20T22:00'];
   public novalue: any = null;
   public properties: any = {};
   public required: any = [];
@@ -104,6 +103,7 @@ export class CrudPage implements OnInit {
   private collections: any = [];
   private views: any = [];
   private view: any = null;
+  private timeout: number = 500;
 
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
     if (event.key === "Enter") {
@@ -121,8 +121,7 @@ export class CrudPage implements OnInit {
     public misc: Miscellaneous,
     private storage: Storage,
     private crud: Crud,
-    private alert: AlertController,
-    private cd: ChangeDetectorRef
+    private alert: AlertController
   ) {
     this.crudForm = this.formBuilder.group({}, {});
   }
@@ -185,8 +184,8 @@ export class CrudPage implements OnInit {
           console.error(error);
           this.misc.doMessage(error, "error");
         }).finally(() => {
-          setTimeout(() => { this.is_ready = true; }, 500);
-          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, 500) : null;
+          setTimeout(() => { this.is_ready = true; }, this.timeout);
+          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
         });
       }).catch((error: any) => {
         console.error(error);
@@ -265,7 +264,7 @@ export class CrudPage implements OnInit {
           if (!this.barcoded_ || this.op !== "insert") {
             setTimeout(() => {
               this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null });
-            }, 500);
+            }, this.timeout);
           } else {
             this.doInitForm();
           }
@@ -287,7 +286,7 @@ export class CrudPage implements OnInit {
     this.crud.Dump().then(() => {
       setTimeout(() => {
         this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
-      }, 500);
+      }, this.timeout);
     }).catch((error: any) => {
       this.doShowError(error);
       console.error(error);
@@ -306,7 +305,7 @@ export class CrudPage implements OnInit {
     }).then(() => {
       setTimeout(() => {
         this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
-      }, 500);
+      }, this.timeout);
     }).catch((error: any) => {
       this.doShowError(error);
       console.error(error);
@@ -341,7 +340,7 @@ export class CrudPage implements OnInit {
   doRunFilter() {
     setTimeout(() => {
       this.doDismissModal({ modified: false, filters: this.filters && this.filters.length > 0 ? this.filters : null });
-    }, 500);
+    }, this.timeout);
   }
 
   doDeleteItemFromArray(name: any, item: any) {

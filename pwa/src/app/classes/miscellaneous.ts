@@ -43,7 +43,6 @@ import { ClipboardPluginWeb } from "@capacitor/core";
 })
 
 export class Miscellaneous {
-  public defaultWidth: number = environment.misc.defaultColumnWidth;
   private apiHost: string = "";
   public toggle: boolean = true;
 

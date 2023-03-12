@@ -111,6 +111,7 @@ function installBI() {
 }
 
 function buildBI() {
+    echo -e "\nBuilding images... $SUFFIX\n"
     if [[ -z $2 || $2 = "bi-api" ]]; then
         docker build --tag $NS/bi-api$SUFFIX:$TAG api/
     fi
@@ -134,12 +135,12 @@ function buildBI() {
 }
 
 function startBI() {
+    echo -e "\nStarting containers... $SUFFIX\n"
     if [ ! -d $DIR ]; then
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
-    echo -e "\nStarting containers...\n"
     SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         echo -e "\n✔ Platform was started successfully."

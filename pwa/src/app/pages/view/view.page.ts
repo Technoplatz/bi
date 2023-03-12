@@ -39,7 +39,6 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
-import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 
 @Component({
   selector: "app-view",
@@ -48,10 +47,9 @@ import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
 })
 
 export class ViewPage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false }) private strcutureEditor?: JsonEditorComponent;
   @ViewChild("select0") selectRef?: IonSelect;
   public loadingText: string = environment.misc.loadingText;
-  
+  public defaultWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Views";
   public subheader: string = "";
   public user: any = null;
@@ -113,7 +111,6 @@ export class ViewPage implements OnInit {
   private master: any = {};
   private collections: any = [];
   private apiHost: string = "";
-  private options?: JsonEditorOptions;
   private sweeped: any = [];
   private sort: any = {};
   private properites_: any = {};
@@ -130,7 +127,7 @@ export class ViewPage implements OnInit {
     private modal: ModalController,
     private alert: AlertController,
     private router: Router,
-    public misc: Miscellaneous,
+    public misc: Miscellaneous
   ) {
     this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;

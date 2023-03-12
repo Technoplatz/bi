@@ -346,7 +346,7 @@ class Schedular():
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
 
-            Crud().log_f({
+            Misc().log_f({
                 "type": "Announcement",
                 "collection": "_view",
                 "op": scope_,
@@ -467,17 +467,33 @@ class Misc():
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
+        self.NOTIFICATION_SLACK_HOOK_URL = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
+
+    def post_slack_notification(self, exc):
+        if self.NOTIFICATION_SLACK_HOOK_URL:
+            exc_ = {
+                "file": __file__ if __file__ else None,
+                "line": exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else None,
+                "name": type(exc).__name__ if hasattr(exc, "__name__") else None,
+                "details": exc.details if hasattr(exc, "details") else exc
+            }
+            resp_ = requests.post(self.NOTIFICATION_SLACK_HOOK_URL, json.dumps({"text": str(exc_)}))
+            if resp_.status_code != 200:
+                print("*** notification error", resp_, flush=True)
 
     def exception_f(self, exc):
         print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        self.post_slack_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def api_error_f(self, exc):
         print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        self.post_slack_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def mongo_error_f(self, exc):
         try:
+            self.post_slack_notification(exc)
             print("*** mongo error", str(exc.details), flush=True)
             print("*** mongo error", type(exc).__name__, flush=True)
             print("*** mongo error", __file__, flush=True)
@@ -525,6 +541,33 @@ class Misc():
 
         except Exception as exc:
             res_ = self.exception_f(exc)
+
+        finally:
+            return res_
+
+    def log_f(self, obj):
+        try:
+            doc_ = {
+                "log_type": obj["type"],
+                "log_date": datetime.now(),
+                "log_user_id": obj["user"],
+                "log_ip": Misc().get_user_ip_f(),
+                "log_collection_id": obj["collection"] if "collection" in obj else None,
+                "log_operation": obj["op"] if "op" in obj else None,
+                "log_object_id": obj["object_id"] if "object_id" in obj else None,
+                "log_document": obj["document"] if "document" in obj else None,
+                "_modified_at": datetime.now(),
+                "_modified_by": obj["user"]
+            }
+
+            Mongo().db["_log"].insert_one(doc_)
+            res_ = {"result": True}
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
 
         finally:
             return res_
@@ -1059,7 +1102,7 @@ class Crud():
             # do delete
             Mongo().db[collection_].delete_many(get_filtered_)
 
-            log_ = self.log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_,
                 "op": "purge",
@@ -1072,7 +1115,7 @@ class Crud():
             res = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_,
                 "op": "purge",
@@ -1142,7 +1185,7 @@ class Crud():
 
             Mongo().db["_view"].insert_one(doc_)
 
-            log_ = self.log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": "_view",
                 "op": "insert",
@@ -1155,7 +1198,7 @@ class Crud():
             res = {"result": True, "id": id_, "view": doc_}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": "_query",
                 "op": "insert",
@@ -1208,7 +1251,7 @@ class Crud():
             }
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": "_query",
                 "op": "insert",
@@ -1425,7 +1468,7 @@ class Crud():
         except pymongo.errors.PyMongoError as exc:
             session_.abort_transaction()
 
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_,
                 "op": "import",
@@ -1678,7 +1721,7 @@ class Crud():
             }
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": vie_collection_id_,
                 "op": "view",
@@ -2563,7 +2606,7 @@ class Crud():
             }
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_,
                 "op": "read",
@@ -2571,33 +2614,6 @@ class Crud():
                 "document": exc.details
             })
             res_ = Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            res_ = Misc().api_error_f(exc)
-
-        except Exception as exc:
-            res_ = Misc().exception_f(exc)
-
-        finally:
-            return res_
-
-    def log_f(self, obj):
-        try:
-            doc = {
-                "log_type": obj["type"],
-                "log_date": datetime.now(),
-                "log_user_id": obj["user"],
-                "log_ip": Misc().get_user_ip_f(),
-                "log_collection_id": obj["collection"] if "collection" in obj else None,
-                "log_operation": obj["op"] if "op" in obj else None,
-                "log_object_id": obj["object_id"] if "object_id" in obj else None,
-                "log_document": obj["document"] if "document" in obj else None,
-                "_modified_at": datetime.now(),
-                "_modified_by": obj["user"]
-            }
-
-            Mongo().db["_log"].insert_one(doc)
-            res_ = {"result": True}
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
@@ -2866,7 +2882,7 @@ class Crud():
             res_ = {"result": True, "structure": structure_}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": cid_,
                 "op": "reconfigure",
@@ -2964,7 +2980,7 @@ class Crud():
 
             Mongo().db["_collection"].update_one({"col_id": cid_}, {"$set": doc_}, upsert=False)
 
-            log_ = self.log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": cid_,
                 "op": "setprop",
@@ -2991,7 +3007,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": cid_,
                 "op": "setprop",
@@ -3032,7 +3048,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_id_,
                 "op": "reconfig",
@@ -3157,7 +3173,7 @@ class Crud():
                             "act_collection_id": act_collection_id_,
                             "act_id": act_id_
                         }, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=True)
-                        self.log_f({
+                        Misc().log_f({
                             "type": "Info",
                             "collection": "_action",
                             "op": "upsert",
@@ -3168,7 +3184,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_,
                 "op": "reverseinit",
@@ -3230,7 +3246,7 @@ class Crud():
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             Mongo().db[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
 
-            log_ = self.log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_id_,
                 "op": "update",
@@ -3278,7 +3294,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_id_,
                 "op": "update",
@@ -3316,7 +3332,7 @@ class Crud():
 
             Mongo().db[collection_].delete_one(match_)
 
-            log_ = self.log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_id_,
                 "op": "remove",
@@ -3335,7 +3351,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_id_,
                 "op": "remove",
@@ -3425,7 +3441,7 @@ class Crud():
                     bin = f"{collection_id_}_bin"
                     Mongo().db[bin].insert_one(doc)
 
-                log_ = self.log_f({
+                log_ = Misc().log_f({
                     "type": "Info",
                     "collection": collection_,
                     "op": f"multiple {op_}",
@@ -3438,7 +3454,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_id_,
                 "op": f"multiple {op_}",
@@ -3512,7 +3528,7 @@ class Crud():
                 })
                 Mongo().db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
 
-            log_ = self.log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_,
                 "op": "action",
@@ -3528,7 +3544,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_id_,
                 "op": "action",
@@ -3688,7 +3704,7 @@ class Crud():
                     if not reconfig_set_f_["result"]:
                         raise APIError(reconfig_set_f_["msg"])
 
-            log_ = self.log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_id_,
                 "op": "insert",
@@ -3701,7 +3717,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            self.log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": collection_id_,
                 "op": "insert",
@@ -3898,7 +3914,7 @@ class OTP():
                 "_otp_secret_modified_by": email_,
             }, "$inc": {"_modified_count": 1}})
 
-            log_ = Crud().log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": "_auth",
                 "op": "reset-otp",
@@ -3966,7 +3982,7 @@ class OTP():
                         "_otp_not_validated_ip": Misc().get_user_ip_f()
                     }, "$inc": {"_modified_count": 1}})
 
-            log_ = Crud().log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": "_auth",
                 "op": "validate-otp",
@@ -4136,7 +4152,7 @@ class Auth():
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            Crud().log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": "_auth",
                 "op": op_,
@@ -4429,7 +4445,7 @@ class Auth():
                     "_apikey_modified_by": email_
                 }, "$inc": {"_apikey_modified_count": 1}}, upsert=False)
 
-                log_ = Crud().log_f({
+                log_ = Misc().log_f({
                     "type": "Info",
                     "collection": "_auth",
                     "op": op_,
@@ -4535,7 +4551,7 @@ class Auth():
                 "_modified_by": email_
             }, "$inc": {"_modified_count": 1}}, upsert=False)
 
-            log_ = Crud().log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": "_auth",
                 "op": "reset",
@@ -4585,7 +4601,7 @@ class Auth():
             verification_content_ = {"tfac": str(tfac_)}
 
             # writes success signin into _log
-            log_ = Crud().log_f({
+            log_ = Misc().log_f({
                 "type": "Info",
                 "collection": "_auth",
                 "op": "signin",
@@ -4703,7 +4719,7 @@ class Auth():
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            Crud().log_f({
+            Misc().log_f({
                 "type": "Error",
                 "collection": "_auth",
                 "op": op_,
@@ -5031,9 +5047,6 @@ def crud_f():
             crud_ = Crud().template_f(input_)
         else:
             raise APIError(f"{op_} operation is not supported")
-
-        if not crud_["result"]:
-            raise APIError(crud_["msg"] if "msg" in crud_ else "crud error")
 
     except APIError as exc:
         crud_ = Misc().api_error_f(exc)
@@ -5432,7 +5445,7 @@ def post_f():
                     break
                 output_.append(item_)
 
-        log_ = Crud().log_f({
+        log_ = Misc().log_f({
             "type": "Info",
             "collection": rh_collection_,
             "op": f"API {operation_}",

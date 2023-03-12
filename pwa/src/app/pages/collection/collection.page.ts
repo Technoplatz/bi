@@ -47,6 +47,7 @@ import { CrudPage } from "../crud/crud.page";
 
 export class CollectionPage implements OnInit {
   @ViewChild("select0") selectRef?: IonSelect;
+  public defaultWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
