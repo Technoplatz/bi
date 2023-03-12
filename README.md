@@ -6,8 +6,8 @@ Technoplatz BI is a [no-code](#what-is-no-code), multi-container data applicatio
 - [How to Get Started](#get-started)
 - [Installation](#installation)
 - [Maintenance](#maintenance)
-- [Licensing Options](#licensing)
-- [About](#about)
+- [Licensing Options](#license)
+- [Impressum](#impressum)
 
 ## Highlights
 
@@ -195,8 +195,8 @@ ADMIN_USER_NAME=John Doe
 COMPANY_NAME=Acme Inc.
 DEPARTMENT_NAME=Finance
 COUNTRY_CODE=DE
-STATE_NAME=North-Rhein-Westfalen
-CITY_NAME=Berlin
+STATE_NAME=Nordrhein-Westfalen
+CITY_NAME=Düsseldorf
 SMTP_PORT=465
 SMTP_SERVER=smtp.sendgrid.net
 SMTP_USERID=apikey
@@ -226,49 +226,88 @@ http://localhost:8100
 
 Unlike the enterprise edition the community edition doesn't provide any official support about maintenance and troubleshooting issues. As long as the system resources are not exceeded you are not expected to encounter a serious problem however the actions to be taken for certain situations are explained in below topics.
 
-| Operation | Command to Run |
+| BI Operation | Command |
 | :--- | :--- |
-| To install the system from stratch | `./bi.sh install` |
-| To receive the latest BI updates | `./bi.sh update` |
-| To start the system or restart the running containers | `./bi.sh start` |
-| To stop the running containers | `./bi.sh stop` |
-| To clean dangling system sources | `./bi.sh prune` |
-| To track the system logs | `./bi.sh logs [service]` |
-| OS ||
-| OS Maintenance | `apt update && apt upgrade -y` |
-| To reboot the Platform | `reboot` |
+| Installing the system from scratch | `./bi.sh install` |
+| Starting the containers | `./bi.sh start` |
+| Stopping the running containers | `./bi.sh stop` |
+| Restarting the running containers | `./bi.sh restart` |
+| Cleaning dangling system sources | `./bi.sh prune` |
+| Receiving the latest updates | `./bi.sh update` |
+| Tracking system logs | `./bi.sh logs [service]` |
+| **Operating System** | **Command** |
+| Updating packages and upgrading OS | `apt update && apt upgrade -y` |
+| Reboot the platform | `reboot` |
 
-## Production
+## License
 
-Although the Community Edition is provided for testing purposes or local use, it is also allowed to be published in a production environment as per the AGPL v3.0 license agreement. However, before getting started some actions should be taken in terms of performance and security issues. You can make a request for the free electronic document regarding this subject [here](#).
+Technoplatz BI Community Edition is an open source platform available under the GNU Affero GPL-v3 license. The platform is also provided as a service for companies want to get prefessional support in terms of managed hosting, custom development and integration services.
 
-## Licensing
-
-Technoplatz BI is an open source platform provided with two licensing options;
-
-
-| | Community Edition | aPaaS Edition |
+| | Community Edition | SaaS Edition |
 | :--- | :---: | :---: |
 |  Hosting | Self Hosted | Managed Hosted |
-|  DB Cluster | Yes [3 internal nodes] | Yes [3 nodes] |
-|  WebApp Firewall | No | Yes |
-|  Two-Factor Authentication | Yes | Yes |
-|  Technical Support | No | Yes |
-|  Custom Development Service | No | Yes (Paid) |
-|  Custom Domain | No | Yes |
-|  License | AGPL v3 | AGPL v3 + SLA |
-|  Pricing | Free | [Paid](https://bi.technoplatz.de/start) |
+|  Database | MongoDB 6 | MongoDB 6 |
+|  Database Clustering | 3 internal nodes | 3 internal/external nodes |
+|  Two-Factor Authentication | ✔ | ✔ |
+|  WebApp Firewall | ✘ | ✔ |
+|  Technical Support | ✘ | ✔ |
+|  Custom Development Services | ✘ | ✔ |
+|  Custom Domain | ✘ | ✔ |
+|  License | GNU AGPL v3 | GNU AGPL v3 + SLA |
+|  Pricing | Free | [Contact Us](https://bi.technoplatz.de/start) |
 
-## About
+## Impressum
 
-Official Web Site
-[https://bi.technoplatz.com](https://bi.technoplatz.com)
+Angaben gemäß § 5 TMG
+Technoplatz IT Solutions GmbH
+Berliner Allee 59 40212 Düsseldorf
 
-## Author
+**Handelsregister**
+HRB 83371
+Registergericht: Amtsgericht Düsseldorf
 
+**Vertreten durch die Geschäftsführer**
 Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)
-Founder, Technoplatz IT Solutions GmbH
 Senior System Analist, Developer
 Data Sciences & Statistics B. Sc.
+
+**Umsatzsteuer-ID**
+Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:
+DE318821373
+
+### Kontakt
+
+E-Mail: support@technoplatz.de
+Web: [https://bi.technoplatz.com/contact](https://bi.technoplatz.com)
+
+Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+Technoplatz IT Solutions GmbH
+
+### EU-Streitschlichtung
+
+Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <https://ec.europa.eu/consumers/odr>.
+
+Unsere E-Mail-Adresse finden Sie oben im [Abschnitt Kontakt](#kontakt).
+
+**Verbraucher­streit­beilegung/Universal­schlichtungs­stelle**
+Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+
+### Haftung für Inhalte
+
+Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+
+Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+
+### Haftung für Links
+
+Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar.
+
+Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Links umgehend entfernen.
+
+### Urheberrecht
+
+Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
+
+Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
 
 --
