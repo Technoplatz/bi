@@ -176,7 +176,7 @@ export class ViewPage implements OnInit {
     });
   }
 
-  async Settings() {
+  async doViewSettings() {
     if (!this.perm) {
       console.error("*** no permission");
     } else {
@@ -198,8 +198,15 @@ export class ViewPage implements OnInit {
         }
       });
       modal.onDidDismiss().then((res: any) => {
-        if (res.data.modified) {
-          this.crud.getAll().then(() => { }).catch((error: any) => {
+        if (res.data.modified) {    
+          this.crud.getAll().then(() => {
+            if (res.data.op === "remove") {
+              this.misc.navi.next({
+                s: "dashboard",
+                sub: null
+              });
+            }
+          }).catch((error: any) => {
             console.error(error);
             this.misc.doMessage(error, "error");
           });

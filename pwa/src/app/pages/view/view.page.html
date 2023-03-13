@@ -61,7 +61,7 @@ https://www.gnu.org/licenses.
                 <span *ngIf="is_url_copied">{{ 'Data Url' | translate }}<br />{{ 'Copied' | translate
                   }}</span>
               </div>
-              <div *ngIf="perm" (click)="Settings()" class="data-sq-button">
+              <div *ngIf="perm" (click)="doViewSettings()" class="data-sq-button">
                 <ion-icon name="settings-outline"></ion-icon><br />
                 <span>{{ 'View Settings' | translate }}</span>
               </div>

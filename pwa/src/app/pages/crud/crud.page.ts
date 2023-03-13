@@ -164,7 +164,6 @@ export class CrudPage implements OnInit {
       this.fieldsupd = res.fields;
       if(this.op === "insert" && this.collection === "_collection") {
         this.fieldsupd = this.fields.filter((obj: any) => obj.name !== "col_structure");
-        console.log("*** fields", this.fields);
       }
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
@@ -190,6 +189,8 @@ export class CrudPage implements OnInit {
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");
+      }).finally(() => {
+        setTimeout(() => { this.is_ready = true; }, this.timeout);
       });
     }).catch((error: any) => {
       console.error(error);
@@ -320,12 +321,12 @@ export class CrudPage implements OnInit {
       message: "Please confirm this deletion.",
       buttons: [
         {
-          text: "Cancel",
+          text: "CANCEL",
           role: "cancel",
           cssClass: "secondary",
           handler: () => { }
         }, {
-          text: "Okay",
+          text: "OKAY",
           handler: () => {
             this.op = "remove";
             this.doSubmit();
@@ -443,6 +444,8 @@ export class CrudPage implements OnInit {
           }
         }).catch((error: any) => {
           reject(error);
+        }).finally(() => {
+          resolve(true);
         });
       }
     });

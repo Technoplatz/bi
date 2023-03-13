@@ -43,7 +43,6 @@ import { ClipboardPluginWeb } from "@capacitor/core";
 })
 
 export class Miscellaneous {
-  private apiHost: string = "";
   public toggle: boolean = true;
 
   constructor(
@@ -67,9 +66,9 @@ export class Miscellaneous {
 
   getAPIHost() {
     return new Promise((resolve) => {
-      const ipregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
+      const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
       const domain_ = window.location.host.split(":")[0];
-      resolve(window.location.protocol + "//" + (ipregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : "api." + domain_));
+      resolve(window.location.protocol + "//" + (ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : "api." + domain_));
     });
   }
 

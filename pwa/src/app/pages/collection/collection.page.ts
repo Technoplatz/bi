@@ -94,7 +94,6 @@ export class CollectionPage implements OnInit {
   private views_structure: any;
   private collections_structure: any;
   private menu: string = "";
-  private saved_filter: string = "";
   private page_end: number = 1;
   private clonok: number = -1;
   private collectionso: any;
@@ -173,62 +172,59 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-        this.storage.get("LSSAVEDFILTER").then((LSSAVEDFILTER: any) => {
-          this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
-          this.saved_filter = LSSAVEDFILTER ? LSSAVEDFILTER : null;
-          this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-            this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-            this.count = 0;
-            this.page = p === 0 ? 1 : p;
-            this.crud.Find(
-              "read",
-              this.id,
-              null,
-              this.filter && this.filter.length > 0 ? this.filter : [],
-              this.sort,
-              this.page,
-              this.limit).then((res: any) => {
-                this.data = res.data;
-                this.reconfig = res.reconfig;
-                this.structure = res.structure;
-                this.actions = this.structure && this.structure.actions ? this.structure.actions : [];
-                this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
-                this.columns_ = [];
-                if (this.properites_) {
-                  this.getColumns().then(() => {
-                    this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
-                    this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
-                    this.count = res.count;
-                    this.multicheckbox = false;
-                    this.multicheckbox ? this.multicheckbox = false : null;
-                    this.selected = new Array(res.data.length).fill(false);
-                    this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
-                    const lmt = this.pages >= 10 ? 10 : this.pages;
-                    this.paget = new Array(lmt);
-                    this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
-                    this.page_end = this.page_start + 10;
-                    this.is_loaded = true;
-                    this.is_samecol = true;
-                    this.is_pane_ok = true;
-                    this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
-                    for (let p = 0; p < this.paget.length; p++) {
-                      this.paget[p] = this.page_start + p;
-                    }
-                    resolve(true);
-                  });
-                } else {
-                  console.error("*** no structure found");
+        this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
+        this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+          this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+          this.count = 0;
+          this.page = p === 0 ? 1 : p;
+          this.crud.Find(
+            "read",
+            this.id,
+            null,
+            this.filter && this.filter.length > 0 ? this.filter : [],
+            this.sort,
+            this.page,
+            this.limit).then((res: any) => {
+              this.data = res.data;
+              this.reconfig = res.reconfig;
+              this.structure = res.structure;
+              this.actions = this.structure && this.structure.actions ? this.structure.actions : [];
+              this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
+              this.columns_ = [];
+              if (this.properites_) {
+                this.getColumns().then(() => {
+                  this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
+                  this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
+                  this.count = res.count;
+                  this.multicheckbox = false;
+                  this.multicheckbox ? this.multicheckbox = false : null;
+                  this.selected = new Array(res.data.length).fill(false);
+                  this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
+                  const lmt = this.pages >= 10 ? 10 : this.pages;
+                  this.paget = new Array(lmt);
+                  this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
+                  this.page_end = this.page_start + 10;
                   this.is_loaded = true;
                   this.is_samecol = true;
-                }
-              }).catch((error: any) => {
-                console.error(error);
-                this.misc.doMessage(error, "error");
+                  this.is_pane_ok = true;
+                  this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
+                  for (let p = 0; p < this.paget.length; p++) {
+                    this.paget[p] = this.page_start + p;
+                  }
+                  resolve(true);
+                });
+              } else {
+                console.error("*** no structure found");
                 this.is_loaded = true;
                 this.is_samecol = true;
-                reject(error);
-              });
-          });
+              }
+            }).catch((error: any) => {
+              console.error(error);
+              this.misc.doMessage(error, "error");
+              this.is_loaded = true;
+              this.is_samecol = true;
+              reject(error);
+            });
         });
       });
     });
@@ -291,39 +287,6 @@ export class CollectionPage implements OnInit {
     } else {
       console.error("no permission");
       this.misc.doMessage("no permission", "error");
-    }
-  }
-
-  async Settings(collection_: any, op: string, data_: any, ix_: number) {
-    if (!this.perm) {
-      console.error("*** no permission");
-    } else {
-      const modal = await this.modal.create({
-        component: CrudPage,
-        backdropDismiss: false,
-        cssClass: "crud-modal",
-        componentProps: {
-          shuttle: {
-            op: op,
-            collection: collection_,
-            collections: this.collections ? this.collections : [],
-            views: this.views ? this.views : [],
-            user: this.user,
-            data: data_,
-            structure: collection_ === "_view" && this.views && this.views_structure ? this.views_structure : collection_ === "_collection" && this.collections_structure ? this.collections_structure : [],
-            direct: -1
-          }
-        }
-      });
-      modal.onDidDismiss().then((res: any) => {
-        if (res.data.modified) {
-          this.crud.getAll().then(() => { }).catch((error: any) => {
-            console.error(error);
-            this.misc.doMessage(error, "error");
-          });
-        }
-      });
-      return await modal.present();
     }
   }
 
@@ -402,18 +365,26 @@ export class CollectionPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
-        this.crud.getAll().then(() => {
-          this.RefreshData(0);
-        }).catch((error: any) => {
-          console.error(error);
-          this.misc.doMessage(error, "error");
+        this.RefreshData(0).then(() => {
+          ["_collection", "_view"].includes(this.id) ? this.crud.getAll().then(() => {
+            if (res.data.op === "remove") {
+              this.misc.navi.next({
+                s: "dashboard",
+                sub: null
+              });
+            }
+          }).catch((error: any) => {
+            console.error(error);
+            this.misc.doMessage(error, "error");
+          }) : null;
         });
-      }
-      if (res.data.filters) {
-        this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
-          this.filter = res.data.filters;
-          this.RefreshData(0);
-        });
+      } else {
+        if (res.data.filters) {
+          this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
+            this.filter = res.data.filters;
+            this.RefreshData(0);
+          });
+        }
       }
     });
     return await modal.present();
@@ -451,14 +422,19 @@ export class CollectionPage implements OnInit {
           modal.present();
           modal.onDidDismiss().then((res: any) => {
             if (res.data.modified) {
-              this.RefreshData(0);
-            } else {
-              if (res.data.filters) {
-                this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
-                  this.filter = res.data.filters;
+              this.crud.getAll().then(() => {
+                if (res.data.op === "remove") {
+                  this.misc.navi.next({
+                    s: "dashboard",
+                    sub: null
+                  });
+                } else {
                   this.RefreshData(0);
-                });
-              }
+                }
+              }).catch((error: any) => {
+                console.error(error);
+                this.misc.doMessage(error, "error");
+              });
             }
           });
         });
@@ -581,7 +557,6 @@ export class CollectionPage implements OnInit {
 
   doClearFilter() {
     this.filter = [];
-    this.saved_filter = "";
     this.storage.set("LSSFILTER_" + this.id, this.filter).then(() => {
       this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
         this.storage.set("LSSAVEDFILTER", "").then(() => {
