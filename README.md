@@ -40,7 +40,7 @@ The widely accepted meaning of no-code term is an application development approa
 |  Provide limited capabilities | Provide required capabilities |
 |  Customized by built-in cosmetic components | Customized by JSON structures |
 
-## Highlights
+### Highlights
 
 The main approach is to combine sustainability with quality and low cost;
 
@@ -125,23 +125,31 @@ Installing Guides for On-premises:
 System Requirements:
 The minimum configuration for the system to work properly on the Docker platform is 2 CPU, 4GB Ram, 20GB Hard Disk. This configuration should be increased in proportion to workload and the number of connections to be established.
 
-### Installation
+## Installation
 
 The installation steps described below must be performed in the order given. Please consider that a certain level of command line skill is required and it may be necessary to add `sudo` in case connected user does not have root privileges.
 
-#### 1. The First Touch
+### 1. The First Touch
 
-Docker platforms sold on ISP marketplaces might be a couple of updates behind in terms of the operating system as of the date you purchase. Therefore, it is highly recommended to run a system update initially and reboot the system. Please reconnect to the platform after the system reboots.
+Docker platforms which are sold on marketplaces might be a couple of weeks or months behind of the latest system updates as of the date you purchase. It is highly recommended to make the operating system up-to-date immediately and reboot the platform afterwards.
 
 ```bash
-apt update && apt upgrade -y && reboot
+apt update && apt upgrade -y
 ```
 
-#### 2. Download and Install
+```bash
+reboot
+```
 
-Open a Terminal session, copy paste and run the first command below to download the service script from the official [GitHub](https://github.com/technoplatz/bi.git) repository and get the installation started with the second command afterwards. Follow the messages coming to the console for the required actions and the result of the operation.
+This step is not required for the Docker Desktop platform. What you need to do is to keep the application itself up-to-date.
 
-**Linux and Mac OS**
+### 2. Download and Install
+
+To get the installation started please follow the messages on the console for the actions to be taken and the result of the process.
+
+#### Linux and Mac OS
+
+Open a [Linux Console](https://en.wikipedia.org/wiki/Linux_console) or [Mac OS Terminal](https://en.wikipedia.org/wiki/Terminal_(macOS)) session, copy paste and run the command below to create the system directory and download the required files from the official GitHub repository.
 
 ```bash
 curl -Lso technoplatz/bi.sh --create-dirs \
@@ -150,11 +158,17 @@ curl -Lso technoplatz/bi.sh --create-dirs \
 && cd technoplatz
 ```
 
+Run the service script with installation option.
+
 ```bash
 ./bi.sh install
 ```
 
-#### 3. Setting Parameters
+#### Windows
+
+In order for the Platform to run on Windows, the Docker Desktop and the WSL2 infrastructure (Windows Subsystem for Linux) must be installed. Please follow [this article](https://docs.docker.com/desktop/install/windows-install/) contains detailed instructions about how to install and run Docker Desktop by getting integrated with the WSL2. After the installation is complete, [Linux commands](#linux-and-mac-os) given above can be run on the WSL2 infrastructure in the same way.
+
+### 3. Setting Parameters
 
 Edit `.env` file, replace the sample values with your own and save the file.
 
@@ -206,7 +220,7 @@ API_KEY=61c09da62f1f9ca9357796c9
 ...
 ```
 
-#### 4. Starting Containers
+### 4. Starting Containers
 
 Enter the command below to start the containers by keeping them up and running in the background. It can take up to 20 seconds till after containers creation for Technoplatz BI to be fully functional. You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run at the background and restarts automatically as the platform is rebooted.
 
@@ -226,7 +240,7 @@ http://localhost:8100
 
 Unlike the enterprise edition the community edition doesn't provide any official support about maintenance and troubleshooting issues. As long as the system resources are not exceeded you are not expected to encounter a serious problem however the actions to be taken for certain situations are explained in below topics.
 
-| BI Operation | Command |
+| Platform Operation | Script Command |
 | :--- | :--- |
 | Installing the system from scratch | `./bi.sh install` |
 | Starting the containers | `./bi.sh start` |
@@ -247,7 +261,7 @@ Technoplatz BI Community Edition is an open source platform available under the 
 | :--- | :---: | :---: |
 |  Hosting | Self Hosted | Managed Hosted |
 |  Database | MongoDB 6 | MongoDB 6 |
-|  Database Clustering | 3 internal nodes | 3 internal/external nodes |
+|  Database Clustering | 3 internal nodes | 3 internal/regional nodes |
 |  Two-Factor Authentication | ✔ | ✔ |
 |  WebApp Firewall | ✘ | ✔ |
 |  Technical Support | ✘ | ✔ |
