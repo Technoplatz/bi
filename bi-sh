@@ -183,6 +183,7 @@ function updateBI() {
         return 0
     fi
     return 1
+}
 
 function pruneBI() {
     echo -e "Cleaning..."

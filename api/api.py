@@ -468,10 +468,14 @@ class Misc():
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
         self.NOTIFICATION_SLACK_HOOK_URL = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
+        self.COMPANY_NAME = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
 
     def post_slack_notification(self, exc):
+        ip_ = self.get_user_ip_f()
         if self.NOTIFICATION_SLACK_HOOK_URL:
             exc_ = {
+                "ip": ip_,
+                "company": self.COMPANY_NAME,
                 "file": __file__ if __file__ else None,
                 "line": exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else None,
                 "name": type(exc).__name__ if hasattr(exc, "__name__") else None,
