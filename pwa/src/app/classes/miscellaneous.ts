@@ -67,8 +67,9 @@ export class Miscellaneous {
 
   getAPIHost() {
     return new Promise((resolve) => {
-      this.apiHost = window.location.host.includes("8100") ? window.location.protocol + "//" + window.location.host.replace(/8100/gi, environment.apiPort) : window.location.protocol + "//api." + window.location.hostname;
-      resolve(this.apiHost);
+      const ipregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
+      const domain_ = window.location.host.split(":")[0];
+      resolve(window.location.protocol + "//" + (ipregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : "api." + domain_));
     });
   }
 
