@@ -161,13 +161,15 @@ function updateBI() {
     if [ $1 ]; then
         curlHeaders+=("-H" "Authorization: token $1")
     fi
-    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML}
-    CONTD=$(cat $DIR/$DCYML | head -c 3)
+    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML.bak https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML}
+    CONTD=$(cat $DIR/$DCYML.bak | head -c 3)
     if [[ "$CONTD" == *"40"* ]]; then
         echo -e "✘ Sorry! Configuration file not received successfully ($CONTD)."
         echo -e "You may try to add your token ${COLOR}./bi.sh update [token]${NOCOLOR} as the way to get connected privately."
+        rm $DIR/$DCYML.bak
         return 0
     else
+        mv $DIR/$DCYML.bak $DIR/$DCYML
         echo -e "✔ Configuration file received successfully.\n"
     fi
     SUFFIX=""
