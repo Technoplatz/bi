@@ -39,7 +39,7 @@ https://www.gnu.org/licenses.
         <h1>{{ subheader }}</h1>
         <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="sub-menu-row sq-menu-row">
-            <ion-col size="12">
+            <ion-col size="12" class="data-sq-container">
               <div (click)="doAnnounceNow(view, 'test')" class="data-sq-button">
                 <ion-icon *ngIf="!in_otp_process_test" name="megaphone-outline"></ion-icon>
                 <ion-icon *ngIf="in_otp_process_test" name="hourglass-outline"></ion-icon>

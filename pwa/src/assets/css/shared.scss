@@ -115,7 +115,7 @@ ion-alert .alert-radio-group {
 .top-tools {
   position: fixed;
   display: flex;
-  right: 24px;
+  right: 32px;
   top: 16px;
   z-index: 99;
   border-bottom: 1px solid var(--ion-color-light);;
@@ -348,33 +348,38 @@ ion-alert .alert-radio-group {
   color: var(--ion-color-danger) !important;
 }
 
+.data-sq-container {
+  display: flex;
+  gap: 2px;
+}
+
 .data-sq-button {
-  min-width: 80px;
-  max-width: 80px;
-  height: 88px;
   vertical-align: top !important;
   text-align: center;
-  padding: 4px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-right: 8px;
+  padding-left: 8px;
   font-weight: 500;
-  line-height: 15px;
   cursor: pointer;
   border-radius: 0px;
-  margin-right: 4px;
-  margin-bottom: 8px;
   background-color: var(--ion-color-primary);
   color: var(--ion-color-white);
   overflow: hidden;
+  flex-basis: 85px;
+  min-width: 85px;
+  flex-grow: 0;
 }
 
 .data-sq-button.required {
   background-color: var(--ion-color-danger) !important;
 }
 
-.data-sq-button ion-icon {
+.data-sq-button ion-icon,
+.data-sq-button i {
   width: 20px !important;
   height: 20px !important;
-  margin-top: 10px !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 4px !important;
 }
 
 .data-sq-button.disabled {

@@ -26,7 +26,7 @@
             "maxLength": 3,
             "pattern": "^[a-z]{3,3}$",
             "title": "Prefix",
-            "description": "Column prefix",
+            "description": "Column Prefix",
             "required": true,
             "permanent": true,
             "width": 110
@@ -35,15 +35,14 @@
             "bsonType": "object",
             "title": "Structure",
             "description": "Collection Structure",
-            "required": true,
-            "width": 120
+            "width": 120,
+            "default": {}
         }
     },
     "required": [
         "col_id",
         "col_title",
-        "col_prefix",
-        "col_structure"
+        "col_prefix"
     ],
     "index": [
         [

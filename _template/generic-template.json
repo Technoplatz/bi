@@ -45,6 +45,20 @@
       "default": 1,
       "width": 120
     },
+    "gen_unit_price": {
+      "bsonType": "number",
+      "title": "Unit Price",
+      "description": "Unit Price",
+      "default": 1,
+      "width": 140
+    },
+    "gen_amount": {
+      "bsonType": "number",
+      "title": "Amount",
+      "description": "Amount",
+      "default": 1,
+      "width": 140
+    },
     "gen_is_enabled": {
       "bsonType": "bool",
       "title": "Is Enabled?",

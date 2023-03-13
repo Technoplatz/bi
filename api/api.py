@@ -79,7 +79,6 @@ app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 app.config["UPLOAD_FOLDER"] = "/vault/"
-# app.url_map.host_matching = True
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 log = logging.getLogger("werkzeug")
@@ -469,12 +468,14 @@ class Misc():
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
         self.NOTIFICATION_SLACK_HOOK_URL = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
         self.COMPANY_NAME = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
+        self.DOMAIN = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else None
 
     def post_slack_notification(self, exc):
         ip_ = self.get_user_ip_f()
         if self.NOTIFICATION_SLACK_HOOK_URL:
             exc_ = {
                 "ip": ip_,
+                "domain": self.DOMAIN,
                 "company": self.COMPANY_NAME,
                 "file": __file__ if __file__ else None,
                 "line": exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else None,
@@ -3621,6 +3622,47 @@ class Crud():
                 "default": "0-Open"
             }
 
+            field_qty_ = f"{prefix_}_qty"
+            field_qty_json_ = {
+                "bsonType": "number",
+                "title": "Quantity",
+                "description": "Quantity",
+                "default": 0
+            }
+
+            field_unit_price_ = f"{prefix_}_unit_price"
+            field_unit_price_json_ = {
+                "bsonType": "number",
+                "title": "Unit Price",
+                "description": "Unit Price",
+                "default": 0
+            }
+
+            field_tax_ = f"{prefix_}_tax"
+            field_tax_json_ = {
+                "bsonType": "number",
+                "title": "Tax",
+                "description": "Tax",
+                "default": 0.19
+            }
+
+            field_escalator_ = f"{prefix_}_escalator"
+            field_escalator_json_ = {
+                "bsonType": "number",
+                "title": "Escalator",
+                "description": "Escalator",
+                "default": 1
+            }
+
+            field_amount_ = f"{prefix_}_amount"
+            field_amount_json_ = {
+                "bsonType": "number",
+                "title": "Amount",
+                "description": "Amount",
+                "calc": f"{field_unit_price_} * {field_qty_} * {field_tax_}  * {field_escalator_}",
+                "default": 0
+            }
+
             field_bool_ = f"{prefix_}_is_active"
             field_bool_json_ = {
                 "bsonType": "bool",
@@ -3633,8 +3675,12 @@ class Crud():
             structure_["properties"][field_no_] = field_no_json_
             structure_["properties"][field_date_] = field_date_json_
             structure_["properties"][field_status_] = field_status_json_
+            structure_["properties"][field_qty_] = field_qty_json_
+            structure_["properties"][field_unit_price_] = field_unit_price_json_
+            structure_["properties"][field_tax_] = field_tax_json_
+            structure_["properties"][field_amount_] = field_amount_json_
+            structure_["properties"][field_escalator_] = field_escalator_json_
             structure_["properties"][field_bool_] = field_bool_json_
-
             structure_["required"] = [field_id_, field_no_]
             structure_["unique"] = [[field_id_]]
             structure_["index"] = [[field_no_], [field_id_, field_no_], [field_status_]]
