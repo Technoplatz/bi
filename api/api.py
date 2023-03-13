@@ -2065,7 +2065,7 @@ class Crud():
             count_ = 0
             if df_ is not None:
                 count_ = len(df_)
-                if vie_p_kpi_ and count_ > 0 and vie_chart_yaxis_:
+                if count_ > 0 and vie_chart_yaxis_:
                     if vie_chart_function_ == "sum":
                         value_ = float(df_[vie_chart_yaxis_].sum())
                     elif vie_chart_function_ == "count":
@@ -2081,7 +2081,7 @@ class Crud():
                     else:
                         raise APIError("invalid visual function")
 
-                if value_ >= 0 and vie_kpi_target_value_ > 0:
+                if vie_p_kpi_ and value_ >= 0 and vie_kpi_target_value_ > 0:
                     perchange_ = float(((value_ - vie_kpi_target_value_) / vie_kpi_target_value_) * 100)
 
                 if sort_:

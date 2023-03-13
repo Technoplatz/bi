@@ -54,8 +54,8 @@ https://www.gnu.org/licenses.
     <ion-row *ngIf="user; else nouser" class="ion-margin-top">
       <ion-col size="1"></ion-col>
       <ion-col size="11" class="ion-padding-top">
-        <ion-button href="/dashboard" class="ion-margin-top">
-          <ion-icon name="terminal-outline"></ion-icon>&nbsp; {{ 'Dashboard' | translate }}
+        <ion-button href="/dashboard" class="ion-margin-top text-medium" size="large">
+          <ion-icon name="easel-outline"></ion-icon>&nbsp; {{ 'Dashboard' | translate }}&nbsp;&nbsp;&nbsp;
         </ion-button>
       </ion-col>
     </ion-row>
@@ -65,7 +65,7 @@ https://www.gnu.org/licenses.
         <ion-col size="11" class="ion-padding-top">
           <ion-button (click)="doSign('signin')" class="ion-margin-top text-medium" size="large">
             <ion-icon name="log-in-outline"></ion-icon>
-            {{ 'Sign in' | translate }}&nbsp;&nbsp;
+            {{ 'Sign in' | translate }}&nbsp;&nbsp;&nbsp;
           </ion-button>
         </ion-col>
       </ion-row>

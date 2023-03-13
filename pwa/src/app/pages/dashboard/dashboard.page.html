@@ -37,7 +37,7 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <h6>{{ 'DASHBOARD' | translate }}</h6>
         <h1>{{ 'Welcome' | translate }}</h1>
-        <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
+        <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div (click)="Settings('_collection', 'insert', null, 0)" class="data-sq-button">
@@ -64,8 +64,8 @@ https://www.gnu.org/licenses.
         <!-- VIEW SECTION -->
         <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
           <div *ngFor="let item of flashcards; let f = index" [class]="flash_css"
-            [style.background-color]="item.vie_p_color_scheme[0] ? item.vie_p_color_scheme[0] : '#ccc'" #chcontainer>
-            <h6>{{ item.vie_title }}</h6>
+            [style.background-color]="item.vie_p_color_scheme && item.vie_p_color_scheme[0] ? item.vie_p_color_scheme[0] : '#eeeeee'" #chcontainer>
+            <h5>{{ item.vie_title }}</h5>
             <div class="visual-buttons">
               <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
                 class="clear-dark-button" color="dark" mode="ios">
@@ -74,8 +74,8 @@ https://www.gnu.org/licenses.
             </div>
             <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
               {{ item.vie_collection_id }} | {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
-              <!-- <div class="filler"></div> -->
-              <h2>{{ item.visual.value }}</h2>
+              <h1>{{ item.visual.value }}</h1>
+              <h6>{{ item._tags.join(' ') }}</h6>
             </div>
           </div>
         </div>

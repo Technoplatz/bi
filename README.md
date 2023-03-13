@@ -1,7 +1,8 @@
 # Technoplatz BI
 
 It's time to get data-driven with your [inner-cycle!](#highlights)
-Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. 
+
+Technoplatz BI is a [low-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. 
 
 - [How to Get Started](#get-started)
 - [Installation](#installation)
@@ -28,7 +29,7 @@ It allows organizations to share data within the circle that surrounds customers
 - **No-code Platform Empowers Its Users**\
 Technoplatz BI essentially designed for business users, not developers. Even though no coding skills required for the platform to use, users learn basics of JSON structure easily and naturally without having to study to become a data expert. This approach also creates a data culture within the company.
 
-### What is No-code?
+## What is No-code?
 
 The widely accepted meaning of no-code term is an application development approach that does not require computer programming skills. No-code platforms use some visual interfaces to allow users to develop their own "App" without knowledge of any programming language. Unlike many no-code platforms, Technoplatz BI empowers users to create and publish their own "solution" run on their own platform.
 
@@ -40,7 +41,7 @@ The widely accepted meaning of no-code term is an application development approa
 |  Provide limited capabilities | Provide required capabilities |
 |  Customized by built-in cosmetic components | Customized by JSON structures |
 
-### Highlights
+## Benefits
 
 The main approach is to combine sustainability with quality and low cost;
 
@@ -228,7 +229,7 @@ Enter the command below to start the containers by keeping them up and running i
 ./bi.sh start
 ```
 
-### 5. Sign in
+### 5. Signing in
 
 In order to open your first session go to the following address in your web browser, click the "Sign in" button, enter your email and password which you provided in the .env file.
 
@@ -272,38 +273,39 @@ Technoplatz BI Community Edition is an open source platform available under the 
 
 ## Impressum
 
-Angaben gemäß § 5 TMG
-Technoplatz IT Solutions GmbH
-Berliner Allee 59 40212 Düsseldorf
+Angaben gemäß § 5 TMG\
+Technoplatz IT Solutions GmbH\
+Berliner Allee 59 40212 Düsseldorf Deutschland
 
-**Handelsregister**
-HRB 83371
+### Handelsregister
+
+HRB 8337\
 Registergericht: Amtsgericht Düsseldorf
 
-**Vertreten durch die Geschäftsführer**
-Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)
-Senior System Analist, Developer
+### Vertreten durch die Geschäftsführer
+
+Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
+Senior System Analist, Developer\
 Data Sciences & Statistics B. Sc.
 
-**Umsatzsteuer-ID**
-Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:
+### Umsatzsteuer-ID
+
+Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:\
 DE318821373
 
 ### Kontakt
 
-E-Mail: support@technoplatz.de
+E-Mail: support@technoplatz.de\
 Web: [https://bi.technoplatz.com/contact](https://bi.technoplatz.com)
 
-Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV\
 Technoplatz IT Solutions GmbH
 
 ### EU-Streitschlichtung
 
 Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <https://ec.europa.eu/consumers/odr>.
 
-Unsere E-Mail-Adresse finden Sie oben im [Abschnitt Kontakt](#kontakt).
-
-**Verbraucher­streit­beilegung/Universal­schlichtungs­stelle**
+Unsere E-Mail-Adresse finden Sie oben im [Abschnitt Kontakt](#kontakt).\
 Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
 
 ### Haftung für Inhalte
