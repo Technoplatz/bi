@@ -153,10 +153,10 @@ To get the installation started please follow the messages on the console for th
 Open a [Linux Console](https://en.wikipedia.org/wiki/Linux_console) or [Mac OS Terminal](https://en.wikipedia.org/wiki/Terminal_(macOS)) session, copy paste and run the command below to create the system directory and download the required files from the official GitHub repository.
 
 ```bash
-curl -Lso technoplatz/bi.sh --create-dirs \
+curl -Lso /opt/technoplatz/bi.sh --create-dirs \
 "https://raw.githubusercontent.com/Technoplatz/bi/main/bi-sh" \
-&& chmod +x technoplatz/bi.sh \
-&& cd technoplatz
+&& chmod +x /opt/technoplatz/bi.sh \
+&& cd /opt/technoplatz
 ```
 
 Run the service script with installation option.

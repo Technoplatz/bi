@@ -4720,6 +4720,12 @@ class Auth():
             if not auth_:
                 raise APIError("account not found")
 
+            if "aut_salt" not in auth_ or auth_["aut_salt"] == None:
+                raise APIError("please set a password")
+
+            if "aut_key" not in auth_ or auth_["aut_key"] == None:
+                raise APIError("please set a new password")
+
             user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError("user not found for validate")
