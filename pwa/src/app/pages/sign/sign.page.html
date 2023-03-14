@@ -30,12 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-content class="ion-padding" *ngIf="showhide=='hide-segment'">
-    <ion-item lines="none">
-        <ion-spinner name="dots" class="ion-margin-start"></ion-spinner>
-    </ion-item>
-</ion-content>
-<ion-content class="ion-padding" [class]="showhide">
+<ion-content class="sign-content">
     <ion-grid *ngIf="error" class="ion-no-padding error-grid">
         <ion-row>
             <ion-col class="ion-padding">
@@ -59,7 +54,8 @@ https://www.gnu.org/licenses.
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #passwordfocus formControlName="password" type="password"
-                placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" class="ion-no-padding" required [value]="email">
+                placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" class="ion-no-padding" required
+                [value]="email">
             </ion-input>
         </ion-item>
         <ion-item lines="full">
@@ -241,4 +237,3 @@ https://www.gnu.org/licenses.
         </ion-item>
     </form>
 </ion-content>
-<modal-footer class="ion-no-margin" *ngIf="is_ready"><modal-footer>

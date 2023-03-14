@@ -63,8 +63,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
         <!-- VIEW SECTION -->
         <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
-          <div *ngFor="let item of flashcards; let f = index" [class]="flash_css"
-            [style.background-color]="item.vie_p_color_scheme && item.vie_p_color_scheme[0] ? item.vie_p_color_scheme[0] : '#eeeeee'" #chcontainer>
+          <div *ngFor="let item of flashcards; let f = index" [class]="flash_css" #chcontainer>
             <h5>{{ item.vie_title }}</h5>
             <div class="visual-buttons">
               <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
@@ -74,7 +73,7 @@ https://www.gnu.org/licenses.
             </div>
             <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
               {{ item.vie_collection_id }} | {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
-              <h1>{{ item.visual.value }}</h1>
+              <h2>{{ item.visual.value }}</h2>
               <h6>{{ item._tags.join(' ') }}</h6>
             </div>
           </div>

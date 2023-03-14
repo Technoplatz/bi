@@ -65,7 +65,6 @@ export class SignPage implements OnInit {
   public successForm: FormGroup;
   public formtype: string = "";
   public isInProgress: boolean = false;
-  public is_ready: boolean = false;
   public isEuTaxRequired: boolean = false;
   public cart: any;
   public taxExcluded: boolean = false;
@@ -75,7 +74,6 @@ export class SignPage implements OnInit {
   public grandtotal: any = 0;
   public currency: string = "";
   public isRememberMe: boolean = false;
-  public showhide: string = "hide-segment";
   public email: string = "";
   private focustime = 600;
   private passwordpttrn_: string = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_-]).{8,32}";
@@ -260,13 +258,11 @@ export class SignPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.doSetFormType("signin").then(() => {
         this.signinForm?.get("email")?.value ? setTimeout(() => {
-            this.showhide = "show-segment";
             this.passwordfocus?.setFocus().then(() => {
               resolve(true);
             });
           }, this.focustime)
           : setTimeout(() => {
-            this.showhide = "show-segment";
             this.emailfocussignin?.setFocus().then(() => {
               resolve(true);
             });
@@ -282,7 +278,6 @@ export class SignPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.doSetFormType("forgot").then(() => {
         setTimeout(() => {
-          this.showhide = "show-segment";
           this.emailfocus?.setFocus().then(() => {
             resolve(true);
           });
@@ -298,7 +293,6 @@ export class SignPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.doSetFormType("signup").then(() => {
         setTimeout(() => {
-          this.showhide = "show-segment";
           this.emailfocussignup?.setFocus().then(() => {
             resolve(true);
           });

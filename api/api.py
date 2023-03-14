@@ -88,8 +88,6 @@ class JSONEncoder(json.JSONEncoder):
 
 
 class Schedular():
-    def __init__(self):
-        self.API_SCHEDULE_INTERVAL_MIN = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 
     def schedule_automation_f(self, doc_):
         try:
@@ -362,7 +360,7 @@ class Schedular():
                 aut_id_ = doc_["aut_id"]
                 if backgroundscheduler_.get_job(aut_id_):
                     backgroundscheduler_.remove_job(aut_id_)
-                backgroundscheduler_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=TZ, replace_existing=True, args=[doc_])
+                backgroundscheduler_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=TZ_, replace_existing=True, args=[doc_])
 
             res_ = {"result": True}
 
@@ -394,7 +392,7 @@ class Schedular():
                     vie_sched_minutes_ = ",".join(vie_sched_minutes_c_)
                     vie_sched_hours_ = ",".join(vie_sched_hours_c_)
                     vie_sched_days_ = ",".join(doc_["vie_sched_days"]) if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0 else "mon"
-                    sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=TZ, replace_existing=True, args=[doc_, "live", None])
+                    sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=TZ_, replace_existing=True, args=[doc_, "live", None])
                     print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now(), flush=True)
 
             res_ = {"result": True}
@@ -410,7 +408,7 @@ class Schedular():
 
     def main_f(self):
         try:
-            sched_ = BackgroundScheduler(timezone=TZ, daemon=True)
+            sched_ = BackgroundScheduler(timezone=TZ_, daemon=True)
             sched_.remove_all_jobs()
 
             # schedule automations initially
@@ -424,15 +422,14 @@ class Schedular():
                 raise APIError(schedule_views_f_["msg"])
 
             # reschedule views regularly
-            sched_.add_job(self.schedule_automations_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_automations", timezone=TZ, replace_existing=True, args=[sched_])
+            sched_.add_job(self.schedule_automations_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_automations", timezone=TZ_, replace_existing=True, args=[sched_])
 
             # reschedule views regularly
-            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_views", timezone=TZ, replace_existing=True, args=[sched_])
+            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", timezone=TZ_, replace_existing=True, args=[sched_])
 
             # schedule database dumps
-            API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
             args_ = {"user": {"email": "cron"}}
-            sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ, replace_existing=True, args=[args_])
+            sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ_, replace_existing=True, args=[args_])
 
             sched_.start()
             res_ = True
@@ -452,22 +449,20 @@ class Misc():
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
-        self.NOTIFICATION_SLACK_HOOK_URL = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
-        self.COMPANY_NAME = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
 
     def post_slack_notification(self, exc):
         ip_ = self.get_user_ip_f()
-        if self.NOTIFICATION_SLACK_HOOK_URL:
+        if NOTIFICATION_SLACK_HOOK_URL_:
             exc_ = {
                 "ip": ip_,
-                "domain": DOMAIN,
-                "company": self.COMPANY_NAME,
+                "domain": DOMAIN_,
+                "company": COMPANY_NAME_,
                 "file": __file__ if __file__ else None,
                 "line": exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else None,
                 "name": type(exc).__name__ if hasattr(exc, "__name__") else None,
                 "details": exc.details if hasattr(exc, "details") else exc
             }
-            resp_ = requests.post(self.NOTIFICATION_SLACK_HOOK_URL, json.dumps({"text": str(exc_)}))
+            resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(exc_)}))
             if resp_.status_code != 200:
                 print("*** notification error", resp_, flush=True)
 
@@ -647,44 +642,30 @@ class Misc():
 
 class Mongo():
     def __init__(self):
-        self.mongo_replicaset_ = os.environ.get("MONGO_REPLICASET")
-        self.mongo0_host_ = os.environ.get("MONGO_HOST")
-        self.mongo1_host_ = os.environ.get("MONGO_REPLICA1_HOST")
-        self.mongo2_host_ = os.environ.get("MONGO_REPLICA2_HOST")
-        self.mongo_port_ = int(os.environ.get("MONGO_PORT"))
-        self.mongo_db_ = os.environ.get("MONGO_DB")
-        self.mongo_authdb_ = os.environ.get("MONGO_AUTH_DB")
-        self.mongo_username_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
-        self.mongo_password_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
         self.mongo_appname_ = "api"
         self.mongo_readpref_ = "primary"
-        self.mongo_tls_ = os.environ.get("MONGO_TLS")
-        self.mongo_tlsInsecure_ = os.environ.get("MONGO_TLS_INSECURE")
-        self.mongo_tlsCertificateKeyFile_ = os.environ.get("MONGO_TLS_CERT_COMBINED_FILE")
-        self.mongo_tlsCAFile_ = os.environ.get("MONGO_TLS_CA_COMBINED_FILE")
-        authSource_ = f"authSource={self.mongo_authdb_}" if self.mongo_authdb_ else ""
-        replicaset_ = f"&replicaSet={self.mongo_replicaset_}" if self.mongo_replicaset_ and self.mongo_replicaset_ != "" else ""
+        authSource_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
+        replicaset_ = f"&replicaSet={MONGO_REPLICASET_}" if MONGO_REPLICASET_ and MONGO_REPLICASET_ != "" else ""
         readPreference_ = f"&readPreference={self.mongo_readpref_}" if self.mongo_readpref_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
-        tls_ = f"&tls=true" if self.mongo_tls_ in ["true", True] else "&tls=false"
-        tlsInsecure_ = f"&tlsInsecure=true" if self.mongo_tlsInsecure_ in ["true", True] else "&tlsInsecure=false"
-        tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={self.mongo_tlsCertificateKeyFile_}" if self.mongo_tlsCertificateKeyFile_ else ""
-        tlsCAFile_ = f"&tlsCAFile={self.mongo_tlsCAFile_}" if self.mongo_tlsCAFile_ else ""
+        tls_ = f"&tls=true" if MONGO_TLS_ in ["true", True] else "&tls=false"
+        tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_COMBINED_FILE_}" if MONGO_TLS_CERT_COMBINED_FILE_ else ""
+        tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_COMBINED_FILE_}" if MONGO_TLS_CA_COMBINED_FILE_ else ""
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
 
         # mongo staff
-        self.connstr = f"mongodb://{self.mongo_username_}:{self.mongo_password_}@{self.mongo0_host_}:{self.mongo_port_},{self.mongo1_host_}:{self.mongo_port_},{self.mongo2_host_}:{self.mongo_port_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
+        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
         self.client = MongoClient(self.connstr)
-        self.db = self.client[self.mongo_db_]
+        self.db = self.client[MONGO_DB_]
 
     def dump_f(self):
         try:
             ts_ = Misc().get_timestamp_f()
-            id_ = f"dump-{self.mongo_db_}-{ts_}"
+            id_ = f"dump-{MONGO_DB_}-{ts_}"
             file_ = f"{id_}.gz"
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
-            command_ = f"mongodump --host {self.mongo0_host_} --port {self.mongo_port_} --db {self.mongo_db_} --authenticationDatabase {self.mongo_authdb_} --username {self.mongo_username_} --password {self.mongo_password_} --{type_} --archive={loc_} --tlsMode requireTLS --tlsCertificateKeyFile {self.mongo_tlsCertificateKeyFile_} --tlsCAFile {self.mongo_tlsCAFile_} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+            command_ = f"mongodump --host {MONGO_HOST_} --port {MONGO_PORT_} --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password {MONGO_PASSWORD_} --{type_} --archive={loc_} --tlsMode requireTLS --tlsCertificateKeyFile {MONGO_TLS_CERT_COMBINED_FILE_} --tlsCAFile {MONGO_TLS_CA_COMBINED_FILE_} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
             os.system(command_)
             size_ = os.path.getsize(loc_)
             res_ = {"result": True, "id": id_, "type": type_, "size": size_}
@@ -701,7 +682,6 @@ class Mongo():
 
 class Crud():
     def __init__(self):
-        self.dbname_ = os.environ.get("MONGO_DB")
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
 
@@ -765,7 +745,7 @@ class Crud():
     def template_f(self, input_):
         try:
             # start transaction
-            session_db_ = Mongo().client[self.dbname_]
+            session_db_ = Mongo().client[MONGO_DB_]
             session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
             session_.start_transaction()
 
@@ -1130,7 +1110,6 @@ class Crud():
             email_ = user_["email"] if user_ and "email" in user_ else None
             # match_ = obj["match"] if "match" in obj and obj["match"] != [] else [{"key": "_id", "op": "nnull", "value": None}]
             match_ = obj["match"] if "match" in obj and obj["match"] != [] else []
-            TZ_ = os.environ.get("TZ")
 
             userindb_ = Mongo().db["_user"].find_one({"usr_id": email_})
             if not userindb_:
@@ -1268,11 +1247,9 @@ class Crud():
             collection_ = obj["collection"]
             prefix_ = obj["prefix"]
             email_ = form_["email"]
-            op_ = form_["op"]
-            API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 
             # start transaction
-            session_db_ = Mongo().client[self.dbname_]
+            session_db_ = Mongo().client[MONGO_DB_]
             session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
             session_.start_transaction()
 
@@ -3762,27 +3739,16 @@ class Crud():
 
 class Email():
     def __init__(self):
-        self.SMTP_SERVER = os.environ.get("SMTP_SERVER")
-        self.SMTP_PORT = os.environ.get("SMTP_PORT")
-        self.SMTP_USERID = os.environ.get("SMTP_USERID")
-        self.SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
-        self.FROM_EMAIL = os.environ.get("FROM_EMAIL")
-        self.EMAIL_TFA_SUBJECT = "Your Backup OTP"
-        self.EMAIL_SIGNUP_SUBJECT = "Welcome"
-        self.EMAIL_SIGNIN_SUBJECT = "New Sign-in"
-        self.EMAIL_UPLOADERR_SUBJECT = "File Upload Result"
-        self.EMAIL_DEFAULT_SUBJECT = "Hello"
-        self.COMPANY_NAME = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
-        self.disclaimer_ = f"<p>Sincerely,</p><p>{self.COMPANY_NAME}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
-        self.disclaimer_text_ = f"\n\nSincerely,\n\n{self.COMPANY_NAME}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {self.COMPANY_NAME} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
+        self.disclaimer_ = f"<p>Sincerely,</p><p>{COMPANY_NAME_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
+        self.disclaimer_text_ = f"\n\nSincerely,\n\n{COMPANY_NAME_}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
 
     def sendEmail_SMTP_f(self, msg):
         try:
-            email_from_ = f"{self.COMPANY_NAME} <{self.FROM_EMAIL}>"
+            email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
             html_ = f"{msg['html']} {self.disclaimer_}"
-            server_ = smtplib.SMTP_SSL(self.SMTP_SERVER, self.SMTP_PORT)
+            server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
             server_.ehlo()
-            server_.login(self.SMTP_USERID, self.SMTP_PASSWORD)
+            server_.login(SMTP_USERID_, SMTP_PASSWORD_)
 
             message_ = MIMEMultipart()
             message_["From"] = email_from_
@@ -3828,8 +3794,8 @@ class Email():
             files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
             html_ = f"{msg['html']}" if "html" in msg else None
             personalizations_ = msg["personalizations"] if "personalizations" in msg else None
-            subject_ = self.EMAIL_UPLOADERR_SUBJECT if op_ in [
-                "uploaderr", "importerr"] else self.EMAIL_SIGNIN_SUBJECT if op_ == "signin" else self.EMAIL_TFA_SUBJECT if op_ == "tfa" else self.EMAIL_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.EMAIL_DEFAULT_SUBJECT
+            subject_ = EMAIL_UPLOADERR_SUBJECT_ if op_ in [
+                "uploaderr", "importerr"] else EMAIL_SIGNIN_SUBJECT_ if op_ == "signin" else EMAIL_TFA_SUBJECT_ if op_ == "tfa" else EMAIL_SIGNUP_SUBJECT_ if op_ == "signup" else msg["subject"] if msg["subject"] else EMAIL_DEFAULT_SUBJECT_
 
             if op_ is None or op_ == "":
                 raise APIError("email operation is missing")
@@ -3846,8 +3812,8 @@ class Email():
             if subject_ is None:
                 raise APIError("email subject is missing")
 
-            subject_ = self.EMAIL_UPLOADERR_SUBJECT if op_ in [
-                "uploaderr", "importerr"] else self.EMAIL_SIGNIN_SUBJECT if op_ == "signin" else self.EMAIL_TFA_SUBJECT if op_ == "tfa" else self.EMAIL_SIGNUP_SUBJECT if op_ == "signup" else msg["subject"] if msg["subject"] else self.EMAIL_DEFAULT_SUBJECT
+            subject_ = EMAIL_UPLOADERR_SUBJECT_ if op_ in [
+                "uploaderr", "importerr"] else EMAIL_SIGNIN_SUBJECT_ if op_ == "signin" else EMAIL_TFA_SUBJECT_ if op_ == "tfa" else EMAIL_SIGNUP_SUBJECT_ if op_ == "signup" else msg["subject"] if msg["subject"] else EMAIL_DEFAULT_SUBJECT_
 
             msg_ = {
                 "op": op_,
@@ -3889,12 +3855,10 @@ class RestAPI():
 
             origin_ = request.headers["Origin"].replace("https://", "").replace("http://", "").replace("/", "")
             origin_ = origin_.split(":")[0]
-            DOMAIN_ = os.environ.get("DOMAIN")
 
             if origin_ != DOMAIN_:
                 raise APIError(f"invalid request {origin_} - {DOMAIN_}")
 
-            API_KEY_ = os.environ.get("API_KEY")
             api_key_header_ = request.headers["X-Api-Key"]
 
             if API_KEY_ != api_key_header_:
@@ -4116,7 +4080,6 @@ class Auth():
 
     def saas_f(self):
         try:
-            COMPANY_NAME_ = os.environ.get("COMPANY_NAME")
             saas_ = {
                 "company": COMPANY_NAME_
             }
@@ -4393,7 +4356,6 @@ class Auth():
             email_ = user_["email"] if "email" in user_ else None
             token_ = user_["token"] if "token" in user_ else None
             jdate_curr_ = Misc().get_jdate_f()
-            secur_max_age_ = os.environ.get("SECUR_MAX_AGE")
 
             if not email_ or not token_:
                 raise APIError("invalid session parameters")
@@ -4413,7 +4375,7 @@ class Auth():
             if "jdate" not in user_:
                 user_["jdate"] = jdate_curr_
 
-            jdate_exp_ = int(user_["jdate"]) + int(secur_max_age_)
+            jdate_exp_ = int(user_["jdate"]) + int(SECUR_MAX_AGE_)
 
             if jdate_curr_ > jdate_exp_:
                 raise APIError(f"session expired")
@@ -4908,13 +4870,43 @@ class Auth():
             return res_
 
 
-TZ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
-DOMAIN = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
+TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
+DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
+MONGO_REPLICASET_ = os.environ.get("MONGO_REPLICASET")
+MONGO_HOST_ = os.environ.get("MONGO_HOST")
+MONGO_REPLICA1_HOST_ = os.environ.get("MONGO_REPLICA1_HOST")
+MONGO_REPLICA2_HOST_ = os.environ.get("MONGO_REPLICA2_HOST")
+MONGO_PORT_ = int(os.environ.get("MONGO_PORT"))
+MONGO_DB_ = os.environ.get("MONGO_DB")
+MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
+MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
+MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
+MONGO_TLS_ = os.environ.get("MONGO_TLS")
+MONGO_TLS_CERT_COMBINED_FILE_ = os.environ.get("MONGO_TLS_CERT_COMBINED_FILE")
+MONGO_TLS_CA_COMBINED_FILE_ = os.environ.get("MONGO_TLS_CA_COMBINED_FILE")
+API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
+NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
+COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
+SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
+SMTP_PORT_ = os.environ.get("SMTP_PORT")
+SMTP_USERID_ = os.environ.get("SMTP_USERID")
+SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
+FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
+EMAIL_TFA_SUBJECT_ = "Your Backup OTP"
+EMAIL_SIGNUP_SUBJECT_ = "Welcome"
+EMAIL_SIGNIN_SUBJECT_ = "New Sign-in"
+EMAIL_UPLOADERR_SUBJECT_ = "File Upload Result"
+EMAIL_DEFAULT_SUBJECT_ = "Hello"
+API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
+API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
+API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
+API_KEY_ = os.environ.get("API_KEY")
+SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
 
 origins_ = [
-    f"https://{DOMAIN}",
-    f"http://{DOMAIN}:8100",
-    f"http://{DOMAIN}:8101"
+    f"https://{DOMAIN_}",
+    f"http://{DOMAIN_}:8100",
+    f"http://{DOMAIN_}:8101"
 ]
 
 app = Flask(__name__)
@@ -5365,8 +5357,7 @@ def post_f():
         if not request.json:
             raise APIError("no data provided")
 
-        API_OUTPUT_ROWS_LIMIT = os.environ.get("API_OUTPUT_ROWS_LIMIT")
-        if not API_OUTPUT_ROWS_LIMIT:
+        if not API_OUTPUT_ROWS_LIMIT_:
             raise APIError("no api rows limit defined")
 
         # checks the authorization from the request header
@@ -5444,7 +5435,7 @@ def post_f():
                 for doc_ in docs_:
                     output_.append(doc_)
                     count_ += 1
-                    if count_ >= int(API_OUTPUT_ROWS_LIMIT):
+                    if count_ >= int(API_OUTPUT_ROWS_LIMIT_):
                         break
         elif operation_ in ["insert", "update", "upsert", "delete"]:
             filter_ = {}
@@ -5480,7 +5471,7 @@ def post_f():
                 elif operation_ == "delete":
                     session_db_[collection_data_].delete_many(filter__, session=session_)
                 count_ += 1
-                if count_ >= int(API_OUTPUT_ROWS_LIMIT):
+                if count_ >= int(API_OUTPUT_ROWS_LIMIT_):
                     break
                 output_.append(item_)
 

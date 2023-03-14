@@ -112,11 +112,18 @@ ion-alert .alert-radio-group {
   max-height: 100% !important;
 }
 
+.sign-content {
+  --padding-start: 32px;
+  --padding-end: 32px;
+  --padding-top: 24px;
+  --padding-bottom: 24px;
+}
+
 .top-tools {
   position: fixed;
   display: flex;
-  right: 32px;
-  top: 16px;
+  right: 40px;
+  top: 14px;
   z-index: 99;
   border-bottom: 1px solid var(--ion-color-light);;
 }
@@ -350,8 +357,8 @@ ion-alert .alert-radio-group {
 
 .data-sq-container {
   display: flex;
-  gap: 2px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin-bottom: 5px;
 }
 
 .data-sq-button {
@@ -724,11 +731,11 @@ ion-spinner {
 }
 
 .signin-modal {
-  --height: 400px !important;
+  --height: 360px !important;
 }
 
 .signup-modal {
-  --height: 480px !important;
+  --height: 500px !important;
 }
 
 .sign-modal {
@@ -1776,24 +1783,6 @@ ion-checkbox {
   text-overflow: ellipsis;
 }
 
-.kpi-sq {
-  position: relative;
-  margin-right: 8px;
-  margin-top: 8px;
-  border: 1px solid var(--ion-color-primary);
-  border-radius: 11px;
-  overflow: hidden;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 12px;
-  height: 180px;
-  width: 260px;
-}
-
-.kpi-sq.chart-stats {
-  position: absolute;
-}
-
 .app-charts {
   position: absolute;
   bottom: 8px;
@@ -1808,14 +1797,14 @@ app-charts {
 
 .flash-sq {
   position: relative;
-  margin-bottom: 10px;
-  margin-right: 10px;
+  margin-bottom: 5px;
+  margin-right: 5px;
   overflow: hidden;
-  padding: 16px;
-  background-color: var(--ion-color-light);
+  padding: 12px;
+  border: 5px solid var(--ion-color-light);
   align-content: flex-start;
   width: 320px;
-  min-height: 150px;
+  min-height: 140px;
   white-space: nowrap !important;
 }
 
@@ -1827,13 +1816,17 @@ app-charts {
   width: 93%;
 }
 
+.flash-sq h6 {
+  margin-top: 8px !important;
+}
+
 .chart-sq {
   position: relative;
-  margin-bottom: 10px;
-  margin-right: 10px;
+  margin-bottom: 5px;
+  margin-right: 5px;
   overflow: hidden;
   padding: 16px;
-  border: 2px solid var(--ion-color-light);
+  border: 5px solid var(--ion-color-light);
   border-radius: 0px;
   align-content: flex-start;
 }
@@ -1844,7 +1837,7 @@ app-charts {
 }
 
 .chart-sq.medium {
-  width: 648px;
+  width: 650px;
   height: 580px;
 }
 
