@@ -111,7 +111,7 @@ function installBI() {
 }
 
 function buildBI() {
-    echo -e "\nBuilding images... $SUFFIX\n"
+    echo -e "\nBuilding images... $SUFFIX $2\n"
     if [[ -z $2 || $2 = "bi-api" ]]; then
         docker build --tag $NS/bi-api$SUFFIX:$TAG api/
     fi
@@ -234,7 +234,7 @@ COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 TAG="latest"
 NS="ghcr.io/technoplatz"
-DIR="/opt/technoplatz/_bi"
+DIR="_bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
 SUFFIX=""
