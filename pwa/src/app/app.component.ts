@@ -67,13 +67,13 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
 
-    this.misc.menutoggle.subscribe((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = LSMENUTOGGLE;
+    this.misc.menutoggle.subscribe((LSMENUTOGGLE: any) => {
+      this.menutoggle = LSMENUTOGGLE === undefined ? true : LSMENUTOGGLE;
       this.storage.set("LSMENUTOGGLE", LSMENUTOGGLE).then(() => { });
     });
 
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = LSMENUTOGGLE === undefined ? true : LSMENUTOGGLE;
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: any) => {
+      this.misc.menutoggle.next(LSMENUTOGGLE);
     });
 
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {

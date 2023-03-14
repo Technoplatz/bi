@@ -3581,16 +3581,6 @@ class Crud():
                 "sort": {}
             }
 
-            field_id_ = f"{prefix_}_id"
-            field_id_json_ = {
-                "bsonType": "string",
-                "title": "ID",
-                "description": "Record ID",
-                "pattern": "^[a-z0-9-_]{3,64}$",
-                "minLength": 3,
-                "maxLength": 64
-            }
-
             field_no_ = f"{prefix_}_no"
             field_no_json_ = {
                 "bsonType": "string",
@@ -3671,7 +3661,6 @@ class Crud():
                 "default": False
             }
 
-            structure_["properties"][field_id_] = field_id_json_
             structure_["properties"][field_no_] = field_no_json_
             structure_["properties"][field_date_] = field_date_json_
             structure_["properties"][field_status_] = field_status_json_
@@ -3681,9 +3670,9 @@ class Crud():
             structure_["properties"][field_amount_] = field_amount_json_
             structure_["properties"][field_escalator_] = field_escalator_json_
             structure_["properties"][field_bool_] = field_bool_json_
-            structure_["required"] = [field_id_, field_no_]
-            structure_["unique"] = [[field_id_]]
-            structure_["index"] = [[field_no_], [field_id_, field_no_], [field_status_]]
+            structure_["required"] = [field_no_]
+            structure_["unique"] = [[field_no_]]
+            structure_["index"] = [[field_status_]]
             structure_["parents"] = []
             structure_["actions"] = []
             structure_["sort"] = {"_modified_at": -1}

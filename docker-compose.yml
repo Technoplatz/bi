@@ -97,10 +97,11 @@ services:
     container_name: mongo0
     hostname: ${MONGO_HOST}
     restart: always
+    depends_on:
+      init:
+        condition: service_completed_successfully
     labels:
       - com.centurylinklabs.watchtower.enable=true
-    depends_on:
-      - init
     expose:
       - "${MONGO_PORT}"
     ports:
@@ -115,6 +116,7 @@ services:
       - TZ=${TZ}
     command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
+      - init
       - mongo1
       - mongo2
     networks:
@@ -126,10 +128,11 @@ services:
     container_name: mongo1
     hostname: ${MONGO_REPLICA1_HOST}
     restart: always
+    depends_on:
+      init:
+        condition: service_completed_successfully
     labels:
       - com.centurylinklabs.watchtower.enable=true
-    depends_on:
-      - init
     expose:
       - "${MONGO_PORT}"
     ports:
@@ -143,6 +146,8 @@ services:
     environment:
       - TZ=${TZ}
     command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    links:
+      - init
     networks:
       network0:
         ipv4_address: ${SUBNET_MONGO_REPLICA1_IPV4}
@@ -152,10 +157,11 @@ services:
     container_name: mongo2
     hostname: ${MONGO_REPLICA2_HOST}
     restart: always
+    depends_on:
+      init:
+        condition: service_completed_successfully
     labels:
       - com.centurylinklabs.watchtower.enable=true
-    depends_on:
-      - init
     expose:
       - "${MONGO_PORT}"
     ports:
@@ -169,6 +175,8 @@ services:
     environment:
       - TZ=${TZ}
     command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    links:
+      - init
     networks:
       network0:
         ipv4_address: ${SUBNET_MONGO_REPLICA2_IPV4}
@@ -177,12 +185,15 @@ services:
     image: ghcr.io/technoplatz/bi-replicaset${SUFFIX}:latest
     container_name: replicaset
     hostname: replicaset
+    depends_on:
+      mongo0:
+        condition: service_started
+      mongo1:
+        condition: service_started
+      mongo2:
+        condition: service_started
     labels:
       - com.centurylinklabs.watchtower.enable=true
-    depends_on:
-      - mongo0
-      - mongo1
-      - mongo2
     volumes:
       - bi-storage-volume:/init
       - bi-mongo0-volume:/data/db
@@ -219,7 +230,8 @@ services:
     image: ghcr.io/technoplatz/bi-api${SUFFIX}:latest
     container_name: api
     depends_on:
-      - replicaset
+      replicaset:
+        condition: service_completed_successfully
     hostname: api
     restart: always
     labels:
@@ -267,7 +279,7 @@ services:
       - MONGO_TLS_CA_COMBINED_FILE=${MONGO_TLS_CA_COMBINED_FILE}
       - NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_SLACK_HOOK_URL}
     links:
-      - pwa
+      - replicaset
     networks:
       network0:
         ipv4_address: ${SUBNET_API_IPV4}
@@ -275,6 +287,9 @@ services:
   pwa:
     image: ghcr.io/technoplatz/bi-pwa${SUFFIX}:latest
     container_name: pwa
+    depends_on:
+      api:
+        condition: service_started
     hostname: pwa
     restart: always
     labels:

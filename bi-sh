@@ -58,7 +58,7 @@ function installBI() {
             case $yn in
                 [Y]* )
                     if [[ -f $DIR/$DOTENV ]]; then
-                        BKFILE=$DOTENV-backup-$(date '+%Y%m%d%H%M%S')
+                        BKFILE=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
                         cp $DIR/$DOTENV $BKFILE
                         echo -e "\n✔ Existing parameter file ${COLOR}$DOTENV${NOCOLOR} has been backed up as ${COLOR}$(pwd)/$BKFILE${NOCOLOR}."
                     fi
@@ -84,7 +84,7 @@ function installBI() {
     CONTD=$(cat $DIR/$DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* ]]; then
         echo -e "✘ Sorry! Required files not received successfully ($CONTD)."
-        echo -e "You may try to add your token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
+        echo -e "\nYou can try again by adding a token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
     else
         echo -e "✔ Required files received successfully."

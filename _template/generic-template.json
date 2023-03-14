@@ -1,13 +1,5 @@
 {
   "properties": {
-    "gen_id": {
-      "bsonType": "string",
-      "title": "ID",
-      "description": "Record ID",
-      "minLength": 1,
-      "maxLength": 64,
-      "width": 120
-    },
     "gen_no": {
       "bsonType": "string",
       "title": "Record No",
@@ -66,9 +58,9 @@
       "width": 130
     }
   },
-  "required": ["gen_id", "gen_no", "gen_type", "gen_status"],
+  "required": ["gen_no", "gen_type", "gen_status"],
   "index": [["gen_type"], ["gen_status"], ["gen_type", "gen_status"]],
-  "unique": [["gen_id"], ["gen_no"]],
+  "unique": [["gen_no"]],
   "parents": [],
   "actions": [
     {

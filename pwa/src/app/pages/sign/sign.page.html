@@ -52,7 +52,7 @@ https://www.gnu.org/licenses.
     </ion-grid>
     <form [formGroup]="resetForm" *ngIf="formtype=='reset'">
         <ion-item class="section-header" lines="none">
-            <h1>{{ 'New Password' | translate }}</h1>
+            <h1>{{ 'Set Password' | translate }}</h1>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Password' | translate }} <sup>
@@ -71,32 +71,12 @@ https://www.gnu.org/licenses.
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-button (click)="Reset()" size="default" [disabled]="!resetForm.valid" class="no-hover">
-                <span *ngIf="!isInProgress">{{ 'Reset Password' | translate }}</span>
+                <span *ngIf="!isInProgress">{{ 'Set Password' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
             <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
-        </ion-item>
-        <ion-item lines="none" class="ion-no-padding">
-            <ion-label class="ion-text-wrap tfac-info">
-                {{ 'Preferred Authenticator Apps' |
-                translate }};<br />
-                {{ 'Authy' }}&nbsp;&nbsp;<a href="https://apps.apple.com/us/app/twilio-authy/id494168017"
-                    target="_new">iOS</a>&nbsp;&nbsp;<a
-                    href="https://play.google.com/store/apps/details?id=com.authy.authy&hl=de&gl=US"
-                    target="_new">Android</a><br />
-                {{ 'Microsoft Authenticator' }}&nbsp;&nbsp;<a
-                    href="https://apps.apple.com/us/app/microsoft-authenticator/id983156458"
-                    target="_new">iOS</a>&nbsp;&nbsp;<a
-                    href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=tr&gl=US"
-                    target="_new">Android</a><br />
-                {{ 'Google Authenticator' }}&nbsp;&nbsp;<a
-                    href="https://apps.apple.com/us/app/google-authenticator/id388497605"
-                    target="_new">iOS</a>&nbsp;&nbsp;<a
-                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
-                    target="_new">Android</a>
-            </ion-label>
         </ion-item>
     </form>
     <form [formGroup]="signupForm" *ngIf="formtype=='signup'">
