@@ -31,7 +31,7 @@
 # 
 
 FROM mongo:latest
-WORKDIR /init
+WORKDIR /app
 COPY mongo-init.sh .
 RUN chmod +x mongo-init.sh
-CMD [ "bash", "-c", "/init/mongo-init.sh"]
+CMD [ "bash", "-c", "/app/mongo-init.sh"]

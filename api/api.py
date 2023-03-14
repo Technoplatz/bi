@@ -71,19 +71,6 @@ from dateutil import tz
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
-app = Flask(__name__)
-
-app.config["CORS_ORIGINS"] = "*"
-app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
-app.config["CORS_SUPPORTS_CREDENTIALS"] = True
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
-app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
-app.config["UPLOAD_FOLDER"] = "/vault/"
-
-CORS(app, resources={r"/*": {"origins": "*"}})
-log = logging.getLogger("werkzeug")
-log.setLevel(logging.ERROR)
-
 
 class APIError(BaseException):
     pass
@@ -102,7 +89,6 @@ class JSONEncoder(json.JSONEncoder):
 
 class Schedular():
     def __init__(self):
-        self.TZ = os.environ.get("TZ")
         self.API_SCHEDULE_INTERVAL_MIN = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 
     def schedule_automation_f(self, doc_):
@@ -376,7 +362,7 @@ class Schedular():
                 aut_id_ = doc_["aut_id"]
                 if backgroundscheduler_.get_job(aut_id_):
                     backgroundscheduler_.remove_job(aut_id_)
-                backgroundscheduler_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=self.TZ, replace_existing=True, args=[doc_])
+                backgroundscheduler_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=TZ, replace_existing=True, args=[doc_])
 
             res_ = {"result": True}
 
@@ -408,7 +394,7 @@ class Schedular():
                     vie_sched_minutes_ = ",".join(vie_sched_minutes_c_)
                     vie_sched_hours_ = ",".join(vie_sched_hours_c_)
                     vie_sched_days_ = ",".join(doc_["vie_sched_days"]) if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0 else "mon"
-                    sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=self.TZ, replace_existing=True, args=[doc_, "live", None])
+                    sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=TZ, replace_existing=True, args=[doc_, "live", None])
                     print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now(), flush=True)
 
             res_ = {"result": True}
@@ -424,7 +410,7 @@ class Schedular():
 
     def main_f(self):
         try:
-            sched_ = BackgroundScheduler(timezone=self.TZ, daemon=True)
+            sched_ = BackgroundScheduler(timezone=TZ, daemon=True)
             sched_.remove_all_jobs()
 
             # schedule automations initially
@@ -438,15 +424,15 @@ class Schedular():
                 raise APIError(schedule_views_f_["msg"])
 
             # reschedule views regularly
-            sched_.add_job(self.schedule_automations_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_automations", timezone=self.TZ, replace_existing=True, args=[sched_])
+            sched_.add_job(self.schedule_automations_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_automations", timezone=TZ, replace_existing=True, args=[sched_])
 
             # reschedule views regularly
-            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_views", timezone=self.TZ, replace_existing=True, args=[sched_])
+            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{self.API_SCHEDULE_INTERVAL_MIN}", id="schedule_views", timezone=TZ, replace_existing=True, args=[sched_])
 
             # schedule database dumps
             API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
             args_ = {"user": {"email": "cron"}}
-            sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=self.TZ, replace_existing=True, args=[args_])
+            sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ, replace_existing=True, args=[args_])
 
             sched_.start()
             res_ = True
@@ -468,14 +454,13 @@ class Misc():
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
         self.NOTIFICATION_SLACK_HOOK_URL = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
         self.COMPANY_NAME = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
-        self.DOMAIN = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else None
 
     def post_slack_notification(self, exc):
         ip_ = self.get_user_ip_f()
         if self.NOTIFICATION_SLACK_HOOK_URL:
             exc_ = {
                 "ip": ip_,
-                "domain": self.DOMAIN,
+                "domain": DOMAIN,
                 "company": self.COMPANY_NAME,
                 "file": __file__ if __file__ else None,
                 "line": exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else None,
@@ -3890,8 +3875,6 @@ class Email():
 
 
 class RestAPI():
-    def __init__(self):
-        self.TZ = os.environ.get("TZ")
 
     def validate_pwa_f(self):
         try:
@@ -3930,8 +3913,6 @@ class RestAPI():
 
 
 class OTP():
-    def __init__(self):
-        self.TZ = os.environ.get("TZ")
 
     def reset_otp_f(self, email_):
         try:
@@ -4132,8 +4113,6 @@ class OTP():
 
 
 class Auth():
-    def __init__(self):
-        self.TZ = os.environ.get("TZ")
 
     def saas_f(self):
         try:
@@ -4929,8 +4908,29 @@ class Auth():
             return res_
 
 
+TZ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
+DOMAIN = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
+
+origins_ = [
+    f"https://{DOMAIN}",
+    f"http://{DOMAIN}:8100",
+    f"http://{DOMAIN}:8101"
+]
+
+app = Flask(__name__)
+app.config["CORS_ORIGINS"] = origins_
+app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
+app.config["CORS_SUPPORTS_CREDENTIALS"] = True
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
+app.config["UPLOAD_FOLDER"] = "/vault/"
+CORS(app)
+
+log = logging.getLogger("werkzeug")
+log.setLevel(logging.ERROR)
+
+
 @app.route("/import", methods=["POST"], endpoint="import")
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def storage_f():
     try:
         # validates restapi request
@@ -4994,7 +4994,6 @@ def storage_f():
 
 
 @app.route("/crud", methods=["POST"])
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization", "X-Requested-With"])
 def crud_f():
     try:
         # validates restapi request
@@ -5105,7 +5104,6 @@ def crud_f():
 
 
 @app.route("/otp", methods=["POST"])
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def otp_f():
     try:
         # validates restapi request
@@ -5169,7 +5167,6 @@ def otp_f():
 
 
 @app.route("/auth", methods=["POST"])
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization", "X-Requested-With"])
 def auth_f():
     try:
         # validates restapi request
@@ -5231,7 +5228,6 @@ def auth_f():
 
 
 @app.route("/get/visual/<string:id>", methods=["GET"])
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_visual_f(id):
     try:
         web_validate_ = RestAPI().validate_pwa_f()
@@ -5291,7 +5287,6 @@ def get_visual_f(id):
 
 
 @app.route("/get/pivot/<string:id>", methods=["GET"])
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_pivot_f(id):
     try:
         validate_ = RestAPI().validate_pwa_f()
@@ -5357,7 +5352,6 @@ def get_pivot_f(id):
 
 
 @app.route("/post", methods=["POST"])
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization", "Accept", "User-Agent"])
 def post_f():
     try:
         # start transaction
@@ -5536,7 +5530,6 @@ def post_f():
 
 
 @app.route("/get/dump", methods=["POST"])
-@cross_origin(origin="*", headers=["Content-Type", "Origin", "Authorization"])
 def get_dump_f():
     try:
         validate_ = RestAPI().validate_pwa_f()
