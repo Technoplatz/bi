@@ -41,7 +41,10 @@ on:
 env:
   DOCKER_IMAGE: bi-replicaset
   FOLDER: _replicaset
+  DOCKERFILE: Dockerfile
   VERSION: latest
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 jobs:
   push-to-packages:
@@ -58,8 +61,9 @@ jobs:
           if [ $BRANCH != "main" ]; then IMAGE_NAME=$DOCKER_IMAGE-$BRANCH:$VERSION; else IMAGE_NAME=$DOCKER_IMAGE:$VERSION; fi
           IMAGE_NAME=$(echo $IMAGE_NAME | tr '[A-Z]' '[a-z]')
           cd $FOLDER
-          docker build . --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
           echo "OIMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "OBRANCH=$BRANCH" >> $GITHUB_OUTPUT
       - name: push-image-ghcr
         id: push-image-ghcr
         run: |
@@ -68,3 +72,15 @@ jobs:
           echo "$GHCR_TOKEN" | docker login ghcr.io -u $ --password-stdin
           docker push $IMAGE_ID
           docker logout ghcr.io
+      - name: push-image-dockerhub
+        id: push-image-dockerhub
+        run: |
+          if [ ${{ steps.build-image.outputs.OBRANCH }} == 'main' ]; then
+            IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
+            docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
+            echo "$DOCKERHUB_TOKEN" | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker push $IMAGE_ID
+            docker logout
+          else
+            echo "Branch ${{ steps.build-image.outputs.OBRANCH }} skipped"
+          fi

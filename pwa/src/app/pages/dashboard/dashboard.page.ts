@@ -93,7 +93,6 @@ export class DashboardPage implements OnInit {
   public count: number = 0;
   public chart_size: string = "small";
   public chart_css: string = "";
-  public flash_css: string = "";
   public is_loaded: boolean = true;
   public is_refreshing: boolean = false;
   public is_selected: boolean = false;
@@ -188,7 +187,6 @@ export class DashboardPage implements OnInit {
           this.visuals = [];
           this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
             this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
-            this.flash_css = "flash-sq";
             this.chart_css = "chart-sq " + this.chart_size;
             for (let v_ = 0; v_ < this.views.length; v_++) {
               this.doGetVisual(this.views[v_], v_);

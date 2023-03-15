@@ -63,7 +63,7 @@ services:
         ipv4_address: ${SUBNET_TRAEFIK_IPV4}
 
   init:
-    image: ghcr.io/technoplatz/bi-init${SUFFIX}:latest
+    image: ${HUB}/technoplatz/bi-init${IMGSUFFIX}:latest
     container_name: init
     hostname: init
     labels:
@@ -182,7 +182,7 @@ services:
         ipv4_address: ${SUBNET_MONGO_REPLICA2_IPV4}
 
   replicaset:
-    image: ghcr.io/technoplatz/bi-replicaset${SUFFIX}:latest
+    image: ${HUB}/technoplatz/bi-replicaset${IMGSUFFIX}:latest
     container_name: replicaset
     hostname: replicaset
     depends_on:
@@ -227,7 +227,7 @@ services:
         ipv4_address: ${SUBNET_REPLICASET_IPV4}
 
   api:
-    image: ghcr.io/technoplatz/bi-api${SUFFIX}:latest
+    image: ${HUB}/technoplatz/bi-api${IMGSUFFIX}:latest
     container_name: api
     depends_on:
       replicaset:
@@ -285,7 +285,7 @@ services:
         ipv4_address: ${SUBNET_API_IPV4}
 
   pwa:
-    image: ghcr.io/technoplatz/bi-pwa${SUFFIX}:latest
+    image: ${HUB}/technoplatz/bi-pwa${IMGSUFFIX}:latest
     container_name: pwa
     depends_on:
       api:
@@ -303,8 +303,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "${PWA_PORT}:80"
-    extra_hosts:
-      - api:${SUBNET_API_IPV4}
     links:
       - api
     networks:

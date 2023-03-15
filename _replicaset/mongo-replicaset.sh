@@ -42,7 +42,6 @@ echo "MONGO_USERNAME=$MONGO_USERNAME"
 echo "MONGO_PASSWORD=$MONGO_PASSWORD"
 
 echo "DB REPLICASET STARTED"
-sleep 10s
 
 if [ ! -f /init/mongo-init.flag ]; then
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_COMBINED_FILE --tlsCAFile $MONGO_TLS_CA_COMBINED_FILE --tlsAllowInvalidCertificates --eval "
@@ -73,8 +72,6 @@ else
     "
     echo "Replicaset was reconfigured successfully."
 fi
-
-sleep 10s
 
 RS_OK=""
 until [[ $RS_OK -eq "1" ]]; do

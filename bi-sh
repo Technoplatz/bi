@@ -111,18 +111,18 @@ function installBI() {
 }
 
 function buildBI() {
-    echo -e "\nBuilding images... $SUFFIX $2\n"
+    echo -e "\nBuilding images... $HUB $2$IMGSUFFIX\n"
     if [[ -z $2 || $2 = "bi-api" ]]; then
-        docker build --tag $NS/bi-api$SUFFIX:$TAG api/
+        docker build --tag $HUB/technoplatz/bi-api$IMGSUFFIX:$TAG api/
     fi
     if [[ -z $2 || $2 = "bi-pwa" ]]; then
-        docker build --tag $NS/bi-pwa$SUFFIX:$TAG pwa/
+        docker build --tag $HUB/technoplatz/bi-pwa$IMGSUFFIX:$TAG pwa/
     fi
     if [[ -z $2 || $2 = "bi-replicaset" ]]; then
-        docker build --tag $NS/bi-replicaset$SUFFIX:$TAG _replicaset/
+        docker build --tag $HUB/technoplatz/bi-replicaset$IMGSUFFIX:$TAG _replicaset/
     fi
     if [[ -z $2 || $2 = "bi-init" ]]; then
-        docker build --tag $NS/bi-init$SUFFIX:$TAG _init/
+        docker build --tag $HUB/technoplatz/bi-init$IMGSUFFIX:$TAG _init/
     fi
     if [ $? -eq 0 ]; then
         echo -e "\n✔ Images were built successfully."
@@ -135,13 +135,13 @@ function buildBI() {
 }
 
 function startBI() {
-    echo -e "\nStarting containers... $SUFFIX\n"
+    echo -e "\nStarting containers... $IMGSUFFIX\n"
     if [ ! -d $DIR ]; then
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
-    SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
+    HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         echo -e "\n✔ Platform was started successfully."
         echo -e "Please be patient up to 20 seconds for the system to be functional."
@@ -172,8 +172,8 @@ function updateBI() {
         mv $DIR/$DCYML.bak $DIR/$DCYML
         echo -e "✔ Configuration file received successfully.\n"
     fi
-    SUFFIX=""
-    SUFFIX=$SUFFIX docker compose -f $DIR/$DCYML pull
+    IMGSUFFIX=""
+    HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML pull
     if [ $? -eq 0 ]; then
         stopBI
         startBI
@@ -233,15 +233,16 @@ function logsBI() {
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 TAG="latest"
-NS="ghcr.io/technoplatz"
+HUB="docker.io"
 DIR="_bi"
 DCYML="docker-compose.yml"
 DOTENV=".env"
-SUFFIX=""
+IMGSUFFIX=""
 LOGTAIL=20
 
 if [ $2 ]; then
-    SUFFIX=$2
+    IMGSUFFIX=$2
+    HUB="ghcr.io"
 fi
 
 case $1 in

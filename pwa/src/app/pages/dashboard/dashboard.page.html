@@ -62,8 +62,13 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
         <!-- VIEW SECTION -->
+        <!-- <div class="brz-visual-group ion-margin-top">
+          <div *ngFor="let item of collections; let f = index" class="flash-rec">
+            <h5>{{ item.col_title }}</h5>
+          </div>
+        </div> -->
         <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
-          <div *ngFor="let item of flashcards; let f = index" [class]="flash_css" #chcontainer>
+          <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer>
             <h5>{{ item.vie_title }}</h5>
             <div class="visual-buttons">
               <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
