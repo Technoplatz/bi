@@ -1,22 +1,22 @@
 #!/bin/bash
-# 
+#
 # Technoplatz BI
-# 
+#
 # Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
-# 
+#
 # If your software can interact with users remotely through a computer
 # network, you should also make sure that it provides a way for users to
 # get its source.  For example, if your program is a web application, its
@@ -24,14 +24,14 @@
 # of the code.  There are many ways you could offer source, and different
 # solutions will be better for different programs; see section 13 for the
 # specific requirements.
-# 
+#
 # You should also get your employer (if you work as a programmer) or school,
 # if any, to sign a "copyright disclaimer" for the program, if necessary.
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
-# 
+#
 
-cat << EOF
+cat <<EOF
 
 Technoplatz BI
 Copyright 2019-$(date +'%Y'), Technoplatz IT Solutions GmbH
@@ -56,31 +56,32 @@ function installBI() {
         while true; do
             read -p "$(echo -e "Oops! An existing ${COLOR}$DIR${NOCOLOR} folder found. Do you want to remove it? (Y/n) ")" yn
             case $yn in
-                [Y]* )
-                    if [[ -f $DIR/$DOTENV ]]; then
-                        BKFILE=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
-                        cp $DIR/$DOTENV $BKFILE
-                        echo -e "\n✔ Existing parameter file ${COLOR}$DIR/$DOTENV${NOCOLOR} has been backed up as ${COLOR}$(pwd)/$BKFILE${NOCOLOR}."
-                    fi
-                    rm -rf $DIR
-                    break;;
-                [Nn]* )
-                    echo -e "\n✘ Installation canceled."
-                    return 0
-                    ;;
-                * ) 
-                    echo -e "\n✘ Please enter ${COLOR}Y${NOCOLOR} or ${COLOR}n${NOCOLOR}.\n"
-                    ;;
+            [Y]*)
+                if [[ -f $DIR/$DOTENV ]]; then
+                    BKFILE=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
+                    cp $DIR/$DOTENV $BKFILE
+                    echo -e "\n✔ Existing parameter file ${COLOR}$DIR/$DOTENV${NOCOLOR} has been backed up as ${COLOR}$(pwd)/$BKFILE${NOCOLOR}."
+                fi
+                rm -rf $DIR
+                break
+                ;;
+            [Nn]*)
+                echo -e "\n✘ Installation canceled."
+                return 0
+                ;;
+            *)
+                echo -e "\n✘ Please enter ${COLOR}Y${NOCOLOR} or ${COLOR}n${NOCOLOR}.\n"
+                ;;
             esac
         done
     fi
     echo -e "\n✔ Installation started."
     mkdir -p $DIR/_init
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
-    if [ $1 ]; then
-        curlHeaders+=("-H" "Authorization: token $1")
+    if [ $TOKEN ]; then
+        curlHeaders+=("-H" "Authorization: token $TOKEN")
     fi
-    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML,$DOTENV}
+    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV $RAWREPO/{$DCYML,$DOTENV}
     CONTD=$(cat $DIR/$DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* ]]; then
         echo -e "✘ Sorry! Required files not received successfully ($CONTD)."
@@ -93,12 +94,11 @@ function installBI() {
     if [[ ! -f $DIR/_init/.secret-key-password ]]; then
         touch $DIR/_init/.secret-key-password
         re='^[a-zA-Z]+$'
-        while ! [[ ${DBPWD:0:1} =~ $re ]]
-        do
+        while ! [[ ${DBPWD:0:1} =~ $re ]]; do
             DBPWD=$(openssl rand -hex 12)
             let "INC+=1"
         done
-        echo $DBPWD > $DIR/_init/.secret-key-password
+        echo $DBPWD >$DIR/_init/.secret-key-password
     fi
     echo -e "✔ The first step completed successfully."
     echo -e "\n>>> NEXT STEPS:"
@@ -153,24 +153,37 @@ function startBI() {
 }
 
 function updateBI() {
+    echo -e "\nUpdating platform from $HUB to $DIR... $TOKEN $IMGSUFFIX\n"
     if [ ! -d $DIR ]; then
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         return 0
     fi
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
-    if [ $1 ]; then
-        curlHeaders+=("-H" "Authorization: token $1")
+    if [ $TOKEN ]; then
+        curlHeaders+=("-H" "Authorization: token $TOKEN")
     fi
-    curl "${curlHeaders[@]}" -Lso $DIR/$DCYML.bak https://raw.githubusercontent.com/Technoplatz/bi/main/{$DCYML}
+    curl "${curlHeaders[@]}" -Lso $DIR/$DCYML.bak $RAWREPO/{$DCYML}
     CONTD=$(cat $DIR/$DCYML.bak | head -c 3)
     if [[ -z $DIR/$DCYML.bak || "$CONTD" == *"40"* ]]; then
-        echo -e "✘ Sorry! Configuration file not received successfully ($CONTD)."
+        echo -e "✘ Sorry! Configuration file not received from repository ($CONTD)."
         echo -e "You may try to add your token ${COLOR}./bi.sh update [token]${NOCOLOR} as the way to get connected privately."
         rm $DIR/$DCYML.bak
         return 0
     else
         mv $DIR/$DCYML.bak $DIR/$DCYML
         echo -e "✔ Configuration file received successfully.\n"
+    fi
+    curl "${curlHeaders[@]}" -Lso $ROOTDIR/bi-sh.bak $RAWREPO/bi-sh
+    CONTD=$(cat $ROOTDIR/bi-sh.bak | head -c 3)
+    if [[ -z $ROOTDIR/bi-sh.bak || "$CONTD" == *"40"* ]]; then
+        echo -e "✘ Sorry! Service script not received from repository ($CONTD)."
+        echo -e "You may try to add your token ${COLOR}./bi.sh update [token]${NOCOLOR} as the way to get connected privately."
+        rm $ROOTDIR/bi-sh.bak
+        return 0
+    else
+        mv $ROOTDIR/bi-sh.bak $ROOTDIR/bi.sh
+        chmod +x $ROOTDIR/bi.sh
+        echo -e "✔ Service script received successfully.\n"
     fi
     IMGSUFFIX=""
     HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML pull
@@ -187,9 +200,9 @@ function updateBI() {
 
 function pruneBI() {
     echo -e "Cleaning..."
-    docker system prune --force
+    docker system prune --force --all
     if [ $? -eq 0 ]; then
-        echo -e "✔ Dangling resources successfully removed."
+        echo -e "✔ Dangling and unused resources successfully removed."
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
@@ -234,49 +247,65 @@ COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 TAG="latest"
 HUB="docker.io"
-DIR="_bi"
+ROOTDIR="/opt/technoplatz"
+DIR=$ROOTDIR/_bi
 DCYML="docker-compose.yml"
 DOTENV=".env"
 IMGSUFFIX=""
+TOKEN=""
 LOGTAIL=20
+RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
 
-if [ $2 ]; then
-    IMGSUFFIX=$2
-    HUB="ghcr.io"
+if [[ ! -z $2 ]]; then
+    if [[ "$2" == *"-dev"* ]]; then
+        IMGSUFFIX=$2
+        HUB="ghcr.io"
+        DIR="_bi"
+        if [[ ! -z $3 ]]; then
+            if [[ $1 == "update" || $1 == "install" ]]; then
+                TOKEN="$3"
+            fi
+        fi
+    else
+        if [[ $1 == "update" || $1 == "install" ]]; then
+            TOKEN="$2"
+        fi
+    fi
 fi
 
 case $1 in
-    "install")
-	    installBI "$2"
-	    ;;
-    "start")
-        startBI
-        ;;
-    "restart")
-        stopBI
-        startBI
-        ;;
-    "stop")
-        stopBI
-        ;;
-    "prune")
-        pruneBI "$2"
-        ;;
-    "update")
-        updateBI "$2"
-        ;;
-    "logs")
-        logsBI "$2" "$3"
-        ;;
-    "help")
-        helpBI
-        ;;
-    "build")
-        buildBI "$2" "$3"
-        ;;
-    *)
-        echo "✘ Sorry. $1 is not an available command."
-        helpBI
+"install")
+    installBI
+    ;;
+"start")
+    startBI
+    ;;
+"restart")
+    stopBI
+    startBI
+    ;;
+"stop")
+    stopBI
+    ;;
+"prune")
+    pruneBI
+    ;;
+"update")
+    updateBI
+    ;;
+"logs")
+    logsBI "$2" "$3"
+    ;;
+"help")
+    helpBI
+    ;;
+"build")
+    buildBI "$2" "$3"
+    ;;
+*)
+    echo "✘ Sorry. $1 is not an available command."
+    helpBI
+    ;;
 esac
 
 echo
