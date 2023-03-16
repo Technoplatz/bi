@@ -62,7 +62,7 @@ export class Crud {
   public collections = new BehaviorSubject([]);
   public views = new BehaviorSubject([]);
   public visuals = new BehaviorSubject([]);
-  public saas = new BehaviorSubject([]);
+  public saas = new BehaviorSubject(null);
   public announcements = new BehaviorSubject([]);
 
   constructor(
@@ -168,224 +168,65 @@ export class Crud {
     });
   }
 
-  SaveAsView(collection: string, filter: any) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "saveasview",
-          user: LSUSERMETA,
-          collection: collection,
-          match: filter
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
-    });
-  }
-
   Reconfigure(collection_: string) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "reconfigure",
-          user: LSUSERMETA,
-          collection: collection_
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            this.storage.remove("LSFILTER_" + collection_).then(() => {
-              resolve(res);
-            });
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
+      this.misc.apiCall("crud", {
+        op: "reconfigure",
+        collection: collection_
+      }).then((res: any) => {
+        this.storage.remove("LSFILTER_" + collection_).then(() => {
+          resolve(res);
         });
-      });
-    });
-  }
-
-  AnnounceNow(view: string, tfac: string, scope: string, collection: string) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted_: any = {
-          op: "announce",
-          user: LSUSERMETA,
-          collection: collection,
-          view: view,
-          tfac: tfac,
-          scope: scope
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted_, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
-    });
-  }
-
-  PurgeFiltered(collection: string, tfac: string, match: any) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "purge",
-          user: LSUSERMETA,
-          collection: collection,
-          match: match,
-          tfac: tfac
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
+      }).catch((error: any) => {
+        reject(error);
       });
     });
   }
 
   Submit(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const properties = structure.properties;
-        let doc_: any = {};
-        let i = 0;
-        for (let item in properties) {
-          doc_[item] = properties[item].bsonType === "date" && form.get(item).value ? new Date(form.get(item).value) : form.get(item).value;
-          if (i === Object.keys(properties).length - 1) {
-            _id ? (doc_["_id"] = _id) : null;
-            let posted_: any = {
+      const properties = structure.properties;
+      let doc_: any = {};
+      let i = 0;
+      for (let item in properties) {
+        doc_[item] = properties[item].bsonType === "date" && form.get(item).value ? new Date(form.get(item).value) : form.get(item).value;
+        if (i === Object.keys(properties).length - 1) {
+          _id ? (doc_["_id"] = _id) : null;
+          if (file) {
+            let posted_: FormData = new FormData();
+            const sto_collection_id_ = doc_["sto_collection_id"];
+            posted_.append("op", op);
+            posted_.append("file", file, file.name);
+            posted_.append("collection", sto_collection_id_);
+            posted_.append("prefix", doc_["sto_prefix"]);
+            posted_.append("name", file.name);
+            posted_.append("size", file.size);
+            posted_.append("type", doc_["sto_file_type"]);
+            this.misc.apiCall("import", posted_).then((res: any) => {
+              res.cid = sto_collection_id_;
+              resolve(res);
+            }).catch((error: any) => {
+              reject(error.msg);
+            });
+          } else {
+            this.misc.apiCall("crud", {
               op: op,
-              user: LSUSERMETA,
               collection: collection,
               doc: doc_,
               match: match && match.length > 0 ? match : null,
               filter: filter ? filter : null,
               _id: _id ? _id : null,
               view: view
-            }
-            if (file) {
-              let formData: FormData = new FormData();
-              const sto_collection_id_ = doc_["sto_collection_id"];
-              formData.append("op", op);
-              formData.append("email", LSUSERMETA.email);
-              formData.append("token", LSUSERMETA.token);
-              formData.append("file", file, file.name);
-              formData.append("collection", sto_collection_id_);
-              formData.append("prefix", doc_["sto_prefix"]);
-              formData.append("name", file.name);
-              formData.append("size", file.size);
-              formData.append("type", doc_["sto_file_type"]);
-              this.http.post<any>(this.apiHost + "/import", formData, {
-                headers: new HttpHeaders(this.uploadHeaders)
-              }).subscribe((res: any) => {
-                res.cid = sto_collection_id_;
-                if (res && res.result) {
-                  resolve(res);
-                } else {
-                  reject(res.msg);
-                }
-              }, (error: any) => {
-                reject(error);
-              });
-            } else {
-              this.http.post<any>(this.apiHost + "/crud", posted_, {
-                headers: new HttpHeaders(this.crudHeaders)
-              }).subscribe((res: any) => {
-                if (res && res.result) {
-                  resolve(res);
-                } else {
-                  reject(res.msg);
-                }
-              }, (error: any) => {
-                reject(error);
-              });
-            }
-          } else {
-            i++;
-          }
-        }
-      });
-    });
-  }
-
-  Find(op: string, collection: string, projection: any, match: any, sort: any, page: number, limit: number) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.storage.get("LSVIEW-" + collection).then((LSVIEW: any) => {
-          const posted: any = {
-            op: op,
-            user: LSUSERMETA,
-            collection: collection,
-            projection: projection,
-            match: match,
-            sort: sort,
-            page: page,
-            limit: limit,
-            view: LSVIEW ? LSVIEW : null
-          }
-          this.http.post<any>(this.apiHost + "/crud", posted, {
-            headers: new HttpHeaders(this.crudHeaders)
-          }).subscribe((res: any) => {
-            if (res && res.result) {
+            }).then((res: any) => {
               resolve(res);
-            } else {
-              reject(res.msg);
-            }
-          }, (error: any) => {
-            reject(error);
-          });
-        });
-      });
-    });
-  }
-
-  getView(_id: string, vie_id_: string, source_: string) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.http.post<any>(this.apiHost + "/crud", {
-          _id: _id,
-          vie_id: vie_id_,
-          op: "view",
-          source: source_,
-          user: LSUSERMETA,
-          email: LSUSERMETA.email
-        }, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
+            }).catch((error: any) => {
+              reject(error.msg);
+            });
           }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
+        } else {
+          i++;
+        }
+      }
     });
   }
 
@@ -451,51 +292,6 @@ export class Crud {
             } else {
               resolve(true);
             }
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
-    });
-  }
-
-  Template(proc_: string, template_: any) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "template",
-          proc: proc_,
-          template: template_,
-          user: LSUSERMETA
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
-      });
-    });
-  }
-
-  Dump() {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.http.post<any>(this.apiHost + "/crud", {
-          op: "dump",
-          user: LSUSERMETA
-        }, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(true);
           } else {
             reject(res.msg);
           }
@@ -645,18 +441,25 @@ export class Crud {
 
   getAnnouncements() {
     return new Promise((resolve, reject) => {
-      this.Find(
-        "read", "_log", null, [{
+      this.misc.apiCall("crud", {
+        op: "read",
+        collection: "_log",
+        projection: null,
+        match: [{
           key: "log_type",
           op: "eq",
           value: "Announcement"
-        }], { "log_date": -1 }, 1, 10).then((res: any) => {
-          this.announcements.next(res);
-          resolve(true);
-        }).catch((error: any) => {
-          console.error("*** announcements error", error);
-          reject(error);
-        });
+        }],
+        sort: { "log_date": -1 },
+        page: 1,
+        limit: 10
+      }).then((res: any) => {
+        this.announcements.next(res);
+        resolve(true);
+      }).catch((error: any) => {
+        console.error("*** announcements error", error);
+        reject(error);
+      });
     });
   }
 

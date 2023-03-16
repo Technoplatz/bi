@@ -162,7 +162,7 @@ export class CrudPage implements OnInit {
       this.crudForm = res.form;
       this.fields = res.fields;
       this.fieldsupd = res.fields;
-      if(this.op === "insert" && this.collection === "_collection") {
+      if (this.op === "insert" && this.collection === "_collection") {
         this.fieldsupd = this.fields.filter((obj: any) => obj.name !== "col_structure");
       }
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
@@ -280,13 +280,17 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doDump() {
-    this.error = "";
+  doDump(op_: string) {
     this.modified = true;
     this.isInProgress = true;
-    this.crud.Dump().then(() => {
+    this.misc.apiCall("crud", {
+      "op": op_,
+      "id": this.data.bak_id,
+      "type": this.data.bak_type
+    }).then(() => {
+      this.misc.doMessage(op_ + " completed successfully", "success");
       setTimeout(() => {
-        this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
+        this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
       }, this.timeout);
     }).catch((error: any) => {
       this.doShowError(error);
@@ -297,7 +301,6 @@ export class CrudPage implements OnInit {
   }
 
   doDownload() {
-    this.error = "";
     this.modified = true;
     this.isInProgress = true;
     this.crud.Download({
@@ -428,7 +431,12 @@ export class CrudPage implements OnInit {
       if (!view_) {
         resolve(true);
       } else {
-        this.crud.getView("", view_, "propsonly").then((res: any) => {
+        this.misc.apiCall("crud", {
+          _id: "",
+          vie_id: view_,
+          op: "view",
+          source: "propsonly"
+        }).then((res: any) => {
           if (res && res.properties) {
             let i = 0;
             for (let item in res.properties) {
@@ -454,11 +462,19 @@ export class CrudPage implements OnInit {
   doGetCollectionProperties(collection_: string) {
     return new Promise((resolve, reject) => {
       const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_source_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
-      this.crud.Find("read", "_collection", null, [{
-        key: "col_id",
-        op: "eq",
-        value: cid_
-      }], null, 1, 1).then((res: any) => {
+      this.misc.apiCall("crud", {
+        op: "read",
+        collection: "_collection",
+        projection: null,
+        match: [{
+          key: "col_id",
+          op: "eq",
+          value: cid_
+        }],
+        sort: null,
+        page: 1,
+        limit: 1
+      }).then((res: any) => {
         const properties = res && res.data && res.data[0] && res.data[0].col_structure && res.data[0].col_structure.properties ? res.data[0].col_structure.properties : this.properties;
         this.property_list = [];
         let i = 0;
@@ -490,11 +506,19 @@ export class CrudPage implements OnInit {
         this.storage.get("LSFILTER_" + this.collection).then((LSFILTER_: any) => {
           LSFILTER_ && LSFILTER_.length > 0 ? this.filters = LSFILTER_ : null;
           this.storage.get("LSSAVEDFILTER").then((LSSAVEDFILTER: any) => {
-            this.crud.Find("read", "_view", null, [{
-              key: "vie_collection_id",
-              op: "eq",
-              value: this.collection
-            }], null, 1, 100).then((res: any) => {
+            this.misc.apiCall("crud", {
+              op: "read",
+              collection: "_view",
+              projection: null,
+              match: [{
+                key: "vie_collection_id",
+                op: "eq",
+                value: this.collection
+              }],
+              sort: null,
+              page: 1,
+              limit: 100
+            }).then((res: any) => {
               this.saved_filters = res.data;
               const f = LSSAVEDFILTER ? res.data.filter((obj: any) => obj.vie_id === LSSAVEDFILTER) : [];
               f && f[0] ? this.filters = f[0].vie_filter : null;
@@ -564,7 +588,15 @@ export class CrudPage implements OnInit {
       f_.parents.match && f_.parents.match[m].lookup && this.crudForm.controls[f_.parents.match[m].lookup].value ? match_[m].value = this.crudForm.controls[f_.parents.match[m].lookup].value : null;
       if (m === match_.length - 1) {
         this.related = [];
-        this.crud.Find("read", collection_, null, match_, null, 1, 1000).then((res: any) => {
+        this.misc.apiCall("crud", {
+          op: "read",
+          collection: collection_,
+          projection: null,
+          match: match_,
+          sort: null,
+          page: 1,
+          limit: 1000
+        }).then((res: any) => {
           if (res && res.data) {
             this.related = res.data;
             for (let k = 0; k < this.related.length; k++) {

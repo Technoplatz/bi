@@ -140,13 +140,18 @@ export class ViewPage implements OnInit {
   ngOnDestroy() { }
 
   ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+    this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user = LSUSERMETA;
-      this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-      this.accountf_apikey = LSUSERMETA && LSUSERMETA.apikey ? LSUSERMETA.apikey : "";
+      this.perm = this.user && this.user.perm ? true : false;
+      this.accountf_apikey = this.user && this.user.apikey ? this.user.apikey : "";
       this.menu = this.router.url.split("/")[1];
       this.id = this.submenu = this.router.url.split("/")[2];
-      this.crud.getView("", this.id, "internal").then((res: any) => {
+      this.misc.apiCall("crud", {
+        op: "view",
+        _id: "",
+        vie_id: this.id,
+        source: "internal"
+      }).then((res: any) => {
         this.view = res && res.record ? res.record : null;
         this.view_data = res && res.data ? res.data : [];
         this.view_count = res && res.count ? res.count : 0;
@@ -172,7 +177,6 @@ export class ViewPage implements OnInit {
           this.misc.doMessage(error, "error");
         });
       });
-      // });
     });
   }
 
@@ -198,7 +202,7 @@ export class ViewPage implements OnInit {
         }
       });
       modal.onDidDismiss().then((res: any) => {
-        if (res.data.modified) {    
+        if (res.data.modified) {
           this.crud.getAll().then(() => {
             if (res.data.op === "remove") {
               this.misc.navi.next({
@@ -295,7 +299,13 @@ export class ViewPage implements OnInit {
             }, {
               text: "CONFIRM",
               handler: (announceData: any) => {
-                this.crud.AnnounceNow(view, announceData && announceData.id ? announceData.id : null, scope, this.id).then(() => {
+                this.misc.apiCall("crud", {
+                  op: "announce",
+                  collection: this.id,
+                  view: view,
+                  tfac: announceData && announceData.id ? announceData.id : null,
+                  scope: scope
+                }).then(() => {
                   this.misc.doMessage("view was announced successfully", "success");
                 }).catch((error: any) => {
                   this.misc.doMessage(error, "error");

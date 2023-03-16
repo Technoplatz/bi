@@ -230,10 +230,10 @@ export class Auth {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         if (LSUSERMETA && LSUSERMETA.email && LSUSERMETA.token) {
-          this.user.next(LSUSERMETA);
           const email_ = LSUSERMETA.email;
           const token_ = LSUSERMETA.token;
           const jdate_ = LSUSERMETA.jdate;
+          this.user.next(LSUSERMETA);
           const creds_ = {
             email: email_,
             token: token_,

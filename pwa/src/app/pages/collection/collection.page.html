@@ -51,7 +51,12 @@ https://www.gnu.org/licenses.
               <ng-template #newrecord>
                 <div (click)="goCrud(null, 'insert')" class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  {{ 'New' | translate }}<br />{{ 'Record' | translate }}
+                  <span *ngIf="id != '_backup'; else normale">
+                    {{ 'New' | translate }}<br />{{ 'Record' | translate }}
+                  </span>
+                  <ng-template #normale>
+                    {{ 'New' | translate }}<br />{{ 'Backup' | translate }}
+                  </ng-template>
                 </div>
               </ng-template>
               <div (click)="RefreshData(0)" class="data-sq-button">
@@ -84,11 +89,6 @@ https://www.gnu.org/licenses.
               <div (click)="MultiCrud('delete')" class="data-sq-button">
                 <ion-icon name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}<br />{{ 'Selected' | translate }}
-              </div>
-              <div *ngIf="perm && filter.length > 0 && data.length > 0 && is_crud" (click)="doPurge()"
-                class="data-sq-button">
-                <ion-icon name="skull"></ion-icon><br />
-                {{ 'Purge' | translate }}<br />{{ 'Filtered' | translate }}
               </div>
               <!-- <div *ngIf="perm && is_crud" (click)="goFields()" class="data-sq-button">
                 <ion-icon name="list-outline"></ion-icon><br />
@@ -222,7 +222,7 @@ https://www.gnu.org/licenses.
               </ion-checkbox>
             </ion-col>
             <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
-            [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultWidth + 'px !important;'">
+              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultWidth + 'px !important;'">
               <span *ngIf="item.value.bsonType=='bool'">
                 {{ record[item.key] }}
               </span>

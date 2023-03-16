@@ -56,15 +56,16 @@ export class TemplatesPage implements OnInit {
   ngOnDestroy() { }
 
   ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA;
-      this.crud.Template("list", null).then((res: any) => {
-        this.templates = res && res.data ? res.data : [];
-        this.is_initialized = true;
-      }).catch((error: any) => {
-        console.error(error);
-        this.misc.doMessage(error, "error");
-      });
+    this.misc.apiCall("crud", {
+      op: "template",
+      proc: "list",
+      template: null
+    }).then((res: any) => {
+      this.templates = res && res.data ? res.data : [];
+      this.is_initialized = true;
+    }).catch((error: any) => {
+      console.error(error);
+      this.misc.doMessage(error, "error");
     });
   }
 
@@ -78,7 +79,11 @@ export class TemplatesPage implements OnInit {
   doInstallTemplate(item_: any, ix: number) {
     if (!this.templates[ix].processing) {
       this.templates[ix].processing = true;
-      this.crud.Template("install", item_).then(() => {
+      this.misc.apiCall("crud", {
+        op: "template",
+        proc: "install",
+        template: item_
+      }).then(() => {
         this.misc.doMessage("template installed successfully", "success");
       }).catch((error: any) => {
         console.error(error);

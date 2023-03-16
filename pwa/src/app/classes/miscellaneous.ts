@@ -37,6 +37,7 @@ import { Storage } from "@ionic/storage";
 import { TranslateService } from "@ngx-translate/core";
 import { environment } from "../../environments/environment";
 import { ClipboardPluginWeb } from "@capacitor/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 
 @Injectable({
   providedIn: "root"
@@ -50,25 +51,56 @@ export class Miscellaneous {
     private translate: TranslateService,
     private modal: ModalController,
     private toast: ToastController,
-    private cb: ClipboardPluginWeb
+    private cb: ClipboardPluginWeb,
+    private http: HttpClient
   ) { }
 
   navi = new Subject<any>();
   menutoggle = new Subject<any>();
   version = new BehaviorSubject<any>([]);
 
-  doMenuToggle() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.toggle = !LSMENUTOGGLE;
-      this.menutoggle.next(this.toggle);
-    });
-  }
-
   getAPIHost() {
     return new Promise((resolve) => {
       const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
       const domain_ = window.location.host.split(":")[0];
       resolve(window.location.protocol + "//" + (ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : "api." + domain_));
+    });
+  }
+
+  apiCall(url: string, posted: any) {
+    return new Promise((resolve, reject) => {
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        const collection_ = posted.collection ? posted.collection : "";
+        this.storage.get("LSVIEW-" + collection_).then((LSVIEW: any) => {
+          posted.user = LSUSERMETA;
+          posted.email = LSUSERMETA.email;
+          posted.view = LSVIEW ? LSVIEW : null;
+          this.getAPIHost().then((apiHost) => {
+            const headers = {
+              "Content-Type": "application/json",
+              "X-Api-Key": environment.apiKey
+            }
+            this.http.post<any>(apiHost + "/" + url, posted, {
+              headers: new HttpHeaders(headers)
+            }).subscribe((res: any) => {
+              if (res && res.result) {
+                resolve(res);
+              } else {
+                reject(res.msg);
+              }
+            }, (error: any) => {
+              reject(error.msg);
+            });
+          });
+        });
+      });
+    });
+  }
+
+  doMenuToggle() {
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      this.toggle = !LSMENUTOGGLE;
+      this.menutoggle.next(this.toggle);
     });
   }
 

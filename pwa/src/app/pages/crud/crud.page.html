@@ -41,12 +41,16 @@ https://www.gnu.org/licenses.
                     {{ 'SEARCH' | translate }}
                 </ion-button>
                 <ion-button *ngIf="collection=='_backup' && op=='insert' && !isInProgress" size="small"
-                    (click)="doDump()">
+                    (click)="doDump('backup')">
                     {{ 'BACKUP' | translate }}
                 </ion-button>
                 <ion-button *ngIf="collection=='_backup' && op=='update' && !isInProgress" size="small"
                     (click)="doDownload()">
                     {{ 'DOWNLOAD' | translate }}
+                </ion-button>
+                <ion-button *ngIf="collection=='_backup' && op=='update' && !isInProgress" size="small"
+                    (click)="doDump('restore')">
+                    {{ 'RESTORE' | translate }}
                 </ion-button>
                 <ion-button *ngIf="barcoded_ && op=='insert'; else nobarcoded" size="small" (click)="doSubmit()">
                     <ion-icon name="barcode-outline"></ion-icon>

@@ -32,9 +32,10 @@ https://www.gnu.org/licenses.
 
 <ion-content class="ion-no-padding">
   <app-tools></app-tools>
-  <div class="page-null">
-    <h1>404</h1>
-    {{ 'Page not found' | translate }}.
+  <div class="console-right">
+    <h6>{{ 'PAGE NOT FOUND' | translate }}!</h6>
+    <h1>{{ '404' | translate }}</h1>
+    {{ 'Please check the address and try again or go to dashboard' | translate }}.
     <p>
       <ion-button (click)="doNavi('dashboard', null)">
         {{ 'Go to Dashboard' | translate }}

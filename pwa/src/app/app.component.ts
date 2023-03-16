@@ -79,6 +79,7 @@ export class AppComponent implements OnInit {
     this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
       this.user_ = LSUSERMETA;
       if (LSUSERMETA) {
+        this.auth.user.next(LSUSERMETA);
         this.crud.getAnnouncements().then(() => { });
         this.crud.getAll().then(() => { }).catch((error: any) => {
           console.error(error);

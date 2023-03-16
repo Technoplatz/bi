@@ -658,15 +658,39 @@ class Mongo():
         self.client = MongoClient(self.connstr)
         self.db = self.client[MONGO_DB_]
 
-    def dump_f(self):
+    def backup_f(self):
         try:
             ts_ = Misc().get_timestamp_f()
             id_ = f"dump-{MONGO_DB_}-{ts_}"
             file_ = f"{id_}.gz"
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
-            command_ = f"mongodump --host {MONGO_HOST_} --port {MONGO_PORT_} --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password {MONGO_PASSWORD_} --{type_} --archive={loc_} --tlsMode requireTLS --tlsCertificateKeyFile {MONGO_TLS_CERT_COMBINED_FILE_} --tlsCAFile {MONGO_TLS_CA_COMBINED_FILE_} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+
+            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_COMBINED_FILE_} --sslCAFile {MONGO_TLS_CA_COMBINED_FILE_} --tlsInsecure --{type_} --archive={loc_}"
             os.system(command_)
+
+            size_ = os.path.getsize(loc_)
+            res_ = {"result": True, "id": id_, "type": type_, "size": size_}
+
+        except pymongo.errors.PyMongoError as exc:
+            res_ = Misc().mongo_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
+    def restore_f(self, obj):
+        try:
+            id_ = obj["id"]
+            file_ = f"{id_}.gz"
+            loc_ = f"/dump/{file_}"
+            type_ = "gzip"
+
+            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_COMBINED_FILE_} --sslCAFile {MONGO_TLS_CA_COMBINED_FILE_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
+            os.system(command_)
+
             size_ = os.path.getsize(loc_)
             res_ = {"result": True, "id": id_, "type": type_, "size": size_}
 
@@ -1468,7 +1492,6 @@ class Crud():
 
     def view_f(self, input_):
         try:
-            # checks if email exists in the input
             email_ = input_["email"] if "email" in input_ else None
             if not email_:
                 raise APIError("email not found in the object")
@@ -1757,8 +1780,9 @@ class Crud():
 
     def dump_f(self, obj):
         try:
-            # remark will be added here
-            dump_f_ = Mongo().dump_f()
+            op_ = obj["op"] if "op" in obj else None
+
+            dump_f_ = Mongo().backup_f() if op_ == "backup" else Mongo().restore_f(obj)
             if not dump_f_["result"]:
                 raise APIError(dump_f_["msg"])
 
@@ -1774,6 +1798,7 @@ class Crud():
                 "bak_type": type_,
                 "bak_size": size_,
                 "bak_description": description_,
+                "bak_process": op_,
                 "_created_at": datetime.now(),
                 "_created_by": email_,
                 "_modified_at": datetime.now(),
@@ -1784,49 +1809,39 @@ class Crud():
             res_ = {"result": True}
 
         except APIError as exc:
-            # remark will be added here
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            # remark will be added here
             res_ = Misc().exception_f(exc)
 
         finally:
-            # remark will be added here
             return res_
 
     def parent_f(self, obji):
         try:
-            # remark will be added here
             collection_ = obji["collection"]
             fields_ = obji["fields"]
 
-            # remark will be added here
             data_collection_ = f"{collection_}_data"
             projection_ = {}
             for field_ in fields_:
                 projection_[field_] = 1
 
-            # remark will be added here
             cursor_ = Mongo().db[data_collection_].find(filter={}, projection=projection_).limit(1000)
             docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
 
-            # remark will be added here
             res_ = {
                 "result": True,
                 "data": docs_
             }
 
         except APIError as exc:
-            # remark will be added here
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            # remark will be added here
             res_ = Misc().exception_f(exc)
 
         finally:
-            # remark will be added here
             return res_
 
     def get_filtered_f(self, obj):
@@ -4242,7 +4257,7 @@ class Auth():
             collection_id_ = input_["collection"] if "collection" in input_ else None
             op_ = input_["op"] if "op" in input_ else None
             cudops_ = ["insert", "update", "upsert", "delete", "remove", "clone", "purge"]
-            collessops_ = ["view", "views", "collections", "template", "dump"]
+            collessops_ = ["view", "views", "collections", "template", "dump", "backup", "restore"]
             allowmatch_ = []
 
             if not user_id_:
@@ -5077,7 +5092,7 @@ def crud_f():
             crud_ = Crud().collection_f(input_)
         elif op_ == "parent":
             crud_ = Crud().parent_f(input_)
-        elif op_ == "dump":
+        elif op_ in ["backup", "restore"]:
             crud_ = Crud().dump_f(input_)
         elif op_ == "template":
             crud_ = Crud().template_f(input_)
@@ -5528,6 +5543,7 @@ def get_dump_f():
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
         input_ = request.json
+
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("invalid credentials")

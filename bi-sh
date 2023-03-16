@@ -47,7 +47,7 @@ function helpBI() {
     echo "./bi.sh stop"
     echo "./bi.sh update"
     echo "./bi.sh prune"
-    echo "./bi.sh logs api|pwa|init|replicaset [num of records]"
+    echo "./bi.sh logs api|pwa|init|replicaset [last n rows]"
     echo "./bi.sh help"
 }
 
@@ -134,24 +134,6 @@ function buildBI() {
     return 1
 }
 
-function startBI() {
-    echo -e "\nStarting containers... $IMGSUFFIX\n"
-    if [ ! -d $DIR ]; then
-        echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
-        echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
-        return 0
-    fi
-    HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
-    if [ $? -eq 0 ]; then
-        echo -e "\n✔ Platform was started successfully."
-        echo -e "Please be patient up to 20 seconds for the system to be functional."
-    else
-        echo -e "\n✘ Sorry! Process was terminated ($?)."
-        return 0
-    fi
-    return 1
-}
-
 function updateBI() {
     echo -e "\nUpdating platform from $HUB to $DIR... $TOKEN $IMGSUFFIX\n"
     if [ ! -d $DIR ]; then
@@ -203,6 +185,24 @@ function pruneBI() {
     docker system prune --force --all
     if [ $? -eq 0 ]; then
         echo -e "✔ Dangling and unused resources successfully removed."
+    else
+        echo -e "\n✘ Sorry! Process was terminated ($?)."
+        return 0
+    fi
+    return 1
+}
+
+function startBI() {
+    echo -e "\nStarting containers... $IMGSUFFIX\n"
+    if [ ! -d $DIR ]; then
+        echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
+        echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
+        return 0
+    fi
+    HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
+    if [ $? -eq 0 ]; then
+        echo -e "\n✔ Platform was started successfully."
+        echo -e "Please be patient up to 20 seconds for the system to be functional."
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
