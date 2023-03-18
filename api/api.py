@@ -648,9 +648,9 @@ class Mongo():
         readPreference_ = f"&readPreference={self.mongo_readpref_}" if self.mongo_readpref_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true"
-        tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_FILE_}" if MONGO_TLS_CERT_FILE_ else ""
-        tlsCertificateKeyFilePassword_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_FILE_PASSWORD_}" if MONGO_TLS_CERT_FILE_PASSWORD_ else ""
-        tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_FILE_}" if MONGO_TLS_CA_FILE_ else ""
+        tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}" if MONGO_TLS_CERT_KEYFILE_ else ""
+        tlsCertificateKeyFilePassword_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_}" if MONGO_TLS_CERT_KEYFILE_PASSWORD_ else ""
+        tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
 
         # mongo staff
@@ -666,7 +666,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_FILE_} --sslCAFile {MONGO_TLS_CA_FILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_FILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
+            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -688,7 +688,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_FILE_} --sslCAFile {MONGO_TLS_CA_FILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_FILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
+            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -4888,9 +4888,9 @@ MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
 MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
 MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
-MONGO_TLS_CA_FILE_ = "/init/mongo_ca.pem"
-MONGO_TLS_CERT_FILE_ = f"/init/{MONGO_HOST_}.pem"
-MONGO_TLS_CERT_FILE_PASSWORD_ = "/init/.tls-key-password"
+MONGO_TLS_CA_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CA_KEYFILE')}"
+MONGO_TLS_CERT_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE')}"
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE_PASSWORD')}"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"

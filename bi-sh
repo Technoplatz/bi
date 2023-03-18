@@ -188,14 +188,12 @@ function startBI() {
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
+    docker cp $CERTSDIR/. api:/certs
     HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         mkdir -p $CERTSDIR
-        docker cp api:/init/ca.pem $CERTSDIR/
-        docker cp api:/init/mongo0.pem $CERTSDIR/
-        docker cp api:/init/.tls-key-password $CERTSDIR/
+        docker cp api:/certs/. $CERTSDIR
         echo -e "\n✔ Platform was started successfully."
-        echo -e "Please be patient up to 20 seconds for the system to be functional."
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
