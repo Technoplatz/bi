@@ -279,7 +279,7 @@ Berliner Allee 59 40212 Düsseldorf Deutschland
 
 ### Handelsregister
 
-HRB 8337\
+HRB 83371\
 Registergericht: Amtsgericht Düsseldorf
 
 ### Vertreten durch die Geschäftsführer

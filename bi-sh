@@ -46,7 +46,7 @@ function helpBI() {
     echo "./bi.sh restart"
     echo "./bi.sh stop"
     echo "./bi.sh update"
-    echo "./bi.sh prune"
+    echo "./bi.sh prune [--all]"
     echo "./bi.sh logs api|pwa|init|replicaset [last n rows]"
     echo "./bi.sh help"
 }
@@ -76,7 +76,6 @@ function installBI() {
         done
     fi
     echo -e "\n✔ Installation started."
-    mkdir -p $DIR/_init
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $TOKEN ]; then
         curlHeaders+=("-H" "Authorization: token $TOKEN")
@@ -89,16 +88,6 @@ function installBI() {
         return 0
     else
         echo -e "✔ Required files received successfully."
-    fi
-    INC=0
-    if [[ ! -f $DIR/_init/.secret-key-password ]]; then
-        touch $DIR/_init/.secret-key-password
-        re='^[a-zA-Z]+$'
-        while ! [[ ${DBPWD:0:1} =~ $re ]]; do
-            DBPWD=$(openssl rand -hex 12)
-            let "INC+=1"
-        done
-        echo $DBPWD >$DIR/_init/.secret-key-password
     fi
     echo -e "✔ The first step completed successfully."
     echo -e "\n>>> NEXT STEPS:"
@@ -155,16 +144,16 @@ function updateBI() {
         mv $DIR/$DCYML.bak $DIR/$DCYML
         echo -e "✔ Configuration file received successfully.\n"
     fi
-    curl "${curlHeaders[@]}" -Lso $ROOTDIR/bi-sh.bak $RAWREPO/bi-sh
-    CONTD=$(cat $ROOTDIR/bi-sh.bak | head -c 3)
-    if [[ -z $ROOTDIR/bi-sh.bak || "$CONTD" == *"40"* ]]; then
+    curl "${curlHeaders[@]}" -Lso $ROOTPATH/bi-sh.bak $RAWREPO/bi-sh
+    CONTD=$(cat $ROOTPATH/bi-sh.bak | head -c 3)
+    if [[ -z $ROOTPATH/bi-sh.bak || "$CONTD" == *"40"* ]]; then
         echo -e "✘ Sorry! Service script not received from repository ($CONTD)."
         echo -e "You may try to add your token ${COLOR}./bi.sh update [token]${NOCOLOR} as the way to get connected privately."
-        rm $ROOTDIR/bi-sh.bak
+        rm $ROOTPATH/bi-sh.bak
         return 0
     else
-        mv $ROOTDIR/bi-sh.bak $ROOTDIR/bi.sh
-        chmod +x $ROOTDIR/bi.sh
+        mv $ROOTPATH/bi-sh.bak $ROOTPATH/bi.sh
+        chmod +x $ROOTPATH/bi.sh
         echo -e "✔ Service script received successfully.\n"
     fi
     IMGSUFFIX=""
@@ -182,7 +171,7 @@ function updateBI() {
 
 function pruneBI() {
     echo -e "Cleaning..."
-    docker system prune --force --all
+    docker system prune --force $1
     if [ $? -eq 0 ]; then
         echo -e "✔ Dangling and unused resources successfully removed."
     else
@@ -201,6 +190,10 @@ function startBI() {
     fi
     HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
+        mkdir -p $CERTSDIR
+        docker cp api:/init/ca.pem $CERTSDIR/
+        docker cp api:/init/mongo0.pem $CERTSDIR/
+        docker cp api:/init/.tls-key-password $CERTSDIR/
         echo -e "\n✔ Platform was started successfully."
         echo -e "Please be patient up to 20 seconds for the system to be functional."
     else
@@ -237,7 +230,7 @@ function logsBI() {
     if [[ ! -z $2 ]]; then
         TAIL=$2
     fi
-    echo -e "Getting the last $TAIL records from $1 log...\n"
+    echo -e "Getting the last $TAIL rows from $1 log...\n"
     docker logs --tail $TAIL $1
     return 1
 }
@@ -247,20 +240,19 @@ COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 TAG="latest"
 HUB="docker.io"
-ROOTDIR="/opt/technoplatz"
-DIR=$ROOTDIR/_bi
 DCYML="docker-compose.yml"
 DOTENV=".env"
 IMGSUFFIX=""
 TOKEN=""
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
+ROOTPATH="/opt/technoplatz"
 
 if [[ ! -z $2 ]]; then
     if [[ "$2" == *"-dev"* ]]; then
         IMGSUFFIX=$2
         HUB="ghcr.io"
-        DIR="_bi"
+        ROOTPATH="."
         if [[ ! -z $3 ]]; then
             if [[ $1 == "update" || $1 == "install" ]]; then
                 TOKEN="$3"
@@ -272,6 +264,9 @@ if [[ ! -z $2 ]]; then
         fi
     fi
 fi
+
+DIR=$ROOTPATH/_bi
+CERTSDIR=$DIR/certs
 
 case $1 in
 "install")
@@ -288,7 +283,7 @@ case $1 in
     stopBI
     ;;
 "prune")
-    pruneBI
+    pruneBI "$2"
     ;;
 "update")
     updateBI

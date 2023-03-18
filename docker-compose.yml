@@ -85,9 +85,7 @@ services:
       - COUNTRY_CODE=${COUNTRY_CODE}
       - STATE_NAME=${STATE_NAME}
       - CITY_NAME=${CITY_NAME}
-      - MONGO_TLS_CA_COMBINED_FILE=${MONGO_TLS_CA_COMBINED_FILE}
-    secrets:
-      - key-password
+      - MONGO_KEEP_EXISTING_CERTS=${MONGO_KEEP_EXISTING_CERTS}
     networks:
       network0:
         ipv4_address: ${SUBNET_INIT_IPV4}
@@ -114,7 +112,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_HOST}.pem --tlsCertificateKeyFilePassword /init/.tls-key-password --tlsCAFile /init/mongo_ca.pem --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
       - mongo1
@@ -145,7 +143,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_HOST}.pem --tlsCertificateKeyFilePassword /init/.tls-key-password --tlsCAFile /init/mongo_ca.pem --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
@@ -174,7 +172,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_COMBINED_FILE} --tlsCAFile ${MONGO_TLS_CA_COMBINED_FILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /init/${MONGO_HOST}.pem --tlsCertificateKeyFilePassword /init/.tls-key-password --tlsCAFile /init/mongo_ca.pem --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
@@ -214,10 +212,6 @@ services:
       - MONGO_REPLICASET=${MONGO_REPLICASET}
       - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
       - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
-      - MONGO_TLS=${MONGO_TLS}
-      - MONGO_TLS_INSECURE=${MONGO_TLS_INSECURE}
-      - MONGO_TLS_CERT_COMBINED_FILE=${MONGO_TLS_CERT_COMBINED_FILE}
-      - MONGO_TLS_CA_COMBINED_FILE=${MONGO_TLS_CA_COMBINED_FILE}
     links:
       - mongo0
       - mongo1
@@ -273,10 +267,7 @@ services:
       - SECUR_MAX_AGE=${SECUR_MAX_AGE}
       - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
       - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
-      - MONGO_TLS=${MONGO_TLS}
-      - MONGO_TLS_INSECURE=${MONGO_TLS_INSECURE}
-      - MONGO_TLS_CERT_COMBINED_FILE=${MONGO_TLS_CERT_COMBINED_FILE}
-      - MONGO_TLS_CA_COMBINED_FILE=${MONGO_TLS_CA_COMBINED_FILE}
+      - API_MAX_CONTENT_LENGTH=${API_MAX_CONTENT_LENGTH}
       - NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_SLACK_HOOK_URL}
     links:
       - replicaset
@@ -367,7 +358,3 @@ networks:
       driver: default
       config:
         - subnet: ${SUBNET}
-
-secrets:
-  key-password:
-    file: _init/.secret-key-password

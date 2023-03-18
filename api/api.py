@@ -88,7 +88,6 @@ class JSONEncoder(json.JSONEncoder):
 
 
 class Schedular():
-
     def schedule_automation_f(self, doc_):
         try:
             aut_id_ = doc_["aut_id"] if "aut_id" in doc_ else None
@@ -648,13 +647,14 @@ class Mongo():
         replicaset_ = f"&replicaSet={MONGO_REPLICASET_}" if MONGO_REPLICASET_ and MONGO_REPLICASET_ != "" else ""
         readPreference_ = f"&readPreference={self.mongo_readpref_}" if self.mongo_readpref_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
-        tls_ = f"&tls=true" if MONGO_TLS_ in ["true", True] else "&tls=false"
-        tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_COMBINED_FILE_}" if MONGO_TLS_CERT_COMBINED_FILE_ else ""
-        tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_COMBINED_FILE_}" if MONGO_TLS_CA_COMBINED_FILE_ else ""
+        tls_ = "&tls=true"
+        tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_FILE_}" if MONGO_TLS_CERT_FILE_ else ""
+        tlsCertificateKeyFilePassword_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_FILE_PASSWORD_}" if MONGO_TLS_CERT_FILE_PASSWORD_ else ""
+        tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_FILE_}" if MONGO_TLS_CA_FILE_ else ""
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
 
         # mongo staff
-        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
+        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
         self.client = MongoClient(self.connstr)
         self.db = self.client[MONGO_DB_]
 
@@ -666,7 +666,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_COMBINED_FILE_} --sslCAFile {MONGO_TLS_CA_COMBINED_FILE_} --tlsInsecure --{type_} --archive={loc_}"
+            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_FILE_} --sslCAFile {MONGO_TLS_CA_FILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_FILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -688,7 +688,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_COMBINED_FILE_} --sslCAFile {MONGO_TLS_CA_COMBINED_FILE_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
+            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_FILE_} --sslCAFile {MONGO_TLS_CA_FILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_FILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -3855,31 +3855,23 @@ class Email():
             return res_
 
 
-class RestAPI():
+class Security():
+    def __init__(self):
+        self.HEADERS = request.headers
+        self.URL = request.url
+        self.QSTRING = request.query_string.decode()
+        self.XAPIKEY = self.HEADERS["X-Api-Key"] if "X-Api-Key" in self.HEADERS else None
+        self.ORIGIN = self.HEADERS["Origin"].replace("https://", "").replace("http://", "").replace("/", "").split(":")[0] if "Origin" in self.HEADERS else None
 
-    def validate_pwa_f(self):
+    def validate_request_f(self):
         try:
-            if not request.headers:
-                raise APIError("invalid request")
+            if self.ORIGIN != DOMAIN_:
+                raise APIError(f"invalid request from {self.ORIGIN}")
 
-            if "Origin" not in request.headers:
-                raise APIError("invalid request")
-
-            if "X-Api-Key" not in request.headers:
-                raise APIError("invalid request")
-
-            origin_ = request.headers["Origin"].replace("https://", "").replace("http://", "").replace("/", "")
-            origin_ = origin_.split(":")[0]
-
-            if origin_ != DOMAIN_:
-                raise APIError(f"invalid request {origin_} - {DOMAIN_}")
-
-            api_key_header_ = request.headers["X-Api-Key"]
-
-            if API_KEY_ != api_key_header_:
+            if API_KEY_ != self.XAPIKEY:
                 raise APIError("invalid api request")
 
-            res_ = {"result": True, "data": request}
+            res_ = {"result": True}
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
@@ -3892,7 +3884,6 @@ class RestAPI():
 
 
 class OTP():
-
     def reset_otp_f(self, email_):
         try:
             # read auth
@@ -4092,7 +4083,6 @@ class OTP():
 
 
 class Auth():
-
     def saas_f(self):
         try:
             saas_ = {
@@ -4885,6 +4875,8 @@ class Auth():
             return res_
 
 
+# IDENTIFICATION DIVISION
+
 TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 MONGO_REPLICASET_ = os.environ.get("MONGO_REPLICASET")
@@ -4896,9 +4888,9 @@ MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
 MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
 MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
-MONGO_TLS_ = os.environ.get("MONGO_TLS")
-MONGO_TLS_CERT_COMBINED_FILE_ = os.environ.get("MONGO_TLS_CERT_COMBINED_FILE")
-MONGO_TLS_CA_COMBINED_FILE_ = os.environ.get("MONGO_TLS_CA_COMBINED_FILE")
+MONGO_TLS_CA_FILE_ = "/init/mongo_ca.pem"
+MONGO_TLS_CERT_FILE_ = f"/init/{MONGO_HOST_}.pem"
+MONGO_TLS_CERT_FILE_PASSWORD_ = "/init/.tls-key-password"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
@@ -4915,10 +4907,14 @@ EMAIL_DEFAULT_SUBJECT_ = "Hello"
 API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
+API_MAX_CONTENT_LENGTH_ = os.environ.get("API_MAX_CONTENT_LENGTH")
 API_KEY_ = os.environ.get("API_KEY")
 SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
 
+# CORS CHECKPOINT
+
 origins_ = [
+    f"http://{DOMAIN_}",
     f"https://{DOMAIN_}",
     f"http://{DOMAIN_}:8100",
     f"http://{DOMAIN_}:8101"
@@ -4928,7 +4924,7 @@ app = Flask(__name__)
 app.config["CORS_ORIGINS"] = origins_
 app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_
 app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 app.config["UPLOAD_FOLDER"] = "/vault/"
 CORS(app)
@@ -4941,7 +4937,7 @@ log.setLevel(logging.ERROR)
 def storage_f():
     try:
         # validates restapi request
-        validate_ = RestAPI().validate_pwa_f()
+        validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
@@ -4977,7 +4973,6 @@ def storage_f():
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
         user_ = validate_["user"]
 
-        # endpoint_ = request.endpoint
         import_f_ = Crud().import_f({"form": form_, "file": file_, "collection": collection__, "user": user_, "prefix": prefix_})
 
         if not import_f_["result"]:
@@ -5004,7 +4999,7 @@ def storage_f():
 def crud_f():
     try:
         # validates restapi request
-        validate_ = RestAPI().validate_pwa_f()
+        validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
@@ -5114,7 +5109,7 @@ def crud_f():
 def otp_f():
     try:
         # validates restapi request
-        validate_ = RestAPI().validate_pwa_f()
+        validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "web validation error")
 
@@ -5177,7 +5172,7 @@ def otp_f():
 def auth_f():
     try:
         # validates restapi request
-        validate_ = RestAPI().validate_pwa_f()
+        validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "web validation error")
 
@@ -5237,7 +5232,7 @@ def auth_f():
 @app.route("/get/visual/<string:id>", methods=["GET"])
 def get_visual_f(id):
     try:
-        web_validate_ = RestAPI().validate_pwa_f()
+        web_validate_ = Security().validate_request_f()
         if not web_validate_["result"]:
             raise APIError(web_validate_["msg"] if "msg" in web_validate_ else "validation error")
 
@@ -5296,7 +5291,7 @@ def get_visual_f(id):
 @app.route("/get/pivot/<string:id>", methods=["GET"])
 def get_pivot_f(id):
     try:
-        validate_ = RestAPI().validate_pwa_f()
+        validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
@@ -5538,7 +5533,7 @@ def post_f():
 @app.route("/get/dump", methods=["POST"])
 def get_dump_f():
     try:
-        validate_ = RestAPI().validate_pwa_f()
+        validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
