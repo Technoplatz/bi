@@ -63,7 +63,7 @@ fi
 cacontent=$(cat /certs/$mongoca)
 certcontent=$(cat /certs/$mongocert)
 
-if [[ $selfsignedreplace = true && -f /certs/$mongoca && -s /certs/$mongoca && -f /certs/$mongocert && -s /certs/$mongocert ]]; then
+if [[ ! $selfsignedreplace = true && -f /certs/$mongoca && -s /certs/$mongoca && -f /certs/$mongocert && -s /certs/$mongocert ]]; then
     if [[ "$cacontent" == *"-----BEGIN PRIVATE KEY-----"* && "$cacontent" == *"-----END CERTIFICATE-----"* && "$certcontent" == *"-----BEGIN PRIVATE KEY-----"* && "$certcontent" == *"-----END CERTIFICATE-----"* ]]; then
         echo "Certificate generation was skipped."
         echo "According to MONGO_SELF_SIGNED_REPLACE is $selfsignedreplace"
@@ -107,5 +107,10 @@ cat /certs/$MONGO_REPLICA1_HOST.key /certs/$MONGO_REPLICA1_HOST.crt >/certs/$MON
 cat /certs/$MONGO_REPLICA2_HOST.key /certs/$MONGO_REPLICA2_HOST.crt >/certs/$MONGO_REPLICA2_HOST.pem
 echo "✔ step 4 completed sucessfully."
 echo
+echo "step 5: Cleaning..."
+rm -rf /certs/*.key
+rm -rf /certs/*.csr
+rm -rf /certs/*.crt
+echo "✔ step 5 completed sucessfully."
 echo "✔ all steps OK."
 echo
