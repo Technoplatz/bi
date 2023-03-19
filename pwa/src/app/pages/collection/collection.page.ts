@@ -202,9 +202,6 @@ export class CollectionPage implements OnInit {
                 this.paget = new Array(lmt);
                 this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
                 this.page_end = this.page_start + 10;
-                this.is_loaded = true;
-                this.is_samecol = true;
-                this.is_pane_ok = true;
                 this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
                 for (let p = 0; p < this.paget.length; p++) {
                   this.paget[p] = this.page_start + p;
@@ -213,15 +210,15 @@ export class CollectionPage implements OnInit {
               });
             } else {
               console.error("*** no structure found");
-              this.is_loaded = true;
-              this.is_samecol = true;
             }
           }).catch((error: any) => {
             console.error(error);
             this.misc.doMessage(error, "error");
+            reject(error);
+          }).finally(() => {
+            this.is_pane_ok = true;
             this.is_loaded = true;
             this.is_samecol = true;
-            reject(error);
           });
         });
       });

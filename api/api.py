@@ -1504,7 +1504,6 @@ class Crud():
             if not vie_structure_:
                 raise APIError("view structure not found")
 
-            # id must be located in the input
             _id = None
             vie_id_ = None
 
@@ -1531,13 +1530,12 @@ class Crud():
 
             if "vie_collection_id" not in view_:
                 raise APIError("collection not found")
+            
             vie_collection_id_ = view_["vie_collection_id"]
 
-            # gets subscribers and check if they are in the list
             if not "_tags" in view_:
                 raise APIError("no tags found")
 
-            # gets subscribers
             view_tags_ = view_["_tags"]
             if not view_tags_ or view_tags_ == []:
                 raise APIError("no subscriber found")
@@ -1613,7 +1611,7 @@ class Crud():
             unset_.append("_created_by")
             unset_.append("_structure")
             unset_.append("_tags")
-            unset_.append("_id")
+            # unset_.append("_id")
             unset_.append("_ID")
 
             for properties_master__ in properties_master_:
@@ -1705,7 +1703,9 @@ class Crud():
                 "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:10],
                 "count": count_,
                 "properties": properties_master_,
-                "structure": vie_structure_
+                "structure": vie_structure_,
+                "col_id": vie_collection_id_,
+                "col_structure": col_structure_
             }
 
         except pymongo.errors.PyMongoError as exc:

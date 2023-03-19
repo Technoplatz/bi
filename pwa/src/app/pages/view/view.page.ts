@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { ModalController, AlertController, IonSelect, NavController } from "@ionic/angular";
+import { ModalController, AlertController, IonSelect } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
@@ -58,7 +58,6 @@ export class ViewPage implements OnInit {
   public paget: any = [];
   public id: string = "";
   public reconfig: boolean = false;
-  public filter: any = [];
   public searched: any = null;
   public data: any = [];
   public selected: any = [];
@@ -70,13 +69,9 @@ export class ViewPage implements OnInit {
   public multicheckbox: boolean = false;
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
-  public barcoded_: boolean = false;
-  public is_samecol: boolean = false;
   public actions: any = [];
   public columns_: any;
   public view_mode: any = {};
-  public qr_exists: boolean = false;
-  public qr_show: boolean = false;
   public otp_show: boolean = false;
   public otp_qr: string = "";
   public in_otp_process: boolean = false;
@@ -85,12 +80,9 @@ export class ViewPage implements OnInit {
   public statistics_key_: string = "";
   public statistics_: any = null;
   public view_id: string = "";
-  public visual_id: string = "";
-  public view_data: any = [];
-  public view_df: any = [];
   public view_count: number = 0;
-  public view_properties: any = [];
-  public view_properties_: any = [];
+  public view_properties: any = {};
+  public view_properties_: any = {};
   public subscribers: string = "";
   public view: any = null;
   public is_url_copied: boolean = false;
@@ -100,25 +92,19 @@ export class ViewPage implements OnInit {
   public viewurl_masked_: string = "";
   public is_apikey_copied: boolean = false;
   private segment = "data";
-  private menu_toggle: boolean = false;
   private page_start: number = 1;
   private is_selected: boolean = false;
   private views: any = [];
-  private viewsx: any = [];
-  private template_showed: boolean = false;
   private submenu: string = "";
-  private master: any = {};
   private collections: any = [];
   private apiHost: string = "";
   private sweeped: any = [];
-  private sort: any = {};
-  private properites_: any = {};
-  private actionix: number = -1;
   private view_structure: any;
   private menu: string = "";
-  private saved_filter: string = "";
   private page_end: number = 1;
 
+  private col_structure: any = {};
+  public col_id: string = "";
   public collections_: any;
   public user_: any;
 
@@ -146,42 +132,86 @@ export class ViewPage implements OnInit {
 
   ngOnDestroy() {
     this.collections_ = null;
+    this.user_ = null;
   }
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
-    this.misc.apiCall("crud", {
-      op: "view",
-      _id: "",
-      vie_id: this.id,
-      source: "internal"
-    }).then((res: any) => {
-      this.view = res && res.record ? res.record : null;
-      this.view_data = res && res.data ? res.data : [];
-      this.view_count = res && res.count ? res.count : 0;
-      this.view_properties = res.properties;
-      this.view_properties_ = Object.keys(res.properties);
-      this.view_structure = res.structure;
-      this.subheader = this.view.vie_title;
-      this.viewurl_ = this.apiHost + "/get/view/" + this.view._id + "?k=" + this.accountf_apikey;
-      this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
-        this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
-          this.pivot_ = res && res.pivot ? res.pivot : null;
-          const statistics_ = res && res.statistics ? res.statistics : null;
-          this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
-          this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
-        }).catch((error: any) => {
-          console.error("*** view mode", error);
-          this.misc.doMessage(error.error.message, "error");
-        }).finally(() => {
-          this.is_initialized = true;
+    this.RefreshData(0).then(() => { }).finally(() => {
+      this.is_initialized = true;
+    });
+  }
+
+  RefreshData(p: number) {
+    return new Promise((resolve, reject) => {
+      this.is_loaded = this.is_selected = false;
+      this.misc.apiCall("crud", {
+        op: "view",
+        _id: "",
+        vie_id: this.id,
+        source: "internal",
+        page: p,
+        limit: this.limit
+      }).then((res: any) => {
+        this.col_structure = res && res.col_structure ? res.col_structure : null;
+        this.col_id = res && res.col_id ? res.col_id : null;
+        this.view = res && res.record ? res.record : null;
+        this.data = res && res.data ? res.data : [];
+        this.view_count = res && res.count ? res.count : 0;
+        this.view_properties = res.properties;
+        this.view_properties_ = Object.keys(res.properties);
+        this.view_structure = res.structure;
+        this.subheader = this.view.vie_title;
+        this.viewurl_ = this.apiHost + "/get/view/" + this.view._id + "?k=" + this.accountf_apikey;
+        this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
+          this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
+            this.pivot_ = res && res.pivot ? res.pivot : null;
+            const statistics_ = res && res.statistics ? res.statistics : null;
+            this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
+            this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
+          }).catch((error: any) => {
+            console.error("*** view mode", error);
+            this.misc.doMessage(error.error.message, "error");
+          }).finally(() => {
+            resolve(true);
+          });
         });
-      }).catch((error: any) => {
-        console.error(error);
-        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.is_loaded = true;
       });
     });
+  }
+
+  async goCrud(rec: any, op: string) {
+    const modal = await this.modal.create({
+      component: CrudPage,
+      backdropDismiss: false,
+      cssClass: "crud-modal",
+      componentProps: {
+        shuttle: {
+          op: op,
+          collection: this.col_id,
+          collections: this.collections ? this.collections : [],
+          views: this.views ? this.views : [],
+          user: this.user,
+          data: rec,
+          structure: this.col_structure,
+          sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
+          filter: [],
+          actions: this.actions && this.actions.length > 0 ? this.actions : [],
+          actionix: -1,
+          view: this.view,
+          barcoded: null
+        }
+      }
+    });
+    modal.onDidDismiss().then((res: any) => {
+      if (res.data.modified) {
+        this.RefreshData(0).then(() => { }).finally(() => { });
+      }
+    });
+    return await modal.present();
   }
 
   async doViewSettings() {
@@ -209,16 +239,13 @@ export class ViewPage implements OnInit {
         if (res.data.modified) {
           this.crud.getAll().then(() => {
             if (res.data.op === "remove") {
-              this.misc.navi.next({
-                s: "dashboard",
-                sub: null
-              });
-            } else {
-              window.location.reload();
+              this.nav("dashboard", null);
             }
           }).catch((error: any) => {
             console.error(error);
             this.misc.doMessage(error, "error");
+          }).finally(() => {
+            this.RefreshData(0).then(() => { }).finally(() => { });
           });
         }
       });
@@ -340,6 +367,32 @@ export class ViewPage implements OnInit {
     }).finally(() => {
       this.is_apikey_copied = false;
       this.is_url_copied = false;
+    });
+  }
+
+  SwitchSelectData(event: any) {
+    this.selected = new Array(this.data.length).fill(event);
+    this.GetIsSelectData();
+  }
+
+  async GetIsSelectData() {
+    this.sweeped[this.segment] = [];
+    const q = await this.selected.findIndex((obj: boolean) => obj === true);
+    q >= 0 ? (this.is_selected = true) : (this.is_selected = false);
+    const r = await this.selected.reduce((acc: any, val: any, index: number) => {
+      const q = val === true ? this.sweeped[this.segment].push(this.data[index]._id) : null;
+    }, []);
+  }
+
+  SetSelectData(i: number, event: any) {
+    this.selected[i] = event.detail.checked;
+    this.GetIsSelectData();
+  }
+
+  nav(s: any, sub: any) {
+    this.misc.navi.next({
+      s: s,
+      sub: sub
     });
   }
 

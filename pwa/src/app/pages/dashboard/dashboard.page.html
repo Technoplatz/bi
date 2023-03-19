@@ -41,21 +41,21 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div (click)="Settings('_collection', 'insert', null, 0)" class="data-sq-button">
-                <ion-icon name="add-circle-outline"></ion-icon><br />
+                <ion-icon name="add-circle"></ion-icon><br />
                 <span>{{ 'New' | translate }}<br />{{ 'Collection' | translate }}</span>
               </div>
               <div (click)="doImport('upload')" class="data-sq-button">
-                <ion-icon name="server-outline"></ion-icon><br />
+                <ion-icon name="server"></ion-icon><br />
                 <span>{{ 'File to' | translate }}<br />{{ 'Collection' | translate }}</span>
               </div>
               <div (click)="doRefresh()" class="data-sq-button">
-                <ion-icon *ngIf="!is_refreshing" name="sync"></ion-icon>
-                <ion-icon *ngIf="is_refreshing" name="hourglass-outline"></ion-icon>
+                <ion-icon *ngIf="!is_refreshing" name="sync-circle"></ion-icon>
+                <ion-icon *ngIf="is_refreshing" name="hourglass"></ion-icon>
                 <br />
                 <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
               </div>
               <div (click)="doResizeCharts()" class="data-sq-button">
-                <ion-icon name="expand-outline"></ion-icon><br />
+                <ion-icon name="expand"></ion-icon><br />
                 <span>{{ 'Resize' | translate }}<br />{{ 'Charts' | translate }}</span>
               </div>
             </ion-col>
