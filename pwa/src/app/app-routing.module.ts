@@ -33,26 +33,19 @@ https://www.gnu.org/licenses.
 import { NgModule, Injectable } from "@angular/core";
 import { PreloadAllModules, RouterModule, Routes, CanActivate, Resolve } from "@angular/router";
 import { Auth } from "./classes/auth";
-import { Miscellaneous } from "./classes/miscellaneous";
 import { Navigation } from "./classes/navigation";
 import { Storage } from "@ionic/storage";
 
 @Injectable()
 export class SessionGuard implements CanActivate {
   constructor(
-    private auth: Auth,
-    private misc: Miscellaneous,
-    private nav: Navigation
+    private auth: Auth
   ) { }
   async canActivate() {
     return await this.auth.Session().then(() => {
       return true;
     }).catch((error: any) => {
-      // this.nav.navigateRoot("/").then(() => {
-      //   this.misc.doMessage(error, "warning");
-      // }).catch((error: any) => {
-      //   console.error(error);
-      // });
+      console.error(error);
       return false;
     });
   }

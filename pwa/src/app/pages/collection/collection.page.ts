@@ -39,6 +39,7 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
+import { JsonEditorOptions } from "ang-jsoneditor";
 
 @Component({
   selector: "app-collection",
@@ -64,7 +65,7 @@ export class CollectionPage implements OnInit {
   public filter: any = [];
   public searched: any = null;
   public data: any = [];
-  private structure: any = [];
+  public structure: any = {};
   public selected: any = [];
   private views: any = [];
   private viewsx: any = [];
@@ -98,6 +99,9 @@ export class CollectionPage implements OnInit {
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
+  public jeoptions?: JsonEditorOptions;
+  public jeopen: boolean = false;
+  public is_saving: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -115,7 +119,7 @@ export class CollectionPage implements OnInit {
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res;
       this.perm = res && res.perm ? true : false;
-    })
+    });
   }
 
   ngOnDestroy() {
@@ -127,6 +131,10 @@ export class CollectionPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
+    this.jeoptions = new JsonEditorOptions();
+    // this.jeoptions.modes = ["code"];
+    this.jeoptions.mode = "code";
+    this.jeoptions.statusBar = true;
     this.crud.getCollection(this.id).then((res: any) => {
       this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
       this.subheader = res && res.data ? res.data.col_title : this.id;
@@ -148,20 +156,6 @@ export class CollectionPage implements OnInit {
     }).catch((error: any) => {
       console.error(error);
       this.misc.doMessage(error, "error");
-    });
-  }
-
-  getColumns() {
-    return new Promise((resolve, reject) => {
-      let p_ = 0;
-      for (let [key, value] of Object.entries(this.properites_)) {
-        this.properites_[key]["index"] = p_;
-        if (p_ === Object.keys(this.properites_).length - 1) {
-          resolve(true);
-        } else {
-          p_++;
-        }
-      }
     });
   }
 
@@ -190,24 +184,22 @@ export class CollectionPage implements OnInit {
             this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
             this.columns_ = [];
             if (this.properites_) {
-              this.getColumns().then(() => {
-                this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
-                this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
-                this.count = res.count;
-                this.multicheckbox = false;
-                this.multicheckbox ? this.multicheckbox = false : null;
-                this.selected = new Array(res.data.length).fill(false);
-                this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
-                const lmt = this.pages >= 10 ? 10 : this.pages;
-                this.paget = new Array(lmt);
-                this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
-                this.page_end = this.page_start + 10;
-                this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
-                for (let p = 0; p < this.paget.length; p++) {
-                  this.paget[p] = this.page_start + p;
-                }
-                resolve(true);
-              });
+              this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
+              this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
+              this.count = res.count;
+              this.multicheckbox = false;
+              this.multicheckbox ? this.multicheckbox = false : null;
+              this.selected = new Array(res.data.length).fill(false);
+              this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
+              const lmt = this.pages >= 10 ? 10 : this.pages;
+              this.paget = new Array(lmt);
+              this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
+              this.page_end = this.page_start + 10;
+              this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
+              for (let p = 0; p < this.paget.length; p++) {
+                this.paget[p] = this.page_start + p;
+              }
+              resolve(true);
             } else {
               console.error("*** no structure found");
             }
@@ -338,7 +330,7 @@ export class CollectionPage implements OnInit {
   async goCrud(rec: any, op: string) {
     const modal = await this.modal.create({
       component: CrudPage,
-      backdropDismiss: false,
+      backdropDismiss: true,
       cssClass: "crud-modal",
       componentProps: {
         shuttle: {
@@ -645,6 +637,28 @@ export class CollectionPage implements OnInit {
   doStartSearch(e: any) {
     this.viewsx = this.views;
     this.viewsx = this.viewsx.filter((obj: any) => (obj["vie_id"] + obj["vie_title"]).toLowerCase().indexOf(e.toLowerCase()) > -1);
+  }
+
+  doShowCode() {
+    this.jeopen = !this.jeopen;
+  }
+
+  doSaveCode() {
+    if (this.perm) {
+      this.is_saving = true;
+      this.misc.apiCall("/crud", {
+        op: "savecode",
+        collection: this.id,
+        structure: this.structure
+      }).then(() => {
+        window.location.reload();
+      }).catch((error: any) => {
+        console.error(error);
+        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.is_saving = false;
+      });
+    }
   }
 
 }

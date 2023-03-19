@@ -80,6 +80,7 @@ export class Crud {
       let i = 0;
       let init: any = {};
       this.fields = [];
+      delete structure.properties["col_structure"];
       for (let item in structure.properties) {
         const p: any = structure.properties[item];
         const bsonType_ = p.bsonType;

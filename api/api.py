@@ -1130,7 +1130,6 @@ class Crud():
             collection_ = obj["collection"]
             user_ = obj["user"] if "user" in obj else None
             email_ = user_["email"] if user_ and "email" in user_ else None
-            # match_ = obj["match"] if "match" in obj and obj["match"] != [] else [{"key": "_id", "op": "nnull", "value": None}]
             match_ = obj["match"] if "match" in obj and obj["match"] != [] else []
 
             userindb_ = Mongo().db["_user"].find_one({"usr_id": email_})
@@ -1530,7 +1529,7 @@ class Crud():
 
             if "vie_collection_id" not in view_:
                 raise APIError("collection not found")
-            
+
             vie_collection_id_ = view_["vie_collection_id"]
 
             if not "_tags" in view_:
@@ -1618,7 +1617,6 @@ class Crud():
                 if properties_master__[:1] == "_" and properties_master__ not in Misc().get_except_underdashes():
                     unset_.append(properties_master__)
 
-            # To collect parent collection's structure and properties
             for parent_ in parents_:
                 if "lookup" in parent_ and "collection" in parent_:
                     parent_collection_ = parent_["collection"]
@@ -2801,7 +2799,6 @@ class Crud():
                     if "fie_parent_collection_id" in doc_ and doc_["fie_parent_collection_id"]:
                         if "fie_parent_field_id" in doc_ and doc_["fie_parent_field_id"]:
                             parents_.append({
-                                "key": field_id_,
                                 "collection": doc_["fie_parent_collection_id"],
                                 "lookup": [{
                                     "local": field_id_,
@@ -3046,6 +3043,48 @@ class Crud():
         finally:
             return res_
 
+    def savecode_f(self, obj):
+        try:
+            user_ = obj["user"] if "user" in obj else None
+            op_ = obj["op"]
+            collection_id_ = obj["collection"]
+            email_ = user_["email"] if user_ and "email" in user_ else user_["usr_id"] if user_ and "usr_id" in user_ else None
+            structure_ = obj["structure"]
+
+            Mongo().db["_collection"].update_one({
+                "col_id": collection_id_
+            }, {"$set": {
+                "col_structure": structure_
+            }, "$inc": {"_modified_count": 1}})
+
+            schemevalidate_ = self.crudscheme_validate_f({
+                "collection": collection_id_,
+                "structure": structure_})
+
+            if not schemevalidate_["result"]:
+                raise APIError(schemevalidate_["msg"])
+
+            res_ = {"result": True}
+
+        except pymongo.errors.PyMongoError as exc:
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": op_,
+                "user": email_,
+                "document": exc.details
+            })
+            res_ = Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
     def reverse_structure_f(self, obj):
         try:
             collection_ = obj["collection"]
@@ -3086,7 +3125,7 @@ class Crud():
                                     fie_indexed_add_ = ix_[1:]
                     if parents_ and len(parents_) > 0:
                         for parent_ in parents_:
-                            if "key" in parent_ and parent_["key"] == prop_:
+                            if "lookup" in parent_ and len(parent_["lookup"]) > 0 and parent_["lookup"][0]["local"] == prop_:
                                 fie_has_parent_ = True
                                 fie_parent_collection_id_ = parent_["collection"]
                                 fie_parent_field_id_ = parent_["lookup"][0]["remote"] if "lookup" in parent_ and len(parent_["lookup"]) > 0 and parent_["lookup"][0]["remote"] else None
@@ -3660,9 +3699,7 @@ class Crud():
             structure_["unique"] = [[field_no_]]
             structure_["index"] = [[field_status_]]
             structure_["parents"] = [{
-                "key": field_account_no_,
                 "collection": "accounts",
-                "button": "Accounts",
                 "lookup": [
                     {
                         "local": field_account_no_,
@@ -5110,6 +5147,8 @@ def crud_f():
             crud_ = Crud().dump_f(input_)
         elif op_ == "template":
             crud_ = Crud().template_f(input_)
+        elif op_ == "savecode":
+            crud_ = Crud().savecode_f(input_)
         else:
             raise APIError(f"{op_} operation is not supported")
 

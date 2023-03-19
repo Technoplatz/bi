@@ -34,9 +34,9 @@ https://www.gnu.org/licenses.
   <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small">
     <ion-label class="ion-padding-start ion-padding-end">{{ 'NEW VERSION AVAILABLE' | translate }}</ion-label>
   </ion-button>
-  <ion-button size="large" fill="clear" (click)="misc.doMenuToggle()">
-    <ion-icon *ngIf="misc.toggle" name="expand" size="large"></ion-icon>
-    <ion-icon *ngIf="!misc.toggle" name="contract" size="large"></ion-icon>
+  <ion-button fill="clear" (click)="misc.doMenuToggle()" size="large">
+    <ion-icon *ngIf="misc.toggle" name="expand" size="medium"></ion-icon>
+    <ion-icon *ngIf="!misc.toggle" name="contract" size="medium"></ion-icon>
   </ion-button>
   <ion-button fill="clear" (click)="misc.navi.next({ s: 'account', sub: 'preferences' })">
     <ion-icon name="person-circle-outline" size="large"></ion-icon>

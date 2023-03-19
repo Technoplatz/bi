@@ -125,7 +125,8 @@ ion-alert .alert-radio-group {
   right: 40px;
   top: 14px;
   z-index: 99;
-  border-bottom: 1px solid var(--ion-color-light);;
+  border-bottom: 1px solid var(--ion-color-light);
+  ;
 }
 
 .top-tools * {
@@ -381,6 +382,11 @@ ion-alert .alert-radio-group {
 
 .data-sq-button.required {
   background-color: var(--ion-color-danger) !important;
+}
+
+.data-sq-button.danger {
+  background-color: var(--ion-color-danger);
+  color: var(--ion-color-white) !important;
 }
 
 .data-sq-button ion-icon {
@@ -744,6 +750,8 @@ ion-spinner {
 
 .crud-modal {
   --box-shadow: none;
+  --height: 50vh;
+  --width: 50%;
 }
 
 .spinner-small {
@@ -1381,18 +1389,30 @@ sup {
   width: 100% !important;
 }
 
-json-editor {
-  width: 100% !important;
+.structureditor {
+  display: flex;
+  flex-flow: column;
+  height: calc(90vh - 160px);
 }
 
-json-editor>div {
-  margin-top: 8px;
-  height: 360px !important;
-  width: 100%;
+json-editor,
+json-editor .jsoneditor,
+json-editor>div,
+json-editor jsoneditor-outer {
+  width: 99.7%;
+  height: 100%;
+  color: yellowgreen !important;
+}
+
+.jsoneditor-menu {
+  background-color: var(--ion-color-primary) !important;
+  border-bottom: 1px solid var(--ion-color-primary) !important;
 }
 
 .ace_editor * {
-  font-family: consolas, menlo, monaco, Ubuntu Mono, source-code-pro, monospace !important;
+  font-family: monospace, source-code-pro, consolas, menlo, monaco, Ubuntu Mono !important;
+  font-size: small !important;
+  font-weight: 600;
 }
 
 ion-checkbox {

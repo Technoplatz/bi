@@ -98,10 +98,35 @@ https://www.gnu.org/licenses.
                 <ion-icon name="warning"></ion-icon><br />
                 {{ 'Update' | translate }}<br />{{ 'Required' | translate }}
               </div>
+              <div *ngIf="perm && is_crud" (click)="doShowCode()" class="data-sq-button">
+                <span *ngIf="!jeopen; else nojeopen">
+                  <ion-icon name="code"></ion-icon><br />
+                  {{ 'Show' | translate }}<br />{{ 'Low-Code' | translate }}
+                </span>
+                <ng-template #nojeopen>
+                  <ion-icon name="eye-off"></ion-icon><br />
+                  {{ 'Hide' | translate }}<br />{{ 'Low-Code' | translate }}
+                </ng-template>
+              </div>
+              <div *ngIf="jeopen && perm" (click)="doSaveCode()" class="data-sq-button danger">
+                <span *ngIf="!is_saving; else saving">
+                  <ion-icon name="save"></ion-icon><br />
+                  {{ 'Submit' | translate }}<br />{{ 'Low-Code' | translate }}
+                </span>
+                <ng-template #saving>
+                  <ion-icon name="hourglass"></ion-icon><br />
+                  {{ 'Saving' | translate }}<br />{{ 'Low-Code' | translate }}
+                </ng-template>
+              </div>
               <div *ngIf="perm && is_crud" (click)="doCollectionSettings()" class="data-sq-button">
                 <ion-icon name="settings"></ion-icon><br />
                 {{ 'Collection' | translate }}<br />{{ 'Settings' | translate }}
               </div>
+            </ion-col>
+          </ion-row>
+          <ion-row *ngIf="perm && is_crud && jeopen">
+            <ion-col size="12" class="structureditor">
+              <json-editor id="structure" [options]="jeoptions" [(ngModel)]="structure"></json-editor>
             </ion-col>
           </ion-row>
           <ion-row *ngIf="is_pane_ok && is_crud" class="ion-margin-top">
@@ -117,7 +142,7 @@ https://www.gnu.org/licenses.
             </ion-col>
             <ng-template #noaction>
               <ion-col>
-                {{ 'NO ACTION FOUND' | translate }}<br />
+                <h6>{{ 'NO ACTION FOUND' | translate }}</h6>
                 {{ 'To create an action you need to add an "action item" into the collection structure' |
                 translate }}.
               </ion-col>
@@ -261,7 +286,7 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="ion-no-padding pages-col">
               <!-- NO RECORD FOUND PAGING -->
               <div *ngIf="is_loaded && (!count || count==0); else showpaging" class="ion-padding-top">
-                <h6>{{ 'No records found' | translate }}!</h6>
+                <h6>{{ 'NO RECORD FOUND' | translate }}!</h6>
                 {{ 'Click the button above to add a new record' | translate }}.
               </div>
               <!-- RECORDS FOUND PAGING -->
