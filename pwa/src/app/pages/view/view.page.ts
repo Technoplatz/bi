@@ -164,7 +164,7 @@ export class ViewPage implements OnInit {
       this.view_properties_ = Object.keys(res.properties);
       this.view_structure = res.structure;
       this.subheader = this.view.vie_title;
-      this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
+      this.viewurl_ = this.apiHost + "/get/view/" + this.view._id + "?k=" + this.accountf_apikey;
       this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
         this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
           this.pivot_ = res && res.pivot ? res.pivot : null;

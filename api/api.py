@@ -5594,7 +5594,7 @@ def get_dump_f():
         return res_
 
 
-@app.route("/get/data/<string:id>", methods=["GET"])
+@app.route("/get/view/<string:id>", methods=["GET"])
 def get_data_f(id):
     try:
         if not request.headers:

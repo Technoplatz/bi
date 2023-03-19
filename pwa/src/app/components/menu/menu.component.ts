@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { Auth } from "../../classes/auth";
@@ -43,16 +43,15 @@ import { Crud } from "../../classes/crud";
 })
 
 export class MenuComponent implements OnInit {
-  @Input() user: any;
   public version = environment.appVersion;
   public release = environment.release;
   public collections: any = [];
   public views: any = [];
   public segmentsadm: any;
-  public init = false;
   public saas_: any;
-  public viewso: any;
-  public collectionso: any;
+  public views_: any;
+  public collections_: any;
+  public user_: any;
 
   constructor(
     private auth: Auth,
@@ -61,25 +60,24 @@ export class MenuComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.collectionso = this.crud.collections.subscribe((res: any) => {
+    this.collections_ = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
     });
-    this.viewso = this.crud.views.subscribe((res: any) => {
+    this.views_ = this.crud.views.subscribe((res: any) => {
       this.views = res && res.data ? res.data : [];
     });
     this.crud.saas.subscribe((res: any) => {
-      this.saas_ = res ? res : {};
+      this.saas_ = res;
+    });
+    this.auth.user.subscribe((res: any) => {
+      this.user_ = res;
+      this.segmentsadm = res && res.perm ? environment.segmentsadm : [];
     });
   }
 
-  ngOnChanges() {
-    console.log("*** user", this.user);
-    this.segmentsadm = this.user && this.user.perm ? environment.segmentsadm : [];
-  }
-
   ngOnDestroy() {
-    this.collectionso = null;
-    this.viewso = null;
+    this.collections_ = null;
+    this.views_ = null;
   }
 
   doNavi(s: string, sub: any) {
