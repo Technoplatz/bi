@@ -253,7 +253,7 @@ export class AccountPage implements OnInit {
   }
 
   doVersion() {
-    this.misc.version.next([true]);
+    this.misc.version.next(true);
   }
 
 }

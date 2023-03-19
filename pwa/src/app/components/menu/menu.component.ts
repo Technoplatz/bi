@@ -30,8 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit } from "@angular/core";
-import { Storage } from "@ionic/storage";
+import { Component, OnInit, Input } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { Auth } from "../../classes/auth";
@@ -44,6 +43,7 @@ import { Crud } from "../../classes/crud";
 })
 
 export class MenuComponent implements OnInit {
+  @Input() user: any;
   public version = environment.appVersion;
   public release = environment.release;
   public collections: any = [];
@@ -57,14 +57,10 @@ export class MenuComponent implements OnInit {
   constructor(
     private auth: Auth,
     private crud: Crud,
-    private storage: Storage,
     private misc: Miscellaneous
   ) { }
 
   ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.segmentsadm = LSUSERMETA && LSUSERMETA.perm ? environment.segmentsadm : [];
-    });
     this.collectionso = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
     });
@@ -74,6 +70,11 @@ export class MenuComponent implements OnInit {
     this.crud.saas.subscribe((res: any) => {
       this.saas_ = res ? res : {};
     });
+  }
+
+  ngOnChanges() {
+    console.log("*** user", this.user);
+    this.segmentsadm = this.user && this.user.perm ? environment.segmentsadm : [];
   }
 
   ngOnDestroy() {

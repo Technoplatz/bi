@@ -49,7 +49,7 @@ export class Auth {
     "Content-Type": "application/json",
     "X-Api-Key": environment.apiKey
   }
-  public user = new BehaviorSubject<any>([]);
+  public user = new BehaviorSubject<any>(null);
 
   constructor(
     private storage: Storage,
@@ -230,33 +230,9 @@ export class Auth {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         if (LSUSERMETA && LSUSERMETA.email && LSUSERMETA.token) {
-          const email_ = LSUSERMETA.email;
-          const token_ = LSUSERMETA.token;
-          const jdate_ = LSUSERMETA.jdate;
-          this.user.next(LSUSERMETA);
-          const creds_ = {
-            email: email_,
-            token: token_,
-            op: "session",
-            jdate: jdate_
-          };
-          this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds_), {
-            headers: new HttpHeaders(this.authHeaders)
-          }).subscribe((res: any) => {
-            if (res && res.result) {
-              resolve(true);
-            } else {
-              this.storage.remove("LSUSERMETA").then(() => {
-                this.user.next(null);
-                reject(res.msg);
-              }).catch((error: any) => {
-                reject(error);
-              });
-            }
-          }, () => {
-            reject("could not connect to the server");
-          });
+          resolve(true);
         } else {
+          this.user.next(null);
           reject("session closed");
         }
       });

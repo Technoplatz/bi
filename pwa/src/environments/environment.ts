@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 export const environment = {
-  animated: true,
+  animated: false,
   sanitizerEnabled: true,
   production: false,
   appVersion: require("../../package.json").version + "-dev",

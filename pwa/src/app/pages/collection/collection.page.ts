@@ -35,6 +35,7 @@ import { ModalController, AlertController, IonSelect, NavController } from "@ion
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
+import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
@@ -47,7 +48,7 @@ import { CrudPage } from "../crud/crud.page";
 
 export class CollectionPage implements OnInit {
   @ViewChild("select0") selectRef?: IonSelect;
-  public defaultWidth: number = environment.misc.defaultColumnWidth;
+  public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
@@ -77,7 +78,6 @@ export class CollectionPage implements OnInit {
   public multicheckbox: boolean = false;
   private master: any = {};
   private collections: any = [];
-  private collections_: any = {};
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public barcoded_: boolean = false;
@@ -96,61 +96,58 @@ export class CollectionPage implements OnInit {
   private menu: string = "";
   private page_end: number = 1;
   private clonok: number = -1;
-  private collectionso: any;
-  private usero: any;
+  private collections_: any;
+  private user_: any;
 
   constructor(
     private storage: Storage,
+    private auth: Auth,
     private crud: Crud,
     private modal: ModalController,
     private alert: AlertController,
     private router: Router,
     public misc: Miscellaneous
   ) {
-    this.collectionso = this.crud.collections.subscribe((res: any) => {
+    this.collections_ = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
       this.collections_structure = res.structure;
-      this.collections_ = {};
-      for (let item_ in res.data) {
-        this.collections_[res.data[item_].col_id] = true;
-      }
     });
+    this.user_ = this.auth.user.subscribe((res: any) => {
+      this.user = res;
+      this.perm = res && res.perm ? true : false;
+    })
   }
 
   ngOnDestroy() {
-    this.collectionso = null;
-    this.usero = null;
+    this.collections_ = null;
+    this.user_ = null;
   }
 
   ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA;
-      this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-      this.menu = this.router.url.split("/")[1];
-      this.id = this.submenu = this.router.url.split("/")[2];
-      this.is_crud = this.id.charAt(0) === "_" ? false : true;
-      this.crud.getCollection(this.id).then((res: any) => {
-        this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
-        this.subheader = res && res.data ? res.data.col_title : this.id;
-        this.storage.set("LSID", this.id).then(() => {
-          this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-            this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-              this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-              LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-              this.actions = [];
-              this.RefreshData(0).then(() => { }).catch((error: any) => {
-                console.error(error);
-                this.misc.doMessage(error, "error");
-              }).finally(() => {
-                this.is_initialized = true;
-              });
+    this.menu = this.router.url.split("/")[1];
+    this.id = this.submenu = this.router.url.split("/")[2];
+    this.is_crud = this.id.charAt(0) === "_" ? false : true;
+    this.crud.getCollection(this.id).then((res: any) => {
+      this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
+      this.subheader = res && res.data ? res.data.col_title : this.id;
+      this.storage.set("LSID", this.id).then(() => {
+        this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+          this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
+            this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+            LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+            this.actions = [];
+            this.RefreshData(0).then(() => { }).catch((error: any) => {
+              console.error(error);
+              this.misc.doMessage(error, "error");
+            }).finally(() => {
+              this.is_initialized = true;
             });
           });
         });
-      }).catch((error: any) => {
-        console.error(error);
-        this.misc.doMessage(error, "error");
       });
+    }).catch((error: any) => {
+      console.error(error);
+      this.misc.doMessage(error, "error");
     });
   }
 
@@ -368,7 +365,7 @@ export class CollectionPage implements OnInit {
       if (res.data.modified) {
         this.RefreshData(0).then(() => {
           ["_collection", "_view", "_backup"].includes(this.id) ? this.crud.getAll().then(() => {
-            if (["remove","restore"].includes(res.data.op)) {
+            if (["remove", "restore"].includes(res.data.op)) {
               this.misc.navi.next({
                 s: "dashboard",
                 sub: null
@@ -438,7 +435,7 @@ export class CollectionPage implements OnInit {
                     sub: null
                   });
                 } else {
-                  this.RefreshData(0);
+                  window.location.reload();
                 }
               }).catch((error: any) => {
                 console.error(error);

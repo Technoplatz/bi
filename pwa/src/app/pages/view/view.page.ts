@@ -49,7 +49,7 @@ import { CrudPage } from "../crud/crud.page";
 export class ViewPage implements OnInit {
   @ViewChild("select0") selectRef?: IonSelect;
   public loadingText: string = environment.misc.loadingText;
-  public defaultWidth: number = environment.misc.defaultColumnWidth;
+  public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Views";
   public subheader: string = "";
   public user: any = null;
@@ -99,7 +99,6 @@ export class ViewPage implements OnInit {
   public viewurl_: string = "";
   public viewurl_masked_: string = "";
   public is_apikey_copied: boolean = false;
-  public collectionso: any;
   private segment = "data";
   private menu_toggle: boolean = false;
   private page_start: number = 1;
@@ -120,6 +119,9 @@ export class ViewPage implements OnInit {
   private saved_filter: string = "";
   private page_end: number = 1;
 
+  public collections_: any;
+  public user_: any;
+
   constructor(
     private storage: Storage,
     private crud: Crud,
@@ -131,51 +133,53 @@ export class ViewPage implements OnInit {
   ) {
     this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;
-      this.collectionso = this.crud.collections.subscribe((res: any) => {
-        this.collections = res && res.data ? res.data : [];
-      });
+    });
+    this.collections_ = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+    });
+    this.user_ = this.auth.user.subscribe((res: any) => {
+      this.user = res ? res : null;
+      this.perm = res && res.perm ? true : false;
+      this.accountf_apikey = res && res.apikey ? res.apikey : null;
     });
   }
 
-  ngOnDestroy() { }
+  ngOnDestroy() {
+    this.collections_ = null;
+  }
 
   ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
-      this.user = LSUSERMETA;
-      this.perm = this.user && this.user.perm ? true : false;
-      this.accountf_apikey = this.user && this.user.apikey ? this.user.apikey : "";
-      this.menu = this.router.url.split("/")[1];
-      this.id = this.submenu = this.router.url.split("/")[2];
-      this.misc.apiCall("crud", {
-        op: "view",
-        _id: "",
-        vie_id: this.id,
-        source: "internal"
-      }).then((res: any) => {
-        this.view = res && res.record ? res.record : null;
-        this.view_data = res && res.data ? res.data : [];
-        this.view_count = res && res.count ? res.count : 0;
-        this.view_properties = res.properties;
-        this.view_properties_ = Object.keys(res.properties);
-        this.view_structure = res.structure;
-        this.subheader = this.view.vie_title;
-        this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
-        this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
-          this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
-            this.pivot_ = res && res.pivot ? res.pivot : null;
-            const statistics_ = res && res.statistics ? res.statistics : null;
-            this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
-            this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
-          }).catch((error: any) => {
-            console.error("*** view mode", error);
-            this.misc.doMessage(error.error.message, "error");
-          }).finally(() => {
-            this.is_initialized = true;
-          });
+    this.menu = this.router.url.split("/")[1];
+    this.id = this.submenu = this.router.url.split("/")[2];
+    this.misc.apiCall("crud", {
+      op: "view",
+      _id: "",
+      vie_id: this.id,
+      source: "internal"
+    }).then((res: any) => {
+      this.view = res && res.record ? res.record : null;
+      this.view_data = res && res.data ? res.data : [];
+      this.view_count = res && res.count ? res.count : 0;
+      this.view_properties = res.properties;
+      this.view_properties_ = Object.keys(res.properties);
+      this.view_structure = res.structure;
+      this.subheader = this.view.vie_title;
+      this.viewurl_ = this.apiHost + "/get/data/" + this.view._id + "?k=" + this.accountf_apikey;
+      this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
+        this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
+          this.pivot_ = res && res.pivot ? res.pivot : null;
+          const statistics_ = res && res.statistics ? res.statistics : null;
+          this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
+          this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
         }).catch((error: any) => {
-          console.error(error);
-          this.misc.doMessage(error, "error");
+          console.error("*** view mode", error);
+          this.misc.doMessage(error.error.message, "error");
+        }).finally(() => {
+          this.is_initialized = true;
         });
+      }).catch((error: any) => {
+        console.error(error);
+        this.misc.doMessage(error, "error");
       });
     });
   }
@@ -209,6 +213,8 @@ export class ViewPage implements OnInit {
                 s: "dashboard",
                 sub: null
               });
+            } else {
+              window.location.reload();
             }
           }).catch((error: any) => {
             console.error(error);

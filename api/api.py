@@ -968,7 +968,6 @@ class Crud():
             return res_
 
     def decode_crud_doc_f(self, doc_, properties_):
-        # to decode user input for crud operation
         try:
             d = doc_
             for k in properties_:
@@ -1001,7 +1000,6 @@ class Crud():
             return res_
 
     def decode_crud_input_f(self, input):
-        # to decode user input for crud operation
         try:
             # gets the required varaibles
             collection_id_ = input["collection"]
@@ -3589,6 +3587,16 @@ class Crud():
                 "default": "0-Open"
             }
 
+            field_account_no_ = f"{prefix_}_account_no"
+            field_account_no_json_ = {
+                "bsonType": "string",
+                "title": "Account No",
+                "description": "Account No",
+                "pattern": "^[a-zA-Z0-9-_]{1,64}$",
+                "minLength": 1,
+                "maxLength": 64
+            }
+
             field_qty_ = f"{prefix_}_qty"
             field_qty_json_ = {
                 "bsonType": "number",
@@ -3641,6 +3649,7 @@ class Crud():
             structure_["properties"][field_no_] = field_no_json_
             structure_["properties"][field_date_] = field_date_json_
             structure_["properties"][field_status_] = field_status_json_
+            structure_["properties"][field_account_no_] = field_account_no_json_
             structure_["properties"][field_qty_] = field_qty_json_
             structure_["properties"][field_unit_price_] = field_unit_price_json_
             structure_["properties"][field_tax_] = field_tax_json_
@@ -3650,7 +3659,17 @@ class Crud():
             structure_["required"] = [field_no_]
             structure_["unique"] = [[field_no_]]
             structure_["index"] = [[field_status_]]
-            structure_["parents"] = []
+            structure_["parents"] = [{
+                "key": field_account_no_,
+                "collection": "accounts",
+                "button": "Accounts",
+                "lookup": [
+                    {
+                        "local": field_account_no_,
+                        "remote": "acc_no"
+                    }
+                ]
+            }]
             structure_["actions"] = []
             structure_["sort"] = {"_modified_at": -1}
 

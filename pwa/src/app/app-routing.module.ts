@@ -48,11 +48,11 @@ export class SessionGuard implements CanActivate {
     return await this.auth.Session().then(() => {
       return true;
     }).catch((error: any) => {
-      console.error(error);
-      this.misc.doMessage(error, "warning");
-      this.nav.navigateRoot("/").then(() => { }).catch((error: any) => {
-        console.error(error);
-      });
+      // this.nav.navigateRoot("/").then(() => {
+      //   this.misc.doMessage(error, "warning");
+      // }).catch((error: any) => {
+      //   console.error(error);
+      // });
       return false;
     });
   }

@@ -53,8 +53,8 @@ export class ToolsComponent implements OnInit {
 
   ngOnInit() {
     this.misc.version.subscribe((res: any) => {
-      this.storage.set("LSVERSION", res[0]).then(() => {
-        this.newVersion = res ? res[0] : false;
+      this.storage.set("LSVERSION", res).then(() => {
+        this.newVersion = res === true ? res : false;
       });
     });
     this.auth.user.subscribe((user: any) => {
@@ -64,7 +64,7 @@ export class ToolsComponent implements OnInit {
 
   doSetVersion() {
     this.storage.set("LSVERSION", [false]).then(() => {
-      this.misc.version.next([false]);
+      this.misc.version.next(false);
       window.location.reload();
     });
   }

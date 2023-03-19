@@ -35,7 +35,6 @@ import { TranslateService } from "@ngx-translate/core";
 import { Router, Event, NavigationError, NavigationEnd, NavigationStart } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./classes/miscellaneous";
-import { Navigation } from "./classes/navigation";
 import { Auth } from "./classes/auth";
 import { Crud } from "./classes/crud";
 import { Plugins } from "@capacitor/core";
@@ -61,56 +60,43 @@ export class AppComponent implements OnInit {
     private auth: Auth,
     private crud: Crud,
     private misc: Miscellaneous,
-    private storage: Storage,
-    private nav: Navigation
+    private storage: Storage
   ) { }
 
   ngOnInit() {
-
-    this.misc.menutoggle.subscribe((LSMENUTOGGLE: any) => {
-      this.menutoggle = LSMENUTOGGLE === undefined ? true : LSMENUTOGGLE;
-      this.storage.set("LSMENUTOGGLE", LSMENUTOGGLE).then(() => { });
+    this.misc.menutoggle.subscribe((res: any) => {
+      this.menutoggle = res === undefined ? true : res;
+      this.storage.set("LSMENUTOGGLE", res).then(() => { });
     });
 
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: any) => {
-      this.misc.menutoggle.next(LSMENUTOGGLE);
-    });
-
-    this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
-      this.user_ = LSUSERMETA;
-      if (LSUSERMETA) {
-        this.auth.user.next(LSUSERMETA);
-        this.crud.getAnnouncements().then(() => { });
-        this.crud.getAll().then(() => { }).catch((error: any) => {
+    this.storage.get("LSUSERMETA").then((res: any) => {
+      this.auth.user.next(res);
+      if (res) {
+        this.crud.getAll().then(() => {
+          this.crud.getAnnouncements().then(() => { });
+        }).catch((error: any) => {
           console.error(error);
           this.misc.doMessage(error, "error");
         });
       }
     });
 
-    // listen auth changes
-    this.auth.user.subscribe((LSUSERMETA: any) => {
-      if (LSUSERMETA) {
-        this.user_ = LSUSERMETA;
-      } else {
-        this.user_ = null;
-        this.misc.navi.next({
-          s: "",
-          sub: null
-        });
+    this.auth.user.subscribe((user: any) => {
+      this.user_ = user;
+      if (!user) {
+        this.misc.navi.next({ s: "", sub: null });
       }
     });
 
     this.misc.navi.subscribe((res: any) => {
-      const p = res.sub ? res.s + "/" + res.sub : res.s;
-      this.nav.navigateRoot(p).then(() => { }).catch((error: any) => {
+      this.router.navigateByUrl(res.sub ? res.s + "/" + res.sub : res.s).then(() => { }).catch((error: any) => {
         console.error(error);
       });
     });
 
-    this.storage.get("LSTHEME").then((LSTHEME: any) => {
-      if (LSTHEME) {
-        document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
+    this.storage.get("LSTHEME").then((res: any) => {
+      if (res) {
+        document.documentElement.style.setProperty("--ion-color-primary", res.color);
       } else {
         const LSTHEME = environment.themes[2];
         this.storage.set("LSTHEME", LSTHEME).then(() => {
@@ -119,7 +105,6 @@ export class AppComponent implements OnInit {
       }
     });
 
-    // listen page changes
     this.router.events.subscribe((event: Event) => {
       if (event instanceof NavigationError) {
         console.error("*** navigation error", event.url, event.error);
@@ -129,16 +114,15 @@ export class AppComponent implements OnInit {
         if (!urlpart1_) {
           this.menutoggle = false;
         } else {
-          if(!this.menutoggle) {
-            this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-              this.menutoggle = LSMENUTOGGLE;
+          if (!this.menutoggle) {
+            this.storage.get("LSMENUTOGGLE").then((res: boolean) => {
+              this.menutoggle = res;
             });
           }
         }
       }
     });
 
-    // listen internet connection
     Network.addListener("networkStatusChange", (status: any) => {
       if (!status.connected) {
         this.net_ = false;
@@ -152,16 +136,11 @@ export class AppComponent implements OnInit {
       }
     });
 
-    // set default language
-    this.misc.getLanguage().then((LSLANG: any) => {
-      this.translate.setDefaultLang(LSLANG ? LSLANG : "en");
-      this.translate.use(LSLANG ? LSLANG : "en");
+    this.misc.getLanguage().then((res: any) => {
+      this.translate.setDefaultLang(res ? res : "en");
+      this.translate.use(res ? res : "en");
     }).catch((error: any) => {
       console.error(error);
-    });
-
-    this.storage.get("LSVERSION").then((res: any) => {
-      this.misc.version.next([false]);
     });
 
   }

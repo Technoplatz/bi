@@ -127,7 +127,6 @@ export class CrudPage implements OnInit {
   }
 
   ngOnInit() {
-    // console.log("*** shuttle", this.shuttle);
     this.modified = false;
     this.collection = this.shuttle.collection ? this.shuttle.collection : null;
     this.user = this.shuttle.user;
@@ -161,10 +160,7 @@ export class CrudPage implements OnInit {
     this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
       this.crudForm = res.form;
       this.fields = res.fields;
-      this.fieldsupd = res.fields;
-      if (this.op === "insert" && this.collection === "_collection") {
-        this.fieldsupd = this.fields.filter((obj: any) => obj.name !== "col_structure");
-      }
+      this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? this.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
       this.visibility = "ion-padding-start ion-padding-end";

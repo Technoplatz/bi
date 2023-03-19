@@ -57,7 +57,7 @@ export class Miscellaneous {
 
   navi = new Subject<any>();
   menutoggle = new Subject<any>();
-  version = new BehaviorSubject<any>([]);
+  version = new BehaviorSubject<boolean>(false);
 
   getAPIHost() {
     return new Promise((resolve) => {
