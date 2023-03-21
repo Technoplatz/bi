@@ -237,6 +237,10 @@ https://www.gnu.org/licenses.
               <span class="column-title">{{ 'Modified by' }}<br /></span>
               {{ '_modified_by' | translate }}
             </ion-col>
+            <ion-col class="data-by-column" (click)="setSort('_upload_id', 1)">
+              <span class="column-title">{{ 'Upload Id' }}<br /></span>
+              {{ '_upload_id' | translate }}
+            </ion-col>
           </ion-row>
 
           <!-- CRUD LIST -->
@@ -278,6 +282,9 @@ https://www.gnu.org/licenses.
             </ion-col>
             <ion-col class="data-by-column">
               {{ record._modified_by }}
+            </ion-col>
+            <ion-col class="data-by-column">
+              {{ record._upload_id }}
             </ion-col>
           </ion-row>
 

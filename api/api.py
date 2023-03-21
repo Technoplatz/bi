@@ -656,6 +656,7 @@ class Mongo():
         # mongo staff
         self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
         self.client = MongoClient(self.connstr)
+        self.session_client = MongoClient(self.connstr)
         self.db = self.client[MONGO_DB_]
 
     def backup_f(self):
@@ -868,6 +869,7 @@ class Crud():
                             session_db_["_action"].update_one({
                                 "act_id": rec_["act_id"]
                             }, {"$set": rec_}, upsert=True)
+
                 reconfigure_f_ = self.reconfigure_f({
                     "userindb": userindb_,
                     "collection": col_id_
@@ -1268,12 +1270,6 @@ class Crud():
             collection_ = obj["collection"]
             prefix_ = obj["prefix"]
             email_ = form_["email"]
-
-            # start transaction
-            session_db_ = Mongo().client[MONGO_DB_]
-            session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
-            session_.start_transaction()
-
             mimetype_ = file_.content_type
 
             if mimetype_ in [
@@ -1319,7 +1315,7 @@ class Crud():
                     raise APIError(get_properties_["msg"])
                 properties_ = get_properties_["properties"]
                 columns_tobe_deleted_ = []
-                # Convert dataset columns into related properties accordingly
+                # Convert dataset columns to related properties
                 for column_ in df_.columns:
                     if column_ in properties_:
                         property_ = properties_[column_]
@@ -1435,26 +1431,20 @@ class Crud():
             df_["_modified_at"] = datetime.now()
             df_["_modified_by"] = email_
             df_["_modified_count"] = 0
+            df_["_upload_id"] = datetime.today().strftime("%Y%m%d%H%M%S")
 
-            # convert pandas dataset to json
             payload_ = df_.to_dict("records")
-
-            # delete temporary collection
-            Mongo().db[collection_tmp_].delete_many({})
-
-            # insert many uploaded records into the new collection
-            count_ = count_tmp_ = 0
-            insert_many_tmp_ = Mongo().db[collection_tmp_].insert_many(payload_, ordered=False)
-            count_tmp_ = len(insert_many_tmp_.inserted_ids)
-            insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
-            count_ = len(insert_many_.inserted_ids)
-
-            session_.commit_transaction()
+            session_client_ = Mongo().session_client
+            session_db_ = session_client_[MONGO_DB_]
+            with session_client_.start_session(causal_consistency=True, default_transaction_options=None, snapshot=False) as session_:
+                with session_.start_transaction():
+                    insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
+                    session_.commit_transaction()
+                    count_ = len(insert_many_.inserted_ids)
 
             res_ = {"result": True, "count": count_}
 
         except pymongo.errors.PyMongoError as exc:
-            session_.abort_transaction()
 
             Misc().log_f({
                 "type": "Error",
@@ -1465,11 +1455,12 @@ class Crud():
             })
 
             res_ = Misc().mongo_error_f(exc)
+
             if "notify" in res_ and res_["notify"]:
                 email_sent_ = Email().sendEmail_f({
                     "personalizations": {"to": [{"email": email_, "name": None}]},
                     "op": "importerr",
-                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />FILE TYPE: {filetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />LINE COUNT: {count_tmp_}<br />ERROR COUNT: {res_['count']} (import)<br /><br />ERRORS:<br />{res_['msg']}"
+                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />FILE TYPE: {filetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}"
                 })
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
@@ -1477,11 +1468,9 @@ class Crud():
                 res_["msg"] = "There are some errors occured while uploading file. Please check your Inbox to get details."
 
         except APIError as exc:
-            session_.abort_transaction()
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            session_.abort_transaction()
             res_ = Misc().exception_f(exc)
 
         finally:
@@ -2853,6 +2842,7 @@ class Crud():
                 "collection": cid_,
                 "user": user_
             })
+
             if not reconfig_set_f_["result"]:
                 raise APIError(reconfig_set_f_["msg"])
 
@@ -4963,7 +4953,7 @@ EMAIL_DEFAULT_SUBJECT_ = "Hello"
 API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
-API_MAX_CONTENT_LENGTH_ = os.environ.get("API_MAX_CONTENT_LENGTH")
+API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_KEY_ = os.environ.get("API_KEY")
 SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
 
@@ -4992,7 +4982,6 @@ log.setLevel(logging.ERROR)
 @app.route("/import", methods=["POST"], endpoint="import")
 def storage_f():
     try:
-        # validates restapi request
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
@@ -5012,18 +5001,13 @@ def storage_f():
         collection__ = form_["collection"]
         col_check_ = Crud().inner_collection_f(collection__)
         if not col_check_["result"]:
-            if op_ == "import":
-                raise APIError(col_check_["msg"])
-            prefix_ = form_["prefix"]
-        else:
-            if op_ != "import":
-                raise APIError("collection already exists")
-            prefix_ = col_check_["collection"]["col_prefix"]
+            raise APIError(col_check_["msg"])
+
+        prefix_ = col_check_["collection"]["col_prefix"]
 
         email_ = form_["email"] if "email" in form_ else None
         token_ = form_["token"] if "token" in form_ else None
 
-        # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "import")
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")

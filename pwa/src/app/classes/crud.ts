@@ -186,30 +186,39 @@ export class Crud {
 
   Submit(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any) {
     return new Promise((resolve, reject) => {
+      console.log("**** str", structure);
       const properties = structure.properties;
       let doc_: any = {};
       let i = 0;
+      console.log("*** okp", Object.keys(properties));
       for (let item in properties) {
         doc_[item] = properties[item].bsonType === "date" && form.get(item).value ? new Date(form.get(item).value) : form.get(item).value;
+        console.log("*** item", item);
+        console.log("--- doc", doc_);
+        console.log("--- i", i);
         if (i === Object.keys(properties).length - 1) {
           _id ? (doc_["_id"] = _id) : null;
           if (file) {
+            console.log("**** file", file);
             let posted_: FormData = new FormData();
             const sto_collection_id_ = doc_["sto_collection_id"];
             posted_.append("op", op);
             posted_.append("file", file, file.name);
             posted_.append("collection", sto_collection_id_);
-            posted_.append("prefix", doc_["sto_prefix"]);
+            posted_.append("prefix", "srv");
             posted_.append("name", file.name);
             posted_.append("size", file.size);
-            posted_.append("type", doc_["sto_file_type"]);
-            this.misc.apiCall("import", posted_).then((res: any) => {
+            posted_.append("type", file.type);
+            this.misc.apiFileCall("import", posted_).then((res: any) => {
+              console.log("--- res", res);
               res.cid = sto_collection_id_;
               resolve(res);
             }).catch((error: any) => {
+              console.error("--- error", error);
               reject(error.msg);
             });
           } else {
+            console.log("**** normal");
             this.misc.apiCall("crud", {
               op: op,
               collection: collection,

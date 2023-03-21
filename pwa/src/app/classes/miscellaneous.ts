@@ -76,12 +76,11 @@ export class Miscellaneous {
           posted.email = LSUSERMETA.email;
           posted.view = LSVIEW ? LSVIEW : null;
           this.getAPIHost().then((apiHost) => {
-            const headers = {
-              "Content-Type": "application/json",
-              "X-Api-Key": environment.apiKey
-            }
             this.http.post<any>(apiHost + "/" + url, posted, {
-              headers: new HttpHeaders(headers)
+              headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "X-Api-Key": environment.apiKey
+              })
             }).subscribe((res: any) => {
               if (res && res.result) {
                 resolve(res);
@@ -91,6 +90,30 @@ export class Miscellaneous {
             }, (error: any) => {
               reject(error.msg);
             });
+          });
+        });
+      });
+    });
+  }
+
+  apiFileCall(url: string, posted: any) {
+    return new Promise((resolve, reject) => {
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        posted.append("email", LSUSERMETA.email);
+        posted.append("token", LSUSERMETA.token);
+        this.getAPIHost().then((apiHost) => {
+          this.http.post<any>(apiHost + "/" + url, posted, {
+            headers: new HttpHeaders({
+              "X-Api-Key": environment.apiKey
+            })
+          }).subscribe((res: any) => {
+            if (res && res.result) {
+              resolve(res);
+            } else {
+              reject(res);
+            }
+          }, (error: any) => {
+            reject(error);
           });
         });
       });

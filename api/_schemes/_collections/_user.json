@@ -36,16 +36,6 @@
             "default": "External",
             "width": 100
         },
-        "usr_group_id": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 64,
-            "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$",
-            "title": "Group ID",
-            "description": "Group id",
-            "required": true,
-            "width": 140
-        },
         "usr_enabled": {
             "bsonType": "bool",
             "title": "Enabled",
@@ -73,8 +63,7 @@
     "required": [
         "usr_id",
         "usr_name",
-        "usr_scope",
-        "usr_group_id"
+        "usr_scope"
     ],
     "unique": [
         [
@@ -83,9 +72,6 @@
     ],
     "index": [
         [
-            "usr_group_id"
-        ],
-        [
             "_tags"
         ]
     ],
@@ -93,19 +79,6 @@
         "_modified_at": -1
     },
     "actions": [
-        {
-            "id": "act-assign-to-group",
-            "title": "ASSIGN A GROUP",
-            "description": "Assigns a group to selected records.",
-            "enabled": true,
-            "filter": [],
-            "fields": [
-                {
-                    "key": "usr_group_id",
-                    "value": null
-                }
-            ]
-        },
         {
             "id": "act-assign-tag",
             "title": "ASSIGN TAGS",

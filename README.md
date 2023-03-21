@@ -2,7 +2,7 @@
 
 It's time to get data-driven with your [inner-cycle!](#highlights)
 
-Technoplatz BI is a [low-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. 
+Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. 
 
 - [How to Get Started](#get-started)
 - [Installation](#installation)
@@ -223,7 +223,7 @@ API_KEY=61c09da62f1f9ca9357796c9
 
 ### 4. Starting Containers
 
-Enter the command below to start the containers by keeping them up and running in the background. It can take up to 20 seconds till after containers creation for Technoplatz BI to be fully functional. You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run at the background and restarts automatically as the platform is rebooted.
+Enter the command below to start the containers by keeping them up and running in the background. You can log out and exit the platform safely after the installation is complete. Technoplatz BI continues to run at the background and restarts automatically as the platform is rebooted.
 
 ```bash
 ./bi.sh start
