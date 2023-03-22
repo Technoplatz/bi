@@ -132,7 +132,6 @@ export class CollectionPage implements OnInit {
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
     this.jeoptions = new JsonEditorOptions();
-    // this.jeoptions.modes = ["code"];
     this.jeoptions.mode = "code";
     this.jeoptions.statusBar = true;
     this.crud.getCollection(this.id).then((res: any) => {
