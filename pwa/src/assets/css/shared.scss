@@ -395,6 +395,12 @@ ion-alert .alert-radio-group {
   margin-bottom: 4px !important;
 }
 
+.data-sq-button svg {
+  width: 24px !important;
+  height: 24px !important;
+  margin-bottom: 2px !important;
+}
+
 .data-sq-button.disabled {
   pointer-events: none !important;
   opacity: 1;
@@ -435,12 +441,21 @@ ion-alert .alert-radio-group {
   font-family: monospace;
 }
 
-.data-at-column {
+.data-ext-columns {
   min-width: 140px;
+  opacity: 0.5;
+}
+
+.data-at-column {
+  min-width: 140px !important;
 }
 
 .data-by-column {
-  min-width: 200px;
+  min-width: 200px !important;
+}
+
+.data-id-column {
+  min-width: 120px !important;
 }
 
 .log-ano-column-s {
@@ -1399,7 +1414,7 @@ json-editor,
 json-editor .jsoneditor,
 json-editor>div,
 json-editor jsoneditor-outer {
-  width: 99.7%;
+  width: 99.5%;
   height: 100%;
   color: yellowgreen !important;
 }

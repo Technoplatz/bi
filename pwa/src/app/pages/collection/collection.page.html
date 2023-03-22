@@ -100,26 +100,29 @@ https://www.gnu.org/licenses.
               </div>
               <div *ngIf="perm && is_crud" (click)="doShowCode()" class="data-sq-button">
                 <span *ngIf="!jeopen; else nojeopen">
-                  <ion-icon name="code"></ion-icon><br />
-                  {{ 'Show' | translate }}<br />{{ 'Low-Code' | translate }}
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#fff">
+                    <title>language_json</title>
+                    <rect fill="none"/><path d="M5,3H7V5H5v5a2,2,0,0,1-2,2,2,2,0,0,1,2,2v5H7v2H5c-1.07-.27-2-.9-2-2V15a2,2,0,0,0-2-2H0V11H1A2,2,0,0,0,3,9V5A2,2,0,0,1,5,3M19,3a2,2,0,0,1,2,2V9a2,2,0,0,0,2,2h1v2H23a2,2,0,0,0-2,2v4a2,2,0,0,1-2,2H17V19h2V14a2,2,0,0,1,2-2,2,2,0,0,1-2-2V5H17V3h2M12,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1M8,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1m8,0a1,1,0,1,1-1,1A1,1,0,0,1,16,15Z"/>
+                  </svg><br />
+                  {{ 'JSON' | translate }}<br />{{ 'Scheme' | translate }}
                 </span>
                 <ng-template #nojeopen>
                   <ion-icon name="eye-off"></ion-icon><br />
-                  {{ 'Hide' | translate }}<br />{{ 'Low-Code' | translate }}
+                  {{ 'Hide' | translate }}<br />{{ 'Scheme' | translate }}
                 </ng-template>
               </div>
               <div *ngIf="jeopen && perm" (click)="doSaveCode()" class="data-sq-button danger">
                 <span *ngIf="!is_saving; else saving">
                   <ion-icon name="save"></ion-icon><br />
-                  {{ 'Submit' | translate }}<br />{{ 'Low-Code' | translate }}
+                  {{ 'Submit' | translate }}<br />{{ 'JSON' | translate }}
                 </span>
                 <ng-template #saving>
                   <ion-icon name="hourglass"></ion-icon><br />
-                  {{ 'Saving' | translate }}<br />{{ 'Low-Code' | translate }}
+                  {{ 'Saving' | translate }}<br />{{ 'JSON' | translate }}
                 </ng-template>
               </div>
               <div *ngIf="perm && is_crud" (click)="doCollectionSettings()" class="data-sq-button">
-                <ion-icon name="settings"></ion-icon><br />
+                <ion-icon name="settings-outline"></ion-icon><br />
                 {{ 'Collection' | translate }}<br />{{ 'Settings' | translate }}
               </div>
             </ion-col>
@@ -229,15 +232,15 @@ https://www.gnu.org/licenses.
                 </div>
               </div>
             </ion-col>
-            <ion-col class="data-at-column" (click)="setSort('_modified_at', 1)">
+            <ion-col class="data-ext-columns data-at-column" (click)="setSort('_modified_at', 1)">
               <span class="column-title">{{ 'Modified At' }}<br /></span>
               {{ '_modified_at' | translate }}
             </ion-col>
-            <ion-col class="data-by-column" (click)="setSort('_modified_by', 1)">
+            <ion-col class="data-ext-columns data-by-column" (click)="setSort('_modified_by', 1)">
               <span class="column-title">{{ 'Modified by' }}<br /></span>
               {{ '_modified_by' | translate }}
             </ion-col>
-            <ion-col class="data-by-column" (click)="setSort('_upload_id', 1)">
+            <ion-col class="data-ext-columns data-id-column" (click)="setSort('_upload_id', 1)">
               <span class="column-title">{{ 'Upload Id' }}<br /></span>
               {{ '_upload_id' | translate }}
             </ion-col>
@@ -276,14 +279,14 @@ https://www.gnu.org/licenses.
                   }}</span>
               </span>
             </ion-col>
-            <ion-col class="data-at-column">
+            <ion-col class="data-ext-columns data-at-column">
               {{ record._modified_at.replace(' ', 'T') | date:'dd.MM.yyyy
               HH:mm:ss' }}
             </ion-col>
-            <ion-col class="data-by-column">
+            <ion-col class="data-ext-columns data-by-column">
               {{ record._modified_by }}
             </ion-col>
-            <ion-col class="data-by-column">
+            <ion-col class="data-ext-columns data-id-column">
               {{ record._upload_id }}
             </ion-col>
           </ion-row>
@@ -293,7 +296,7 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="ion-no-padding pages-col">
               <!-- NO RECORD FOUND PAGING -->
               <div *ngIf="is_loaded && (!count || count==0); else showpaging" class="ion-padding-top">
-                <h6>{{ 'NO RECORD FOUND' | translate }}!</h6>
+                <h6>{{ 'No record found' | translate }}</h6>
                 {{ 'Click the button above to add a new record' | translate }}.
               </div>
               <!-- RECORDS FOUND PAGING -->

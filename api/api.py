@@ -35,6 +35,7 @@ from pickle import TRUE
 import sys
 import pandas as pd
 import numpy as np
+import numexpr as ne
 import openpyxl
 import stat
 import bson
@@ -96,7 +97,7 @@ class Schedular():
             aut_source_set_ = doc_["aut_source_set"] if "aut_source_set" in doc_ and len(doc_["aut_source_set"]) > 0 else None
             aut_target_set_ = doc_["aut_target_set"] if "aut_target_set" in doc_ and len(doc_["aut_target_set"]) > 0 else None
             aut_target_collection_id_ = doc_["aut_target_collection_id"] if "aut_target_collection_id" in doc_ else None
-            aut_target_filter_ = doc_["aut_target_filter"] if "aut_target_filter" in doc_ and len(doc_["aut_target_filter"]) > 0 else None
+            aut_target_match_ = doc_["aut_target_match"] if "aut_target_match" in doc_ and len(doc_["aut_target_match"]) > 0 else None
             aut_target_ = doc_["aut_target"] if "aut_target" in doc_ else False
             aut_target_upsert_ = True if "aut_target_upsert" in doc_ and doc_["aut_target_upsert"] == True else False
             aut_target_prefixes_ = doc_["aut_target_prefixes"] if "aut_target_prefixes" in doc_ and len(doc_["aut_target_prefixes"]) > 0 else None
@@ -105,9 +106,9 @@ class Schedular():
                 raise APIError("automation info is missing")
 
             if aut_target_:
-                if not aut_target_filter_ or not aut_target_collection_id_:
+                if not aut_target_match_ or not aut_target_collection_id_:
                     raise APIError("match info is missing")
-                if not len(aut_target_filter_) > 0:
+                if not len(aut_target_match_) > 0:
                     raise APIError("matched fields is missing")
 
             collection_ = Mongo().db["_collection"].find_one({"col_id": aut_source_collection_id_})
@@ -118,6 +119,10 @@ class Schedular():
             if not structure_:
                 raise APIError(f"structure not found: {aut_source_collection_id_}")
 
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise APIError(f"source properties not found: {aut_source_collection_id_}")
+
             get_filtered_ = Crud().get_filtered_f({
                 "match": aut_source_filter_,
                 "properties": structure_["properties"] if "properties" in structure_ else None
@@ -126,31 +131,34 @@ class Schedular():
             source_data_file_ = f"{aut_source_collection_id_}_data"
             if source_data_file_ not in Mongo().db.list_collection_names():
                 raise APIError("collection data is missing")
+
             target_data_file_ = None
             target_structure_ = None
 
             if aut_target_:
                 target_data_file_ = f"{aut_target_collection_id_}_data"
                 if target_data_file_ not in Mongo().db.list_collection_names():
-                    raise APIError(f"remote collection data is missing {target_data_file_}")
+                    raise APIError(f"target collection data is missing {target_data_file_}")
+
                 collection_ = Mongo().db["_collection"].find_one({"col_id": aut_target_collection_id_})
                 if not collection_:
-                    raise APIError(f"remote collection not found to schedule: {aut_target_collection_id_}")
+                    raise APIError(f"target collection not found to schedule: {aut_target_collection_id_}")
+
                 target_structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
                 if not target_structure_:
-                    raise APIError(f"remote structure not found: {aut_target_collection_id_}")
+                    raise APIError(f"target structure not found: {aut_target_collection_id_}")
+
+                target_properties_ = target_structure_["properties"] if "properties" in target_structure_ else None
+                if not target_properties_:
+                    raise APIError(f"target properties not found: {aut_target_collection_id_}")
 
             find_ = Mongo().db[source_data_file_].find(get_filtered_)
             for rec_ in find_:
-                target_filter_ = []
-                target_match_ = None
-                target_matched_ = False
-                target_exists_ = False
+                target_match_ = {}
                 id_ = rec_["_id"]
                 if aut_target_ and target_structure_:
-                    for idx_, m_ in enumerate(aut_target_filter_):
+                    for m_ in aut_target_match_:
                         m_key_ = m_["key"]
-                        m_op_ = m_["op"]
                         m_value_ = m_["value"]
                         if m_value_[:1] == "$":
                             f_ = m_value_[1:]
@@ -160,61 +168,40 @@ class Schedular():
                                     if m_value_.startswith(prefix_):
                                         m_value_ = m_value_[len(prefix_):]
                                         break
-                                if idx_ == 0:
-                                    target_match_ = {}
-                                    target_match_[m_key_] = m_value_
-                        target_filter_.append({
-                            "key": m_key_,
-                            "op": m_op_,
-                            "value": m_value_
-                        })
+                        target_match_[m_key_] = m_value_
 
-                    if target_match_ == None:
-                        raise APIError("The first item of automation target filter must be the matching field")
+                    if target_match_ == {}:
+                        raise APIError("The first item of the target filter must be the matching field")
 
-                    get_filtered_ = Crud().get_filtered_f({
-                        "match": target_filter_,
-                        "properties": target_structure_["properties"] if "properties" in target_structure_ else None
-                    })
-                    aggregate_ = Mongo().db[target_data_file_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
-                    aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
-                    if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
-                        target_matched_ = target_exists_ = True
-                    else:
-                        aggregate_ = Mongo().db[target_data_file_].aggregate([{"$match": target_match_}, {"$group": {"_id": None, "count": {"$sum": 1}}}])
-                        aggregate_ = json.loads(JSONEncoder().encode(list(aggregate_)))
-                        if aggregate_ and "count" in aggregate_[0] and int(aggregate_[0]["count"]) > 0:
-                            target_exists_ = True
-                else:
-                    target_matched_ = True
+                set_source_ = {}
+                set_target_ = {}
+                set_source_["_modified_by"] = set_target_["_modified_by"] = "Automation"
+                set_source_["_modified_at"] = set_target_["_modified_at"] = datetime.now()
 
-                if target_matched_ or aut_target_upsert_:
-                    set_source_ = {}
-                    set_target_ = {}
-                    set_source_["_modified_by"] = set_target_["_modified_by"] = "Automation"
-                    set_source_["_modified_at"] = set_target_["_modified_at"] = datetime.now()
-                    if aut_source_set_:
-                        for aut_source_set__ in aut_source_set_:
-                            key_ = aut_source_set__["key"]
-                            value_ = aut_source_set__["value"]
-                            value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
-                            set_source_[key_] = value_
-                        Mongo().db[source_data_file_].update_one({"_id": id_}, {"$set": set_source_})
-                    if aut_target_set_:
-                        for aut_target_set__ in aut_target_set_:
-                            key_ = aut_target_set__["key"]
-                            value_ = aut_target_set__["value"]
-                            if value_[:1] == "$":
-                                f_ = value_[1:]
-                                value_ = rec_[f_] if f_ in rec_ else None
-                            else:
-                                value_ = True if value_.lower() == "true" else False if value_.lower() == "false" else value_
-                            set_target_[key_] = value_
-                        if target_matched_:
-                            Mongo().db[target_data_file_].update_many(get_filtered_, {"$set": set_target_})
-                        else:
-                            if aut_target_upsert_ and not target_exists_:
-                                Mongo().db[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=True)
+                if aut_source_set_ and len(aut_source_set_) > 0:
+                    for aut_source_set__ in aut_source_set_:
+                        key_ = aut_source_set__["key"]
+                        # value_ = aut_source_set__["value"]
+                        value_ = Misc().string_to_formula_f(aut_source_set__, rec_, properties_)
+                        set_source_[key_] = value_
+                    Mongo().db[source_data_file_].update_one({"_id": id_}, {"$set": set_source_})
+
+                if aut_target_set_ and len(aut_target_set_) > 0:
+                    for aut_target_set__ in aut_target_set_:
+                        key_ = aut_target_set__["key"]
+                        value_ = Misc().string_to_formula_f(aut_target_set__, rec_, target_properties_)
+                        set_target_[key_] = value_
+
+                    update_many_ = Mongo().db[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=aut_target_upsert_)
+                    # if update_many_:
+                    #     Misc().log_f({
+                    #         "type": "Info",
+                    #         "collection": aut_target_collection_id_,
+                    #         "op": "upsert",
+                    #         "user": "automation",
+                    #         "object_id": aut_id_,
+                    #         "document": set_target_
+                    #     })
 
             res_ = {"result": True}
 
@@ -637,6 +624,30 @@ class Misc():
                         dict_[field_] = properties_property_[field_]
             properties_new_[property_] = dict_
         return properties_new_
+
+    def string_to_formula_f(self, set_, rec_, properties_):
+        key_ = set_["key"]
+        value_ = set_["value"]
+        if value_[:1] == "$":
+            f_ = value_[1:]
+            value_ = rec_[f_] if f_ in rec_ else None
+        elif value_[:1] == "=":
+            formula_ = str(value_[1:]).replace(" ", "")
+            parts_ = re.split("([+-/*()])", formula_)
+            for part_ in parts_:
+                if part_[:1] == "$":
+                    f_ = part_[1:]
+                    if f_ in rec_:
+                        if rec_[f_] in [None, ""]:
+                            rec_[f_] = 0
+                        formula_ = formula_.replace(part_, str(rec_[f_]))
+                    else:
+                        formula_ = formula_.replace(part_, "")
+
+            value_ = str(ne.evaluate(formula_))
+            value_ = float(value_) if properties_[key_]["bsonType"] in ["number", "decimal", "double"] else int(value_) if properties_[key_]["bsonType"] == "int" else None
+
+        return value_
 
 
 class Mongo():
@@ -1910,37 +1921,27 @@ class Crud():
                     elif f["op"] == "false":
                         fres_ = {"$eq": False}
 
-                    elif f["op"] == "null":
-                        or_ = []
-                        or1_ = {}
-                        or2_ = {}
-                        or3_ = {}
-                        or1_[f["key"]] = {"$type": 10}
-                        or2_[f["key"]] = {"$exists": False}
-                        or3_[f["key"]] = {"$eq": None}
-                        or_.append(or1_)
-                        or_.append(or2_)
-                        or_.append(or3_)
-                        fres_ = {"$or": or_}
-
                     elif f["op"] == "nnull":
-                        and_ = []
-                        and1_ = {}
-                        and2_ = {}
-                        and3_ = {}
-                        and1_[f["key"]] = {"$not": {"$type": 10}}
-                        and2_[f["key"]] = {"$exists": True}
-                        and3_[f["key"]] = {"$not": {"$eq": None}}
-                        and_.append(and1_)
-                        and_.append(and2_)
-                        and_.append(and3_)
-                        fres_ = {"$and": and_}
+                        array_ = []
+                        array1_ = {}
+                        array2_ = {}
+                        array1_[f["key"]] = {"$ne": None}
+                        array2_[f["key"]] = {"$exists": True}
+                        array_.append(array1_)
+                        array_.append(array2_)
+
+                    elif f["op"] == "null":
+                        array_ = []
+                        array1_ = {}
+                        array2_ = {}
+                        array1_[f["key"]] = {"$eq": None}
+                        array2_[f["key"]] = {"$exists": False}
+                        array_.append(array1_)
+                        array_.append(array2_)
 
                     fpart_ = {}
-                    if f["op"] == "null":
-                        fpart_["$or"] = or_
-                    elif f["op"] == "nnull":
-                        fpart_["$and"] = and_
+                    if f["op"] in ["null", "nnull"]:
+                        fpart_["$or"] = array_
                     else:
                         fpart_[f["key"]] = fres_
 

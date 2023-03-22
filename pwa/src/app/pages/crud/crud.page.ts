@@ -66,6 +66,7 @@ export class CrudPage implements OnInit {
   public filterops: any = environment.filterops;
   public pivotvalueops: any = environment.pivotvalueops;
   public loadingText: string = environment.misc.loadingText;
+  public timeout: number = environment.misc.default_delay;
   public selected_: any = [];
   public crudForm: FormGroup;
   public fieldsupd: any = [];
@@ -103,7 +104,6 @@ export class CrudPage implements OnInit {
   private collections: any = [];
   private views: any = [];
   private view: any = null;
-  private timeout: number = 500;
 
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
     if (event.key === "Enter") {

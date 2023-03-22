@@ -11,7 +11,8 @@
                 "Error",
                 "Warning",
                 "Denied",
-                "Announcement"
+                "Announcement",
+                "Automation"
             ],
             "pattern": "^[a-zA-Z]{1,16}$",
             "required": true,

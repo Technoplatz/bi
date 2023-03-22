@@ -5,6 +5,7 @@ requests
 bleach
 pandas
 numpy
+numexpr
 openpyxl
 apscheduler
 Jinja2

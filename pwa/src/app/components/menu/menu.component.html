@@ -56,21 +56,6 @@ https://www.gnu.org/licenses.
     <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
-        </ion-button>
-        <p *ngIf="!views || views.length == 0; else viewsfound">
-          <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
-        </p>
-        <ng-template #viewsfound>
-          <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)" class="clicked-item dark">
-            {{ item.vie_title }}
-          </p>
-        </ng-template>
-      </ion-label>
-    </ion-item>
-    <ion-item lines="none">
-      <ion-label class="ion-text-wrap ion-no-margin">
-        <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="server-outline"></ion-icon>{{ 'Collections' | translate }}
         </ion-button>
         <p *ngIf="!collections || collections.length == 0; else collectionsfound" class="danger">
@@ -79,6 +64,21 @@ https://www.gnu.org/licenses.
         <ng-template #collectionsfound>
           <p *ngFor="let item of collections" (click)="doNavi('collection', item.col_id)" class="clicked-item dark">
             {{ item.col_title }}
+          </p>
+        </ng-template>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
+        </ion-button>
+        <p *ngIf="!views || views.length == 0; else viewsfound">
+          <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
+        </p>
+        <ng-template #viewsfound>
+          <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)" class="clicked-item dark">
+            {{ item.vie_title }}
           </p>
         </ng-template>
       </ion-label>

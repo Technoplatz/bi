@@ -10,15 +10,6 @@
             "required": true,
             "width": 190
         },
-        "aut_title": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "title": "Title",
-            "description": "Automation Title",
-            "required": true,
-            "width": 180
-        },
         "aut_enabled": {
             "bsonType": "bool",
             "title": "Enabled",
@@ -38,7 +29,7 @@
         },
         "aut_source_filter": {
             "bsonType": "array",
-            "minItems": 0,
+            "minItems": 1,
             "maxItems": 16,
             "uniqueItems": true,
             "additionalProperties": false,
@@ -53,7 +44,7 @@
                         "maxLength": 64,
                         "pattern": "^[a-z_]{1,64}$",
                         "title": "key",
-                        "description": "Collection key"
+                        "description": "Key"
                     },
                     "op": {
                         "bsonType": "string",
@@ -77,11 +68,11 @@
                             "false"
                         ],
                         "title": "op",
-                        "description": "Filter operator"
+                        "description": "Operator"
                     },
                     "value": {
                         "bsonType": "string",
-                        "minLength": 1,
+                        "minLength": 0,
                         "maxLength": 64,
                         "title": "value",
                         "description": "Value"
@@ -89,8 +80,7 @@
                 },
                 "required": [
                     "key",
-                    "op",
-                    "value"
+                    "op"
                 ]
             },
             "title": "Source Filter",
@@ -152,7 +142,7 @@
             "collection": true,
             "width": 190
         },
-        "aut_target_filter": {
+        "aut_target_match": {
             "bsonType": "array",
             "minItems": 0,
             "maxItems": 16,
@@ -168,32 +158,8 @@
                         "minLength": 1,
                         "maxLength": 64,
                         "pattern": "^[a-z_]{1,64}$",
-                        "title": "Remote Field",
-                        "description": "Remote Field"
-                    },
-                    "op": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 8,
-                        "pattern": "^[a-z]{1,8}$",
-                        "enum": [
-                            "eq",
-                            "ne",
-                            "contains",
-                            "nc",
-                            "in",
-                            "nin",
-                            "gt",
-                            "gte",
-                            "lt",
-                            "lte",
-                            "null",
-                            "nnull",
-                            "true",
-                            "false"
-                        ],
-                        "title": "op",
-                        "description": "Operator"
+                        "title": "Field",
+                        "description": "Field"
                     },
                     "value": {
                         "bsonType": "string",
@@ -208,9 +174,9 @@
                     "value"
                 ]
             },
-            "title": "Target Filter",
-            "description": "Target Filter",
-            "subType": "matchfields",
+            "title": "Target Match",
+            "description": "Target Match",
+            "subType": "setfields",
             "width": 160
         },
         "aut_target_set": {
@@ -229,20 +195,19 @@
                         "minLength": 1,
                         "maxLength": 64,
                         "pattern": "^[a-z_]{1,64}$",
-                        "title": "Remote Field",
-                        "description": "Remote Field"
+                        "title": "Field",
+                        "description": "Field"
                     },
                     "value": {
                         "bsonType": "string",
                         "minLength": 0,
                         "maxLength": 64,
-                        "title": "Remote Field Value",
-                        "description": "Remote Field Value"
+                        "title": "Value",
+                        "description": "Value"
                     }
                 },
                 "required": [
-                    "key",
-                    "value"
+                    "key"
                 ]
             },
             "title": "Target Set",
