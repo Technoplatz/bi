@@ -276,7 +276,7 @@ https://www.gnu.org/licenses.
                                 </ng-template>
                             </div>
                             <ion-input
-                                *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='float'"
+                                *ngIf="field.bsonType=='int' || field.bsonType=='number' || field.bsonType=='decimal' || field.bsonType=='float'"
                                 class="ion-no-padding" [formControlName]="field.name" type="number"
                                 [required]="field.required" [placeholder]="field.description"
                                 [(ngModel)]="data[field.name]"

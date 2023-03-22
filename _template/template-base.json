@@ -1,0 +1,70 @@
+{
+  "properties": {
+    "foo_no": {
+      "bsonType": "string",
+      "title": "No",
+      "description": "Foo No",
+      "pattern": "^[a-zA-Z0-9-]{1,64}$",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "foo_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status",
+      "enum": ["0-Open", "1-InProgress", "2-Closed", "3-Finalized", "4-Archived"],
+      "default": "0-Open"
+    },
+    "foo_account_no": {
+      "bsonType": "string",
+      "title": "Account No",
+      "description": "Account No",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "foo_qty": {
+      "bsonType": "number",
+      "title": "Quantity",
+      "description": "Quantity",
+      "default": 1
+    }
+  },
+  "required": ["foo_no", "foo_status", "foo_account_no"],
+  "index": [["foo_status"], ["foo_account_no"]],
+  "unique": [["foo_no"]],
+  "parents": [
+    {
+      "collection": "accounts",
+      "lookup": [
+        {
+          "local": "foo_account_no",
+          "remote": "acc_no"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "open-to-in-progress",
+      "title": "0-Open to 1-InProgress",
+      "enabled": true,
+      "filter": [
+        {
+          "key": "foo_status",
+          "op": "eq",
+          "value": "0-Open"
+        }
+      ],
+      "set": [
+        {
+          "key": "foo_status",
+          "value": "1-InProgress"
+        }
+      ],
+      "one_click": true
+    }
+  ],
+  "sort": {
+    "_modified_at": -1
+  }
+}

@@ -99,15 +99,10 @@ https://www.gnu.org/licenses.
                 {{ 'Update' | translate }}<br />{{ 'Required' | translate }}
               </div>
               <div *ngIf="perm && is_crud" (click)="doShowCode()" class="data-sq-button">
-                <span *ngIf="!jeopen; else nojeopen">
-                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#fff">
-                    <title>language_json</title>
-                    <rect fill="none" />
-                    <path
-                      d="M5,3H7V5H5v5a2,2,0,0,1-2,2,2,2,0,0,1,2,2v5H7v2H5c-1.07-.27-2-.9-2-2V15a2,2,0,0,0-2-2H0V11H1A2,2,0,0,0,3,9V5A2,2,0,0,1,5,3M19,3a2,2,0,0,1,2,2V9a2,2,0,0,0,2,2h1v2H23a2,2,0,0,0-2,2v4a2,2,0,0,1-2,2H17V19h2V14a2,2,0,0,1,2-2,2,2,0,0,1-2-2V5H17V3h2M12,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1M8,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1m8,0a1,1,0,1,1-1,1A1,1,0,0,1,16,15Z" />
-                  </svg><br />
+                <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
+                  <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
                   {{ 'JSON' | translate }}<br />{{ 'Scheme' | translate }}
-                </span>
+                </div>
                 <ng-template #nojeopen>
                   <ion-icon name="close-circle-outline"></ion-icon><br />
                   {{ 'Close' | translate }}<br />{{ 'Scheme' | translate }}
@@ -260,29 +255,31 @@ https://www.gnu.org/licenses.
             </ion-col>
             <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
-              <span *ngIf="item.value.bsonType=='bool'">
-                {{ record[item.key] }}
-              </span>
-              <span *ngIf="item.value.bsonType=='date' && record[item.key]">
-                {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
-              </span>
-              <span *ngIf="item.value.bsonType=='array'">
-                <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">
-                  {{ record[item.key]?.length }} {{ 'Line' | translate }}<span *ngIf="record[item.key]?.length > 1">{{
-                    's' }}</span>
+              <span *ngIf="['date', 'array', 'object', 'decimal'].includes(item.value.bsonType); else othertype">
+                <span *ngIf="item.value.bsonType=='date' && record[item.key]">
+                  {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
                 </span>
-                <ng-template #noarrayobject>
-                  <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
-                </ng-template>
+                <span *ngIf="item.value.bsonType=='array'">
+                  <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">
+                    {{ record[item.key]?.length }} {{ 'Line' | translate }}<span *ngIf="record[item.key]?.length > 1">{{
+                      's' }}</span>
+                  </span>
+                  <ng-template #noarrayobject>
+                    <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
+                  </ng-template>
+                </span>
+                <span *ngIf="item.value.bsonType=='object'">
+                  <span>{{ 'Object' | translate }}</span>
+                </span>
+                <span *ngIf="item.value.bsonType=='decimal'">
+                  <span>{{ record[item.key]?.toFixed(2) }}</span>
+                </span>
               </span>
-              <span *ngIf="item.value.bsonType=='object'">
-                <span>{{ 'Object' | translate }}</span>
-              </span>
-              <span
-                *ngIf="item.value.bsonType != 'array' && item.value.bsonType != 'date' && item.value.bsonType != 'object' && item.value.bsonType != 'bool'">
-                <span *ngIf="record && item.key && record[item.key]">{{ record[item.key].toString()
-                  }}</span>
-              </span>
+              <ng-template #othertype>
+                <span>
+                  {{ record[item.key]?.toString() }}
+                </span>
+              </ng-template>
             </ion-col>
             <ion-col class="data-ext-columns data-at-column">
               {{ record._modified_at.replace(' ', 'T') | date:'dd.MM.yyyy

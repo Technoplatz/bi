@@ -418,7 +418,7 @@ class Schedular():
             sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ_, replace_existing=True, args=[args_])
 
             sched_.start()
-            
+
             res_ = True
 
         except APIError as exc:
@@ -781,10 +781,6 @@ class Crud():
 
     def template_f(self, input_):
         try:
-            # start transaction
-            session_db_ = Mongo().client[MONGO_DB_]
-            session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
-            session_.start_transaction()
 
             proc_ = input_["proc"] if "proc" in input_ else None
             if proc_ not in ["list", "install"]:
@@ -811,151 +807,65 @@ class Crud():
                 data_ = [item_ for item_ in data_]
                 data_.sort(key=operator.itemgetter("sort"), reverse=False)
 
-            if proc_ == "install":
+            elif proc_ == "install":
+                suffix_ = Misc().get_timestamp_f()
                 template_ = input_["template"] if "template" in input_ else None
                 if not template_:
                     raise APIError("invalid template requested")
 
-                col_id_ = template_["collection"]
-                col_title_ = template_["title"]
-                prefix_ = template_["prefix"] if "prefix" in template_ else "xxx"
-                data_file_ = template_["data"]
-                fields_ = template_["fields"]
-                actions_ = template_["actions"]
-                automations_ = template_["automations"]
-                views_ = template_["views"]
+                col_id_ = f"{template_['collection']}-{suffix_}"
+                col_title_ = f"{template_['title']}-{suffix_}"
+                file_ = template_["file"]
                 collection__ = f"{col_id_}_data"
 
-                find_one_ = Mongo().db["_collection"].find_one({"col_id": col_id_})
-                if find_one_:
-                    raise APIError("collection is already exists")
-                if col_id_ in Mongo().db.list_collection_names():
-                    raise APIError("collection data is already exists")
+                prefix_ = template_["prefix"] if "prefix" in template_ else "foo"
 
-                doc_ = {
+                find_one_ = Mongo().db["_collection"].find_one({"col_id": col_id_})
+
+                if find_one_:
+                    raise APIError("collection name already exists")
+                if col_id_ in Mongo().db.list_collection_names():
+                    raise APIError("collection data already exists")
+
+                find_one_ = Mongo().db["_collection"].find_one({"col_prefix": prefix_})
+                if find_one_:
+                    raise APIError(f"collection prefix already exists: {prefix_}")
+
+                path_ = f"/app/_schemes/templates/{file_}"
+                if os.path.isfile(path_):
+                    f_ = open(path_, "r")
+                    jtxt_ = f_.read()
+                    jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
+                    structure_ = json.loads(jtxt_)
+
+                find_one_ = Mongo().db["_collection"].insert_one({
                     "col_id": col_id_,
                     "col_title": col_title_,
                     "col_prefix": prefix_,
-                    "col_structure": None,
+                    "col_structure": structure_,
                     "_created_at": datetime.now(),
                     "_created_by": email_,
                     "_modified_at": datetime.now(),
                     "_modified_by": email_,
                     "_modified_count": 0
-                }
-
-                # insert collection
-                session_db_["_collection"].insert_one(doc_)
-
-                # process _field records
-                path_ = f"/app/_schemes/templates/{fields_}"
-                if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    data_ = json.loads(f_.read())
-                    if data_ and len(data_) > 0:
-                        session_db_["_field"].delete_many({"fie_collection_id": col_id_})
-                        for rec_ in data_:
-                            exists_ = session_db_["_field"].find_one({
-                                "fie_id": rec_["fie_id"]
-                            })
-                            if exists_:
-                                raise APIError(f"field is already exists {rec_['fie_id']}")
-                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
-                            rec_["_created_by"] = rec_["_modified_by"] = email_
-                            rec_["_modified_count"] = 0
-                            if "fie_default" in rec_:
-                                rec_["fie_default"] = str(rec_["fie_default"])
-                            session_db_["_field"].insert_one(rec_)
-
-                # process _action records
-                path_ = f"/app/_schemes/templates/{actions_}"
-                if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    data_ = json.loads(f_.read())
-                    if data_ and len(data_) > 0:
-                        session_db_["_action"].delete_many({"act_collection_id": col_id_})
-                        for rec_ in data_:
-                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
-                            rec_["_created_by"] = rec_["_modified_by"] = email_
-                            rec_["_modified_count"] = 0
-                            session_db_["_action"].update_one({
-                                "act_id": rec_["act_id"]
-                            }, {"$set": rec_}, upsert=True)
-
-                reconfigure_f_ = self.reconfigure_f({
-                    "userindb": userindb_,
-                    "collection": col_id_
                 })
-                if not reconfigure_f_["result"]:
-                    raise APIError(reconfigure_f_["msg"])
-                col_structure_ = reconfigure_f_["structure"]
 
-                # process data
-                path_ = f"/app/_schemes/templates/{data_file_}"
-                if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    data_ = json.loads(f_.read())
-                    if data_ and len(data_) > 0:
-                        session_db_[collection__].delete_many({})
-                        for rec_ in data_:
-                            decoded_ = Crud().decode_crud_input_f({
-                                "collection": col_id_,
-                                "doc": rec_
-                            })
-                            doc__ = decoded_["doc"]
-                            doc__["_created_at"] = doc__["_modified_at"] = datetime.now()
-                            doc__["_created_by"] = doc__["_modified_by"] = email_
-                            doc__["_modified_count"] = 0
-                            session_db_[collection__].insert_one(doc__)
-
-                # add validation before adding dummy records
                 schemevalidate_ = self.crudscheme_validate_f({
                     "collection": collection__,
-                    "structure": col_structure_
+                    "structure": structure_
                 })
                 if not schemevalidate_["result"]:
                     raise APIError(schemevalidate_["msg"])
 
-                # process views
-                path_ = f"/app/_schemes/templates/{views_}"
-                if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    data_ = json.loads(f_.read())
-                    if data_ and len(data_) > 0:
-                        session_db_["_view"].delete_many({"vie_collection_id": col_id_})
-                        for rec_ in data_:
-                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
-                            rec_["_created_by"] = rec_["_modified_by"] = email_
-                            rec_["_modified_count"] = 0
-                            session_db_["_view"].insert_one(rec_)
-
-                # automations views
-                path_ = f"/app/_schemes/templates/{automations_}"
-                if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    data_ = json.loads(f_.read())
-                    if data_ and len(data_) > 0:
-                        session_db_["_automation"].delete_many({"aut_source_collection_id": col_id_})
-                        for rec_ in data_:
-                            rec_["_created_at"] = rec_["_modified_at"] = datetime.now()
-                            rec_["_created_by"] = rec_["_modified_by"] = email_
-                            rec_["_modified_count"] = 0
-                            session_db_["_automation"].insert_one(rec_)
-
-                session_.commit_transaction() if session_ else None
-
             res_ = {"result": True, "data": data_}
 
         except pymongo.errors.PyMongoError as exc:
-            session_.abort_transaction()
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            session_.abort_transaction()
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
-            session_.abort_transaction()
             res_ = Misc().exception_f(exc)
 
         finally:
@@ -997,7 +907,7 @@ class Crud():
                                 d[k] = datetime.strptime(doc_[k][:ln_], rgx_) if doc_[k] is not None else None
                         elif property_["bsonType"] == "string":
                             d[k] = str(doc_[k]) if doc_[k] is not None else doc_[k]
-                        elif property_["bsonType"] in ["number", "int", "float", "double"]:
+                        elif property_["bsonType"] in ["number", "int", "float", "double", "decimal"]:
                             d[k] = doc_[k] * 1 if d[k] is not None else d[k]
                         elif property_["bsonType"] == "bool":
                             d[k] = True if d[k] and d[k] in [True, "true", "True", "TRUE"] else False
@@ -1336,7 +1246,7 @@ class Crud():
                                 df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
                             elif property_["bsonType"] == "string":
                                 df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                            elif property_["bsonType"] == "number":
+                            elif property_["bsonType"] in ["number", "decimal"]:
                                 df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                         else:
                             columns_tobe_deleted_.append(column_)
@@ -1361,6 +1271,10 @@ class Crud():
                     if dtype_ in ["int", "int64", "float", "float64"]:
                         df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                         dict_["bsonType"] = "number"
+                        required_.append(column_)
+                    if dtype_ == "decimal":
+                        df_[column_] = df_[column_].apply(self.frame_convert_number_f)
+                        dict_["bsonType"] = "decimal"
                         required_.append(column_)
                     elif dtype_ in ["date", "datetime64", "datetime64[ns]"]:
                         df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
@@ -1854,7 +1768,7 @@ class Crud():
                     typ = properties_[f["key"]]["bsonType"] if f["key"] in properties_ else "string"
 
                     if f["op"] in ["eq", "contains"]:
-                        if typ == "number":
+                        if typ in ["number", "decimal"]:
                             fres_ = float(f["value"])
                         elif typ == "bool":
                             fres_ = bool(f["value"])
@@ -1867,7 +1781,7 @@ class Crud():
                                 fres_ = {"$regex": f["value"], "$options": "i"} if f["value"] else {"$regex": "", "$options": "i"}
 
                     if f["op"] in ["ne", "nc"]:
-                        if typ == "number":
+                        if typ in ["number", "decimal"]:
                             fres_ = {"$not": {"$eq": float(f["value"])}}
                         elif typ == "bool":
                             fres_ = {"$not": {"$eq": bool(f["value"])}}
@@ -1885,7 +1799,7 @@ class Crud():
                             fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
 
                     elif f["op"] == "gt":
-                        if typ == "number":
+                        if typ in ["number", "decimal"]:
                             fres_ = {"$gt": float(f["value"])}
                         elif typ == "date":
                             fres_ = {"$gt": datetime.strptime(f["value"][:10], "%Y-%m-%d")}
@@ -1893,7 +1807,7 @@ class Crud():
                             fres_ = {"$gt": f["value"]}
 
                     elif f["op"] == "gte":
-                        if typ == "number":
+                        if typ in ["number", "decimal"]:
                             fres_ = {"$gte": float(f["value"])}
                         elif typ == "date":
                             fres_ = {"$gte": datetime.strptime(f["value"][:10], "%Y-%m-%d")}
@@ -1901,7 +1815,7 @@ class Crud():
                             fres_ = {"$gte": f["value"]}
 
                     elif f["op"] == "lt":
-                        if typ == "number":
+                        if typ in ["number", "decimal"]:
                             fres_ = {"$lt": float(f["value"])}
                         elif typ == "date":
                             fres_ = {"$lt": datetime.strptime(f["value"][:10], "%Y-%m-%d")}
@@ -1909,7 +1823,7 @@ class Crud():
                             fres_ = {"$lt": f["value"]}
 
                     elif f["op"] == "lte":
-                        if typ == "number":
+                        if typ in ["number", "decimal"]:
                             fres_ = {"$lte": float(f["value"])}
                         elif typ == "date":
                             fres_ = {"$lte": datetime.strptime(f["value"][:10], "%Y-%m-%d")}
@@ -2198,7 +2112,7 @@ class Crud():
                     if prop_ in df_:
                         if property_["bsonType"] == "array":
                             df_[prop_] = df_[prop_].apply(",".join)
-                        if property_["bsonType"] == "number":
+                        if property_["bsonType"] in ["number", "decimal"]:
                             df_[prop_] = pd.to_numeric(df_[prop_], errors="coerce")
                     if property_["bsonType"] in ["object", "array"]:
                         dropped_.append(prop_)
@@ -2728,7 +2642,7 @@ class Crud():
                 if "fie_barcoded" in doc_ and doc_["fie_barcoded"] == True:
                     field_["barcoded"] = True
 
-                if field_["bsonType"] in ["number", "int"]:
+                if field_["bsonType"] in ["number", "int", "decimal"]:
                     if "fie_minimum" in doc_ and doc_["fie_minimum"] is not None and doc_["fie_minimum"] > 0:
                         field_["minimum"] = int(doc_["fie_minimum"])
                     if "fie_maximum" in doc_ and doc_["fie_minimum"] is not None and doc_["fie_maximum"] > 0:
@@ -2759,7 +2673,7 @@ class Crud():
                         field_["items"]["bsonType"] = "string"
 
                 if "fie_default" in doc_ and doc_["fie_default"]:
-                    field_["default"] = float(doc_["fie_default"]) if field_["bsonType"] == "number" else int(doc_["fie_default"]) if field_["bsonType"] == "int" else str(doc_["fie_default"])
+                    field_["default"] = float(doc_["fie_default"]) if field_["bsonType"] in ["number", "decimal"] else int(doc_["fie_default"]) if field_["bsonType"] == "int" else str(doc_["fie_default"])
 
                 if "fie_required" in doc_ and doc_["fie_required"]:
                     field_["required"] = True
@@ -2909,7 +2823,7 @@ class Crud():
             if doc_["col_structure"]["properties"][key_]["bsonType"] == "string" and properties_[key_]["bsonType"] != "string":
                 raise APIError("string is not convertible")
 
-            if doc_["col_structure"]["properties"][key_]["bsonType"] == "number" and properties_[key_]["bsonType"] not in ["number", "string"]:
+            if doc_["col_structure"]["properties"][key_]["bsonType"] in ["number", "decimal"] and properties_[key_]["bsonType"] not in ["number", "decimal", "string"]:
                 raise APIError("number is not convertible")
 
             # set string items
@@ -2922,7 +2836,7 @@ class Crud():
                     properties_[key_].pop("maxLength", None)
 
             # set numeric items
-            if properties_[key_]["bsonType"] == "number":
+            if properties_[key_]["bsonType"] in ["number", "decimal"]:
                 properties_[key_].pop("minLength", None)
                 properties_[key_].pop("maxLength", None)
                 if "minimum" in properties_[key_] and properties_[key_]["minimum"] in [None, 0, ""]:
@@ -3583,146 +3497,6 @@ class Crud():
         finally:
             return res_
 
-    def set_generic_collection_f(self, doc_):
-        try:
-            prefix_ = doc_["col_prefix"]
-
-            structure_ = {
-                "properties": {},
-                "required": [],
-                "index": [],
-                "unique": [],
-                "parents": [],
-                "actions": [],
-                "sort": {}
-            }
-
-            field_no_ = f"{prefix_}_no"
-            field_no_json_ = {
-                "bsonType": "string",
-                "title": "No",
-                "description": "Record No",
-                "minLength": 1,
-                "maxLength": 128
-            }
-
-            field_date_ = f"{prefix_}_date"
-            field_date_json_ = {
-                "bsonType": "date",
-                "title": "Date",
-                "description": "Record Date",
-                "default": "$CURRENT_DATE"
-            }
-
-            field_status_ = f"{prefix_}_status"
-            field_status_json_ = {
-                "bsonType": "string",
-                "title": "Status",
-                "description": "Record Status",
-                "enum": [
-                    "0-Open",
-                    "1-InProgress",
-                    "2-Closed",
-                    "3-Finalized"
-                ],
-                "default": "0-Open"
-            }
-
-            field_account_no_ = f"{prefix_}_account_no"
-            field_account_no_json_ = {
-                "bsonType": "string",
-                "title": "Account No",
-                "description": "Account No",
-                "pattern": "^[a-zA-Z0-9-_]{1,64}$",
-                "minLength": 1,
-                "maxLength": 64
-            }
-
-            field_qty_ = f"{prefix_}_qty"
-            field_qty_json_ = {
-                "bsonType": "number",
-                "title": "Quantity",
-                "description": "Quantity",
-                "default": 0
-            }
-
-            field_unit_price_ = f"{prefix_}_unit_price"
-            field_unit_price_json_ = {
-                "bsonType": "number",
-                "title": "Unit Price",
-                "description": "Unit Price",
-                "default": 0
-            }
-
-            field_tax_ = f"{prefix_}_tax"
-            field_tax_json_ = {
-                "bsonType": "number",
-                "title": "Tax",
-                "description": "Tax",
-                "default": 0.19
-            }
-
-            field_escalator_ = f"{prefix_}_escalator"
-            field_escalator_json_ = {
-                "bsonType": "number",
-                "title": "Escalator",
-                "description": "Escalator",
-                "default": 1
-            }
-
-            field_amount_ = f"{prefix_}_amount"
-            field_amount_json_ = {
-                "bsonType": "number",
-                "title": "Amount",
-                "description": "Amount",
-                "calc": f"{field_unit_price_} * {field_qty_} * {field_tax_}  * {field_escalator_}",
-                "default": 0
-            }
-
-            field_bool_ = f"{prefix_}_is_active"
-            field_bool_json_ = {
-                "bsonType": "bool",
-                "title": "Is Active?",
-                "description": "Is Active?",
-                "default": False
-            }
-
-            structure_["properties"][field_no_] = field_no_json_
-            structure_["properties"][field_date_] = field_date_json_
-            structure_["properties"][field_status_] = field_status_json_
-            structure_["properties"][field_account_no_] = field_account_no_json_
-            structure_["properties"][field_qty_] = field_qty_json_
-            structure_["properties"][field_unit_price_] = field_unit_price_json_
-            structure_["properties"][field_tax_] = field_tax_json_
-            structure_["properties"][field_amount_] = field_amount_json_
-            structure_["properties"][field_escalator_] = field_escalator_json_
-            structure_["properties"][field_bool_] = field_bool_json_
-            structure_["required"] = [field_no_]
-            structure_["unique"] = [[field_no_]]
-            structure_["index"] = [[field_status_]]
-            structure_["parents"] = [{
-                "collection": "accounts",
-                "lookup": [
-                    {
-                        "local": field_account_no_,
-                        "remote": "acc_no"
-                    }
-                ]
-            }]
-            structure_["actions"] = []
-            structure_["sort"] = {"_modified_at": -1}
-
-            res_ = {"result": True, "structure": structure_}
-
-        except APIError as exc:
-            res_ = Misc().api_error_f(exc)
-
-        except Exception as exc:
-            res_ = Misc().exception_f(exc)
-
-        finally:
-            return res_
-
     def insert_f(self, obj):
         try:
             # gets the required parameters
@@ -3739,19 +3513,16 @@ class Crud():
             doc_["_created_at"] = doc_["_modified_at"] = datetime.now()
             doc_["_created_by"] = doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
-            # add field prefix from the related collection
-            if collection_id_ == "_field":
-                field_col_ = Mongo().db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
-                if not field_col_:
-                    raise APIError(f"collection not found to insert: {doc_['fie_collection_id']}")
-                if doc_["fie_id"][:3] != field_col_["col_prefix"]:
-                    doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
-
             if collection_id_ == "_collection":
-                set_generic_collection_f_ = self.set_generic_collection_f(doc_)
-                if not set_generic_collection_f_["result"]:
-                    raise APIError(set_generic_collection_f_["msg"])
-                doc_["col_structure"] = set_generic_collection_f_["structure"]
+                file_ = "template-foo.json"
+                prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
+                path_ = f"/app/_schemes/templates/{file_}"
+                if os.path.isfile(path_):
+                    f_ = open(path_, "r")
+                    jtxt_ = f_.read()
+                    jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
+                    structure_ = json.loads(jtxt_)
+                doc_["col_structure"] = structure_
 
             Mongo().db[collection_].insert_one(doc_)
 

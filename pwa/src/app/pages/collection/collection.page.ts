@@ -423,7 +423,7 @@ export class CollectionPage implements OnInit {
                     sub: null
                   });
                 } else {
-                  window.location.reload();
+                  this.misc.navi.next({ s: "dashboard", sub: null});
                 }
               }).catch((error: any) => {
                 console.error(error);

@@ -395,10 +395,11 @@ ion-alert .alert-radio-group {
   margin-bottom: 4px !important;
 }
 
-.data-sq-button svg {
+.data-sq-button ion-img {
   width: 24px !important;
   height: 24px !important;
-  margin-bottom: 2px !important;
+  margin: auto;
+  margin-bottom: 6px !important;
 }
 
 .data-sq-button.disabled {

@@ -69,13 +69,6 @@ export class TemplatesPage implements OnInit {
     });
   }
 
-  doNavi(s: string, sub: any) {
-    this.misc.navi.next({
-      s: s,
-      sub: sub,
-    });
-  }
-
   doInstallTemplate(item_: any, ix: number) {
     if (!this.templates[ix].processing) {
       this.templates[ix].processing = true;
@@ -85,6 +78,12 @@ export class TemplatesPage implements OnInit {
         template: item_
       }).then(() => {
         this.misc.doMessage("template installed successfully", "success");
+        this.crud.getAll().then(() => {
+          this.misc.navi.next({
+            s: "dashboard",
+            sub: null
+          });
+        });
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");
