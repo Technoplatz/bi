@@ -169,6 +169,7 @@ export class CrudPage implements OnInit {
         this.doGetCollectionProperties(this.collection).then(() => {
           this.tab = "data";
           this.showhide = this.op === "action" ? "hide-segment" : "show-segment";
+          
           if (this.actionix >= 0) {
             this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
               console.error(error);
@@ -205,7 +206,7 @@ export class CrudPage implements OnInit {
   }
 
   async propertiesAktionFilter(v: any) {
-    return Object.entries(this.properties).filter((obj: any) => v.set.some((f: any) => obj[0] === f.key));
+    return Object.entries(this.properties).filter((obj: any) => v.fields.some((f: any) => obj[0] === f.key));
   }
 
   doAktionChange(ix: number) {
@@ -214,22 +215,22 @@ export class CrudPage implements OnInit {
       let structure_: any = this.structure;
       let controls_: any = {};
       let fields_: any = {};
-      this.fieldsupd = this.fields.filter((obj: any) => v.set.some((f: any) => obj.name === f.key));
+      this.fieldsupd = this.fields.filter((obj: any) => v.fields.some((f: any) => obj.name === f.key));
       this.propertiesAktionFilter(v).then((properties_filter_: any) => {
         for (let j = 0; j < properties_filter_.length; j++) {
           fields_[properties_filter_[j][0]] = properties_filter_[j][1];
           if (j === properties_filter_.length - 1) {
             structure_.properties = fields_;
-            structure_.required = structure_.required ? structure_.required.filter((obj: any) => v.set.some((f: any) => obj.name === f.key)) : [];
-            const form_ctrl_filter_ = Object.entries(this.crudForm.controls).filter((obj: any) => v.set.some((f: any) => obj[0] === f.key));
+            structure_.required = structure_.required ? structure_.required.filter((obj: any) => v.fields.some((f: any) => obj.name === f.key)) : [];
+            const form_ctrl_filter_ = Object.entries(this.crudForm.controls).filter((obj: any) => v.fields.some((f: any) => obj[0] === f.key));
             for (let k = 0; k < form_ctrl_filter_.length; k++) {
               controls_[form_ctrl_filter_[k][0]] = form_ctrl_filter_[k][1];
               if (k === form_ctrl_filter_.length - 1) {
-                for (let f = 0; f < v.set.length; f++) {
-                  v.set[f].value === "$CURRENT_DATE" ? v.set[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 19) : null;
-                  this.data[v.set[f].key] = v.set[f].value;
-                  this.crudForm.get(v.set[f].key)?.setValue(v.set[f].value);
-                  if (f === v.set.length - 1) {
+                for (let f = 0; f < v.fields.length; f++) {
+                  v.fields[f].value === "$CURRENT_DATE" ? v.fields[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 19) : null;
+                  this.data[v.fields[f].key] = v.fields[f].value;
+                  this.crudForm.get(v.fields[f].key)?.setValue(v.fields[f].value);
+                  if (f === v.fields.length - 1) {
                     this.crudForm.controls = controls_;
                     this.showhide = "show-segment";
                     resolve(true);

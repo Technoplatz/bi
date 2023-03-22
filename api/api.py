@@ -414,10 +414,11 @@ class Schedular():
             sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", timezone=TZ_, replace_existing=True, args=[sched_])
 
             # schedule database dumps
-            args_ = {"user": {"email": "cron"}}
+            args_ = {"user": {"email": "cron"}, "op": "backup"}
             sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ_, replace_existing=True, args=[args_])
 
             sched_.start()
+            
             res_ = True
 
         except APIError as exc:
@@ -1403,7 +1404,7 @@ class Crud():
                 if not schemevalidate_["result"]:
                     raise APIError(schemevalidate_["msg"])
                 Mongo().db[collection__].delete_one({})
-                reverse_structure_f_ = self.reverse_structure_f({
+                reverse_structure_f_ = self.config_structure_to_field_f({
                     "collection": collection_,
                     "structure": structure_,
                     "user": user_
@@ -1787,7 +1788,7 @@ class Crud():
             size_ = dump_f_["size"]
             op_ = obj["op"] if "op" in obj else None
             email_ = obj["user"]["email"] if obj and obj["user"] else "cron"
-            description_ = "On Demand" if op_ == "dump" else "Automatic"
+            description_ = "On Demand" if op_ == "backup" else "Automatic"
 
             doc_ = {
                 "bak_id": id_,
@@ -2838,7 +2839,7 @@ class Crud():
                 "_modified_by": user_["email"] if user_ and "email" in user_ else None
             }, "$inc": {"_modified_count": 1}})
 
-            reconfig_set_f_ = self.reconfig_set_f({
+            reconfig_set_f_ = self.config_field_to_structure_f({
                 "op": "set",
                 "collection": cid_,
                 "user": user_
@@ -2993,7 +2994,7 @@ class Crud():
         finally:
             return res_
 
-    def reconfig_set_f(self, obj):
+    def config_field_to_structure_f(self, obj):
         try:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
@@ -3048,12 +3049,21 @@ class Crud():
                 "col_structure": structure_
             }, "$inc": {"_modified_count": 1}})
 
-            schemevalidate_ = self.crudscheme_validate_f({
+            f_ = self.crudscheme_validate_f({
                 "collection": collection_id_,
                 "structure": structure_})
 
-            if not schemevalidate_["result"]:
-                raise APIError(schemevalidate_["msg"])
+            if not f_["result"]:
+                raise APIError(f_["msg"])
+
+            f_ = self.config_structure_to_field_f({
+                "collection": collection_id_,
+                "structure": structure_,
+                "user": user_
+            })
+
+            if not f_["result"]:
+                raise APIError(f_["msg"])
 
             res_ = {"result": True}
 
@@ -3076,7 +3086,7 @@ class Crud():
         finally:
             return res_
 
-    def reverse_structure_f(self, obj):
+    def config_structure_to_field_f(self, obj):
         try:
             collection_ = obj["collection"]
             doc_ = Mongo().db["_collection"].find_one({"col_id": collection_})
@@ -3266,40 +3276,41 @@ class Crud():
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            if collection_id_ == "_collection":
-                col_id_ = doc_["col_id"] if "col_id" in doc_ else None
-                col_structure_ = doc_["col_structure"] if "col_structure" in doc_ else None
-                datac_ = f"{col_id_}_data"
-                if col_structure_ and col_structure_ != {}:
-                    reverse_structure_f_ = self.reverse_structure_f({
-                        "collection": col_id_,
-                        "structure": col_structure_,
-                        "user": user_
-                    })
-                    if not reverse_structure_f_["result"]:
-                        raise APIError(reverse_structure_f_["msg"])
-                    datac_not_found_ = False
-                    if datac_ not in Mongo().db.list_collection_names():
-                        datac_not_found_ = True
-                        Mongo().db[datac_].insert_one({})
-                    schemevalidate_ = self.crudscheme_validate_f({
-                        "collection": datac_,
-                        "structure": col_structure_
-                    })
-                    if not schemevalidate_["result"]:
-                        raise APIError(schemevalidate_["msg"])
-                    if datac_not_found_:
-                        Mongo().db[datac_].delete_one({})
-            elif collection_id_ in ["_field", "_action"]:
-                cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
-                if cid_:
-                    reconfig_set_f_ = self.reconfig_set_f({
-                        "op": "request",
-                        "collection": cid_,
-                        "user": user_
-                    })
-                    if not reconfig_set_f_["result"]:
-                        raise APIError(reconfig_set_f_["msg"])
+            # if collection_id_ == "_collection":
+            #     col_id_ = doc_["col_id"] if "col_id" in doc_ else None
+            #     col_structure_ = doc_["col_structure"] if "col_structure" in doc_ else None
+            #     datac_ = f"{col_id_}_data"
+            #     if col_structure_ and col_structure_ != {}:
+            #         config_structure_to_field_f_ = self.config_structure_to_field_f({
+            #             "collection": col_id_,
+            #             "structure": col_structure_,
+            #             "user": user_
+            #         })
+            #         if not config_structure_to_field_f_["result"]:
+            #             raise APIError(config_structure_to_field_f_["msg"])
+
+            #         datac_not_found_ = False
+            #         if datac_ not in Mongo().db.list_collection_names():
+            #             datac_not_found_ = True
+            #             Mongo().db[datac_].insert_one({})
+            #         schemevalidate_ = self.crudscheme_validate_f({
+            #             "collection": datac_,
+            #             "structure": col_structure_
+            #         })
+            #         if not schemevalidate_["result"]:
+            #             raise APIError(schemevalidate_["msg"])
+            #         if datac_not_found_:
+            #             Mongo().db[datac_].delete_one({})
+            # elif collection_id_ in ["_field", "_action"]:
+            #     cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
+            #     if cid_:
+            #         config_field_to_structure_f_ = self.config_field_to_structure_f({
+            #             "op": "request",
+            #             "collection": cid_,
+            #             "user": user_
+            #         })
+            #         if not config_field_to_structure_f_["result"]:
+            #             raise APIError(config_field_to_structure_f_["msg"])
 
             res_ = {"result": True}
 
@@ -3759,13 +3770,13 @@ class Crud():
             elif collection_id_ in ["_field", "_action"]:
                 cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
                 if cid_:
-                    reconfig_set_f_ = self.reconfig_set_f({
+                    config_structure_f_ = self.config_field_to_structure_f({
                         "op": "request",
                         "collection": cid_,
                         "user": user_
                     })
-                    if not reconfig_set_f_["result"]:
-                        raise APIError(reconfig_set_f_["msg"])
+                    if not config_structure_f_["result"]:
+                        raise APIError(config_structure_f_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -5589,7 +5600,7 @@ def get_dump_f():
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
 
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "dump")
+        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "backup")
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "request not validated")
 
