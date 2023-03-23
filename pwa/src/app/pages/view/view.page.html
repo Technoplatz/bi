@@ -53,25 +53,25 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Share' | translate }}<br />{{ 'LIVE' | translate }}</span>
               </div>
               <div (click)="RefreshData(0)" class="data-sq-button">
-                <ion-icon *ngIf="is_loaded" name="sync-circle"></ion-icon>
-                <ion-icon *ngIf="!is_loaded" name="hourglass"></ion-icon>
+                <ion-icon *ngIf="is_loaded" name="sync-circle-outline"></ion-icon>
+                <ion-icon *ngIf="!is_loaded" name="hourglass-outline"></ion-icon>
                 <br />
                 {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
               </div>
               <div (click)="doCopy('view')" class="data-sq-button">
-                <ion-icon *ngIf="!is_url_copied" name="copy"></ion-icon>
-                <ion-icon *ngIf="is_url_copied" name="checkmark"></ion-icon>
+                <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
+                <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
                 <br />
                 <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data URL' | translate }}</span>
                 <span *ngIf="is_url_copied">{{ 'Data URL' | translate }}<br />{{ 'Copied' | translate }}</span>
               </div>
               <div *ngIf="perm" (click)="misc.navi.next('collection/'+ col_id)" class="data-sq-button">
-                <ion-icon name="server"></ion-icon>
+                <ion-icon name="server-outline"></ion-icon>
                 <br />
-                <span>{{ 'Collection' | translate }}<br />{{ 'Data' | translate }}</span>
+                <span>{{ 'Go To' | translate }}<br />{{ 'Collection' | translate }}</span>
               </div>
               <div *ngIf="perm" (click)="doViewSettings()" class="data-sq-button">
-                <ion-icon name="settings"></ion-icon><br />
+                <ion-icon name="settings-outline"></ion-icon><br />
                 <span>{{ 'View Settings' | translate }}</span>
               </div>
             </ion-col>

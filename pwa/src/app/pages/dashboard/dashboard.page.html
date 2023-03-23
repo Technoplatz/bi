@@ -41,25 +41,25 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div (click)="Settings('_collection', 'insert', null, 0)" class="data-sq-button">
-                <ion-icon name="add-circle"></ion-icon><br />
+                <ion-icon name="add-circle-outline"></ion-icon><br />
                 <span>{{ 'New' | translate }}<br />{{ 'Collection' | translate }}</span>
               </div>
               <div (click)="doImport()" class="data-sq-button">
-                <ion-icon name="server"></ion-icon><br />
-                <span>{{ 'Import' | translate }}<br />{{ 'Excel' | translate }}</span>
+                <ion-icon name="download-outline"></ion-icon><br />
+                <span>{{ 'Get' | translate }}<br />{{ 'Data' | translate }}</span>
               </div>
               <div (click)="doRefresh()" class="data-sq-button">
-                <ion-icon *ngIf="!is_refreshing" name="sync-circle"></ion-icon>
-                <ion-icon *ngIf="is_refreshing" name="hourglass"></ion-icon>
+                <ion-icon *ngIf="!is_refreshing" name="sync-circle-outline"></ion-icon>
+                <ion-icon *ngIf="is_refreshing" name="hourglass-outline"></ion-icon>
                 <br />
                 <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
               </div>
               <div (click)="doResizeCharts()" class="data-sq-button">
-                <ion-icon name="expand"></ion-icon><br />
+                <ion-icon name="expand-outline"></ion-icon><br />
                 <span>{{ 'Resize' | translate }}<br />{{ 'Charts' | translate }}</span>
               </div>
               <div (click)="misc.navi.next('templates')" class="data-sq-button">
-                <ion-icon name="document"></ion-icon><br />
+                <ion-icon name="document-outline"></ion-icon><br />
                 <span>{{ 'Smart' | translate }}<br />{{ 'Templates' | translate }}</span>
               </div>
             </ion-col>

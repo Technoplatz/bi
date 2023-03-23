@@ -59,8 +59,8 @@ function installBI() {
             [Y]*)
                 if [[ -f $DIR/$DOTENV ]]; then
                     BKFILE=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
-                    cp $DIR/$DOTENV $BKFILE
-                    echo -e "\n✔ Existing parameter file ${COLOR}$DIR/$DOTENV${NOCOLOR} has been backed up as ${COLOR}$(pwd)/$BKFILE${NOCOLOR}."
+                    cp $DIR/$DOTENV $DIR/$BKFILE
+                    echo -e "\n✔ Existing parameter file ${COLOR}$DIR/$DOTENV${NOCOLOR} has been backed up as ${COLOR}$DIR/$BKFILE${NOCOLOR}."
                 fi
                 rm -rf $DIR
                 break

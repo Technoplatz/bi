@@ -41,8 +41,8 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="doImport()" class="data-sq-button">
-                <ion-icon name="cloud-upload"></ion-icon><br />
-                {{ 'Import' | translate }}<br />{{ 'File' | translate }}
+                <ion-icon name="download-outline"></ion-icon><br />
+                {{ 'Get' | translate }}<br />{{ 'Data' | translate }}
               </div>
               <div *ngIf="barcoded_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="barcode"></ion-icon><br />
@@ -50,7 +50,7 @@ https://www.gnu.org/licenses.
               </div>
               <ng-template #newrecord>
                 <div (click)="goCrud(null, 'insert')" class="data-sq-button">
-                  <ion-icon name="add-circle"></ion-icon><br />
+                  <ion-icon name="add-circle-outline"></ion-icon><br />
                   <span *ngIf="id != '_backup'; else normale">
                     {{ 'New' | translate }}<br />{{ 'Record' | translate }}
                   </span>
@@ -60,43 +60,39 @@ https://www.gnu.org/licenses.
                 </div>
               </ng-template>
               <div (click)="RefreshData(0)" class="data-sq-button">
-                <ion-icon *ngIf="is_loaded" name="sync-circle"></ion-icon>
-                <ion-icon *ngIf="!is_loaded" name="hourglass"></ion-icon>
+                <ion-icon *ngIf="is_loaded" name="sync-circle-outline"></ion-icon>
+                <ion-icon *ngIf="!is_loaded" name="hourglass-outline"></ion-icon>
                 <br />
                 {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
               </div>
               <div *ngIf="filter.length==0" (click)="goCrud(null, 'filter')" class="data-sq-button">
-                <ion-icon name="funnel"></ion-icon>
+                <ion-icon name="funnel-outline"></ion-icon>
                 <br />
                 <span>{{ 'Apply' | translate }}<br />{{ 'Filter' | translate }}
                 </span>
               </div>
               <div *ngIf="filter.length>0" (click)="doClearFilter()" class="data-sq-button required">
-                <ion-icon name="close-circle"></ion-icon>
+                <ion-icon name="close-circle-outline"></ion-icon>
                 <br />
                 <span>{{ 'Clear' | translate }}<br />{{ 'Filter' |
                   translate }}
                 </span>
               </div>
               <div *ngIf="is_crud" (click)="doSaveAsView()" class="data-sq-button">
-                <ion-icon name="save" *ngIf="!is_viewsaving"></ion-icon>
-                <ion-icon name="hourglass" *ngIf="is_viewsaving"></ion-icon><br />
+                <ion-icon name="save-outline" *ngIf="!is_viewsaving"></ion-icon>
+                <ion-icon name="hourglass-outline" *ngIf="is_viewsaving"></ion-icon><br />
                 {{ 'Save' | translate }}<br />{{ 'as View' | translate }}
               </div>
               <div (click)="MultiCrud('clone')" class="data-sq-button">
-                <ion-icon name="duplicate"></ion-icon><br />
+                <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone' | translate }}<br />{{ 'Selected' | translate }}
               </div>
               <div (click)="MultiCrud('delete')" class="data-sq-button">
-                <ion-icon name="trash"></ion-icon><br />
+                <ion-icon name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}<br />{{ 'Selected' | translate }}
               </div>
-              <!-- <div *ngIf="perm && is_crud" (click)="goFields()" class="data-sq-button">
-                <ion-icon name="list"></ion-icon><br />
-                {{ 'Data' | translate }}<br />{{ 'Fields' | translate }}
-              </div> -->
               <div *ngIf="perm && is_crud && reconfig" (click)="doReconfigure()" class="data-sq-button required">
-                <ion-icon name="warning"></ion-icon><br />
+                <ion-icon name="warning-outline"></ion-icon><br />
                 {{ 'Update' | translate }}<br />{{ 'Required' | translate }}
               </div>
               <div *ngIf="perm && is_crud" (click)="doShowCode()" class="data-sq-button">
