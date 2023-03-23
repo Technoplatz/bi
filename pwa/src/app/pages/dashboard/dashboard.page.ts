@@ -242,7 +242,7 @@ export class DashboardPage implements OnInit {
       modal.present();
       modal.onDidDismiss().then((res: any) => {
         if (type_ === "upload") {
-          // go collection
+          this.misc.doMessage("file uploaded successfully", "success");
         }
       });
     });

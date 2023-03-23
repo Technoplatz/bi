@@ -130,16 +130,6 @@ export const environment = {
         "required": true,
         "width": 110
       },
-      "sto_prefix": {
-        "bsonType": "string",
-        "minLength": 3,
-        "maxLength": 3,
-        "pattern": "^[a-z]{3,3}$",
-        "title": "Column Prefix",
-        "description": "Column Prefix",
-        "required": true,
-        "width": 90
-      },
       "sto_file": {
         "bsonType": "string",
         "minLength": 0,
@@ -153,7 +143,6 @@ export const environment = {
     "required": [
       "sto_id",
       "sto_collection_id",
-      "sto_prefix",
       "sto_file"
     ],
     "unique": [
@@ -162,9 +151,6 @@ export const environment = {
       ],
       [
         "sto_collection_id"
-      ],
-      [
-        "sto_prefix"
       ]
     ],
     "index": [
