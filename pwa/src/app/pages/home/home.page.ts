@@ -33,7 +33,7 @@ https://www.gnu.org/licenses.
 import { Component, OnInit } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
-import { Miscellaneous } from "../../classes/miscellaneous";
+import { Miscellaneous } from "../../classes/misc";
 import { SignPage } from "../sign/sign.page";
 
 @Component({

@@ -35,7 +35,7 @@ import { IonInput } from "@ionic/angular";
 import { Validators, FormBuilder, FormGroup } from "@angular/forms";
 import { Storage } from "@ionic/storage";
 import { Auth } from "../../classes/auth";
-import { Miscellaneous } from "../../classes/miscellaneous";
+import { Miscellaneous } from "../../classes/misc";
 
 @Component({
   selector: "app-sign",

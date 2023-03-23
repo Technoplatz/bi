@@ -62,4 +62,5 @@ import { PipesModule } from './../../pipes/pipes-module';
     SupportPage
   ]
 })
+
 export class SupportPageModule { }

@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { Miscellaneous } from "../../classes/miscellaneous";
+import { Miscellaneous } from "../../classes/misc";
 import { Storage } from "@ionic/storage";
 import { environment } from "../../../environments/environment";
 import { HttpClient } from '@angular/common/http';
@@ -59,7 +59,6 @@ export class SupportPage implements OnInit {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;
       this.http.get(environment.support_url, { responseType: "text" }).subscribe((md: any) => {
-        console.log(md);
         this.support_md = md;
       }, (error: any) => {
         console.error(error);

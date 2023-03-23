@@ -38,7 +38,7 @@ import { TranslateService } from "@ngx-translate/core";
 import { environment } from "../../environments/environment";
 import { ClipboardPluginWeb } from "@capacitor/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { CrudPage } from "./../pages/crud/crud.page";
+import { CrudPage } from "../pages/crud/crud.page";
 
 @Injectable({
   providedIn: "root"

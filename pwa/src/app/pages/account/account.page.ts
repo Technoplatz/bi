@@ -34,7 +34,7 @@ import { Component, OnInit } from "@angular/core";
 import { Storage } from "@ionic/storage";
 import { Auth } from "../../classes/auth";
 import { AlertController } from "@ionic/angular";
-import { Miscellaneous } from "../../classes/miscellaneous";
+import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { Router } from "@angular/router";
 

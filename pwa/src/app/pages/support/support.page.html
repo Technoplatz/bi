@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
   <div class="console-right">
     <h6>{{ 'SUPPORT' | translate }}</h6>
     <h1>{{ 'How to...' | translate }}</h1>
-    <div class="ion-margin-top ion-margin-bottom">{{ 'In progress' | translate }}...</div>
+    <div class="ion-margin-top ion-margin-bottom" [innerHtml]="support_md">{{ 'In progress' | translate }}...</div>
     <ion-button (click)="misc.navi.next('dashboard')"> {{ 'Go to Dashboard' | translate }} </ion-button>
   </div>
 </ion-content>

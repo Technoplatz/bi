@@ -34,7 +34,7 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { ModalController, IonSelect } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
-import { Miscellaneous } from "../../classes/miscellaneous";
+import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
 import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";

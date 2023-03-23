@@ -35,7 +35,7 @@ import { Storage } from "@ionic/storage";
 import { Subject, BehaviorSubject } from "rxjs";
 import { Validators, FormControl } from "@angular/forms";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Miscellaneous } from "./miscellaneous";
+import { Miscellaneous } from "./misc";
 import { environment } from "../../environments/environment";
 
 @Injectable({
@@ -47,14 +47,6 @@ export class Crud {
   public productList: any = [];
   public fields: any = [];
   private apiHost: string = "";
-  private crudHeaders: any = {
-    "Content-Type": "application/json",
-    "X-Api-Key": environment.apiKey
-  }
-  private uploadHeaders: any = {
-    "X-Api-Key": environment.apiKey
-  }
-
   public modalSubmitListener = new Subject<any>();
   public updateListener = new Subject<any>();
   public objectsListener = new BehaviorSubject([]);
@@ -64,6 +56,10 @@ export class Crud {
   public visuals = new BehaviorSubject<any>([]);
   public saas = new BehaviorSubject(null);
   public announcements = new BehaviorSubject<any>([]);
+  private crudHeaders: any = {
+    "Content-Type": "application/json",
+    "X-Api-Key": environment.apiKey
+  }
 
   constructor(
     private storage: Storage,

@@ -60,17 +60,11 @@ https://www.gnu.org/licenses.
               </div>
               <div (click)="misc.navi.next('templates')" class="data-sq-button">
                 <ion-icon name="document"></ion-icon><br />
-                <span>{{ 'Collection' | translate }}<br />{{ 'Templates' | translate }}</span>
+                <span>{{ 'Smart' | translate }}<br />{{ 'Templates' | translate }}</span>
               </div>
             </ion-col>
           </ion-row>
         </ion-grid>
-        <!-- VIEW SECTION -->
-        <!-- <div class="brz-visual-group ion-margin-top">
-          <div *ngFor="let item of collections; let f = index" class="flash-rec">
-            <h5>{{ item.col_title }}</h5>
-          </div>
-        </div> -->
         <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
           <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer>
             <h5>{{ item.vie_title }}</h5>

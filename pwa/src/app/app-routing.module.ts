@@ -33,7 +33,6 @@ https://www.gnu.org/licenses.
 import { NgModule, Injectable } from "@angular/core";
 import { PreloadAllModules, RouterModule, Routes, CanActivate, Resolve } from "@angular/router";
 import { Auth } from "./classes/auth";
-import { Navigation } from "./classes/navigation";
 import { Storage } from "@ionic/storage";
 
 @Injectable()
@@ -48,17 +47,6 @@ export class SessionGuard implements CanActivate {
       console.error(error);
       return false;
     });
-  }
-}
-
-@Injectable()
-export class ModalAccessGuard implements CanActivate {
-  constructor(
-    private nav: Navigation,
-  ) { }
-  async canActivate() {
-    this.nav.navigateRoot("/").then(() => { }).catch((error: any) => { console.error(error); });
-    return false;
   }
 }
 
@@ -208,6 +196,6 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule],
-  providers: [ModalAccessGuard, SessionGuard, UserResolver, AdminResolver],
+  providers: [SessionGuard, UserResolver, AdminResolver],
 })
 export class AppRoutingModule { }

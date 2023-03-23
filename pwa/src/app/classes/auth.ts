@@ -32,10 +32,9 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { Storage } from "@ionic/storage";
-import { Subject, BehaviorSubject } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 import { Crud } from "./crud";
-import { Navigation } from "./navigation";
-import { Miscellaneous } from "./miscellaneous";
+import { Miscellaneous } from "./misc";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { environment } from "../../environments/environment";
 
@@ -53,7 +52,6 @@ export class Auth {
 
   constructor(
     private storage: Storage,
-    private navigation: Navigation,
     private misc: Miscellaneous,
     private crud: Crud,
     private http: HttpClient
@@ -108,11 +106,8 @@ export class Auth {
           this.storage.set("LSUSERMETA", res.user).then(() => {
             this.crud.getAll().then(() => {
               this.user.next(res.user);
-              this.navigation.navigateRoot("/dashboard").then(() => {
-                resolve(true);
-              }).catch((error: any) => {
-                reject(error);
-              });
+              this.misc.navi.next("/dashboard");
+              resolve(true);
             }).catch((error: any) => {
               console.error(error);
               this.misc.doMessage(error, "error");
@@ -136,11 +131,8 @@ export class Auth {
         headers: new HttpHeaders(this.authHeaders)
       }).subscribe((res: any) => {
         if (res && res.result) {
-          this.navigation.navigateRoot("/").then(() => {
-            resolve(true);
-          }).catch((error: any) => {
-            reject(error);
-          });
+          this.misc.navi.next("/");
+          resolve(true);
         } else {
           reject(res.msg);
         }
@@ -216,11 +208,8 @@ export class Auth {
             });
           });
         } else {
-          this.navigation.navigateRoot("/").then(() => {
-            resolve(true);
-          }).catch((error: any) => {
-            reject(error);
-          });
+          this.misc.navi.next("/");
+          resolve(true);
         }
       });
     });

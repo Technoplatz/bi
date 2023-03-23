@@ -34,7 +34,7 @@ import { Component, OnInit, HostListener, Input, ViewChild } from "@angular/core
 import { FormBuilder, FormGroup } from "@angular/forms";
 import { AlertController } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
-import { Miscellaneous } from "./../../classes/miscellaneous";
+import { Miscellaneous } from "../../classes/misc";
 import { Crud } from "./../../classes/crud";
 import { environment } from "./../../../environments/environment";
 import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";

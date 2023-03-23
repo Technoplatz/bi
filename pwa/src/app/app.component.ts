@@ -34,7 +34,7 @@ import { Component, OnInit } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
 import { Router, Event, NavigationError, NavigationEnd, NavigationStart } from "@angular/router";
 import { Storage } from "@ionic/storage";
-import { Miscellaneous } from "./classes/miscellaneous";
+import { Miscellaneous } from "./classes/misc";
 import { Auth } from "./classes/auth";
 import { Crud } from "./classes/crud";
 import { Plugins } from "@capacitor/core";
