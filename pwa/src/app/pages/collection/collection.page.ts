@@ -102,6 +102,7 @@ export class CollectionPage implements OnInit {
   public jeoptions?: JsonEditorOptions;
   public jeopen: boolean = false;
   public is_saving: boolean = false;
+  public is_viewsaving: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -445,13 +446,18 @@ export class CollectionPage implements OnInit {
 
   doSaveAsView() {
     if (this.perm && this.data.length > 0 && this.is_crud) {
+      this.is_viewsaving = true;
       this.misc.apiCall("crud", {
         op: "saveasview",
         collection: this.id,
         match: this.filter
       }).then((res: any) => {
-        this.misc.navi.next("view/" + res.id);
+        this.crud.getAll().then(() => {
+          this.is_viewsaving = false;
+          this.misc.navi.next("view/" + res.id);
+        });
       }).catch((error: any) => {
+        this.is_viewsaving = false;
         this.misc.doMessage("filter not saved", "error");
         console.error(error);
       });
