@@ -84,12 +84,12 @@ export class AppComponent implements OnInit {
     this.auth.user.subscribe((user: any) => {
       this.user_ = user;
       if (!user) {
-        this.misc.navi.next({ s: "", sub: null });
+        this.misc.navi.next("");
       }
     });
 
-    this.misc.navi.subscribe((res: any) => {
-      this.router.navigateByUrl(res.sub ? res.s + "/" + res.sub : res.s).then(() => { }).catch((error: any) => {
+    this.misc.navi.subscribe((path: any) => {
+      this.router.navigateByUrl(path).then(() => { }).catch((error: any) => {
         console.error(error);
       });
     });

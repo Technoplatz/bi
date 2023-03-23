@@ -1,12 +1,14 @@
 [
   {
     "_id": "template-foo",
-    "title": "Foo",
+    "title": "Foo Template",
     "by": "Technoplatz",
-    "description": "A basic template includes essential data types for generic use.",
+    "description": "A basic collection template includes essential fields and data types for generic business use.",
     "collection": "foo",
     "file": "template-foo.json",
     "prefix": "foo",
+    "datatypes": ["String", "Enum", "Date", "Decimal", "Number", "Boolean"],
+    "structure": ["Parents", "Index", "Unique", "Required", "Actions", "Sort"],
     "icon": "business-outline",
     "sort": 10
   }

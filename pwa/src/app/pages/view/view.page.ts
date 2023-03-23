@@ -239,7 +239,7 @@ export class ViewPage implements OnInit {
         if (res.data.modified) {
           this.crud.getAll().then(() => {
             if (res.data.op === "remove") {
-              this.nav("dashboard", null);
+              this.misc.navi.next("dashboard");
             }
           }).catch((error: any) => {
             console.error(error);
@@ -387,13 +387,6 @@ export class ViewPage implements OnInit {
   SetSelectData(i: number, event: any) {
     this.selected[i] = event.detail.checked;
     this.GetIsSelectData();
-  }
-
-  nav(s: any, sub: any) {
-    this.misc.navi.next({
-      s: s,
-      sub: sub
-    });
   }
 
 }

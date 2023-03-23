@@ -45,7 +45,7 @@ export class _404Page implements OnInit {
   public user: any = null;
 
   constructor(
-    private misc: Miscellaneous, 
+    public misc: Miscellaneous, 
     private storage: Storage
   ) { }
 
@@ -54,13 +54,6 @@ export class _404Page implements OnInit {
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;
-    });
-  }
-
-  doNavi(s: string, sub: any) {
-    this.misc.navi.next({
-      s: s,
-      sub: sub,
     });
   }
 

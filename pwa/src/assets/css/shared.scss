@@ -1011,7 +1011,8 @@ app-menu {
 }
 
 .text-medium {
-  font-size: medium !important;
+  font-size: 16px !important;
+  line-height: 18px !important;
 }
 
 .logo-column {
@@ -1034,14 +1035,6 @@ app-menu {
 
 .logo-container svg {
   margin: auto !important;
-}
-
-ion-card-subtitle,
-ion-card-header {
-  font-weight: 600;
-  white-space: nowrap;
-  text-overflow: ellipsis !important;
-  overflow: hidden !important;
 }
 
 sup {
@@ -1303,34 +1296,42 @@ sup {
 
 .template-card-container {
   display: flex;
-  flex-wrap: nowrap;
+  margin-top: 16px;
 }
 
-.template-card {
+.template-card-container ion-card {
+  align-content: flex-start;
   margin: 0px;
-  margin-top: 8px !important;
-  margin-right: 8px !important;
-  border-radius: 11px;
-  padding: 0px;
-  min-width: 260px !important;
-  max-width: 260px !important;
-  height: 180px;
-  overflow: hidden;
+  gap: 16px;
+  border-radius: 0px;
+  min-width: 360px !important;
+  max-width: 360px !important;
   box-shadow: none !important;
-  border: 1px solid var(--ion-color-primary);
-}
-
-.template-card ion-card-content {
-  height: 64px;
-  overflow: hidden;
+  border: 5px solid var(--ion-color-light);
   color: var(--ion-color-dark);
-  line-height: normal;
-  margin-top: 0px !important;
-  margin-bottom: 16px !important;
+  overflow: visible !important;
 }
 
-.template-card ion-card-subtitle {
-  color: var(--ion-color-primary) !important;
+.template-card-container ion-card ion-card-content {
+  margin-top: 16px !important;
+}
+
+.template-card-container ion-card p {
+  margin-top: 8px !important;
+}
+
+.template-card-container ion-card ion-button {
+  bottom: 16px;
+  margin: 16px;
+}
+
+.template-card-container ion-card ion-icon {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  top: 0px;
+  right: 0px;
+  margin: 20px;
 }
 
 .data-div {
@@ -1408,7 +1409,7 @@ sup {
 .structureditor {
   display: flex;
   flex-flow: column;
-  height: calc(90vh - 220px);
+  height: calc(90vh - 200px);
 }
 
 json-editor,

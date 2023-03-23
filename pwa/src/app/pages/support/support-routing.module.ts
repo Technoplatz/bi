@@ -1,7 +1,7 @@
-<!--
+/*
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -28,21 +28,22 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
--->
+*/
 
-<div class="top-tools">
-  <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small">
-    <ion-label class="ion-padding-start ion-padding-end">{{ 'NEW VERSION AVAILABLE' | translate }}</ion-label>
-  </ion-button>
-  <ion-button fill="clear" (click)="misc.navi.next('support')" size="large">
-    <ion-icon name="help-circle-outline" size="large"></ion-icon>
-  </ion-button>
-  <ion-button fill="clear" (click)="misc.doMenuToggle()" size="large">
-    <ion-icon *ngIf="misc.toggle" name="expand" size="medium"></ion-icon>
-    <ion-icon *ngIf="!misc.toggle" name="contract" size="medium"></ion-icon>
-  </ion-button>
-  <ion-button fill="clear" (click)="misc.navi.next('account/preferences')">
-    <ion-icon name="person-circle-outline" size="large"></ion-icon>
-    <ion-label>&nbsp;{{ name }}</ion-label>
-  </ion-button>
-</div>
+import { NgModule } from "@angular/core";
+import { Routes, RouterModule } from "@angular/router";
+import { SupportPage } from "./support.page";
+
+const routes: Routes = [
+  {
+    path: "",
+    component: SupportPage
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
+})
+
+export class SupportPageRoutingModule { }

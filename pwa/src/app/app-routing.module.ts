@@ -109,7 +109,7 @@ const routes: Routes = [
     }
   },
   {
-    path: "dashboard/templates",
+    path: "templates",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/templates/templates.module").then((m) => m.TemplatesPageModule),
     data: { preload: true },
@@ -181,18 +181,18 @@ const routes: Routes = [
     }
   },
   {
-    path: "setup/:p",
+    path: "404",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/dashboard/dashboard.module").then((m) => m.DashboardPageModule),
+    loadChildren: () => import("./pages/_404/_404.module").then((m) => m._404PageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,
     }
   },
   {
-    path: "404",
+    path: "support",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/_404/_404.module").then((m) => m._404PageModule),
+    loadChildren: () => import("./pages/support/support.module").then((m) => m.SupportPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,

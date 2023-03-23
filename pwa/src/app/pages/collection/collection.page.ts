@@ -354,10 +354,7 @@ export class CollectionPage implements OnInit {
         this.RefreshData(0).then(() => {
           ["_collection", "_view", "_backup"].includes(this.id) ? this.crud.getAll().then(() => {
             if (["remove", "restore"].includes(res.data.op)) {
-              this.misc.navi.next({
-                s: "dashboard",
-                sub: null
-              });
+              this.misc.navi.next("dashboard");
             }
           }).catch((error: any) => {
             console.error(error);
@@ -365,7 +362,7 @@ export class CollectionPage implements OnInit {
           }) : null;
         });
       } else {
-        if (res.data.filters) {
+        if (res.data.filters && res.data.filters.length > 0) {
           this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
             this.filter = res.data.filters;
             this.RefreshData(0);
@@ -418,12 +415,9 @@ export class CollectionPage implements OnInit {
             if (res.data.modified) {
               this.crud.getAll().then(() => {
                 if (res.data.op === "remove") {
-                  this.misc.navi.next({
-                    s: "dashboard",
-                    sub: null
-                  });
+                  this.misc.navi.next("dashboard");
                 } else {
-                  this.misc.navi.next({ s: "dashboard", sub: null});
+                  this.misc.navi.next("dashboard");
                 }
               }).catch((error: any) => {
                 console.error(error);
@@ -456,10 +450,7 @@ export class CollectionPage implements OnInit {
         collection: this.id,
         match: this.filter
       }).then((res: any) => {
-        this.misc.navi.next({
-          s: "view",
-          sub: res.id
-        });
+        this.misc.navi.next("view/" + res.id);
       }).catch((error: any) => {
         this.misc.doMessage("filter not saved", "error");
         console.error(error);
@@ -606,10 +597,7 @@ export class CollectionPage implements OnInit {
       "op": "eq",
       "value": this.id
     }]).then(() => {
-      this.misc.navi.next({
-        s: "admin",
-        sub: "_field"
-      });
+      this.misc.navi.next("admin/_field");
     });
   }
 

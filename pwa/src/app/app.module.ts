@@ -92,7 +92,6 @@ export function createTranslateLoader(http: HttpClient) {
         }),
         ServiceWorkerModule.register("ngsw-worker.js", {
             enabled: environment.production
-            // registrationStrategy: "registerImmediately"
         }),
         NgJsonEditorModule
     ],
@@ -105,7 +104,6 @@ export function createTranslateLoader(http: HttpClient) {
             provide: RouteReuseStrategy,
             useClass: IonicRouteStrategy
         }
-        // { provide: LocationStrategy, useClass: HashLocationStrategy }
     ],
     bootstrap: [
         AppComponent

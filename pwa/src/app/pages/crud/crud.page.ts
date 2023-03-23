@@ -483,7 +483,7 @@ export class CrudPage implements OnInit {
             i++;
           } else {
             this.property_list.push({ key: key, value: val });
-            this.property_list.push({ key: "_id", value: null });
+            this.property_list.push({ key: "_upload_id", value: null });
             resolve(true);
           }
         }

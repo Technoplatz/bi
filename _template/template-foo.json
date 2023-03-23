@@ -3,7 +3,7 @@
     "foo_no": {
       "bsonType": "string",
       "title": "No",
-      "description": "Foo No",
+      "description": "Record ID",
       "pattern": "^[a-zA-Z0-9-]{1,64}$",
       "minLength": 1,
       "maxLength": 64
@@ -51,8 +51,8 @@
       "description": "Is Enabled?"
     }
   },
-  "required": ["foo_no", "foo_type", "foo_status"],
-  "index": [["foo_type"], ["foo_status"], ["foo_type", "foo_status"]],
+  "required": ["foo_no", "foo_account_no", "foo_status"],
+  "index": [["foo_account_no"], ["foo_status"], ["foo_account_no", "foo_status"]],
   "unique": [["foo_no"]],
   "parents": [
     {

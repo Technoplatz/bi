@@ -58,6 +58,10 @@ https://www.gnu.org/licenses.
                 <ion-icon name="expand"></ion-icon><br />
                 <span>{{ 'Resize' | translate }}<br />{{ 'Charts' | translate }}</span>
               </div>
+              <div (click)="misc.navi.next('templates')" class="data-sq-button">
+                <ion-icon name="document"></ion-icon><br />
+                <span>{{ 'Collection' | translate }}<br />{{ 'Templates' | translate }}</span>
+              </div>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -71,8 +75,15 @@ https://www.gnu.org/licenses.
           <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer>
             <h5>{{ item.vie_title }}</h5>
             <div class="visual-buttons">
-              <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
-                class="clear-dark-button" color="dark" mode="ios">
+              <ion-button
+                *ngIf="perm"
+                size="small"
+                fill="clear"
+                (click)="Settings('_view', 'update', item, f)"
+                class="clear-dark-button"
+                color="dark"
+                mode="ios"
+              >
                 <ion-icon name="settings-outline"></ion-icon>
               </ion-button>
             </div>
@@ -87,8 +98,15 @@ https://www.gnu.org/licenses.
           <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
             <div *ngIf="item && item.visual">
               <div class="visual-buttons">
-                <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, i)"
-                  class="clear-dark-button" color="dark" mode="ios">
+                <ion-button
+                  *ngIf="perm"
+                  size="small"
+                  fill="clear"
+                  (click)="Settings('_view', 'update', item, i)"
+                  class="clear-dark-button"
+                  color="dark"
+                  mode="ios"
+                >
                   <ion-icon name="settings-outline"></ion-icon>
                 </ion-button>
               </div>
@@ -99,13 +117,15 @@ https://www.gnu.org/licenses.
                   <span *ngIf="item.visual.function && item.visual.yaxis">
                     | {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
                   </span>
-                  <span *ngIf="item.visual.kpi_target_value; else notargetv">&rarr;
-                    {{ item.visual.kpi_target_value }}</span>
+                  <span *ngIf="item.visual.kpi_target_value; else notargetv">&rarr; {{ item.visual.kpi_target_value }}</span>
                   <ng-template #notargetv><br /></ng-template>
                 </div>
                 <div class="app-charts">
-                  <app-charts *ngIf="item.visual.data && item.visual.data.length > 0; else nochartdata"
-                    [visual]="item.visual" [width]="chcontainer.offsetWidth"></app-charts>
+                  <app-charts
+                    *ngIf="item.visual.data && item.visual.data.length > 0; else nochartdata"
+                    [visual]="item.visual"
+                    [width]="chcontainer.offsetWidth"
+                  ></app-charts>
                   <ng-template #nochartdata>
                     <div class="visual-error">
                       {{ 'CHART NOT GENERATED' | translate }}<br />

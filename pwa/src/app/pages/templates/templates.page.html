@@ -32,8 +32,43 @@ https://www.gnu.org/licenses.
 
 <ion-content class="ion-no-padding">
   <app-tools></app-tools>
+  <div class="console-right">
+    <h6>{{ 'STUDIO' | translate }}</h6>
+    <h1>{{ 'Collection Templates' | translate }}</h1>
+    <p class="text-medium">
+      {{ 'A collection is a grouping of database documents in JSON format.' | translate }}<br />
+      {{ 'Documents within a collection can have many different fields and fields can be defined in various data types.' | translate
+      }}
+    </p>
+    <p class="text-medium">{{ 'A collection exists within a single database.' | translate }}<br /></p>
+    <div class="template-card-container">
+      <ion-card *ngFor="let item of templates; let t = index">
+        <ion-icon [name]="item.icon" color="primary"></ion-icon>
+        <ion-card-header>
+          <ion-card-title>{{ item.title }}</ion-card-title>
+          <ion-card-subtitle>{{ 'by' | translate }} {{ item.by }}</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <span class="text-medium">{{ item.description }}</span>
+          <p><strong>{{ 'Data Types' | translate }}:</strong> {{ item.datatypes.join(', ') }}. 
+          <strong>{{ 'Structure' | translate }}:</strong> {{ item.structure.join(', ') }}.
+          <strong>{{ 'Prefix' | translate }}: </strong> {{ item.prefix}}_
+        </p>
+        </ion-card-content>
+        <ion-button color="primary" (click)="doInstallTemplate(item, t)">
+          <ion-icon *ngIf="templates[t].processing" name="timer-outline"></ion-icon>
+          {{ 'INSTALL' | translate }}
+        </ion-button>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>
+<app-inner-footer></app-inner-footer>
+
+<!-- <ion-content class="ion-no-padding">
+  <app-tools></app-tools>
   <div *ngIf="is_initialized" class="ion-padding ion-margin-bottom">
-    <h6>{{ 'DASHBOARD' | translate }}</h6>
+    <h6>{{ 'COLLECTIONS' | translate }}</h6>
         <h1>{{ header }}</h1>
     <ion-grid class="ion-no-padding ion-margin-bottom">
       <ion-row class="sub-menu-row sq-menu-row">
@@ -62,7 +97,6 @@ https://www.gnu.org/licenses.
           <ion-icon [name]="item.icon" size="large" class="ion-margin-end"></ion-icon>
           <div>
             <div class="data-title temp">{{ item.title }}</div>
-            <!-- {{ item.collection }} -->
           </div>
         </ion-col>
         <ion-col size="4" class="ion-text-wrap">
@@ -84,5 +118,6 @@ https://www.gnu.org/licenses.
       <ion-text class="pe">{{ 'No templates found' | translate }}.</ion-text>
     </ng-template>
   </div>
-</ion-content>
+</ion-content> 
 <app-inner-footer></app-inner-footer>
+-->

@@ -208,10 +208,7 @@ export class DashboardPage implements OnInit {
   }
 
   doEnterViewMode(view_: any) {
-    this.misc.navi.next({
-      s: "view",
-      sub: view_.vie_id,
-    });
+    this.misc.navi.next("view/" + view_.vie_id)
   }
 
   doImport(type_: string) {

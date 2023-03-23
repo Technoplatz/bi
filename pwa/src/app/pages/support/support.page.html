@@ -30,19 +30,13 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<div class="top-tools">
-  <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small">
-    <ion-label class="ion-padding-start ion-padding-end">{{ 'NEW VERSION AVAILABLE' | translate }}</ion-label>
-  </ion-button>
-  <ion-button fill="clear" (click)="misc.navi.next('support')" size="large">
-    <ion-icon name="help-circle-outline" size="large"></ion-icon>
-  </ion-button>
-  <ion-button fill="clear" (click)="misc.doMenuToggle()" size="large">
-    <ion-icon *ngIf="misc.toggle" name="expand" size="medium"></ion-icon>
-    <ion-icon *ngIf="!misc.toggle" name="contract" size="medium"></ion-icon>
-  </ion-button>
-  <ion-button fill="clear" (click)="misc.navi.next('account/preferences')">
-    <ion-icon name="person-circle-outline" size="large"></ion-icon>
-    <ion-label>&nbsp;{{ name }}</ion-label>
-  </ion-button>
-</div>
+<ion-content class="ion-no-padding">
+  <app-tools></app-tools>
+  <div class="console-right">
+    <h6>{{ 'SUPPORT' | translate }}</h6>
+    <h1>{{ 'How to...' | translate }}</h1>
+    <div class="ion-margin-top ion-margin-bottom">{{ 'In progress' | translate }}...</div>
+    <ion-button (click)="misc.navi.next('dashboard')"> {{ 'Go to Dashboard' | translate }} </ion-button>
+  </div>
+</ion-content>
+<app-inner-footer></app-inner-footer>

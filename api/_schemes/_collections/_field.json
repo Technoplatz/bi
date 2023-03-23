@@ -295,9 +295,6 @@
     ],
     "unique": [
         [
-            "fie_id"
-        ],
-        [
             "fie_collection_id",
             "fie_id"
         ]

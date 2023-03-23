@@ -33,13 +33,13 @@ https://www.gnu.org/licenses.
 <ion-content>
   <ion-header class="ion-no-border">
     <ion-toolbar>
-      <img class="ion-margin-start bi-logo" src="../../../assets/images/logo.png">
+      <img class="ion-margin-start bi-logo" src="../../../assets/images/logo.png" />
     </ion-toolbar>
   </ion-header>
   <ion-list lines="none" class="menu-side">
     <ion-item lines="none" class="pane-item">
       <ion-label>
-        {{ 'Console' }}_<br />
+        {{ "Console" }}_<br />
         <span>
           v{{ version }} ({{ release }})&nbsp;<br />
           {{ saas_ ? saas_.company : null }}&nbsp;
@@ -48,21 +48,21 @@ https://www.gnu.org/licenses.
     </ion-item>
     <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
-        <ion-button size="default" fill="clear" class="dash-button" (click)="doNavi('dashboard', null)">
-          <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Dashboard' | translate }}
+        <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('dashboard')">
+          <ion-icon name="stats-chart-sharp"></ion-icon>{{ "Dashboard" | translate }}
         </ion-button>
       </ion-label>
     </ion-item>
     <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="server-outline"></ion-icon>{{ 'Collections' | translate }}
+          <ion-icon name="server-outline"></ion-icon>{{ "Collections" | translate }}
         </ion-button>
         <p *ngIf="!collections || collections.length == 0; else collectionsfound" class="danger">
-          {{ 'No collections found' | translate }}
+          {{ "No collections found" | translate }}
         </p>
         <ng-template #collectionsfound>
-          <p *ngFor="let item of collections" (click)="doNavi('collection', item.col_id)" class="clicked-item dark">
+          <p *ngFor="let item of collections" (click)="misc.navi.next('collection/'+ item.col_id)" class="clicked-item dark">
             {{ item.col_title }}
           </p>
         </ng-template>
@@ -71,13 +71,13 @@ https://www.gnu.org/licenses.
     <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="eye-outline"></ion-icon>{{ 'Shared Views' | translate }}
+          <ion-icon name="eye-outline"></ion-icon>{{ "Shared Views" | translate }}
         </ion-button>
         <p *ngIf="!views || views.length == 0; else viewsfound">
-          <ion-text color="medium">{{ 'No view found' | translate }}</ion-text>
+          <ion-text color="medium">{{ "No view found" | translate }}</ion-text>
         </p>
         <ng-template #viewsfound>
-          <p *ngFor="let item of views" (click)="doNavi('view', item.vie_id)" class="clicked-item dark">
+          <p *ngFor="let item of views" (click)="misc.navi.next('view/' + item.vie_id)" class="clicked-item dark">
             {{ item.vie_title }}
           </p>
         </ng-template>
@@ -86,9 +86,9 @@ https://www.gnu.org/licenses.
     <ion-item *ngIf="segmentsadm" lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
+          <ion-icon name="hammer-outline"></ion-icon>{{ "Administration" | translate }}
         </ion-button>
-        <p *ngFor="let item of segmentsadm" (click)="doNavi('admin', item.id)" class="clicked-item dark">
+        <p *ngFor="let item of segmentsadm" (click)="misc.navi.next('admin/' + item.id)" class="clicked-item dark">
           {{ item.title }}
         </p>
       </ion-label>
@@ -96,19 +96,19 @@ https://www.gnu.org/licenses.
     <ion-item lines="none">
       <ion-label class="ion-text-wrap">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="options-outline"></ion-icon>{{ 'Account' | translate }}
+          <ion-icon name="options-outline"></ion-icon>{{ "Account" | translate }}
         </ion-button>
-        <p (click)="doNavi('account', 'apikey')" class="clicked-item dark">
-          {{ 'API Key' | translate }}
+        <p (click)="misc.navi.next('account/apikey')" class="clicked-item dark">
+          {{ "API Key" | translate }}
         </p>
-        <p (click)="doNavi('account', 'security')" class="clicked-item dark">
-          {{ 'Security' | translate }}
+        <p (click)="misc.navi.next('account/security')" class="clicked-item dark">
+          {{ "Security" | translate }}
         </p>
-        <p (click)="doNavi('account', 'preferences')" class="clicked-item dark">
-          {{ 'Preferences' | translate }}
+        <p (click)="misc.navi.next('account/preferences')" class="clicked-item dark">
+          {{ "Preferences" | translate }}
         </p>
-        <p (click)="doNavi('account', 'signout')" class="clicked-item dark">
-          {{ 'Sign Out' | translate }}
+        <p (click)="misc.navi.next('account/signout')" class="clicked-item dark">
+          {{ "Sign Out" | translate }}
         </p>
       </ion-label>
     </ion-item>

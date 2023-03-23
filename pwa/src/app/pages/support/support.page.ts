@@ -31,60 +31,39 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { environment } from "../../../environments/environment";
 import { Miscellaneous } from "../../classes/miscellaneous";
-import { Auth } from "../../classes/auth";
-import { Crud } from "../../classes/crud";
+import { Storage } from "@ionic/storage";
+import { environment } from "../../../environments/environment";
+import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: "app-menu",
-  templateUrl: "./menu.component.html",
-  styleUrls: ["./menu.component.scss"],
+  selector: "app-support",
+  templateUrl: "./support.page.html",
+  styleUrls: ["./support.page.scss"]
 })
 
-export class MenuComponent implements OnInit {
-  public version = environment.appVersion;
-  public release = environment.release;
-  public collections: any = [];
-  public views: any = [];
-  public segmentsadm: any;
-  public saas_: any;
-  public views_: any;
-  public collections_: any;
-  public user_: any;
+export class SupportPage implements OnInit {
+  public header: string = "Sorry!";
+  public user: any = null;
+  public support_md: any = null;
 
   constructor(
     public misc: Miscellaneous,
-    private auth: Auth,
-    private crud: Crud,
+    private storage: Storage,
+    public http: HttpClient
   ) { }
 
+  ngOnDestroy() { }
+
   ngOnInit() {
-    this.collections_ = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
-    });
-    this.views_ = this.crud.views.subscribe((res: any) => {
-      this.views = res && res.data ? res.data : [];
-    });
-    this.crud.saas.subscribe((res: any) => {
-      this.saas_ = res;
-    });
-    this.auth.user.subscribe((res: any) => {
-      this.user_ = res;
-      this.segmentsadm = res && res.perm ? environment.segmentsadm : [];
-    });
-  }
-
-  ngOnDestroy() {
-    this.collections_ = null;
-    this.views_ = null;
-  }
-
-  Signout() {
-    this.auth.Signout().then(() => {
-      console.log("*** signed out");
-    }).catch((error: any) => {
-      console.error("signout error", error.message);
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.user = LSUSERMETA;
+      this.http.get(environment.support_url, { responseType: "text" }).subscribe((md: any) => {
+        console.log(md);
+        this.support_md = md;
+      }, (error: any) => {
+        console.error(error);
+      });
     });
   }
 

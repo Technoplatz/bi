@@ -1193,7 +1193,7 @@ class Crud():
             prefix_ = obj["prefix"]
             email_ = form_["email"]
             mimetype_ = file_.content_type
-
+            
             if mimetype_ in [
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     "application/vnd.ms-excel"]:
@@ -1219,131 +1219,45 @@ class Crud():
             df_ = df_.rename(lambda column_: self.convert_cname_f(column_), axis="columns")
 
             # to add prefix to all columns
-            prefix__ = f"{prefix_}_"
-            df_ = df_.add_prefix(prefix__)
-            columns_ = []
-            for column_ in df_.columns:
-                columns_.append(column_[4:] if column_[:8] == f"{prefix__}{prefix__}" else column_)
-            df_.columns = df_.columns[:0].tolist() + columns_
+            # prefix__ = f"{prefix_}_"
+            # df_ = df_.add_prefix(prefix__)
+            # columns_ = []
+            # for column_ in df_.columns:
+            #     columns_.append(column_[4:] if column_[:8] == f"{prefix__}{prefix__}" else column_)
+            # df_.columns = df_.columns[:0].tolist() + columns_
 
             collection__ = f"{collection_}_data"
-            collection_tmp_ = f"{collection_}_tmp"
-
             find_one_ = Mongo().db["_collection"].find_one({"col_id": collection_})
+            if not find_one_:
+                raise APIError(f"collection not found {collection_}")
+        
+            get_properties_ = self.get_properties_f(collection_)
+            if not get_properties_["result"]:
+                raise APIError(get_properties_["msg"])
+            properties_ = get_properties_["properties"]
+            columns_tobe_deleted_ = []
 
-            if find_one_:
-                get_properties_ = self.get_properties_f(collection_)
-                if not get_properties_["result"]:
-                    raise APIError(get_properties_["msg"])
-                properties_ = get_properties_["properties"]
-                columns_tobe_deleted_ = []
-                # Convert dataset columns to related properties
-                for column_ in df_.columns:
-                    if column_ in properties_:
-                        property_ = properties_[column_]
-                        if "bsonType" in property_:
-                            if property_["bsonType"] == "date":
-                                df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
-                            elif property_["bsonType"] == "string":
-                                df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                            elif property_["bsonType"] in ["number", "decimal"]:
-                                df_[column_] = df_[column_].apply(self.frame_convert_number_f)
-                        else:
-                            columns_tobe_deleted_.append(column_)
+            # Convert dataset columns to related properties
+            for column_ in df_.columns:
+                if column_ in properties_:
+                    property_ = properties_[column_]
+                    if "bsonType" in property_:
+                        if property_["bsonType"] == "date":
+                            df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                        elif property_["bsonType"] == "string":
+                            df_[column_] = df_[column_].apply(self.frame_convert_string_f)
+                        elif property_["bsonType"] in ["number", "decimal"]:
+                            df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                     else:
                         columns_tobe_deleted_.append(column_)
-                # Remove unnecessary columns from dataset if they exist
-                if "_structure" in df_.columns:
-                    columns_tobe_deleted_.append("_structure")
-                if len(columns_tobe_deleted_) > 0:
-                    df_ = df_.drop(columns_tobe_deleted_, axis=1)
-            else:
-                structure_ = {}
-                properties_ = {}
-                counter_ = 0
-                required_ = []
-                index_ = []
-                for column_ in df_.columns:
-                    counter_ += 1
-                    dtype_ = df_[column_].dtype
-                    dict_ = {}
-                    dict_["bsonType"] = "string"
-                    if dtype_ in ["int", "int64", "float", "float64"]:
-                        df_[column_] = df_[column_].apply(self.frame_convert_number_f)
-                        dict_["bsonType"] = "number"
-                        required_.append(column_)
-                    if dtype_ == "decimal":
-                        df_[column_] = df_[column_].apply(self.frame_convert_number_f)
-                        dict_["bsonType"] = "decimal"
-                        required_.append(column_)
-                    elif dtype_ in ["date", "datetime64", "datetime64[ns]"]:
-                        df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
-                        dict_["bsonType"] = "date"
-                        required_.append(column_)
-                    elif dtype_ == "bool":
-                        dict_["bsonType"] = "bool"
-                    elif dtype_ in ["object", "string"]:
-                        df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                        dict_["minLength"] = 1
-                        dict_["maxLength"] = 256
-                        required_.append(column_)
-                        index_.append([column_])
-                    dict_["title"] = column_[4:].replace("_", " ").title()
-                    dict_["description"] = column_
-                    dict_["width"] = 120
-                    properties_[column_] = dict_
-                structure_["properties"] = properties_
-                structure_["required"] = required_ if len(required_) > 0 else None
-                structure_["index"] = index_
-                structure_["unique"] = []
-                structure_["parents"] = []
-                structure_["sort"] = {"_created_at": -1}
-                structure_["actions"] = []
-                doc_ = {
-                    "col_id": collection_,
-                    "col_title": collection_.title(),
-                    "col_prefix": prefix_,
-                    "col_structure": structure_,
-                    "_created_at": datetime.now(),
-                    "_modified_at": datetime.now(),
-                    "_created_by": email_,
-                    "_modified_by": email_,
-                    "_modified_count": 0
-                }
-                Mongo().db["_collection"].insert_one(doc_)
-                Mongo().db[collection__].insert_one({})
-                schemevalidate_ = self.crudscheme_validate_f({
-                    "collection": collection__,
-                    "structure": structure_})
-                if not schemevalidate_["result"]:
-                    raise APIError(schemevalidate_["msg"])
-                Mongo().db[collection__].delete_one({})
-                reverse_structure_f_ = self.config_structure_to_field_f({
-                    "collection": collection_,
-                    "structure": structure_,
-                    "user": user_
-                })
-                if not reverse_structure_f_["result"]:
-                    raise APIError(reverse_structure_f_["msg"])
-                per_id_ = f"per-{collection_}-1"
-                Mongo().db["_permission"].update_one({
-                    "per_id": per_id_,
-                }, {"$set": {
-                    "per_id": per_id_,
-                    "per_tag_id": user_["_tags"][0] if "_tags" in user_ and len(user_["_tags"]) > 0 else "#Managers",
-                    "per_collection_id": collection_,
-                    "per_create": True,
-                    "per_read": True,
-                    "per_update": True,
-                    "per_delete": True,
-                    "per_share": True,
-                    "per_match": [],
-                    "_created_at": datetime.now(),
-                    "_modified_at": datetime.now(),
-                    "_created_by": email_,
-                    "_modified_by": email_,
-                    "_modified_count": 0
-                }}, upsert=True)
+                else:
+                    columns_tobe_deleted_.append(column_)
+
+            # Remove unnecessary columns from dataset if they exist
+            if "_structure" in df_.columns:
+                columns_tobe_deleted_.append("_structure")
+            if len(columns_tobe_deleted_) > 0:
+                df_ = df_.drop(columns_tobe_deleted_, axis=1)
 
             df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
 
@@ -1360,8 +1274,10 @@ class Crud():
             df_["_upload_id"] = datetime.today().strftime("%Y%m%d%H%M%S")
 
             payload_ = df_.to_dict("records")
+
             session_client_ = Mongo().session_client
             session_db_ = session_client_[MONGO_DB_]
+            count_ = 0
             with session_client_.start_session(causal_consistency=True, default_transaction_options=None, snapshot=False) as session_:
                 with session_.start_transaction():
                     insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
@@ -1762,7 +1678,7 @@ class Crud():
         filtered_ = {}
         if properties_:
             for f in match_:
-                if f["key"] and f["op"] and (f["key"] == "_id" or f["key"] in properties_):
+                if f["key"] and f["op"] and (f["key"] in ["_id", "_upload_id"] or f["key"] in properties_):
 
                     fres_ = None
                     typ = properties_[f["key"]]["bsonType"] if f["key"] in properties_ else "string"
@@ -2964,17 +2880,8 @@ class Crud():
             }, "$inc": {"_modified_count": 1}})
 
             f_ = self.crudscheme_validate_f({
-                "collection": collection_id_,
+                "collection": f"{collection_id_}_data",
                 "structure": structure_})
-
-            if not f_["result"]:
-                raise APIError(f_["msg"])
-
-            f_ = self.config_structure_to_field_f({
-                "collection": collection_id_,
-                "structure": structure_,
-                "user": user_
-            })
 
             if not f_["result"]:
                 raise APIError(f_["msg"])

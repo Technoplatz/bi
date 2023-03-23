@@ -31,7 +31,6 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "../../classes/miscellaneous";
 import { Crud } from "../../classes/crud";
 
@@ -48,9 +47,8 @@ export class TemplatesPage implements OnInit {
   public user: any = null;
 
   constructor(
-    private misc: Miscellaneous,
-    private crud: Crud,
-    private storage: Storage
+    public misc: Miscellaneous,
+    private crud: Crud
   ) { }
 
   ngOnDestroy() { }
@@ -79,10 +77,7 @@ export class TemplatesPage implements OnInit {
       }).then(() => {
         this.misc.doMessage("template installed successfully", "success");
         this.crud.getAll().then(() => {
-          this.misc.navi.next({
-            s: "dashboard",
-            sub: null
-          });
+          this.misc.navi.next("dashboard");
         });
       }).catch((error: any) => {
         console.error(error);
