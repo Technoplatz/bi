@@ -59,11 +59,11 @@ export class Crud {
   public updateListener = new Subject<any>();
   public objectsListener = new BehaviorSubject([]);
   public objects = this.objectsListener.asObservable();
-  public collections = new BehaviorSubject([]);
-  public views = new BehaviorSubject([]);
-  public visuals = new BehaviorSubject([]);
+  public collections = new BehaviorSubject<any>([]);
+  public views = new BehaviorSubject<any>([]);
+  public visuals = new BehaviorSubject<any>([]);
   public saas = new BehaviorSubject(null);
-  public announcements = new BehaviorSubject([]);
+  public announcements = new BehaviorSubject<any>([]);
 
   constructor(
     private storage: Storage,
@@ -196,13 +196,8 @@ export class Crud {
           if (file) {
             let posted_: FormData = new FormData();
             const sto_collection_id_ = doc_["sto_collection_id"];
-            posted_.append("op", op);
             posted_.append("file", file, file.name);
             posted_.append("collection", sto_collection_id_);
-            posted_.append("prefix", "srv");
-            posted_.append("name", file.name);
-            posted_.append("size", file.size);
-            posted_.append("type", file.type);
             this.misc.apiFileCall("import", posted_).then((res: any) => {
               res.cid = sto_collection_id_;
               resolve(res);
@@ -346,6 +341,7 @@ export class Crud {
         }).subscribe((res: any) => {
           if (res && res.result) {
             this.collections.next(res);
+            this.misc.collections.next(res);
             resolve(res);
           } else {
             reject(res.msg);

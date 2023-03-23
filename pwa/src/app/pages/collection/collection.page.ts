@@ -78,7 +78,7 @@ export class CollectionPage implements OnInit {
   private is_selected: boolean = false;
   public multicheckbox: boolean = false;
   private master: any = {};
-  private collections: any = [];
+  public collections: any = [];
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public barcoded_: boolean = false;
@@ -213,41 +213,6 @@ export class CollectionPage implements OnInit {
             this.is_samecol = true;
           });
         });
-      });
-    });
-  }
-
-  doImport(type_: string) {
-    const import_structure_ = environment.import_structure;
-    const upload_structure_ = environment.upload_structure;
-    this.modal.create({
-      component: CrudPage,
-      backdropDismiss: false,
-      cssClass: "crud-modal",
-      componentProps: {
-        shuttle: {
-          op: type_ === "import" ? "import" : "upload",
-          collection: "_storage",
-          collections: this.collections ? this.collections : [],
-          views: this.views ? this.views : [],
-          user: this.user,
-          data: {
-            "sto_id": type_ === "import" ? "data-import" : "data-upload",
-            "sto_collection_id": this.id,
-            "sto_prefix": type_ === "import" ? null : null,
-            "sto_file": null
-          },
-          structure: type_ === "import" ? import_structure_ : upload_structure_,
-          sweeped: [],
-          filter: { "sto_collection_id": type_ === "import" ? this.id : null },
-          actions: [],
-          direct: -1
-        }
-      }
-    }).then((modal: any) => {
-      modal.present();
-      modal.onDidDismiss().then((res: any) => {
-        this.RefreshData(0);
       });
     });
   }
@@ -652,6 +617,12 @@ export class CollectionPage implements OnInit {
         this.is_saving = false;
       });
     }
+  }
+
+  doImport() {
+    this.misc.doImport(this.id).then(() => {
+      this.RefreshData(0).then(() => { });
+    });
   }
 
 }

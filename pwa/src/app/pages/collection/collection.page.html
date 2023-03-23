@@ -40,7 +40,7 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
-              <div *ngIf="is_crud" (click)="doImport('import')" class="data-sq-button">
+              <div *ngIf="is_crud" (click)="doImport()" class="data-sq-button">
                 <ion-icon name="cloud-upload"></ion-icon><br />
                 {{ 'Import' | translate }}<br />{{ 'File' | translate }}
               </div>

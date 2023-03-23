@@ -31,7 +31,6 @@ https://www.gnu.org/licenses.
 """
 
 import os
-from pickle import TRUE
 import sys
 import pandas as pd
 import numpy as np
@@ -55,6 +54,7 @@ import pyotp
 import smtplib
 import urllib
 import hashlib
+from pickle import TRUE
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -1185,15 +1185,14 @@ class Crud():
 
     def import_f(self, obj):
         try:
-            # gets parameters and file from pwa
+            # INPUTS
             form_ = obj["form"]
             file_ = obj["file"]
-            user_ = obj["user"]
             collection_ = obj["collection"]
-            prefix_ = obj["prefix"]
             email_ = form_["email"]
             mimetype_ = file_.content_type
-            
+
+            # CREATE A DATAFRAME
             if mimetype_ in [
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     "application/vnd.ms-excel"]:
@@ -1213,31 +1212,23 @@ class Crud():
                     raise APIError(f"file size is greater than {API_UPLOAD_LIMIT_BYTES_} bytes")
                 df_ = pd.read_csv(file_, encoding="utf-8", header=0)
             else:
-                raise APIError("file type is not excel or csv")
+                raise APIError("file type is not supported")
 
-            # to make columns clean
+            # TO MAKE THE COLUMNS CLEAN
             df_ = df_.rename(lambda column_: self.convert_cname_f(column_), axis="columns")
 
-            # to add prefix to all columns
-            # prefix__ = f"{prefix_}_"
-            # df_ = df_.add_prefix(prefix__)
-            # columns_ = []
-            # for column_ in df_.columns:
-            #     columns_.append(column_[4:] if column_[:8] == f"{prefix__}{prefix__}" else column_)
-            # df_.columns = df_.columns[:0].tolist() + columns_
-
+            # GET COLLECTION PROPERTIES
             collection__ = f"{collection_}_data"
             find_one_ = Mongo().db["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
-        
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
             properties_ = get_properties_["properties"]
-            columns_tobe_deleted_ = []
 
-            # Convert dataset columns to related properties
+            # CONVERT DATASET COLUMNS
+            columns_tobe_deleted_ = []
             for column_ in df_.columns:
                 if column_ in properties_:
                     property_ = properties_[column_]
@@ -1246,26 +1237,27 @@ class Crud():
                             df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                        elif property_["bsonType"] in ["number", "decimal"]:
+                        elif property_["bsonType"] in ["number", "int", "decimal"]:
                             df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                     else:
                         columns_tobe_deleted_.append(column_)
                 else:
                     columns_tobe_deleted_.append(column_)
 
-            # Remove unnecessary columns from dataset if they exist
+            # REMOVING UNNECESSRY COLUMNS
             if "_structure" in df_.columns:
                 columns_tobe_deleted_.append("_structure")
             if len(columns_tobe_deleted_) > 0:
                 df_ = df_.drop(columns_tobe_deleted_, axis=1)
 
+            # SUM OF ALL NUMERICS BY COMBINING DUPLICATE ITEMS
+            # ITS OBVIOUS BUT TRUE :)
             df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
 
-            df_ = df_.replace({'nan': None})
-            df_ = df_.replace({'NaN': None})
-            df_ = df_.replace({'nat': None})
-            df_ = df_.replace({'NaT': None})
+            # REMOVING NANS
+            df_.replace(['nan', 'NaN', 'nat', 'NaT'], None, inplace=True)
 
+            # SETTING THE DEFAULTS
             df_["_created_at"] = datetime.now()
             df_["_created_by"] = email_
             df_["_modified_at"] = datetime.now()
@@ -1273,21 +1265,19 @@ class Crud():
             df_["_modified_count"] = 0
             df_["_upload_id"] = datetime.today().strftime("%Y%m%d%H%M%S")
 
+            # BULK INSERT DF INTO DATABASE
             payload_ = df_.to_dict("records")
-
             session_client_ = Mongo().session_client
             session_db_ = session_client_[MONGO_DB_]
-            count_ = 0
             with session_client_.start_session(causal_consistency=True, default_transaction_options=None, snapshot=False) as session_:
                 with session_.start_transaction():
                     insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
                     session_.commit_transaction()
                     count_ = len(insert_many_.inserted_ids)
 
-            res_ = {"result": True, "count": count_}
+            res_ = {"result": True, "count": count_ }
 
         except pymongo.errors.PyMongoError as exc:
-
             Misc().log_f({
                 "type": "Error",
                 "collection": collection_,
@@ -1295,7 +1285,6 @@ class Crud():
                 "user": email_,
                 "document": exc.details
             })
-
             res_ = Misc().mongo_error_f(exc)
 
             if "notify" in res_ and res_["notify"]:
@@ -1307,7 +1296,7 @@ class Crud():
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
 
-                res_["msg"] = "There are some errors occured while uploading file. Please check your Inbox to get details."
+                res_["msg"] = "Please check your Inbox to get the error details."
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
@@ -4043,7 +4032,7 @@ class Auth():
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
-                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ in ["insert", "import", "upload"] and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
+                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ in ["insert", "import"] and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
                         # the first tag is getting to be considered for allowed matches
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
@@ -4684,17 +4673,12 @@ def storage_f():
         if not file_:
             raise APIError("no file found")
 
-        op_ = form_["op"]
-        if op_ not in ["import", "upload"]:
-            raise APIError(f"invalid import option {op_}")
-
         collection__ = form_["collection"]
         col_check_ = Crud().inner_collection_f(collection__)
         if not col_check_["result"]:
             raise APIError(col_check_["msg"])
 
         prefix_ = col_check_["collection"]["col_prefix"]
-
         email_ = form_["email"] if "email" in form_ else None
         token_ = form_["token"] if "token" in form_ else None
 
@@ -4704,7 +4688,6 @@ def storage_f():
         user_ = validate_["user"]
 
         import_f_ = Crud().import_f({"form": form_, "file": file_, "collection": collection__, "user": user_, "prefix": prefix_})
-
         if not import_f_["result"]:
             raise APIError(import_f_["msg"])
 

@@ -261,7 +261,7 @@ export class CrudPage implements OnInit {
           this.crud.modalSubmitListener.next({ "result": true });
           if (!this.barcoded_ || this.op !== "insert") {
             setTimeout(() => {
-              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null });
+              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
             }, this.timeout);
           } else {
             this.doInitForm();

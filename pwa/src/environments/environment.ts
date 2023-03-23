@@ -61,8 +61,7 @@ export const environment = {
         "title": "ID",
         "description": "Storage ID",
         "permanent": true,
-        "required": true,
-        "width": 160
+        "required": true
       },
       "sto_collection_id": {
         "bsonType": "string",
@@ -72,8 +71,7 @@ export const environment = {
         "title": "Collection ID",
         "description": "Collection ID",
         "collection": true,
-        "required": true,
-        "width": 110
+        "required": true
       },
       "sto_file": {
         "bsonType": "string",
@@ -81,8 +79,7 @@ export const environment = {
         "maxLength": 64,
         "file": true,
         "title": "File",
-        "description": "File",
-        "width": 100
+        "description": "File"
       }
     },
     "required": [
@@ -101,64 +98,6 @@ export const environment = {
     "index": [
       [
         "sto_collection_id"
-      ]
-    ],
-    "sort": {
-      "_modified_at": -1
-    }
-  },
-  upload_structure: {
-    "properties": {
-      "sto_id": {
-        "bsonType": "string",
-        "minLength": 3,
-        "maxLength": 32,
-        "pattern": "^[a-z0-9-]{3,32}$",
-        "title": "ID",
-        "description": "Storage ID",
-        "permanent": true,
-        "required": true,
-        "width": 160
-      },
-      "sto_collection_id": {
-        "bsonType": "string",
-        "minLength": 3,
-        "maxLength": 32,
-        "pattern": "^[a-z0-9-_]{3,32}$",
-        "title": "Collection",
-        "description": "Collection ID",
-        "required": true,
-        "width": 110
-      },
-      "sto_file": {
-        "bsonType": "string",
-        "minLength": 0,
-        "maxLength": 64,
-        "file": true,
-        "title": "File",
-        "description": "File",
-        "width": 100
-      }
-    },
-    "required": [
-      "sto_id",
-      "sto_collection_id",
-      "sto_file"
-    ],
-    "unique": [
-      [
-        "sto_id"
-      ],
-      [
-        "sto_collection_id"
-      ]
-    ],
-    "index": [
-      [
-        "sto_collection_id"
-      ],
-      [
-        "sto_prefix"
       ]
     ],
     "sort": {

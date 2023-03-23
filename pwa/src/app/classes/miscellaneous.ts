@@ -38,13 +38,22 @@ import { TranslateService } from "@ngx-translate/core";
 import { environment } from "../../environments/environment";
 import { ClipboardPluginWeb } from "@capacitor/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { CrudPage } from "./../pages/crud/crud.page";
 
 @Injectable({
   providedIn: "root"
 })
 
 export class Miscellaneous {
+  public user = new BehaviorSubject<any>(null);
+  public collections = new BehaviorSubject<any>([]);
+  public navi = new Subject<any>();
+  public menutoggle = new Subject<any>();
+  public version = new BehaviorSubject<boolean>(false);
   public toggle: boolean = true;
+
+  private user_: any;
+  private collections_: any;
 
   constructor(
     private storage: Storage,
@@ -53,11 +62,14 @@ export class Miscellaneous {
     private toast: ToastController,
     private cb: ClipboardPluginWeb,
     private http: HttpClient
-  ) { }
-
-  navi = new Subject<any>();
-  menutoggle = new Subject<any>();
-  version = new BehaviorSubject<boolean>(false);
+  ) {
+    this.user.subscribe((user: any) => {
+      this.user_ = user;
+    });
+    this.collections.subscribe((res: any) => {
+      this.collections_ = res && res.data ? res.data : [];
+    });
+  }
 
   getAPIHost() {
     return new Promise((resolve) => {
@@ -69,27 +81,65 @@ export class Miscellaneous {
 
   apiCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const collection_ = posted.collection ? posted.collection : "";
-        this.storage.get("LSVIEW-" + collection_).then((LSVIEW: any) => {
-          posted.user = LSUSERMETA;
-          posted.email = LSUSERMETA.email;
-          posted.view = LSVIEW ? LSVIEW : null;
-          this.getAPIHost().then((apiHost) => {
-            this.http.post<any>(apiHost + "/" + url, posted, {
-              headers: new HttpHeaders({
-                "Content-Type": "application/json",
-                "X-Api-Key": environment.apiKey
-              })
-            }).subscribe((res: any) => {
-              if (res && res.result) {
-                resolve(res);
-              } else {
-                reject(res.msg);
-              }
-            }, (error: any) => {
-              reject(error.msg);
-            });
+      const collection_ = posted.collection ? posted.collection : "";
+      this.storage.get("LSVIEW-" + collection_).then((LSVIEW: any) => {
+        posted.user = this.user_;
+        posted.email = this.user_.email;
+        posted.view = LSVIEW ? LSVIEW : null;
+        this.getAPIHost().then((apiHost) => {
+          this.http.post<any>(apiHost + "/" + url, posted, {
+            headers: new HttpHeaders({
+              "Content-Type": "application/json",
+              "X-Api-Key": environment.apiKey
+            })
+          }).subscribe((res: any) => {
+            if (res && res.result) {
+              resolve(res);
+            } else {
+              reject(res.msg);
+            }
+          }, (error: any) => {
+            reject(error.msg);
+          });
+        });
+      });
+    });
+  }
+
+  doImport(id: any) {
+    return new Promise((resolve, reject) => {
+      this.modal.create({
+        component: CrudPage,
+        backdropDismiss: false,
+        cssClass: "crud-modal",
+        componentProps: {
+          shuttle: {
+            op: "import",
+            collection: "_storage",
+            collections: this.collections_ ? this.collections_ : [],
+            views: [],
+            user: this.user_,
+            data: {
+              "sto_id": "data-import",
+              "sto_collection_id": id,
+              "sto_file": null
+            },
+            structure: environment.import_structure,
+            sweeped: [],
+            filter: {},
+            actions: [],
+            direct: -1
+          }
+        }
+      }).then((modal: any) => {
+        modal.present().then(() => {
+          modal.onDidDismiss().then((res: any) => {
+            if (res.data && res.data.modified) {
+              this.doMessage("file imported successfully", "success");
+              resolve(res.data.cid);
+            } else {
+              reject(res);
+            }
           });
         });
       });
@@ -98,23 +148,21 @@ export class Miscellaneous {
 
   apiFileCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        posted.append("email", LSUSERMETA.email);
-        posted.append("token", LSUSERMETA.token);
-        this.getAPIHost().then((apiHost) => {
-          this.http.post<any>(apiHost + "/" + url, posted, {
-            headers: new HttpHeaders({
-              "X-Api-Key": environment.apiKey
-            })
-          }).subscribe((res: any) => {
-            if (res && res.result) {
-              resolve(res);
-            } else {
-              reject(res);
-            }
-          }, (error: any) => {
-            reject(error);
-          });
+      posted.append("email", this.user_.email);
+      posted.append("token", this.user_.token);
+      this.getAPIHost().then((apiHost) => {
+        this.http.post<any>(apiHost + "/" + url, posted, {
+          headers: new HttpHeaders({
+            "X-Api-Key": environment.apiKey
+          })
+        }).subscribe((res: any) => {
+          if (res && res.result) {
+            resolve(res);
+          } else {
+            reject(res);
+          }
+        }, (error: any) => {
+          reject(error);
         });
       });
     });

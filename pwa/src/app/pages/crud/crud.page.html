@@ -66,10 +66,6 @@ https://www.gnu.org/licenses.
                     (click)="doSubmit()">
                     {{ 'IMPORT' | translate }}
                 </ion-button>
-                <ion-button *ngIf="collection=='_storage' && op=='upload' && !isInProgress" size="small"
-                    (click)="doSubmit()">
-                    {{ 'UPLOAD' | translate }}
-                </ion-button>
                 <ion-button size="small" (click)="doDismissModal({ modified: false, filter: [] })">
                     {{ 'CANCEL' | translate }}
                 </ion-button>
@@ -122,7 +118,7 @@ https://www.gnu.org/licenses.
         <div *ngIf="op=='filter'">
             <app-filter [filters]="filters" [property_list]="property_list"></app-filter>
         </div>
-        <div *ngIf="op=='insert' || op=='update' || op=='import' || op=='upload' || op=='action'">
+        <div *ngIf="op=='insert' || op=='update' || op=='import' || op=='action'">
             <div *ngIf="tab=='relation'" class="ion-padding-bottom ion-margin-top">
                 <ion-item *ngIf="reloading" class="clicked-item" lines="none">
                     <ion-spinner name="lines" class="ion-margin-end"></ion-spinner>
