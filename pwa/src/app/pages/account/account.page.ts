@@ -98,7 +98,7 @@ export class AccountPage implements OnInit {
     this.auth.Signout().then(() => {
       console.log("*** signed out");
     }).catch((error: any) => {
-      console.error("signout error", error.message);
+      console.error("signout error", error.msg);
     });
   }
 

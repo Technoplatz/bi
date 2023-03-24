@@ -454,7 +454,7 @@ export class SignPage implements OnInit {
 
   doDismissModal() {
     this.misc.dismissModal(null).then(() => { }).catch((error: any) => {
-      console.error("error", error.message);
+      console.error("error", error.msg);
     });
   }
 }

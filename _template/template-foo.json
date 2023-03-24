@@ -34,16 +34,16 @@
       "default": 1
     },
     "foo_unit_price": {
-      "bsonType": "decimal",
+      "bsonType": "number",
       "title": "Price",
       "description": "Unit Price",
-      "default": 0.0
+      "default": 0
     },
     "foo_amount": {
-      "bsonType": "decimal",
+      "bsonType": "number",
       "title": "Amount",
       "description": "Amount",
-      "default": 0.0
+      "default": 0
     },
     "foo_is_disabled": {
       "bsonType": "bool",

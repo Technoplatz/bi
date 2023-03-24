@@ -172,7 +172,7 @@ export class ViewPage implements OnInit {
             this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
           }).catch((error: any) => {
             console.error("*** view mode", error);
-            this.misc.doMessage(error.error.message, "error");
+            this.misc.doMessage(error.error.msg, "error");
           }).finally(() => {
             resolve(true);
           });

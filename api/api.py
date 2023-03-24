@@ -54,6 +54,7 @@ import pyotp
 import smtplib
 import urllib
 import hashlib
+import jwt
 from pickle import TRUE
 from email import encoders
 from email.mime.base import MIMEBase
@@ -437,7 +438,7 @@ class Misc():
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
                             "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
 
-    def post_slack_notification(self, exc):
+    def post_notification(self, exc):
         ip_ = self.get_user_ip_f()
         if NOTIFICATION_SLACK_HOOK_URL_:
             exc_ = {
@@ -455,17 +456,17 @@ class Misc():
 
     def exception_f(self, exc):
         print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
-        self.post_slack_notification(exc)
+        self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def api_error_f(self, exc):
         print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
-        self.post_slack_notification(exc)
+        self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def mongo_error_f(self, exc):
         try:
-            self.post_slack_notification(exc)
+            self.post_notification(exc)
             print("*** mongo error", str(exc.details), flush=True)
             print("*** mongo error", type(exc).__name__, flush=True)
             print("*** mongo error", __file__, flush=True)
@@ -907,8 +908,10 @@ class Crud():
                                 d[k] = datetime.strptime(doc_[k][:ln_], rgx_) if doc_[k] is not None else None
                         elif property_["bsonType"] == "string":
                             d[k] = str(doc_[k]) if doc_[k] is not None else doc_[k]
-                        elif property_["bsonType"] in ["number", "int", "float", "double", "decimal"]:
+                        elif property_["bsonType"] in ["number", "int", "float", "double"]:
                             d[k] = doc_[k] * 1 if d[k] is not None else d[k]
+                        elif property_["bsonType"] == "decimal":
+                            d[k] = doc_[k] * 1.00 if d[k] is not None else d[k]
                         elif property_["bsonType"] == "bool":
                             d[k] = True if d[k] and d[k] in [True, "true", "True", "TRUE"] else False
                     else:
@@ -973,6 +976,9 @@ class Crud():
 
     def frame_convert_number_f(self, c):
         return c * 1 if c is not None else c
+    
+    def frame_convert_decimal_f(self, c):
+        return c * 1.00 if c is not None else c
 
     def purge_f(self, obj):
         try:
@@ -1237,8 +1243,10 @@ class Crud():
                             df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                        elif property_["bsonType"] in ["number", "int", "decimal"]:
+                        elif property_["bsonType"] in ["number", "int"]:
                             df_[column_] = df_[column_].apply(self.frame_convert_number_f)
+                        elif property_["bsonType"] in ["decimal"]:
+                            df_[column_] = df_[column_].apply(self.frame_convert_decimal_f)
                     else:
                         columns_tobe_deleted_.append(column_)
                 else:
@@ -1275,7 +1283,7 @@ class Crud():
                     session_.commit_transaction()
                     count_ = len(insert_many_.inserted_ids)
 
-            res_ = {"result": True, "count": count_ }
+            res_ = {"result": True, "count": count_}
 
         except pymongo.errors.PyMongoError as exc:
             Misc().log_f({
@@ -1296,7 +1304,7 @@ class Crud():
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
 
-                res_["msg"] = "Please check your Inbox to get the error details."
+                res_["msg"] = "please check your inbox to get the error details."
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
@@ -3607,6 +3615,9 @@ class Security():
         finally:
             return res_
 
+    def header_simple_f(self):
+        return {"Content-Type": "application/json; charset=utf-8"}
+
 
 class OTP():
     def reset_otp_f(self, email_):
@@ -3906,19 +3917,6 @@ class Auth():
 
         finally:
             return res
-
-    def token_f(self):
-        try:
-            length_ = 256
-            charset_ = string.ascii_uppercase + string.ascii_lowercase + string.digits + "/+"
-            urand_ = random.SystemRandom()
-            res_ = "".join([urand_.choice(charset_) for _ in range(length_)])
-
-        except Exception as exc:
-            res_ = Misc().exception_f(exc)
-
-        finally:
-            return res_
 
     def password_hash_f(self, password_, salted_):
         try:
@@ -4326,14 +4324,13 @@ class Auth():
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            # generates a token an updates on db
+            # GENERATING JWT FOR USER
             name_db_ = user_["usr_name"]
             perm_ = True if Misc().permitted_user_f(user_) else False
             apikey_ = user_["aut_apikey"]
             jdate_ = Misc().get_jdate_f()
+            token_ = jwt.encode({"some": "payload"}, password_, algorithm="HS256")
 
-            # updates user token
-            token_ = self.token_f()
             Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_token": token_,
                 "aut_tfac": None,
@@ -4698,17 +4695,18 @@ def storage_f():
         }
 
     except APIError as exc:
-        res_ = Misc().api_error_f(exc)
+        res_ = {"msg": str(exc), "status": 400}
 
     except Exception as exc:
-        res_ = Misc().exception_f(exc)
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
         Mongo().client.close() if Mongo().client else None
-        return json.dumps(res_, default=json_util.default, sort_keys=False)
+        status_ = res_["status"] if "status" in res_ else 200
+        return json.dumps(res_, default=json_util.default, sort_keys=False), status_, Security().header_simple_f()
 
 
-@app.route("/crud", methods=["POST"])
+@app.route("/crud", methods=["POST"], endpoint="crud")
 def crud_f():
     try:
         # validates restapi request
@@ -4767,57 +4765,58 @@ def crud_f():
 
         # distributes the operation to the right function
         if op_ == "read":
-            crud_ = Crud().read_f(input_)
+            res_ = Crud().read_f(input_)
         elif op_ in ["update", "import", "upload"]:
-            crud_ = Crud().upsert_f(input_)
+            res_ = Crud().upsert_f(input_)
         elif op_ == "insert":
-            crud_ = Crud().insert_f(input_)
+            res_ = Crud().insert_f(input_)
         elif op_ in ["clone", "delete"]:
-            crud_ = Crud().multiple_f(input_)
+            res_ = Crud().multiple_f(input_)
         elif op_ == "action":
-            crud_ = Crud().action_f(input_)
+            res_ = Crud().action_f(input_)
         elif op_ == "remove":
-            crud_ = Crud().remove_f(input_)
+            res_ = Crud().remove_f(input_)
         elif op_ == "setprop":
-            crud_ = Crud().setprop_f(input_)
+            res_ = Crud().setprop_f(input_)
         elif op_ == "reconfigure":
-            crud_ = Crud().reconfigure_f(input_)
+            res_ = Crud().reconfigure_f(input_)
         elif op_ == "saveasview":
-            crud_ = Crud().saveasview_f(input_)
+            res_ = Crud().saveasview_f(input_)
         elif op_ == "purge":
-            crud_ = Crud().purge_f(input_)
+            res_ = Crud().purge_f(input_)
         elif op_ == "view":
-            crud_ = Crud().view_f(input_)
+            res_ = Crud().view_f(input_)
         elif op_ == "views":
-            crud_ = Crud().views_f(input_)
+            res_ = Crud().views_f(input_)
         elif op_ == "announce":
-            crud_ = Crud().announce_f(input_)
+            res_ = Crud().announce_f(input_)
         elif op_ == "visuals":
-            crud_ = Crud().visuals_f(input_)
+            res_ = Crud().visuals_f(input_)
         elif op_ == "collections":
-            crud_ = Crud().collections_f(input_)
+            res_ = Crud().collections_f(input_)
         elif op_ == "collection":
-            crud_ = Crud().collection_f(input_)
+            res_ = Crud().collection_f(input_)
         elif op_ == "parent":
-            crud_ = Crud().parent_f(input_)
+            res_ = Crud().parent_f(input_)
         elif op_ in ["backup", "restore"]:
-            crud_ = Crud().dump_f(input_)
+            res_ = Crud().dump_f(input_)
         elif op_ == "template":
-            crud_ = Crud().template_f(input_)
+            res_ = Crud().template_f(input_)
         elif op_ == "savecode":
-            crud_ = Crud().savecode_f(input_)
+            res_ = Crud().savecode_f(input_)
         else:
-            raise APIError(f"{op_} operation is not supported")
+            raise APIError(f"{op_} is not a supported operation")
 
     except APIError as exc:
-        crud_ = Misc().api_error_f(exc)
+        res_ = {"msg": str(exc), "status": 400}
 
     except Exception as exc:
-        crud_ = Misc().exception_f(exc)
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
         Mongo().client.close() if Mongo().client else None
-        return json.dumps(crud_, default=json_util.default, sort_keys=False)
+        status_ = res_["status"] if "status" in res_ else 200
+        return json.dumps(res_, default=json_util.default, sort_keys=False), status_, Security().header_simple_f()
 
 
 @app.route("/otp", methods=["POST"])
@@ -4873,17 +4872,18 @@ def otp_f():
             raise APIError(res_["msg"])
 
     except APIError as exc:
-        res_ = Misc().api_error_f(exc)
+        res_ = {"msg": str(exc), "status": 401}
 
     except Exception as exc:
-        res_ = Misc().exception_f(exc)
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
         Mongo().client.close() if Mongo().client else None
-        return json.dumps(res_, default=json_util.default)
+        status_ = res_["status"] if "status" in res_ else 200
+        return json.dumps(res_, default=json_util.default), status_, Security().header_simple_f()
 
 
-@app.route("/auth", methods=["POST"])
+@app.route("/auth", methods=["POST"], endpoint="auth")
 def auth_f():
     try:
         # validates restapi request
@@ -4931,17 +4931,25 @@ def auth_f():
         user_ = auth_["user"] if auth_ and "user" in auth_ else None
         saas_ = auth_["saas"] if auth_ and "saas" in auth_ else None
 
+        token_ = None
+        if op_ == "tfac":
+            token_ = user_["token"] if "token" in user_ and user_["token"] != None else None
+
         res_ = {"result": True, "user": user_, "saas": saas_}
 
     except APIError as exc:
-        res_ = Misc().api_error_f(exc)
+        res_ = {"msg": str(exc), "status": 401}
 
     except Exception as exc:
-        res_ = Misc().exception_f(exc)
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
         Mongo().client.close() if Mongo().client else None
-        return json.dumps(res_, default=json_util.default, sort_keys=False)
+        status_ = res_["status"] if "status" in res_ else 200
+        header_ = Security().header_simple_f()
+        if token_ != None:
+            header_["Set-Cookie"] = f"technoplatz-bi-session={token_}; path=/; samesite=strict; httponly"
+        return json.dumps(res_, default=json_util.default, sort_keys=False), status_, header_
 
 
 @app.route("/get/visual/<string:id>", methods=["GET"])
@@ -4980,27 +4988,19 @@ def get_visual_f(id):
             "visual": view_to_visual_f_
         }
 
-        code_ = 200
-
     except AuthError as exc:
-        print("*** get/view auth error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 401
+        res_ = {"msg": str(exc), "status": 401}
 
     except APIError as exc:
-        print("*** get/view api error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 500
+        res_ = {"msg": str(exc), "status": 400}
 
     except Exception as exc:
-        print("*** get/view exception", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 500
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
         Mongo().client.close() if Mongo().client else None
-        headers = {"Content-Type": "application/json; charset=utf-8"}
-        return res_, code_, headers
+        status_ = res_["status"] if "status" in res_ else 200
+        return res_, status_, Security().header_simple_f()
 
 
 @app.route("/get/pivot/<string:id>", methods=["GET"])
@@ -5045,27 +5045,19 @@ def get_pivot_f(id):
             "count": count_
         }
 
-        code_ = 200
-
     except AuthError as exc:
-        print("*** get/view auth error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 401
+        res_ = {"msg": str(exc), "status": 401}
 
     except APIError as exc:
-        print("*** get/view api error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 500
+        res_ = {"msg": str(exc), "status": 400}
 
     except Exception as exc:
-        print("*** get/view exception", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 500
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
         Mongo().client.close() if Mongo().client else None
-        headers = {"Content-Type": "application/json; charset=utf-8"}
-        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers
+        status_ = res_["status"] if "status" in res_ else 200
+        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), status_, Security().header_simple_f()
 
 
 @app.route("/post", methods=["POST"])
@@ -5218,31 +5210,25 @@ def post_f():
         }))
 
         session_.commit_transaction() if session_ else None
-        code_ = 200
+
         res_ = {"result": True, "response": response_}
 
     except AuthError as exc:
         session_.abort_transaction() if session_ else None
-        print("*** auth error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        code_ = 401
-        res_ = {"result": False, "response": str(exc)}
+        res_ = {"result": False, "response": str(exc), "status": 401}
 
     except APIError as exc:
         session_.abort_transaction() if session_ else None
-        print("*** api error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        code_ = 500
-        res_ = {"result": False, "response": str(exc)}
+        res_ = {"result": False, "response": str(exc), "status": 400}
 
     except Exception as exc:
         session_.abort_transaction() if session_ else None
-        print("*** exception", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        code_ = 500
-        res_ = {"result": False, "response": str(exc)}
+        res_ = {"result": False, "response": str(exc), "status": 500}
 
     finally:
         Mongo().client.close() if Mongo().client else None
-        headers_ = {"Content-Type": "application/json; charset=utf-8"}
-        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers_
+        status_ = res_["status"] if "status" in res_ else 200
+        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), status_, Security().header_simple_f()
 
 
 @app.route("/get/dump", methods=["POST"])
@@ -5275,19 +5261,17 @@ def get_dump_f():
         res_ = send_from_directory(directory=directory_, path=file_, as_attachment=True)
 
     except AuthError as exc:
-        print("*** get dump error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = None
+        res_ = {"msg": str(exc), "status": 401}
 
     except APIError as exc:
-        print("*** get dump api error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = None
+        res_ = {"msg": str(exc), "status": 400}
 
     except Exception as exc:
-        print("*** get dump exception", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = None
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
-        return res_
+        status_ = res_["status"] if "status" in res_ else 200
+        return res_, status_, Security().header_simple_f()
 
 
 @app.route("/get/view/<string:id>", methods=["GET"])
@@ -5335,26 +5319,19 @@ def get_data_f(id):
             raise APIError(generate_view_data_f_["msg"])
 
         res_ = generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
-        code_ = 200
 
     except AuthError as exc:
-        print("*** get/view auth error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 401
+        res_ = {"msg": str(exc), "status": 401}
 
     except APIError as exc:
-        print("*** get/view api error", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 500
+        res_ = {"msg": str(exc), "status": 400}
 
     except Exception as exc:
-        print("*** get/view exception", str(exc), type(exc).__name__, exc.__traceback__.tb_lineno, flush=True)
-        res_ = {"message": str(exc)}
-        code_ = 500
+        res_ = {"msg": str(exc), "status": 500}
 
     finally:
-        headers_ = {"Content-Type": "application/json; charset=utf-8"}
-        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), code_, headers_
+        status_ = res_["status"] if "status" in res_ else 200
+        return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), status_, Security().header_simple_f()
 
 
 if __name__ == "__main__":

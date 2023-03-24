@@ -35,7 +35,7 @@ import { Storage } from "@ionic/storage";
 import { BehaviorSubject } from "rxjs";
 import { Crud } from "./crud";
 import { Miscellaneous } from "./misc";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpResponse } from "@angular/common/http";
 import { environment } from "../../environments/environment";
 
 @Injectable({
@@ -74,7 +74,7 @@ export class Auth {
         }
       }, (error: any) => {
         console.error("*** error", error);
-        reject(error.message);
+        reject(error.msg);
       });
     });
   }
@@ -91,7 +91,7 @@ export class Auth {
           reject(res.msg);
         }
       }, (error: any) => {
-        reject(error.message);
+        reject(error.msg);
       });
     });
   }
@@ -102,7 +102,8 @@ export class Auth {
       this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
         headers: new HttpHeaders(this.authHeaders)
       }).subscribe((res: any) => {
-        if (res && res.result) {
+        console.log("*** rh", res);
+        if (res.result) {
           this.storage.set("LSUSERMETA", res.user).then(() => {
             this.crud.getAll().then(() => {
               this.user.next(res.user);
@@ -242,7 +243,7 @@ export class Auth {
             reject(res.msg);
           }
         }, (error: any) => {
-          reject(error.message);
+          reject(error.msg);
         });
       }).catch((error: any) => {
         reject(error);
@@ -266,7 +267,7 @@ export class Auth {
           reject({ message: "no api response" });
         }
       }, (error: any) => {
-        reject({ message: error.message });
+        reject({ message: error.msg });
       });
     });
   }

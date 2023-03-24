@@ -319,15 +319,17 @@ export class CollectionPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
-        this.RefreshData(0).then(() => {
-          ["_collection", "_view", "_backup"].includes(this.id) ? this.crud.getAll().then(() => {
-            if (["remove", "restore"].includes(res.data.op)) {
-              this.misc.navi.next("dashboard");
-            }
-          }).catch((error: any) => {
-            console.error(error);
-            this.misc.doMessage(error, "error");
-          }) : null;
+        this.storage.remove("LSFILTER_" + this.id).then(() => {
+          this.RefreshData(0).then(() => {
+            ["_collection", "_view", "_backup"].includes(this.id) ? this.crud.getAll().then(() => {
+              if (["remove", "restore"].includes(res.data.op)) {
+                this.misc.navi.next("dashboard");
+              }
+            }).catch((error: any) => {
+              console.error(error);
+              this.misc.doMessage(error, "error");
+            }) : null;
+          });
         });
       } else {
         if (res.data.filters && res.data.filters.length > 0) {

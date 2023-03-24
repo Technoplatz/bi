@@ -78,7 +78,7 @@ export function createTranslateLoader(http: HttpClient) {
         FormsModule,
         ReactiveFormsModule,
         IonicStorageModule.forRoot({
-            name: "__bretzeldb",
+            name: "__bidb",
             driverOrder: ["indexeddb", "sqlite", "websql"]
         }),
         AppRoutingModule,

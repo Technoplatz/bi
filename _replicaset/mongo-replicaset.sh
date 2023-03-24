@@ -126,7 +126,6 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
         db.createCollection('_auth', { 'capped': false });
         db.getCollection('_auth').insertOne({
             aut_id: '${ADMIN_EMAIL}',
-            aut_password: null,
             aut_token: null,
             aut_tfac: null,
             aut_expires: 0,
@@ -200,7 +199,6 @@ else
             var apikey_ = (u1 + u2 + u3).slice(1);
             var upsert_auth_ = db.getCollection('_auth').updateOne({ aut_id: '${ADMIN_EMAIL}' }, { \$set: {
                 aut_id: '${ADMIN_EMAIL}',
-                aut_password: null,
                 aut_token: null,
                 aut_tfac: null,
                 aut_expires: 0,

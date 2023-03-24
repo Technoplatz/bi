@@ -58,7 +58,7 @@ export class UserResolver implements Resolve<any> {
       this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
         resolve(LSUSERMETA);
       }).catch((error: any) => {
-        reject({ message: error.message });
+        reject({ message: error.msg });
       });
     });
   }
@@ -72,7 +72,7 @@ export class AdminResolver implements Resolve<any> {
       this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
         resolve(LSUSERMETA && LSUSERMETA.perm ? true : false);
       }).catch((error: any) => {
-        reject({ message: error.message });
+        reject({ message: error.msg });
       });
     });
   }
