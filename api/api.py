@@ -1260,8 +1260,8 @@ class Crud():
             # SETTING THE DEFAULTS
             df_["_created_at"] = datetime.now()
             df_["_created_by"] = email_
-            df_["_modified_at"] = datetime.now()
-            df_["_modified_by"] = email_
+            df_["_modified_at"] = None
+            df_["_modified_by"] = None
             df_["_modified_count"] = 0
             df_["_upload_id"] = datetime.today().strftime("%Y%m%d%H%M%S")
 

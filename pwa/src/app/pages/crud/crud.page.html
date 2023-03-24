@@ -34,9 +34,7 @@ https://www.gnu.org/licenses.
     <ion-grid class="ion-no-padding">
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
-                <ion-button *ngIf="isInProgress" size="small">
-                    {{ 'PROCESSING' | translate }}...
-                </ion-button>
+                <ion-button *ngIf="isInProgress" size="small"> {{ 'PROCESSING' | translate }}... </ion-button>
                 <ion-button *ngIf="op=='filter' && !isInProgress" size="small" (click)="doRunFilter()">
                     {{ 'SEARCH' | translate }}
                 </ion-button>
@@ -66,9 +64,8 @@ https://www.gnu.org/licenses.
                     (click)="doSubmit()">
                     {{ 'IMPORT' | translate }}
                 </ion-button>
-                <ion-button size="small" (click)="doDismissModal({ modified: false, filter: [] })">
-                    {{ 'CANCEL' | translate }}
-                </ion-button>
+                <ion-button size="small" (click)="doDismissModal({ modified: false, filter: [] })"> {{ 'CANCEL' |
+                    translate }} </ion-button>
                 <ion-button *ngIf="op=='update'" color="danger" size="small" (click)="doRemove()" class="end-item">
                     {{ 'DELETE' | translate }}&nbsp;
                 </ion-button>
@@ -81,12 +78,8 @@ https://www.gnu.org/licenses.
         </ion-row>
         <ion-row *ngIf="tab=='relation'" class="ion-padding-top ion-padding-bottom" (click)="doSubmitRelated()">
             <ion-col size="12">
-                <ion-button size="small">
-                    {{ 'OK' | translate }}
-                </ion-button>
-                <ion-button size="small" (click)="goTab('data')">
-                    {{ 'CANCEL' | translate }}
-                </ion-button>
+                <ion-button size="small"> {{ 'OK' | translate }} </ion-button>
+                <ion-button size="small" (click)="goTab('data')"> {{ 'CANCEL' | translate }} </ion-button>
             </ion-col>
         </ion-row>
         <ion-row *ngIf="op=='filter' && saved_filters && saved_filters.length > 0"
@@ -122,9 +115,7 @@ https://www.gnu.org/licenses.
             <div *ngIf="tab=='relation'" class="ion-padding-bottom ion-margin-top">
                 <ion-item *ngIf="reloading" class="clicked-item" lines="none">
                     <ion-spinner name="lines" class="ion-margin-end"></ion-spinner>
-                    <ion-label>
-                        {{ parents.collection }} {{ 'is loading' | translate }}...
-                    </ion-label>
+                    <ion-label> {{ parents.collection }} {{ 'is loading' | translate }}... </ion-label>
                 </ion-item>
                 <ion-item *ngIf="!reloading" class="clicked-item" lines="none">
                     <ion-searchbar showCancelButton="never" debounce="500" placeholder="Search" animated="true"
@@ -148,13 +139,10 @@ https://www.gnu.org/licenses.
                                 [checked]="related[k].selected"></ion-checkbox>
                         </ion-col>
                         <ion-col *ngFor="let rel of parents.lookup; let i = index" [size]="12/parents.lookup.length"
-                            (click)="doSetRelated(item)" class="clicked-item">{{
-                            item[rel.remote] }}</ion-col>
+                            (click)="doSetRelated(item)" class="clicked-item">{{ item[rel.remote] }}</ion-col>
                     </ion-row>
                     <ion-row>
-                        <ion-col size="12">
-                            {{ related.length }} {{ 'records found' | translate }}
-                        </ion-col>
+                        <ion-col size="12"> {{ related.length }} {{ 'records found' | translate }} </ion-col>
                     </ion-row>
                 </ion-grid>
             </div>
@@ -170,9 +158,8 @@ https://www.gnu.org/licenses.
                         <ion-select class="ion-no-padding ion-no-margin"
                             (ionChange)="doAktionChange($event.detail.value)"
                             placeholder="{{ 'Select an Action' | translate }}" [value]="actionix">
-                            <ion-select-option *ngFor="let item of aktions; let ak = index" [value]="ak">
-                                {{ item.title }}
-                            </ion-select-option>
+                            <ion-select-option *ngFor="let item of aktions; let ak = index" [value]="ak"> {{ item.title
+                                }} </ion-select-option>
                         </ion-select>
                     </ion-item>
                     <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
@@ -187,8 +174,7 @@ https://www.gnu.org/licenses.
                             </ion-label>
                             <div *ngIf="field.parents && field.bsonType!='array'" (click)="doRelated(field)"
                                 class="clicked-item ion-margin-top full-flex">
-                                <ion-badge class="ion-padding-start ion-padding-end">{{
-                                    field.parents.collection }}
+                                <ion-badge class="ion-padding-start ion-padding-end">{{ field.parents.collection }}
                                 </ion-badge>
                             </div>
                             <div *ngIf="field.bsonType=='string' && !field.file" class="full-width">
@@ -224,8 +210,7 @@ https://www.gnu.org/licenses.
                                         [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
                                         [(ngModel)]="data[field.name]"
                                         (ionChange)="doChangeEnum(field, $event.target.value)">
-                                        <ion-select-option *ngFor="let item of field.enum" [value]="item">
-                                            {{ item }}
+                                        <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
                                         </ion-select-option>
                                     </ion-select>
                                 </ng-template>
@@ -233,9 +218,8 @@ https://www.gnu.org/licenses.
                                     <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
                                         [(ngModel)]="data[field.name]">
-                                        <ion-select-option *ngFor="let item of data_properties" [value]="item">
-                                            {{ item }}
-                                        </ion-select-option>
+                                        <ion-select-option *ngFor="let item of data_properties" [value]="item"> {{ item
+                                            }} </ion-select-option>
                                     </ion-select>
                                 </ng-template>
                             </div>
@@ -247,8 +231,7 @@ https://www.gnu.org/licenses.
                             </div>
                             <div *ngIf="field.bsonType=='date'">
                                 <div *ngIf="data[field.name]; else nodatevalue" class="datetime-class">
-                                    <ion-datetime-button [datetime]="field.name">
-                                    </ion-datetime-button>
+                                    <ion-datetime-button [datetime]="field.name"> </ion-datetime-button>
                                     <ion-button (click)="doCancelDate(field.name)" fill="clear"
                                         class="ion-no-padding datetime-button">
                                         <ion-icon name="close-circle-outline"></ion-icon>
@@ -289,8 +272,8 @@ https://www.gnu.org/licenses.
                                 </ion-label>
                                 <div *ngIf="field.parents" (click)="doRelated(field)"
                                     class="clicked-item ion-margin-top full-flex">
-                                    <ion-badge class="ion-padding-start ion-padding-end ion-margin-bottom">{{
-                                        field.parents.collection }}
+                                    <ion-badge class="ion-padding-start ion-padding-end ion-margin-bottom">
+                                        {{ field.parents.collection }}
                                     </ion-badge>
                                 </div>
                                 <ion-input *ngIf="field?.manualAdd" name="arrayitem" [title]="field.name"
@@ -300,20 +283,28 @@ https://www.gnu.org/licenses.
                                     class="add-and-enter"></ion-input>
                                 <ion-input [formControlName]="field.name" [(ngModel)]="data[field.name]"
                                     class="hide-segment"></ion-input>
-                                <app-kov [data]="data" [field]="field" [keylist]="property_list" [op]="op">
-                                </app-kov>
+                                <app-kov [data]="data" [field]="field" [keylist]="property_list" [op]="op"> </app-kov>
                             </div>
                             <json-editor *ngIf="field.bsonType=='object'" [id]="field.name" [options]="options"
                                 [formControlName]="field.name" class="ion-margin-top ion-margin-bottom"
                                 (change)="doJsonChangeLog($event)" [(ngModel)]="data[field.name]"></json-editor>
-                            <!-- <ion-icon *ngIf="crudForm?.get(field.name)?.invalid" name="close" class="invalid-field">
-                            </ion-icon> -->
                         </ion-item>
                     </ion-list>
                     <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
                         <ion-item *ngIf="data['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
                             <ion-label position="stacked">{{ 'Record ID' }}</ion-label>
-                            <ion-input class="ion-no-padding" type="text" [value]="data['_id']" disabled>
+                            <ion-input class="ion-no-padding" type="text" [value]="data['_id']" disabled> </ion-input>
+                        </ion-item>
+                        <ion-item *ngIf="data['_created_at']" lines="full" class="ion-no-margin">
+                            <ion-label position="stacked">{{ 'Created At' }}</ion-label>
+                            <ion-input class="ion-no-margin"
+                                [value]="data['_created_at'] && data['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
+                                disabled>
+                            </ion-input>
+                        </ion-item>
+                        <ion-item *ngIf="data['_created_by']" lines="full" class="ion-no-margin">
+                            <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>
+                            <ion-input class="ion-no-padding" type="text" [value]="data['_created_by']" disabled>
                             </ion-input>
                         </ion-item>
                         <ion-item *ngIf="data['_modified_at']" lines="full" class="ion-no-margin">
@@ -326,18 +317,6 @@ https://www.gnu.org/licenses.
                         <ion-item *ngIf="data['_modified_by']" lines="full" class="ion-no-margin">
                             <ion-label position="stacked">{{ 'Modified By' | translate }}</ion-label>
                             <ion-input class="ion-no-padding" type="text" [value]="data['_modified_by']" disabled>
-                            </ion-input>
-                        </ion-item>
-                        <ion-item *ngIf="data['_created_at']" lines="full" class="ion-no-margin">
-                            <ion-label position="stacked">{{ 'Created At' }}</ion-label>
-                            <ion-input class="ion-no-margin"
-                                [value]="data['_created_at'] && data['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
-                                disabled>
-                            </ion-input>
-                        </ion-item>
-                        <ion-item *ngIf="data['_created_by']" lines="full" class="ion-no-margin">
-                            <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>
-                            <ion-input class="ion-no-padding" type="text" [value]="data['_created_by']" disabled>
                             </ion-input>
                         </ion-item>
                         <ion-item *ngIf="data['_upload_id']" lines="full" class="ion-no-margin">
@@ -353,13 +332,11 @@ https://www.gnu.org/licenses.
     <ng-template #crudloading>
         <ion-item lines="none">
             <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-            <ion-label>
-                {{ loadingText | translate }}
-            </ion-label>
+            <ion-label> {{ loadingText | translate }} </ion-label>
         </ion-item>
     </ng-template>
-
 </ion-content>
 
 <modal-footer>
-    <modal-footer>
+    <modal-footer></modal-footer>
+</modal-footer>

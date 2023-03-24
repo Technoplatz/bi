@@ -48,7 +48,8 @@
     "foo_is_enabled": {
       "bsonType": "bool",
       "title": "Is Enabled?",
-      "description": "Is Enabled?"
+      "description": "Is Enabled?",
+      "default": true
     }
   },
   "required": ["foo_no", "foo_account_no", "foo_status"],

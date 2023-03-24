@@ -444,7 +444,7 @@ ion-alert .alert-radio-group {
 
 .data-ext-columns {
   min-width: 140px;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .data-at-column {
@@ -1696,6 +1696,7 @@ ion-checkbox {
 .check-column {
   max-width: 30px !important;
   min-width: 30px !important;
+  z-index: 999 !important;
 }
 
 .data-grid ion-row:first-child {

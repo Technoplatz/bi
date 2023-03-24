@@ -49,6 +49,7 @@ import { JsonEditorOptions } from "ang-jsoneditor";
 
 export class CollectionPage implements OnInit {
   @ViewChild("select0") selectRef?: IonSelect;
+
   public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
@@ -89,7 +90,6 @@ export class CollectionPage implements OnInit {
   private menu_toggle: boolean = false;
   public view_mode: any = {};
   private sweeped: any = [];
-  private sort: any = {};
   private properites_: any = {};
   private actionix: number = -1;
   private views_structure: any;
@@ -99,10 +99,12 @@ export class CollectionPage implements OnInit {
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
+
   public jeoptions?: JsonEditorOptions;
   public jeopen: boolean = false;
   public is_saving: boolean = false;
   public is_viewsaving: boolean = false;
+  public sort: any = {};
 
   constructor(
     private storage: Storage,
@@ -450,7 +452,7 @@ export class CollectionPage implements OnInit {
 
   setSort(key: string, d: number) {
     this.sort = {};
-    this.sort[key] = d;
+    this.sort[key] = d ? d * -1 : 1;
     this.RefreshData(0);
   }
 
