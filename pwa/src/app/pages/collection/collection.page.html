@@ -51,7 +51,8 @@ https://www.gnu.org/licenses.
               <ng-template #newrecord>
                 <div (click)="goCrud(null, 'insert')" class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  <span *ngIf="id != '_backup'; else normale"> {{ 'New' | translate }}<br />{{ 'Record' | translate }} </span>
+                  <span *ngIf="id != '_backup'; else normale"> {{ 'New' | translate }}<br />{{ 'Record' | translate }}
+                  </span>
                   <ng-template #normale> {{ 'New' | translate }}<br />{{ 'Backup' | translate }} </ng-template>
                 </div>
               </ng-template>
@@ -130,12 +131,8 @@ https://www.gnu.org/licenses.
             <ion-col *ngIf="perm && actions?.length > 0; else noaction">
               <h6>{{ 'ACTIONS' | translate }} [{{ actions?.length }}]</h6>
               <div class="act-buttons-wrapper">
-                <ion-button
-                  *ngFor="let item of actions; let ac = index"
-                  (click)="doAction(ac)"
-                  fill="outline"
-                  class="action-button"
-                >
+                <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" fill="outline"
+                  class="action-button">
                   <ion-icon name="play-circle"></ion-icon>
                   {{ item.title }}
                 </ion-button>
@@ -157,10 +154,8 @@ https://www.gnu.org/licenses.
               <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)" mode="md">
               </ion-checkbox>
             </ion-col>
-            <ion-col
-              *ngFor="let item of columns_ | keyvalue : orderByIndex"
-              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'"
-            >
+            <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
+              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
                 <span class="column-title">{{ item.value.title }}<br /> </span>
                 {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
@@ -179,76 +174,46 @@ https://www.gnu.org/licenses.
                   </ion-button>
                   <br />
                   <div *ngIf="item.value.bsonType!='bool'">
-                    <ion-button
-                      [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'eq')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'eq')">
                       <ion-text>=</ion-text>
                     </ion-button>
-                    <ion-button
-                      [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'ne')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'ne')">
                       <ion-text>&ne;</ion-text>
                     </ion-button>
-                    <ion-button
-                      [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'gte')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'gte')">
                       <ion-text>&ge;</ion-text>
                     </ion-button>
-                    <ion-button
-                      [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'lte')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'lte')">
                       <ion-text>&le;</ion-text>
                     </ion-button>
-                    <ion-button
-                      [color]="searched[item.key].op == 'null' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'null')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'null')">
                       <ion-text>&#9723;</ion-text>
                     </ion-button>
-                    <ion-button
-                      [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'nnull')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'nnull')">
                       <ion-text>&#9724;</ion-text>
                     </ion-button>
                   </div>
                   <div *ngIf="item.value.bsonType=='bool'">
-                    <ion-button
-                      [color]="searched[item.key].op == 'true' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'true')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'true')">
                       <ion-text>{{ 'True' | translate }}</ion-text>
                     </ion-button>
-                    <ion-button
-                      [color]="searched[item.key].op == 'false' ? 'primary' : 'light'"
-                      size="small"
-                      (click)="doSetSearchItemOp(item.key, 'false')"
-                    >
+                    <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'false')">
                       <ion-text>{{ 'False' | translate }}</ion-text>
                     </ion-button>
                   </div>
                   <div>
-                    <ion-input
-                      *ngIf="item.value.bsonType!='bool'"
-                      [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'"
-                      size="32"
-                      [(ngModel)]="searched[item.key].kw"
-                      [ngModelOptions]="{standalone: true}"
-                      class="ion-no-padding search-input"
-                      placeholder="{{ 'Search' | translate }}"
-                      disabled="false"
-                    >
+                    <ion-input *ngIf="item.value.bsonType!='bool'"
+                      [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
+                      [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
+                      class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
                     </ion-input>
                   </div>
                   <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
@@ -260,23 +225,28 @@ https://www.gnu.org/licenses.
                 </div>
               </div>
             </ion-col>
-            <ion-col class="data-ext-columns data-at-column clicked-item" (click)="setSort('_created_at', sort['_created_at'])">
+            <ion-col class="data-ext-columns data-at-column clicked-item"
+              (click)="setSort('_created_at', sort['_created_at'])">
               <span class="column-title">{{ 'Created At' }}<br /></span>
               {{ '_created_at' | translate }}
             </ion-col>
-            <ion-col class="data-ext-columns data-by-column clicked-item" (click)="setSort('_created_by', sort['_created_by'])">
+            <ion-col class="data-ext-columns data-by-column clicked-item"
+              (click)="setSort('_created_by', sort['_created_by'])">
               <span class="column-title">{{ 'Created by' }}<br /></span>
               {{ '_created_by' | translate }}
             </ion-col>
-            <ion-col class="data-ext-columns data-at-column clicked-item" (click)="setSort('_modified_at', sort['_modified_at'])">
+            <ion-col class="data-ext-columns data-at-column clicked-item"
+              (click)="setSort('_modified_at', sort['_modified_at'])">
               <span class="column-title">{{ 'Modified At' }}<br /></span>
               {{ '_modified_at' | translate }}
             </ion-col>
-            <ion-col class="data-ext-columns data-by-column clicked-item" (click)="setSort('_modified_by', sort['_modified_by'])">
+            <ion-col class="data-ext-columns data-by-column clicked-item"
+              (click)="setSort('_modified_by', sort['_modified_by'])">
               <span class="column-title">{{ 'Modified by' }}<br /></span>
               {{ '_modified_by' | translate }}
             </ion-col>
-            <ion-col class="data-ext-columns data-id-column clicked-item" (click)="setSort('_upload_id', sort['_upload_id'])">
+            <ion-col class="data-ext-columns data-id-column clicked-item"
+              (click)="setSort('_upload_id', sort['_upload_id'])">
               <span class="column-title">{{ 'Upload Id' }}<br /></span>
               {{ '_upload_id' | translate }}
             </ion-col>
@@ -285,29 +255,20 @@ https://www.gnu.org/licenses.
           <!-- CRUD LIST -->
           <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item">
             <ion-col class="ion-text-center check-column">
-              <ion-checkbox
-                id="checkbox"
-                [(ngModel)]="selected[i]"
-                [checked]="selected[i]"
-                (ionChange)="SetSelectData(i,$event)"
-                mode="md"
-              >
+              <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
+                (ionChange)="SetSelectData(i,$event)" mode="md">
               </ion-checkbox>
             </ion-col>
-            <ion-col
-              *ngFor="let item of columns_ | keyvalue : orderByIndex"
-              (click)="goCrud(record, 'update')"
-              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'"
-            >
+            <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
+              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
               <span *ngIf="['date', 'array', 'object', 'decimal'].includes(item.value.bsonType); else othertype">
                 <span *ngIf="item.value.bsonType=='date' && record[item.key]">
                   {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
                 </span>
                 <span *ngIf="item.value.bsonType=='array'">
                   <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">
-                    {{ record[item.key]?.length }} {{ 'Line' | translate }}<span *ngIf="record[item.key]?.length > 1"
-                      >{{ 's' }}</span
-                    >
+                    {{ record[item.key]?.length }} {{ 'Line' | translate }}<span *ngIf="record[item.key]?.length > 1">{{
+                      's' }}</span>
                   </span>
                   <ng-template #noarrayobject>
                     <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
@@ -327,14 +288,16 @@ https://www.gnu.org/licenses.
             <ion-col class="data-ext-columns data-at-column" (click)="goCrud(record, 'update')">
               {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
             </ion-col>
-            <ion-col class="data-ext-columns data-by-column" (click)="goCrud(record, 'update')"> {{ record._created_by }} </ion-col>
+            <ion-col class="data-ext-columns data-by-column" (click)="goCrud(record, 'update')"> {{ record._created_by
+              }} </ion-col>
             <ion-col class="data-ext-columns data-at-column" (click)="goCrud(record, 'update')">
               {{ record._modified_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
             </ion-col>
             <ion-col class="data-ext-columns data-by-column" (click)="goCrud(record, 'update')">
               {{ record._modified_by }}
             </ion-col>
-            <ion-col class="data-ext-columns data-id-column" (click)="goCrud(record, 'update')"> {{ record._upload_id }} </ion-col>
+            <ion-col class="data-ext-columns data-id-column" (click)="goCrud(record, 'update')"> {{ record._upload_id }}
+            </ion-col>
           </ion-row>
 
           <!-- CRUD LIST PAGINATION -->
@@ -357,13 +320,15 @@ https://www.gnu.org/licenses.
                   {{ count }} {{ 'records' | translate }}
                 </ion-button>
                 <span *ngIf="page > 10">
-                  <ion-button size="small" fill="clear" (click)="RefreshData(1)" class="ion-no-padding"> 1 ... </ion-button>
+                  <ion-button size="small" fill="clear" (click)="RefreshData(1)" class="ion-no-padding"> 1 ...
+                  </ion-button>
                   <ion-button size="small" fill="clear" (click)="RefreshData(page-1)" class="ion-no-padding">
                     <ion-icon name="caret-back"></ion-icon>
                   </ion-button>
                 </span>
                 <span *ngFor="let in of paget; let i = index">
-                  <ion-button *ngIf="page != in" size="small" fill="clear" (click)="RefreshData(in)" class="ion-no-padding">
+                  <ion-button *ngIf="page != in" size="small" fill="clear" (click)="RefreshData(in)"
+                    class="ion-no-padding">
                     <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
                   </ion-button>
                   <ion-button *ngIf="page == in" size="small" fill="clear" class="ion-no-padding text-underlined">

@@ -218,6 +218,7 @@ export class Miscellaneous {
   }
 
   async doMessage(msg: string, type: string) {
+    type === "error" ? console.error(msg) : null;
     const typed: any = {
       message: msg,
       duration: type === "success" ? 5000 : 10000,

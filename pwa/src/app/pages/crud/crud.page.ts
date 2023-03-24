@@ -78,7 +78,6 @@ export class CrudPage implements OnInit {
   public error: string = "";
   public options?: JsonEditorOptions;
   public arrays: any = [];
-  public visibility: string = "ion-padding-start ion-padding-end ion-hide";
   public parentkey: number = 0;
   public aktions: any = [];
   public localfield: string = "";
@@ -110,7 +109,7 @@ export class CrudPage implements OnInit {
       if (event.target.getAttribute("name") === "arrayitem") {
         this.doAddItemToArray(event).then(() => {
         }).catch((error: any) => {
-          console.error(error);
+          this.misc.doMessage(error, "error");
         });
       }
     }
@@ -150,7 +149,6 @@ export class CrudPage implements OnInit {
       this.doGetFilters().then(() => {
         this.doInitForm();
       }).catch((error: any) => {
-        console.error(error);
         this.misc.doMessage(error, "error");
       });
     });
@@ -163,34 +161,28 @@ export class CrudPage implements OnInit {
       this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? this.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
-      this.visibility = "ion-padding-start ion-padding-end";
       const view_ = this.collection === "_view" && this.data ? this.data.vie_id : null;
       this.doGetViewProperties(view_).then(() => {
         this.doGetCollectionProperties(this.collection).then(() => {
           this.tab = "data";
           this.showhide = this.op === "action" ? "hide-segment" : "show-segment";
-
           if (this.actionix >= 0) {
             this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
-              console.error(error);
               this.misc.doMessage(error, "error");
             });
           }
         }).catch((error: any) => {
-          console.error(error);
           this.misc.doMessage(error, "error");
         }).finally(() => {
           setTimeout(() => { this.is_ready = true; }, this.timeout);
           this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
         });
       }).catch((error: any) => {
-        console.error(error);
         this.misc.doMessage(error, "error");
       }).finally(() => {
         setTimeout(() => { this.is_ready = true; }, this.timeout);
       });
     }).catch((error: any) => {
-      console.error(error);
       this.misc.doMessage(error, "error");
     });
   }
@@ -252,7 +244,6 @@ export class CrudPage implements OnInit {
     this.error = "";
     if (!this.isInProgress) {
       if (this.op !== "remove" && !this.crudForm.valid) {
-        this.doShowError("form is not valid");
         this.misc.doMessage("form is not valid", "error");
       } else {
         this.modified = true;
@@ -267,8 +258,6 @@ export class CrudPage implements OnInit {
             this.doInitForm();
           }
         }).catch((error: any) => {
-          this.doShowError(error);
-          console.error(error);
           this.misc.doMessage(error, "error");
         }).finally(() => {
           this.isInProgress = false;
@@ -290,8 +279,7 @@ export class CrudPage implements OnInit {
         this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
       }, this.timeout);
     }).catch((error: any) => {
-      this.doShowError(error);
-      console.error(error);
+      this.misc.doMessage(error, "error");
     }).finally(() => {
       this.isInProgress = false;
     });
@@ -308,8 +296,7 @@ export class CrudPage implements OnInit {
         this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
       }, this.timeout);
     }).catch((error: any) => {
-      this.doShowError(error);
-      console.error(error);
+      this.misc.doMessage(error, "error");
     }).finally(() => {
       this.isInProgress = false;
     });
@@ -367,7 +354,7 @@ export class CrudPage implements OnInit {
         this.crudForm.controls[event.target.getAttribute("title")].setValue(this.data[event.target.getAttribute("title")]);
         resolve(true);
       } else {
-        this.doShowError("maximum number of items exceeds");
+        this.misc.doMessage("maximum number of items exceeds", "error");
         reject("array item is invalid");
       }
     });
@@ -398,16 +385,13 @@ export class CrudPage implements OnInit {
 
   doAfterError() {
     this.storage.get("LSOP").then((LSOP: string) => { }).catch((error: any) => {
-      console.error(error);
       this.misc.doMessage(error, "error");
     });
   }
 
   doDismissModal(obj: any) {
     this.misc.dismissModal(obj ? obj : { modified: false, filter: [] }).then(() => { }).catch((error: any) => {
-      console.error(error);
       this.misc.doMessage(error, "error");
-      this.doShowError(error);
     });
   }
 
@@ -488,8 +472,7 @@ export class CrudPage implements OnInit {
           }
         }
       }).catch((error: any) => {
-        this.doShowError(error);
-        console.error(error);
+        this.misc.doMessage(error, "error");
         reject(error);
       });
     });
@@ -533,8 +516,7 @@ export class CrudPage implements OnInit {
                 }
               }
             }).catch((error: any) => {
-              this.doShowError(error);
-              console.error(error);
+              this.misc.doMessage(error, "error");
             });
           });
         });
@@ -561,13 +543,6 @@ export class CrudPage implements OnInit {
     } else if (field_.view) {
       this.doGetViewProperties(value_);
     }
-  }
-
-  doShowError(error: any) {
-    this.error = error;
-    setTimeout(() => {
-      this.error = "";
-    }, 7000);
   }
 
   doRelated(f_: any) {
@@ -611,8 +586,7 @@ export class CrudPage implements OnInit {
             }
           }
         }).catch((error: any) => {
-          this.doShowError(error);
-          console.error(error);
+          this.misc.doMessage(error, "error");
         });
       }
     }
@@ -678,7 +652,7 @@ export class CrudPage implements OnInit {
   doCopyToken() {
     this.is_token_copied = true;
     this.misc.copyToClipboard(btoa(this._id)).then(() => { }).catch((error: any) => {
-      console.error("not copied", error);
+      this.misc.doMessage("not copied", "error");
     }).finally(() => {
       this.is_token_copied = false;
     });
