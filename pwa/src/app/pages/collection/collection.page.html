@@ -133,7 +133,8 @@ https://www.gnu.org/licenses.
               <div class="act-buttons-wrapper">
                 <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" fill="outline"
                   class="action-button">
-                  <ion-icon name="play-circle"></ion-icon>
+                  <ion-icon *ngIf="item.one_click" name="play-circle"></ion-icon>
+                  <ion-icon *ngIf="!item.one_click" name="checkbox-outline"></ion-icon>
                   {{ item.title }}
                 </ion-button>
               </div>

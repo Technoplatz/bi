@@ -147,7 +147,6 @@ export class CollectionPage implements OnInit {
             LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
             this.actions = [];
             this.RefreshData(0).then(() => { }).catch((error: any) => {
-              console.error(error);
               this.misc.doMessage(error, "error");
             }).finally(() => {
               this.is_initialized = true;
@@ -156,7 +155,6 @@ export class CollectionPage implements OnInit {
         });
       });
     }).catch((error: any) => {
-      console.error(error);
       this.misc.doMessage(error, "error");
     });
   }
@@ -203,10 +201,9 @@ export class CollectionPage implements OnInit {
               }
               resolve(true);
             } else {
-              console.error("*** no structure found");
+              this.misc.doMessage("no structure found", "error");
             }
           }).catch((error: any) => {
-            console.error(error);
             this.misc.doMessage(error, "error");
             reject(error);
           }).finally(() => {
@@ -221,25 +218,22 @@ export class CollectionPage implements OnInit {
 
   doAction(ix: any) {
     if (this.perm) {
-      this.actionix = ix;
-      if (this.actions[ix] && this.actions[ix].filter && this.actions[ix].filter.length > 0 && (!this.sweeped[this.segment] || this.sweeped[this.segment].length === 0)) {
+      if (!this.actions[ix].one_click && !this.sweeped[this.segment]) {
+        this.misc.doMessage("please make selection", "error");
+      } else {
+        this.actionix = ix;
         this.storage.set("LSFILTER_" + this.id, this.actions[ix].filter).then(() => {
           this.filter = this.actions[ix].filter;
           this.RefreshData(0).then(() => {
-            this.data && this.data.length > 0 ? this.goCrud(null, "action") : null;
+            this.data?.length > 0 ? this.goCrud(null, "action") : null;
           }).catch((error: any) => {
-            console.error(error);
             this.misc.doMessage(error, "error");
           });
         }).catch((error: any) => {
-          console.error(error);
           this.misc.doMessage(error, "error");
         });
-      } else {
-        this.goCrud(null, "action");
       }
     } else {
-      console.error("no permission");
       this.misc.doMessage("no permission", "error");
     }
   }
@@ -274,7 +268,6 @@ export class CollectionPage implements OnInit {
                     this.page = environment.misc.default_page;
                     this.RefreshData(0);
                   }).catch((error: any) => {
-                    console.error(error);
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
                     this.is_loaded = true;
@@ -290,7 +283,6 @@ export class CollectionPage implements OnInit {
       }
     } else {
       this.misc.doMessage("you must select record(s) prior to " + op, "error");
-      console.error("*** you must select record(s) prior to update");
     }
   }
 
@@ -326,7 +318,6 @@ export class CollectionPage implements OnInit {
                 this.misc.navi.next("dashboard");
               }
             }).catch((error: any) => {
-              console.error(error);
               this.misc.doMessage(error, "error");
             }) : null;
           });
@@ -390,14 +381,12 @@ export class CollectionPage implements OnInit {
                   this.misc.navi.next("dashboard");
                 }
               }).catch((error: any) => {
-                console.error(error);
                 this.misc.doMessage(error, "error");
               });
             }
           });
         });
       }).catch((error: any) => {
-        console.error(error);
         this.misc.doMessage(error, "error");
       });
     }
@@ -427,11 +416,9 @@ export class CollectionPage implements OnInit {
         });
       }).catch((error: any) => {
         this.is_viewsaving = false;
-        this.misc.doMessage("filter not saved", "error");
-        console.error(error);
+        this.misc.doMessage(error, "error");
       });
     } else {
-      console.error("*** you must apply a filter prior to save");
       this.misc.doMessage("you must apply a filter prior to save", "error");
     }
   }
@@ -586,7 +573,6 @@ export class CollectionPage implements OnInit {
           this.misc.doMessage("structure not updated", "error");
         }
       }).catch((error: any) => {
-        console.error(error);
         this.misc.doMessage(error, "error");
       });
     }
@@ -615,7 +601,6 @@ export class CollectionPage implements OnInit {
       }).then(() => {
         window.location.reload();
       }).catch((error: any) => {
-        console.error(error);
         this.misc.doMessage(error, "error");
       }).finally(() => {
         this.is_saving = false;

@@ -221,7 +221,7 @@ export class Miscellaneous {
     type === "error" ? console.error(msg) : null;
     const typed: any = {
       message: msg,
-      duration: type === "success" ? 5000 : 10000,
+      duration: type === "success" ? 5000 : 7000,
       position: "top",
       cssClass: type === "success" ? "toast-class-success" : "toast-class-error",
       buttons: [{
@@ -231,7 +231,6 @@ export class Miscellaneous {
         handler: () => { }
       }]
     };
-    this.toast.dismiss().then(() => { }).catch((error: any) => { });
     const toast = await this.toast.create(typed);
     toast.present();
   }
