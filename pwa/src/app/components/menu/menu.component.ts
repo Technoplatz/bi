@@ -45,26 +45,26 @@ import { Crud } from "../../classes/crud";
 export class MenuComponent implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
+  public collections_: any;
   public collections: any = [];
+  public views_: any;
   public views: any = [];
   public segmentsadm: any;
   public saas_: any;
-  public views_: any;
-  public collections_: any;
   public user_: any;
 
   constructor(
     public misc: Miscellaneous,
     private auth: Auth,
-    private crud: Crud,
+    private crud: Crud
   ) { }
 
   ngOnInit() {
     this.collections_ = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
+      res && res.data ? this.collections = res.data : null;
     });
     this.views_ = this.crud.views.subscribe((res: any) => {
-      this.views = res && res.data ? res.data : [];
+      res && res.data ? this.views = res.data : null;
     });
     this.crud.saas.subscribe((res: any) => {
       this.saas_ = res;
@@ -84,7 +84,7 @@ export class MenuComponent implements OnInit {
     this.auth.Signout().then(() => {
       console.log("*** signed out");
     }).catch((error: any) => {
-      console.error("signout error", error.message);
+      console.error(error);
     });
   }
 

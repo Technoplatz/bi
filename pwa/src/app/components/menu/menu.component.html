@@ -58,7 +58,7 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="server-outline"></ion-icon>{{ "Collections" | translate }}
         </ion-button>
-        <p *ngIf="!collections || collections.length == 0; else collectionsfound" class="danger">
+        <p *ngIf="collections?.length == 0; else collectionsfound" class="medium">
           {{ "No collections found" | translate }}
         </p>
         <ng-template #collectionsfound>
@@ -73,8 +73,8 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="eye-outline"></ion-icon>{{ "Shared Views" | translate }}
         </ion-button>
-        <p *ngIf="!views || views.length == 0; else viewsfound">
-          <ion-text color="medium">{{ "No view found" | translate }}</ion-text>
+        <p *ngIf="views?.length == 0; else viewsfound">
+          <ion-text color="medium">{{ "No views found" | translate }}</ion-text>
         </p>
         <ng-template #viewsfound>
           <p *ngFor="let item of views" (click)="misc.navi.next('view/' + item.vie_id)" class="clicked-item dark">

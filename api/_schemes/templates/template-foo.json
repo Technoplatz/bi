@@ -37,19 +37,19 @@
       "bsonType": "decimal",
       "title": "Price",
       "description": "Unit Price",
-      "default": 0.00
+      "default": 0.0
     },
     "foo_amount": {
       "bsonType": "decimal",
       "title": "Amount",
       "description": "Amount",
-      "default": 0.00
+      "default": 0.0
     },
-    "foo_is_enabled": {
+    "foo_is_disabled": {
       "bsonType": "bool",
-      "title": "Is Enabled?",
-      "description": "Is Enabled?",
-      "default": true
+      "title": "Is Disabled?",
+      "description": "Is Disabled?",
+      "default": false
     }
   },
   "required": ["foo_no", "foo_account_no", "foo_status"],

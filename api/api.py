@@ -528,8 +528,8 @@ class Misc():
                 "log_operation": obj["op"] if "op" in obj else None,
                 "log_object_id": obj["object_id"] if "object_id" in obj else None,
                 "log_document": obj["document"] if "document" in obj else None,
-                "_modified_at": datetime.now(),
-                "_modified_by": obj["user"]
+                "_created_at": datetime.now(),
+                "_created_by": obj["user"]
             }
 
             Mongo().db["_log"].insert_one(doc_)
