@@ -81,7 +81,6 @@ export class CrudPage implements OnInit {
   public parentkey: number = 0;
   public aktions: any = [];
   public localfield: string = "";
-  public showhide: string = "show-segment";
   public parents: any;
   public relact: boolean = false;
   public reloading: boolean = false;
@@ -90,6 +89,7 @@ export class CrudPage implements OnInit {
   public is_token_copied: boolean = false;
   public barcoded_: boolean = false;
   public istrue_: boolean = true;
+  public visible: string = "hide";
   public filters: any = [{
     key: null,
     op: null,
@@ -140,12 +140,12 @@ export class CrudPage implements OnInit {
     this.view = this.shuttle.view;
     this.barcoded_ = this.shuttle.barcoded;
     this.properties = this.structure.properties;
+    this.options = new JsonEditorOptions();
+    this.options.modes = ["code", "tree"];
+    this.options.mode = "code";
+    this.options.statusBar = true;
     this.doGetAllAktions(this.op).then((res: any) => {
       this.aktions = res;
-      this.options = new JsonEditorOptions();
-      this.options.modes = ["code", "tree"];
-      this.options.mode = "code";
-      this.options.statusBar = true;
       this.doGetFilters().then(() => {
         this.doInitForm();
       }).catch((error: any) => {
@@ -156,31 +156,24 @@ export class CrudPage implements OnInit {
 
   doInitForm() {
     this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
+      this.tab = "data";
+      this.visible = this.op === "action" ? "hide" : "show";
       this.crudForm = res.form;
       this.fields = res.fields;
       this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? this.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
-      const view_ = this.collection === "_view" && this.data ? this.data.vie_id : null;
-      this.doGetViewProperties(view_).then(() => {
-        this.doGetCollectionProperties(this.collection).then(() => {
-          this.tab = "data";
-          this.showhide = this.op === "action" ? "hide-segment" : "show-segment";
-          if (this.actionix >= 0) {
-            this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            });
-          }
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-        }).finally(() => {
-          setTimeout(() => { this.is_ready = true; }, this.timeout);
-          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
-        });
+      this.doGetProperties().then(() => {
+        if (this.actionix >= 0) {
+          this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          });
+        }
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
       }).finally(() => {
-        setTimeout(() => { this.is_ready = true; }, this.timeout);
+        setTimeout(() => { this.visible = "show"; }, this.timeout);
+        this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
       });
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
@@ -224,7 +217,7 @@ export class CrudPage implements OnInit {
                   this.crudForm.get(v.set[f].key)?.setValue(v.set[f].value);
                   if (f === v.set.length - 1) {
                     this.crudForm.controls = controls_;
-                    this.showhide = "show-segment";
+                    this.visible = "show";
                     resolve(true);
                   }
                 }
@@ -339,10 +332,7 @@ export class CrudPage implements OnInit {
   doAddItemToArray(event: any) {
     return new Promise((resolve, reject) => {
       const field_ = this.fields.filter((obj: any) => obj.name === event.target.getAttribute("title"));
-      const minItems = field_[0] && field_[0].minItems ? field_[0].minItems : 0;
       const maxItems = field_[0] && field_[0].maxItems ? field_[0].maxItems : 32;
-      const input = document.querySelector(".chips-input");
-      const chipGroup = document.querySelector(".brz-visual-group");
       const chipEl = document.createElement("ion-chip");
       chipEl.slot = "start";
       chipEl.outline = true;
@@ -406,75 +396,22 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doGetViewProperties(view_: string) {
+  doGetProperties() {
     return new Promise((resolve, reject) => {
-      this.data_properties = [];
-      if (!view_) {
-        resolve(true);
-      } else {
-        this.misc.apiCall("crud", {
-          _id: "",
-          vie_id: view_,
-          op: "view",
-          source: "propsonly"
-        }).then((res: any) => {
-          if (res && res.properties) {
-            let i = 0;
-            for (let item in res.properties) {
-              this.data_properties.push(item);
-              if (i < Object.keys(res.properties).length - 1) {
-                resolve(true);
-              } else {
-                i++;
-              }
-            }
-          } else {
-            reject("view properties not found");
-          }
-        }).catch((error: any) => {
-          reject(error);
-        }).finally(() => {
+      this.property_list = [];
+      let i = 0;
+      for (let property in this.properties) {
+        const key = property;
+        const val = this.properties[property].title;
+        if (i < Object.keys(this.properties).length - 1) {
+          this.property_list.push({ key: key, value: val });
+          i++;
+        } else {
+          this.property_list.push({ key: key, value: val });
+          this.property_list.push({ key: "_upload_id", value: null });
           resolve(true);
-        });
-      }
-    });
-  }
-
-  doGetCollectionProperties(collection_: string) {
-    return new Promise((resolve, reject) => {
-      const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_source_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
-      this.misc.apiCall("crud", {
-        op: "read",
-        collection: "_collection",
-        projection: null,
-        match: [{
-          key: "col_id",
-          op: "eq",
-          value: cid_
-        }],
-        sort: null,
-        page: 1,
-        limit: 1
-      }).then((res: any) => {
-        const properties = res && res.data && res.data[0] && res.data[0].col_structure && res.data[0].col_structure.properties ? res.data[0].col_structure.properties : this.properties;
-        this.property_list = [];
-        let i = 0;
-        for (let property in properties) {
-          const key = property;
-          const val = properties[property].title;
-          if (i < Object.keys(properties).length - 1) {
-            this.property_list.push({ key: key, value: val });
-            i++;
-          } else {
-            this.property_list.push({ key: key, value: val });
-            this.property_list.push({ key: "_upload_id", value: null });
-            resolve(true);
-          }
         }
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-        reject(error);
-      });
+      };
     });
   }
 
@@ -538,11 +475,7 @@ export class CrudPage implements OnInit {
   }
 
   doChangeEnum(field_: any, value_: any) {
-    if (field_.collection) {
-      this.doGetCollectionProperties(value_);
-    } else if (field_.view) {
-      this.doGetViewProperties(value_);
-    }
+    this.doGetProperties();
   }
 
   doRelated(f_: any) {

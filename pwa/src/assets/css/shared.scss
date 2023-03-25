@@ -1600,12 +1600,12 @@ ion-checkbox {
   padding-bottom: 8px;
 }
 
-.hide-segment {
+.hide {
   display: none !important;
 }
 
-.show-segment {
-  display: block !important;
+.show {
+  display: initial;
 }
 
 .hide-scrollbar::-webkit-scrollbar {

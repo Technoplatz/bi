@@ -2273,7 +2273,7 @@ class Crud():
 
             res_ = {
                 "result": True,
-                "data": data_,
+                "data": json.loads(JSONEncoder().encode(data_)),
                 "structure": structure_
             }
 
@@ -3093,42 +3093,6 @@ class Crud():
             })
             if not log_["result"]:
                 raise APIError(log_["msg"])
-
-            # if collection_id_ == "_collection":
-            #     col_id_ = doc_["col_id"] if "col_id" in doc_ else None
-            #     col_structure_ = doc_["col_structure"] if "col_structure" in doc_ else None
-            #     datac_ = f"{col_id_}_data"
-            #     if col_structure_ and col_structure_ != {}:
-            #         config_structure_to_field_f_ = self.config_structure_to_field_f({
-            #             "collection": col_id_,
-            #             "structure": col_structure_,
-            #             "user": user_
-            #         })
-            #         if not config_structure_to_field_f_["result"]:
-            #             raise APIError(config_structure_to_field_f_["msg"])
-
-            #         datac_not_found_ = False
-            #         if datac_ not in Mongo().db.list_collection_names():
-            #             datac_not_found_ = True
-            #             Mongo().db[datac_].insert_one({})
-            #         schemevalidate_ = self.crudscheme_validate_f({
-            #             "collection": datac_,
-            #             "structure": col_structure_
-            #         })
-            #         if not schemevalidate_["result"]:
-            #             raise APIError(schemevalidate_["msg"])
-            #         if datac_not_found_:
-            #             Mongo().db[datac_].delete_one({})
-            # elif collection_id_ in ["_field", "_action"]:
-            #     cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
-            #     if cid_:
-            #         config_field_to_structure_f_ = self.config_field_to_structure_f({
-            #             "op": "request",
-            #             "collection": cid_,
-            #             "user": user_
-            #         })
-            #         if not config_field_to_structure_f_["result"]:
-            #             raise APIError(config_field_to_structure_f_["msg"])
 
             res_ = {"result": True}
 

@@ -99,7 +99,7 @@ https://www.gnu.org/licenses.
     </ion-grid>
 </ion-header>
 <ion-content class="ion-padding-start ion-padding-end">
-    <div *ngIf="is_ready; else crudloading">
+    <div [class]="visible">
         <ion-grid class="ion-no-padding" class="ion-no-padding">
             <ion-row *ngIf="data && localfield && data[localfield]" class="ion-no-padding">
                 <ion-col size="auto" class="ion-padding-top">
@@ -160,7 +160,7 @@ https://www.gnu.org/licenses.
                     </ion-select>
                 </ion-item>
                 <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
-                    class="ion-no-padding ion-margin-bottom crud-form-list" [class]="showhide">
+                    class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
                     <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index" class="ion-no-margin">
                         <ion-label *ngIf="field.bsonType!='array'" position="stacked">
                             {{ field.title | translate }}
@@ -215,7 +215,7 @@ https://www.gnu.org/licenses.
                                 <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
                                     [required]="field.required" class="ion-no-padding ion-no-margin"
                                     [(ngModel)]="data[field.name]">
-                                    <ion-select-option *ngFor="let item of data_properties" [value]="item"> {{ item }}
+                                    <ion-select-option *ngFor="let item of properties" [value]="item"> {{ item }}
                                     </ion-select-option>
                                 </ion-select>
                             </ng-template>
@@ -275,7 +275,7 @@ https://www.gnu.org/licenses.
                                 [placeholder]="field.description" auto-grow="true" [(ngModel)]="arrayitem[field.name]"
                                 [ngModelOptions]="{standalone: true}" class="add-and-enter"></ion-input>
                             <ion-input [formControlName]="field.name" [(ngModel)]="data[field.name]"
-                                class="hide-segment"></ion-input>
+                                class="hide"></ion-input>
                             <app-kov [data]="data" [field]="field" [keylist]="property_list" [op]="op"> </app-kov>
                         </div>
                         <json-editor *ngIf="field.bsonType=='object'" [id]="field.name" [options]="options"
@@ -321,11 +321,9 @@ https://www.gnu.org/licenses.
             </form>
         </ng-template>
     </div>
-    <ng-template #crudloading>
-        <ion-item lines="none">
-            <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-            <ion-label> {{ loadingText | translate }} </ion-label>
-        </ion-item>
-    </ng-template>
+    <ion-item *ngIf="visible=='hide'" lines="none">
+        <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
+        <ion-label> {{ loadingText | translate }} </ion-label>
+    </ion-item>
 </ion-content>
 <modal-footer><modal-footer></modal-footer></modal-footer>

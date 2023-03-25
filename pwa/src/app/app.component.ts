@@ -114,12 +114,6 @@ export class AppComponent implements OnInit {
         const urlpart1_ = event.url.split("/")[1];
         if (!urlpart1_) {
           this.menutoggle = false;
-        } else {
-          if (!this.menutoggle) {
-            this.storage.get("LSMENUTOGGLE").then((res: boolean) => {
-              this.menutoggle = res;
-            });
-          }
         }
       }
     });
@@ -142,6 +136,10 @@ export class AppComponent implements OnInit {
       this.translate.use(res ? res : "en");
     }).catch((error: any) => {
       console.error(error);
+    });
+
+    this.storage.get("LSMENUTOGGLE").then((res: any) => {
+      this.misc.menutoggle.next(res);
     });
 
   }

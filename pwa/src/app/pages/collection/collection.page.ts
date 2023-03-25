@@ -340,54 +340,38 @@ export class CollectionPage implements OnInit {
 
   doCollectionSettings() {
     if (this.perm && this.is_crud) {
-      this.misc.apiCall("crud", {
-        op: "read",
+      this.master = {
         collection: "_collection",
-        projection: null,
-        match: [{
-          key: "col_id",
-          op: "eq",
-          value: this.id
-        }],
-        sort: null,
-        page: 1,
-        limit: 1
-      }).then((res: any) => {
-        this.master = {
-          collection: "_collection",
-          structure: res.structure,
-          data: res.data[0]
-        }
-        this.modal.create({
-          component: CrudPage,
-          backdropDismiss: false,
-          cssClass: "crud-modal",
-          componentProps: {
-            shuttle: {
-              op: "update",
-              collection: this.master.collection,
-              collections: this.collections ? this.collections : [],
-              views: this.views ? this.views : [],
-              user: this.user,
-              data: this.master.data,
-              structure: this.master.structure,
-              direct: -1
-            }
+        structure: this.collections_structure,
+        data: this.collections[0]
+      }
+      this.modal.create({
+        component: CrudPage,
+        backdropDismiss: false,
+        cssClass: "crud-modal",
+        componentProps: {
+          shuttle: {
+            op: "update",
+            collection: this.master.collection,
+            collections: this.collections ? this.collections : [],
+            views: this.views ? this.views : [],
+            user: this.user,
+            data: this.master.data,
+            structure: this.master.structure,
+            direct: -1
           }
-        }).then((modal: any) => {
-          modal.present();
-          modal.onDidDismiss().then((res: any) => {
-            if (res.data.modified) {
-              this.crud.getAll().then(() => { }).catch((error: any) => {
-                this.misc.doMessage(error, "error");
-              }).finally(() => {
-                this.misc.navi.next("dashboard");
-              });
-            }
-          });
+        }
+      }).then((modal: any) => {
+        modal.present();
+        modal.onDidDismiss().then((res: any) => {
+          if (res.data.modified) {
+            this.crud.getAll().then(() => { }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+            }).finally(() => {
+              this.misc.navi.next("dashboard");
+            });
+          }
         });
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
       });
     }
   }
