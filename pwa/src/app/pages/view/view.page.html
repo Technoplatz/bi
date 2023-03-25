@@ -65,12 +65,12 @@ https://www.gnu.org/licenses.
                 <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data URL' | translate }}</span>
                 <span *ngIf="is_url_copied">{{ 'Data URL' | translate }}<br />{{ 'Copied' | translate }}</span>
               </div>
-              <div *ngIf="perm" (click)="misc.navi.next('collection/'+ col_id)" class="data-sq-button">
+              <div (click)="misc.navi.next('collection/'+ col_id)" class="data-sq-button">
                 <ion-icon name="server-outline"></ion-icon>
                 <br />
                 <span>{{ 'Go To' | translate }}<br />{{ 'Collection' | translate }}</span>
               </div>
-              <div *ngIf="perm" (click)="doViewSettings()" class="data-sq-button">
+              <div (click)="doViewSettings()" class="data-sq-button">
                 <ion-icon name="settings-outline"></ion-icon><br />
                 <span>{{ 'View Settings' | translate }}</span>
               </div>

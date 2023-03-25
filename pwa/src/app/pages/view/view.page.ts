@@ -53,7 +53,6 @@ export class ViewPage implements OnInit {
   public header: string = "Views";
   public subheader: string = "";
   public user: any = null;
-  public perm: boolean = false;
   public is_crud: boolean = false;
   public paget: any = [];
   public id: string = "";
@@ -125,7 +124,6 @@ export class ViewPage implements OnInit {
     });
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res ? res : null;
-      this.perm = res && res.perm ? true : false;
       this.accountf_apikey = res && res.apikey ? res.apikey : null;
     });
   }
@@ -215,42 +213,33 @@ export class ViewPage implements OnInit {
   }
 
   async doViewSettings() {
-    if (!this.perm) {
-      console.error("*** no permission");
-    } else {
-      const modal = await this.modal.create({
-        component: CrudPage,
-        backdropDismiss: false,
-        cssClass: "crud-modal",
-        componentProps: {
-          shuttle: {
-            op: "update",
-            collection: "_view",
-            collections: this.collections ? this.collections : [],
-            views: this.views ? this.views : [],
-            user: this.user,
-            data: this.view,
-            structure: this.view_structure,
-            direct: -1
-          }
+    const modal = await this.modal.create({
+      component: CrudPage,
+      backdropDismiss: false,
+      cssClass: "crud-modal",
+      componentProps: {
+        shuttle: {
+          op: "update",
+          collection: "_view",
+          collections: this.collections ? this.collections : [],
+          views: this.views ? this.views : [],
+          user: this.user,
+          data: this.view,
+          structure: this.view_structure,
+          direct: -1
         }
-      });
-      modal.onDidDismiss().then((res: any) => {
-        if (res.data.modified) {
-          this.crud.getAll().then(() => {
-            if (res.data.op === "remove") {
-              this.misc.navi.next("dashboard");
-            }
-          }).catch((error: any) => {
-            console.error(error);
-            this.misc.doMessage(error, "error");
-          }).finally(() => {
-            this.RefreshData(0).then(() => { }).finally(() => { });
-          });
-        }
-      });
-      return await modal.present();
-    }
+      }
+    });
+    modal.onDidDismiss().then((res: any) => {
+      if (res.data.modified) {
+        this.crud.getAll().then(() => { }).catch((error: any) => {
+          this.misc.doMessage(error, "error");
+        }).finally(() => {
+          this.misc.navi.next("dashboard");
+        });
+      }
+    });
+    return await modal.present();
   }
 
   doOTP(obj: any) {
