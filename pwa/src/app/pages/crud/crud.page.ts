@@ -244,9 +244,7 @@ export class CrudPage implements OnInit {
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then((res: any) => {
           this.crud.modalSubmitListener.next({ "result": true });
           if (!this.barcoded_ || this.op !== "insert") {
-            setTimeout(() => {
-              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
-            }, this.timeout);
+            this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
           } else {
             this.doInitForm();
           }
@@ -268,9 +266,7 @@ export class CrudPage implements OnInit {
       "type": this.data.bak_type
     }).then(() => {
       this.misc.doMessage(op_ + " completed successfully", "success");
-      setTimeout(() => {
-        this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
-      }, this.timeout);
+      this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     }).finally(() => {
@@ -285,9 +281,7 @@ export class CrudPage implements OnInit {
       "id": this.data.bak_id,
       "type": this.data.bak_type
     }).then(() => {
-      setTimeout(() => {
-        this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
-      }, this.timeout);
+      this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     }).finally(() => {
@@ -319,9 +313,7 @@ export class CrudPage implements OnInit {
   }
 
   doRunFilter() {
-    setTimeout(() => {
-      this.doDismissModal({ modified: false, filters: this.filters && this.filters.length > 0 ? this.filters : null });
-    }, this.timeout);
+    this.doDismissModal({ modified: false, filters: this.filters && this.filters.length > 0 ? this.filters : null });
   }
 
   doDeleteItemFromArray(name: any, item: any) {
@@ -367,16 +359,6 @@ export class CrudPage implements OnInit {
         this.crudForm.get(this.parents.lookup[0].local)?.setValue(this.data[this.parents.lookup[0].local]);
       }
     }
-  }
-
-  doJsonChangeLog(event: any) {
-    event ? null : null;
-  }
-
-  doAfterError() {
-    this.storage.get("LSOP").then((LSOP: string) => { }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
-    });
   }
 
   doDismissModal(obj: any) {

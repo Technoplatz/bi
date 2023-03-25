@@ -280,7 +280,7 @@ https://www.gnu.org/licenses.
                         </div>
                         <json-editor *ngIf="field.bsonType=='object'" [id]="field.name" [options]="options"
                             [formControlName]="field.name" class="ion-margin-top ion-margin-bottom"
-                            (change)="doJsonChangeLog($event)" [(ngModel)]="data[field.name]"></json-editor>
+                            [data]="data[field.name]"></json-editor>
                     </ion-item>
                 </ion-list>
                 <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
