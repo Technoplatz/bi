@@ -122,7 +122,7 @@ https://www.gnu.org/licenses.
           </ion-row>
           <ion-row>
             <ion-col size="12" class="structureditor">
-              <json-editor id="structure" [options]="jeoptions" [(ngModel)]="structure"></json-editor>
+              <json-editor id="structure" [options]="jeoptions" [data]="structure_"></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -169,9 +169,6 @@ https://www.gnu.org/licenses.
                   </ion-button>
                   <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
                     <ion-icon name="arrow-up"></ion-icon>
-                  </ion-button>
-                  <ion-button color="light" size="small" (click)="goField(item.key)">
-                    <ion-icon name="settings"></ion-icon>
                   </ion-button>
                   <br />
                   <div *ngIf="item.value.bsonType!='bool'">

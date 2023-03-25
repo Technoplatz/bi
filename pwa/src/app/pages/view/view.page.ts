@@ -265,7 +265,7 @@ export class ViewPage implements OnInit {
           this.auth.OTP(obj).then((res: any) => {
             if (res && res.result) {
               this.otp_qr = res.qr;
-              if (op_ === "reset" || op_ === "show") {
+              if (["reset", "show"].includes(op_)) {
                 this.otp_show = true;
                 resolve(true);
               } else if (op_ === "validate") {
@@ -361,7 +361,7 @@ export class ViewPage implements OnInit {
   doCopy(v: string) {
     const s = v === "apikey" ? this.accountf_apikey : v === "view" ? this.viewurl_ : "";
     this.is_apikey_copied = v === "apikey" ? true : false;
-    this.is_url_copied = v === "view" || v === "collection" ? true : false;
+    this.is_url_copied = ["view", "collection"].includes(v) ? true : false;
     this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {

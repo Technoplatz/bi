@@ -258,10 +258,10 @@ export class SignPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.doSetFormType("signin").then(() => {
         this.signinForm?.get("email")?.value ? setTimeout(() => {
-            this.passwordfocus?.setFocus().then(() => {
-              resolve(true);
-            });
-          }, this.focustime)
+          this.passwordfocus?.setFocus().then(() => {
+            resolve(true);
+          });
+        }, this.focustime)
           : setTimeout(() => {
             this.emailfocussignin?.setFocus().then(() => {
               resolve(true);
@@ -306,7 +306,7 @@ export class SignPage implements OnInit {
 
   doAfterSuccess() {
     this.storage.get("LSOP").then((LSOP: string) => {
-      const q = LSOP === "forgot" || LSOP === "signup" || LSOP === "checkout" ? this.doSetOp("signin") : null;
+      ["forgot", "signup", "checkout"].includes(LSOP) ? this.doSetOp("signin") : null;
     }).catch((error: any) => {
       console.error("storage get error", error);
     });

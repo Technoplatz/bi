@@ -766,8 +766,7 @@ ion-spinner {
 
 .crud-modal {
   --box-shadow: none;
-  --height: 50vh;
-  --width: 50%;
+  --min-height: 75vh;
 }
 
 .spinner-small {

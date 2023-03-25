@@ -117,7 +117,7 @@ export class AccountPage implements OnInit {
   doAccount(s: string) {
     return new Promise((resolve) => {
       this.auth.Account(s).then((res: any) => {
-        if (s === "apikeygen" || s === "apikeyget") {
+        if (["apikeygen", "apikeyget"].includes(s)) {
           this.accountf_apikey = res && res.user && res.user.apikey ? res.user.apikey : null;
           this.accountf_apikeydate = res && res.user && res.user.apikey_modified_at ? res.user.apikey_modified_at.$date : null;
           s === "apikeygen" ? this.doApiKeyEnabled() : null;

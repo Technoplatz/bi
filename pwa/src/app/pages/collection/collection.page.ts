@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { ModalController, AlertController, IonSelect, NavController } from "@ionic/angular";
+import { ModalController, AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
@@ -39,7 +39,7 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
-import { JsonEditorOptions } from "ang-jsoneditor";
+import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 
 @Component({
   selector: "app-collection",
@@ -48,7 +48,8 @@ import { JsonEditorOptions } from "ang-jsoneditor";
 })
 
 export class CollectionPage implements OnInit {
-  @ViewChild("select0") selectRef?: IonSelect;
+  @ViewChild(JsonEditorComponent, { static: false })
+  editor: JsonEditorComponent = new JsonEditorComponent;
 
   public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
@@ -67,6 +68,7 @@ export class CollectionPage implements OnInit {
   public searched: any = null;
   public data: any = [];
   public structure: any = {};
+  public structure_: any = {};
   public selected: any = [];
   private views: any = [];
   private viewsx: any = [];
@@ -123,6 +125,10 @@ export class CollectionPage implements OnInit {
       this.user = res;
       this.perm = res && res.perm ? true : false;
     });
+    this.jeoptions = new JsonEditorOptions();
+    this.jeoptions.mode = "code";
+    this.jeoptions.statusBar = true;
+    this.jeoptions.onChange = () => this.structure = this.editor.get();
   }
 
   ngOnDestroy() {
@@ -134,9 +140,6 @@ export class CollectionPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
-    this.jeoptions = new JsonEditorOptions();
-    this.jeoptions.mode = "code";
-    this.jeoptions.statusBar = true;
     this.crud.getCollection(this.id).then((res: any) => {
       this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
       this.subheader = res && res.data ? res.data.col_title : this.id;
@@ -180,6 +183,7 @@ export class CollectionPage implements OnInit {
             this.data = res.data;
             this.reconfig = res.reconfig;
             this.structure = res.structure;
+            this.structure_ = res.structure;
             this.actions = this.structure && this.structure.actions ? this.structure.actions : [];
             this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
             this.columns_ = [];
@@ -266,7 +270,9 @@ export class CollectionPage implements OnInit {
                   this.sweeped[this.segment],
                   true).then(() => {
                     this.page = environment.misc.default_page;
-                    this.RefreshData(0);
+                    this.RefreshData(0).then(() => {
+                      ["_collection", "_view"].includes(this.id) ? this.crud.getAll().then(() => { }) : null;
+                    });
                   }).catch((error: any) => {
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
@@ -313,13 +319,9 @@ export class CollectionPage implements OnInit {
       if (res.data.modified) {
         this.storage.remove("LSFILTER_" + this.id).then(() => {
           this.RefreshData(0).then(() => {
-            ["_collection", "_view", "_backup"].includes(this.id) ? this.crud.getAll().then(() => {
-              if (["remove", "restore"].includes(res.data.op)) {
-                this.misc.navi.next("dashboard");
-              }
-            }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            }) : null;
+            if (["remove", "restore"].includes(res.data.op)) {
+              this.misc.navi.next("dashboard");
+            }
           });
         });
       } else {
@@ -330,6 +332,8 @@ export class CollectionPage implements OnInit {
           });
         }
       }
+    }).finally(() => {
+      ["_collection", "_view"].includes(this.id) ? this.crud.getAll().then(() => { }) : null;
     });
     return await modal.present();
   }
@@ -374,14 +378,10 @@ export class CollectionPage implements OnInit {
           modal.present();
           modal.onDidDismiss().then((res: any) => {
             if (res.data.modified) {
-              this.crud.getAll().then(() => {
-                if (res.data.op === "remove") {
-                  this.misc.navi.next("dashboard");
-                } else {
-                  this.misc.navi.next("dashboard");
-                }
-              }).catch((error: any) => {
+              this.crud.getAll().then(() => { }).catch((error: any) => {
                 this.misc.doMessage(error, "error");
+              }).finally(() => {
+                this.misc.navi.next("dashboard");
               });
             }
           });
@@ -499,7 +499,7 @@ export class CollectionPage implements OnInit {
   doSearch(k: string, v: string) {
     this.searched[k].setmode = false;
     if (!this.filter || this.filter.length === 0) {
-      if (v === "true" || v === "false") {
+      if (["true", "false"].includes(v)) {
         this.filter.push({
           key: k,
           op: v,
@@ -546,21 +546,6 @@ export class CollectionPage implements OnInit {
 
   doSetSearchItemOp(k: string, op: string) {
     this.searched[k].op = op;
-  }
-
-  goField(f_: string) {
-    console.log("*** f_", this.id, f_);
-  }
-
-  goFields() {
-    const id_ = "_field";
-    this.storage.set("LSFILTER_" + id_, [{
-      "key": "fie_collection_id",
-      "op": "eq",
-      "value": this.id
-    }]).then(() => {
-      this.misc.navi.next("admin/_field");
-    });
   }
 
   doReconfigure() {
