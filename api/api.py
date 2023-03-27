@@ -194,15 +194,6 @@ class Schedular():
                         set_target_[key_] = value_
 
                     update_many_ = Mongo().db[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=aut_target_upsert_)
-                    # if update_many_:
-                    #     Misc().log_f({
-                    #         "type": "Info",
-                    #         "collection": aut_target_collection_id_,
-                    #         "op": "upsert",
-                    #         "user": "automation",
-                    #         "object_id": aut_id_,
-                    #         "document": set_target_
-                    #     })
 
             res_ = {"result": True}
 
@@ -347,6 +338,7 @@ class Schedular():
                 aut_id_ = doc_["aut_id"]
                 if backgroundscheduler_.get_job(aut_id_):
                     backgroundscheduler_.remove_job(aut_id_)
+           
                 backgroundscheduler_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=TZ_, replace_existing=True, args=[doc_])
 
             res_ = {"result": True}
@@ -462,6 +454,10 @@ class Misc():
     def api_error_f(self, exc):
         print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
         self.post_notification(exc)
+        return {"result": False, "msg": str(exc)}
+
+    def auth_error_f(self, exc):
+        print("*** auth error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
         return {"result": False, "msg": str(exc)}
 
     def mongo_error_f(self, exc):
@@ -976,7 +972,7 @@ class Crud():
 
     def frame_convert_number_f(self, c):
         return c * 1 if c is not None else c
-    
+
     def frame_convert_decimal_f(self, c):
         return c * 1.00 if c is not None else c
 
@@ -3805,12 +3801,12 @@ class Auth():
 
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise APIError(f"user auth not found {email_}")
+                raise AuthError(f"user auth not found {email_}")
 
             # checks if tfac is valid format
             compile_ = re.compile("^[0-9]{6,6}$")
             if not re.search(compile_, str(tfac_)):
-                raise APIError("invalid TFAC")
+                raise AuthError("invalid TFAC")
 
             aut_otp_secret_ = auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
             aut_otp_validated_ = auth_["aut_otp_validated"] if "aut_otp_validated" in auth_ else False
@@ -3822,9 +3818,9 @@ class Auth():
                 if aut_otp_secret_ and aut_otp_validated_:
                     validate_otp_f_ = OTP().validate_otp_f(email_, {"otp": tfac_})
                     if not validate_otp_f_["result"]:
-                        raise APIError("OTP codes does not match")
+                        raise AuthError("Invalid OTP code")
                 else:
-                    raise APIError("OTP codes do not match")
+                    raise AuthError("Invalid OTP")
 
             Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_tfac": None,
@@ -3838,6 +3834,9 @@ class Auth():
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except AuthError as exc:
             Misc().log_f({
                 "type": "Error",
                 "collection": "_auth",
@@ -3851,7 +3850,7 @@ class Auth():
                     "_modified_by": email_
                 }
             })
-            res_ = Misc().api_error_f(exc)
+            res_ = Misc().auth_error_f(exc)
 
         except Exception as exc:
             res_ = Misc().exception_f(exc)
@@ -4028,12 +4027,27 @@ class Auth():
             ]})
 
             if not allowed_:
-                raise APIError(f"connection is not allowed from your address")
+                raise APIError(f"connection is not allowed from IP address {ip_}")
 
             res_ = {"result": True}
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
+
+        except AuthError as exc:
+            Misc().log_f({
+                "type": "Error",
+                "collection": "_firewall",
+                "op": "block",
+                "user": user_id,
+                "document": {
+                    "ip": ip_,
+                    "exception": str(exc),
+                    "_modified_at": datetime.now(),
+                    "_modified_by": user_id
+                }
+            })
+            res_ = Misc().auth_error_f(exc)
 
         except Exception as exc:
             res_ = Misc().exception_f(exc)
@@ -4262,13 +4276,13 @@ class Auth():
             # validates user with basic auth
             user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_}, "tfac")
             if not user_validate_["result"]:
-                raise APIError(user_validate_["msg"])
+                raise AuthError(user_validate_["msg"])
             user_ = user_validate_["user"] if "user" in user_validate_ else None
 
             # verify OTP
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
             if not verify_2fa_f_["result"]:
-                raise APIError(verify_2fa_f_["msg"])
+                raise AuthError(verify_2fa_f_["msg"])
 
             verification_content_ = {"tfac": str(tfac_)}
 
@@ -4326,6 +4340,9 @@ class Auth():
         except pymongo.errors.PyMongoError as exc:
             res_ = Misc().mongo_error_f(exc)
 
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
+
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
 
@@ -4350,23 +4367,23 @@ class Auth():
 
             auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
-                raise APIError("account not found")
+                raise AuthError("account not found")
 
             if "aut_salt" not in auth_ or auth_["aut_salt"] == None:
-                raise APIError("please set a password")
+                raise AuthError("please set a password")
 
             if "aut_key" not in auth_ or auth_["aut_key"] == None:
-                raise APIError("please set a new password")
+                raise AuthError("please set a new password")
 
             user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
-                raise APIError("user not found for validate")
+                raise AuthError("user not found for validate")
 
             user_["aut_apikey"] = auth_["aut_apikey"] if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None else None
 
             enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
             if not enabled_:
-                raise APIError("user is disabled")
+                raise AuthError("user is disabled")
 
             salt_ = auth_["aut_salt"]
             key_ = auth_["aut_key"]
@@ -4374,28 +4391,28 @@ class Auth():
 
             if not password_:
                 if not token_:
-                    raise APIError("no credentials provided")
+                    raise AuthError("no credentials provided")
                 else:
                     if token_db_ != token_:
-                        raise APIError("session closed")
+                        raise AuthError("session closed")
             else:
                 hash_f_ = self.password_hash_f(password_, salt_)
                 if not hash_f_["result"]:
                     raise APIError(hash_f_["msg"])
                 new_key_ = hash_f_["key"]
                 if new_key_ != key_:
-                    raise APIError("invalid email or password")
+                    raise AuthError("invalid email or password")
 
             firewall_ = self.firewall_f(user_id_)
             if not firewall_["result"]:
-                raise APIError(firewall_["msg"])
+                raise AuthError(firewall_["msg"])
 
             res_ = {"result": True, "user": user_, "auth": auth_}
 
         except pymongo.errors.PyMongoError as exc:
             res_ = Misc().mongo_error_f(exc)
 
-        except APIError as exc:
+        except AuthError as exc:
             Misc().log_f({
                 "type": "Error",
                 "collection": "_auth",
@@ -4406,6 +4423,9 @@ class Auth():
                     "exception": str(exc)
                 }
             })
+            res_ = Misc().auth_error_f(exc)
+
+        except APIError as exc:
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
@@ -4467,20 +4487,19 @@ class Auth():
 
             user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_}, "signin")
             if not user_validate_["result"]:
-                raise APIError(user_validate_["msg"])
+                raise AuthError(user_validate_["msg"])
 
-            # checks if authy qr is activated
             OTP_send_ = OTP().request_otp_f(email_)
             if not OTP_send_["result"]:
                 raise APIError(OTP_send_["msg"])
 
             res = {"result": True, "msg": "user needs to be validated by OTP"}
 
-        except pymongo.errors.PyMongoError as exc:
-            res = Misc().mongo_error_f(exc)
-
         except APIError as exc:
             res = Misc().api_error_f(exc)
+
+        except AuthError as exc:
+            res = Misc().auth_error_f(exc)
 
         except Exception as exc:
             res = Misc().exception_f(exc)
@@ -4867,6 +4886,7 @@ def auth_f():
             raise APIError("no operation found")
 
         op_ = input_["op"]
+        token_ = None
 
         if op_ == "signup":
             auth_ = Auth().signup_f()
@@ -4895,7 +4915,6 @@ def auth_f():
         user_ = auth_["user"] if auth_ and "user" in auth_ else None
         saas_ = auth_["saas"] if auth_ and "saas" in auth_ else None
 
-        token_ = None
         if op_ == "tfac":
             token_ = user_["token"] if "token" in user_ and user_["token"] != None else None
 

@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
+import { NavController } from "@ionic/angular";
 import { Router, Event, NavigationError, NavigationEnd, NavigationStart } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./classes/misc";
@@ -60,7 +61,8 @@ export class AppComponent implements OnInit {
     private auth: Auth,
     private crud: Crud,
     private misc: Miscellaneous,
-    private storage: Storage
+    private storage: Storage,
+    private nav: NavController
   ) { }
 
   ngOnInit() {
@@ -90,7 +92,7 @@ export class AppComponent implements OnInit {
     });
 
     this.misc.navi.subscribe((path: any) => {
-      this.router.navigateByUrl(path).then(() => { }).catch((error: any) => {
+      this.nav.navigateRoot(path).then(() => { }).catch((error: any) => {
         console.error(error);
       });
     });
@@ -99,9 +101,8 @@ export class AppComponent implements OnInit {
       if (res) {
         document.documentElement.style.setProperty("--ion-color-primary", res.color);
       } else {
-        const LSTHEME = environment.themes[2];
-        this.storage.set("LSTHEME", LSTHEME).then(() => {
-          document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
+        this.storage.set("LSTHEME", environment.themes[0]).then(() => {
+          document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
         });
       }
     });

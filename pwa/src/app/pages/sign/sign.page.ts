@@ -158,25 +158,24 @@ export class SignPage implements OnInit {
       this.storage.get("LSREMEMBERME").then((LSREMEMBERME: boolean) => {
         this.email = LSUSEREMAIL;
         this.isRememberMe = LSREMEMBERME;
-        this.signinForm = this.formBuilder.group(
-          {
-            email: [
-              this.email,
-              Validators.compose([
-                Validators.required,
-                Validators.email,
-                Validators.maxLength(64)
-              ])],
-            password: [
-              null,
-              Validators.compose([
-                Validators.required,
-                Validators.minLength(8),
-                Validators.maxLength(32),
-                Validators.pattern(this.passwordpttrn_)
-              ])],
-            isRememberMe: [this.isRememberMe, Validators.compose([])],
-          },
+        this.signinForm = this.formBuilder.group({
+          email: [
+            this.email,
+            Validators.compose([
+              Validators.required,
+              Validators.email,
+              Validators.maxLength(64)
+            ])],
+          password: [
+            null,
+            Validators.compose([
+              Validators.required,
+              Validators.minLength(8),
+              Validators.maxLength(32),
+              Validators.pattern(this.passwordpttrn_)
+            ])],
+          isRememberMe: [this.isRememberMe, Validators.compose([])],
+        },
           {}
         );
       });
@@ -332,26 +331,24 @@ export class SignPage implements OnInit {
           this.storage.set("LSUSEREMAIL", this.signinForm?.get("email")?.value).then(() => {
             this.doSetFormType("tfac").then(() => {
               setTimeout(() => {
-                this.tfacfocus?.setFocus().then(() => {
-                  this.isInProgress = false;
-                });
+                this.tfacfocus?.setFocus().then(() => { });
               }, this.focustime);
             }).catch((error: any) => {
               console.error(error);
             });
           });
         });
-      }).catch((error: any) => {
-        this.isInProgress = false;
+      }).catch((err: any) => {
         this.signinForm?.controls["password"].setValue(null);
-        this.error = error;
+        this.error = err;
+      }).finally(() => {
+        this.isInProgress = false;
       });
     } else {
       this.isInProgress = false;
       this.signinForm?.controls["password"].setValue(null);
       this.error = "invalid credentials";
     }
-
   }
 
   TFAC() {

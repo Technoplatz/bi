@@ -82,9 +82,9 @@ function installBI() {
     fi
     curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV $RAWREPO/{$DCYML,$DOTENV}
     CONTD=$(cat $DIR/$DCYML | head -c 3)
-    if [[ "$CONTD" == *"40"* ]]; then
-        echo -e "✘ Sorry! Required files not received successfully ($CONTD)."
-        echo -e "\nYou can try again by adding a token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
+    if [[ "$CONTD" == *"40"* || ! -z $DIR/$DCYML || -z $DIR/$DOTENV ]]; then
+        echo -e "\n✘ Sorry! Required files not received successfully $CONTD."
+        echo -e "You can retry by adding a token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
     else
         echo -e "✔ Required files received successfully."
@@ -188,7 +188,9 @@ function startBI() {
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
-    docker cp $CERTSDIR/. api:/certs
+    if [ -d $CERTSDIR ]; then
+        docker cp $CERTSDIR/. api:/certs
+    fi
     HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         mkdir -p $CERTSDIR

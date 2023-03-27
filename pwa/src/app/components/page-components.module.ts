@@ -37,7 +37,6 @@ import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MenuComponent } from "./menu/menu.component";
 import { FooterComponent } from "./footer/footer.component";
-import { FilterComponent } from "./filter/filter.component";
 import { ToolsComponent } from "./tools/tools.component";
 import { KovComponent } from "./kov/kov.component";
 import { InnerFooterComponent } from "./inner-footer/inner-footer.component";
@@ -50,7 +49,6 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
     declarations: [
         MenuComponent,
         FooterComponent,
-        FilterComponent,
         ToolsComponent,
         KovComponent,
         InnerFooterComponent,
@@ -69,7 +67,6 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
     exports: [
         MenuComponent,
         FooterComponent,
-        FilterComponent,
         ToolsComponent,
         KovComponent,
         InnerFooterComponent,

@@ -62,11 +62,6 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
               </div>
-              <div *ngIf="filter.length==0" (click)="goCrud(null, 'filter')" class="data-sq-button">
-                <ion-icon name="funnel-outline"></ion-icon>
-                <br />
-                <span>{{ 'Apply' | translate }}<br />{{ 'Filter' | translate }} </span>
-              </div>
               <div *ngIf="filter.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 <br />
@@ -84,10 +79,6 @@ https://www.gnu.org/licenses.
               <div (click)="MultiCrud('delete')" class="data-sq-button">
                 <ion-icon name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}<br />{{ 'Selected' | translate }}
-              </div>
-              <div *ngIf="perm && is_crud && reconfig" (click)="doReconfigure()" class="data-sq-button required">
-                <ion-icon name="warning-outline"></ion-icon><br />
-                {{ 'Update' | translate }}<br />{{ 'Required' | translate }}
               </div>
               <div *ngIf="perm && is_crud" (click)="doShowCode()" class="data-sq-button">
                 <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">

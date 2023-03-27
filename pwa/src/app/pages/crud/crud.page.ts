@@ -90,11 +90,6 @@ export class CrudPage implements OnInit {
   public barcoded_: boolean = false;
   public istrue_: boolean = true;
   public visible: string = "hide";
-  public filters: any = [{
-    key: null,
-    op: null,
-    value: null
-  }];
   private structure: any = {};
   private sweeped: any;
   private filter: any = [];
@@ -132,6 +127,7 @@ export class CrudPage implements OnInit {
     this.op = this.shuttle.op;
     this.dataprev = this.shuttle.data;
     this.structure = this.shuttle.structure;
+    this.properties = this.shuttle.structure.properties;
     this.sweeped = this.shuttle.sweeped;
     this.filter = this.shuttle.filter;
     this.collections = this.shuttle.collections;
@@ -139,18 +135,13 @@ export class CrudPage implements OnInit {
     this.actionix = this.shuttle.actionix;
     this.view = this.shuttle.view;
     this.barcoded_ = this.shuttle.barcoded;
-    this.properties = this.structure.properties;
     this.options = new JsonEditorOptions();
     this.options.modes = ["code", "tree"];
     this.options.mode = "code";
     this.options.statusBar = true;
     this.doGetAllAktions(this.op).then((res: any) => {
       this.aktions = res;
-      this.doGetFilters().then(() => {
-        this.doInitForm();
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      });
+      this.doInitForm();
     });
   }
 
@@ -312,10 +303,6 @@ export class CrudPage implements OnInit {
     await alert.present();
   }
 
-  doRunFilter() {
-    this.doDismissModal({ modified: false, filters: this.filters && this.filters.length > 0 ? this.filters : null });
-  }
-
   doDeleteItemFromArray(name: any, item: any) {
     this.data[name] = this.data[name].filter((e: any) => e !== item);
     this.crudForm.controls[name].setValue(this.data[name]);
@@ -394,65 +381,6 @@ export class CrudPage implements OnInit {
           resolve(true);
         }
       };
-    });
-  }
-
-  doGetFilters() {
-    return new Promise((resolve, reject) => {
-      if (this.op !== "filter") {
-        resolve([]);
-      } else {
-        this.storage.get("LSFILTER_" + this.collection).then((LSFILTER_: any) => {
-          LSFILTER_ && LSFILTER_.length > 0 ? this.filters = LSFILTER_ : null;
-          this.storage.get("LSSAVEDFILTER").then((LSSAVEDFILTER: any) => {
-            this.misc.apiCall("crud", {
-              op: "read",
-              collection: "_view",
-              projection: null,
-              match: [{
-                key: "vie_collection_id",
-                op: "eq",
-                value: this.collection
-              }],
-              sort: null,
-              page: 1,
-              limit: 100
-            }).then((res: any) => {
-              this.saved_filters = res.data;
-              const f = LSSAVEDFILTER ? res.data.filter((obj: any) => obj.vie_id === LSSAVEDFILTER) : [];
-              f && f[0] ? this.filters = f[0].vie_filter : null;
-              this.saved_filter = LSSAVEDFILTER ? LSSAVEDFILTER : null;
-              let i = 0;
-              for (let property in this.properties) {
-                const key = property;
-                const val = this.properties[property].title;
-                if (i < Object.keys(this.properties).length - 1) {
-                  this.property_list.push({ key: key, value: val });
-                  i++;
-                } else {
-                  this.property_list.push({ key: key, value: val });
-                  resolve(this.property_list);
-                }
-              }
-            }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            });
-          });
-        });
-      }
-    });
-  }
-
-  doTextAreaChanged(event: any) {
-    const last_ = event.target.value.slice(-1);
-    const n_ = event.target.value.split(" ");
-    const lastw_ = n_[n_.length - 1];
-  }
-
-  doChangeFilter() {
-    this.storage.set("LSSAVEDFILTER", this.saved_filter).then(() => {
-      const f = this.saved_filters.filter((obj: any) => obj.vie_id === this.saved_filter);
-      this.filters = f[0].vie_filter;
     });
   }
 

@@ -71,7 +71,6 @@ export class CollectionPage implements OnInit {
   public structure_: any = {};
   public selected: any = [];
   private views: any = [];
-  private viewsx: any = [];
   public pages: any = [];
   public limit: number = environment.misc.limit;
   public page: number = 1;
@@ -441,7 +440,9 @@ export class CollectionPage implements OnInit {
     full ? this.searched = {} : null;
     this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
       for (let key_ in this.structure.properties) {
-        this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "eq", setmode: false } : { actived: false, kw: this.searched[key_] && this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_] && this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_] && this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_] && this.searched[key_].setmode ? this.searched[key_].setmode : null };
+        if(this.searched) {
+          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "eq", setmode: false } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_].setmode ? this.searched[key_].setmode : null };
+        }
       }
     });
   }
@@ -450,11 +451,9 @@ export class CollectionPage implements OnInit {
     this.filter = [];
     this.storage.set("LSSFILTER_" + this.id, this.filter).then(() => {
       this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
-        this.storage.set("LSSAVEDFILTER", "").then(() => {
-          this.doResetSearch(true);
-          this.searched = {};
-          this.RefreshData(0);
-        });
+        this.doResetSearch(true);
+        this.searched = {};
+        this.RefreshData(0);
       });
     });
   }
@@ -532,28 +531,8 @@ export class CollectionPage implements OnInit {
     this.searched[k].op = op;
   }
 
-  doReconfigure() {
-    if (this.perm) {
-      this.crud.Reconfigure(this.id).then((res: any) => {
-        if (res && res.result) {
-          this.RefreshData(0);
-          this.misc.doMessage("structure updated successfully", "success");
-        } else {
-          this.misc.doMessage("structure not updated", "error");
-        }
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      });
-    }
-  }
-
   doTemplateShow() {
     this.template_showed = !this.template_showed;
-  }
-
-  doStartSearch(e: any) {
-    this.viewsx = this.views;
-    this.viewsx = this.viewsx.filter((obj: any) => (obj["vie_id"] + obj["vie_title"]).toLowerCase().indexOf(e.toLowerCase()) > -1);
   }
 
   doShowCode() {

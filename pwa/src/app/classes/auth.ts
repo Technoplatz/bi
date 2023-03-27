@@ -72,9 +72,9 @@ export class Auth {
         } else {
           reject(res.msg);
         }
-      }, (error: any) => {
-        console.error("*** error", error);
-        reject(error.msg);
+      }, (err: any) => {
+        const error_ = err.error;
+        reject(error_.msg);
       });
     });
   }
@@ -90,8 +90,9 @@ export class Auth {
         } else {
           reject(res.msg);
         }
-      }, (error: any) => {
-        reject(error.msg);
+      }, (err: any) => {
+        const error_ = err.error;
+        reject(error_.msg);
       });
     });
   }
@@ -102,25 +103,26 @@ export class Auth {
       this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
         headers: new HttpHeaders(this.authHeaders)
       }).subscribe((res: any) => {
-        console.log("*** rh", res);
         if (res.result) {
           this.storage.set("LSUSERMETA", res.user).then(() => {
             this.crud.getAll().then(() => {
               this.user.next(res.user);
-              this.misc.navi.next("/dashboard");
+              setTimeout(() => {
+                this.misc.navi.next("/dashboard");
+                this.misc.menutoggle.next(true);
+              }, 1000);
               resolve(true);
             }).catch((error: any) => {
               console.error(error);
               this.misc.doMessage(error, "error");
             });
-          }).catch((error: any) => {
-            reject(error);
-          });
+          })
         } else {
           reject(res.msg);
         }
-      }, (error: any) => {
-        reject(error);
+      }, (err: any) => {
+        const error_ = err.error;
+        reject(error_.msg);
       });
     });
   }
