@@ -148,29 +148,32 @@ export class CrudPage implements OnInit {
   doInitForm() {
     this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
       this.tab = "data";
-      this.visible = this.op === "action" ? "hide" : "show";
       this.crudForm = res.form;
       this.fields = res.fields;
       this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? this.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
       this.doGetProperties().then(() => {
-        if (this.actionix >= 0) {
-          this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
-          });
-        }
+        this.doGetCollectionProperties(this.collection).then(() => {
+          if (this.actionix >= 0) {
+            this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+            });
+          }
+        }).catch((error: any) => {
+          console.error(error);
+          this.misc.doMessage(error, "error");
+        }).finally(() => {
+          this.visible = this.op === "action" ? "hide" : "show";
+          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
+        });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
-      }).finally(() => {
-        setTimeout(() => { this.visible = "show"; }, this.timeout);
-        this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
       });
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     });
   }
-
   doGetAllAktions(op: string) {
     return new Promise((resolve, reject) => {
       if (op !== "action") {
@@ -384,8 +387,50 @@ export class CrudPage implements OnInit {
     });
   }
 
+  doGetCollectionProperties(collection_: string) {
+    return new Promise((resolve, reject) => {
+      const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_source_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
+      this.misc.apiCall("crud", {
+        op: "read",
+        collection: "_collection",
+        projection: null,
+        match: [{
+          key: "col_id",
+          op: "eq",
+          value: cid_
+        }],
+        sort: null,
+        page: 1,
+        limit: 1
+      }).then((res: any) => {
+        const properties = res && res.data && res.data[0] && res.data[0].col_structure && res.data[0].col_structure.properties ? res.data[0].col_structure.properties : this.properties;
+        this.property_list = [];
+        let i = 0;
+        for (let property in properties) {
+          const key = property;
+          const val = properties[property].title;
+          if (i < Object.keys(properties).length - 1) {
+            this.property_list.push({ key: key, value: val });
+            i++;
+          } else {
+            this.property_list.push({ key: key, value: val });
+            this.property_list.push({ key: "_upload_id", value: null });
+            resolve(true);
+          }
+        }
+      }).catch((error: any) => {
+        console.error(error);
+        reject(error);
+      });
+    });
+  }
+
   doChangeEnum(field_: any, value_: any) {
-    this.doGetProperties();
+    if (field_.collection) {
+      this.doGetCollectionProperties(value_);
+    } else if (field_.view) {
+      this.doGetProperties();
+    }
   }
 
   doRelated(f_: any) {

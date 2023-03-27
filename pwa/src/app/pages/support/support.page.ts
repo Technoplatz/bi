@@ -45,7 +45,7 @@ import { HttpClient } from '@angular/common/http';
 export class SupportPage implements OnInit {
   public header: string = "Sorry!";
   public user: any = null;
-  public support_md: any = null;
+  public support_md: any = "";
 
   constructor(
     public misc: Miscellaneous,

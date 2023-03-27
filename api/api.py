@@ -338,7 +338,7 @@ class Schedular():
                 aut_id_ = doc_["aut_id"]
                 if backgroundscheduler_.get_job(aut_id_):
                     backgroundscheduler_.remove_job(aut_id_)
-           
+
                 backgroundscheduler_.add_job(self.schedule_automation_f, "cron", day_of_week="*", hour="*", minute="*", id=aut_id_, timezone=TZ_, replace_existing=True, args=[doc_])
 
             res_ = {"result": True}
@@ -3146,6 +3146,7 @@ class Crud():
                 Mongo().db[f"{c_}_data"].aggregate([{"$match": {}}, {"$out": f"{c_}_data_removed"}])
                 Mongo().db[f"{c_}_data"].drop()
                 Mongo().db["_field"].delete_many({"fie_collection_id": c_})
+                Mongo().db["_automation"].update_many({ "$or": [{"aut_source_collection_id": c_}, {"aut_target_collection_id": c_}]}, {"$set": {"aut_enabled": False}})
 
             res_ = {"result": True}
 
