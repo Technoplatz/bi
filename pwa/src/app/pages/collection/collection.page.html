@@ -132,8 +132,8 @@ https://www.gnu.org/licenses.
             </ion-col>
             <ng-template #noaction>
               <ion-col>
-                <h6>{{ 'NO ACTION FOUND' | translate }}</h6>
-                {{ 'To create an action you need to add an "action item" into the collection structure' | translate }}.
+                <h6>{{ 'No actions found' | translate }}</h6>
+                {{ 'To create an action please add an item into "actions" field of JSON Scheme' | translate }}.
               </ion-col>
             </ng-template>
           </ion-row>
@@ -165,37 +165,37 @@ https://www.gnu.org/licenses.
                   <div *ngIf="item.value.bsonType!='bool'">
                     <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'eq')">
-                      <ion-text>=</ion-text>
+                      =
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'ne')">
-                      <ion-text>&ne;</ion-text>
+                      &ne;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'gte')">
-                      <ion-text>&ge;</ion-text>
+                      &ge;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'lte')">
-                      <ion-text>&le;</ion-text>
+                      &le;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'null')">
-                      <ion-text>&#9723;</ion-text>
+                      &#9723;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'nnull')">
-                      <ion-text>&#9724;</ion-text>
+                      &#9724;
                     </ion-button>
                   </div>
                   <div *ngIf="item.value.bsonType=='bool'">
                     <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'true')">
-                      <ion-text>{{ 'True' | translate }}</ion-text>
+                      {{ 'True' | translate }}
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'false')">
-                      <ion-text>{{ 'False' | translate }}</ion-text>
+                      {{ 'False' | translate }}
                     </ion-button>
                   </div>
                   <div>
@@ -294,7 +294,7 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="ion-no-padding pages-col">
               <!-- NO RECORD FOUND PAGING -->
               <div *ngIf="is_loaded && (!count || count==0); else showpaging" class="ion-padding-top">
-                <h6>{{ 'No record found' | translate }}</h6>
+                <h6>{{ 'No records found' | translate }}</h6>
                 {{ 'Click the button above to add a new record' | translate }}.
               </div>
               <!-- RECORDS FOUND PAGING -->

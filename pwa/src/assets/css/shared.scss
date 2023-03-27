@@ -1408,7 +1408,7 @@ sup {
 .structureditor {
   display: flex;
   flex-flow: column;
-  height: calc(90vh - 200px);
+  height: calc(90vh - 205px);
 }
 
 json-editor,
@@ -1534,8 +1534,13 @@ ion-checkbox {
   border-top: 0px;
   border: 2px solid var(--ion-color-dark);
   z-index: 999999 !important;
-  background-color: #FFFFFF;
+  background-color: #fff;
   cursor: default;
+}
+
+.search-box ion-button {
+  margin-right: 2px !important;
+  margin-bottom: 2px !important;
 }
 
 .web-header {
@@ -1562,16 +1567,6 @@ ion-checkbox {
 .column-title {
   font-weight: 600;
   color: var(--ion-color-dark);
-}
-
-.search-box ion-button {
-  margin-right: 1px !important;
-  margin-bottom: 1px !important;
-  min-width: 32px;
-}
-
-.search-box ion-button ion-text {
-  padding-right: 4px !important;
 }
 
 .searched-title {
