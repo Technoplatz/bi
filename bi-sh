@@ -246,13 +246,12 @@ IMGSUFFIX=""
 TOKEN=""
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
-ROOTPATH="/opt/technoplatz"
+ROOTPATH="."
 
 if [[ ! -z $2 ]]; then
     if [[ "$2" == *"-dev"* ]]; then
         IMGSUFFIX=$2
         HUB="ghcr.io"
-        ROOTPATH="."
         if [[ ! -z $3 ]]; then
             if [[ $1 == "update" || $1 == "install" ]]; then
                 TOKEN="$3"
