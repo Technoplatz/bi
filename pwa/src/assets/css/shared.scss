@@ -207,7 +207,6 @@ ion-alert .alert-radio-group {
 
 .act-buttons-wrapper {
   padding-top: 8px;
-  width: fit-content;
   position: relative;
 }
 
@@ -869,17 +868,13 @@ ion-select {
 
 .datetime-class {
   display: flex;
+  margin-left: 0px !important;
 }
 
 .datetime-button {
-  margin-left: 4px;
-  margin-top: 10px !important;
-}
-
-ion-datetime-button {
-  margin-left: 0px !important;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  margin-left: 0px;
+  margin-top: 4px !important;
+  margin-bottom: 8px !important;
 }
 
 ion-datetime {

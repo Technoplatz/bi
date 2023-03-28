@@ -1,7 +1,7 @@
 {
   "name": "technoplatz-bi-pwa",
-  "version": "3.0.79",
-  "author": "Mustafa Mat",
+  "version": "3.0.80",
+  "author": "Mustafa Mat, Technoplatz IT Solutions GmbH",
   "homepage": "https://bi.technoplatz.com",
   "scripts": {
     "ng": "ng",

@@ -81,6 +81,7 @@ export class CrudPage implements OnInit {
   public parentkey: number = 0;
   public aktions: any = [];
   public localfield: string = "";
+  public field_parents: any;
   public parents: any;
   public relact: boolean = false;
   public reloading: boolean = false;
@@ -90,6 +91,7 @@ export class CrudPage implements OnInit {
   public barcoded_: boolean = false;
   public istrue_: boolean = true;
   public visible: string = "hide";
+  public parent: any = {};
   private structure: any = {};
   private sweeped: any;
   private filter: any = [];
@@ -146,6 +148,7 @@ export class CrudPage implements OnInit {
   }
 
   doInitForm() {
+    this.parents = this.structure?.parents ? this.structure.parents : [];
     this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
       this.tab = "data";
       this.crudForm = res.form;
@@ -340,13 +343,13 @@ export class CrudPage implements OnInit {
   doSubmitRelated() {
     this.tab = "data";
     this.related = this.relatedx;
-    this.data[this.parents.lookup[0].local] = [];
+    this.data[this.field_parents.lookup[0].local] = [];
     for (let k = 0; k < this.related.length; k++) {
       if (this.related[k].selected) {
-        this.data[this.parents.lookup[0].local].push(this.related[k][this.parents.lookup[0].remote]);
+        this.data[this.field_parents.lookup[0].local].push(this.related[k][this.field_parents.lookup[0].remote]);
       }
       if (k === this.related.length - 1) {
-        this.crudForm.get(this.parents.lookup[0].local)?.setValue(this.data[this.parents.lookup[0].local]);
+        this.crudForm.get(this.field_parents.lookup[0].local)?.setValue(this.data[this.field_parents.lookup[0].local]);
       }
     }
   }
@@ -437,25 +440,21 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doRelated(f_: any) {
+  doParent(parent_: any) {
+    this.parent = parent_;
+    let projection_: any = {};
     this.reloading = true;
     this.relact = true;
     this.tab = "relation";
-    this.parents = f_.parents;
-    const collection_ = f_.parents.collection;
-    let match_ = f_.parents.match ? f_.parents.match : [{
-      "key": "_id",
-      "op": "nnull",
-      "value": null
-    }];
-    for (let m = 0; m < match_.length; m++) {
-      f_.parents.match && f_.parents.match[m].lookup && this.crudForm.controls[f_.parents.match[m].lookup].value ? match_[m].value = this.crudForm.controls[f_.parents.match[m].lookup].value : null;
-      if (m === match_.length - 1) {
+    let match_ = this.parent.match ? this.parent.match : [];
+    for (let p = 0; p < this.parent.lookup.length; p++) {
+      projection_[this.parent.lookup[p].remote] = 1
+      if (p === this.parent.lookup.length - 1) {
         this.related = [];
         this.misc.apiCall("crud", {
           op: "read",
-          collection: collection_,
-          projection: null,
+          collection: this.parent.collection,
+          projection: projection_,
           match: match_,
           sort: null,
           page: 1,
@@ -464,13 +463,7 @@ export class CrudPage implements OnInit {
           if (res && res.data) {
             this.related = res.data;
             for (let k = 0; k < this.related.length; k++) {
-              if (this.data[f_.name]) {
-                for (let b = 0; b < this.data[f_.name].length; b++) {
-                  if (this.related[k][f_.parents.lookup[0].remote] === this.data[f_.name][b]) {
-                    this.related[k].selected = true;
-                  }
-                }
-              }
+              this.related[k].selected = true;
               if (k === this.related.length - 1) {
                 this.relatedx = this.related = this.related.sort((a: any, b: any) => (a.selected ? -1 : 1));
                 this.reloading = false;
@@ -479,36 +472,37 @@ export class CrudPage implements OnInit {
           }
         }).catch((error: any) => {
           this.misc.doMessage(error, "error");
+        }).finally(() => {
+          this.field_parents = parent_;
+          this.reloading = false;
         });
       }
     }
   }
 
   doSetRelated(item: any) {
-    if (this.properties[this.parents.lookup[0].local].bsonType != 'array') {
-      for (let k = 0; k < this.parents.lookup.length; k++) {
-        if (this.parents.lookup[k].local) {
-          if (this.properties[this.parents.lookup[k].local].bsonType === "array") {
-            !this.data[this.parents.lookup[k].local] || typeof this.data[this.parents.lookup[k].local] === "string" ? this.data[this.parents.lookup[k].local] = [] : null;
-            if (!this.data[this.parents.lookup[k].local] || !this.data[this.parents.lookup[k].local].find((obj: any) => obj === item[this.parents.lookup[k].remote])) {
-              this.data[this.parents.lookup[k].local].push(item[this.parents.lookup[k].remote]);
-              this.crudForm.get(this.parents.lookup[k].local)?.setValue(this.data[this.parents.lookup[k].local]);
-            }
-          } else {
-            this.data[this.parents.lookup[k].local] = item[this.parents.lookup[k].remote];
-            this.crudForm.get(this.parents.lookup[k].local)?.setValue(item[this.parents.lookup[k].remote]);
+    for (let k = 0; k < this.field_parents.lookup.length; k++) {
+      if (this.field_parents.lookup[k].local) {
+        if (this.properties[this.field_parents.lookup[k].local].bsonType === "array") {
+          !this.data[this.field_parents.lookup[k].local] || typeof this.data[this.field_parents.lookup[k].local] === "string" ? this.data[this.field_parents.lookup[k].local] = [] : null;
+          if (!this.data[this.field_parents.lookup[k].local] || !this.data[this.field_parents.lookup[k].local].find((obj: any) => obj === item[this.field_parents.lookup[k].remote])) {
+            this.data[this.field_parents.lookup[k].local].push(item[this.field_parents.lookup[k].remote]);
+            this.crudForm.get(this.field_parents.lookup[k].local)?.setValue(this.data[this.field_parents.lookup[k].local]);
           }
+        } else {
+          this.data[this.field_parents.lookup[k].local] = item[this.field_parents.lookup[k].remote];
+          this.crudForm.get(this.field_parents.lookup[k].local)?.setValue(item[this.field_parents.lookup[k].remote]);
         }
-        if (k === this.parents.lookup.length - 1) {
-          this.tab = "data";
-        }
+      }
+      if (k === this.field_parents.lookup.length - 1) {
+        this.tab = "data";
       }
     }
   }
 
   doStartSearch(e: any) {
     this.related = this.relatedx;
-    this.related = this.related.filter((obj: any) => (obj[this.parents.lookup[0].remote] + obj[this.parents.lookup[1]?.remote] + obj[this.parents.lookup[2]?.remote]).toLowerCase().indexOf(e.toLowerCase()) > -1);
+    this.related = this.related.filter((obj: any) => (obj[this.field_parents.lookup[0].remote] + obj[this.field_parents.lookup[1]?.remote] + obj[this.field_parents.lookup[2]?.remote]).toLowerCase().indexOf(e.toLowerCase()) > -1);
   }
 
   doCopyToken() {
