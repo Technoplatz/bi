@@ -1,8 +1,6 @@
 # Technoplatz BI
 
-It's time to get data-driven with your [inner-cycle!](#highlights)
-
-Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch. 
+Technoplatz BI is a [no-code](#what-is-no-code), multi-container data application and data sharing platform designed to manage business processes without developing software from scratch.
 
 - [How to Get Started](#get-started)
 - [Installation](#installation)

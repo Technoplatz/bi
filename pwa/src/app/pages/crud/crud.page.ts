@@ -150,7 +150,7 @@ export class CrudPage implements OnInit {
       this.tab = "data";
       this.crudForm = res.form;
       this.fields = res.fields;
-      this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? this.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
+      this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? res.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
       this.doGetProperties().then(() => {
@@ -509,36 +509,6 @@ export class CrudPage implements OnInit {
   doStartSearch(e: any) {
     this.related = this.relatedx;
     this.related = this.related.filter((obj: any) => (obj[this.parents.lookup[0].remote] + obj[this.parents.lookup[1]?.remote] + obj[this.parents.lookup[2]?.remote]).toLowerCase().indexOf(e.toLowerCase()) > -1);
-  }
-
-  doKvAdd(i: number, fn: string) {
-    if (this.data[fn][i].key) {
-      this.data[fn].push({
-        key: null,
-        value: null
-      });
-    }
-  }
-
-  doKvInit(fn: string) {
-    this.data[fn].push({
-      key: null,
-      value: null
-    });
-  }
-
-  doKvRemove(i: number, fn: string) {
-    this.data[fn].splice(i, 1);
-  }
-
-  doReorder(ev: CustomEvent<ItemReorderEventDetail>, fn: string) {
-    this.data[fn] = ev.detail.complete(this.data[fn]);
-    this.crudForm.get(fn)?.setValue(this.data[fn]);
-  }
-
-  doFieldReset(fn: string) {
-    this.crudForm.get(fn)?.setValue(null);
-    this.data[fn] = null;
   }
 
   doCopyToken() {
