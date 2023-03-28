@@ -1,69 +1,54 @@
 {
-    "properties": {
-        "bak_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-]{3,64}$",
-            "title": "ID",
-            "description": "Backup ID",
-            "permanent": true,
-            "default": "database-dump",
-            "width": 220
-        },
-        "bak_description": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 128,
-            "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß.,;?*_/()! -]{0,128}$",
-            "title": "Description",
-            "description": "Description",
-            "textarea": true,
-            "width": 160
-        },
-        "bak_process": {
-            "bsonType": "string",
-            "title": "Process",
-            "description": "Backup Type",
-            "enum": [
-                "backup",
-                "restore"
-            ],
-            "default": "backup",
-            "permanent": true,
-            "width": 90
-        },
-        "bak_type": {
-            "bsonType": "string",
-            "title": "Backup Type",
-            "description": "Backup Type",
-            "enum": [
-                "gzip"
-            ],
-            "default": "gzip",
-            "width": 90
-        },
-        "bak_size": {
-            "bsonType": "number",
-            "title": "Size",
-            "description": "File Size",
-            "permanent": true,
-            "width": 90
-        }
+  "properties": {
+    "bak_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-]{3,64}$",
+      "title": "ID",
+      "description": "Backup ID",
+      "permanent": true,
+      "default": "database-dump",
+      "width": 220
     },
-    "required": [
-        "bak_id",
-        "bak_type"
-    ],
-    "unique": [
-        [
-            "bak_id"
-        ],
-        [
-            "bak_file"
-        ]
-    ],
-    "sort": {
-        "_created_at": -1
+    "bak_description": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 128,
+      "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß.,;?*_/()! -]{0,128}$",
+      "title": "Description",
+      "description": "Description",
+      "textarea": true,
+      "width": 160
+    },
+    "bak_process": {
+      "bsonType": "string",
+      "title": "Process",
+      "description": "Backup Type",
+      "enum": ["backup", "restore"],
+      "default": "backup",
+      "permanent": true,
+      "width": 90
+    },
+    "bak_type": {
+      "bsonType": "string",
+      "title": "Backup Type",
+      "description": "Backup Type",
+      "enum": ["gzip"],
+      "default": "gzip",
+      "width": 90
+    },
+    "bak_size": {
+      "bsonType": "number",
+      "title": "Size",
+      "description": "File Size",
+      "permanent": true,
+      "width": 90
     }
+  },
+  "required": ["bak_id", "bak_type"],
+  "unique": [["bak_id"], ["bak_file"]],
+  "sort": {
+    "_created_at": -1
+  }
 }

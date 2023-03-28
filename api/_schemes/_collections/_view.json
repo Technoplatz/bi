@@ -1,486 +1,426 @@
 {
-    "properties": {
-        "vie_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-]{3,64}$",
-            "title": "ID",
-            "description": "View ID",
-            "required": true,
-            "width": 230
-        },
-        "vie_collection_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-_]{3,64}$",
-            "title": "Collection ID",
-            "description": "Collection ID",
-            "collection": true,
-            "required": true,
-            "permanent": true,
-            "width": 140
-        },
-        "vie_title": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "title": "Title",
-            "description": "View Title",
-            "required": true,
-            "width": 230
-        },
-        "vie_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 1000,
-            "width": 120
-        },
-        "vie_dashboard": {
-            "bsonType": "bool",
-            "title": "Dashboard",
-            "description": "Show on Dashboard",
-            "default": false,
-            "width": 120
-        },
-        "vie_filter": {
-            "bsonType": "array",
-            "minItems": 0,
-            "maxItems": 16,
-            "uniqueItems": true,
-            "additionalProperties": false,
-            "filter": true,
-            "items": {
-                "bsonType": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "key": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[a-z_]{1,64}$",
-                        "title": "key",
-                        "description": "Collection key"
-                    },
-                    "op": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 8,
-                        "pattern": "^[a-z]{1,8}$",
-                        "enum": [
-                            "eq",
-                            "ne",
-                            "contains",
-                            "nc",
-                            "in",
-                            "nin",
-                            "gt",
-                            "gte",
-                            "lt",
-                            "lte",
-                            "null",
-                            "nnull",
-                            "true",
-                            "false"
-                        ],
-                        "title": "op",
-                        "description": "Filter operator"
-                    },
-                    "value": {
-                        "bsonType": "string",
-                        "minLength": 0,
-                        "maxLength": 64,
-                        "title": "value",
-                        "description": "Value"
-                    }
-                },
-                "required": [
-                    "key",
-                    "op",
-                    "value"
-                ]
-            },
-            "title": "Filter",
-            "description": "Datacard filter",
-            "subType": "filter",
-            "width": 120
-        },
-        "vie_projection": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 64,
-            "items": {
-                "bsonType": "string",
-                "minLength": 0,
-                "maxLength": 64,
-                "pattern": "^[a-z_]{0,64}$"
-            },
-            "title": "Selected Columns",
-            "description": "Selected columns",
-            "subType": "property",
-            "width": 140
-        },
-        "vie_excluded_columns": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 64,
-            "items": {
-                "bsonType": "string",
-                "minLength": 0,
-                "maxLength": 64,
-                "pattern": "^[a-z_]{0,64}$"
-            },
-            "title": "Excluded Columns",
-            "description": "Excluded columns",
-            "subType": "property",
-            "width": 170
-        },
-        "vie_pivot_index": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 16,
-            "items": {
-                "bsonType": "string",
-                "minLength": 1,
-                "maxLength": 64,
-                "pattern": "^[a-z_]{1,64}$"
-            },
-            "title": "Pivot Rows",
-            "description": "Pivot Rows",
-            "subType": "property",
-            "width": 130
-        },
-        "vie_pivot_columns": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 16,
-            "items": {
-                "bsonType": "string",
-                "minLength": 1,
-                "maxLength": 64,
-                "pattern": "^[a-z_]{1,64}$"
-            },
-            "title": "Pivot Columns",
-            "description": "Pivot Columns",
-            "subType": "property",
-            "width": 150
-        },
-        "vie_pivot_values": {
-            "bsonType": "array",
-            "minItems": 0,
-            "maxItems": 2,
-            "uniqueItems": true,
-            "additionalProperties": false,
-            "kv": true,
-            "items": {
-                "bsonType": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "key": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[a-z_]{1,64}$",
-                        "title": "Key",
-                        "description": "Index key"
-                    },
-                    "value": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[a-z]{1,64}$",
-                        "enum": [
-                            "sum",
-                            "count",
-                            "size",
-                            "unique",
-                            "mean",
-                            "avg",
-                            "average",
-                            "stdev",
-                            "std",
-                            "var",
-                            "min",
-                            "max"
-                        ],
-                        "title": "Function",
-                        "description": "Index value"
-                    }
-                },
-                "required": [
-                    "key",
-                    "value"
-                ]
-            },
-            "title": "Pivot Values",
-            "description": "Pivot Values",
-            "subType": "keyvalue",
-            "width": 140
-        },
-        "vie_order_by": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 16,
-            "items": {
-                "bsonType": "string",
-                "minLength": 1,
-                "maxLength": 64,
-                "pattern": "^[a-z_]{1,64}$"
-            },
-            "title": "Order By",
-            "description": "Order By",
-            "subType": "property",
-            "width": 150
-        },
-        "vie_pivot_totals": {
-            "bsonType": "bool",
-            "title": "Pivot Totals",
-            "description": "Showing pivot totals",
-            "width": 130
-        },
-        "vie_attach_pivot": {
-            "bsonType": "bool",
-            "title": "Attach Pivot",
-            "description": "Attach Pivot?",
-            "width": 140
-        },
-        "vie_attach_csv": {
-            "bsonType": "bool",
-            "title": "Attach CSV",
-            "description": "Attach CSV?",
-            "width": 130
-        },
-        "vie_attach_excel": {
-            "bsonType": "bool",
-            "title": "Attach Excel",
-            "description": "Attach Excel?",
-            "width": 140
-        },
-        "vie_visual_style": {
+  "properties": {
+    "vie_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-]{3,64}$",
+      "title": "ID",
+      "description": "View ID",
+      "required": true,
+      "width": 230
+    },
+    "vie_collection_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "title": "Collection ID",
+      "description": "Collection ID",
+      "collection": true,
+      "required": true,
+      "permanent": true,
+      "width": 140
+    },
+    "vie_title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Title",
+      "description": "View Title",
+      "required": true,
+      "width": 230
+    },
+    "vie_priority": {
+      "bsonType": "number",
+      "title": "Priority",
+      "description": "Priority 0-999999",
+      "minimum": 0,
+      "maximum": 999999,
+      "default": 1000,
+      "width": 120
+    },
+    "vie_dashboard": {
+      "bsonType": "bool",
+      "title": "Dashboard",
+      "description": "Show on Dashboard",
+      "default": false,
+      "width": 120
+    },
+    "vie_filter": {
+      "bsonType": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "additionalProperties": false,
+      "filter": true,
+      "items": {
+        "bsonType": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
             "bsonType": "string",
             "minLength": 1,
             "maxLength": 64,
-            "title": "Visual Style",
-            "description": "Visual Style",
-            "enum": [
-                "Flashcard",
-                "Vertical Bar",
-                "Normalized Vertical Bar",
-                "Stacked Vertical Bar",
-                "Grouped Vertical Bar",
-                "Horizontal Bar",
-                "Normalized Horizontal Bar",
-                "Stacked Horizontal Bar",
-                "Grouped Horizontal Bar",
-                "Line",
-                "Pie",
-                "Doughnut"
-            ],
-            "width": 210
-        },
-        "vie_p_kpi": {
-            "bsonType": "bool",
-            "title": "KPI",
-            "default": false,
-            "description": "KPI",
-            "width": 140
-        },
-        "vie_kpi_target_value": {
-            "bsonType": "number",
-            "title": "KPI Target Value",
-            "description": "KPI Target Value",
-            "default": 1,
-            "width": 160
-        },
-        "vie_p_xaxis_show": {
-            "bsonType": "bool",
-            "title": "Show X Axis",
-            "default": true,
-            "description": "Show X Axis",
-            "width": 140
-        },
-        "vie_p_xaxis_label_show": {
-            "bsonType": "bool",
-            "title": "Show X Axis Label",
-            "default": true,
-            "description": "Show X Axis Label",
-            "width": 140
-        },
-        "vie_p_yaxis_show": {
-            "bsonType": "bool",
-            "title": "Show Y Axis",
-            "default": true,
-            "description": "Show Y Axis",
-            "width": 140
-        },
-        "vie_p_yaxis_label_show": {
-            "bsonType": "bool",
-            "title": "Show Y Axis Label",
-            "default": true,
-            "description": "Show Y Axis Label",
-            "width": 140
-        },
-        "vie_p_legend_show": {
-            "bsonType": "bool",
-            "title": "Show Legend",
-            "default": false,
-            "description": "Show Legend",
-            "width": 150
-        },
-        "vie_p_datalabel_show": {
-            "bsonType": "bool",
-            "title": "Show Data Label",
-            "default": false,
-            "description": "Show Data Label",
-            "width": 180
-        },
-        "vie_p_grid_show": {
-            "bsonType": "bool",
-            "title": "Show Grid",
-            "default": true,
-            "description": "Show Grid",
-            "width": 180
-        },
-        "vie_p_gradient": {
-            "bsonType": "bool",
-            "title": "Gradient",
-            "default": true,
-            "description": "Gradient",
-            "width": 120
-        },
-        "vie_p_color_scheme": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 32,
-            "items": {
-                "bsonType": "string",
-                "minLength": 3,
-                "maxLength": 64,
-                "pattern": "^[a-zA-Z0-9# ]{3,64}$"
-            },
-            "title": "Colors",
-            "description": "Color name or rgb code like #cc0000",
-            "default": [
-                "#CCF1FF",
-                "#E0D7FF",
-                "#FFCCE1",
-                "#D7EEFF",
-                "#FAFFC7",
-                "#DDDDDD"
-            ],
-            "manualAdd": true,
-            "color": true,
-            "width": 180
-        },
-        "vie_scheduled": {
-            "bsonType": "bool",
-            "title": "Scheduled",
-            "description": "Scheduled?",
-            "width": 120
-        },
-        "vie_sched_timezone": {
+            "pattern": "^[a-z_]{1,64}$",
+            "title": "key",
+            "description": "Collection key"
+          },
+          "op": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 8,
+            "pattern": "^[a-z]{1,8}$",
+            "enum": ["eq", "ne", "contains", "nc", "in", "nin", "gt", "gte", "lt", "lte", "null", "nnull", "true", "false"],
+            "title": "op",
+            "description": "Filter operator"
+          },
+          "value": {
             "bsonType": "string",
             "minLength": 0,
             "maxLength": 64,
-            "title": "Scheduled Time Zone",
-            "description": "Scheduled time zone",
-            "enum": [
-                "Europe/Berlin",
-                "Europe/Istanbul"
-            ],
-            "default": "Europe/Berlin",
-            "width": 170
+            "title": "value",
+            "description": "Value"
+          }
         },
-        "vie_sched_days": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 7,
-            "items": {
-                "bsonType": "string",
-                "minLength": 3,
-                "maxLength": 3
-            },
-            "title": "Scheduled Days",
-            "description": "Scheduled days",
-            "subType": "day",
-            "width": 140
-        },
-        "vie_sched_hours": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 8,
-            "items": {
-                "bsonType": "number",
-                "minimum": 0,
-                "maximum": 23
-            },
-            "title": "Scheduled Hours",
-            "description": "Scheduled hours",
-            "subType": "hour",
-            "width": 160
-        },
-        "vie_sched_minutes": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 8,
-            "items": {
-                "bsonType": "number",
-                "minimum": 0,
-                "maximum": 59
-            },
-            "title": "Scheduled minutes",
-            "description": "Scheduled Minutes",
-            "subType": "minute",
-            "width": 160
-        },
-        "_tags": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 100,
-            "items": {
-                "bsonType": "string",
-                "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$"
-            },
-            "title": "Tags",
-            "description": "Add a tag and Enter",
-            "subType": "tag",
-            "manualAdd": true,
-            "width": 300
-        }
+        "required": ["key", "op", "value"]
+      },
+      "title": "Filter",
+      "description": "Datacard filter",
+      "subType": "filter",
+      "width": 120
     },
-    "required": [
-        "vie_id",
-        "vie_collection_id",
-        "vie_title"
-    ],
-    "unique": [
-        [
-            "vie_id"
-        ]
-    ],
-    "index": [
-        [
-            "vie_collection_id"
-        ],
-        [
-            "_tags"
-        ]
-    ],
-    "sort": {
-        "_modified_at": -1
+    "vie_projection": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 64,
+      "items": {
+        "bsonType": "string",
+        "minLength": 0,
+        "maxLength": 64,
+        "pattern": "^[a-z_]{0,64}$"
+      },
+      "title": "Selected Columns",
+      "description": "Selected columns",
+      "subType": "property",
+      "width": 140
+    },
+    "vie_excluded_columns": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 64,
+      "items": {
+        "bsonType": "string",
+        "minLength": 0,
+        "maxLength": 64,
+        "pattern": "^[a-z_]{0,64}$"
+      },
+      "title": "Excluded Columns",
+      "description": "Excluded columns",
+      "subType": "property",
+      "width": 170
+    },
+    "vie_pivot_index": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 16,
+      "items": {
+        "bsonType": "string",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[a-z_]{1,64}$"
+      },
+      "title": "Pivot Rows",
+      "description": "Pivot Rows",
+      "subType": "property",
+      "width": 130
+    },
+    "vie_pivot_columns": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 16,
+      "items": {
+        "bsonType": "string",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[a-z_]{1,64}$"
+      },
+      "title": "Pivot Columns",
+      "description": "Pivot Columns",
+      "subType": "property",
+      "width": 150
+    },
+    "vie_pivot_values": {
+      "bsonType": "array",
+      "minItems": 0,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "additionalProperties": false,
+      "kv": true,
+      "items": {
+        "bsonType": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z_]{1,64}$",
+            "title": "Key",
+            "description": "Index key"
+          },
+          "value": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z]{1,64}$",
+            "enum": ["sum", "count", "size", "unique", "mean", "avg", "average", "stdev", "std", "var", "min", "max"],
+            "title": "Function",
+            "description": "Index value"
+          }
+        },
+        "required": ["key", "value"]
+      },
+      "title": "Pivot Values",
+      "description": "Pivot Values",
+      "subType": "keyvalue",
+      "width": 140
+    },
+    "vie_order_by": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 16,
+      "items": {
+        "bsonType": "string",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[a-z_]{1,64}$"
+      },
+      "title": "Order By",
+      "description": "Order By",
+      "subType": "property",
+      "width": 150
+    },
+    "vie_pivot_totals": {
+      "bsonType": "bool",
+      "title": "Pivot Totals",
+      "description": "Showing pivot totals",
+      "width": 130
+    },
+    "vie_attach_pivot": {
+      "bsonType": "bool",
+      "title": "Attach Pivot",
+      "description": "Attach Pivot?",
+      "width": 140
+    },
+    "vie_attach_csv": {
+      "bsonType": "bool",
+      "title": "Attach CSV",
+      "description": "Attach CSV?",
+      "width": 130
+    },
+    "vie_attach_excel": {
+      "bsonType": "bool",
+      "title": "Attach Excel",
+      "description": "Attach Excel?",
+      "width": 140
+    },
+    "vie_visual_style": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Visual Style",
+      "description": "Visual Style",
+      "enum": [
+        "Flashcard",
+        "Vertical Bar",
+        "Normalized Vertical Bar",
+        "Stacked Vertical Bar",
+        "Grouped Vertical Bar",
+        "Horizontal Bar",
+        "Normalized Horizontal Bar",
+        "Stacked Horizontal Bar",
+        "Grouped Horizontal Bar",
+        "Line",
+        "Pie",
+        "Doughnut"
+      ],
+      "width": 210
+    },
+    "vie_p_kpi": {
+      "bsonType": "bool",
+      "title": "KPI",
+      "default": false,
+      "description": "KPI",
+      "width": 140
+    },
+    "vie_kpi_target_value": {
+      "bsonType": "number",
+      "title": "KPI Target Value",
+      "description": "KPI Target Value",
+      "default": 1,
+      "width": 160
+    },
+    "vie_p_xaxis_show": {
+      "bsonType": "bool",
+      "title": "Show X Axis",
+      "default": true,
+      "description": "Show X Axis",
+      "width": 140
+    },
+    "vie_p_xaxis_label_show": {
+      "bsonType": "bool",
+      "title": "Show X Axis Label",
+      "default": true,
+      "description": "Show X Axis Label",
+      "width": 140
+    },
+    "vie_p_yaxis_show": {
+      "bsonType": "bool",
+      "title": "Show Y Axis",
+      "default": true,
+      "description": "Show Y Axis",
+      "width": 140
+    },
+    "vie_p_yaxis_label_show": {
+      "bsonType": "bool",
+      "title": "Show Y Axis Label",
+      "default": true,
+      "description": "Show Y Axis Label",
+      "width": 140
+    },
+    "vie_p_legend_show": {
+      "bsonType": "bool",
+      "title": "Show Legend",
+      "default": false,
+      "description": "Show Legend",
+      "width": 150
+    },
+    "vie_p_datalabel_show": {
+      "bsonType": "bool",
+      "title": "Show Data Label",
+      "default": false,
+      "description": "Show Data Label",
+      "width": 180
+    },
+    "vie_p_grid_show": {
+      "bsonType": "bool",
+      "title": "Show Grid",
+      "default": true,
+      "description": "Show Grid",
+      "width": 180
+    },
+    "vie_p_gradient": {
+      "bsonType": "bool",
+      "title": "Gradient",
+      "default": true,
+      "description": "Gradient",
+      "width": 120
+    },
+    "vie_p_color_scheme": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 32,
+      "items": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 64,
+        "pattern": "^[a-zA-Z0-9# ]{3,64}$"
+      },
+      "title": "Colors",
+      "description": "Color name or rgb code like #cc0000",
+      "default": ["#CCF1FF", "#E0D7FF", "#FFCCE1", "#D7EEFF", "#FAFFC7", "#DDDDDD"],
+      "manualAdd": true,
+      "color": true,
+      "width": 180
+    },
+    "vie_scheduled": {
+      "bsonType": "bool",
+      "title": "Scheduled",
+      "description": "Scheduled?",
+      "width": 120
+    },
+    "vie_sched_timezone": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 64,
+      "title": "Scheduled Time Zone",
+      "description": "Scheduled time zone",
+      "enum": ["Europe/Berlin", "Europe/Istanbul"],
+      "default": "Europe/Berlin",
+      "width": 170
+    },
+    "vie_sched_days": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 7,
+      "items": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 3
+      },
+      "title": "Scheduled Days",
+      "description": "Scheduled days",
+      "subType": "day",
+      "width": 140
+    },
+    "vie_sched_hours": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 8,
+      "items": {
+        "bsonType": "number",
+        "minimum": 0,
+        "maximum": 23
+      },
+      "title": "Scheduled Hours",
+      "description": "Scheduled hours",
+      "subType": "hour",
+      "width": 160
+    },
+    "vie_sched_minutes": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 8,
+      "items": {
+        "bsonType": "number",
+        "minimum": 0,
+        "maximum": 59
+      },
+      "title": "Scheduled minutes",
+      "description": "Scheduled Minutes",
+      "subType": "minute",
+      "width": 160
+    },
+    "_tags": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 100,
+      "items": {
+        "bsonType": "string",
+        "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$"
+      },
+      "title": "Tags",
+      "description": "Add a tag and Enter",
+      "subType": "tag",
+      "manualAdd": true,
+      "width": 300
     }
+  },
+  "required": ["vie_id", "vie_collection_id", "vie_title"],
+  "unique": [["vie_id"]],
+  "index": [["vie_collection_id"], ["_tags"]],
+  "sort": {
+    "_modified_at": -1
+  }
 }

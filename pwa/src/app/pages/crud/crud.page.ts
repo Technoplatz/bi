@@ -389,39 +389,43 @@ export class CrudPage implements OnInit {
 
   doGetCollectionProperties(collection_: string) {
     return new Promise((resolve, reject) => {
-      const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_source_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
-      this.misc.apiCall("crud", {
-        op: "read",
-        collection: "_collection",
-        projection: null,
-        match: [{
-          key: "col_id",
-          op: "eq",
-          value: cid_
-        }],
-        sort: null,
-        page: 1,
-        limit: 1
-      }).then((res: any) => {
-        const properties = res && res.data && res.data[0] && res.data[0].col_structure && res.data[0].col_structure.properties ? res.data[0].col_structure.properties : this.properties;
-        this.property_list = [];
-        let i = 0;
-        for (let property in properties) {
-          const key = property;
-          const val = properties[property].title;
-          if (i < Object.keys(properties).length - 1) {
-            this.property_list.push({ key: key, value: val });
-            i++;
-          } else {
-            this.property_list.push({ key: key, value: val });
-            this.property_list.push({ key: "_upload_id", value: null });
-            resolve(true);
+      if (collection_.charAt(0) !== "_") {
+        resolve(true);
+      } else {
+        const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_source_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
+        this.misc.apiCall("crud", {
+          op: "read",
+          collection: "_collection",
+          projection: null,
+          match: [{
+            key: "col_id",
+            op: "eq",
+            value: cid_
+          }],
+          sort: null,
+          page: 1,
+          limit: 1
+        }).then((res: any) => {
+          const properties = res && res.data && res.data[0] && res.data[0].col_structure && res.data[0].col_structure.properties ? res.data[0].col_structure.properties : this.properties;
+          this.property_list = [];
+          let i = 0;
+          for (let property in properties) {
+            const key = property;
+            const val = properties[property].title;
+            if (i < Object.keys(properties).length - 1) {
+              this.property_list.push({ key: key, value: val });
+              i++;
+            } else {
+              this.property_list.push({ key: key, value: val });
+              this.property_list.push({ key: "_upload_id", value: null });
+              resolve(true);
+            }
           }
-        }
-      }).catch((error: any) => {
-        console.error(error);
-        reject(error);
-      });
+        }).catch((error: any) => {
+          console.error(error);
+          reject(error);
+        });
+      }
     });
   }
 

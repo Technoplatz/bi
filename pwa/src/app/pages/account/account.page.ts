@@ -121,6 +121,8 @@ export class AccountPage implements OnInit {
           this.accountf_apikey = res && res.user && res.user.apikey ? res.user.apikey : null;
           this.accountf_apikeydate = res && res.user && res.user.apikey_modified_at ? res.user.apikey_modified_at.$date : null;
           s === "apikeygen" ? this.doApiKeyEnabled() : null;
+          this.user.apikey = this.accountf_apikey;
+          this.storage.set("LSUSERMETA", this.user).then(() => { });
         }
         resolve(true);
       }).catch((error: any) => {

@@ -1,168 +1,130 @@
 {
-    "properties": {
-        "act_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-]{3,64}$",
-            "title": "ID",
-            "description": "Action ID",
-            "required": true,
-            "width": 190
-        },
-        "act_collection_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-_]{3,64}$",
-            "title": "Collection ID",
-            "description": "Collection ID",
-            "required": true,
-            "collection": true,
-            "width": 140
-        },
-        "act_title": {
+  "properties": {
+    "act_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-]{3,64}$",
+      "title": "ID",
+      "description": "Action ID",
+      "required": true,
+      "width": 190
+    },
+    "act_collection_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "title": "Collection ID",
+      "description": "Collection ID",
+      "required": true,
+      "collection": true,
+      "width": 140
+    },
+    "act_title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Title",
+      "description": "Action Title",
+      "required": true,
+      "width": 140
+    },
+    "act_enabled": {
+      "bsonType": "bool",
+      "title": "Enabled",
+      "description": "Enabled or not",
+      "width": 110
+    },
+    "act_one_click": {
+      "bsonType": "bool",
+      "title": "One Click",
+      "description": "One Click",
+      "width": 120
+    },
+    "act_filter": {
+      "bsonType": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "additionalProperties": false,
+      "filter": true,
+      "items": {
+        "bsonType": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
             "bsonType": "string",
             "minLength": 1,
             "maxLength": 64,
-            "title": "Title",
-            "description": "Action Title",
-            "required": true,
-            "width": 140
+            "pattern": "^[a-z_]{1,64}$",
+            "title": "key",
+            "description": "Collection key"
+          },
+          "op": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 8,
+            "pattern": "^[a-z]{1,8}$",
+            "enum": ["eq", "ne", "contains", "nc", "in", "nin", "gt", "gte", "lt", "lte", "null", "nnull", "true", "false"],
+            "title": "op",
+            "description": "Filter operator"
+          },
+          "value": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "value",
+            "description": "Value"
+          }
         },
-        "act_enabled": {
-            "bsonType": "bool",
-            "title": "Enabled",
-            "description": "Enabled or not",
-            "width": 110
-        },
-        "act_one_click": {
-            "bsonType": "bool",
-            "title": "One Click",
-            "description": "One Click",
-            "width": 120
-        },
-        "act_filter": {
-            "bsonType": "array",
-            "minItems": 0,
-            "maxItems": 16,
-            "uniqueItems": true,
-            "additionalProperties": false,
-            "filter": true,
-            "items": {
-                "bsonType": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "key": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[a-z_]{1,64}$",
-                        "title": "key",
-                        "description": "Collection key"
-                    },
-                    "op": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 8,
-                        "pattern": "^[a-z]{1,8}$",
-                        "enum": [
-                            "eq",
-                            "ne",
-                            "contains",
-                            "nc",
-                            "in",
-                            "nin",
-                            "gt",
-                            "gte",
-                            "lt",
-                            "lte",
-                            "null",
-                            "nnull",
-                            "true",
-                            "false"
-                        ],
-                        "title": "op",
-                        "description": "Filter operator"
-                    },
-                    "value": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "title": "value",
-                        "description": "Value"
-                    }
-                },
-                "required": [
-                    "key",
-                    "op",
-                    "value"
-                ]
-            },
-            "title": "Filter",
-            "description": "Action filter",
-            "subType": "filter",
-            "width": 120
-        },
-        "act_set": {
-            "bsonType": "array",
-            "minItems": 0,
-            "maxItems": 16,
-            "uniqueItems": true,
-            "additionalProperties": false,
-            "kv": true,
-            "items": {
-                "bsonType": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "key": {
-                        "bsonType": "string",
-                        "minLength": 1,
-                        "maxLength": 64,
-                        "pattern": "^[a-z_]{1,64}$",
-                        "title": "Key",
-                        "description": "Index key"
-                    },
-                    "value": {
-                        "bsonType": "string",
-                        "minLength": 0,
-                        "maxLength": 64,
-                        "title": "Value",
-                        "description": "Field value"
-                    }
-                },
-                "required": [
-                    "key",
-                    "value"
-                ]
-            },
-            "title": "Field Values",
-            "description": "Field Values",
-            "subType": "keyvalue",
-            "width": 130
-        }
+        "required": ["key", "op", "value"]
+      },
+      "title": "Filter",
+      "description": "Action filter",
+      "subType": "filter",
+      "width": 120
     },
-    "required": [
-        "act_id",
-        "act_collection_id",
-        "act_title"
-    ],
-    "unique": [
-        [
-            "act_id"
-        ]
-    ],
-    "index": [
-        [
-            "act_collection_id"
-        ],
-        [
-            "act_collection_id",
-            "act_enabled"
-        ]
-    ],
-    "sort": {
-        "act_collection_id": 1,
-        "_modified_at": -1
+    "act_set": {
+      "bsonType": "array",
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "additionalProperties": false,
+      "kv": true,
+      "items": {
+        "bsonType": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "bsonType": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z_]{1,64}$",
+            "title": "Key",
+            "description": "Index key"
+          },
+          "value": {
+            "bsonType": "string",
+            "minLength": 0,
+            "maxLength": 64,
+            "title": "Value",
+            "description": "Field value"
+          }
+        },
+        "required": ["key", "value"]
+      },
+      "title": "Field Values",
+      "description": "Field Values",
+      "subType": "keyvalue",
+      "width": 130
     }
+  },
+  "required": ["act_id", "act_collection_id", "act_title"],
+  "unique": [["act_id"]],
+  "index": [["act_collection_id"], ["act_collection_id", "act_enabled"]],
+  "sort": {
+    "act_collection_id": 1,
+    "_modified_at": -1
+  }
 }

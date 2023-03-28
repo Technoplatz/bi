@@ -143,7 +143,7 @@ export const environment = {
     { "id": "_firewall", "title": "Firewall" },
     { "id": "_token", "title": "API Tokens" },
     { "id": "_backup", "title": "Backups" },
-    { "id": "_log", "title": "System Logs" }
+    { "id": "_log", "title": "Logs" }
   ],
   charts: {
     colorScheme: {

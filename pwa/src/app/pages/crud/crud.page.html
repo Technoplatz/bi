@@ -261,7 +261,7 @@ https://www.gnu.org/licenses.
             </ion-list>
             <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
                 <ion-item *ngIf="data['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
-                    <ion-label position="stacked">{{ 'Record ID' }}</ion-label>
+                    <ion-label position="stacked">{{ 'ID' }}</ion-label>
                     <ion-input class="ion-no-padding" type="text" [value]="data['_id']" disabled> </ion-input>
                 </ion-item>
                 <ion-item *ngIf="data['_created_at']" lines="full" class="ion-no-margin">
@@ -296,7 +296,9 @@ https://www.gnu.org/licenses.
             </ion-list>
         </form>
     </ng-template>
-    <ion-item *ngIf="visible=='hide'" lines="none">
+</ion-content>
+<ion-content *ngIf="visible=='hide'" class="ion-padding-start ion-padding-end">
+    <ion-item lines="none">
         <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
         <ion-label> {{ loadingText | translate }} </ion-label>
     </ion-item>

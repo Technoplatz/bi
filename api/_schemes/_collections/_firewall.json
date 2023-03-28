@@ -1,65 +1,47 @@
 {
-    "properties": {
-        "fwa_rule_id": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-]+$",
-            "title": "ID",
-            "description": "Rule ID",
-            "permanent": true,
-            "required": true,
-            "width": 180
-        },
-        "fwa_user_id": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^.+@.+$",
-            "title": "User",
-            "description": "User ID",
-            "required": true,
-            "width": 180
-        },
-        "fwa_ip": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 16,
-            "title": "IP Address",
-            "description": "IP Address",
-            "required": true,
-            "width": 120
-        },
-        "fwa_enabled": {
-            "bsonType": "bool",
-            "title": "Enabled",
-            "default": true,
-            "description": "Enabled or not",
-            "width": 120
-        }
+  "properties": {
+    "fwa_rule_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-]+$",
+      "title": "ID",
+      "description": "Rule ID",
+      "permanent": true,
+      "required": true,
+      "width": 180
     },
-    "required": [
-        "fwa_rule_id",
-        "fwa_user_id",
-        "fwa_ip"
-    ],
-    "index": [
-        [
-            "fwa_user_id",
-            "fwa_ip",
-            "fwa_enabled"
-        ]
-    ],
-    "unique": [
-        [
-            "fwa_rule_id"
-        ],
-        [
-            "fwa_user_id",
-            "fwa_ip"
-        ]
-    ],
-    "sort": {
-        "fwa_user_id": 1
+    "fwa_user_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^.+@.+$",
+      "title": "User",
+      "description": "User ID",
+      "required": true,
+      "width": 180
+    },
+    "fwa_ip": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 16,
+      "title": "IP Address",
+      "description": "IP Address",
+      "required": true,
+      "width": 120
+    },
+    "fwa_enabled": {
+      "bsonType": "bool",
+      "title": "Enabled",
+      "default": true,
+      "description": "Enabled or not",
+      "width": 120
     }
+  },
+  "required": ["fwa_rule_id", "fwa_user_id", "fwa_ip"],
+  "index": [["fwa_user_id", "fwa_ip", "fwa_enabled"]],
+  "unique": [["fwa_rule_id"], ["fwa_user_id", "fwa_ip"]],
+  "sort": {
+    "fwa_user_id": 1
+  }
 }

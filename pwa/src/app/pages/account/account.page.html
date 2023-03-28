@@ -71,36 +71,45 @@ https://www.gnu.org/licenses.
         {{ 'API keys allow you to access your data from spreadsheets and other BI Tools'
         |
         translate }}.
-        <ul>
-          <li>{{ 'API Key is hidden by default' | translate }}.</li>
-          <li>{{ 'To see your API Key click the show button below. It will be shown for 5 seconds.' | translate }}.
+        <ul class="ion-margin-bottom">
+          <li>{{ 'API key is hidden by default' | translate }}.</li>
+          <li>{{ 'To make your key visible for a couple of seconds click the show button below.' | translate }}.
           </li>
-          <li>{{ 'You can copy your key to Clipboard' | translate }}.</li>
-          <li>{{ 'Once you generate a new API Key previous one won\'t be accepted anymore' | translate }}.
+          <li>{{ 'You can copy your key to clipboard' | translate }}.</li>
+          <li>{{ 'Once you generate a new key, previous one won\'t be accepted anymore' | translate }}.
           </li>
         </ul>
-        <p *ngIf="is_apikey_enabled" class="fixed-font">{{ accountf_apikey }}</p>
-        <p *ngIf="!is_apikey_enabled">
-          &#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;&#9632;
-        </p>
+        <h6 *ngIf="is_apikey_enabled; else apihedden">
+          <h6>{{ accountf_apikey }}</h6>
+        </h6>
+        <ng-template #apihedden>
+            <h6>--- HIDDEN ---</h6>
+        </ng-template>
         <p *ngIf="accountf_apikeydate">{{ 'Created at' | translate }} {{ accountf_apikeydate |
           date:'dd.MM.yyyy HH:mm' }}&nbsp;</p>
-        <p class="ion-padding-top">
-          <ion-button (click)="doApiKeyEnabled()" size="default">
-            <ion-spinner *ngIf="is_apikey_enabled" name="dots"></ion-spinner>
-            <ion-icon *ngIf="!is_apikey_enabled" name="eye"></ion-icon>
-            <ion-label *ngIf="!is_apikey_enabled">{{ 'SHOW' | translate }}</ion-label>
+        <p class="ion-margin-top">
+          <ion-button (click)="doApiKeyEnabled()" size="small">
+            <div *ngIf="!is_apikey_enabled; else notenabled">
+              <ion-label>{{ 'SHOW' | translate }}</ion-label>
+            </div>
+            <ng-template #notenabled>
+              <ion-spinner *ngIf="is_apikey_enabled; notenabled" name="dots"></ion-spinner>
+            </ng-template>
           </ion-button>
-          <ion-button (click)="doCopy('apikey')" size="default">
-            <ion-icon *ngIf="!is_apikey_copied" name="copy"></ion-icon>
-            <ion-label *ngIf="!is_apikey_copied">{{ 'COPY' | translate }}</ion-label>
-            <ion-icon *ngIf="is_apikey_copied" name="checkmark"></ion-icon>
-            <ion-label *ngIf="is_apikey_copied">{{ 'COPIED' | translate }}</ion-label>
+          <ion-button (click)="doCopy('apikey')" size="small">
+            <div *ngIf="!is_apikey_copied; else copied">
+              <ion-label>{{ 'COPY' | translate }}</ion-label>
+            </div>
+            <ng-template #copied>
+              <ion-icon name="checkmark-outline"></ion-icon>
+              <ion-label>{{ 'COPIED' | translate }}</ion-label>
+            </ng-template>
           </ion-button>
-          <ion-button (click)="doAccount('apikeygen')" class="ion-margin-end" size="default">
-            <ion-spinner *ngIf="is_processing_account" name="dots"></ion-spinner>
-            <ion-icon *ngIf="!is_processing_account" name="refresh"></ion-icon>
-            <ion-label *ngIf="!is_processing_account">{{ 'GENERATE' | translate }}</ion-label>
+          <ion-button (click)="doAccount('apikeygen')" size="small">
+            <ion-spinner *ngIf="is_processing_account; else noprocessing" name="dots"></ion-spinner>
+            <ng-template #noprocessing>
+              <ion-label>{{ 'GENERATE' | translate }}</ion-label>
+            </ng-template>
           </ion-button>
         </p>
       </div>

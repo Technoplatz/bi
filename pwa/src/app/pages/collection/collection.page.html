@@ -49,11 +49,20 @@ https://www.gnu.org/licenses.
                 {{ 'Read' | translate }}<br />{{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
-                <div (click)="goCrud(null, 'insert')" class="data-sq-button">
+                <div *ngIf="!['_log'].includes(id)" (click)="goCrud(null, 'insert')" class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  <span *ngIf="id != '_backup'; else normale"> {{ 'New' | translate }}<br />{{ 'Record' | translate }}
-                  </span>
-                  <ng-template #normale> {{ 'New' | translate }}<br />{{ 'Backup' | translate }} </ng-template>
+                  {{ 'New' | translate }}<br />
+                  <span *ngIf="is_crud; else normale">{{ 'Record' | translate }}</span>
+                  <ng-template #normale>
+                    <span *ngIf="id=='_user'">{{ 'User' | translate }}</span>
+                    <span *ngIf="id=='_collection'">{{ 'Collection' | translate }}</span>
+                    <span *ngIf="id=='_view'">{{ 'View' | translate }}</span>
+                    <span *ngIf="id=='_automation'">{{ 'Task' | translate }}</span>
+                    <span *ngIf="id=='_backup'">{{ 'Backup' | translate }}</span>
+                    <span *ngIf="id=='_token'">{{ 'Token' | translate }}</span>
+                    <span *ngIf="id=='_action'">{{ 'Action' | translate }}</span>
+                    <span *ngIf="['_firewall','_permission'].includes(id)">{{ 'Permission' | translate }}</span>
+                  </ng-template>
                 </div>
               </ng-template>
               <div (click)="RefreshData(0)" class="data-sq-button">

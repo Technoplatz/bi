@@ -1,254 +1,227 @@
 {
-    "properties": {
-        "vis_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-]{3,64}$",
-            "title": "ID",
-            "description": "Visual ID",
-            "required": true,
-            "width": 240
-        },
-        "vis_chart_style": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "title": "Chart Style",
-            "description": "Chart Style",
-            "enum": [
-                "Vertical Bar",
-                "Normalized Vertical Bar",
-                "Stacked Vertical Bar",
-                "Grouped Vertical Bar",
-                "Horizontal Bar",
-                "Normalized Horizontal Bar",
-                "Stacked Horizontal Bar",
-                "Grouped Horizontal Bar",
-                "Line",
-                "Pie",
-                "Doughnut"
-            ],
-            "width": 210
-        },
-        "vis_view_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-_]{3,64}$",
-            "title": "View ID",
-            "description": "View ID",
-            "required": true,
-            "view": true,
-            "width": 240
-        },
-        "vis_title": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "title": "Title",
-            "description": "Visual Title",
-            "required": true,
-            "width": 240
-        },
-        "vis_description": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 128,
-            "title": "Description",
-            "description": "Description",
-            "textarea": true,
-            "width": 160
-        },
-        "vis_enabled": {
-            "bsonType": "bool",
-            "title": "Enabled?",
-            "description": "Enabled?",
-            "default": true,
-            "width": 110
-        },
-        "vis_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 1000,
-            "width": 120
-        },
-        "vis_chart_xaxis": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{1,64}$",
-            "title": "X Axis",
-            "description": "Chart X Axis",
-            "property": true,
-            "width": 140
-        },
-        "vis_chart_yaxis": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{1,64}$",
-            "title": "Y Axis (Data)",
-            "description": "Chart Y Axis",
-            "property": true,
-            "width": 140
-        },
-        "vis_chart_legend": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{1,64}$",
-            "title": "Legend (Group)",
-            "description": "Legend (Group) Column",
-            "property": true,
-            "width": 140
-        },
-        "vis_chart_function": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 8,
-            "pattern": "^[a-z]{1,8}$",
-            "title": "Function",
-            "description": "Function for Data Column",
-            "enum": [
-                "count",
-                "sum",
-                "unique",
-                "mean",
-                "var",
-                "stdev",
-                "datediff"
-            ],
-            "width": 160
-        },
-        "vis_p_xaxis_label": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
-            "title": "X Axis Label",
-            "description": "X Axis Label",
-            "width": 140
-        },
-        "vis_p_yaxis_label": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
-            "title": "Y Axis Label",
-            "description": "Y Axis Label",
-            "width": 140
-        },
-        "vis_p_legend_title": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
-            "title": "Legend Label",
-            "description": "Legend Label",
-            "width": 140
-        },
-        "vis_p_kpi": {
-            "bsonType": "bool",
-            "title": "KPI",
-            "default": false,
-            "description": "KPI",
-            "width": 140
-        },
-        "vis_kpi_target_value": {
-            "bsonType": "number",
-            "title": "KPI Target Value",
-            "description": "KPI Target Value",
-            "default": 1,
-            "width": 140
-        },
-        "vis_p_xaxis_show": {
-            "bsonType": "bool",
-            "title": "Show X Axis",
-            "default": true,
-            "description": "Show X Axis",
-            "width": 140
-        },
-        "vis_p_yaxis_show": {
-            "bsonType": "bool",
-            "title": "Show Y Axis",
-            "default": true,
-            "description": "Show Y Axis",
-            "width": 140
-        },
-        "vis_p_datalabel_show": {
-            "bsonType": "bool",
-            "title": "Show Data Label",
-            "default": true,
-            "description": "Show Data Label",
-            "width": 180
-        },
-        "vis_p_grid_show": {
-            "bsonType": "bool",
-            "title": "Show Grid",
-            "default": true,
-            "description": "Show Grid",
-            "width": 180
-        },
-        "vis_p_gradient": {
-            "bsonType": "bool",
-            "title": "Gradient",
-            "default": true,
-            "description": "Gradient",
-            "width": 120
-        },
-        "vis_p_color_scheme": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 16,
-            "items": {
-                "bsonType": "string",
-                "minLength": 3,
-                "maxLength": 64,
-                "pattern": "^[a-zA-Z0-9# ]{3,64}$"
-            },
-            "title": "Color Scheme",
-            "description": "Color Scheme",
-            "default": [
-                "LightBlue",
-                "FireBrick",
-                "PaleGoldenRod",
-                "YellowGreen"
-            ],
-            "color": true,
-            "width": 180
-        }
+  "properties": {
+    "vis_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-]{3,64}$",
+      "title": "ID",
+      "description": "Visual ID",
+      "required": true,
+      "width": 240
     },
-    "required": [
-        "vis_id",
-        "vis_view_id",
-        "vis_title",
-        "vis_chart_style",
-        "vis_chart_xaxis",
-        "vis_chart_legend",
-        "vis_chart_function"
-    ],
-    "unique": [
-        [
-            "vis_id"
-        ],
-        [
-            "vis_title"
-        ]
-    ],
-    "index": [
-        [
-            "vis_view_id"
-        ],
-        [
-            "vis_enabled"
-        ]
-    ],
-    "sort": {
-        "_modified_at": -1
+    "vis_chart_style": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Chart Style",
+      "description": "Chart Style",
+      "enum": [
+        "Vertical Bar",
+        "Normalized Vertical Bar",
+        "Stacked Vertical Bar",
+        "Grouped Vertical Bar",
+        "Horizontal Bar",
+        "Normalized Horizontal Bar",
+        "Stacked Horizontal Bar",
+        "Grouped Horizontal Bar",
+        "Line",
+        "Pie",
+        "Doughnut"
+      ],
+      "width": 210
+    },
+    "vis_view_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "title": "View ID",
+      "description": "View ID",
+      "required": true,
+      "view": true,
+      "width": 240
+    },
+    "vis_title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Title",
+      "description": "Visual Title",
+      "required": true,
+      "width": 240
+    },
+    "vis_description": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "Description",
+      "description": "Description",
+      "textarea": true,
+      "width": 160
+    },
+    "vis_enabled": {
+      "bsonType": "bool",
+      "title": "Enabled?",
+      "description": "Enabled?",
+      "default": true,
+      "width": 110
+    },
+    "vis_priority": {
+      "bsonType": "number",
+      "title": "Priority",
+      "description": "Priority 0-999999",
+      "minimum": 0,
+      "maximum": 999999,
+      "default": 1000,
+      "width": 120
+    },
+    "vis_chart_xaxis": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z_]{1,64}$",
+      "title": "X Axis",
+      "description": "Chart X Axis",
+      "property": true,
+      "width": 140
+    },
+    "vis_chart_yaxis": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z_]{1,64}$",
+      "title": "Y Axis (Data)",
+      "description": "Chart Y Axis",
+      "property": true,
+      "width": 140
+    },
+    "vis_chart_legend": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z_]{1,64}$",
+      "title": "Legend (Group)",
+      "description": "Legend (Group) Column",
+      "property": true,
+      "width": 140
+    },
+    "vis_chart_function": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 8,
+      "pattern": "^[a-z]{1,8}$",
+      "title": "Function",
+      "description": "Function for Data Column",
+      "enum": ["count", "sum", "unique", "mean", "var", "stdev", "datediff"],
+      "width": 160
+    },
+    "vis_p_xaxis_label": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
+      "title": "X Axis Label",
+      "description": "X Axis Label",
+      "width": 140
+    },
+    "vis_p_yaxis_label": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
+      "title": "Y Axis Label",
+      "description": "Y Axis Label",
+      "width": 140
+    },
+    "vis_p_legend_title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9_() -]{1,64}$",
+      "title": "Legend Label",
+      "description": "Legend Label",
+      "width": 140
+    },
+    "vis_p_kpi": {
+      "bsonType": "bool",
+      "title": "KPI",
+      "default": false,
+      "description": "KPI",
+      "width": 140
+    },
+    "vis_kpi_target_value": {
+      "bsonType": "number",
+      "title": "KPI Target Value",
+      "description": "KPI Target Value",
+      "default": 1,
+      "width": 140
+    },
+    "vis_p_xaxis_show": {
+      "bsonType": "bool",
+      "title": "Show X Axis",
+      "default": true,
+      "description": "Show X Axis",
+      "width": 140
+    },
+    "vis_p_yaxis_show": {
+      "bsonType": "bool",
+      "title": "Show Y Axis",
+      "default": true,
+      "description": "Show Y Axis",
+      "width": 140
+    },
+    "vis_p_datalabel_show": {
+      "bsonType": "bool",
+      "title": "Show Data Label",
+      "default": true,
+      "description": "Show Data Label",
+      "width": 180
+    },
+    "vis_p_grid_show": {
+      "bsonType": "bool",
+      "title": "Show Grid",
+      "default": true,
+      "description": "Show Grid",
+      "width": 180
+    },
+    "vis_p_gradient": {
+      "bsonType": "bool",
+      "title": "Gradient",
+      "default": true,
+      "description": "Gradient",
+      "width": 120
+    },
+    "vis_p_color_scheme": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 16,
+      "items": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 64,
+        "pattern": "^[a-zA-Z0-9# ]{3,64}$"
+      },
+      "title": "Color Scheme",
+      "description": "Color Scheme",
+      "default": ["LightBlue", "FireBrick", "PaleGoldenRod", "YellowGreen"],
+      "color": true,
+      "width": 180
     }
+  },
+  "required": [
+    "vis_id",
+    "vis_view_id",
+    "vis_title",
+    "vis_chart_style",
+    "vis_chart_xaxis",
+    "vis_chart_legend",
+    "vis_chart_function"
+  ],
+  "unique": [["vis_id"], ["vis_title"]],
+  "index": [["vis_view_id"], ["vis_enabled"]],
+  "sort": {
+    "_modified_at": -1
+  }
 }

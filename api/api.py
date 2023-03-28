@@ -3979,7 +3979,7 @@ class Auth():
 
             collection_ = Mongo().db["_collection"].find_one({"col_id": collection_id_})
             if not collection_:
-                raise APIError(f"permitted collection not found {collection_id_} for {op_}")
+                raise APIError(f"no access permission for {collection_id_}/{op_}")
 
             permission_ = False  # default
 
@@ -4123,15 +4123,12 @@ class Auth():
             apikey_ = None
 
             if op_ == "apikeygen":
-
                 apikey_ = secrets.token_hex(16)
-
                 Mongo().db["_auth"].update_one({"aut_id": email_}, {"$set": {
                     "aut_apikey": apikey_,
                     "_apikey_modified_at": datetime.now(),
                     "_apikey_modified_by": email_
                 }, "$inc": {"_apikey_modified_count": 1}}, upsert=False)
-
                 log_ = Misc().log_f({
                     "type": "Info",
                     "collection": "_auth",

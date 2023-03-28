@@ -1,318 +1,278 @@
 {
-    "properties": {
-        "fie_collection_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{3,64}$",
-            "title": "Collection ID",
-            "description": "Collection ID",
-            "collection": true,
-            "required": true,
-            "permanent": true,
-            "width": 140
-        },
-        "fie_id": {
-            "bsonType": "string",
-            "minLength": 2,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{2,64}$",
-            "title": "Field ID",
-            "description": "Field ID",
-            "required": true,
-            "width": 170
-        },
-        "fie_type": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "title": "Field Type",
-            "description": "Field Type",
-            "enum": [
-                "string",
-                "number",
-                "int",
-                "float",
-                "date",
-                "bool",
-                "array"
-            ],
-            "required": true,
-            "width": 90
-        },
-        "fie_title": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "title": "Title",
-            "description": "Field Title",
-            "required": true,
-            "width": 160
-        },
-        "fie_priority": {
-            "bsonType": "number",
-            "title": "Priority",
-            "description": "Priority 0-999999",
-            "minimum": 0,
-            "maximum": 999999,
-            "default": 1000,
-            "width": 120
-        },
-        "fie_description": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 128,
-            "title": "Description",
-            "description": "Description",
-            "textarea": true,
-            "width": 160
-        },
-        "fie_default": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 64,
-            "title": "Default Value",
-            "description": "Default Value",
-            "width": 120
-        },
-        "fie_required": {
-            "bsonType": "bool",
-            "title": "Required?",
-            "description": "Required?",
-            "default": false,
-            "width": 110
-        },
-        "fie_permanent": {
-            "bsonType": "bool",
-            "title": "Permanent?",
-            "description": "Permanent?",
-            "default": false,
-            "width": 120
-        },
-        "fie_unique": {
-            "bsonType": "bool",
-            "title": "Unique?",
-            "description": "Unique?",
-            "default": false,
-            "width": 110
-        },
-        "fie_unique_add": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 8,
-            "items": {
-                "bsonType": "string",
-                "minLength": 0,
-                "maxLength": 64,
-                "pattern": "^[a-z_]{0,64}$"
-            },
-            "title": "Unique Additionals",
-            "description": "Unique Additionals",
-            "subType": "property",
-            "width": 130
-        },
-        "fie_indexed": {
-            "bsonType": "bool",
-            "title": "Indexed?",
-            "description": "Indexed?",
-            "default": false,
-            "width": 120
-        },
-        "fie_indexed_add": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 8,
-            "items": {
-                "bsonType": "string",
-                "minLength": 0,
-                "maxLength": 64,
-                "pattern": "^[a-z_]{1,64}$"
-            },
-            "title": "Indexed Additionals",
-            "description": "Indexed Additionals",
-            "subType": "property",
-            "width": 140
-        },
-        "fie_min_length": {
-            "bsonType": "number",
-            "title": "min. Length",
-            "description": "min. Length",
-            "minimum": 0,
-            "maximum": 2048,
-            "width": 120
-        },
-        "fie_max_length": {
-            "bsonType": "number",
-            "title": "max. Length",
-            "description": "max. Length",
-            "minimum": 0,
-            "maximum": 2048,
-            "width": 130
-        },
-        "fie_minimum": {
-            "bsonType": "number",
-            "title": "Min. Value",
-            "description": "Min. Value",
-            "minimum": 0,
-            "maximum": 999999999,
-            "width": 120
-        },
-        "fie_maximum": {
-            "bsonType": "number",
-            "title": "Max. Value",
-            "description": "Max. Value",
-            "minimum": 0,
-            "maximum": 999999999,
-            "width": 120
-        },
-        "fie_array_unique_items": {
-            "bsonType": "bool",
-            "title": "Array Unique Items?",
-            "description": "Array Unique Items?",
-            "default": false,
-            "width": 180
-        },
-        "fie_array_min_items": {
-            "bsonType": "number",
-            "title": "Array Min. Items",
-            "description": "Array Min. Items",
-            "minimum": 0,
-            "maximum": 256,
-            "width": 160
-        },
-        "fie_array_max_items": {
-            "bsonType": "number",
-            "title": "Array Max. Items",
-            "description": "Array Max. Items",
-            "minimum": 0,
-            "maximum": 256,
-            "width": 160
-        },
-        "fie_array_items_type": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 64,
-            "title": "Array Items Type",
-            "description": "Array Items Type",
-            "enum": [
-                "string",
-                "number",
-                "int",
-                "float",
-                "date",
-                "boolean",
-                "array",
-                null
-            ],
-            "width": 160
-        },
-        "fie_array_manual_add": {
-            "bsonType": "bool",
-            "title": "Array Manual Add?",
-            "description": "Array Manual Add?",
-            "default": false,
-            "width": 170
-        },
-        "fie_width": {
-            "bsonType": "number",
-            "title": "Width",
-            "description": "Width",
-            "minimum": 80,
-            "maximum": 320,
-            "default": 120,
-            "width": 90
-        },
-        "fie_has_parent": {
-            "bsonType": "bool",
-            "title": "Has Parent?",
-            "description": "Has Parent?",
-            "default": false,
-            "width": 120
-        },
-        "fie_parent_collection_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{3,64}$",
-            "title": "Parent Collection",
-            "description": "Parent Collection",
-            "collection": true,
-            "width": 190
-        },
-        "fie_parent_field_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{3,64}$",
-            "title": "Parent Field",
-            "description": "Parent Field",
-            "width": 170
-        },
-        "fie_options": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 64,
-            "items": {
-                "bsonType": "string",
-                "minLength": 1,
-                "maxLength": 64,
-                "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß-]{1,64}$"
-            },
-            "title": "Enum Options",
-            "description": "Add an option and Enter",
-            "manualAdd": true,
-            "width": 200
-        },
-        "fie_barcoded": {
-            "bsonType": "bool",
-            "title": "Barcoded?",
-            "description": "Barcoded?",
-            "default": false,
-            "width": 120
-        },
-        "fie_sort": {
-            "bsonType": "string",
-            "title": "Sort",
-            "description": "Sort",
-            "enum": [
-                "ascending",
-                "descending",
-                "unsorted"
-            ],
-            "minLength": 0,
-            "maxLength": 64,
-            "default": "unsorted",
-            "width": 90
-        }
+  "properties": {
+    "fie_collection_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z_]{3,64}$",
+      "title": "Collection ID",
+      "description": "Collection ID",
+      "collection": true,
+      "required": true,
+      "permanent": true,
+      "width": 140
     },
-    "required": [
-        "fie_id",
-        "fie_title",
-        "fie_type"
-    ],
-    "unique": [
-        [
-            "fie_collection_id",
-            "fie_id"
-        ]
-    ],
-    "index": [
-        [
-            "fie_type"
-        ],
-        [
-            "fie_id"
-        ],
-        [
-            "fie_collection_id"
-        ]
-    ],
-    "sort": {
-        "fie_collection_id": 1,
-        "fie_priority": 1,
-        "fie_id": 1
+    "fie_id": {
+      "bsonType": "string",
+      "minLength": 2,
+      "maxLength": 64,
+      "pattern": "^[a-z_]{2,64}$",
+      "title": "Field ID",
+      "description": "Field ID",
+      "required": true,
+      "width": 170
+    },
+    "fie_type": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Field Type",
+      "description": "Field Type",
+      "enum": ["string", "number", "int", "float", "date", "bool", "array"],
+      "required": true,
+      "width": 90
+    },
+    "fie_title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Title",
+      "description": "Field Title",
+      "required": true,
+      "width": 160
+    },
+    "fie_priority": {
+      "bsonType": "number",
+      "title": "Priority",
+      "description": "Priority 0-999999",
+      "minimum": 0,
+      "maximum": 999999,
+      "default": 1000,
+      "width": 120
+    },
+    "fie_description": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "Description",
+      "description": "Description",
+      "textarea": true,
+      "width": 160
+    },
+    "fie_default": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 64,
+      "title": "Default Value",
+      "description": "Default Value",
+      "width": 120
+    },
+    "fie_required": {
+      "bsonType": "bool",
+      "title": "Required?",
+      "description": "Required?",
+      "default": false,
+      "width": 110
+    },
+    "fie_permanent": {
+      "bsonType": "bool",
+      "title": "Permanent?",
+      "description": "Permanent?",
+      "default": false,
+      "width": 120
+    },
+    "fie_unique": {
+      "bsonType": "bool",
+      "title": "Unique?",
+      "description": "Unique?",
+      "default": false,
+      "width": 110
+    },
+    "fie_unique_add": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 8,
+      "items": {
+        "bsonType": "string",
+        "minLength": 0,
+        "maxLength": 64,
+        "pattern": "^[a-z_]{0,64}$"
+      },
+      "title": "Unique Additionals",
+      "description": "Unique Additionals",
+      "subType": "property",
+      "width": 130
+    },
+    "fie_indexed": {
+      "bsonType": "bool",
+      "title": "Indexed?",
+      "description": "Indexed?",
+      "default": false,
+      "width": 120
+    },
+    "fie_indexed_add": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 8,
+      "items": {
+        "bsonType": "string",
+        "minLength": 0,
+        "maxLength": 64,
+        "pattern": "^[a-z_]{1,64}$"
+      },
+      "title": "Indexed Additionals",
+      "description": "Indexed Additionals",
+      "subType": "property",
+      "width": 140
+    },
+    "fie_min_length": {
+      "bsonType": "number",
+      "title": "min. Length",
+      "description": "min. Length",
+      "minimum": 0,
+      "maximum": 2048,
+      "width": 120
+    },
+    "fie_max_length": {
+      "bsonType": "number",
+      "title": "max. Length",
+      "description": "max. Length",
+      "minimum": 0,
+      "maximum": 2048,
+      "width": 130
+    },
+    "fie_minimum": {
+      "bsonType": "number",
+      "title": "Min. Value",
+      "description": "Min. Value",
+      "minimum": 0,
+      "maximum": 999999999,
+      "width": 120
+    },
+    "fie_maximum": {
+      "bsonType": "number",
+      "title": "Max. Value",
+      "description": "Max. Value",
+      "minimum": 0,
+      "maximum": 999999999,
+      "width": 120
+    },
+    "fie_array_unique_items": {
+      "bsonType": "bool",
+      "title": "Array Unique Items?",
+      "description": "Array Unique Items?",
+      "default": false,
+      "width": 180
+    },
+    "fie_array_min_items": {
+      "bsonType": "number",
+      "title": "Array Min. Items",
+      "description": "Array Min. Items",
+      "minimum": 0,
+      "maximum": 256,
+      "width": 160
+    },
+    "fie_array_max_items": {
+      "bsonType": "number",
+      "title": "Array Max. Items",
+      "description": "Array Max. Items",
+      "minimum": 0,
+      "maximum": 256,
+      "width": 160
+    },
+    "fie_array_items_type": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 64,
+      "title": "Array Items Type",
+      "description": "Array Items Type",
+      "enum": ["string", "number", "int", "float", "date", "boolean", "array", null],
+      "width": 160
+    },
+    "fie_array_manual_add": {
+      "bsonType": "bool",
+      "title": "Array Manual Add?",
+      "description": "Array Manual Add?",
+      "default": false,
+      "width": 170
+    },
+    "fie_width": {
+      "bsonType": "number",
+      "title": "Width",
+      "description": "Width",
+      "minimum": 80,
+      "maximum": 320,
+      "default": 120,
+      "width": 90
+    },
+    "fie_has_parent": {
+      "bsonType": "bool",
+      "title": "Has Parent?",
+      "description": "Has Parent?",
+      "default": false,
+      "width": 120
+    },
+    "fie_parent_collection_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z_]{3,64}$",
+      "title": "Parent Collection",
+      "description": "Parent Collection",
+      "collection": true,
+      "width": 190
+    },
+    "fie_parent_field_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z_]{3,64}$",
+      "title": "Parent Field",
+      "description": "Parent Field",
+      "width": 170
+    },
+    "fie_options": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 64,
+      "items": {
+        "bsonType": "string",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß-]{1,64}$"
+      },
+      "title": "Enum Options",
+      "description": "Add an option and Enter",
+      "manualAdd": true,
+      "width": 200
+    },
+    "fie_barcoded": {
+      "bsonType": "bool",
+      "title": "Barcoded?",
+      "description": "Barcoded?",
+      "default": false,
+      "width": 120
+    },
+    "fie_sort": {
+      "bsonType": "string",
+      "title": "Sort",
+      "description": "Sort",
+      "enum": ["ascending", "descending", "unsorted"],
+      "minLength": 0,
+      "maxLength": 64,
+      "default": "unsorted",
+      "width": 90
     }
+  },
+  "required": ["fie_id", "fie_title", "fie_type"],
+  "unique": [["fie_collection_id", "fie_id"]],
+  "index": [["fie_type"], ["fie_id"], ["fie_collection_id"]],
+  "sort": {
+    "fie_collection_id": 1,
+    "fie_priority": 1,
+    "fie_id": 1
+  }
 }

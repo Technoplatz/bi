@@ -1,57 +1,42 @@
 {
-    "properties": {
-        "sto_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-]{3,64}$",
-            "title": "ID",
-            "description": "Storage ID",
-            "permanent": true,
-            "required": true,
-            "width": 160
-        },
-        "sto_collection_id": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "pattern": "^[a-z0-9-_]{3,64}$",
-            "title": "Collection",
-            "description": "Collection ID",
-            "collection": true,
-            "required": true,
-            "width": 110
-        },
-        "sto_file": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 64,
-            "file": true,
-            "title": "File",
-            "description": "File",
-            "required": true,
-            "width": 100
-        }
+  "properties": {
+    "sto_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-]{3,64}$",
+      "title": "ID",
+      "description": "Storage ID",
+      "permanent": true,
+      "required": true,
+      "width": 160
     },
-    "required": [
-        "sto_id",
-        "sto_collection_id",
-        "sto_file"
-    ],
-    "unique": [
-        [
-            "sto_id"
-        ],
-        [
-            "sto_collection_id"
-        ]
-    ],
-    "index": [
-        [
-            "sto_collection_id"
-        ]
-    ],
-    "sort": {
-        "_modified_at": -1
+    "sto_collection_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "title": "Collection",
+      "description": "Collection ID",
+      "collection": true,
+      "required": true,
+      "width": 110
+    },
+    "sto_file": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 64,
+      "file": true,
+      "title": "File",
+      "description": "File",
+      "required": true,
+      "width": 100
     }
+  },
+  "required": ["sto_id", "sto_collection_id", "sto_file"],
+  "unique": [["sto_id"], ["sto_collection_id"]],
+  "index": [["sto_collection_id"]],
+  "sort": {
+    "_modified_at": -1
+  }
 }

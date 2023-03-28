@@ -1,96 +1,79 @@
 {
-    "properties": {
-        "usr_id": {
-            "bsonType": "string",
-            "minLength": 0,
-            "maxLength": 64,
-            "pattern": "^.+@.+$",
-            "title": "Email",
-            "description": "Email",
-            "required": true,
-            "width": 200
-        },
-        "usr_name": {
-            "bsonType": "string",
-            "minLength": 3,
-            "maxLength": 64,
-            "title": "Full Name",
-            "description": "Full Name",
-            "required": true,
-            "width": 140
-        },
-        "usr_scope": {
-            "bsonType": "string",
-            "minLength": 7,
-            "maxLength": 13,
-            "title": "Scope",
-            "description": "User Scope",
-            "enum": [
-                "Internal",
-                "External",
-                "Manager",
-                "Administrator"
-            ],
-            "pattern": "^[a-zA-Z]{7,13}$",
-            "required": true,
-            "default": "External",
-            "width": 100
-        },
-        "usr_enabled": {
-            "bsonType": "bool",
-            "title": "Enabled",
-            "description": "Enabled or not",
-            "width": 110
-        },
-        "_tags": {
-            "bsonType": "array",
-            "uniqueItems": true,
-            "minItems": 0,
-            "maxItems": 100,
-            "items": {
-                "bsonType": "string",
-                "minLength": 0,
-                "maxLength": 64,
-                "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$"
-            },
-            "title": "Tags",
-            "description": "Add a tag and Enter",
-            "subType": "tag",
-            "manualAdd": true,
-            "width": 300
-        }
+  "properties": {
+    "usr_id": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^.+@.+$",
+      "title": "Email",
+      "description": "Email",
+      "required": true,
+      "width": 200
     },
-    "required": [
-        "usr_id",
-        "usr_name",
-        "usr_scope"
-    ],
-    "unique": [
-        [
-            "usr_id"
-        ]
-    ],
-    "index": [
-        [
-            "_tags"
-        ]
-    ],
-    "sort": {
-        "_modified_at": -1
+    "usr_name": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "title": "Full Name",
+      "description": "Full Name",
+      "required": true,
+      "width": 140
     },
-    "actions": [
+    "usr_scope": {
+      "bsonType": "string",
+      "minLength": 7,
+      "maxLength": 13,
+      "title": "Scope",
+      "description": "User Scope",
+      "enum": ["Internal", "External", "Manager", "Administrator"],
+      "pattern": "^[a-zA-Z]{7,13}$",
+      "required": true,
+      "default": "External",
+      "width": 100
+    },
+    "usr_enabled": {
+      "bsonType": "bool",
+      "title": "Enabled",
+      "description": "Enabled or not",
+      "width": 110
+    },
+    "_tags": {
+      "bsonType": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 100,
+      "items": {
+        "bsonType": "string",
+        "minLength": 0,
+        "maxLength": 64,
+        "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$"
+      },
+      "title": "Tags",
+      "description": "Add a tag and Enter",
+      "subType": "tag",
+      "manualAdd": true,
+      "width": 300
+    }
+  },
+  "required": ["usr_id", "usr_name", "usr_scope"],
+  "unique": [["usr_id"]],
+  "index": [["_tags"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "actions": [
+    {
+      "id": "act-assign-tag",
+      "title": "ASSIGN TAGS",
+      "description": "Assign TAG to users which are selected.",
+      "enabled": true,
+      "filter": [],
+      "fields": [
         {
-            "id": "act-assign-tag",
-            "title": "ASSIGN TAGS",
-            "description": "Assign TAG to users which are selected.",
-            "enabled": true,
-            "filter": [],
-            "fields": [
-                {
-                    "key": "_tags",
-                    "value": null
-                }
-            ]
+          "key": "_tags",
+          "value": null
         }
-    ]
+      ]
+    }
+  ]
 }
