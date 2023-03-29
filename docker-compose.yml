@@ -63,7 +63,7 @@ services:
         ipv4_address: ${SUBNET_TRAEFIK_IPV4}
 
   init:
-    image: ${HUB}/technoplatz/bi-init${IMGSUFFIX}:latest
+    image: ${HUB}technoplatz/bi-init${IMGSUFFIX}:latest
     container_name: init
     hostname: init
     labels:
@@ -184,7 +184,7 @@ services:
         ipv4_address: ${SUBNET_MONGO_REPLICA2_IPV4}
 
   replicaset:
-    image: ${HUB}/technoplatz/bi-replicaset${IMGSUFFIX}:latest
+    image: ${HUB}technoplatz/bi-replicaset${IMGSUFFIX}:latest
     container_name: replicaset
     hostname: replicaset
     depends_on:
@@ -228,7 +228,7 @@ services:
         ipv4_address: ${SUBNET_REPLICASET_IPV4}
 
   api:
-    image: ${HUB}/technoplatz/bi-api${IMGSUFFIX}:latest
+    image: ${HUB}technoplatz/bi-api${IMGSUFFIX}:latest
     container_name: api
     depends_on:
       replicaset:
@@ -286,7 +286,7 @@ services:
         ipv4_address: ${SUBNET_API_IPV4}
 
   pwa:
-    image: ${HUB}/technoplatz/bi-pwa${IMGSUFFIX}:latest
+    image: ${HUB}technoplatz/bi-pwa${IMGSUFFIX}:latest
     container_name: pwa
     depends_on:
       api:
