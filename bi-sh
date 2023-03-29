@@ -134,7 +134,6 @@ function updateBI() {
     fi
     docker compose -f $DIR/$DCYML pull
     if [ $? -eq 0 ]; then
-        stopBI
         startBI
         echo -e "\n✔ The latest version received successfully."
     else
