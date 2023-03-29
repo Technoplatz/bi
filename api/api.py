@@ -264,7 +264,7 @@ class Schedular():
             padding_r_ = 2 * padding_
             font_size_body_ = 13
             font_size_table_ = 13
-            background_ = "#eeeeee"
+            background_ = "#eee"
             style_div_ = f"font-size: {font_size_body_}px;"
             header_ = f"{vie_title_}"
             styles_ = [
@@ -307,16 +307,15 @@ class Schedular():
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
 
-            Misc().log_f({
-                "type": "Announcement",
-                "collection": "_view",
-                "op": scope_,
-                "user": user_id_,
-                "object_id": vie_id_,
-                "document": {
-                    "subscribers": ",".join(to_),
-                    "view": doc_
-                }
+            Mongo().db["_announcement"].insert_one({
+                "ano_id": f"ano-{Misc().get_timestamp_f()}",
+                "ano_scope": scope_,
+                "ano_vie_id": vie_id_,
+                "ano_vie_title": vie_title_,
+                "ano_to": to_,
+                "_tags": vie_tags_,
+                "_created_at": datetime.now(),
+                "_created_by": user_id_
             })
 
             res_ = {"result": True}
@@ -2159,54 +2158,6 @@ class Crud():
         finally:
             return res_
 
-    def visuals_f(self, obj):
-        try:
-            # receives the user in db
-            user_ = obj["userindb"]
-
-            vis_structure_ = self.root_schemes_f("_collections/_visual")
-            if not vis_structure_:
-                raise APIError("structure of the visual is missing")
-
-            # get the visuals which their view's subscribers list includes the requester user or group
-            visuals_ = Mongo().db["_visual"].aggregate([
-                {"$lookup": {
-                    "from": "_view",
-                    "let": {"vid": "$vis_view_id"},
-                    "pipeline": [
-                        {"$match":
-                            {"$expr":
-                                {"$and": [
-                                    {"$eq": ["$$vid", "$vie_id"]},
-                                    {"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}
-                                ]}
-                             }
-                         }
-                    ],
-                    "as": "_view"}
-                 },
-                {"$unwind": {"path": "$_view", "preserveNullAndEmptyArrays": False}},
-                {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_view"]}}
-            ])
-
-            res_ = {
-                "result": True,
-                "data": json.loads(JSONEncoder().encode(list(visuals_))),
-                "structure": vis_structure_
-            }
-
-        except pymongo.errors.PyMongoError as exc:
-            res_ = Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            res_ = Misc().api_error_f(exc)
-
-        except Exception as exc:
-            res_ = Misc().exception_f(exc)
-
-        finally:
-            return res_
-
     def views_f(self, obj):
         try:
             # receives the user in db
@@ -2259,7 +2210,7 @@ class Crud():
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
                 for usr_tag_ in usr_tags_:
                     filter_ = {
-                        "per_tag_id": usr_tag_,
+                        "per_tag": usr_tag_,
                         "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
                     }
                     permissions_ = Mongo().db["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
@@ -2299,7 +2250,7 @@ class Crud():
                 for usr_tag_ in usr_tags_:
                     permissions_ = Mongo().db["_permission"].find_one({
                         "per_collection_id": col_id_,
-                        "per_tag_id": usr_tag_,
+                        "per_tag": usr_tag_,
                         "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
                     })
                     if permissions_:
@@ -3046,7 +2997,7 @@ class Crud():
             col_check_ = self.inner_collection_f(collection_id_)
 
             # protect _log collection from clonning and deleting
-            if collection_id_ in ["_log", "_backup"]:
+            if collection_id_ in ["_log", "_backup", "_announcement"]:
                 raise APIError("this collection is protected")
 
             if not col_check_["result"]:
@@ -3120,7 +3071,7 @@ class Crud():
             collection_id_ = obj["collection"]
 
             # protect _log collection from delete requests
-            if collection_id_ in ["_log", "_backup", "_user"]:
+            if collection_id_ in ["_log", "_backup", "_announcement"]:
                 raise APIError("this collection is protected to delete")
 
             is_crud_ = True if collection_id_[:1] != "_" else False
@@ -3146,7 +3097,7 @@ class Crud():
                 Mongo().db[f"{c_}_data"].aggregate([{"$match": {}}, {"$out": f"{c_}_data_removed"}])
                 Mongo().db[f"{c_}_data"].drop()
                 Mongo().db["_field"].delete_many({"fie_collection_id": c_})
-                Mongo().db["_automation"].update_many({ "$or": [{"aut_source_collection_id": c_}, {"aut_target_collection_id": c_}]}, {"$set": {"aut_enabled": False}})
+                Mongo().db["_automation"].update_many({"$or": [{"aut_source_collection_id": c_}, {"aut_target_collection_id": c_}]}, {"$set": {"aut_enabled": False}})
 
             res_ = {"result": True}
 
@@ -3181,7 +3132,7 @@ class Crud():
                 raise APIError("operation not supported")
 
             # protect _log collection from clonning and deleting
-            if collection_id_ in ["_log", "_backup"]:
+            if collection_id_ in ["_log", "_backup", "_announcement"]:
                 raise APIError("this collection is protected is protected for bulk processes")
 
             # protect _user collection from deleting requests
@@ -3985,7 +3936,7 @@ class Auth():
 
             for ix_, usr_tag_ in enumerate(usr_tags_):
                 permission_check_ = Mongo().db["_permission"].find_one({
-                    "per_tag_id": usr_tag_,
+                    "per_tag": usr_tag_,
                     "per_collection_id": collection_id_
                 })
                 if permission_check_ is not None:
@@ -4019,16 +3970,16 @@ class Auth():
         finally:
             return res_
 
-    def firewall_f(self, user_id):
+    def firewall_f(self, user_):
         try:
             ip_ = Misc().get_user_ip_f()
+            tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             allowed_ = Mongo().db["_firewall"].find_one({"$or": [
-                {"fwa_user_id": user_id, "fwa_ip": ip_, "fwa_enabled": True},
-                {"fwa_user_id": user_id, "fwa_ip": "0.0.0.0", "fwa_enabled": True}
+                {"fwa_tag": {"$in": tags_}, "fwa_source_ip": ip_, "fwa_enabled": True},
+                {"fwa_tag": {"$in": tags_}, "fwa_source_ip": "0.0.0.0", "fwa_enabled": True}
             ]})
-
             if not allowed_:
-                raise APIError(f"connection is not allowed from IP address {ip_}")
+                raise AuthError(f"connection is not allowed from IP address {ip_}")
 
             res_ = {"result": True}
 
@@ -4040,12 +3991,12 @@ class Auth():
                 "type": "Error",
                 "collection": "_firewall",
                 "op": "block",
-                "user": user_id,
+                "user": user_["usr_id"],
                 "document": {
                     "ip": ip_,
                     "exception": str(exc),
                     "_modified_at": datetime.now(),
-                    "_modified_by": user_id
+                    "_modified_by":  user_["usr_id"],
                 }
             })
             res_ = Misc().auth_error_f(exc)
@@ -4365,22 +4316,27 @@ class Auth():
 
             auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
+                type_ = "auth"
                 raise AuthError("account not found")
 
             if "aut_salt" not in auth_ or auth_["aut_salt"] == None:
+                type_ = "salt"
                 raise AuthError("please set a password")
 
             if "aut_key" not in auth_ or auth_["aut_key"] == None:
+                type_ = "key"
                 raise AuthError("please set a new password")
 
             user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
+                type_ = "user"
                 raise AuthError("user not found for validate")
 
             user_["aut_apikey"] = auth_["aut_apikey"] if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None else None
 
             enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
             if not enabled_:
+                type_ = "disabled"
                 raise AuthError("user is disabled")
 
             salt_ = auth_["aut_salt"]
@@ -4389,9 +4345,11 @@ class Auth():
 
             if not password_:
                 if not token_:
+                    type_ = "token"
                     raise AuthError("no credentials provided")
                 else:
                     if token_db_ != token_:
+                        type_ = "token"
                         raise AuthError("session closed")
             else:
                 hash_f_ = self.password_hash_f(password_, salt_)
@@ -4399,10 +4357,12 @@ class Auth():
                     raise APIError(hash_f_["msg"])
                 new_key_ = hash_f_["key"]
                 if new_key_ != key_:
+                    type_ = "hash"
                     raise AuthError("invalid email or password")
 
-            firewall_ = self.firewall_f(user_id_)
+            firewall_ = self.firewall_f(user_)
             if not firewall_["result"]:
+                type_ = "firewall"
                 raise AuthError(firewall_["msg"])
 
             res_ = {"result": True, "user": user_, "auth": auth_}
@@ -4411,16 +4371,17 @@ class Auth():
             res_ = Misc().mongo_error_f(exc)
 
         except AuthError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": "_auth",
-                "op": op_,
-                "user": user_id_,
-                "document": {
-                    "type": "token" if token_ else "password",
-                    "exception": str(exc)
-                }
-            })
+            if type_ != "firewall":
+                Misc().log_f({
+                    "type": "Error",
+                    "collection": "_auth",
+                    "op": op_,
+                    "user": user_id_,
+                    "document": {
+                        "type": type_,
+                        "exception": str(exc)
+                    }
+                })
             res_ = Misc().auth_error_f(exc)
 
         except APIError as exc:
@@ -4459,7 +4420,7 @@ class Auth():
                 raise APIError("user not validated")
 
             # checks if firewall entry exists
-            firewall_ = self.firewall_f(user_id_)
+            firewall_ = self.firewall_f(user_)
             if not firewall_["result"]:
                 raise APIError(firewall_["msg"])
 
@@ -4543,12 +4504,14 @@ class Auth():
 
             aut_otp_secret_ = pyotp.random_base32()
             qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
+            apikey_ = secrets.token_hex(16)
 
             Mongo().db["_auth"].insert_one({
                 "aut_id": email_,
                 "aut_salt": salt_,
                 "aut_key": key_,
                 "aut_token": None,
+                "aut_apikey": apikey_,
                 "aut_tfac": None,
                 "aut_expires": 0,
                 "aut_otp_secret": aut_otp_secret_,
@@ -4771,8 +4734,6 @@ def crud_f():
             res_ = Crud().views_f(input_)
         elif op_ == "announce":
             res_ = Crud().announce_f(input_)
-        elif op_ == "visuals":
-            res_ = Crud().visuals_f(input_)
         elif op_ == "collections":
             res_ = Crud().collections_f(input_)
         elif op_ == "collection":

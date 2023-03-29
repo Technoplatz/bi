@@ -193,21 +193,19 @@ export class Auth {
         if (LSUSERMETA && LSUSERMETA.email) {
           const email = LSUSERMETA.email;
           this.storage.remove("LSUSERMETA").then(() => {
-            this.storage.remove("LSID").then(() => {
-              this.http.post<any>(this.apiHost + "/auth", JSON.stringify({
-                email: email,
-                op: "signout"
-              }), {
-                headers: new HttpHeaders(this.authHeaders)
-              }).subscribe((res: any) => {
-                if (res && res.result) {
-                  this.user.next(null);
-                } else {
-                  reject(res.msg);
-                }
-              }, () => {
-                reject("could not connected to the server");
-              });
+            this.http.post<any>(this.apiHost + "/auth", JSON.stringify({
+              email: email,
+              op: "signout"
+            }), {
+              headers: new HttpHeaders(this.authHeaders)
+            }).subscribe((res: any) => {
+              if (res && res.result) {
+                this.user.next(null);
+              } else {
+                reject(res.msg);
+              }
+            }, () => {
+              reject("could not connected to the server");
             });
           });
         } else {
@@ -221,7 +219,7 @@ export class Auth {
   Session() {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        if (LSUSERMETA && LSUSERMETA.email && LSUSERMETA.token) {
+        if (LSUSERMETA && LSUSERMETA?.email && LSUSERMETA.token) {
           resolve(true);
         } else {
           this.user.next(null);

@@ -50,8 +50,8 @@ https://www.gnu.org/licenses.
         </ion-card-header>
         <ion-card-content>
           <span class="text-medium">{{ item.description }}</span>
-          <p><strong>{{ 'Data Types' | translate }}:</strong> {{ item.datatypes.join(', ') }}. 
-          <strong>{{ 'Structure' | translate }}:</strong> {{ item.structure.join(', ') }}.
+          <p><strong>{{ 'Data Types' | translate }}:</strong> {{ item.datatypes?.join(', ') }}. 
+          <strong>{{ 'Structure' | translate }}:</strong> {{ item.structure?.join(', ') }}.
           <strong>{{ 'Prefix' | translate }}: </strong> {{ item.prefix}}_
         </p>
         </ion-card-content>

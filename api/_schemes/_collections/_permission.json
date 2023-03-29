@@ -10,13 +10,13 @@
       "required": true,
       "width": 240
     },
-    "per_tag_id": {
+    "per_tag": {
       "bsonType": "string",
       "minLength": 3,
       "maxLength": 64,
-      "pattern": "^[#@][a-zA-Z0-9]{3,64}$",
+      "pattern": "^[#@][a-zA-Z0-9]{4,64}$",
       "title": "Tag",
-      "description": "Tag",
+      "description": "Enter a tag #...",
       "required": true,
       "width": 140
     },
@@ -110,9 +110,9 @@
       "width": 120
     }
   },
-  "required": ["per_id", "per_tag_id", "per_collection_id"],
-  "unique": [["per_id"], ["per_tag_id", "per_collection_id"]],
-  "index": [["per_tag_id"], ["per_collection_id"]],
+  "required": ["per_id", "per_tag", "per_collection_id"],
+  "unique": [["per_id"], ["per_tag", "per_collection_id"]],
+  "index": [["per_tag"], ["per_collection_id"]],
   "sort": {
     "_modified_at": -1
   }

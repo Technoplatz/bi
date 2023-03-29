@@ -302,7 +302,7 @@ export class ViewPage implements OnInit {
         this.in_otp_process = this.in_otp_process_test = false;
         this.alert.create({
           cssClass: "my-custom-class",
-          header: scope === "live" ? "Announce Now!" : "TEST Announcement",
+          header: scope === "live" ? "LIVE Announcement!" : "TEST Announcement",
           subHeader: "Please enter your Two-Factor Authorization Code",
           inputs: [
             {

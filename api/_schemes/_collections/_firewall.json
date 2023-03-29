@@ -1,32 +1,29 @@
 {
   "properties": {
-    "fwa_rule_id": {
+    "fwa_name": {
       "bsonType": "string",
-      "minLength": 1,
+      "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-]+$",
-      "title": "ID",
-      "description": "Rule ID",
-      "permanent": true,
-      "required": true,
+      "title": "Rule Name",
+      "description": "Rule Name",
       "width": 180
     },
-    "fwa_user_id": {
+    "fwa_tag": {
       "bsonType": "string",
-      "minLength": 1,
+      "minLength": 3,
       "maxLength": 64,
-      "pattern": "^.+@.+$",
-      "title": "User",
-      "description": "User ID",
-      "required": true,
-      "width": 180
+      "pattern": "^[#@][a-zA-Z0-9]{4,64}$",
+      "title": "Tag",
+      "description": "Enter a tag #...",
+      "width": 140
     },
-    "fwa_ip": {
+    "fwa_source_ip": {
       "bsonType": "string",
-      "minLength": 1,
-      "maxLength": 16,
-      "title": "IP Address",
-      "description": "IP Address",
+      "minLength": 7,
+      "maxLength": 15,
+      "title": "Source IP",
+      "description": "Source IP",
       "required": true,
       "width": 120
     },
@@ -38,10 +35,10 @@
       "width": 120
     }
   },
-  "required": ["fwa_rule_id", "fwa_user_id", "fwa_ip"],
-  "index": [["fwa_user_id", "fwa_ip", "fwa_enabled"]],
-  "unique": [["fwa_rule_id"], ["fwa_user_id", "fwa_ip"]],
+  "required": ["fwa_name", "fwa_source_ip", "fwa_tag"],
+  "index": [["fwa_name", "fwa_source_ip", "fwa_enabled"]],
+  "unique": [["fwa_name"]],
   "sort": {
-    "fwa_user_id": 1
+    "_modified_at": -1
   }
 }

@@ -82,7 +82,6 @@ export class DashboardPage implements OnInit {
   public views_dash: any = [];
   public views_pane: any = [];
   public flashcards: any = [];
-  public visuals: any = [];
   public kpis: any = [];
   public metrics: any = [];
   public pages: any = [];
@@ -184,7 +183,6 @@ export class DashboardPage implements OnInit {
         if (this.views.length > 0) {
           this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style !== "Flashcard");
           this.flashcards = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style === "Flashcard");
-          this.visuals = [];
           this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
             this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
             this.chart_css = "chart-sq " + this.chart_size;
@@ -200,7 +198,6 @@ export class DashboardPage implements OnInit {
   doRefresh() {
     this.is_refreshing = true;
     this.crud.getAll().then(() => { }).catch((error: any) => {
-      console.error(error);
       this.misc.doMessage(error, "error");
     }).finally(() => {
       this.is_refreshing = false;
@@ -247,7 +244,7 @@ export class DashboardPage implements OnInit {
         this.views[v_].visual = chart;
       }).catch((error: any) => {
         this.views[v_].visual = {};
-        this.visuals[v_].error = error;
+        this.misc.doMessage(error, "error");
       }).finally(() => {
         this.views[v_].loading = false;
       });
@@ -255,7 +252,6 @@ export class DashboardPage implements OnInit {
       const error_ = "Please create an API key in the Preferences section";
       this.views[v_].visual = {};
       this.views[v_].error = error_;
-      console.error(error_);
       this.misc.doMessage(error_, "error");
     }
   }

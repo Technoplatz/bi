@@ -41,15 +41,15 @@
       "bsonType": "array",
       "uniqueItems": true,
       "minItems": 0,
-      "maxItems": 100,
+      "maxItems": 256,
       "items": {
         "bsonType": "string",
         "minLength": 0,
         "maxLength": 64,
-        "pattern": "^[#@][a-zA-Z0-9ÜĞİŞÖÇüğışçöß]{0,64}$"
+        "pattern": "^[#@][a-zA-Z0-9]{4,64}$"
       },
       "title": "Tags",
-      "description": "Add a tag and Enter",
+      "description": "Enter a tag #...",
       "subType": "tag",
       "manualAdd": true,
       "width": 300

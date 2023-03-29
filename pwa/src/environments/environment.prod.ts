@@ -138,6 +138,7 @@ export const environment = {
     { "id": "_view", "title": "Shared Views" },
     { "id": "_action", "title": "Actions" },
     { "id": "_automation", "title": "Automations" },
+    { "id": "_announcement", "title": "Announcements" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },
     { "id": "_firewall", "title": "Firewall" },

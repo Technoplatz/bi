@@ -142,17 +142,15 @@ export class CollectionPage implements OnInit {
     this.crud.getCollection(this.id).then((res: any) => {
       this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
       this.subheader = res && res.data ? res.data.col_title : this.id;
-      this.storage.set("LSID", this.id).then(() => {
-        this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-          this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-            this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-            LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-            this.actions = [];
-            this.RefreshData(0).then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            }).finally(() => {
-              this.is_initialized = true;
-            });
+      this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+        this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
+          this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+          LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+          this.actions = [];
+          this.RefreshData(0).then(() => { }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          }).finally(() => {
+            this.is_initialized = true;
           });
         });
       });
@@ -412,7 +410,7 @@ export class CollectionPage implements OnInit {
   }
 
   SetSelectData(i: number, event: any) {
-    if (this.segment !== "_log" && this.segment !== "_backup") {
+    if (!["_log", "_backup", "_announcement"].includes(this.segment)) {
       this.selected[i] = event.detail.checked;
       this.GetIsSelectData();
     }
@@ -440,7 +438,7 @@ export class CollectionPage implements OnInit {
     full ? this.searched = {} : null;
     this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
       for (let key_ in this.structure.properties) {
-        if(this.searched) {
+        if (this.searched) {
           this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "eq", setmode: false } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_].setmode ? this.searched[key_].setmode : null };
         }
       }

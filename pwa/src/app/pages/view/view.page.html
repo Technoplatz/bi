@@ -80,7 +80,7 @@ https://www.gnu.org/licenses.
 
         <!-- VIEW GRID SECTION -->
         <div class="ion-margin-bottom">
-          {{ 'Shared with' | translate }} {{ view["_tags"] && view["_tags"].join(' ') }}<br />
+          {{ 'Shared with' | translate }} {{ view["_tags"]?.join(' ') }}<br />
           <span *ngIf="view.vie_scheduled; else notscheduled">{{ 'Scheduled' | translate }}</span>
           <ng-template #notscheduled> {{ 'Not Scheduled' | translate }} </ng-template>
           <ion-grid class="data-grid ion-no-padding ion-margin-top">

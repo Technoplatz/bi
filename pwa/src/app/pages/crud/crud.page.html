@@ -233,7 +233,7 @@ https://www.gnu.org/licenses.
                         [(ngModel)]="data[field.name]">
                     </ion-checkbox>
                     <div *ngIf="field.bsonType=='array'" class="full-width">
-                        <ion-label position="stacked">{{ field.title | translate }}
+                        <ion-label position="stacked">{{ field.title | translate }} {{ op | translate }} 
                             <sup *ngIf="field.required">
                                 <ion-icon name="star"></ion-icon>
                             </sup>

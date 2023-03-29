@@ -49,7 +49,8 @@ https://www.gnu.org/licenses.
                 {{ 'Read' | translate }}<br />{{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
-                <div *ngIf="!['_log'].includes(id)" (click)="goCrud(null, 'insert')" class="data-sq-button">
+                <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"
+                  class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
                   {{ 'New' | translate }}<br />
                   <span *ngIf="is_crud; else normale">{{ 'Record' | translate }}</span>
@@ -269,7 +270,7 @@ https://www.gnu.org/licenses.
                       's' }}</span>
                   </span>
                   <ng-template #noarrayobject>
-                    <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(' ') }}</span>
+                    <span *ngIf="record[item.key]?.length > 0">{{ record[item.key].join(', ') }}</span>
                   </ng-template>
                 </span>
                 <span *ngIf="item.value.bsonType=='object'">

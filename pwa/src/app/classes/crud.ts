@@ -325,26 +325,23 @@ export class Crud {
     });
   }
 
-  getCollections() {
+  getCollections(LSUSERMETA: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "collections",
-          user: LSUSERMETA
+      const posted: any = {
+        op: "collections",
+        user: LSUSERMETA
+      }
+      this.http.post<any>(this.apiHost + "/crud", posted, {
+        headers: new HttpHeaders(this.crudHeaders)
+      }).subscribe((res: any) => {
+        if (res && res.result) {
+          this.misc.collections.next(res);
+          resolve(this.collections.next(res));
+        } else {
+          reject(res.msg);
         }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            this.collections.next(res);
-            this.misc.collections.next(res);
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
+      }, (error: any) => {
+        reject(error);
       });
     });
   }
@@ -372,41 +369,65 @@ export class Crud {
     });
   }
 
-  getViews() {
+  getViews(LSUSERMETA: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          op: "views",
-          user: LSUSERMETA,
-          dashboard: false
+      const posted: any = {
+        op: "views",
+        user: LSUSERMETA,
+        dashboard: false
+      }
+      this.http.post<any>(this.apiHost + "/crud", posted, {
+        headers: new HttpHeaders(this.crudHeaders)
+      }).subscribe((res: any) => {
+        if (res && res.result) {
+          resolve(this.views.next(res));
+        } else {
+          reject(res.msg);
         }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            this.views.next(res);
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
+      }, (error: any) => {
+        reject(error);
+      });
+    });
+  }
+
+  getAnnouncements(LSUSERMETA: any) {
+    return new Promise((resolve, reject) => {
+      this.misc.apiCall("crud", {
+        op: "read",
+        collection: "_announcement",
+        projection: null,
+        match: [{
+          key: "ano_to",
+          op: "eq",
+          value: LSUSERMETA.email
+        }],
+        sort: { "log_date": -1 },
+        page: 1,
+        limit: 10
+      }).then((res: any) => {
+        resolve(this.announcements.next(res));
+      }).catch((error: any) => {
+        console.error("*** announcements error", error);
+        reject(error);
       });
     });
   }
 
   getAll() {
     return new Promise((resolve, reject) => {
-      this.getSaas().then(() => {
-        this.getCollections().then(() => {
-          this.getViews().then(() => {
-            resolve(true);
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        this.getSaas().then(() => {
+          this.getCollections(LSUSERMETA).then(() => {
+            this.getViews(LSUSERMETA).then(() => {
+              this.getAnnouncements(LSUSERMETA).then(() => {
+                resolve(true);
+              });
+            }).catch((error: any) => {
+              reject(error);
+            });
           }).catch((error: any) => {
             reject(error);
           });
-        }).catch((error: any) => {
-          reject(error);
         });
       });
     });
@@ -427,30 +448,6 @@ export class Crud {
           reject(res.msg);
         }
       }, (error: any) => {
-        reject(error);
-      });
-    });
-  }
-
-  getAnnouncements() {
-    return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
-        op: "read",
-        collection: "_log",
-        projection: null,
-        match: [{
-          key: "log_type",
-          op: "eq",
-          value: "Announcement"
-        }],
-        sort: { "log_date": -1 },
-        page: 1,
-        limit: 10
-      }).then((res: any) => {
-        this.announcements.next(res);
-        resolve(true);
-      }).catch((error: any) => {
-        console.error("*** announcements error", error);
         reject(error);
       });
     });
