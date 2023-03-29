@@ -99,32 +99,8 @@ function installBI() {
     return 1
 }
 
-function buildBI() {
-    echo -e "\nBuilding images... $HUB $2$IMGSUFFIX\n"
-    if [[ -z $2 || $2 = "bi-api" ]]; then
-        docker build --tag $HUB/technoplatz/bi-api$IMGSUFFIX:$TAG api/
-    fi
-    if [[ -z $2 || $2 = "bi-pwa" ]]; then
-        docker build --tag $HUB/technoplatz/bi-pwa$IMGSUFFIX:$TAG pwa/
-    fi
-    if [[ -z $2 || $2 = "bi-replicaset" ]]; then
-        docker build --tag $HUB/technoplatz/bi-replicaset$IMGSUFFIX:$TAG _replicaset/
-    fi
-    if [[ -z $2 || $2 = "bi-init" ]]; then
-        docker build --tag $HUB/technoplatz/bi-init$IMGSUFFIX:$TAG _init/
-    fi
-    if [ $? -eq 0 ]; then
-        echo -e "\n✔ Images were built successfully."
-        startBI
-    else
-        echo -e "\n✘ Sorry! Process was terminated ($?)."
-        return 0
-    fi
-    return 1
-}
-
 function updateBI() {
-    echo -e "\nUpdating platform from $HUB to $DIR... $TOKEN $IMGSUFFIX\n"
+    echo -e "\nUpdating platform...\n"
     if [ ! -d $DIR ]; then
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         return 0
@@ -141,8 +117,8 @@ function updateBI() {
         rm $DIR/$DCYML.bak
         return 0
     else
-        mv $DIR/$DCYML.bak $DIR/$DCYML
-        echo -e "✔ Configuration file received successfully.\n"
+        mv -f $DIR/$DCYML.bak $DIR/$DCYML
+        echo -e "✔ Configuration file received successfully."
     fi
     curl "${curlHeaders[@]}" -Lso $ROOTPATH/bi-sh.bak $RAWREPO/bi-sh
     CONTD=$(cat $ROOTPATH/bi-sh.bak | head -c 3)
@@ -152,12 +128,11 @@ function updateBI() {
         rm $ROOTPATH/bi-sh.bak
         return 0
     else
-        mv $ROOTPATH/bi-sh.bak $ROOTPATH/bi.sh
+        mv -f $ROOTPATH/bi-sh.bak $ROOTPATH/bi.sh
         chmod +x $ROOTPATH/bi.sh
         echo -e "✔ Service script received successfully.\n"
     fi
-    IMGSUFFIX=""
-    HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML pull
+    docker compose -f $DIR/$DCYML pull
     if [ $? -eq 0 ]; then
         stopBI
         startBI
@@ -182,7 +157,7 @@ function pruneBI() {
 }
 
 function startBI() {
-    echo -e "\nStarting containers... $IMGSUFFIX\n"
+    echo -e "\nStarting containers...\n"
     if [ ! -d $DIR ]; then
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
@@ -191,7 +166,7 @@ function startBI() {
     if [ -d $CERTSDIR ]; then
         docker cp $CERTSDIR/. api:/certs
     fi
-    HUB=$HUB IMGSUFFIX=$IMGSUFFIX docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
+    docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         mkdir -p $CERTSDIR
         docker cp api:/certs/. $CERTSDIR
@@ -238,20 +213,14 @@ function logsBI() {
 # ENV VARIABLES
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
-TAG="latest"
-HUB="docker.io"
 DCYML="docker-compose.yml"
 DOTENV=".env"
-IMGSUFFIX=""
 TOKEN=""
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
-ROOTPATH="."
 
 if [[ ! -z $2 ]]; then
     if [[ "$2" == *"-dev"* ]]; then
-        IMGSUFFIX=$2
-        HUB="ghcr.io"
         if [[ ! -z $3 ]]; then
             if [[ $1 == "update" || $1 == "install" ]]; then
                 TOKEN="$3"
@@ -264,6 +233,7 @@ if [[ ! -z $2 ]]; then
     fi
 fi
 
+ROOTPATH="."
 DIR=$ROOTPATH/_bi
 CERTSDIR=$DIR/certs
 
@@ -292,9 +262,6 @@ case $1 in
     ;;
 "help")
     helpBI
-    ;;
-"build")
-    buildBI "$2" "$3"
     ;;
 *)
     echo "✘ Sorry. $1 is not an available command."
