@@ -416,21 +416,23 @@ export class Crud {
   getAll() {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.getSaas().then(() => {
-          this.getCollections(LSUSERMETA).then(() => {
-            this.getViews(LSUSERMETA).then(() => {
-              this.getAnnouncements(LSUSERMETA).then(() => {
-                resolve(true);
-              });
-            }).catch((error: any) => {
-              reject(error);
-            });
-          }).catch((error: any) => {
-            reject(error);
-          });
+        this.getCollections(LSUSERMETA).then(() => {
+          resolve(true);
+        }).catch((error: any) => {
+          reject(error);
+        });
+        this.getViews(LSUSERMETA).then(() => {
+          resolve(true);
+        }).catch((error: any) => {
+          reject(error);
+        });
+        this.getAnnouncements(LSUSERMETA).then(() => {
+          resolve(true);
+        }).catch((error: any) => {
+          reject(error);
         });
       });
-    });
+    })
   }
 
   getSaas() {

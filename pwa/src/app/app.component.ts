@@ -75,9 +75,10 @@ export class AppComponent implements OnInit {
       this.auth.user.next(res);
       this.misc.user.next(res);
       if (res) {
-        this.crud.getAll().then(() => { }).catch((error: any) => {
-          console.error(error);
-          this.misc.doMessage(error, "error");
+        this.crud.getSaas().then(() => {
+          this.crud.getAll().then(() => { }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          });
         });
       }
     });
