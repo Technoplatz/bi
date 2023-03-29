@@ -81,7 +81,7 @@ ion-button {
   --opacity: 1;
   --border-radius: 0px;
   margin: 0px;
-  margin-right: 8px !important;
+  margin-right: 4px !important;
   letter-spacing: normal;
 }
 
@@ -110,6 +110,10 @@ ion-alert .sc-ion-alert-md {
 
 ion-alert .alert-radio-group {
   max-height: 100% !important;
+}
+
+.api-key-item ion-button {
+  width: 80px;
 }
 
 .sign-content {
@@ -180,21 +184,10 @@ ion-alert .alert-radio-group {
 }
 
 .theme-button {
-  width: 100px;
-  position: relative;
-  height: 40px;
+  min-width: 50px;
+  height: 16px;
   margin-right: 4px;
   cursor: pointer;
-}
-
-.theme-button p {
-  color: #fff !important;
-  font-weight: 600;
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }
 
 .menu-on {
@@ -910,6 +903,10 @@ ion-item {
   --background-focused-opacity: transparent !important;
   --background-hover: transparent !important;
   --background-hover-opacity: transparent !important;
+}
+
+ion-label {
+  position: relative !important;
 }
 
 app-menu {

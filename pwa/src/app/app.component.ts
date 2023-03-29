@@ -71,11 +71,12 @@ export class AppComponent implements OnInit {
       this.storage.set("LSMENUTOGGLE", res).then(() => { });
     });
 
-    this.storage.get("LSUSERMETA").then((res: any) => {
-      this.auth.user.next(res);
-      this.misc.user.next(res);
-      if (res) {
-        this.crud.getSaas().then(() => {
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.auth.user.next(LSUSERMETA);
+      this.misc.user.next(LSUSERMETA);
+      if (LSUSERMETA) {
+        this.crud.getSaas().then((saas: any) => {
+          this.misc.saas.next(saas);
           this.crud.getAll().then(() => { }).catch((error: any) => {
             this.misc.doMessage(error, "error");
           });

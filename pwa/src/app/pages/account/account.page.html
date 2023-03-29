@@ -47,137 +47,105 @@ https://www.gnu.org/licenses.
         {{ 'SIGN OUT' | translate }}
       </ion-button>
     </div>
-    <div *ngIf="submenu=='preferences'">
-      <p>
-        {{ 'Please press the button of the color of your choice' | translate }}.<br />
-        {{ 'Theme color will be changed accordingly' | translate }}.
-      </p>
-      <div class="flex-container">
-        <div *ngFor="let item of themes" size="default" [style.background-color]="item.color" class="theme-button"
-          (click)="doTheme(item)">
-          <p>{{ item.name }}</p>
-        </div>
-      </div>
-      <div class="ion-margin-top">
-        <ion-button (click)="doVersion()" size="default">
-          {{ 'Version' | translate }}
-        </ion-button>
-      </div>
-    </div>
 
-    <!-- API KEY -->
-    <div *ngIf="submenu=='apikey'" class="ion-margin-top">
-      <div *ngIf="accountf_apikey; else noapikey">
-        {{ 'API keys allow you to access your data from spreadsheets and other BI Tools'
-        |
-        translate }}.
-        <ul class="ion-margin-bottom">
-          <li>{{ 'API key is hidden by default' | translate }}.</li>
-          <li>{{ 'To make your key visible for a couple of seconds click the show button below.' | translate }}.
-          </li>
-          <li>{{ 'You can copy your key to clipboard' | translate }}.</li>
-          <li>{{ 'Once you generate a new key, previous one won\'t be accepted anymore' | translate }}.
-          </li>
-        </ul>
-        <h6 *ngIf="is_apikey_enabled; else apihedden">
-          <h6>{{ accountf_apikey }}</h6>
-        </h6>
-        <ng-template #apihedden>
-            <h6>--- HIDDEN ---</h6>
-        </ng-template>
-        <p *ngIf="accountf_apikeydate">{{ 'Created at' | translate }} {{ accountf_apikeydate |
-          date:'dd.MM.yyyy HH:mm' }}&nbsp;</p>
-        <p class="ion-margin-top">
-          <ion-button (click)="doApiKeyEnabled()" size="small">
-            <div *ngIf="!is_apikey_enabled; else notenabled">
-              <ion-label>{{ 'SHOW' | translate }}</ion-label>
+    <div *ngIf="submenu=='settings'">
+      <ion-list class="ion-padding-end">
+        <ion-list-header>Personal</ion-list-header>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'E-mail' | translate }}
+          </ion-label>
+          <p>{{ user.email }}</p>
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Password' | translate }}
+          </ion-label>
+          --- HIDDEN ---
+          <ion-button (click)="misc.doSign('forgot')" size="small" slot="end">
+            <div>
+              <ion-label>{{ 'Reset' | translate }}</ion-label>
             </div>
             <ng-template #notenabled>
               <ion-spinner *ngIf="is_apikey_enabled; notenabled" name="dots"></ion-spinner>
             </ng-template>
           </ion-button>
-          <ion-button (click)="doCopy('apikey')" size="small">
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Theme Color' | translate }}
+          </ion-label>
+          <div class="flex-container">
+            <div *ngFor="let item of themes" size="default" [style.background-color]="item.color" class="theme-button"
+              (click)="doTheme(item)">
+            </div>
+          </div>
+        </ion-item>
+        <ion-item class="api-key-item">
+          <ion-label position="fixed" class="ion-margin-end">{{ 'API Key' | translate }}
+          </ion-label>
+          <div>
+            <span *ngIf="is_apikey_enabled; else apihidden">
+              {{ accountf_apikey }}
+            </span>
+            <ng-template #apihidden>
+              --- HIDDEN ---
+            </ng-template>
+          </div>
+          <ion-button (click)="doApiKeyEnabled()" size="small" slot="end">
+            <div *ngIf="!is_apikey_enabled; else notenabled">
+              <ion-label>{{ 'Show' | translate }}</ion-label>
+            </div>
+            <ng-template #notenabled>
+              <ion-spinner *ngIf="is_apikey_enabled; notenabled" name="dots"></ion-spinner>
+            </ng-template>
+          </ion-button>
+          <ion-button (click)="doCopy('apikey')" size="small" slot="end">
             <div *ngIf="!is_apikey_copied; else copied">
-              <ion-label>{{ 'COPY' | translate }}</ion-label>
+              <ion-label>{{ 'Copy' | translate }}</ion-label>
             </div>
             <ng-template #copied>
               <ion-icon name="checkmark-outline"></ion-icon>
-              <ion-label>{{ 'COPIED' | translate }}</ion-label>
             </ng-template>
           </ion-button>
-          <ion-button (click)="doAccount('apikeygen')" size="small">
+          <ion-button (click)="doAccount('apikeygen')" size="small" slot="end">
             <ion-spinner *ngIf="is_processing_account; else noprocessing" name="dots"></ion-spinner>
             <ng-template #noprocessing>
-              <ion-label>{{ 'GENERATE' | translate }}</ion-label>
+              <div *ngIf="!is_apikey_enabled; else notenabled">
+                <ion-label>{{ 'Generate' | translate }}</ion-label>
+              </div>
+              <ng-template #notenabled>
+                <ion-spinner *ngIf="is_apikey_enabled; notenabled" name="dots"></ion-spinner>
+              </ng-template>
             </ng-template>
           </ion-button>
-        </p>
-      </div>
-      <ng-template #noapikey>
-        {{ 'API key allows you to securely access your database from spreadsheets or other BI
-        Tools'
-        |
-        translate }}.
-        <ul>
-          <li>{{ 'You have not created an API Key yet' | translate }}. {{ 'To create a new one
-            please
-            click the button below' | translate }}.</li>
-        </ul>
-        <p>
-          <ion-button (click)="doAccount('apikeygen')" size="default" class="ion-margin-top">
-            <ion-icon name="key"></ion-icon>
-            <ion-label>{{ 'CREATE AN API KEY' | translate }}</ion-label>
+        </ion-item>
+        <ion-item class="api-key-item">
+          <ion-label position="fixed" class="ion-margin-end">{{ '2FA Auth' | translate }}
+          </ion-label>
+          <span *ngIf="!otp_show">{{ 'Always On' | translate }}</span>
+          <qrcode *ngIf="otp_qr && otp_show" [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'"
+            [allowEmptyString]="true">
+          </qrcode>
+          <ion-button *ngIf="!otp_show" (click)="doOTP({ op: 'show' })" size="small" slot="end">
+            <ion-label>{{ 'Show QR' | translate }}</ion-label>
           </ion-button>
-        </p>
-      </ng-template>
-    </div>
-
-    <!-- SECURITY -->
-    <div *ngIf="submenu=='security'" class="ion-margin-top">
-      <h5>{{ 'Password change' | translate }} (OTP)</h5>
-      {{ 'You can reset your password anytime' | translate }}.
-      <ul>
-        <li>{{ 'Click to "Sign out" button in the header' | translate }}.</li>
-        <li>{{ 'Click "Sign In" button again and click "Reset Password" button afterwards' |
-          translate }}.</li>
-      </ul>
-      <h5>{{ 'Two-Factor Authentication' | translate }} (OTP)</h5>
-      {{ 'This method supplements password by producing one-time codes as a second layer
-      of
-      security' | translate }}.<br />
-      {{ 'You can activate your OTP with the following steps below' | translate }};
-      <ul>
-        <li>{{ 'Install an "OTP Authenticator App" on your Mobile Phone' | translate }}.
-          <ul>
-            <li>Authy</li>
-            <li>Microsoft Authenticator</li>
-            <li>Google Authenticator<br /><br /></li>
-          </ul>
-        </li>
-        <li>{{ 'Click "Reset OTP" button below. A new QR code will be generated' | translate }}.
-        </li>
-        <li>{{ 'Run the OTP App on Mobile Phone and select "Add Account"' | translate }}.</li>
-        <li>{{ 'Read the QR code' | translate }}.</li>
-        <li>{{ 'Validate the new QR code with "Validate OTP" button' | translate }}.</li>
-      </ul>
-      <ion-button *ngIf="!otp_show" size="default" class="ion-no-margin ion-margin-top" (click)="doResetOTP()">
-        <ion-icon name="refresh-outline"></ion-icon>
-        <ion-label>{{ 'Reset OTP' | translate }}</ion-label>
-      </ion-button>
-      <ion-button *ngIf="!otp_show" size="default" class="ion-no-margin ion-margin-top" (click)="doOTP({ op: 'show' })">
-        <ion-icon name="eye-outline"></ion-icon>
-        <ion-label>{{ 'Show QR Code' | translate }}</ion-label>
-      </ion-button>
-      <div *ngIf="otp_show">
-        <qrcode *ngIf="otp_qr" [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'" [allowEmptyString]="true">
-        </qrcode>
-        <ion-button size="default" class="ion-no-margin ion-margin-top" (click)="doValidateOTP()">
-          <ion-icon name="qr-code"></ion-icon>
-          <ion-label>{{ 'Validate OTP' | translate }}</ion-label>
-        </ion-button>
-        <ion-button size="default" class="ion-no-margin ion-margin-top" (click)="doOTP({ op: 'hide' })">
-          <ion-icon name="eye-off-outline"></ion-icon>
-          <ion-label>{{ 'Hide QR Code' | translate }}</ion-label>
+          <ion-button *ngIf="otp_show" (click)="doOTP({ op: 'hide' })" size="small" slot="end">
+            <ion-label>{{ 'Hide QR' | translate }}</ion-label>
+          </ion-button>
+          <ion-button *ngIf="otp_show" (click)="doResetOTP()" size="small" slot="end">
+            <ion-label>{{ 'Reset 2FA' | translate }}</ion-label>
+          </ion-button>
+          <ion-button *ngIf="otp_show" (click)="doValidateOTP()" size="small" slot="end">
+            <ion-label>{{ 'Validate' | translate }}</ion-label>
+          </ion-button>
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Saas' | translate }}
+          </ion-label>
+          <p>{{ saas.version }}</p>
+        </ion-item>
+      </ion-list>
+      <div class="ion-margin-top">
+        <ion-button (click)="doVersion()" size="default">
+          {{ 'Version' | translate }}
         </ion-button>
       </div>
     </div>

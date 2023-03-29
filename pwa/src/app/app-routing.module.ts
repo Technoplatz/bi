@@ -115,25 +115,7 @@ const routes: Routes = [
     }
   },
   {
-    path: "account/preferences",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
-  {
-    path: "account/apikey",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
-  {
-    path: "account/security",
+    path: "account/settings",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
     data: { preload: true },

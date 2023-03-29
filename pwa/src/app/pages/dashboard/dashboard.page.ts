@@ -249,7 +249,7 @@ export class DashboardPage implements OnInit {
         this.views[v_].loading = false;
       });
     } else {
-      const error_ = "Please create an API key in the Preferences section";
+      const error_ = "Please create an API key in the settings section";
       this.views[v_].visual = {};
       this.views[v_].error = error_;
       this.misc.doMessage(error_, "error");

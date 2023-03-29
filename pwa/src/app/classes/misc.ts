@@ -39,6 +39,7 @@ import { environment } from "../../environments/environment";
 import { ClipboardPluginWeb } from "@capacitor/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { CrudPage } from "../pages/crud/crud.page";
+import { SignPage } from "../pages/sign/sign.page";
 
 @Injectable({
   providedIn: "root"
@@ -50,6 +51,7 @@ export class Miscellaneous {
   public navi = new Subject<any>();
   public menutoggle = new Subject<any>();
   public version = new BehaviorSubject<boolean>(false);
+  public saas = new BehaviorSubject<any>(null);
   public toggle: boolean = true;
 
   private user_: any;
@@ -251,6 +253,19 @@ export class Miscellaneous {
         reject(error);
       });
     });
+  }
+
+  async doSign(op: string) {
+    const modal = await this.modal.create({
+      component: SignPage,
+      backdropDismiss: false,
+      cssClass: "signin-modal",
+      componentProps: {
+        op: op,
+        user: null
+      }
+    });
+    return await modal.present();
   }
 
 }

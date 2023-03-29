@@ -47,7 +47,7 @@ export class HomePage implements OnInit {
 
   constructor(
     private modal: ModalController,
-    private misc: Miscellaneous,
+    public misc: Miscellaneous,
     private storage: Storage
   ) { }
 
@@ -67,19 +67,6 @@ export class HomePage implements OnInit {
       componentProps: {
         op: "signup",
         user: this.user
-      }
-    });
-    return await modal.present();
-  }
-
-  async doSign(op: string) {
-    const modal = await this.modal.create({
-      component: SignPage,
-      backdropDismiss: false,
-      cssClass: "signin-modal",
-      componentProps: {
-        op: op,
-        user: null
       }
     });
     return await modal.present();

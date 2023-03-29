@@ -3537,7 +3537,7 @@ class OTP():
             # read auth
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise APIError("account not found")
+                raise AuthError("account not found")
 
             aut_otp_secret_ = pyotp.random_base32()
 
@@ -3565,7 +3565,6 @@ class OTP():
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            # sets the response
             res_ = {"result": True, "qr": qr_}
 
         except pymongo.errors.PyMongoError as exc:
@@ -3573,6 +3572,9 @@ class OTP():
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
+
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
 
         except Exception as exc:
             res_ = Misc().exception_f(exc)
@@ -3586,17 +3588,17 @@ class OTP():
             # read auth
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise APIError("account not found")
+                raise AuthError("account not found")
 
             aut_otp_secret_ = auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
             aut_otp_validated_ = auth_["aut_otp_validated"] if "aut_otp_validated" in auth_ else False
 
             if not aut_otp_secret_:
-                raise APIError("OTP secret is missing")
+                raise AuthError("OTP secret is missing")
 
             otp_ = request_["otp"] if "otp" in request_ else None
             if not otp_:
-                raise APIError("OTP is missing")
+                raise AuthError("OTP is missing")
 
             totp_ = pyotp.TOTP(aut_otp_secret_)
             qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="BI")
@@ -3645,6 +3647,9 @@ class OTP():
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
 
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
+
         except Exception as exc:
             res_ = Misc().exception_f(exc)
 
@@ -3657,7 +3662,7 @@ class OTP():
             # read auth
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise APIError("account not found")
+                raise AuthError("account not found")
 
             aut_otp_secret_ = auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
 
@@ -3677,6 +3682,9 @@ class OTP():
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
+
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
 
         except Exception as exc:
             res_ = Misc().exception_f(exc)
@@ -3734,7 +3742,8 @@ class Auth():
     def saas_f(self):
         try:
             saas_ = {
-                "company": COMPANY_NAME_
+                "company": COMPANY_NAME_,
+                "version": "Technoplatz BI - Brezel Enterprise Edition"
             }
 
             res_ = {"result": True, "user": None, "saas": saas_}
@@ -4068,7 +4077,7 @@ class Auth():
 
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise APIError("account not found")
+                raise AuthError("account not found")
 
             response_ = {}
             apikey_ = None
@@ -4113,6 +4122,9 @@ class Auth():
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
 
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
+
         except Exception as exc:
             res_ = Misc().exception_f(exc)
 
@@ -4131,7 +4143,7 @@ class Auth():
             # checks if the user account was created already
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise APIError("account not found")
+                raise AuthError("account not found")
 
             OTP_send_ = OTP().request_otp_f(email_)
             if not OTP_send_["result"]:
@@ -4145,6 +4157,9 @@ class Auth():
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
 
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
+
         except Exception as exc:
             res_ = Misc().exception_f(exc)
 
@@ -4153,7 +4168,6 @@ class Auth():
 
     def reset_f(self):
         try:
-            # sets the required parameters
             input_ = request.json
 
             email_ = input_["email"]
@@ -4162,12 +4176,11 @@ class Auth():
 
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise APIError("account not found")
+                raise AuthError("account not found")
 
-            # verify OTP
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "reset")
             if not verify_2fa_f_["result"]:
-                raise APIError(verify_2fa_f_["msg"])
+                raise AuthError(verify_2fa_f_["msg"])
 
             hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
@@ -4205,6 +4218,9 @@ class Auth():
         except pymongo.errors.PyMongoError as exc:
             res_ = Misc().mongo_error_f(exc)
 
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
+
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
 
@@ -4216,26 +4232,22 @@ class Auth():
 
     def tfac_f(self):
         try:
-            # sets the required parameters
             input_ = request.json
             email_ = input_["email"]
             password_ = input_["password"]
             tfac_ = input_["tfac"]
 
-            # validates user with basic auth
             user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_}, "tfac")
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
             user_ = user_validate_["user"] if "user" in user_validate_ else None
 
-            # verify OTP
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
             if not verify_2fa_f_["result"]:
                 raise AuthError(verify_2fa_f_["msg"])
 
             verification_content_ = {"tfac": str(tfac_)}
 
-            # writes success signin into _log
             log_ = Misc().log_f({
                 "type": "Info",
                 "collection": "_auth",
