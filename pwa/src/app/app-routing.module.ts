@@ -115,7 +115,7 @@ const routes: Routes = [
     }
   },
   {
-    path: "account/settings",
+    path: "account/profile-settings",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
     data: { preload: true },

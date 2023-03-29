@@ -47,8 +47,7 @@ https://www.gnu.org/licenses.
         {{ 'SIGN OUT' | translate }}
       </ion-button>
     </div>
-
-    <div *ngIf="submenu=='settings'">
+    <div *ngIf="submenu=='profile-settings'">
       <ion-list class="ion-padding-end">
         <ion-list-header>Personal</ion-list-header>
         <ion-item>
@@ -140,7 +139,7 @@ https://www.gnu.org/licenses.
         <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'Saas' | translate }}
           </ion-label>
-          <p>{{ saas.version }}</p>
+          <p>{{ saas?.version }}</p>
         </ion-item>
       </ion-list>
       <div class="ion-margin-top">

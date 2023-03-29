@@ -95,7 +95,7 @@ export class AccountPage implements OnInit {
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.submenu = this.router.url.split("/")[2];
-    this.subheader = this.submenu === "settings" ? "Settings" : this.submenu === "signout" ? "Sign Out" : this.submenu;
+    this.subheader = this.submenu === "profile-settings" ? "Profile Settings" : this.submenu === "signout" ? "Sign Out" : this.submenu;
   }
 
   doTheme(LSTHEME: any) {
