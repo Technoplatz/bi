@@ -16,7 +16,7 @@
       "title": "Date",
       "description": "Log date",
       "required": true,
-      "width": 120
+      "width": 140
     },
     "log_user_id": {
       "bsonType": "string",
