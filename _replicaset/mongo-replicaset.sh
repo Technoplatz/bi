@@ -37,12 +37,15 @@ echo "MONGO_HOST=$MONGO_HOST"
 echo "MONGO_REPLICA1_HOST=$MONGO_REPLICA1_HOST"
 echo "MONGO_REPLICA2_HOST=$MONGO_REPLICA2_HOST"
 echo "MONGO_USERNAME=$MONGO_USERNAME"
-echo "MONGO_PASSWORD=$MONGO_PASSWORD"
 echo "MONGO_TLS_CA_KEYFILE=$MONGO_TLS_CA_KEYFILE"
 echo "MONGO_TLS_CERT_KEYFILE=$MONGO_TLS_CERT_KEYFILE"
 echo "MONGO_TLS_CERT_KEYFILE_PASSWORD=$MONGO_TLS_CERT_KEYFILE_PASSWORD"
+echo "MONGO_DB_PASSWORD_FILE=$MONGO_DB_PASSWORD_FILE"
 
 echo "DB REPLICASET STARTED"
+
+MONGO_PASSWORD=$(cat "/certs/$MONGO_DB_PASSWORD_FILE")
+echo "MONGO_PASSWORD=$MONGO_PASSWORD"
 
 if [ ! -f /certs/mongo-init.flag ]; then
     mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile /certs/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword /certs/$MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile /certs/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
@@ -84,8 +87,6 @@ until [[ $RS_OK -eq "1" ]]; do
     RS_OK=$(echo "$RS_STATUS" | jq '.ok' -r)
     echo "RS_OK: $RS_OK"
 done
-
-# CHECK WHETHER DB EXISTS OR NOT
 
 MONGO_INDEXOF_DB=$(mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile /certs/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword /certs/$MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile /certs/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
     db.getMongo().getDBNames().indexOf('${MONGO_DB}');

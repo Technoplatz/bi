@@ -2204,7 +2204,7 @@ class Crud():
                 for usr_tag_ in usr_tags_:
                     filter_ = {
                         "per_tag": usr_tag_,
-                        "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
+                        "$or": [{"per_insert": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
                     }
                     permissions_ = Mongo().db["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
                     for permission_ in permissions_:
@@ -2244,7 +2244,7 @@ class Crud():
                     permissions_ = Mongo().db["_permission"].find_one({
                         "per_collection_id": col_id_,
                         "per_tag": usr_tag_,
-                        "$or": [{"per_create": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
+                        "$or": [{"per_insert": True}, {"per_read": True}, {"per_update": True}, {"per_delete": True}]
                     })
                     if permissions_:
                         permitted_ = True
@@ -3893,7 +3893,7 @@ class Auth():
 
             if not user_id_:
                 raise APIError(f"user not found {user_id_}")
-            
+
             op_ = "read" if op_ in ["collection"] else input_["op"]
             if not op_:
                 raise APIError(f"operation is missing {op_}")
@@ -3901,7 +3901,7 @@ class Auth():
             if Misc().permitted_user_f(user_):
                 res_ = {"result": True, "allowmatch": allowmatch_}
                 return
-            
+
             if op_ in administratives_:
                 raise AuthError(f"no {op_} permission for {collection_id_}")
 
@@ -3925,13 +3925,13 @@ class Auth():
                     "per_collection_id": collection_id_
                 })
                 if permission_check_:
-                    per_create_ = True if "per_create" in permission_check_ and permission_check_["per_create"] == True else False
+                    per_insert_ = True if "per_insert" in permission_check_ and permission_check_["per_insert"] == True else False
                     per_read_ = True if "per_read" in permission_check_ and permission_check_["per_read"] == True else False
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
 
-                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ in ["insert", "import"] and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
+                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ in ["insert", "import"] and per_insert_) or (op_ == "upsert" and per_insert_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_insert_) or (op_ == "delete" and per_read_ and per_delete_):
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True
@@ -4535,18 +4535,6 @@ class Auth():
 
 TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
-MONGO_REPLICASET_ = os.environ.get("MONGO_REPLICASET")
-MONGO_HOST_ = os.environ.get("MONGO_HOST")
-MONGO_REPLICA1_HOST_ = os.environ.get("MONGO_REPLICA1_HOST")
-MONGO_REPLICA2_HOST_ = os.environ.get("MONGO_REPLICA2_HOST")
-MONGO_PORT_ = int(os.environ.get("MONGO_PORT"))
-MONGO_DB_ = os.environ.get("MONGO_DB")
-MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
-MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
-MONGO_TLS_CA_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CA_KEYFILE')}"
-MONGO_TLS_CERT_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE')}"
-MONGO_TLS_CERT_KEYFILE_PASSWORD_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE_PASSWORD')}"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
@@ -4568,9 +4556,23 @@ API_KEY_ = os.environ.get("API_KEY")
 SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
 SAAS_ = os.environ.get("SAAS")
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
+MONGO_REPLICASET_ = os.environ.get("MONGO_REPLICASET")
+MONGO_HOST_ = os.environ.get("MONGO_HOST")
+MONGO_REPLICA1_HOST_ = os.environ.get("MONGO_REPLICA1_HOST")
+MONGO_REPLICA2_HOST_ = os.environ.get("MONGO_REPLICA2_HOST")
+MONGO_PORT_ = int(os.environ.get("MONGO_PORT"))
+MONGO_DB_ = os.environ.get("MONGO_DB")
+MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
+MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
+MONGO_TLS_CA_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CA_KEYFILE')}"
+MONGO_TLS_CERT_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE')}"
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE_PASSWORD')}"
+MONGO_DB_PASSWORD_FILE_ = f"/certs/{os.environ.get('MONGO_DB_PASSWORD_FILE')}"
+
+f_ = open(f"{MONGO_DB_PASSWORD_FILE_}", "r")
+MONGO_PASSWORD_ = f_.readline().split('\n')[0]
 
 # CORS CHECKPOINT
-
 origins_ = [
     f"http://{DOMAIN_}",
     f"https://{DOMAIN_}",

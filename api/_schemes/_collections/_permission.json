@@ -31,10 +31,10 @@
       "collection": true,
       "width": 150
     },
-    "per_create": {
+    "per_insert": {
       "bsonType": "bool",
-      "title": "Create",
-      "description": "Create Permission",
+      "title": "Insert",
+      "description": "Insert Permission",
       "default": false,
       "width": 100
     },
