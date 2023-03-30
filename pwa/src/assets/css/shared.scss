@@ -112,6 +112,10 @@ ion-alert .alert-radio-group {
   max-height: 100% !important;
 }
 
+ion-note {
+  font-size: 11px !important;
+}
+
 .api-key-item ion-button {
   width: 80px;
 }
@@ -885,6 +889,7 @@ ion-list-header {
   min-height: 36px !important;
   border-bottom: 1px solid var(--ion-color-primary);
   color: var(--ion-color-primary);
+  padding-left: 0px !important;
 }
 
 ion-item {

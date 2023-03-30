@@ -47,26 +47,14 @@ https://www.gnu.org/licenses.
         {{ 'SIGN OUT' | translate }}
       </ion-button>
     </div>
-    <div *ngIf="submenu=='profile-settings'">
+    <div *ngIf="submenu=='profile-settings'" class="profile-settings">
       <ion-list class="ion-padding-end">
-        <ion-list-header>Personal</ion-list-header>
+        <ion-list-header>{{ 'PERSONAL' | translate }}</ion-list-header>
         <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'E-mail' | translate }}
           </ion-label>
-          <p>{{ user.email }}</p>
-        </ion-item>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Password' | translate }}
-          </ion-label>
-          --- HIDDEN ---
-          <ion-button (click)="misc.doSign('forgot')" size="small" slot="end">
-            <div>
-              <ion-label>{{ 'Reset' | translate }}</ion-label>
-            </div>
-            <ng-template #notenabled>
-              <ion-spinner *ngIf="is_apikey_enabled; notenabled" name="dots"></ion-spinner>
-            </ng-template>
-          </ion-button>
+          {{ user.email }}
+          <ion-note slot="end">{{ 'Your email address can be changed by Admin.' | translate }}</ion-note>
         </ion-item>
         <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'Theme Color' | translate }}
@@ -77,17 +65,24 @@ https://www.gnu.org/licenses.
             </div>
           </div>
         </ion-item>
+        <ion-list-header>{{ 'SECURITY' | translate }}</ion-list-header>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Password' | translate }}
+          </ion-label>
+          --- HIDDEN ---
+          <ion-button (click)="misc.doSign('forgot')" size="small" slot="end">
+            {{ 'Reset' | translate }}
+          </ion-button>
+        </ion-item>
         <ion-item class="api-key-item">
           <ion-label position="fixed" class="ion-margin-end">{{ 'API Key' | translate }}
           </ion-label>
-          <div>
-            <span *ngIf="is_apikey_enabled; else apihidden">
-              {{ accountf_apikey }}
-            </span>
-            <ng-template #apihidden>
-              --- HIDDEN ---
-            </ng-template>
-          </div>
+          <span *ngIf="is_apikey_enabled; else apihidden">
+            {{ accountf_apikey }}
+          </span>
+          <ng-template #apihidden>
+            --- HIDDEN ---
+          </ng-template>
           <ion-button (click)="doApiKeyEnabled()" size="small" slot="end">
             <div *ngIf="!is_apikey_enabled; else notenabled">
               <ion-label>{{ 'Show' | translate }}</ion-label>
@@ -119,12 +114,21 @@ https://www.gnu.org/licenses.
         <ion-item class="api-key-item">
           <ion-label position="fixed" class="ion-margin-end">{{ '2FA Auth' | translate }}
           </ion-label>
-          <span *ngIf="!otp_show">{{ 'Always On' | translate }}</span>
-          <qrcode *ngIf="otp_qr && otp_show" [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'"
-            [allowEmptyString]="true">
-          </qrcode>
+          <span *ngIf="!otp_show">
+            {{ 'Always On' | translate }}
+          </span>
+          <div *ngIf="otp_qr && otp_show">
+            <qrcode [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'" [allowEmptyString]="true">
+            </qrcode>
+            <ion-note slot="start" class="ion-margin-start">{{ 'Read QR code to use this 2FA code with any Authenticator
+              App.' | translate }}</ion-note>
+            <div class="filler"></div>
+          </div>
           <ion-button *ngIf="!otp_show" (click)="doOTP({ op: 'show' })" size="small" slot="end">
-            <ion-label>{{ 'Show QR' | translate }}</ion-label>
+            <ion-spinner *ngIf="otp_process; else noprocess" name="dots"></ion-spinner>
+            <ng-template #noprocess>
+              <ion-label>{{ 'Show QR' | translate }}</ion-label>
+            </ng-template>
           </ion-button>
           <ion-button *ngIf="otp_show" (click)="doOTP({ op: 'hide' })" size="small" slot="end">
             <ion-label>{{ 'Hide QR' | translate }}</ion-label>
@@ -136,17 +140,21 @@ https://www.gnu.org/licenses.
             <ion-label>{{ 'Validate' | translate }}</ion-label>
           </ion-button>
         </ion-item>
+        <ion-list-header>{{ 'SYSTEM' | translate }}</ion-list-header>
         <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Saas' | translate }}
+          <ion-label position="fixed" class="ion-margin-end">{{ 'SaaS' | translate }}
           </ion-label>
-          <p>{{ saas?.version }}</p>
+          {{ saas?.version }}
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Version' | translate }}
+          </ion-label>
+          v{{ version }} ({{ release }})
+          <ion-button (click)="doVersion()" size="small" slot="end">
+            <ion-label>{{ 'Check for Update' | translate }}</ion-label>
+          </ion-button>
         </ion-item>
       </ion-list>
-      <div class="ion-margin-top">
-        <ion-button (click)="doVersion()" size="default">
-          {{ 'Version' | translate }}
-        </ion-button>
-      </div>
     </div>
   </div>
 </ion-content>

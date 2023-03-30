@@ -3743,7 +3743,7 @@ class Auth():
         try:
             saas_ = {
                 "company": COMPANY_NAME_,
-                "version": "Technoplatz BI - Brezel Enterprise Edition"
+                "version": "Technoplatz BI - Enterprise Edition" if SAAS_.lower() == "ee" else "Technoplatz BI - Community Edition"
             }
 
             res_ = {"result": True, "user": None, "saas": saas_}
@@ -4588,6 +4588,7 @@ API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_KEY_ = os.environ.get("API_KEY")
 SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
+SAAS_ = os.environ.get("SAAS")
 
 # CORS CHECKPOINT
 

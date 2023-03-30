@@ -45,6 +45,8 @@ import { Router } from "@angular/router";
 })
 
 export class AccountPage implements OnInit {
+  public version = environment.appVersion;
+  public release = environment.release;
   public header: string = "Account";
   public subheader: string = "";
   public user: any = null;
@@ -63,6 +65,8 @@ export class AccountPage implements OnInit {
   public viewurl_masked_: string = "";
   public qr_exists: boolean = false;
   public otp_show: boolean = false;
+  public otp_process: boolean = false;
+  public qr_show: boolean = false;
   public otp_qr: string = "";
   public saas: any = null;
 
@@ -224,6 +228,8 @@ export class AccountPage implements OnInit {
           this.otp_show = false;
           resolve(true);
         } else {
+          this.otp_process = true;
+          this.otp_show = false;
           this.auth.OTP(obj).then((res: any) => {
             if (res && res.result) {
               this.otp_qr = res.qr;
@@ -232,11 +238,9 @@ export class AccountPage implements OnInit {
                 resolve(true);
               } else if (op_ === "validate") {
                 if (res.success) {
-                  this.otp_show = false;
                   this.misc.doMessage("OTP validated successfully", "success");
                   resolve(true);
                 } else {
-                  this.otp_show = false;
                   const err_ = "OTP does not match";
                   this.misc.doMessage(err_, "error");
                   reject(err_);
@@ -254,9 +258,10 @@ export class AccountPage implements OnInit {
               reject(res.msg);
             }
           }).catch((error: any) => {
-            this.otp_show = false;
             this.misc.doMessage(error, "error");
             reject(error);
+          }).finally(() => {
+            this.otp_process = false;
           });
         }
       }

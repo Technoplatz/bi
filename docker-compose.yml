@@ -279,6 +279,7 @@ services:
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
+      - SAAS=${SAAS}
     links:
       - replicaset
     networks:
