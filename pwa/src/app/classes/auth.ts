@@ -72,9 +72,8 @@ export class Auth {
         } else {
           reject(res.msg);
         }
-      }, (err: any) => {
-        const error_ = err.error;
-        reject(error_.msg);
+      }, (res: any) => {
+        reject(res.error && res.error.msg ? res.error.msg : res);
       });
     });
   }
@@ -90,9 +89,8 @@ export class Auth {
         } else {
           reject(res.msg);
         }
-      }, (err: any) => {
-        const error_ = err.error;
-        reject(error_.msg);
+      }, (res: any) => {
+        reject(res.error && res.error.msg ? res.error.msg : res);
       });
     });
   }
@@ -120,9 +118,8 @@ export class Auth {
         } else {
           reject(res.msg);
         }
-      }, (err: any) => {
-        const error_ = err.error;
-        reject(error_.msg);
+      }, (res: any) => {
+        reject(res.error && res.error.msg ? res.error.msg : res);
       });
     });
   }
@@ -139,8 +136,8 @@ export class Auth {
         } else {
           reject(res.msg);
         }
-      }, (error: any) => {
-        reject(error);
+      }, (res: any) => {
+        reject(res.error && res.error.msg ? res.error.msg : res);
       });
     });
   }
@@ -159,8 +156,8 @@ export class Auth {
           } else {
             reject(res.msg);
           }
-        }, (error: any) => {
-          reject(error);
+        }, (res: any) => {
+          reject(res.error && res.error.msg ? res.error.msg : res);
         });
       });
     });
@@ -180,8 +177,8 @@ export class Auth {
           } else {
             reject(res.msg);
           }
-        }, (error: any) => {
-          reject(error);
+        }, (res: any) => {
+          reject(res.error && res.error.msg ? res.error.msg : res);
         });
       });
     });
@@ -204,8 +201,8 @@ export class Auth {
               } else {
                 reject(res.msg);
               }
-            }, () => {
-              reject("could not connected to the server");
+            }, (res: any) => {
+              reject(res.error && res.error.msg ? res.error.msg : res);
             });
           });
         } else {
@@ -245,8 +242,8 @@ export class Auth {
         }, (error: any) => {
           reject(error.msg);
         });
-      }).catch((error: any) => {
-        reject(error);
+      }, (res: any) => {
+        reject(res.error && res.error.msg ? res.error.msg : res);
       });
     });
   }
@@ -266,8 +263,8 @@ export class Auth {
         } else {
           reject({ message: "no api response" });
         }
-      }, (error: any) => {
-        reject({ message: error.msg });
+      }, (res: any) => {
+        reject(res.error && res.error.msg ? res.error.msg : res);
       });
     });
   }

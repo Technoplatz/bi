@@ -84,7 +84,6 @@ export class CollectionPage implements OnInit {
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public barcoded_: boolean = false;
-  public is_samecol: boolean = false;
   private view: any = null;
   public actions: any = [];
   public columns_: any;
@@ -154,8 +153,9 @@ export class CollectionPage implements OnInit {
           });
         });
       });
-    }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
+    }).catch((res: any) => {
+      this.is_initialized = true;
+      this.misc.doMessage(res.error.msg, "error");
     });
   }
 
@@ -210,7 +210,6 @@ export class CollectionPage implements OnInit {
           }).finally(() => {
             this.is_pane_ok = true;
             this.is_loaded = true;
-            this.is_samecol = true;
           });
         });
       });
@@ -274,7 +273,6 @@ export class CollectionPage implements OnInit {
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
                     this.is_loaded = true;
-                    this.is_samecol = true;
                   });
               }
             }

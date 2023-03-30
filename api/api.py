@@ -591,15 +591,8 @@ class Misc():
             return res_
 
     def permitted_user_f(self, user_):
-        # check user on _user collection
-        user_id_ = user_["usr_id"]
-        auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
-        if not auth_:
-            return False
-        if "aut_root" in auth_ and auth_["aut_root"] == True:
-            return True
         tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-        return True if "#Managers" in tags_ or "#Administrators" in tags_ else False
+        return True if any(i in tags_ for i in PERMISSIVE_TAGS_) else False
 
     def properties_cleaner_f(self, properties):
         properties_new_ = {}
@@ -3889,81 +3882,63 @@ class Auth():
 
     def permission_f(self, input_):
         try:
-            # gets the required parameters
-            user_id_ = input_["user"] if "user" in input_ else None
+            user_ = input_["user"]
+            user_id_ = user_["usr_id"] if "usr_id" in user_ else None
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             collection_id_ = input_["collection"] if "collection" in input_ else None
             op_ = input_["op"] if "op" in input_ else None
-            cudops_ = ["insert", "update", "upsert", "delete", "remove", "clone", "purge"]
-            collessops_ = ["view", "views", "collections", "template", "dump", "backup", "restore"]
+            administratives_ = ["dump", "backup", "restore"]
+            permissive_ = ["view", "views", "collections", "template"]
             allowmatch_ = []
 
             if not user_id_:
                 raise APIError(f"user not found {user_id_}")
-
+            
+            op_ = "read" if op_ in ["collection"] else input_["op"]
             if not op_:
                 raise APIError(f"operation is missing {op_}")
 
+            if Misc().permitted_user_f(user_):
+                res_ = {"result": True, "allowmatch": allowmatch_}
+                return
+            
+            if op_ in administratives_:
+                raise AuthError(f"no {op_} permission for {collection_id_}")
+
             if not collection_id_:
-                res_ = {"result": True, "allowmatch": allowmatch_} if op_ in collessops_ else {"result": False, "allowmatch": allowmatch_}
+                res_ = {"result": True, "allowmatch": allowmatch_} if op_ in permissive_ else {"result": False, "allowmatch": allowmatch_}
                 return
 
-            # check user on _user collection
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
-            if not auth_:
-                raise APIError(f"invalid user id {user_id_}")
-
-            # check user on _auth collection
-            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
-            if not user_:
-                raise APIError(f"user not found {user_id_}")
-
-            # set variabled related to user
-            aut_root_ = True if "aut_root" in auth_ and auth_["aut_root"] else False
-            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-
-            if aut_root_:
+            if collection_id_[:1] == "_" and op_ == "read":
                 res_ = {"result": True, "allowmatch": allowmatch_}
                 return
 
-            if collection_id_:
-                if collection_id_[:1] == "_":
-                    if op_ == "read":
-                        res_ = {"result": True, "allowmatch": allowmatch_}
-                        return
-                    elif op_ in cudops_:
-                        if not Misc().permitted_user_f(user_):
-                            res_ = {"result": False, "allowmatch": allowmatch_}
-                            return
-            else:
-                raise APIError("no collection found for {op_}")
-
             collection_ = Mongo().db["_collection"].find_one({"col_id": collection_id_})
             if not collection_:
-                raise APIError(f"no access permission for {collection_id_}/{op_}")
+                raise APIError(f"no collection found {collection_id_}/{op_}")
 
-            permission_ = False  # default
+            permission_ = False
 
             for ix_, usr_tag_ in enumerate(usr_tags_):
                 permission_check_ = Mongo().db["_permission"].find_one({
                     "per_tag": usr_tag_,
                     "per_collection_id": collection_id_
                 })
-                if permission_check_ is not None:
+                if permission_check_:
                     per_create_ = True if "per_create" in permission_check_ and permission_check_["per_create"] == True else False
                     per_read_ = True if "per_read" in permission_check_ and permission_check_["per_read"] == True else False
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
+
                     if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ in ["insert", "import"] and per_create_) or (op_ == "upsert" and per_create_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_create_) or (op_ == "delete" and per_read_ and per_delete_):
-                        # the first tag is getting to be considered for allowed matches
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True
                         break
 
-            # not permiited goes to error
-            if not permission_:
-                raise APIError(f"user is not allowed to {op_} on {collection_id_}")
+            if permission_ == False:
+                raise AuthError(f"no {op_} permission for {collection_id_}")
 
             res_ = {"result": permission_, "allowmatch": allowmatch_}
 
@@ -3972,6 +3947,9 @@ class Auth():
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
+
+        except AuthError as exc:
+            res_ = Misc().auth_error_f(exc)
 
         except Exception as exc:
             res_ = Misc().exception_f(exc)
@@ -4589,6 +4567,7 @@ API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_KEY_ = os.environ.get("API_KEY")
 SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
 SAAS_ = os.environ.get("SAAS")
+PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 
 # CORS CHECKPOINT
 
@@ -4679,7 +4658,6 @@ def crud_f():
             raise APIError("no operation found")
         op_ = input_["op"]
 
-        # gets the email and user token
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("user info not found")
@@ -4689,18 +4667,16 @@ def crud_f():
         collection_ = input_["collection"] if "collection" in input_ else None
         match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
 
-        # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
         input_["userindb"] = validate_["user"]
 
-        # check permission
-        allowmatch_ = []
-        permission_f_ = Auth().permission_f({"user": email_, "collection": collection_, "op": op_})
+        permission_f_ = Auth().permission_f({"user": validate_["user"], "auth": validate_["auth"], "collection": collection_, "op": op_})
         if not permission_f_["result"]:
-            raise APIError(permission_f_["msg"])
+            raise AuthError(permission_f_["msg"])
 
+        allowmatch_ = []
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ = allowmatch_ + match_
@@ -4764,6 +4740,9 @@ def crud_f():
 
     except APIError as exc:
         res_ = {"msg": str(exc), "status": 400}
+
+    except AuthError as exc:
+        res_ = {"msg": str(exc), "status": 401}
 
     except Exception as exc:
         res_ = {"msg": str(exc), "status": 500}

@@ -98,10 +98,10 @@ export class Miscellaneous {
             if (res && res.result) {
               resolve(res);
             } else {
-              reject(res.msg);
+              reject(res);
             }
-          }, (error: any) => {
-            reject(error.msg);
+          }, (res: any) => {
+            reject(res.error && res.error.msg ? res.error.msg : res);
           });
         });
       });
@@ -163,8 +163,8 @@ export class Miscellaneous {
           } else {
             reject(res);
           }
-        }, (error: any) => {
-          reject(error);
+        }, (res: any) => {
+          reject(res.error && res.error.msg ? res.error.msg : res);
         });
       });
     });

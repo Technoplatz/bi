@@ -245,8 +245,8 @@ export class CrudPage implements OnInit {
           } else {
             this.doInitForm();
           }
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
+        }).catch((res: any) => {
+          this.misc.doMessage(res, "error");
         }).finally(() => {
           this.isInProgress = false;
         });

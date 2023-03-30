@@ -235,7 +235,6 @@ export class Crud {
           reject(res.msg);
         }
       }, (error: any) => {
-        console.error("*** error", error);
         reject(error);
       });
     });
@@ -253,7 +252,6 @@ export class Crud {
           reject(res.msg);
         }
       }, (error: any) => {
-        console.error("*** error", error);
         reject(error);
       });
     });
@@ -261,35 +259,16 @@ export class Crud {
 
   MultiCrud(op: string, collection: string, match: any, is_crud: boolean) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.http.post<any>(this.apiHost + "/crud", {
-          op: op,
-          user: LSUSERMETA,
-          collection: collection,
-          match: match,
-          doc: null,
-          is_crud: is_crud
-        }, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            if (res.response) {
-              const resp = JSON.parse(res.response);
-              this.storage.set("LSRECORDID", resp._id).then(() => {
-                this.updateListener.next(resp);
-                resolve(resp);
-              }).catch((error: any) => {
-                reject(error);
-              });
-            } else {
-              resolve(true);
-            }
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
+      this.misc.apiCall("crud", {
+        op: op,
+        collection: collection,
+        match: match,
+        doc: null,
+        is_crud: is_crud
+      }).then((res: any) => {
+        resolve(res);
+      }).catch((error: any) => {
+        reject(error);
       });
     });
   }
@@ -318,29 +297,21 @@ export class Crud {
           } else {
             reject(res.msg);
           }
-        }, (error: any) => {
-          reject(error);
+        }, (res: any) => {
+          reject(res.error && res.error.msg ? res.error.msg : res);
         });
       });
     });
   }
 
-  getCollections(LSUSERMETA: any) {
+  getCollections() {
     return new Promise((resolve, reject) => {
-      const posted: any = {
+      this.misc.apiCall("crud", {
         op: "collections",
-        user: LSUSERMETA
-      }
-      this.http.post<any>(this.apiHost + "/crud", posted, {
-        headers: new HttpHeaders(this.crudHeaders)
-      }).subscribe((res: any) => {
-        if (res && res.result) {
-          this.misc.collections.next(res);
-          resolve(this.collections.next(res));
-        } else {
-          reject(res.msg);
-        }
-      }, (error: any) => {
+      }).then((res: any) => {
+        this.misc.collections.next(res);
+        resolve(this.collections.next(res));
+      }).catch((error: any) => {
         reject(error);
       });
     });
@@ -348,43 +319,25 @@ export class Crud {
 
   getCollection(id: string) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const posted: any = {
-          collection: id,
-          op: "collection",
-          user: LSUSERMETA
-        }
-        this.http.post<any>(this.apiHost + "/crud", posted, {
-          headers: new HttpHeaders(this.crudHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error);
-        });
+      this.misc.apiCall("crud", {
+        collection: id,
+        op: "collection",
+      }).then((res: any) => {
+        resolve(res);
+      }).catch((error: any) => {
+        reject(error);
       });
     });
   }
 
-  getViews(LSUSERMETA: any) {
+  getViews() {
     return new Promise((resolve, reject) => {
-      const posted: any = {
+      this.misc.apiCall("crud", {
         op: "views",
-        user: LSUSERMETA,
         dashboard: false
-      }
-      this.http.post<any>(this.apiHost + "/crud", posted, {
-        headers: new HttpHeaders(this.crudHeaders)
-      }).subscribe((res: any) => {
-        if (res && res.result) {
-          resolve(this.views.next(res));
-        } else {
-          reject(res.msg);
-        }
-      }, (error: any) => {
+      }).then((res: any) => {
+        resolve(this.views.next(res));
+      }).catch((error: any) => {
         reject(error);
       });
     });
@@ -407,7 +360,6 @@ export class Crud {
       }).then((res: any) => {
         resolve(this.announcements.next(res));
       }).catch((error: any) => {
-        console.error("*** announcements error", error);
         reject(error);
       });
     });
@@ -416,12 +368,12 @@ export class Crud {
   getAll() {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.getCollections(LSUSERMETA).then(() => {
+        this.getCollections().then(() => {
           resolve(true);
         }).catch((error: any) => {
           reject(error);
         });
-        this.getViews(LSUSERMETA).then(() => {
+        this.getViews().then(() => {
           resolve(true);
         }).catch((error: any) => {
           reject(error);
@@ -449,8 +401,8 @@ export class Crud {
         } else {
           reject(res.msg);
         }
-      }, (error: any) => {
-        reject(error);
+      }, (res: any) => {
+        reject(res.error && res.error.msg ? res.error.msg : res);
       });
     });
   }

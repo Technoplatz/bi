@@ -71,7 +71,7 @@
   },
   "required": ["log_type", "log_date", "log_user_id", "log_operation"],
   "sort": {
-    "_modified_at": -1
+    "_created_at": -1
   },
   "index": [["log_object_id"], ["log_operation"], ["log_collection_id"], ["log_type", "log_date"]]
 }
