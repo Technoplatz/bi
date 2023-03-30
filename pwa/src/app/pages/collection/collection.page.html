@@ -117,7 +117,7 @@ https://www.gnu.org/licenses.
               </ion-button>
               <ion-button (click)="doShowCode()">
                 <ion-icon name="close-circle-outline"></ion-icon>
-                &nbsp;&nbsp;{{ 'Cancel' | translate }}
+                &nbsp;&nbsp;{{ 'Close JSON' | translate }}
               </ion-button>
             </ion-col>
           </ion-row>
@@ -262,7 +262,7 @@ https://www.gnu.org/licenses.
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
               <span *ngIf="['date', 'array', 'object', 'decimal'].includes(item.value.bsonType); else othertype">
                 <span *ngIf="item.value.bsonType=='date' && record[item.key]">
-                  {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
+                  {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
                 </span>
                 <span *ngIf="item.value.bsonType=='array'">
                   <span *ngIf="item.value.items?.bsonType=='object'; else noarrayobject">

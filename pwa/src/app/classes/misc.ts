@@ -164,7 +164,7 @@ export class Miscellaneous {
             reject(res);
           }
         }, (res: any) => {
-          reject(res.error && res.error.msg ? res.error.msg : res);
+          reject(res.error && res.error.msg ? res.error.msg : "please click cancel and try again");
         });
       });
     });

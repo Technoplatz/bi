@@ -66,6 +66,13 @@
       "default": false,
       "width": 100
     },
+    "per_scheme": {
+      "bsonType": "bool",
+      "title": "Scheme",
+      "description": "Scheme Permission",
+      "default": false,
+      "width": 100
+    },
     "per_match": {
       "bsonType": "array",
       "minItems": 0,

@@ -198,7 +198,7 @@ export class Crud {
               res.cid = sto_collection_id_;
               resolve(res);
             }).catch((error: any) => {
-              reject(error.msg);
+              reject(error);
             });
           } else {
             this.misc.apiCall("crud", {

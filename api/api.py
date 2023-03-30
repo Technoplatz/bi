@@ -55,6 +55,7 @@ import smtplib
 import urllib
 import hashlib
 import jwt
+import xlrd
 from pickle import TRUE
 from email import encoders
 from email.mime.base import MIMEBase
@@ -447,7 +448,6 @@ class Misc():
 
     def exception_f(self, exc):
         print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
-        self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def api_error_f(self, exc):
@@ -954,9 +954,12 @@ class Crud():
         finally:
             return res_
 
-    def frame_convert_datetime_f(self, c):
-        str_ = str(c).strip()
-        return datetime.strptime(str_[:10], "%Y-%m-%d") if c not in ["NaT", "NaN", "nat", "nan", np.nan, None] else None
+    def frame_convert_datetime_f(self, data_):
+        try:
+            str_ = str(data_).strip()
+            return datetime.fromisoformat(str_) if str_ not in [" ", "0", "0.0", "NaT", "NaN", "nat", "nan", np.nan, np.double, None] else None
+        except ValueError as exc:
+            raise APIError(str(exc))
 
     def frame_convert_string_f(self, c):
         str_ = str(c).strip()
@@ -1216,6 +1219,8 @@ class Crud():
             find_one_ = Mongo().db["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
+            structure_ = find_one_["col_structure"]
+            
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
@@ -1228,7 +1233,11 @@ class Crud():
                     property_ = properties_[column_]
                     if "bsonType" in property_:
                         if property_["bsonType"] == "date":
-                            df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                            try:
+                                df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                            except:
+                                if "required" in structure_ and len(structure_["required"]) > 0 and column_ in structure_["required"]:
+                                    raise Exception(f"invalid or empty date in {column_} column")
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
                         elif property_["bsonType"] in ["number", "int"]:
@@ -1251,7 +1260,7 @@ class Crud():
             df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
 
             # REMOVING NANS
-            df_.replace(['nan', 'NaN', 'nat', 'NaT'], None, inplace=True)
+            df_.replace([np.nan, pd.NaT, 'nan', 'NaN', 'nat', 'NaT'], None, inplace=True)
 
             # SETTING THE DEFAULTS
             df_["_created_at"] = datetime.now()
@@ -3930,8 +3939,17 @@ class Auth():
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
+                    per_scheme_ = True if "per_scheme" in permission_check_ and permission_check_["per_scheme"] == True else False
 
-                    if (op_ == "announce" and per_share_) or (op_ == "read" and per_read_) or (op_ in ["insert", "import"] and per_insert_) or (op_ == "upsert" and per_insert_ and per_update_) or (op_ in ["update", "action"] and per_read_ and per_update_) or (op_ == "clone" and per_read_ and per_insert_) or (op_ == "delete" and per_read_ and per_delete_):
+                    if \
+                        (op_ == "savecode" and per_scheme_) or \
+                        (op_ == "announce" and per_share_) or \
+                        (op_ == "read" and per_read_) or \
+                        (op_ in ["insert", "import"] and per_insert_) or \
+                        (op_ == "upsert" and per_insert_ and per_update_) or \
+                        (op_ in ["update", "action"] and per_read_ and per_update_) or \
+                        (op_ == "clone" and per_read_ and per_insert_) or \
+                            (op_ == "delete" and per_read_ and per_delete_):
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True
@@ -4570,7 +4588,7 @@ MONGO_TLS_CERT_KEYFILE_PASSWORD_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYF
 MONGO_DB_PASSWORD_FILE_ = f"/certs/{os.environ.get('MONGO_DB_PASSWORD_FILE')}"
 
 f_ = open(f"{MONGO_DB_PASSWORD_FILE_}", "r")
-MONGO_PASSWORD_ = f_.readline().split('\n')[0]
+MONGO_PASSWORD_ = f_.readline().splitlines()[0]
 
 # CORS CHECKPOINT
 origins_ = [
