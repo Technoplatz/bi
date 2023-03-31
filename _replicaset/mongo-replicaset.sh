@@ -1,22 +1,22 @@
 #!/bin/bash
-# 
+#
 # Technoplatz BI
-# 
+#
 # Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see https://www.gnu.org/licenses.
-# 
+#
 # If your software can interact with users remotely through a computer
 # network, you should also make sure that it provides a way for users to
 # get its source.  For example, if your program is a web application, its
@@ -24,12 +24,12 @@
 # of the code.  There are many ways you could offer source, and different
 # solutions will be better for different programs; see section 13 for the
 # specific requirements.
-# 
+#
 # You should also get your employer (if you work as a programmer) or school,
 # if any, to sign a "copyright disclaimer" for the program, if necessary.
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
-# 
+#
 
 echo "COMPANY_NAME=$COMPANY_NAME"
 echo "ADMIN_EMAIL=$ADMIN_EMAIL"
@@ -136,8 +136,6 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             aut_otp_secret: null,
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
-            _modified_at: new Date(),
-            _modified_by: '${ADMIN_EMAIL}',
             _modified_count: 0,
             _apikey_modified_at: new Date(),
             _apikey_modified_by: '${ADMIN_EMAIL}'
@@ -155,8 +153,6 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             _tags: ${PERMISSIVE_TAGS},
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
-            _modified_at: new Date(),
-            _modified_by: '${ADMIN_EMAIL}',
             _modified_count: 0
         });
         db.getCollection('_user').createIndex({ 'usr_id': 1 }, { unique: true });
@@ -165,9 +161,9 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
         db.getCollection('_firewall').drop();
         db.createCollection('_firewall', { 'capped': false });
         db.getCollection('_firewall').insertOne({
-            fwa_rule_id: 'manager-allow',
-            fwa_user_id: '${ADMIN_EMAIL}',
-            fwa_ip: '0.0.0.0',
+            fwa_name: 'manager-allow',
+            fwa_tag: '#Managers',
+            fwa_source_ip: '0.0.0.0',
             fwa_enabled: true,
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
@@ -175,9 +171,20 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             _modified_by: '${ADMIN_EMAIL}',
             _modified_count: 0
         });
-        db.getCollection('_firewall').createIndex({ 'fwa_rule_id': 1, 'fwa_ip': 1, 'fwa_enabled':1 });
-        db.getCollection('_firewall').createIndex({ 'fwa_rule_id': 1, 'fwa_user_id': 1 }, { unique: true });
-        db.getCollection('_firewall').createIndex({ 'fwa_user_id': 1, 'fwa_ip': 1 }, { unique: true });
+        db.getCollection('_firewall').insertOne({
+            fwa_name: 'admin-allow',
+            fwa_tag: '#Administrator',
+            fwa_source_ip: '0.0.0.0',
+            fwa_enabled: true,
+            _created_at: new Date(),
+            _created_by: '${ADMIN_EMAIL}',
+            _modified_at: new Date(),
+            _modified_by: '${ADMIN_EMAIL}',
+            _modified_count: 0
+        });
+        db.getCollection('_firewall').createIndex({ 'fwa_name': 1, 'fwa_source_ip': 1, 'fwa_enabled':1 });
+        db.getCollection('_firewall').createIndex({ 'fwa_name': 1, 'fwa_tag': 1 }, { unique: true });
+        db.getCollection('_firewall').createIndex({ 'fwa_tag': 1, 'fwa_source_ip': 1 }, { unique: true });
         print('_firewall created.');
         print('update completed.');
     "
@@ -207,53 +214,55 @@ else
                 aut_apikey: apikey_,
                 aut_otp_validated: false,
                 aut_otp_secret: null,
-                _created_at: new Date(),
-                _created_by: 'saas',
                 _modified_at: new Date(),
                 _modified_by: 'saas',
                 _modified_count: 0,
                 _apikey_modified_at: new Date(),
                 _apikey_modified_by: 'saas'
-            }}, { upsert: true });
+            }}, { upsert: false });
             if(upsert_auth_) {
                 print('auth upserted', '${ADMIN_EMAIL}');
             }
-            var upsert_user_ = db.getCollection('_user').updateOne({ usr_id: '${ADMIN_EMAIL}' }, { \$set: {
+            var update_user_ = db.getCollection('_user').updateOne({ usr_id: '${ADMIN_EMAIL}' }, { \$set: {
                 usr_id: '${ADMIN_EMAIL}',
                 usr_name: '${ADMIN_USER_NAME}',
                 usr_scope: 'Administrator',
                 usr_enabled: true,
                 _tags: ${PERMISSIVE_TAGS},
-                _created_at: new Date(),
-                _created_by: 'saas',
                 _modified_at: new Date(),
                 _modified_by: 'saas',
                 _modified_count: 0
-            }}, { upsert: true });
-            if(upsert_user_) {
+            }}, { upsert: false });
+            if(update_user_) {
                 print('user upserted', '${ADMIN_EMAIL}');
             }
-            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_rule_id: 'manager-allow' }, { \$set: {
-                fwa_rule_id: 'manager-allow',
-                fwa_user_id: '${ADMIN_EMAIL}',
-                fwa_ip: '0.0.0.0',
+            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_name: 'manager-allow' }, { \$set: {
+                fwa_name: 'manager-allow',
+                fwa_tag: '#Managers',
+                fwa_source_ip: '0.0.0.0',
                 fwa_enabled: true,
-                _created_at: new Date(),
-                _created_by: 'saas',
                 _modified_at: new Date(),
-                _modified_by: 'saas',
-                _modified_count: 0
-            }}, { upsert: true });
+                _modified_by: 'saas'
+            }, "$inc": {"_modified_count": 1}}, { upsert: true });
             if(upsert_firewall_) {
-                print('firewall added', '${ADMIN_EMAIL}');
+                print('firewall updated', '#Managers');
+            }
+            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_name: 'admin-allow' }, { \$set: {
+                fwa_name: 'admin-allow',
+                fwa_tag: '#Administrators',
+                fwa_source_ip: '0.0.0.0',
+                fwa_enabled: true,
+                _modified_at: new Date(),
+                _modified_by: 'saas'
+            }, "$inc": {"_modified_count": 1}}, { upsert: true });
+            if(upsert_firewall_) {
+                print('firewall updated', '#Administrators');
             }
             db.getCollection('_saas').updateOne({ sas_id: 'saas-ex' }, { \$set: {
                 sas_id: 'saas-ex',
                 sas_user_id: saas_.sas_user_id,
                 sas_user_name: saas_.sas_user_name,
                 sas_company_name: saas_.sas_company_name,
-                _created_at: new Date(),
-                _created_by: 'saas',
                 _updated_at: new Date(),
                 _updated_by: 'saas'
             }}, { upsert: true });

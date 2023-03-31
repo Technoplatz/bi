@@ -1213,7 +1213,7 @@ class Crud():
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
             structure_ = find_one_["col_structure"]
-            
+
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
@@ -5122,7 +5122,6 @@ def post_f():
                 doc__ = decode_crud_doc_f_["doc"]
                 doc__["_modified_at"] = datetime.now()
                 doc__["_modified_by"] = "API"
-
                 if operation_ == "upsert":
                     session_db_[collection_data_].update_many(filter__, {"$set": doc__, "$inc": {"_modified_count": 1}}, upsert=True, session=session_)
                 if operation_ == "update":
