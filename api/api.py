@@ -215,7 +215,7 @@ class Schedular():
             vie_attach_csv_ = doc_["vie_attach_csv"] if "vie_attach_csv" in doc_ else False
             vie_attach_excel_ = doc_["vie_attach_excel"] if "vie_attach_excel" in doc_ else False
             user_id_ = email_ if email_ else doc_["_created_by"] if "_created_by" in doc_ else doc_["_modified_by"] if "_modified_by" in doc_ else None
-            vie_tags_ = doc_["_tags"] if "_tags" in doc_ and scope_ == "live" else ["#Managers", "#Administrators"]
+            vie_tags_ = doc_["_tags"] if "_tags" in doc_ and scope_ == "live" else PERMISSIVE_TAGS_
 
             if not user_id_:
                 raise APIError("no user provided")
@@ -650,12 +650,12 @@ class Mongo():
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true"
         tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}" if MONGO_TLS_CERT_KEYFILE_ else ""
-        tlsCertificateKeyFilePassword_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_}" if MONGO_TLS_CERT_KEYFILE_PASSWORD_ else ""
+        tlsCertificateKeyFilePassword_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEY_PASSWORD_}" if MONGO_TLS_CERT_KEY_PASSWORD_ else ""
         tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
 
         # mongo staff
-        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
+        self.connstr = f"mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
         self.client = MongoClient(self.connstr)
         self.session_client = MongoClient(self.connstr)
         self.db = self.client[MONGO_DB_]
@@ -668,7 +668,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
+            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_INITDB_ROOT_USERNAME_} --password \"{MONGO_INITDB_ROOT_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -690,7 +690,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
+            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_INITDB_ROOT_USERNAME_} --password \"{MONGO_INITDB_ROOT_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -4574,14 +4574,11 @@ MONGO_REPLICA2_HOST_ = os.environ.get("MONGO_REPLICA2_HOST")
 MONGO_PORT_ = int(os.environ.get("MONGO_PORT"))
 MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
-MONGO_TLS_CA_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CA_KEYFILE')}"
-MONGO_TLS_CERT_KEYFILE_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE')}"
-MONGO_TLS_CERT_KEYFILE_PASSWORD_ = f"/certs/{os.environ.get('MONGO_TLS_CERT_KEYFILE_PASSWORD')}"
-MONGO_DB_PASSWORD_FILE_ = f"/certs/{os.environ.get('MONGO_DB_PASSWORD_FILE')}"
-
-f_ = open(f"{MONGO_DB_PASSWORD_FILE_}", "r")
-MONGO_PASSWORD_ = f_.readline().splitlines()[0]
+MONGO_INITDB_ROOT_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_INITDB_ROOT_USERNAME"))
+MONGO_INITDB_ROOT_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_INITDB_ROOT_PASSWORD"))
+MONGO_TLS_CERT_KEY_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_TLS_CERT_KEY_PASSWORD"))
+MONGO_TLS_CA_KEYFILE_ = f"/cert/{os.environ.get('MONGO_TLS_CA_KEYFILE')}"
+MONGO_TLS_CERT_KEYFILE_ = f"/cert/{os.environ.get('MONGO_TLS_CERT_KEYFILE')}"
 
 # CORS CHECKPOINT
 origins_ = [

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Technoplatz BI
 #
@@ -87,20 +87,20 @@ function installBI() {
         echo -e "You can retry by adding a token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
     else
-        echo -e "✔ Required files received successfully."
+        echo "✔ Required files received successfully."
     fi
-    echo -e "✔ The first step completed successfully."
-    echo -e "\n>>> NEXT STEPS:"
+    echo "✔ The first step completed successfully."
+    echo "\n>>> NEXT STEPS:"
     echo -e "${COLOR}>>> Please note that your project folder is $DIR${NOCOLOR}"
     echo -e ">>> 1. Open ${COLOR}$DIR$/.env${NOCOLOR} file with any text editor."
     echo ">>> 2. Apply the necessary changes and save it."
     echo -e ">>> 3. Run ${COLOR}./bi.sh start${NOCOLOR} to make containers up and keep them running."
-    echo -e "\nHere you go :)"
+    echo "\nHere you go :)"
     return 1
 }
 
 function updateBI() {
-    echo -e "\nUpdating platform...\n"
+    echo "\nUpdating platform...\n"
     if [ ! -d $DIR ]; then
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         return 0
@@ -118,7 +118,7 @@ function updateBI() {
         return 0
     else
         mv -f $DIR/$DCYML.bak $DIR/$DCYML
-        echo -e "✔ Configuration file received successfully."
+        echo "✔ Configuration file received successfully."
     fi
     curl "${curlHeaders[@]}" -Lso $ROOTPATH/bi-sh.bak $RAWREPO/bi-sh
     CONTD=$(cat $ROOTPATH/bi-sh.bak | head -c 3)
@@ -130,7 +130,7 @@ function updateBI() {
     else
         mv -f $ROOTPATH/bi-sh.bak $ROOTPATH/bi.sh
         chmod +x $ROOTPATH/bi.sh
-        echo -e "✔ Service script received successfully.\n"
+        echo "✔ Service script received successfully.\n"
     fi
     docker compose -f $DIR/$DCYML pull
     if [ $? -eq 0 ]; then
@@ -147,7 +147,7 @@ function pruneBI() {
     echo -e "Cleaning..."
     docker system prune --force $1
     if [ $? -eq 0 ]; then
-        echo -e "✔ Dangling and unused resources successfully removed."
+        echo "✔ Dangling and unused resources successfully removed."
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
@@ -156,20 +156,15 @@ function pruneBI() {
 }
 
 function startBI() {
-    echo -e "\nStarting containers...\n"
+    echo "\nStarting containers...\n"
     if [ ! -d $DIR ]; then
         echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
-    if [ -d $CERTSDIR ]; then
-        docker cp $CERTSDIR/. api:/certs
-    fi
     docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
-        mkdir -p $CERTSDIR
-        docker cp api:/certs/. $CERTSDIR
-        echo -e "\n✔ Platform was started successfully."
+        echo "\n✔ Platform is up and running."
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
@@ -178,7 +173,7 @@ function startBI() {
 }
 
 function stopBI() {
-    echo -e "Stopping containers...\n"
+    echo "Stopping containers...\n"
     if [[ ! -z $(docker container ls -qa) ]]; then
         docker container stop $(docker container ls -qa)
         docker container rm $(docker container ls -qa)
@@ -234,7 +229,6 @@ fi
 
 ROOTPATH="."
 DIR=$ROOTPATH/_bi
-CERTSDIR=$DIR/certs
 
 case $1 in
 "install")

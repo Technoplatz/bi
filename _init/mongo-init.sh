@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 #
 # Technoplatz BI
 #
@@ -29,7 +29,7 @@
 # if any, to sign a "copyright disclaimer" for the program, if necessary.
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
-#
+# 
 
 echo "COUNTRY_CODE=$COUNTRY_CODE"
 echo "STATE_NAME=$STATE_NAME"
@@ -44,17 +44,17 @@ echo "MONGO_SELF_SIGNED_CERTS=$MONGO_SELF_SIGNED_CERTS"
 echo "MONGO_SECRETS_REPLACE=$MONGO_SECRETS_REPLACE"
 echo "MONGO_TLS_CA_KEYFILE=$MONGO_TLS_CA_KEYFILE"
 echo "MONGO_TLS_CERT_KEYFILE=$MONGO_TLS_CERT_KEYFILE"
-echo "MONGO_TLS_CERT_KEYFILE_PASSWORD=$MONGO_TLS_CERT_KEYFILE_PASSWORD"
-echo "MONGO_DB_PASSWORD_FILE=$MONGO_DB_PASSWORD_FILE"
+echo "MONGO_TLS_CERT_KEY_PASSWORD_FILE=$MONGO_TLS_CERT_KEY_PASSWORD_FILE"
 
 echo $(date '+%Y%m%d%H%M%S')
+
+MONGO_TLS_CERT_KEY_PASSWORD=$(cat "$MONGO_TLS_CERT_KEY_PASSWORD_FILE")
+echo "MONGO_TLS_CERT_KEY_PASSWORD=$MONGO_TLS_CERT_KEY_PASSWORD"
 
 selfsigned=$MONGO_SELF_SIGNED_CERTS
 selfsignedreplace=$MONGO_SECRETS_REPLACE
 mongoca=$MONGO_TLS_CA_KEYFILE
 mongocert=$MONGO_TLS_CERT_KEYFILE
-mongocertpassfile=$MONGO_TLS_CERT_KEYFILE_PASSWORD
-mongodbpassfile=$MONGO_DB_PASSWORD_FILE
 
 if [[ ! $selfsigned = true ]]; then
     echo "Certificate generation skipped."
@@ -62,10 +62,10 @@ if [[ ! $selfsigned = true ]]; then
     exit 0
 fi
 
-cacontent=$(cat /certs/$mongoca)
-certcontent=$(cat /certs/$mongocert)
+cacontent=$(cat /cert/$mongoca)
+certcontent=$(cat /cert/$mongocert)
 
-if [[ ! $selfsignedreplace = true && -f /certs/$mongoca && -s /certs/$mongoca && -f /certs/$mongocert && -s /certs/$mongocert ]]; then
+if [[ ! $selfsignedreplace = true && -f /cert/$mongoca && -s /cert/$mongoca && -f /cert/$mongocert && -s /cert/$mongocert ]]; then
     if [[ "$cacontent" == *"-----BEGIN PRIVATE KEY-----"* && "$cacontent" == *"-----END CERTIFICATE-----"* && "$certcontent" == *"-----BEGIN PRIVATE KEY-----"* && "$certcontent" == *"-----END CERTIFICATE-----"* ]]; then
         echo "Certificate generation skipped."
         echo "As far as MONGO_SECRETS_REPLACE is $selfsignedreplace"
@@ -73,57 +73,33 @@ if [[ ! $selfsignedreplace = true && -f /certs/$mongoca && -s /certs/$mongoca &&
     fi
 fi
 
-INC=0
-DBCERTKEY=""
-if [[ ! -f /certs/$mongocertpassfile ]]; then
-    touch /certs/$mongocertpassfile
-    re='^[a-zA-Z]+$'
-    while ! [[ ${DBCERTKEY:0:1} =~ $re ]]; do
-        DBCERTKEY=$(openssl rand -hex 12)
-        let "INC+=1"
-    done
-    echo -n $DBCERTKEY >/certs/$mongocertpassfile
-fi
-
-INC=0
-DBPASSPWD=""
-if [[ ! -f /certs/$mongodbpassfile ]]; then
-    touch /certs/$mongodbpassfile
-    re='^[a-zA-Z]+$'
-    while ! [[ ${DBPASSPWD:0:1} =~ $re ]]; do
-        DBPASSPWD=$(openssl rand -hex 12)
-        let "INC+=1"
-    done
-    echo -n $DBPASSPWD >/certs/$mongodbpassfile
-fi
-
 echo "step 1: Creating a root certificate..."
-openssl req -nodes -newkey rsa:4096 -out /certs/mongo_ca.crt -new -x509 -keyout /certs/mongo_ca.key -passout pass:$DBCERTKEY -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST/emailAddress=$ADMIN_EMAIL"
-cat /certs/mongo_ca.key /certs/mongo_ca.crt >/certs/$mongoca
+openssl req -nodes -newkey rsa:4096 -out /cert/mongo_ca.crt -new -x509 -keyout /cert/mongo_ca.key -passout pass:$MONGO_TLS_CERT_KEY_PASSWORD -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST/emailAddress=$ADMIN_EMAIL"
+cat /cert/mongo_ca.key /cert/mongo_ca.crt >/cert/$mongoca
 echo "✔ step 1 completed sucessfully."
 echo
 echo "step 2: Generating certificate requests..."
-openssl req -nodes -newkey rsa:4096 -sha256 -keyout /certs/$MONGO_HOST.key -out /certs/$MONGO_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST/emailAddress=$ADMIN_EMAIL"
-openssl req -nodes -newkey rsa:4096 -sha256 -keyout /certs/$MONGO_REPLICA1_HOST.key -out /certs/$MONGO_REPLICA1_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_REPLICA1_HOST/emailAddress=$ADMIN_EMAIL"
-openssl req -nodes -newkey rsa:4096 -sha256 -keyout /certs/$MONGO_REPLICA2_HOST.key -out /certs/$MONGO_REPLICA2_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_REPLICA2_HOST/emailAddress=$ADMIN_EMAIL"
+openssl req -nodes -newkey rsa:4096 -sha256 -keyout /cert/$MONGO_HOST.key -out /cert/$MONGO_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST/emailAddress=$ADMIN_EMAIL"
+openssl req -nodes -newkey rsa:4096 -sha256 -keyout /cert/$MONGO_REPLICA1_HOST.key -out /cert/$MONGO_REPLICA1_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_REPLICA1_HOST/emailAddress=$ADMIN_EMAIL"
+openssl req -nodes -newkey rsa:4096 -sha256 -keyout /cert/$MONGO_REPLICA2_HOST.key -out /cert/$MONGO_REPLICA2_HOST.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_REPLICA2_HOST/emailAddress=$ADMIN_EMAIL"
 echo "✔ step 2 completed sucessfully."
 echo
 echo "step 3: Signing node certificate requests with mongo_ca.key..."
-openssl x509 -req -in /certs/$MONGO_HOST.csr -CA /certs/$mongoca -CAkey /certs/mongo_ca.key -passin pass:$DBCERTKEY -set_serial 00 -out /certs/$MONGO_HOST.crt
-openssl x509 -req -in /certs/$MONGO_REPLICA1_HOST.csr -CA /certs/$mongoca -CAkey /certs/mongo_ca.key -passin pass:$DBCERTKEY -set_serial 00 -out /certs/$MONGO_REPLICA1_HOST.crt
-openssl x509 -req -in /certs/$MONGO_REPLICA2_HOST.csr -CA /certs/$mongoca -CAkey /certs/mongo_ca.key -passin pass:$DBCERTKEY -set_serial 00 -out /certs/$MONGO_REPLICA2_HOST.crt
+openssl x509 -req -in /cert/$MONGO_HOST.csr -CA /cert/$mongoca -CAkey /cert/mongo_ca.key -passin pass:$MONGO_TLS_CERT_KEY_PASSWORD -set_serial 00 -out /cert/$MONGO_HOST.crt
+openssl x509 -req -in /cert/$MONGO_REPLICA1_HOST.csr -CA /cert/$mongoca -CAkey /cert/mongo_ca.key -passin pass:$MONGO_TLS_CERT_KEY_PASSWORD -set_serial 00 -out /cert/$MONGO_REPLICA1_HOST.crt
+openssl x509 -req -in /cert/$MONGO_REPLICA2_HOST.csr -CA /cert/$mongoca -CAkey /cert/mongo_ca.key -passin pass:$MONGO_TLS_CERT_KEY_PASSWORD -set_serial 00 -out /cert/$MONGO_REPLICA2_HOST.crt
 echo "✔ step 3 completed sucessfully."
 echo
 echo "step 4: Combining key and crt as pem..."
-cat /certs/$MONGO_HOST.key /certs/$MONGO_HOST.crt >/certs/$mongocert
-cat /certs/$MONGO_REPLICA1_HOST.key /certs/$MONGO_REPLICA1_HOST.crt >/certs/$MONGO_REPLICA1_HOST.pem
-cat /certs/$MONGO_REPLICA2_HOST.key /certs/$MONGO_REPLICA2_HOST.crt >/certs/$MONGO_REPLICA2_HOST.pem
+cat /cert/$MONGO_HOST.key /cert/$MONGO_HOST.crt >/cert/$mongocert
+cat /cert/$MONGO_REPLICA1_HOST.key /cert/$MONGO_REPLICA1_HOST.crt >/cert/$MONGO_REPLICA1_HOST.pem
+cat /cert/$MONGO_REPLICA2_HOST.key /cert/$MONGO_REPLICA2_HOST.crt >/cert/$MONGO_REPLICA2_HOST.pem
 echo "✔ step 4 completed sucessfully."
 echo
 echo "step 5: Cleaning..."
-rm -rf /certs/*.key
-rm -rf /certs/*.csr
-rm -rf /certs/*.crt
+rm -rf /cert/*.key
+rm -rf /cert/*.csr
+rm -rf /cert/*.crt
 echo "✔ step 5 completed sucessfully."
 echo "✔ all steps OK."
 echo

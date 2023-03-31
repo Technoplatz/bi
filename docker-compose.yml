@@ -69,7 +69,7 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=false
     volumes:
-      - bi-cert-volume:/certs
+      - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
       - bi-mongo0-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
@@ -89,8 +89,7 @@ services:
       - MONGO_SECRETS_REPLACE=${MONGO_SECRETS_REPLACE}
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
-      - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
-      - MONGO_DB_PASSWORD_FILE=${MONGO_DB_PASSWORD_FILE}
+      - MONGO_TLS_CERT_KEY_PASSWORD=${MONGO_TLS_CERT_KEY_PASSWORD}
     networks:
       network0:
         ipv4_address: ${SUBNET_INIT_IPV4}
@@ -110,16 +109,16 @@ services:
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
-      - bi-cert-volume:/certs:ro
+      - bi-cert-volume:/cert:ro
       - bi-mongo0-volume:/data/db
       - bi-mongo0-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/certs/${MONGO_DB_PASSWORD_FILE}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /certs/${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /certs/${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile /certs/${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /cert/${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEY_PASSWORD} --tlsCAFile /cert/${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
       - mongo1
@@ -143,16 +142,16 @@ services:
     ports:
       - "${MONGO_REPLICA1_PORT}:${MONGO_PORT}"
     volumes:
-      - bi-cert-volume:/certs:ro
+      - bi-cert-volume:/cert:ro
       - bi-mongo1-volume:/data/db
       - bi-mongo1-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/certs/${MONGO_DB_PASSWORD_FILE}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /certs/${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /certs/${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile /certs/${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA1_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA1_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /cert/${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEY_PASSWORD} --tlsCAFile /cert/${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
@@ -174,16 +173,16 @@ services:
     ports:
       - "${MONGO_REPLICA2_PORT}:${MONGO_PORT}"
     volumes:
-      - bi-cert-volume:/certs:ro
+      - bi-cert-volume:/cert:ro
       - bi-mongo2-volume:/data/db
       - bi-mongo2-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/certs/${MONGO_DB_PASSWORD_FILE}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /certs/${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /certs/${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile /certs/${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO_REPLICA2_IPV4} --dbpath /data/db --journal --logpath /var/log/mongodb/${MONGO_REPLICA2_HOST}.log --logappend --quiet --replSet ${MONGO_REPLICASET} --port ${MONGO_PORT} --tlsMode requireTLS --tlsCertificateKeyFile /cert/${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEY_PASSWORD} --tlsCAFile /cert/${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
@@ -204,7 +203,7 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     volumes:
-      - bi-cert-volume:/certs
+      - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
       - bi-mongo0-volume:/data/configdb
       - /etc/timezone:/etc/timezone:ro
@@ -214,8 +213,6 @@ services:
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_USER_NAME=${ADMIN_USER_NAME}
       - COMPANY_NAME=${COMPANY_NAME}
-      - MONGO_USERNAME=${MONGO_USERNAME}
-      - MONGO_DB_PASSWORD_FILE=${MONGO_DB_PASSWORD_FILE}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST=${MONGO_HOST}
@@ -225,7 +222,9 @@ services:
       - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
-      - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_TLS_CERT_KEY_PASSWORD=${MONGO_TLS_CERT_KEY_PASSWORD}
     links:
       - mongo0
       - mongo1
@@ -252,7 +251,7 @@ services:
       - bi-storage-volume:/cron
       - bi-storage-volume:/dump
       - bi-storage-volume:/vault
-      - bi-cert-volume:/certs
+      - bi-cert-volume:/cert
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -262,8 +261,6 @@ services:
       - DOMAIN=${DOMAIN}
       - COMPANY_NAME=${COMPANY_NAME}
       - FROM_EMAIL=${FROM_EMAIL}
-      - MONGO_USERNAME=${MONGO_USERNAME}
-      - MONGO_DB_PASSWORD_FILE=${MONGO_DB_PASSWORD_FILE}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST=${MONGO_HOST}
@@ -285,7 +282,9 @@ services:
       - NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_SLACK_HOOK_URL}
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
-      - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_TLS_CERT_KEY_PASSWORD=${MONGO_TLS_CERT_KEY_PASSWORD}
       - SAAS=${SAAS}
     links:
       - replicaset
