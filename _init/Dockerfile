@@ -31,6 +31,8 @@
 #
 
 FROM bash:latest
+RUN apk update
+RUN apk add openssl
 COPY mongo-init.sh /
 RUN chmod +x /mongo-init.sh
 CMD ["bash", "/mongo-init.sh"]
