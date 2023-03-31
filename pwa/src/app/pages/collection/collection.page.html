@@ -110,14 +110,14 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding ion-margin-bottom" *ngIf="perm && is_crud && jeopen">
           <ion-row>
             <ion-col class="ion-padding-bottom">
-              <ion-button (click)="doSaveCode()">
+              <ion-button (click)="doSaveScheme()">
                 <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
                 <ion-icon *ngIf="!is_saving" name="cloud-upload-outline"></ion-icon>
                 &nbsp;&nbsp;{{ 'Submit' | translate }} {{ 'JSON' | translate }}
               </ion-button>
               <ion-button (click)="doShowCode()">
                 <ion-icon name="close-circle-outline"></ion-icon>
-                &nbsp;&nbsp;{{ 'Close JSON' | translate }}
+                &nbsp;&nbsp;{{ 'Close' | translate }}
               </ion-button>
             </ion-col>
           </ion-row>

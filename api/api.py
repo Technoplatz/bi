@@ -979,40 +979,33 @@ class Crud():
             match_ = obj["match"]
             tfac_ = obj["tfac"] if "tfac" in obj and obj["tfac"] else None
 
-            # get user auth
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
-            # verify OTP
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "purge")
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
 
-            # generates the data collection name according to the collection id
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            # created a cursor for retrieve the collection structure will be added into the respone
             cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_}")
             if not cursor_:
                 raise APIError(f"collection not found to purge: {collection_}")
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
 
-            # sets the standard filter
             get_filtered_ = self.get_filtered_f({
                 "match": match_,
                 "properties": structure_["properties"] if "properties" in structure_ else None
             })
 
-            # backup records to be multi deleted
             ts_ = Misc().get_timestamp_f()
             bin_ = f"{collection_id_}_bin_{ts_}"
             binned_ = Mongo().db[collection_].find(get_filtered_)
             Mongo().db[bin_].insert_many(binned_)
 
-            # do delete
             Mongo().db[collection_].delete_many(get_filtered_)
 
             log_ = Misc().log_f({
@@ -2811,7 +2804,7 @@ class Crud():
         finally:
             return res_
 
-    def savecode_f(self, obj):
+    def savescheme_f(self, obj):
         try:
             user_ = obj["user"] if "user" in obj else None
             op_ = obj["op"]
@@ -3942,7 +3935,7 @@ class Auth():
                     per_scheme_ = True if "per_scheme" in permission_check_ and permission_check_["per_scheme"] == True else False
 
                     if \
-                        (op_ == "savecode" and per_scheme_) or \
+                        (op_ == "savescheme" and per_scheme_) or \
                         (op_ == "announce" and per_share_) or \
                         (op_ == "read" and per_read_) or \
                         (op_ in ["insert", "import"] and per_insert_) or \
@@ -4753,8 +4746,8 @@ def crud_f():
             res_ = Crud().dump_f(input_)
         elif op_ == "template":
             res_ = Crud().template_f(input_)
-        elif op_ == "savecode":
-            res_ = Crud().savecode_f(input_)
+        elif op_ == "savescheme":
+            res_ = Crud().savescheme_f(input_)
         else:
             raise APIError(f"{op_} is not a supported operation")
 

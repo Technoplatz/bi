@@ -1,7 +1,7 @@
 # 
 # Technoplatz BI
 # 
-# Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+# Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 # 
 
-FROM node:16-alpine as build
+FROM node:current-alpine as build
 WORKDIR /app
 RUN npm install -g npm
 RUN npm install -g @ionic/cli
@@ -38,7 +38,7 @@ COPY package.json /app/
 RUN npm install
 COPY . /app/
 RUN ionic build --prod
-FROM nginx:alpine
+FROM nginx:mainline-alpine
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/www /usr/share/nginx/html

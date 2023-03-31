@@ -535,11 +535,11 @@ export class CollectionPage implements OnInit {
     this.jeopen = !this.jeopen;
   }
 
-  doSaveCode() {
+  doSaveScheme() {
     if (this.perm) {
       this.is_saving = true;
       this.misc.apiCall("/crud", {
-        op: "savecode",
+        op: "savescheme",
         collection: this.id,
         structure: this.structure
       }).then(() => {
