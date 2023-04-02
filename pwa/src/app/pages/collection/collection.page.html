@@ -113,11 +113,11 @@ https://www.gnu.org/licenses.
               <ion-button (click)="doSaveScheme()">
                 <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
                 <ion-icon *ngIf="!is_saving" name="cloud-upload-outline"></ion-icon>
-                &nbsp;{{ 'Submit' | translate }} {{ 'JSON' | translate }}
+                {{ 'Submit' | translate }} {{ 'JSON' | translate }}
               </ion-button>
               <ion-button (click)="doShowCode()">
                 <ion-icon name="close-circle-outline"></ion-icon>
-                &nbsp;{{ 'Close' | translate }}
+                {{ 'Close' | translate }}
               </ion-button>
             </ion-col>
           </ion-row>

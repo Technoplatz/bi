@@ -38,7 +38,6 @@ import { Miscellaneous } from "../../classes/misc";
 import { Crud } from "./../../classes/crud";
 import { environment } from "./../../../environments/environment";
 import { JsonEditorComponent, JsonEditorOptions } from "ang-jsoneditor";
-import { ItemReorderEventDetail } from '@ionic/core';
 
 @Component({
   selector: "app-crud",

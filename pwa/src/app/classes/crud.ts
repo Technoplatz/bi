@@ -257,22 +257,6 @@ export class Crud {
     });
   }
 
-  MultiCrud(op: string, collection: string, match: any, is_crud: boolean) {
-    return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
-        op: op,
-        collection: collection,
-        match: match,
-        doc: null,
-        is_crud: is_crud
-      }).then((res: any) => {
-        resolve(res);
-      }).catch((error: any) => {
-        reject(error);
-      });
-    });
-  }
-
   Download(obj: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {

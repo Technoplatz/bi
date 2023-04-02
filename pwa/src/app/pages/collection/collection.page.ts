@@ -260,20 +260,19 @@ export class CollectionPage implements OnInit {
               text: "OKAY",
               handler: () => {
                 this.is_loaded = this.is_selected = false;
-                this.crud.MultiCrud(
-                  op,
-                  this.id,
-                  this.sweeped[this.segment],
-                  true).then(() => {
-                    this.page = environment.misc.default_page;
-                    this.RefreshData(0).then(() => {
-                      ["_collection", "_view"].includes(this.id) ? this.crud.getAll().then(() => { }) : null;
-                    });
-                  }).catch((error: any) => {
-                    this.misc.doMessage(error, "error");
-                  }).finally(() => {
-                    this.is_loaded = true;
-                  });
+                this.misc.apiCall("crud", {
+                  op: op,
+                  collection: this.id,
+                  match: this.sweeped[this.segment],
+                  doc: null,
+                  is_crud: true
+                }).then(() => {
+                  this.RefreshData(0);
+                }).catch((res: any) => {
+                  this.misc.doMessage(res && res.msg ? res.msg : res, "error");
+                }).finally(() => {
+                  this.is_loaded = true;
+                });
               }
             }
           ]

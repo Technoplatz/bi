@@ -499,7 +499,7 @@ class Misc():
                     specifiedAs_ = err_details__["specifiedAs"] if err_details__ and "specifiedAs" in err_details__ else None
                     pattern_ = specifiedAs_["pattern"] if specifiedAs_ and "pattern" in specifiedAs_ else None
                     errhtml_ = ""
-                    errhtml_ += f"Error in field {err_property_name_}" if err_property_name_ else ""
+                    errhtml_ += f"Property validation of {err_property_name_} failed." if err_property_name_ else ""
                     errhtml_ += f", value: {str(consideredValue_)}" if consideredValue_ else ""
                     errhtml_ += f", reason: {str(reason_)}" if reason_ else ""
                     errhtml_ += f", pattern: {str(pattern_)}" if pattern_ else ""
