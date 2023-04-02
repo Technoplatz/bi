@@ -1,7 +1,7 @@
 #
 # Technoplatz BI
 #
-# Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+# Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -28,7 +28,7 @@
 # if any, to sign a "copyright disclaimer" for the program, if necessary.
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
-#
+# 
 
 FROM python:3.9-slim
 RUN DEBIAN_FRONTEND=noninteractive

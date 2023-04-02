@@ -37,10 +37,10 @@ on:
       - dev0
       - main
     paths:
-      - "api/**"
+      - "backend/api/**"
 env:
   DOCKER_IMAGE: bi-api
-  FOLDER: api
+  FOLDER: backend/api
   DOCKERFILE: Dockerfile
   VERSION: latest
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

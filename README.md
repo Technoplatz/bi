@@ -2,8 +2,22 @@
 
 Technoplatz BI is an open source, multi-container, no-code data application and sharing platform designed for business professionals to build unique data driven solutions without developing software from scratch.
 
+- [Caveats](#caveats)
 - [Licensing Options](#license)
 - [Impressum](#impressum)
+- [Author](#author)
+
+## Caveats
+
+### Technoplatz BI in Production
+
+If you plan to use the Community Edition in production, there are topics that you need to consider in terms of the total accomplishment of the platform. Please read Technoplatz's recommendations below;
+
+- Hosting
+- Replica Sets
+- Indexes and Performance
+- Maintenance
+- Security
 
 ## Licensing Options
 
@@ -37,9 +51,7 @@ Registergericht: Amtsgericht Düsseldorf
 
 ### Vertreten durch die Geschäftsführer
 
-Mustafa Mat [@mustafamat](https://www.github.com/mustafamat)\
-Senior System Analist, Developer\
-Data Sciences, Statistics B. Sc.
+Mustafa Mat
 
 ### Umsatzsteuer-ID
 
@@ -78,5 +90,13 @@ Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konk
 Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
 
 Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
+
+## Author
+
+Mustafa Mat\
+<sup>Geschäftsführer, MD</sup>\
+Senior System Analist, FS Developer\
+Data Sciences, Statistics B.Sc.\
+[@mustafamat](https://www.github.com/mustafamat)
 
 --

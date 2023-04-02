@@ -56,6 +56,7 @@ import urllib
 import hashlib
 import jwt
 import xlrd
+import asyncio
 from pickle import TRUE
 from email import encoders
 from email.mime.base import MIMEBase
@@ -643,21 +644,29 @@ class Misc():
 class Mongo():
     def __init__(self):
         self.mongo_appname_ = "api"
-        self.mongo_readpref_ = "primary"
+        self.mongo_readpref_primary_ = "primary"
+        self.mongo_readpref_secondary_ = "secondary"
         authSource_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
         replicaset_ = f"&replicaSet={MONGO_REPLICASET_}" if MONGO_REPLICASET_ and MONGO_REPLICASET_ != "" else ""
-        readPreference_ = f"&readPreference={self.mongo_readpref_}" if self.mongo_readpref_ else ""
+        readPreference_primary_ = f"&readPreference={self.mongo_readpref_primary_}" if self.mongo_readpref_primary_ else ""
+        readPreference_secondary_ = f"&readPreference={self.mongo_readpref_secondary_}" if self.mongo_readpref_secondary_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true"
         tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}" if MONGO_TLS_CERT_KEYFILE_ else ""
         tlsCertificateKeyFilePassword_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEY_PASSWORD_}" if MONGO_TLS_CERT_KEY_PASSWORD_ else ""
         tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
+        retryWrites_ = "&retryWrites=true"
 
-        # mongo staff
-        self.connstr = f"mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
-        self.client = MongoClient(self.connstr)
+        # PRIMARY CONNECTION STRING
+        self.connstr = f"mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_primary_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
+
+        # SECONDARY CONNECTION STRING
+        self.connstr_cs = f"mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?{authSource_}{readPreference_primary_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}{retryWrites_}"
+
         self.session_client = MongoClient(self.connstr)
+        self.client = MongoClient(self.connstr)
+        self.client_cs = MongoClient(self.connstr_cs).changestream
         self.db = self.client[MONGO_DB_]
 
     def backup_f(self):
@@ -705,6 +714,82 @@ class Mongo():
         finally:
             return res_
 
+    async def async_obj_f(obj):
+        await asyncio.sleep(1)
+
+    async def change_stream_f(self):
+        collection_ = "_collection"
+        pipeline_ = [{"$match": {"operationType": {"$in": ["insert", "update", "replace", "delete"]}}}]
+        # client_ = pymongo.MongoClient(self.connstr)
+        print("*** change 111", collection_, flush=True)
+        try:
+            changes_ = []
+            client_ = pymongo.MongoClient(self.connstr_cs)
+            print("*** change 000", client_, flush=True)
+            change_stream_ = client_.changestream[collection_].watch()
+            # async with client_.changestream[collection_].watch(pipeline_) as change_stream_:
+            print("*** change 222", change_stream_, flush=True)
+            async for change_ in change_stream_:
+                task_ = asyncio.create_task(self.async_obj_f(change_))
+                changes_.append(task_)
+                print("*** change 4440", task_, flush=True)
+                await asyncio.gather(*changes_)
+
+        except pymongo.errors.PyMongoError as exc:
+            print("*** change 4440", str(exc), flush=True)
+
+        finally:
+            return True
+
+        # collection_ = "_collection"
+        # print("*** change 000", collection_, flush=True)
+        # change_stream_ = self.client_cs[MONGO_DB_].changestream[collection_].watch()
+        # print("*** change 111", collection_, flush=True)
+        # async for change_ in change_stream_:
+        #     print("*** change 4440", flush=True)
+        #     await change_stream_.next()
+
+        # collection_ = "_collection"
+        # client_ = pymongo.MongoClient(self.connstr_cs)
+        # print("*** change 000", collection_, flush=True)
+        # change_stream_ = client_.changestream.collection.watch()
+        # print("*** change 111", change_stream_, flush=True)
+        # tasks_ = []
+        # tasks2_ = ["a", "b", "c"]
+        # async for t_ in tasks2_:
+        #     tasks_.append(t_)
+        #     print("*** change 333", tasks_, flush=True)
+        # return tasks_
+
+        # await asyncio.gather(*tasks_)
+
+        # change_stream_ = client_.changestream.collection.watch()
+        # async for change_ in change_stream_:
+        #     print("*** change 333", change_, flush=True)
+
+        # collection_ = "_collection"
+        # resume_token_ = None
+        # pipeline_ = [{"$match": {"operationType": {"$in": ["insert", "update"]}}}]
+        # db_cs_ = self.client_cs[MONGO_DB_]
+        # print("*** change 000", collection_, flush=True)
+        # try:
+        #     print("*** change 111", collection_, flush=True)
+        #     async with db_cs_[collection_].watch(pipeline_) as change_stream_:
+        #         print("*** change 222", change_stream_, flush=True)
+        #         async for change_ in change_stream_:
+        #             print("*** change 333", change_, flush=True)
+        #             resume_token_ = change_stream_.resume_token
+        # except pymongo.errors.PyMongoError as exc:
+        #     print("*** change 4440", str(exc), flush=True)
+        #     if resume_token_ is None:
+        #         print("*** change 444", resume_token_, flush=True)
+        #     else:
+        #         print("*** change 4441", str(exc), flush=True)
+        #         async with db_cs_[collection_].watch(pipeline_, resume_after=resume_token_) as change_stream_:
+        #             print("*** change 222-1", change_stream_, flush=True)
+        #             async for change_ in change_stream_:
+        #                 print("*** change 555", change_, flush=True)
+
 
 class Crud():
     def __init__(self):
@@ -739,7 +824,7 @@ class Crud():
     def get_properties_f(self, collection):
         try:
             # gets the required collection
-            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"_collections/{collection}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"{collection}")
 
             if not cursor_:
                 raise APIError("collection not found for properties")
@@ -785,7 +870,7 @@ class Crud():
                 raise APIError("user not found")
 
             data_ = None
-            path_ = f"/app/_schemes/templates/_templates.json"
+            path_ = f"/app/_templates/templates.json"
             if not os.path.isfile(path_):
                 raise APIError("no templates found")
 
@@ -820,7 +905,7 @@ class Crud():
                 if find_one_:
                     raise APIError(f"collection prefix already exists: {prefix_}")
 
-                path_ = f"/app/_schemes/templates/{file_}"
+                path_ = f"/app/_templates/{file_}"
                 if os.path.isfile(path_):
                     f_ = open(path_, "r")
                     jtxt_ = f_.read()
@@ -863,7 +948,7 @@ class Crud():
     def inner_collection_f(self, c):
         try:
             is_crud_ = True if c[:1] != "_" else False
-            collection_ = Mongo().db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"_collections/{c}")
+            collection_ = Mongo().db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"{c}")
             if not collection_:
                 raise APIError(f"collection not found to root: {c}")
             res_ = {"result": True, "collection": collection_}
@@ -990,7 +1075,7 @@ class Crud():
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_}")
             if not cursor_:
                 raise APIError(f"collection not found to purge: {collection_}")
 
@@ -1317,7 +1402,7 @@ class Crud():
 
             user_tags_ = user_["_tags"]
 
-            vie_structure_ = self.root_schemes_f("_collections/_view")
+            vie_structure_ = self.root_schemes_f("_view")
             if not vie_structure_:
                 raise APIError("view structure not found")
 
@@ -1376,7 +1461,7 @@ class Crud():
             if is_crud_ and not "col_structure" in vie_collection_:
                 raise APIError("structure not found in collection")
 
-            col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemes_f(f"_collections/{vie_collection_id_}")
+            col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemes_f(f"{vie_collection_id_}")
 
             # Get properties of the structure
             if not "properties" in col_structure_:
@@ -2159,7 +2244,7 @@ class Crud():
             user_ = obj["userindb"]
             records_ = []
 
-            vie_structure_ = self.root_schemes_f("_collections/_view")
+            vie_structure_ = self.root_schemes_f("_view")
             if not vie_structure_:
                 raise APIError("view structure not found")
 
@@ -2170,7 +2255,7 @@ class Crud():
             for view_ in views_:
                 vie_collection_id_ = view_["vie_collection_id"]
                 is_crud_ = True if vie_collection_id_[:1] != "_" else False
-                collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{vie_collection_id_}")
+                collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"{vie_collection_id_}")
                 if not collection_:
                     continue
                 records_.append(view_)
@@ -2197,7 +2282,7 @@ class Crud():
         try:
             user_ = obj["userindb"]
             data_ = []
-            structure_ = self.root_schemes_f("_collections/_collection")
+            structure_ = self.root_schemes_f("_collection")
 
             if Misc().permitted_user_f(user_):
                 data_ = list(Mongo().db["_collection"].find(filter={}, sort=[("_updated_at", -1)]))
@@ -2295,7 +2380,7 @@ class Crud():
             collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
 
             # created a cursor for retrieve the collection structure will be added into the respone
-            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_id_}")
 
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
@@ -2433,7 +2518,7 @@ class Crud():
         try:
             collection_ = obj["collection"]
 
-            structure_ = self.root_schemes_f(f"_collections/{collection_}")
+            structure_ = self.root_schemes_f(f"{collection_}")
 
             schemevalidate_ = self.crudscheme_validate_f({
                 "collection": collection_,
@@ -3145,7 +3230,7 @@ class Crud():
 
             # retrieves the collection structure
             # root collection's structures can be found at github
-            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
+            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:
@@ -3239,7 +3324,7 @@ class Crud():
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"_collections/{collection_id_}")
+            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:
@@ -3327,7 +3412,7 @@ class Crud():
             if collection_id_ == "_collection":
                 file_ = "template-foo.json"
                 prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
-                path_ = f"/app/_schemes/templates/{file_}"
+                path_ = f"/app/_templates/{file_}"
                 if os.path.isfile(path_):
                     f_ = open(path_, "r")
                     jtxt_ = f_.read()
@@ -4599,6 +4684,8 @@ CORS(app)
 
 log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
+
+change_stream_f_ = asyncio.run(Mongo().change_stream_f())
 
 
 @app.route("/import", methods=["POST"], endpoint="import")

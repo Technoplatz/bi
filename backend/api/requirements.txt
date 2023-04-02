@@ -1,6 +1,8 @@
 Flask
 flask-cors
 pymongo[tls]
+dnspython
+asyncio
 requests
 bleach
 pandas

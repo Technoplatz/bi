@@ -166,7 +166,7 @@ function startBI() {
     if [ $? -eq 0 ]; then
         echo "\n✔ Platform is up and running."
     else
-        echo -e "\n✘ Sorry! Process was terminated ($?)."
+        echo "\n✘ Sorry! Process was terminated ($?)."
         return 0
     fi
     return 1
@@ -178,9 +178,9 @@ function stopBI() {
         docker container stop $(docker container ls -qa)
         docker container rm $(docker container ls -qa)
         if [ $? -eq 0 ]; then
-            echo -e "\n✔ Running containers stopped and removed successfully."
+            echo "\n✔ Running containers stopped and removed successfully."
         else
-            echo -e "\n✘ Sorry! Process was terminated ($?)."
+            echo "\n✘ Sorry! Process was terminated ($?)."
             return 0
         fi
     else
@@ -191,16 +191,34 @@ function stopBI() {
 
 function logsBI() {
     if [ ! $1 ]; then
-        echo -e "\n✘ Sorry! You need to provide a docker service ID."
-        echo -e "Command should be given like ./bi.sh logs api|pwa|init|replicaset"
+        echo "\n✘ Sorry! You need to provide a docker service ID."
+        echo "Command should be given like ./bi.sh logs api|pwa|init|replicaset"
         return 0
     fi
     TAIL=$LOGTAIL
     if [[ ! -z $2 ]]; then
         TAIL=$2
     fi
-    echo -e "Getting the last $TAIL rows from $1 log...\n"
+    echo "Getting the last $TAIL rows from $1 log...\n"
     docker logs --tail $TAIL $1
+    return 1
+}
+
+function buildBI() {
+    if [ ! $1 ]; then
+        echo "\n✘ Sorry! You need to provide a image ID."
+        return 0
+    fi
+    if [ ! $2 ]; then
+        echo "\n✘ Sorry! You need to provide a folder."
+        return 0
+    fi
+    echo "Building $1 from $2...\n"
+    docker build --tag $1 $2
+    if [ $? -ne 0 ]; then
+        echo "\n✘ Sorry! An error occured."
+        return 0
+    fi
     return 1
 }
 
@@ -252,6 +270,9 @@ case $1 in
     ;;
 "logs")
     logsBI "$2" "$3"
+    ;;
+"build")
+    buildBI "$2" "$3"
     ;;
 "help")
     helpBI

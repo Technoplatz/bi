@@ -234,21 +234,23 @@ https://www.gnu.org/licenses.
               <span class="column-title">{{ 'Created by' }}<br /></span>
               {{ '_created_by' | translate }}
             </ion-col>
-            <ion-col class="data-ext-columns data-at-column clicked-item"
-              (click)="setSort('_modified_at', sort['_modified_at'])">
-              <span class="column-title">{{ 'Modified At' }}<br /></span>
-              {{ '_modified_at' | translate }}
-            </ion-col>
-            <ion-col class="data-ext-columns data-by-column clicked-item"
-              (click)="setSort('_modified_by', sort['_modified_by'])">
-              <span class="column-title">{{ 'Modified by' }}<br /></span>
-              {{ '_modified_by' | translate }}
-            </ion-col>
-            <ion-col class="data-ext-columns data-id-column clicked-item"
-              (click)="setSort('_upload_id', sort['_upload_id'])">
-              <span class="column-title">{{ 'Upload Id' }}<br /></span>
-              {{ '_upload_id' | translate }}
-            </ion-col>
+            <div>
+              <ion-col class="data-ext-columns data-at-column clicked-item"
+                (click)="setSort('_modified_at', sort['_modified_at'])">
+                <span class="column-title">{{ 'Modified At' }}<br /></span>
+                {{ '_modified_at' | translate }}
+              </ion-col>
+              <ion-col class="data-ext-columns data-by-column clicked-item"
+                (click)="setSort('_modified_by', sort['_modified_by'])">
+                <span class="column-title">{{ 'Modified by' }}<br /></span>
+                {{ '_modified_by' | translate }}
+              </ion-col>
+              <ion-col class="data-ext-columns data-id-column clicked-item"
+                (click)="setSort('_upload_id', sort['_upload_id'])">
+                <span class="column-title">{{ 'Upload Id' }}<br /></span>
+                {{ '_upload_id' | translate }}
+              </ion-col>
+            </div>
           </ion-row>
 
           <!-- CRUD LIST -->
