@@ -337,7 +337,7 @@ export class CollectionPage implements OnInit {
       this.master = {
         collection: "_collection",
         structure: this.collections_structure,
-        data: this.collections[0]
+        data: this.collections.find((obj: any) => obj.col_id === this.id)
       }
       this.modal.create({
         component: CrudPage,

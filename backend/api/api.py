@@ -1385,7 +1385,7 @@ class Crud():
             vie_collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_})
 
             # Get the collection structure of the query
-            if is_crud_ and not "col_structure" in vie_collection_:
+            if is_crud_ and "col_structure" not in vie_collection_:
                 raise APIError("structure not found in collection")
 
             col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemes_f(f"{vie_collection_id_}")

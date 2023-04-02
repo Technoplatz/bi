@@ -174,8 +174,8 @@ export class Crud {
         this.storage.remove("LSFILTER_" + collection_).then(() => {
           resolve(res);
         });
-      }).catch((error: any) => {
-        reject(error);
+      }).catch((err: any) => {
+        reject(err);
       });
     });
   }
@@ -197,8 +197,8 @@ export class Crud {
             this.misc.apiFileCall("import", posted_).then((res: any) => {
               res.cid = sto_collection_id_;
               resolve(res);
-            }).catch((error: any) => {
-              reject(error);
+            }).catch((err: any) => {
+              reject(err);
             });
           } else {
             this.misc.apiCall("crud", {
@@ -211,8 +211,8 @@ export class Crud {
               view: view
             }).then((res: any) => {
               resolve(res);
-            }).catch((error: any) => {
-              reject(error);
+            }).catch((err: any) => {
+              reject(err);
             });
           }
         } else {
@@ -234,8 +234,8 @@ export class Crud {
         } else {
           reject(res.msg);
         }
-      }, (error: any) => {
-        reject(error);
+      }, (err: any) => {
+        reject(err);
       });
     });
   }
@@ -251,8 +251,8 @@ export class Crud {
         } else {
           reject(res.msg);
         }
-      }, (error: any) => {
-        reject(error);
+      }, (err: any) => {
+        reject(err);
       });
     });
   }
@@ -295,8 +295,8 @@ export class Crud {
       }).then((res: any) => {
         this.misc.collections.next(res);
         resolve(this.collections.next(res));
-      }).catch((error: any) => {
-        reject(error);
+      }).catch((err: any) => {
+        reject(err);
       });
     });
   }
@@ -308,8 +308,8 @@ export class Crud {
         op: "collection",
       }).then((res: any) => {
         resolve(res);
-      }).catch((error: any) => {
-        reject(error);
+      }).catch((err: any) => {
+        reject(err);
       });
     });
   }
@@ -321,8 +321,8 @@ export class Crud {
         dashboard: false
       }).then((res: any) => {
         resolve(this.views.next(res));
-      }).catch((error: any) => {
-        reject(error);
+      }).catch((err: any) => {
+        reject(err);
       });
     });
   }
@@ -343,8 +343,8 @@ export class Crud {
         limit: 10
       }).then((res: any) => {
         resolve(this.announcements.next(res));
-      }).catch((error: any) => {
-        reject(error);
+      }).catch((err: any) => {
+        reject(err);
       });
     });
   }
@@ -354,18 +354,18 @@ export class Crud {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.getCollections().then(() => {
           resolve(true);
-        }).catch((error: any) => {
-          reject(error);
+        }).catch((err: any) => {
+          reject(err);
         });
         this.getViews().then(() => {
           resolve(true);
-        }).catch((error: any) => {
-          reject(error);
+        }).catch((err: any) => {
+          reject(err);
         });
         this.getAnnouncements(LSUSERMETA).then(() => {
           resolve(true);
-        }).catch((error: any) => {
-          reject(error);
+        }).catch((err: any) => {
+          reject(err);
         });
       });
     })

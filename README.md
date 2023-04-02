@@ -2,19 +2,42 @@
 
 Technoplatz BI is an open source, multi-container, no-code data application and sharing platform designed for business professionals to build unique data driven solutions without developing software from scratch.
 
+- [How to get started](#how-to-get-started)
 - [Caveats](#caveats)
 - [Licensing Options](#license)
 - [Impressum](#impressum)
 - [Author](#author)
 
+## How to get started
+
+Technoplatz BI requires Docker platform to run. Docker is the leading virtualization technology for developing, shipping and running business grade applications. Before getting started what you need to do is to create a Docker instance on the cloud or on-premises. There are many options with different configurations are sold on the marketplaces of the leading Cloud providers.
+
+Here's the guides you need;
+
+- Creating a Docker instance on the Cloud\
+[Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
+
+- Installing Docker on-premises\
+[Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
+
+- System Requirements\
+The optimum configuration for a Docker instance to run the system properly is given below. The initial resources should be increased as far as the workload and the number of connections to be established.
+
+    - 2 vCPU
+    - 4 GB of RAM
+    - 30 GB Premium SSD
+    - Ubuntu Linux 22.04 LTS
+
+### Installation
+
 ## Caveats
 
 ### Technoplatz BI in Production
 
-If you plan to use the Community Edition in production, there are topics that you need to consider in terms of the total accomplishment of the platform. Please read Technoplatz's recommendations below;
+If you plan to use the Community Edition in production, there are certain topics that you need to consider before go live in terms of the total accomplishment of the services. Please read Technoplatz's recommendations below;
 
 - Hosting
-- Replica Sets
+- Database Replication
 - Indexes and Performance
 - Maintenance
 - Security
@@ -27,7 +50,7 @@ The platform is also provided as a service for the organizations demanding prefe
 
 | | Community Edition | SaaS Edition |
 | :--- | :---: | :---: |
-|  Hosting | Self Hosted | Managed Hosted |
+|  Hosting | Self-Hosted | Managed |
 |  Database | MongoDB 6 | MongoDB 6 |
 |  Database Clustering | 3 internal nodes | 3 internal/regional nodes |
 |  Two-Factor Authentication | ✔ | ✔ |
@@ -95,7 +118,7 @@ Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden 
 
 Mustafa Mat\
 <sup>Geschäftsführer, MD</sup>\
-Senior System Analist, FS Developer\
+Senior System Analist, Developer\
 Data Sciences, Statistics B.Sc.\
 [@mustafamat](https://www.github.com/mustafamat)
 

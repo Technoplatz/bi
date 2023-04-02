@@ -98,9 +98,10 @@ export class Miscellaneous {
             if (res && res.result) {
               resolve(res);
             } else {
-              reject(res);
+              reject(res && res.msg ? res.msg : res);
             }
           }, (res: any) => {
+            console.error("*** res2", res);
             reject(res.error && res.error.msg ? res.error.msg : res);
           });
         });
