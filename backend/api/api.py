@@ -717,79 +717,6 @@ class Mongo():
     async def async_obj_f(obj):
         await asyncio.sleep(1)
 
-    async def change_stream_f(self):
-        collection_ = "_collection"
-        pipeline_ = [{"$match": {"operationType": {"$in": ["insert", "update", "replace", "delete"]}}}]
-        # client_ = pymongo.MongoClient(self.connstr)
-        print("*** change 111", collection_, flush=True)
-        try:
-            changes_ = []
-            client_ = pymongo.MongoClient(self.connstr_cs)
-            print("*** change 000", client_, flush=True)
-            change_stream_ = client_.changestream[collection_].watch()
-            # async with client_.changestream[collection_].watch(pipeline_) as change_stream_:
-            print("*** change 222", change_stream_, flush=True)
-            async for change_ in change_stream_:
-                task_ = asyncio.create_task(self.async_obj_f(change_))
-                changes_.append(task_)
-                print("*** change 4440", task_, flush=True)
-                await asyncio.gather(*changes_)
-
-        except pymongo.errors.PyMongoError as exc:
-            print("*** change 4440", str(exc), flush=True)
-
-        finally:
-            return True
-
-        # collection_ = "_collection"
-        # print("*** change 000", collection_, flush=True)
-        # change_stream_ = self.client_cs[MONGO_DB_].changestream[collection_].watch()
-        # print("*** change 111", collection_, flush=True)
-        # async for change_ in change_stream_:
-        #     print("*** change 4440", flush=True)
-        #     await change_stream_.next()
-
-        # collection_ = "_collection"
-        # client_ = pymongo.MongoClient(self.connstr_cs)
-        # print("*** change 000", collection_, flush=True)
-        # change_stream_ = client_.changestream.collection.watch()
-        # print("*** change 111", change_stream_, flush=True)
-        # tasks_ = []
-        # tasks2_ = ["a", "b", "c"]
-        # async for t_ in tasks2_:
-        #     tasks_.append(t_)
-        #     print("*** change 333", tasks_, flush=True)
-        # return tasks_
-
-        # await asyncio.gather(*tasks_)
-
-        # change_stream_ = client_.changestream.collection.watch()
-        # async for change_ in change_stream_:
-        #     print("*** change 333", change_, flush=True)
-
-        # collection_ = "_collection"
-        # resume_token_ = None
-        # pipeline_ = [{"$match": {"operationType": {"$in": ["insert", "update"]}}}]
-        # db_cs_ = self.client_cs[MONGO_DB_]
-        # print("*** change 000", collection_, flush=True)
-        # try:
-        #     print("*** change 111", collection_, flush=True)
-        #     async with db_cs_[collection_].watch(pipeline_) as change_stream_:
-        #         print("*** change 222", change_stream_, flush=True)
-        #         async for change_ in change_stream_:
-        #             print("*** change 333", change_, flush=True)
-        #             resume_token_ = change_stream_.resume_token
-        # except pymongo.errors.PyMongoError as exc:
-        #     print("*** change 4440", str(exc), flush=True)
-        #     if resume_token_ is None:
-        #         print("*** change 444", resume_token_, flush=True)
-        #     else:
-        #         print("*** change 4441", str(exc), flush=True)
-        #         async with db_cs_[collection_].watch(pipeline_, resume_after=resume_token_) as change_stream_:
-        #             print("*** change 222-1", change_stream_, flush=True)
-        #             async for change_ in change_stream_:
-        #                 print("*** change 555", change_, flush=True)
-
 
 class Crud():
     def __init__(self):
@@ -4684,8 +4611,6 @@ CORS(app)
 
 log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
-
-change_stream_f_ = asyncio.run(Mongo().change_stream_f())
 
 
 @app.route("/import", methods=["POST"], endpoint="import")
