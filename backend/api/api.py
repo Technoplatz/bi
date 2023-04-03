@@ -1203,7 +1203,7 @@ class Crud():
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
             properties_ = get_properties_["properties"]
-            
+
             # CREATE A DATAFRAME
             if mimetype_ in [
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -2400,6 +2400,15 @@ class Crud():
                 properties_ = Misc().properties_cleaner_f(properties_)
 
                 if "required" in structure_ and structure_["required"] and len(structure_["required"]) > 0:
+                    break_ = False
+                    err_ = None
+                    for req_ in structure_["required"]:
+                        if req_ not in properties_:
+                            break_ = True
+                            err_ = f"{req_} is required but not found in the structure"
+                            break
+                    if break_:
+                        raise APIError(err_)
                     required_ = structure_["required"]
                 else:
                     required_ = None
@@ -2414,22 +2423,38 @@ class Crud():
 
                 Mongo().db[collection_].drop_indexes()
                 if "index" in structure_ and len(structure_["index"]) > 0:
+                    break_ = False
+                    err_ = None
                     for indexes in structure_["index"]:
                         ixs = []
                         ix_name_ = ""
                         for ix in indexes:
+                            if ix not in properties_:
+                                break_ = True
+                                err_ = f"{ix} is index but not found in the structure"
+                                break
                             ixs.append((ix, pymongo.ASCENDING))
                             ix_name_ += f"_{ix}"
+                        if break_:
+                            raise APIError(err_)
                         ix_name_ = f"ix_{collection_}{ix_name_}"
                         Mongo().db[collection_].create_index(ixs, unique=False, name=ix_name_)
 
                 if "unique" in structure_ and len(structure_["unique"]) > 0:
+                    break_ = False
+                    err_ = None
                     for uniques in structure_["unique"]:
                         uqs = []
                         uq_name_ = ""
                         for uq in uniques:
+                            if uq not in properties_:
+                                break_ = True
+                                err_ = f"{uq} is unique but not found in the structure"
+                                break
                             uqs.append((uq, pymongo.ASCENDING))
                             uq_name_ += f"_{uq}"
+                        if break_:
+                            raise APIError(err_)
                         uq_name_ = f"uq_{collection_}{uq_name_}"
                         Mongo().db[collection_].create_index(uqs, unique=True, name=uq_name_)
 

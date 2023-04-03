@@ -61,7 +61,8 @@ export const environment = {
         "title": "ID",
         "description": "Storage ID",
         "permanent": true,
-        "required": true
+        "required": true,
+        "hidden": true
       },
       "sto_collection_id": {
         "bsonType": "string",

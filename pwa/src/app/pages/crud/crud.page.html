@@ -59,7 +59,7 @@ https://www.gnu.org/licenses.
                 </ng-template>
                 <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" size="small"
                     (click)="doSubmit()">
-                    {{ 'IMPORT' | translate }}
+                    {{ 'UPLOAD' | translate }}
                 </ion-button>
                 <ion-button size="small" (click)="doDismissModal({ modified: false, filter: [] })"> {{ 'CANCEL' |
                     translate }} </ion-button>
@@ -107,8 +107,8 @@ https://www.gnu.org/licenses.
                         [size]="12/parent.lookup.length">{{ item.remote }}</ion-col>
                 </ion-row>
                 <ion-row *ngFor="let item of related; let k=index" class="ion-no-padding ion-nowrap">
-                    <ion-col *ngFor="let rel of parent.lookup; let i = index"
-                        [size]="12/parent.lookup.length" (click)="doSetRelated(item)" class="clicked-item">{{
+                    <ion-col *ngFor="let rel of parent.lookup; let i = index" [size]="12/parent.lookup.length"
+                        (click)="doSetRelated(item)" class="clicked-item">{{
                         item[rel.remote] }}</ion-col>
                 </ion-row>
                 <ion-row>
@@ -137,7 +137,8 @@ https://www.gnu.org/licenses.
                     </ion-label>
                     <div class="ion-margin-top full-flex ion-margin-bottom">
                         <ion-badge *ngFor="let parent of parents; let p = index"
-                            class="clicked-item ion-padding-start ion-padding-end parent-badge" (click)="doParent(parent)">{{ parent.collection }}
+                            class="clicked-item ion-padding parent-badge"
+                            (click)="doParent(parent)" color="medium">{{ parent.collection }}
                         </ion-badge>
                     </div>
                 </ion-item>
@@ -149,55 +150,61 @@ https://www.gnu.org/licenses.
                             <ion-icon *ngIf="field.readonly" name="star"></ion-icon>
                         </sup>
                     </ion-label>
-                    <div *ngIf="field.bsonType=='string' && !field.file" class="full-width">
-                        <div *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword">
-                            <ion-input #barcodefocus *ngIf="!field.textarea"
-                                [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
-                                [maxlength]="field.maxLength" [minlength]="field.minLength"
-                                [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
-                                [required]="field.required" [placeholder]="field.description"
-                                [(ngModel)]="data[field.name]" auto-grow="true"
-                                [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
-                            </ion-input>
-                            <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
-                                [placeholder]="field.description" [(ngModel)]="data[field.name]"
-                                [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
-                                [formControlName]="field.name" [required]="field.required" spellcheck="false"
-                                debounce="500">
-                            </ion-textarea>
+                    <div *ngIf="field.bsonType=='string'">
+                        <div *ngIf="!field.file; else isfile" class="full-width">
+                            <div
+                                *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword">
+                                <ion-input #barcodefocus *ngIf="!field.textarea"
+                                    [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
+                                    [maxlength]="field.maxLength" [minlength]="field.minLength"
+                                    [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
+                                    [required]="field.required" [placeholder]="field.description"
+                                    [(ngModel)]="data[field.name]" auto-grow="true"
+                                    [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                    [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
+                                </ion-input>
+                                <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
+                                    [placeholder]="field.description" [(ngModel)]="data[field.name]"
+                                    [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                    auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
+                                    [formControlName]="field.name" [required]="field.required" spellcheck="false"
+                                    debounce="500">
+                                </ion-textarea>
+                            </div>
+                            <ng-template #checkpassword>
+                                <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
+                                    [formControlName]="field.name" type="password" spellcheck="false" autocorrect="off"
+                                    [required]="field.required" [placeholder]="field.description"
+                                    [(ngModel)]="data[field.name]" auto-grow="true">
+                                </ion-input>
+                            </ng-template>
+                            <ng-template #checkenum>
+                                <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
+                                    [required]="field.required" class="ion-no-padding ion-no-margin"
+                                    [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                    [(ngModel)]="data[field.name]"
+                                    (ionChange)="doChangeEnum(field, $event.target.value)">
+                                    <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
+                                    </ion-select-option>
+                                </ion-select>
+                            </ng-template>
+                            <ng-template #checkproperty>
+                                <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
+                                    [required]="field.required" class="ion-no-padding ion-no-margin"
+                                    [(ngModel)]="data[field.name]">
+                                    <ion-select-option *ngFor="let item of properties" [value]="item"> {{ item }}
+                                    </ion-select-option>
+                                </ion-select>
+                            </ng-template>
                         </div>
-                        <ng-template #checkpassword>
-                            <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
-                                [formControlName]="field.name" type="password" spellcheck="false" autocorrect="off"
-                                [required]="field.required" [placeholder]="field.description"
-                                [(ngModel)]="data[field.name]" auto-grow="true">
-                            </ion-input>
+                        <ng-template #isfile>
+                            <div class="full-width">
+                                <p *ngIf="data[field.name]">{{ data[field.name] }}</p>
+                                <ion-input [id]="field.name" class="ion-no-padding" [formControlName]="field.name"
+                                    type="file" [required]="field.required" (change)="onFileChange($event)">
+                                </ion-input>
+                            </div>
                         </ng-template>
-                        <ng-template #checkenum>
-                            <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
-                                [required]="field.required" class="ion-no-padding ion-no-margin"
-                                [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                [(ngModel)]="data[field.name]" (ionChange)="doChangeEnum(field, $event.target.value)">
-                                <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
-                                </ion-select-option>
-                            </ion-select>
-                        </ng-template>
-                        <ng-template #checkproperty>
-                            <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
-                                [required]="field.required" class="ion-no-padding ion-no-margin"
-                                [(ngModel)]="data[field.name]">
-                                <ion-select-option *ngFor="let item of properties" [value]="item"> {{ item }}
-                                </ion-select-option>
-                            </ion-select>
-                        </ng-template>
-                    </div>
-                    <div *ngIf="field.bsonType=='string' && field.file" class="full-width">
-                        <p *ngIf="data[field.name]">{{ data[field.name] }}</p>
-                        <ion-input [id]="field.name" class="ion-no-padding" [formControlName]="field.name" type="file"
-                            [required]="field.required" (change)="onFileChange($event)">
-                        </ion-input>
                     </div>
                     <div *ngIf="field.bsonType=='date'">
                         <div *ngIf="data[field.name]; else nodatevalue" class="datetime-class">
@@ -233,7 +240,7 @@ https://www.gnu.org/licenses.
                         [(ngModel)]="data[field.name]">
                     </ion-checkbox>
                     <div *ngIf="field.bsonType=='array'" class="full-width">
-                        <ion-label position="stacked">{{ field.title | translate }} {{ op | translate }} 
+                        <ion-label position="stacked">{{ field.title | translate }}
                             <sup *ngIf="field.required">
                                 <ion-icon name="star"></ion-icon>
                             </sup>

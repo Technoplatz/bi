@@ -62,7 +62,7 @@ export const environment = {
         "description": "Storage ID",
         "permanent": true,
         "required": true,
-        "width": 160
+        "hidden": true
       },
       "sto_collection_id": {
         "bsonType": "string",
@@ -72,8 +72,7 @@ export const environment = {
         "title": "Collection ID",
         "description": "Collection ID",
         "collection": true,
-        "required": true,
-        "width": 110
+        "required": true
       },
       "sto_file": {
         "bsonType": "string",
@@ -81,8 +80,7 @@ export const environment = {
         "maxLength": 64,
         "file": true,
         "title": "File",
-        "description": "File",
-        "width": 100
+        "description": "File"
       }
     },
     "required": [

@@ -42,7 +42,7 @@ https://www.gnu.org/licenses.
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="doImport()" class="data-sq-button">
                 <ion-icon name="download-outline"></ion-icon><br />
-                {{ 'Get' | translate }}<br />{{ 'Data' | translate }}
+                {{ 'File' | translate }}<br />{{ 'Upload' | translate }}
               </div>
               <div *ngIf="barcoded_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="barcode"></ion-icon><br />
@@ -97,8 +97,13 @@ https://www.gnu.org/licenses.
                 </div>
                 <ng-template #nojeopen>
                   <ion-icon name="close-circle-outline"></ion-icon><br />
-                  {{ 'Close' | translate }}<br />{{ 'Scheme' | translate }}
+                  {{ 'Cancel' | translate }}<br />{{ 'Scheme' | translate }}
                 </ng-template>
+              </div>
+              <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger" (click)="doSaveScheme()">
+                <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
+                <ion-icon *ngIf="!is_saving" name="cloud-upload-outline"></ion-icon><br />
+                {{ 'Save' | translate }}<br />{{ 'Scheme' | translate }}
               </div>
               <div *ngIf="perm && is_crud" (click)="doCollectionSettings()" class="data-sq-button">
                 <ion-icon name="settings-outline"></ion-icon><br />
@@ -108,19 +113,6 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
         <ion-grid class="ion-no-padding ion-margin-bottom" *ngIf="perm && is_crud && jeopen">
-          <ion-row>
-            <ion-col class="ion-padding-bottom">
-              <ion-button (click)="doSaveScheme()">
-                <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
-                <ion-icon *ngIf="!is_saving" name="cloud-upload-outline"></ion-icon>
-                {{ 'Submit' | translate }} {{ 'JSON' | translate }}
-              </ion-button>
-              <ion-button (click)="doShowCode()">
-                <ion-icon name="close-circle-outline"></ion-icon>
-                {{ 'Close' | translate }}
-              </ion-button>
-            </ion-col>
-          </ion-row>
           <ion-row>
             <ion-col size="12" class="structureditor">
               <json-editor id="structure" [options]="jeoptions" [data]="structure_"></json-editor>
