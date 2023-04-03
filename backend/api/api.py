@@ -57,6 +57,7 @@ import hashlib
 import jwt
 import xlrd
 import asyncio
+import io
 from pickle import TRUE
 from email import encoders
 from email.mime.base import MIMEBase
@@ -973,13 +974,13 @@ class Crud():
         except ValueError as exc:
             raise APIError(str(exc))
 
-    def frame_convert_string_f(self, c):
-        str_ = c.replace(r'\W', "").strip()
+    def frame_convert_string_f(self, data_):
+        str_ = str(data_).replace(r'\W', "").strip()
         return str_ if str_ not in ["", None] else None
 
-    def frame_convert_number_f(self, c):
-        num_ = c.replace(r'[^0-9-.,]', "")
-        return num_ * 1 if num_ not in ["", None] else None
+    def frame_convert_number_f(self, data_):
+        str_ = str(data_).replace(r'\D', "").strip()
+        return float(str_) if str_ not in ["", None] else None
 
     def purge_f(self, obj):
         try:
@@ -1192,31 +1193,6 @@ class Crud():
             email_ = form_["email"]
             mimetype_ = file_.content_type
 
-            # CREATE A DATAFRAME
-            if mimetype_ in [
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    "application/vnd.ms-excel"]:
-                filetype_ = "excel"
-                file_.seek(0, os.SEEK_END)
-                filesize_ = file_.tell()
-                if filesize_ == 0:
-                    raise APIError("file is empty")
-                if filesize_ > API_UPLOAD_LIMIT_BYTES_:
-                    raise APIError(f"file size is greater than {API_UPLOAD_LIMIT_BYTES_} bytes")
-                df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl")
-            elif mimetype_ == "text/csv":
-                filetype_ = "csv"
-                filesize_ = file_.content_length
-                content_ = file_.read().decode("utf-8")
-                if filesize_ > API_UPLOAD_LIMIT_BYTES_ or len(content_) > API_UPLOAD_LIMIT_BYTES_:
-                    raise APIError(f"file size is greater than {API_UPLOAD_LIMIT_BYTES_} bytes")
-                df_ = pd.read_csv(file_, encoding="utf-8", header=0)
-            else:
-                raise APIError("file type is not supported")
-
-            # MAKING COLUMN NAMES PRETTY
-            df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
-
             # GETTING COLLECTION PROPERTIES
             collection__ = f"{collection_}_data"
             find_one_ = Mongo().db["_collection"].find_one({"col_id": collection_})
@@ -1227,6 +1203,38 @@ class Crud():
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
             properties_ = get_properties_["properties"]
+            
+            # CREATE A DATAFRAME
+            if mimetype_ in [
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/vnd.ms-excel"]:
+                filesize_ = file_.tell()
+                if filesize_ > API_UPLOAD_LIMIT_BYTES_:
+                    raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
+                file_.seek(0, os.SEEK_END)
+                df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl")
+            elif mimetype_ in ["text/csv", "application/json"]:
+                content_ = file_.read().decode("utf-8")
+                filesize_ = file_.content_length
+                if filesize_ > API_UPLOAD_LIMIT_BYTES_:
+                    raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
+                if mimetype_ == "text/csv":
+                    df_ = pd.read_csv(io.StringIO(content_), header=0)
+                else:
+                    session_client_ = Mongo().session_client
+                    session_db_ = session_client_[MONGO_DB_]
+                    with session_client_.start_session(causal_consistency=True, default_transaction_options=None, snapshot=False) as session_:
+                        with session_.start_transaction():
+                            insert_many_ = session_db_[collection__].insert_many(content_, ordered=False, session=session_)
+                            session_.commit_transaction()
+                            count_ = len(insert_many_.inserted_ids)
+                            res_ = {"result": True, "count": count_}
+                            raise
+            else:
+                raise APIError("file type is not supported")
+
+            # MAKING COLUMN NAMES PRETTY
+            df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
 
             # CONVERTING DATASET COLUMNS
             columns_tobe_deleted_ = []
@@ -1243,7 +1251,7 @@ class Crud():
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
                             if "exclude" in property_ and len(property_["exclude"]) > 0:
-                                df_[column_] = df_[column_].str.replace("|".join(property_["exclude"]), "")
+                                df_[column_] = df_[column_].str.replace("|".join(property_["exclude"]), "", regex=False)
                         elif property_["bsonType"] in ["number", "int", "decimal"]:
                             df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                     else:
@@ -1298,7 +1306,7 @@ class Crud():
                 email_sent_ = Email().sendEmail_f({
                     "personalizations": {"to": [{"email": email_, "name": None}]},
                     "op": "importerr",
-                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />FILE TYPE: {filetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}"
+                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}"
                 })
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
@@ -1461,7 +1469,8 @@ class Crud():
                                 local_ = look__["local"]
                                 remote_ = look__["remote"]
                                 let_[f"{local_}"] = f"${local_}"
-                                pipeline__.append({"$eq": [f"$${local_}", f"${remote_}"]}),
+                                if local_:
+                                    pipeline__.append({"$eq": [f"$${local_}", f"${remote_}"]}),
 
                         pipeline_ = [{"$match": {"$expr": {"$and": pipeline__}}}]
 
