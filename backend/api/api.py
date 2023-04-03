@@ -429,7 +429,7 @@ class Misc():
     def __init__(self):
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
-                            "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded"]
+                            "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded", "exclude"]
 
     def post_notification(self, exc):
         ip_ = self.get_user_ip_f()
@@ -974,14 +974,12 @@ class Crud():
             raise APIError(str(exc))
 
     def frame_convert_string_f(self, c):
-        str_ = str(c).strip()
-        return str_ if c is not None else c
+        str_ = c.replace(r'\W', "").strip()
+        return str_ if str_ not in ["", None] else None
 
     def frame_convert_number_f(self, c):
-        return c * 1 if c is not None else c
-
-    def frame_convert_decimal_f(self, c):
-        return c * 1.00 if c is not None else c
+        num_ = c.replace(r'[^0-9-.,]', "")
+        return num_ * 1 if num_ not in ["", None] else None
 
     def purge_f(self, obj):
         try:
@@ -1132,13 +1130,13 @@ class Crud():
         finally:
             return res
 
-    def convert_cname_f(self, str_):
-        CLEANTAGS = re.compile(r"<[^>]+>")
-        CLEANPTRN = re.compile(r"[!'\"#$%&()*+/.,;<>?@[\]^\-`{|}~\\]")
+    def convert_column_name_f(self, str_):
+        cleantags_ = re.compile(r"<[^>]+>")
+        cleanptrn_ = re.compile(r"[!'\"#$%&()*+/.,;<>?@[\]^\-`{|}~\\]")
         exceptions_ = {"ç": "c", "ğ": "g", "ı": "i", "ş": "s", "ü": "u", "ö": "o", "ü": "u", "Ç": "c", "Ğ": "g", "İ": "i", "Ş": "s", "Ü": "u", "Ö": "o", "Ü": "u", " ": "_"}
         str_ = str_.replace("\t", " ")
-        str_ = re.sub(CLEANTAGS, "", str_)
-        str_ = re.sub(CLEANPTRN, "", str_)
+        str_ = re.sub(cleantags_, "", str_)
+        str_ = re.sub(cleanptrn_, "", str_)
         str_ = str_[:32]
         str_ = re.sub(" +", " ", str_)
         str_ = re.sub(".", lambda char_: exceptions_.get(char_.group(), char_.group()), str_)
@@ -1216,22 +1214,21 @@ class Crud():
             else:
                 raise APIError("file type is not supported")
 
-            # TO MAKE THE COLUMNS CLEAN
-            df_ = df_.rename(lambda column_: self.convert_cname_f(column_), axis="columns")
+            # MAKING COLUMN NAMES PRETTY
+            df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
 
-            # GET COLLECTION PROPERTIES
+            # GETTING COLLECTION PROPERTIES
             collection__ = f"{collection_}_data"
             find_one_ = Mongo().db["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
             structure_ = find_one_["col_structure"]
-
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
             properties_ = get_properties_["properties"]
 
-            # CONVERT DATASET COLUMNS
+            # CONVERTING DATASET COLUMNS
             columns_tobe_deleted_ = []
             for column_ in df_.columns:
                 if column_ in properties_:
@@ -1245,10 +1242,10 @@ class Crud():
                                     raise Exception(f"invalid or empty date in {column_} column")
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                        elif property_["bsonType"] in ["number", "int"]:
+                            if "exclude" in property_ and len(property_["exclude"]) > 0:
+                                df_[column_] = df_[column_].str.replace("|".join(property_["exclude"]), "")
+                        elif property_["bsonType"] in ["number", "int", "decimal"]:
                             df_[column_] = df_[column_].apply(self.frame_convert_number_f)
-                        elif property_["bsonType"] in ["decimal"]:
-                            df_[column_] = df_[column_].apply(self.frame_convert_decimal_f)
                     else:
                         columns_tobe_deleted_.append(column_)
                 else:
@@ -1258,7 +1255,7 @@ class Crud():
             if "_structure" in df_.columns:
                 columns_tobe_deleted_.append("_structure")
             if len(columns_tobe_deleted_) > 0:
-                df_ = df_.drop(columns_tobe_deleted_, axis=1)
+                df_.drop(columns_tobe_deleted_, axis=1, inplace=True)
 
             # SUM OF ALL NUMERICS BY COMBINING DUPLICATE ITEMS
             # ITS OBVIOUS BUT TRUE :)

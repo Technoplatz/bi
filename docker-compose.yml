@@ -290,6 +290,10 @@ services:
       - SAAS=${SAAS}
     links:
       - replicaset
+    extra_hosts:
+      - mongo0:${SUBNET_MONGO_IPV4}
+      - mongo1:${SUBNET_MONGO_REPLICA1_IPV4}
+      - mongo2:${SUBNET_MONGO_REPLICA2_IPV4}
     networks:
       network0:
         ipv4_address: ${SUBNET_API_IPV4}
