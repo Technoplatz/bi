@@ -49,7 +49,7 @@ export const environment = {
     limits: [20, 50, 100],
     loadingText: "Bitte warten Sie",
     defaultColumnWidth: 140,
-    default_delay: 1000
+    default_delay: 500
   },
   import_structure: {
     "properties": {

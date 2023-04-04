@@ -7,7 +7,6 @@
       "pattern": "^[a-z0-9-]{3,64}$",
       "title": "ID",
       "description": "View ID",
-      "required": true,
       "width": 230
     },
     "vie_collection_id": {
@@ -18,7 +17,6 @@
       "title": "Collection ID",
       "description": "Collection ID",
       "collection": true,
-      "required": true,
       "permanent": true,
       "width": 140
     },
@@ -28,7 +26,6 @@
       "maxLength": 64,
       "title": "Title",
       "description": "View Title",
-      "required": true,
       "width": 230
     },
     "vie_priority": {
@@ -160,7 +157,6 @@
       "maxItems": 2,
       "uniqueItems": true,
       "additionalProperties": false,
-      "kv": true,
       "items": {
         "bsonType": "object",
         "additionalProperties": false,

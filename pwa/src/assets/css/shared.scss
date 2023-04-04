@@ -924,6 +924,12 @@ app-menu {
   border-right: 1px solid var(--ion-color-light) !important;
 }
 
+.input-desc {
+  font-size: 12px !important;
+  color: var(--ion-color-medium);
+  width: 100%;
+}
+
 .action-button {
   max-width: 180px;
   overflow: hidden !important;

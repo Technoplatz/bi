@@ -112,23 +112,13 @@ https://www.gnu.org/licenses.
                         item[rel.remote] }}</ion-col>
                 </ion-row>
                 <ion-row>
-                    <ion-col size="12"> {{ related.length }} {{ 'records found' | translate }} </ion-col>
+                    <ion-col size="12">{{ related.length }} {{ 'records found' | translate }}</ion-col>
                 </ion-row>
             </ion-grid>
         </ng-template>
     </div>
     <ng-template #norelation>
         <form [formGroup]="crudForm" enctype="multipart/form-data">
-            <ion-item *ngIf="op=='action' && actionix < 0 && aktions && aktions.length > 0" lines="full"
-                class="ion-no-margin ion-no-padding crud-form-list">
-                <ion-label position="stacked">{{ 'Action' | translate }}
-                </ion-label>
-                <ion-select class="ion-no-padding ion-no-margin" (ionChange)="doAktionChange($event.detail.value)"
-                    placeholder="{{ 'Select an Action' | translate }}" [value]="actionix">
-                    <ion-select-option *ngFor="let item of aktions; let ak = index" [value]="ak"> {{ item.title }}
-                    </ion-select-option>
-                </ion-select>
-            </ion-item>
             <ion-list *ngIf="fieldsupd && fieldsupd.length > 0" class="ion-no-padding ion-margin-bottom crud-form-list"
                 [class]="visible">
                 <ion-item *ngIf="parents?.length > 0">
@@ -137,19 +127,20 @@ https://www.gnu.org/licenses.
                     </ion-label>
                     <div class="ion-margin-top full-flex ion-margin-bottom">
                         <ion-badge *ngFor="let parent of parents; let p = index"
-                            class="clicked-item ion-padding parent-badge"
+                            class="clicked-item ion-padding-end ion-padding-start parent-badge"
                             (click)="doParent(parent)" color="medium">{{ parent.collection }}
                         </ion-badge>
                     </div>
                 </ion-item>
                 <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index" class="ion-no-margin">
-                    <ion-label *ngIf="field.bsonType!='array'" position="stacked">
+                    <ion-label position="stacked">
                         {{ field.title | translate }}
                         <sup *ngIf="field.required">
                             <ion-icon name="star"></ion-icon>
                             <ion-icon *ngIf="field.readonly" name="star"></ion-icon>
                         </sup>
                     </ion-label>
+                    <div class="input-desc">{{ field.description | translate }}</div>
                     <div *ngIf="field.bsonType=='string'">
                         <div *ngIf="!field.file; else isfile" class="full-width">
                             <div
@@ -240,18 +231,13 @@ https://www.gnu.org/licenses.
                         [(ngModel)]="data[field.name]">
                     </ion-checkbox>
                     <div *ngIf="field.bsonType=='array'" class="full-width">
-                        <ion-label position="stacked">{{ field.title | translate }}
-                            <sup *ngIf="field.required">
-                                <ion-icon name="star"></ion-icon>
-                            </sup>
-                        </ion-label>
                         <ion-input *ngIf="field?.manualAdd" name="arrayitem" [title]="field.name"
                             [type]="field.items.bsonType=='string' ? 'text' : 'number'" [required]="field.required"
                             [placeholder]="field.description" auto-grow="true" [(ngModel)]="arrayitem[field.name]"
                             [ngModelOptions]="{standalone: true}" class="add-and-enter"></ion-input>
                         <ion-input [formControlName]="field.name" [(ngModel)]="data[field.name]"
                             class="hide"></ion-input>
-                        <app-kov [data]="data" [field]="field" [keylist]="property_list" [op]="op"> </app-kov>
+                        <app-kov [data]="data" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
                     </div>
                     <json-editor *ngIf="field.bsonType=='object'" [id]="field.name" [options]="options"
                         [formControlName]="field.name" class="ion-margin-top ion-margin-bottom"
@@ -285,11 +271,6 @@ https://www.gnu.org/licenses.
                 <ion-item *ngIf="data['_modified_by']" lines="full" class="ion-no-margin">
                     <ion-label position="stacked">{{ 'Modified By' | translate }}</ion-label>
                     <ion-input class="ion-no-padding" type="text" [value]="data['_modified_by']" disabled>
-                    </ion-input>
-                </ion-item>
-                <ion-item *ngIf="data['_upload_id']" lines="full" class="ion-no-margin">
-                    <ion-label position="stacked">{{ 'Upload Id' | translate }}</ion-label>
-                    <ion-input class="ion-no-padding" type="text" [value]="data['_upload_id']" disabled>
                     </ion-input>
                 </ion-item>
             </ion-list>

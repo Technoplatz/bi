@@ -104,7 +104,6 @@ class Schedular():
             aut_target_match_ = doc_["aut_target_match"] if "aut_target_match" in doc_ and len(doc_["aut_target_match"]) > 0 else None
             aut_target_ = doc_["aut_target"] if "aut_target" in doc_ else False
             aut_target_upsert_ = True if "aut_target_upsert" in doc_ and doc_["aut_target_upsert"] == True else False
-            aut_target_prefixes_ = doc_["aut_target_prefixes"] if "aut_target_prefixes" in doc_ and len(doc_["aut_target_prefixes"]) > 0 else None
 
             if not aut_id_ or not aut_source_collection_id_ or not aut_source_filter_:
                 raise APIError("automation info is missing")
@@ -167,11 +166,6 @@ class Schedular():
                         if m_value_[:1] == "$":
                             f_ = m_value_[1:]
                             m_value_ = rec_[f_]
-                            if aut_target_prefixes_:
-                                for prefix_ in aut_target_prefixes_:
-                                    if m_value_.startswith(prefix_):
-                                        m_value_ = m_value_[len(prefix_):]
-                                        break
                         target_match_[m_key_] = m_value_
 
                     if target_match_ == {}:
@@ -430,7 +424,7 @@ class Misc():
     def __init__(self):
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
-                            "objectId", "calc", "filter", "kv", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded", "exclude"]
+                            "objectId", "calc", "filter", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded", "exclude"]
 
     def post_notification(self, exc):
         ip_ = self.get_user_ip_f()
@@ -1278,7 +1272,6 @@ class Crud():
             df_["_modified_at"] = None
             df_["_modified_by"] = None
             df_["_modified_count"] = 0
-            df_["_upload_id"] = datetime.today().strftime("%Y%m%d%H%M%S")
 
             # BULK INSERT DF INTO DATABASE
             payload_ = df_.to_dict("records")
@@ -1683,23 +1676,20 @@ class Crud():
         filtered_ = {}
         if properties_:
             for f in match_:
-                if f["key"] and f["op"] and (f["key"] in ["_id", "_upload_id"] or f["key"] in properties_):
+                if f["key"] and f["op"] and f["key"] in properties_:
 
                     fres_ = None
                     typ = properties_[f["key"]]["bsonType"] if f["key"] in properties_ else "string"
 
                     if f["op"] in ["eq", "contains"]:
-                        if typ in ["number", "decimal"]:
+                        if typ in ["number", "int", "decimal"]:
                             fres_ = float(f["value"])
                         elif typ == "bool":
                             fres_ = bool(f["value"])
                         elif typ == "date":
                             fres_ = datetime.strptime(f["value"][:10], "%Y-%m-%d")
                         else:
-                            if f["key"] == "_id":
-                                fres_ = ObjectId(f["value"])
-                            else:
-                                fres_ = {"$regex": f["value"], "$options": "i"} if f["value"] else {"$regex": "", "$options": "i"}
+                            fres_ = {"$regex": f["value"], "$options": "i"} if f["value"] else {"$regex": "", "$options": "i"}
 
                     if f["op"] in ["ne", "nc"]:
                         if typ in ["number", "decimal"]:

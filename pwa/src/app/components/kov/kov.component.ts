@@ -41,15 +41,15 @@ import { ItemReorderEventDetail } from '@ionic/core';
 })
 
 export class KovComponent implements OnInit {
-  @Input() keylist: any;
+  @Input() properties: any;
   @Input() data: any;
   @Input() field: any;
   @Input() op: string = "";
   public kovs: any = null;
-  public type: string = "";
-
+  public type: string = "key";
+  public ok: boolean = false;
   public filterops: any = environment.filterops;
-  public fieldname: string = "";
+  public fname: string = "";
   private hours_: any = [];
   private minutes_: any = [];
   private days_: any = [
@@ -72,14 +72,6 @@ export class KovComponent implements OnInit {
     { "key": null, "value": null }
   ]
 
-  // subTypes
-  // - property
-  // - hour
-  // - minute
-  // - filter
-  // - subscriber
-  // - tag
-
   constructor() { }
 
   ngOnInit() {
@@ -92,64 +84,60 @@ export class KovComponent implements OnInit {
   }
 
   ngOnChanges() {
-    this.fieldname = this.field.name;
-    this.kovs = null;
-    this.type = "key";
-    if (this.field.subType) {
-      if (this.field.subType === "keyvalue") {
-        this.type = this.field.subType;
-        this.kovs = this.keylist;
-      } else if (this.field.subType === "filter") {
-        this.type = "keyopvalue";
-        this.kovs = this.keylist;
-      } else if (this.field.subType === "property") {
-        this.kovs = this.keylist;
-      } else if (this.field.subType === "hour") {
-        this.kovs = this.hours_;
-      } else if (this.field.subType === "minute") {
-        this.kovs = this.minutes_;
-      } else if (this.field.subType === "day") {
-        this.kovs = this.days_;
-      } else if (this.field.subType === "tag") {
-        this.kovs = this.tags_;
-      } else if (this.field.subType === "matchfields") {
-        this.type = this.field.subType;
-      } else if (this.field.subType === "string") {
-        this.kovs = this.empty_;
-      } else if (this.field.subType === "setfields") {
-        this.type = this.field.subType;
-        this.kovs = this.dual_;
-      }
+    this.ok = false;
+    this.fname = this.field.name;
+    if (["keyvalue", "emptyfield"].includes(this.field.subType)) {
+      this.type = this.field.subType;
+    } else if (this.field.subType === "filter") {
+      this.type = "keyopvalue";
     }
+    if (["keyvalue", "filter", "property"].includes(this.field.subType)) {
+      this.kovs = this.properties;
+    } else if (this.field.subType === "hour") {
+      this.kovs = this.hours_;
+    } else if (this.field.subType === "minute") {
+      this.kovs = this.minutes_;
+    } else if (this.field.subType === "day") {
+      this.kovs = this.days_;
+    } else if (this.field.subType === "tag") {
+      this.kovs = this.tags_;
+    } else if (this.field.subType === "string") {
+      this.kovs = this.empty_;
+    } else if (this.field.subType === "emptyfield") {
+      this.kovs = this.dual_;
+    }
+    setTimeout(() => {
+      this.ok = true;
+    }, 1000);
   }
 
   doLineAdd(i: number) {
-    if (i === -1 || !this.data[this.fieldname]) {
-      this.data[this.fieldname] = [{ "key": null }];
+    if (i === -1 || !this.data[this.fname]) {
+      this.data[this.fname] = [{ "key": null }];
     } else {
-      if (this.type === "keyopvalue" || this.type === "matchfields") {
-        this.data[this.fieldname].push({
+      if (this.type === "keyopvalue") {
+        this.data[this.fname].push({
           key: null,
           op: null,
           value: null
         });
-      } else if (this.type === "keyvalue" || this.type === "setfields") {
-        this.data[this.fieldname].push({
+      } else if (this.type === "keyvalue" || this.type === "emptyfield") {
+        this.data[this.fname].push({
           key: null,
           value: null
         });
       } else if (this.type === "key") {
-        this.data[this.fieldname].push({
+        this.data[this.fname].push({
           key: null
         });
       } else if (this.type === "other") {
-        this.data[this.fieldname].push(null);
+        this.data[this.fname].push(null);
       }
     }
   }
 
   doLineRemove(i: number) {
-    this.data[this.fieldname].splice(i, 1);
+    this.data[this.fname].splice(i, 1);
   }
 
   doReorder(ev: CustomEvent<ItemReorderEventDetail>, fn: string) {

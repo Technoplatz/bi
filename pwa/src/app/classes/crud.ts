@@ -101,7 +101,7 @@ export class Crud {
         const file_ = p.file ? true : false;
         const filter_ = p.filter ? true : false;
         const property_ = p.property ? true : false;
-        const kv_ = p.kv ? true : false;
+        const kv_ = p.subType === "keyvalue" ? true : false;
         const permanent_ = p.permanent ? true : false;
         const collection_ = p.collection ? true : false;
         const textarea_ = p.textarea ? true : false;

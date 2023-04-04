@@ -78,7 +78,6 @@ export class CrudPage implements OnInit {
   public options?: JsonEditorOptions;
   public arrays: any = [];
   public parentkey: number = 0;
-  public aktions: any = [];
   public localfield: string = "";
   public field_parents: any;
   public parents: any;
@@ -140,13 +139,6 @@ export class CrudPage implements OnInit {
     this.options.modes = ["code", "tree"];
     this.options.mode = "code";
     this.options.statusBar = true;
-    this.doGetAllAktions(this.op).then((res: any) => {
-      this.aktions = res;
-      this.doInitForm();
-    });
-  }
-
-  doInitForm() {
     this.parents = this.structure?.parents ? this.structure.parents : [];
     this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
       this.tab = "data";
@@ -155,73 +147,15 @@ export class CrudPage implements OnInit {
       this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? res.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
       this.data = this.shuttle.data ? this.shuttle.data : res.init;
       this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
-      this.doGetProperties().then(() => {
-        this.doGetCollectionProperties(this.collection).then(() => {
-          if (this.actionix >= 0) {
-            this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            });
-          }
-        }).catch((error: any) => {
-          console.error(error);
-          this.misc.doMessage(error, "error");
-        }).finally(() => {
-          this.visible = this.op === "action" ? "hide" : "show";
-          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
-        });
+      this.doGetSubProperties(this.collection).then(() => {
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.visible = this.op === "action" ? "hide" : "show";
+        this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
       });
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
-    });
-  }
-  doGetAllAktions(op: string) {
-    return new Promise((resolve, reject) => {
-      if (op !== "action") {
-        resolve([]);
-      } else {
-        resolve(this.shuttle.actions && this.shuttle.actions.length > 0 ? this.shuttle.actions : []);
-      }
-    });
-  }
-
-  async propertiesAktionFilter(v: any) {
-    return Object.entries(this.properties).filter((obj: any) => v.set.some((f: any) => obj[0] === f.key));
-  }
-
-  doAktionChange(ix: number) {
-    return new Promise((resolve) => {
-      const v = this.aktions[ix];
-      let structure_: any = this.structure;
-      let controls_: any = {};
-      let fields_: any = {};
-      this.fieldsupd = this.fields.filter((obj: any) => v.set.some((f: any) => obj.name === f.key));
-      this.propertiesAktionFilter(v).then((properties_filter_: any) => {
-        for (let j = 0; j < properties_filter_.length; j++) {
-          fields_[properties_filter_[j][0]] = properties_filter_[j][1];
-          if (j === properties_filter_.length - 1) {
-            structure_.properties = fields_;
-            structure_.required = structure_.required ? structure_.required.filter((obj: any) => v.set.some((f: any) => obj.name === f.key)) : [];
-            const form_ctrl_filter_ = Object.entries(this.crudForm.controls).filter((obj: any) => v.set.some((f: any) => obj[0] === f.key));
-            for (let k = 0; k < form_ctrl_filter_.length; k++) {
-              controls_[form_ctrl_filter_[k][0]] = form_ctrl_filter_[k][1];
-              if (k === form_ctrl_filter_.length - 1) {
-                for (let f = 0; f < v.set.length; f++) {
-                  v.set[f].value === "$CURRENT_DATE" ? v.set[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 19) : null;
-                  this.data[v.set[f].key] = v.set[f].value;
-                  this.crudForm.get(v.set[f].key)?.setValue(v.set[f].value);
-                  if (f === v.set.length - 1) {
-                    this.crudForm.controls = controls_;
-                    this.visible = "show";
-                    resolve(true);
-                  }
-                }
-              }
-            }
-          }
-        }
-      });
     });
   }
 
@@ -239,10 +173,10 @@ export class CrudPage implements OnInit {
         this.isInProgress = true;
         this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then((res: any) => {
           this.crud.modalSubmitListener.next({ "result": true });
-          if (!this.barcoded_ || this.op !== "insert") {
-            this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+          if (this.barcoded_) {
+            console.log("*** barcode is staying alive");
           } else {
-            this.doInitForm();
+            this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
           }
         }).catch((res: any) => {
           this.misc.doMessage(res, "error");
@@ -370,72 +304,47 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doGetProperties() {
+  doGetSubProperties(coll_: string) {
     return new Promise((resolve, reject) => {
-      this.property_list = [];
-      let i = 0;
-      for (let property in this.properties) {
-        const key = property;
-        const val = this.properties[property].title;
-        if (i < Object.keys(this.properties).length - 1) {
-          this.property_list.push({ key: key, value: val });
-          i++;
-        } else {
-          this.property_list.push({ key: key, value: val });
-          this.property_list.push({ key: "_upload_id", value: null });
-          resolve(true);
-        }
-      };
-    });
-  }
-
-  doGetCollectionProperties(collection_: string) {
-    return new Promise((resolve, reject) => {
-      if (collection_.charAt(0) !== "_") {
-        resolve(true);
-      } else {
-        const cid_ = collection_ === "_permission" ? this.data["per_collection_id"] : collection_ === "_automation" ? this.data["aut_source_collection_id"] : collection_ === "_action" ? this.data["act_collection_id"] : collection_ === "_field" ? this.data["fie_collection_id"] : collection_ === "_view" ? this.data["vie_collection_id"] : collection_;
-        this.misc.apiCall("crud", {
-          op: "read",
-          collection: "_collection",
-          projection: null,
-          match: [{
-            key: "col_id",
-            op: "eq",
-            value: cid_
-          }],
-          sort: null,
-          page: 1,
-          limit: 1
-        }).then((res: any) => {
-          const properties = res && res.data && res.data[0] && res.data[0].col_structure && res.data[0].col_structure.properties ? res.data[0].col_structure.properties : this.properties;
-          this.property_list = [];
-          let i = 0;
-          for (let property in properties) {
-            const key = property;
-            const val = properties[property].title;
-            if (i < Object.keys(properties).length - 1) {
-              this.property_list.push({ key: key, value: val });
-              i++;
-            } else {
-              this.property_list.push({ key: key, value: val });
-              this.property_list.push({ key: "_upload_id", value: null });
-              resolve(true);
-            }
+      this.misc.apiCall("crud", {
+        op: "read",
+        collection: "_collection",
+        projection: null,
+        match: [{
+          key: "col_id",
+          op: "eq",
+          value: coll_ === "_collection" ? this.data["col_id"] : coll_ === "_permission" ? this.data["per_collection_id"] : coll_ === "_automation" ? this.data["aut_source_collection_id"] : coll_ === "_action" ? this.data["act_collection_id"] : coll_ === "_view" ? this.data["vie_collection_id"] : coll_
+        }],
+        sort: null,
+        page: 1,
+        limit: 1
+      }).then((res: any) => {
+        const properties = res && res.data && res.data[0] && res.data[0].col_structure && res.data[0].col_structure.properties ? res.data[0].col_structure.properties : this.properties;
+        let i = 0;
+        let array_: any = [];
+        for (let prop_ in properties) {
+          if (i === Object.keys(properties).length - 1) {
+            this.property_list = array_;
+            resolve(this.property_list);
+          } else {
+            array_.push({ key: prop_, value: properties[prop_]?.title });
+            i++;
           }
-        }).catch((error: any) => {
-          console.error(error);
-          reject(error);
-        });
-      }
+        }
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
+      });
     });
   }
 
-  doChangeEnum(field_: any, value_: any) {
+  doChangeEnum(field_: any, coll_: any) {
     if (field_.collection) {
-      this.doGetCollectionProperties(value_);
-    } else if (field_.view) {
-      this.doGetProperties();
+      this.doGetSubProperties(coll_).then((properties_: any) => {
+        this.property_list = properties_;
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+      });
     }
   }
 
@@ -479,19 +388,11 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doSetRelated(item: any) {
+  doSetRelated(item_: any) {
     for (let k = 0; k < this.field_parents.lookup.length; k++) {
       if (this.field_parents.lookup[k].local) {
-        if (this.properties[this.field_parents.lookup[k].local].bsonType === "array") {
-          !this.data[this.field_parents.lookup[k].local] || typeof this.data[this.field_parents.lookup[k].local] === "string" ? this.data[this.field_parents.lookup[k].local] = [] : null;
-          if (!this.data[this.field_parents.lookup[k].local] || !this.data[this.field_parents.lookup[k].local].find((obj: any) => obj === item[this.field_parents.lookup[k].remote])) {
-            this.data[this.field_parents.lookup[k].local].push(item[this.field_parents.lookup[k].remote]);
-            this.crudForm.get(this.field_parents.lookup[k].local)?.setValue(this.data[this.field_parents.lookup[k].local]);
-          }
-        } else {
-          this.data[this.field_parents.lookup[k].local] = item[this.field_parents.lookup[k].remote];
-          this.crudForm.get(this.field_parents.lookup[k].local)?.setValue(item[this.field_parents.lookup[k].remote]);
-        }
+        this.data[this.field_parents.lookup[k].local] = item_[this.field_parents.lookup[k].remote];
+        this.crudForm.get(this.field_parents.lookup[k].local)?.setValue(item_[this.field_parents.lookup[k].remote]);
       }
       if (k === this.field_parents.lookup.length - 1) {
         this.tab = "data";

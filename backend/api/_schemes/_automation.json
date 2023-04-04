@@ -21,8 +21,8 @@
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "Source Collection",
-      "description": "Source Collection ID",
+      "title": "Collection",
+      "description": "Collection ID",
       "required": true,
       "collection": true,
       "width": 180
@@ -76,7 +76,6 @@
       "maxItems": 16,
       "uniqueItems": true,
       "additionalProperties": false,
-      "kv": true,
       "items": {
         "bsonType": "object",
         "additionalProperties": false,
@@ -127,7 +126,6 @@
       "maxItems": 16,
       "uniqueItems": true,
       "additionalProperties": false,
-      "kv": true,
       "items": {
         "bsonType": "object",
         "additionalProperties": false,
@@ -152,7 +150,7 @@
       },
       "title": "Target Match",
       "description": "Target Match",
-      "subType": "setfields",
+      "subType": "keyvalue",
       "width": 160
     },
     "aut_target_set": {
@@ -161,7 +159,6 @@
       "maxItems": 16,
       "uniqueItems": true,
       "additionalProperties": false,
-      "kv": true,
       "items": {
         "bsonType": "object",
         "additionalProperties": false,
@@ -186,7 +183,7 @@
       },
       "title": "Target Set",
       "description": "Target Set",
-      "subType": "setfields",
+      "subType": "keyvalue",
       "width": 140
     },
     "aut_target_upsert": {
@@ -194,20 +191,6 @@
       "title": "Upsert?",
       "description": "Upsert?",
       "width": 140
-    },
-    "aut_target_prefixes": {
-      "bsonType": "array",
-      "uniqueItems": true,
-      "minItems": 0,
-      "maxItems": 32,
-      "items": {
-        "bsonType": "string"
-      },
-      "title": "Target Prefixes",
-      "description": "Add a prefix and Enter",
-      "subType": "string",
-      "manualAdd": true,
-      "width": 180
     }
   },
   "required": ["aut_id", "aut_source_collection_id"],

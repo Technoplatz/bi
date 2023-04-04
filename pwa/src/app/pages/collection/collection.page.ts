@@ -311,23 +311,8 @@ export class CollectionPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
-        this.storage.remove("LSFILTER_" + this.id).then(() => {
-          this.RefreshData(0).then(() => {
-            if (["remove", "restore"].includes(res.data.op)) {
-              this.misc.navi.next("dashboard");
-            }
-          });
-        });
-      } else {
-        if (res.data.filters && res.data.filters.length > 0) {
-          this.storage.set("LSFILTER_" + this.id, res.data.filters).then(() => {
-            this.filter = res.data.filters;
-            this.RefreshData(0);
-          });
-        }
+        this.RefreshData(0);
       }
-    }).finally(() => {
-      ["_collection", "_view"].includes(this.id) ? this.crud.getAll().then(() => { }) : null;
     });
     return await modal.present();
   }
@@ -359,11 +344,7 @@ export class CollectionPage implements OnInit {
         modal.present();
         modal.onDidDismiss().then((res: any) => {
           if (res.data.modified) {
-            this.crud.getAll().then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            }).finally(() => {
-              this.misc.navi.next("dashboard");
-            });
+            window.location.reload();
           }
         });
       });

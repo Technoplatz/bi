@@ -91,7 +91,6 @@
       "maxItems": 16,
       "uniqueItems": true,
       "additionalProperties": false,
-      "kv": true,
       "items": {
         "bsonType": "object",
         "additionalProperties": false,

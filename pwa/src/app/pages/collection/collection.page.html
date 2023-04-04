@@ -41,7 +41,7 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="doImport()" class="data-sq-button">
-                <ion-icon name="download-outline"></ion-icon><br />
+                <ion-icon name="cloud-upload-outline"></ion-icon><br />
                 {{ 'File' | translate }}<br />{{ 'Upload' | translate }}
               </div>
               <div *ngIf="barcoded_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
@@ -52,16 +52,15 @@ https://www.gnu.org/licenses.
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  {{ 'New' | translate }}<br />
+                  {{ 'Add' | translate }}<br />
                   <span *ngIf="is_crud; else normale">{{ 'Record' | translate }}</span>
                   <ng-template #normale>
                     <span *ngIf="id=='_user'">{{ 'User' | translate }}</span>
                     <span *ngIf="id=='_collection'">{{ 'Collection' | translate }}</span>
                     <span *ngIf="id=='_view'">{{ 'View' | translate }}</span>
-                    <span *ngIf="id=='_automation'">{{ 'Task' | translate }}</span>
+                    <span *ngIf="id=='_automation'">{{ 'Trigger' | translate }}</span>
                     <span *ngIf="id=='_backup'">{{ 'Backup' | translate }}</span>
                     <span *ngIf="id=='_token'">{{ 'Token' | translate }}</span>
-                    <span *ngIf="id=='_action'">{{ 'Action' | translate }}</span>
                     <span *ngIf="['_firewall','_permission'].includes(id)">{{ 'Rule' | translate }}</span>
                   </ng-template>
                 </div>
@@ -122,12 +121,10 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="is_pane_ok && is_crud" class="ion-no-padding">
           <ion-row class="ion-no-margin">
             <ion-col *ngIf="perm && actions?.length > 0; else noaction">
-              <h6>{{ 'ACTIONS' | translate }} [{{ actions?.length }}]</h6>
+              <h6>{{ 'ACTIONS' | translate }}</h6>
               <div class="act-buttons-wrapper">
-                <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" fill="outline"
-                  class="action-button">
-                  <ion-icon *ngIf="item.one_click" name="play-circle"></ion-icon>
-                  <ion-icon *ngIf="!item.one_click" name="checkbox-outline"></ion-icon>
+                <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)"
+                  class="action-button" color="dark">
                   {{ item.title }}
                 </ion-button>
               </div>
@@ -236,11 +233,6 @@ https://www.gnu.org/licenses.
               <span class="column-title">{{ 'Modified by' }}<br /></span>
               {{ '_modified_by' | translate }}
             </ion-col>
-            <ion-col *ngIf="!['_log','_backup'].includes(id)" class="data-ext-columns data-id-column clicked-item"
-              (click)="setSort('_upload_id', sort['_upload_id'])">
-              <span class="column-title">{{ 'Upload Id' }}<br /></span>
-              {{ '_upload_id' | translate }}
-            </ion-col>
           </ion-row>
 
           <!-- CRUD LIST -->
@@ -288,10 +280,6 @@ https://www.gnu.org/licenses.
             <ion-col *ngIf="!['_log','_backup'].includes(id)" class="data-ext-columns data-by-column"
               (click)="goCrud(record, 'update')">
               {{ record._modified_by }}
-            </ion-col>
-            <ion-col *ngIf="!['_log','_backup'].includes(id)" class="data-ext-columns data-id-column"
-              (click)="goCrud(record, 'update')"> {{ record._upload_id
-              }}
             </ion-col>
           </ion-row>
 

@@ -17,7 +17,6 @@
       "maxLength": 128,
       "title": "Description",
       "description": "Description",
-      "textarea": true,
       "width": 160
     },
     "tkn_collection_id": {

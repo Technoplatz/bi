@@ -206,7 +206,7 @@ export class ViewPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
-        this.RefreshData(0).then(() => { }).finally(() => { });
+        this.RefreshData(0);
       }
     });
     return await modal.present();
@@ -232,11 +232,11 @@ export class ViewPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
-        this.crud.getAll().then(() => { }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-        }).finally(() => {
+        if (["remove", "restore"].includes(res.data.op)) {
           this.misc.navi.next("dashboard");
-        });
+        } else {
+          window.location.reload();
+        }
       }
     });
     return await modal.present();
