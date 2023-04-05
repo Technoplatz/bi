@@ -48,17 +48,18 @@ The 4-cylinder core engine of Technoplatz BI is provided as a community edition 
 
 The platform is also provided as a service for the organizations demanding prefessional support in terms of managed hosting, custom development and integration services.
 
-| | Community Edition | SaaS Edition |
+| | Community Edition | Brezel Edition |
 | :--- | :---: | :---: |
-|  Hosting | Self-Hosted | Managed |
-|  Database | MongoDB 6 | MongoDB 6 |
-|  Database Clustering | 3 internal nodes | 3 internal/regional nodes |
+|  Hosting | Self-Hosted | SaaS |
+|  Database | MongoDB | MongoDB:latest |
+|  Replication & Clustering | Internal Nodes | +Regional Nodes |
 |  Two-Factor Authentication | ✔ | ✔ |
+|  Automation | ✘ | ✔ |
 |  WebApp Firewall | ✘ | ✔ |
 |  Technical Support | ✘ | ✔ |
-|  Custom Development Services | ✘ | ✔ |
+|  Custom Integration Services | ✘ | ✔ |
 |  Custom Domain | ✘ | ✔ |
-|  License | GNU AGPL v3 | GNU AGPL v3 + SLA |
+|  License | GNU Affero GPL v3 | GNU Affero GPL v3 + SLA |
 |  Pricing | Free | [Contact Us](https://bi.technoplatz.de/start) |
 
 ## Impressum

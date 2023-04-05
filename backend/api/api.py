@@ -328,7 +328,7 @@ class Schedular():
 
     def schedule_automations_f(self, backgroundscheduler_):
         try:
-            print("*** schedule automations started", datetime.now())
+            print("*** schedule automations started", datetime.now(), flush=True)
             find_ = Mongo().db["_automation"].find({"aut_enabled": True})
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
@@ -350,7 +350,7 @@ class Schedular():
 
     def schedule_views_f(self, sched_):
         try:
-            print("*** schedule views restarted", datetime.now())
+            print("*** schedule views restarted", datetime.now(), flush=True)
             view_find_ = Mongo().db["_view"].find({})
             for doc_ in view_find_:
                 vie_id_ = doc_["vie_id"]
@@ -368,7 +368,7 @@ class Schedular():
                     vie_sched_hours_ = ",".join(vie_sched_hours_c_)
                     vie_sched_days_ = ",".join(doc_["vie_sched_days"]) if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0 else "mon"
                     sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=TZ_, replace_existing=True, args=[doc_, "live", None])
-                    print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now())
+                    print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now(), flush=True)
 
             res_ = {"result": True}
 
@@ -440,28 +440,29 @@ class Misc():
             }
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(exc_)}))
             if resp_.status_code != 200:
-                print("*** notification error", resp_)
+                print("*** notification error", resp_, flush=True)
 
     def exception_f(self, exc):
-        print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
+        print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
         return {"result": False, "msg": str(exc)}
 
     def api_error_f(self, exc):
-        print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
+        print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
         self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def auth_error_f(self, exc):
-        print("*** auth error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
+        print("*** auth error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
         return {"result": False, "msg": str(exc)}
 
     def mongo_error_f(self, exc):
         try:
             self.post_notification(exc)
-            print("*** mongo error", str(exc.details))
-            print("*** mongo error", type(exc).__name__)
-            print("*** mongo error", __file__)
-            print("*** mongo error", exc.__traceback__.tb_lineno)
+            print("*** mongo error", exc, flush=True)
+            # print("*** mongo error", type(exc).details, flush=True)
+            # print("*** mongo error", type(exc).__name__, flush=True)
+            # print("*** mongo error", __file__, flush=True)
+            # print("*** mongo error", type(exc).__traceback__.tb_lineno, flush=True)
             notify_ = False
             errhtml_ = ""
             count_ = 0
@@ -635,6 +636,25 @@ class Misc():
 
         return value_
 
+    def get_users_from_tags_f(self, tags_):
+        try:
+            personalizations_ = []
+            to_ = []
+            users_ = Mongo().db["_user"].find({"_tags": {"$elemMatch": {"$in": tags_}}})
+            if users_:
+                for member_ in users_:
+                    if member_["usr_id"] not in to_:
+                        to_.append(member_["usr_id"])
+                        personalizations_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
+
+            res_ = {"result": True, "to": personalizations_}
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
 
 class Mongo():
     def __init__(self):
@@ -644,24 +664,17 @@ class Mongo():
         authSource_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
         replicaset_ = f"&replicaSet={MONGO_REPLICASET_}" if MONGO_REPLICASET_ and MONGO_REPLICASET_ != "" else ""
         readPreference_primary_ = f"&readPreference={self.mongo_readpref_primary_}" if self.mongo_readpref_primary_ else ""
-        readPreference_secondary_ = f"&readPreference={self.mongo_readpref_secondary_}" if self.mongo_readpref_secondary_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true"
         tlsCertificateKeyFile_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}" if MONGO_TLS_CERT_KEYFILE_ else ""
         tlsCertificateKeyFilePassword_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEY_PASSWORD_}" if MONGO_TLS_CERT_KEY_PASSWORD_ else ""
         tlsCAFile_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
-        retryWrites_ = "&retryWrites=true"
 
         # PRIMARY CONNECTION STRING
         self.connstr = f"mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_primary_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
 
-        # SECONDARY CONNECTION STRING
-        self.connstr_cs = f"mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?{authSource_}{readPreference_primary_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}{retryWrites_}"
-
-        self.session_client = MongoClient(self.connstr)
         self.client = MongoClient(self.connstr)
-        self.client_cs = MongoClient(self.connstr_cs).changestream
         self.db = self.client[MONGO_DB_]
 
     def backup_f(self):
@@ -1008,9 +1021,7 @@ class Crud():
 
             ts_ = Misc().get_timestamp_f()
             bin_ = f"{collection_id_}_bin_{ts_}"
-            binned_ = Mongo().db[collection_].find(get_filtered_)
-            Mongo().db[bin_].insert_many(binned_)
-
+            Mongo().db[bin_].insert_many(Mongo().db[collection_].find(get_filtered_))
             Mongo().db[collection_].delete_many(get_filtered_)
 
             log_ = Misc().log_f({
@@ -1215,15 +1226,14 @@ class Crud():
                 if mimetype_ == "text/csv":
                     df_ = pd.read_csv(io.StringIO(content_), header=0)
                 else:
-                    session_client_ = Mongo().session_client
+                    session_client_ = MongoClient(Mongo().connstr)
                     session_db_ = session_client_[MONGO_DB_]
-                    with session_client_.start_session(causal_consistency=True, default_transaction_options=None, snapshot=False) as session_:
-                        with session_.start_transaction():
-                            insert_many_ = session_db_[collection__].insert_many(content_, ordered=False, session=session_)
-                            session_.commit_transaction()
-                            count_ = len(insert_many_.inserted_ids)
-                            res_ = {"result": True, "count": count_}
-                            raise
+                    session_ = session_client_.start_session()
+                    session_.start_transaction()
+                    insert_many_ = Mongo().db[collection__].insert_many(content_, ordered=False, session=session_)
+                    session_.commit_transaction()
+                    session_client_.close()
+                    raise
             else:
                 raise APIError("file type is not supported")
 
@@ -1275,17 +1285,21 @@ class Crud():
 
             # BULK INSERT DF INTO DATABASE
             payload_ = df_.to_dict("records")
-            session_client_ = Mongo().session_client
+
+            session_client_ = MongoClient(Mongo().connstr)
             session_db_ = session_client_[MONGO_DB_]
-            with session_client_.start_session(causal_consistency=True, default_transaction_options=None, snapshot=False) as session_:
-                with session_.start_transaction():
-                    insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
-                    session_.commit_transaction()
-                    count_ = len(insert_many_.inserted_ids)
+            session_ = session_client_.start_session()
+            session_.start_transaction()
+            insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
+            session_.commit_transaction()
+            count_ = len(insert_many_.inserted_ids)
+            session_client_.close()
 
             res_ = {"result": True, "count": count_}
 
         except pymongo.errors.PyMongoError as exc:
+            session_.abort_transaction() if session_ else None
+            res_ = Misc().mongo_error_f(exc)
             Misc().log_f({
                 "type": "Error",
                 "collection": collection_,
@@ -1293,8 +1307,6 @@ class Crud():
                 "user": email_,
                 "document": exc.details
             })
-            res_ = Misc().mongo_error_f(exc)
-
             if "notify" in res_ and res_["notify"]:
                 email_sent_ = Email().sendEmail_f({
                     "personalizations": {"to": [{"email": email_, "name": None}]},
@@ -1307,9 +1319,11 @@ class Crud():
                 res_["msg"] = "please check your inbox to get the error details."
 
         except APIError as exc:
+            session_.abort_transaction() if session_ else None
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
+            session_.abort_transaction() if session_ else None
             res_ = Misc().exception_f(exc)
 
         finally:
@@ -2171,10 +2185,7 @@ class Crud():
             if not vie_structure_:
                 raise APIError("view structure not found")
 
-            views_ = Mongo().db["_view"].find(filter={
-                "_tags": {"$elemMatch": {"$in": user_["_tags"]}}
-            }, sort=[("vie_priority", 1)])
-
+            views_ = Mongo().db["_view"].find({"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}, sort=[("vie_priority", 1)])
             for view_ in views_:
                 vie_collection_id_ = view_["vie_collection_id"]
                 is_crud_ = True if vie_collection_id_[:1] != "_" else False
@@ -2338,7 +2349,6 @@ class Crud():
 
             # create cursor for the query
             cursor_ = Mongo().db[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
-
             docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
             count_ = Mongo().db[collection_].count_documents(get_filtered_)
 
@@ -3287,6 +3297,13 @@ class Crud():
             if not action_:
                 raise APIError("action not found")
 
+            tags_ = action_["_tags"] if "_tags" in action_ and len(action_["_tags"]) > 0 else None
+            if not tags_:
+                raise APIError("no tags found in action")
+            
+            subject_ = action_["subject"] if "subject" in action_ else "Action Completed"
+            html_ = action_["body"] if "body" in action_ else f"<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
+
             filter_ = action_["filter"] if "filter" in action_ and len(action_["filter"]) > 0 else None
             if not (filter_ and len(filter_) > 0):
                 raise APIError("no action filter not found")
@@ -3300,11 +3317,27 @@ class Crud():
             doc_["_modified_by"] = email_
 
             if ids_ and len(ids_) > 0:
-                get_filtered_ = { "$and": [get_filtered_, {"_id": {"$in": ids_}}] }
+                get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
 
-            Mongo().db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}})
+            # DO ACTION ON DATABASE
+            session_client_ = MongoClient(Mongo().connstr)
+            session_db_ = session_client_[MONGO_DB_]
+            session_ = session_client_.start_session()
+            session_.start_transaction()
+            session_db_[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, session=session_)
 
             # EMAIL SEND
+            email_sent_ = Email().sendEmail_f({
+                "op": "action",
+                "tags": tags_,
+                "subject": subject_,
+                "html": html_
+            })
+            if not email_sent_["result"]:
+                raise APIError(email_sent_["msg"])
+            
+            session_.commit_transaction()
+            session_client_.close()
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -3322,6 +3355,7 @@ class Crud():
             res_ = {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
+            session_.abort_transaction() if session_ else None
             Misc().log_f({
                 "type": "Error",
                 "collection": collection_id_,
@@ -3332,9 +3366,11 @@ class Crud():
             res_ = Misc().mongo_error_f(exc)
 
         except APIError as exc:
+            session_.abort_transaction() if session_ else None
             res_ = Misc().api_error_f(exc)
 
         except Exception as exc:
+            session_.abort_transaction() if session_ else None
             res_ = Misc().exception_f(exc)
 
         finally:
@@ -3479,9 +3515,16 @@ class Email():
             op_ = msg["op"] if "op" in msg else None
             files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
             html_ = f"{msg['html']}" if "html" in msg else None
+            tags_ = msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
             personalizations_ = msg["personalizations"] if "personalizations" in msg else None
-            subject_ = EMAIL_UPLOADERR_SUBJECT_ if op_ in [
-                "uploaderr", "importerr"] else EMAIL_SIGNIN_SUBJECT_ if op_ == "signin" else EMAIL_TFA_SUBJECT_ if op_ == "tfa" else EMAIL_SIGNUP_SUBJECT_ if op_ == "signup" else msg["subject"] if msg["subject"] else EMAIL_DEFAULT_SUBJECT_
+            subject_ = msg["subject"] if "subject" in msg else None
+
+            if subject_ is None:
+                subject_ = EMAIL_UPLOADERR_SUBJECT_ if op_ in [
+                    "uploaderr", "importerr"] else EMAIL_SIGNIN_SUBJECT_ if op_ == "signin" else EMAIL_TFA_SUBJECT_ if op_ == "tfa" else EMAIL_SIGNUP_SUBJECT_ if op_ == "signup" else msg["subject"] if msg["subject"] else EMAIL_DEFAULT_SUBJECT_
+
+            if subject_ is None:
+                raise APIError("subject is missing")
 
             if op_ is None or op_ == "":
                 raise APIError("email operation is missing")
@@ -3489,17 +3532,17 @@ class Email():
             if html_ is None or html_ == "":
                 raise APIError("email message is missing")
 
+            if tags_:
+                f_ = Misc().get_users_from_tags_f(tags_)
+                if not f_["result"]:
+                    raise APIError(f"personalizations error {f_['msg']}")
+                personalizations_ = f_ if "to" in f_ else None
+
             if personalizations_ is None:
                 raise APIError("email personalizations is missing")
 
             if "to" not in personalizations_ or len(personalizations_["to"]) == 0:
-                raise APIError("email to is missing")
-
-            if subject_ is None:
-                raise APIError("email subject is missing")
-
-            subject_ = EMAIL_UPLOADERR_SUBJECT_ if op_ in [
-                "uploaderr", "importerr"] else EMAIL_SIGNIN_SUBJECT_ if op_ == "signin" else EMAIL_TFA_SUBJECT_ if op_ == "tfa" else EMAIL_SIGNUP_SUBJECT_ if op_ == "signup" else msg["subject"] if msg["subject"] else EMAIL_DEFAULT_SUBJECT_
+                raise APIError("to list is missing")
 
             msg_ = {
                 "op": op_,
@@ -3729,18 +3772,15 @@ class OTP():
             if "usr_enabled" not in user_ or not user_["usr_enabled"]:
                 raise APIError("user status is disabled to get logged in")
 
-            # gets the user id
             usr_id_ = user_["usr_id"]
             name_ = user_["usr_name"]
 
-            # generates a random number
             tfac_ = randint(100001, 999999)
             Mongo().db["_auth"].update_one({"aut_id": usr_id_}, {"$set": {
                 "aut_tfac": tfac_,
                 "_tfac_modified_at": datetime.now(),
             }, "$inc": {"_modified_count": 1}})
 
-            # sends TFAC to the user with an email
             email_sent_ = Email().sendEmail_f({
                 "op": "tfa",
                 "personalizations": {"to": [{"email": usr_id_, "name": name_}]},
@@ -5038,10 +5078,6 @@ def get_pivot_f(id):
 @app.route("/post", methods=["POST"])
 def post_f():
     try:
-        # start transaction
-        session_db_ = Mongo().client[Crud().dbname_]
-        session_ = Mongo().client.start_session(causal_consistency=True, default_transaction_options=None)
-        session_.start_transaction()
 
         if not request.headers:
             raise AuthError("no headers provided")
@@ -5120,6 +5156,11 @@ def post_f():
         output_ = []
         count_ = 0
 
+        session_client_ = MongoClient(Mongo().connstr)
+        session_db_ = session_client_[MONGO_DB_]
+        session_ = session_client_.start_session()
+        session_.start_transaction()
+
         if operation_ == "read":
             for item_ in body_:
                 cursor_ = session_db_[collection_data_].find(item_)
@@ -5183,7 +5224,8 @@ def post_f():
             "output": output_
         }))
 
-        session_.commit_transaction() if session_ else None
+        session_.commit_transaction()
+        session_client_.close()
 
         res_ = {"result": True, "response": response_}
 
@@ -5200,7 +5242,6 @@ def post_f():
         res_ = {"result": False, "response": str(exc), "status": 500}
 
     finally:
-        Mongo().client.close() if Mongo().client else None
         status_ = res_["status"] if "status" in res_ else 200
         return json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False), status_, Security().header_simple_f()
 

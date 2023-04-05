@@ -86,7 +86,8 @@ https://www.gnu.org/licenses.
                 {{ 'Clone' | translate }}<br />{{ 'Selected' | translate }}
               </div>
               <div (click)="MultiCrud('delete')" class="data-sq-button">
-                <ion-icon name="trash-outline"></ion-icon><br />
+                <ion-icon *ngIf="is_deleting" name="hourglass"></ion-icon>
+                <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}<br />{{ 'Selected' | translate }}
               </div>
               <div *ngIf="perm && is_crud" (click)="doShowCode()" class="data-sq-button">

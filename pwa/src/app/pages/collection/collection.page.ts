@@ -103,6 +103,7 @@ export class CollectionPage implements OnInit {
   public jeoptions?: JsonEditorOptions;
   public jeopen: boolean = false;
   public is_saving: boolean = false;
+  public is_deleting: boolean = false;
   public is_viewsaving: boolean = false;
   public sort: any = {};
 
@@ -241,32 +242,32 @@ export class CollectionPage implements OnInit {
         this.alert.create({
           header: "Confirm",
           message: "Please confirm this " + op,
-          buttons: [
-            {
-              text: "Cancel",
-              role: "cancel",
-              cssClass: "secondary",
-              handler: () => { }
-            }, {
-              text: "OKAY",
-              handler: () => {
-                this.is_loaded = this.is_selected = false;
-                this.misc.apiCall("crud", {
-                  op: op,
-                  collection: this.id,
-                  match: this.sweeped[this.segment],
-                  doc: null,
-                  is_crud: true
-                }).then(() => {
-                  this.RefreshData(0);
-                }).catch((res: any) => {
-                  this.misc.doMessage(res && res.msg ? res.msg : res, "error");
-                }).finally(() => {
-                  this.is_loaded = true;
-                });
-              }
+          buttons: [{
+            text: "Cancel",
+            role: "cancel",
+            cssClass: "secondary",
+            handler: () => { }
+          }, {
+            text: "OKAY",
+            handler: () => {
+              this.is_deleting = true;
+              this.is_loaded = this.is_selected = false;
+              this.misc.apiCall("crud", {
+                op: op,
+                collection: this.id,
+                match: this.sweeped[this.segment],
+                doc: null,
+                is_crud: true
+              }).then(() => {
+                this.RefreshData(0);
+              }).catch((res: any) => {
+                this.misc.doMessage(res && res.msg ? res.msg : res, "error");
+              }).finally(() => {
+                this.is_loaded = true;
+                this.is_deleting = false;
+              });
             }
-          ]
+          }]
         }).then((alert: any) => {
           alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
           alert.present();
