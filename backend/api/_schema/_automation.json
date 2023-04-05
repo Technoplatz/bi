@@ -29,7 +29,7 @@
     },
     "aut_source_filter": {
       "bsonType": "array",
-      "minItems": 0,
+      "minItems": 1,
       "maxItems": 16,
       "uniqueItems": true,
       "additionalProperties": false,
@@ -193,7 +193,7 @@
       "width": 140
     }
   },
-  "required": ["aut_id", "aut_source_collection_id"],
+  "required": ["aut_id", "aut_source_collection_id", "aut_source_filter"],
   "unique": [["aut_id"]],
   "index": [["aut_source_collection_id"], ["aut_source_collection_id", "aut_enabled"]],
   "sort": {

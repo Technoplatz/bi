@@ -328,7 +328,7 @@ class Schedular():
 
     def schedule_automations_f(self, backgroundscheduler_):
         try:
-            print("*** schedule automations started", datetime.now(), flush=True)
+            print("*** schedule automations started", datetime.now())
             find_ = Mongo().db["_automation"].find({"aut_enabled": True})
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
@@ -350,7 +350,7 @@ class Schedular():
 
     def schedule_views_f(self, sched_):
         try:
-            print("*** schedule views restarted", datetime.now(), flush=True)
+            print("*** schedule views restarted", datetime.now())
             view_find_ = Mongo().db["_view"].find({})
             for doc_ in view_find_:
                 vie_id_ = doc_["vie_id"]
@@ -368,7 +368,7 @@ class Schedular():
                     vie_sched_hours_ = ",".join(vie_sched_hours_c_)
                     vie_sched_days_ = ",".join(doc_["vie_sched_days"]) if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0 else "mon"
                     sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=TZ_, replace_existing=True, args=[doc_, "live", None])
-                    print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now(), flush=True)
+                    print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now())
 
             res_ = {"result": True}
 
@@ -440,28 +440,28 @@ class Misc():
             }
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(exc_)}))
             if resp_.status_code != 200:
-                print("*** notification error", resp_, flush=True)
+                print("*** notification error", resp_)
 
     def exception_f(self, exc):
-        print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
         return {"result": False, "msg": str(exc)}
 
     def api_error_f(self, exc):
-        print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
         self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def auth_error_f(self, exc):
-        print("*** auth error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** auth error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
         return {"result": False, "msg": str(exc)}
 
     def mongo_error_f(self, exc):
         try:
             self.post_notification(exc)
-            print("*** mongo error", str(exc.details), flush=True)
-            print("*** mongo error", type(exc).__name__, flush=True)
-            print("*** mongo error", __file__, flush=True)
-            print("*** mongo error", exc.__traceback__.tb_lineno, flush=True)
+            print("*** mongo error", str(exc.details))
+            print("*** mongo error", type(exc).__name__)
+            print("*** mongo error", __file__)
+            print("*** mongo error", exc.__traceback__.tb_lineno)
             notify_ = False
             errhtml_ = ""
             count_ = 0
@@ -718,9 +718,9 @@ class Crud():
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
 
-    def root_schemes_f(self, scheme):
+    def root_schemas_f(self, schema):
         try:
-            f_ = open(f"/app/_schemes/{scheme}.json", "r")
+            f_ = open(f"/app/_schema/{schema}.json", "r")
             res_ = json.loads(f_.read())
 
         except APIError as exc:
@@ -746,7 +746,7 @@ class Crud():
     def get_properties_f(self, collection):
         try:
             # gets the required collection
-            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemes_f(f"{collection}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemas_f(f"{collection}")
 
             if not cursor_:
                 raise APIError("collection not found for properties")
@@ -792,7 +792,7 @@ class Crud():
                 raise APIError("user not found")
 
             data_ = None
-            path_ = f"/app/_templates/templates.json"
+            path_ = f"/app/_template/templates.json"
             if not os.path.isfile(path_):
                 raise APIError("no templates found")
 
@@ -827,7 +827,7 @@ class Crud():
                 if find_one_:
                     raise APIError(f"collection prefix already exists: {prefix_}")
 
-                path_ = f"/app/_templates/{file_}"
+                path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
                     f_ = open(path_, "r")
                     jtxt_ = f_.read()
@@ -846,12 +846,12 @@ class Crud():
                     "_modified_count": 0
                 })
 
-                schemevalidate_ = self.crudscheme_validate_f({
+                schemavalidate_ = self.crudschema_validate_f({
                     "collection": collection__,
                     "structure": structure_
                 })
-                if not schemevalidate_["result"]:
-                    raise APIError(schemevalidate_["msg"])
+                if not schemavalidate_["result"]:
+                    raise APIError(schemavalidate_["msg"])
 
             res_ = {"result": True, "data": data_}
 
@@ -870,7 +870,7 @@ class Crud():
     def inner_collection_f(self, c):
         try:
             is_crud_ = True if c[:1] != "_" else False
-            collection_ = Mongo().db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemes_f(f"{c}")
+            collection_ = Mongo().db["_collection"].find_one({"col_id": c}) if is_crud_ else self.root_schemas_f(f"{c}")
             if not collection_:
                 raise APIError(f"collection not found to root: {c}")
             res_ = {"result": True, "collection": collection_}
@@ -995,7 +995,7 @@ class Crud():
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_}")
             if not cursor_:
                 raise APIError(f"collection not found to purge: {collection_}")
 
@@ -1327,7 +1327,7 @@ class Crud():
 
             user_tags_ = user_["_tags"]
 
-            vie_structure_ = self.root_schemes_f("_view")
+            vie_structure_ = self.root_schemas_f("_view")
             if not vie_structure_:
                 raise APIError("view structure not found")
 
@@ -1386,7 +1386,7 @@ class Crud():
             if is_crud_ and "col_structure" not in vie_collection_:
                 raise APIError("structure not found in collection")
 
-            col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemes_f(f"{vie_collection_id_}")
+            col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemas_f(f"{vie_collection_id_}")
 
             # Get properties of the structure
             if not "properties" in col_structure_:
@@ -1789,7 +1789,7 @@ class Crud():
 
             value_ = 0
             perchange_ = 0
-            color_scheme_def_ = ["FireBrick", "DarkSeaGreen", "CornFlowerBlue", "LightSkyBlue"]
+            color_schema_def_ = ["FireBrick", "DarkSeaGreen", "CornFlowerBlue", "LightSkyBlue"]
             vie_p_xaxis_show_ = True if "vie_p_xaxis_show" in doc_ and doc_["vie_p_xaxis_show"] in ["true", True] else False
             vie_p_yaxis_show_ = True if "vie_p_yaxis_show" in doc_ and doc_["vie_p_yaxis_show"] in ["true", True] else False
             vie_p_xaxis_label_show_ = True if "vie_p_xaxis_label_show" in doc_ and doc_["vie_p_xaxis_label_show"] in ["true", True] else False
@@ -1805,8 +1805,8 @@ class Crud():
             vie_chart_yaxis_ = doc_["vie_pivot_values"][0]["key"] if "vie_pivot_values" in doc_ and len(doc_["vie_pivot_values"]) > 0 and "key" in doc_["vie_pivot_values"][0] else None
             vie_chart_function_ = doc_["vie_pivot_values"][0]["value"] if "vie_pivot_values" in doc_ and len(doc_["vie_pivot_values"]) > 0 and "value" in doc_["vie_pivot_values"][0] else "sum"
             vie_chart_legend_ = doc_["vie_pivot_columns"][0] if "vie_pivot_columns" in doc_ and len(doc_["vie_pivot_columns"]) > 0 else None
-            vie_p_color_scheme_ = doc_["vie_p_color_scheme"] if "vie_p_color_scheme" in doc_ and len(doc_["vie_p_color_scheme"]) > 0 else []
-            vie_p_color_scheme_ += color_scheme_def_
+            vie_p_color_schema_ = doc_["vie_p_color_schema"] if "vie_p_color_schema" in doc_ and len(doc_["vie_p_color_schema"]) > 0 else []
+            vie_p_color_schema_ += color_schema_def_
             view_id_ = doc_["vie_id"]
 
             generate_view_data_f_ = Crud().view_f({
@@ -1938,7 +1938,7 @@ class Crud():
                 "gradient": vie_p_gradient_,
                 "datalabel_show": vie_p_datalabel_show_,
                 "grid_show": vie_p_grid_show_,
-                "color_scheme": vie_p_color_scheme_
+                "color_schema": vie_p_color_schema_
             }
 
         except APIError as exc:
@@ -2167,7 +2167,7 @@ class Crud():
             user_ = obj["userindb"]
             records_ = []
 
-            vie_structure_ = self.root_schemes_f("_view")
+            vie_structure_ = self.root_schemas_f("_view")
             if not vie_structure_:
                 raise APIError("view structure not found")
 
@@ -2178,7 +2178,7 @@ class Crud():
             for view_ in views_:
                 vie_collection_id_ = view_["vie_collection_id"]
                 is_crud_ = True if vie_collection_id_[:1] != "_" else False
-                collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemes_f(f"{vie_collection_id_}")
+                collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_}) if is_crud_ else self.root_schemas_f(f"{vie_collection_id_}")
                 if not collection_:
                     continue
                 records_.append(view_)
@@ -2205,7 +2205,7 @@ class Crud():
         try:
             user_ = obj["userindb"]
             data_ = []
-            structure_ = self.root_schemes_f("_collection")
+            structure_ = self.root_schemas_f("_collection")
 
             if Misc().permitted_user_f(user_):
                 data_ = list(Mongo().db["_collection"].find(filter={}, sort=[("_updated_at", -1)]))
@@ -2303,7 +2303,7 @@ class Crud():
             collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
 
             # created a cursor for retrieve the collection structure will be added into the respone
-            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_id_}")
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
 
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
@@ -2370,7 +2370,7 @@ class Crud():
         finally:
             return res_
 
-    def crudscheme_validate_f(self, obj):
+    def crudschema_validate_f(self, obj):
         try:
             properties_ = {}
             required_ = []
@@ -2462,17 +2462,17 @@ class Crud():
         finally:
             return res_
 
-    def nocrudscheme_validate_f(self, obj):
+    def nocrudschema_validate_f(self, obj):
         try:
             collection_ = obj["collection"]
 
-            structure_ = self.root_schemes_f(f"{collection_}")
+            structure_ = self.root_schemas_f(f"{collection_}")
 
-            schemevalidate_ = self.crudscheme_validate_f({
+            schemavalidate_ = self.crudschema_validate_f({
                 "collection": collection_,
                 "structure": structure_})
-            if not schemevalidate_["result"]:
-                raise APIError(schemevalidate_["msg"])
+            if not schemavalidate_["result"]:
+                raise APIError(schemavalidate_["msg"])
 
             res_ = {"result": True}
 
@@ -2766,12 +2766,12 @@ class Crud():
             if datac_ not in Mongo().db.list_collection_names():
                 datac_not_found_ = True
                 Mongo().db[datac_].insert_one({})
-            schemevalidate_ = self.crudscheme_validate_f({
+            schemavalidate_ = self.crudschema_validate_f({
                 "collection": datac_,
                 "structure": doc_["col_structure"]
             })
-            if not schemevalidate_["result"]:
-                raise APIError(schemevalidate_["msg"])
+            if not schemavalidate_["result"]:
+                raise APIError(schemavalidate_["msg"])
             if datac_not_found_:
                 Mongo().db[datac_].delete_one({})
 
@@ -2837,7 +2837,7 @@ class Crud():
         finally:
             return res_
 
-    def savescheme_f(self, obj):
+    def saveschema_f(self, obj):
         try:
             user_ = obj["user"] if "user" in obj else None
             op_ = obj["op"]
@@ -2851,7 +2851,7 @@ class Crud():
                 "col_structure": structure_
             }, "$inc": {"_modified_count": 1}})
 
-            f_ = self.crudscheme_validate_f({
+            f_ = self.crudschema_validate_f({
                 "collection": f"{collection_id_}_data",
                 "structure": structure_})
 
@@ -3034,11 +3034,11 @@ class Crud():
             is_crud_ = True if collection_id_[:1] != "_" else False
 
             if not is_crud_:
-                schemevalidate_ = self.nocrudscheme_validate_f({
+                schemavalidate_ = self.nocrudschema_validate_f({
                     "collection": collection_id_
                 })
-                if not schemevalidate_["result"]:
-                    raise APIError(schemevalidate_["msg"])
+                if not schemavalidate_["result"]:
+                    raise APIError(schemavalidate_["msg"])
 
             doc_ = {}
             for item in doc:
@@ -3176,9 +3176,7 @@ class Crud():
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            # retrieves the collection structure
-            # root collection's structures can be found at github
-            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_id_}")
+            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:
@@ -3254,64 +3252,65 @@ class Crud():
     def action_f(self, obj):
         try:
             collection_id_ = obj["collection"]
-            user_ = obj["user"] if "user" in obj else None
-            userindb_ = obj["userindb"] if "userindb" in obj else None
+            user_ = obj["userindb"] if "userindb" in obj else None
             match_ = obj["match"] if "match" in obj else None
-            filter_ = obj["filter"] if "filter" in obj else None
+            actionix_ = obj["actionix"] if "actionix" in obj else None
             doc_ = obj["doc"] if "doc" in obj else None
-            view_ = obj["view"] if "view" in obj else None
+
+            email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
+            if not email_:
+                raise APIError("user is not allowed")
+
+            is_crud_ = True if collection_id_[:1] != "_" else False
+            if not is_crud_:
+                raise APIError("operation is not allowed")
+
+            if int(actionix_) < 0:
+                raise APIError("please select an action to run")
+            actionix_ = int(actionix_)
 
             ids_ = []
-            if match_:
+            if match_ and len(match_) > 0:
                 for _id in match_:
                     ids_.append(ObjectId(_id))
 
-            if not filter_ and len(ids_) == 0:
-                raise APIError("please select a row before performing an action")
-
-            is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
+            schema_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
+            if not schema_:
+                raise APIError("schema not found")
 
-            structure__ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemes_f(f"{collection_id_}")
-            if structure__:
-                structure_ = structure__["col_structure"] if is_crud_ else structure__
-            else:
-                raise APIError(f"collection structure not found: {collection_id_}")
+            structure_ = schema_["col_structure"] if "col_structure" in schema_ else None
             if not structure_:
-                raise APIError("structure not found")
+                raise APIError(f"structure not found {collection_id_}")
 
-            if not match_:
-                if filter_ and len(filter_) > 0:
-                    match_ = filter_
-                else:
-                    match_ = []
+            action_ = structure_["actions"][actionix_] if "actions" in structure_ and len(structure_["actions"]) > 0 and structure_["actions"][actionix_] else None
+            if not action_:
+                raise APIError("action not found")
 
-            if view_ is not None:
-                cursor_ = Mongo().db["_view"].find_one({
-                    "vie_id": view_["vie_id"],
-                    "_tags": {"$elemMatch": {"$in": userindb_["_tags"]}}
-                })
-                if not cursor_:
-                    raise APIError(f"view not found {view_['vie_id']}")
-                match_ = cursor_["vie_filter"] + match_
+            filter_ = action_["filter"] if "filter" in action_ and len(action_["filter"]) > 0 else None
+            if not (filter_ and len(filter_) > 0):
+                raise APIError("no action filter not found")
+
+            get_filtered_ = self.get_filtered_f({
+                "match": filter_,
+                "properties": structure_["properties"] if "properties" in structure_ else None
+            })
 
             doc_["_modified_at"] = datetime.now()
-            doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
+            doc_["_modified_by"] = email_
 
             if ids_ and len(ids_) > 0:
-                Mongo().db[collection_].update_many({"_id": {"$in": ids_}}, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
-            else:
-                get_filtered_ = self.get_filtered_f({
-                    "match": match_,
-                    "properties": structure_["properties"] if "properties" in structure_ else None
-                })
-                Mongo().db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False)
+                get_filtered_ = { "$and": [get_filtered_, {"_id": {"$in": ids_}}] }
+
+            Mongo().db[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}})
+
+            # EMAIL SEND
 
             log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_,
                 "op": "action",
-                "user": user_["email"] if user_ else None,
+                "user": email_,
                 "document": {
                     "doc": doc_,
                     "match": match_
@@ -3327,7 +3326,7 @@ class Crud():
                 "type": "Error",
                 "collection": collection_id_,
                 "op": "action",
-                "user": user_["email"] if user_ else None,
+                "user": email_,
                 "document": exc.details
             })
             res_ = Misc().mongo_error_f(exc)
@@ -3348,7 +3347,6 @@ class Crud():
             collection_id_ = obj["collection"]
             doc_ = obj["doc"]
 
-            # remove unnecesssary items from the document
             doc_.pop("_id", None) if "_id" in doc_ else None
             doc_.pop("_structure", None) if "_structure" in doc_ else None
 
@@ -3360,7 +3358,7 @@ class Crud():
             if collection_id_ == "_collection":
                 file_ = "template-foo.json"
                 prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
-                path_ = f"/app/_templates/{file_}"
+                path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
                     f_ = open(path_, "r")
                     jtxt_ = f_.read()
@@ -3376,11 +3374,11 @@ class Crud():
                 datac_ = f"{col_id_}_data"
                 if col_structure_ and col_structure_ != {} and datac_ not in Mongo().db.list_collection_names():
                     Mongo().db[datac_].insert_one({})
-                    schemevalidate_ = self.crudscheme_validate_f({
+                    schemavalidate_ = self.crudschema_validate_f({
                         "collection": datac_,
                         "structure": col_structure_})
-                    if not schemevalidate_["result"]:
-                        raise APIError(schemevalidate_["msg"])
+                    if not schemavalidate_["result"]:
+                        raise APIError(schemavalidate_["msg"])
                     Mongo().db[datac_].delete_one({})
             elif collection_id_ in ["_field", "_action"]:
                 cid_ = doc_["fie_collection_id"] if collection_id_ == "_field" and "fie_collection_id" in doc_ else doc_["act_collection_id"] if collection_id_ == "_action" and "act_collection_id" in doc_ else None
@@ -3965,10 +3963,10 @@ class Auth():
                     per_update_ = True if "per_update" in permission_check_ and permission_check_["per_update"] == True else False
                     per_delete_ = True if "per_delete" in permission_check_ and permission_check_["per_delete"] == True else False
                     per_share_ = True if "per_share" in permission_check_ and permission_check_["per_share"] == True else False
-                    per_scheme_ = True if "per_scheme" in permission_check_ and permission_check_["per_scheme"] == True else False
+                    per_schema_ = True if "per_schema" in permission_check_ and permission_check_["per_schema"] == True else False
 
                     if \
-                        (op_ == "savescheme" and per_scheme_) or \
+                        (op_ == "saveschema" and per_schema_) or \
                         (op_ == "announce" and per_share_) or \
                         (op_ == "read" and per_read_) or \
                         (op_ in ["insert", "import"] and per_insert_) or \
@@ -4776,8 +4774,8 @@ def crud_f():
             res_ = Crud().dump_f(input_)
         elif op_ == "template":
             res_ = Crud().template_f(input_)
-        elif op_ == "savescheme":
-            res_ = Crud().savescheme_f(input_)
+        elif op_ == "saveschema":
+            res_ = Crud().saveschema_f(input_)
         else:
             raise APIError(f"{op_} is not a supported operation")
 

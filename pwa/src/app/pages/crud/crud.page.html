@@ -140,7 +140,7 @@ https://www.gnu.org/licenses.
                             <ion-icon *ngIf="field.readonly" name="star"></ion-icon>
                         </sup>
                     </ion-label>
-                    <div class="input-desc">{{ field.description | translate }}</div>
+                    <div *ngIf="field?.description" class="input-desc">{{ field.description | translate }}</div>
                     <div *ngIf="field.bsonType=='string'">
                         <div *ngIf="!field.file; else isfile" class="full-width">
                             <div
@@ -149,13 +149,12 @@ https://www.gnu.org/licenses.
                                     [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                     [maxlength]="field.maxLength" [minlength]="field.minLength"
                                     [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
-                                    [required]="field.required" [placeholder]="field.description"
-                                    [(ngModel)]="data[field.name]" auto-grow="true"
+                                    [required]="field.required" [(ngModel)]="data[field.name]" auto-grow="true"
                                     [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
                                     [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
                                 </ion-input>
                                 <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
-                                    [placeholder]="field.description" [(ngModel)]="data[field.name]"
+                                    [(ngModel)]="data[field.name]"
                                     [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
                                     auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
                                     [formControlName]="field.name" [required]="field.required" spellcheck="false"
@@ -165,8 +164,7 @@ https://www.gnu.org/licenses.
                             <ng-template #checkpassword>
                                 <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
                                     [formControlName]="field.name" type="password" spellcheck="false" autocorrect="off"
-                                    [required]="field.required" [placeholder]="field.description"
-                                    [(ngModel)]="data[field.name]" auto-grow="true">
+                                    [required]="field.required" [(ngModel)]="data[field.name]" auto-grow="true">
                                 </ion-input>
                             </ng-template>
                             <ng-template #checkenum>
@@ -190,7 +188,7 @@ https://www.gnu.org/licenses.
                         </div>
                         <ng-template #isfile>
                             <div class="full-width">
-                                <p *ngIf="data[field.name]">{{ data[field.name] }}</p>
+                                <!-- <p *ngIf="data[field.name]">{{ data[field.name] }}</p> -->
                                 <ion-input [id]="field.name" class="ion-no-padding" [formControlName]="field.name"
                                     type="file" [required]="field.required" (change)="onFileChange($event)">
                                 </ion-input>
@@ -224,7 +222,7 @@ https://www.gnu.org/licenses.
                     </div>
                     <ion-input *ngIf="['int','number','decimal','float'].includes(field.bsonType)"
                         class="ion-no-padding" [formControlName]="field.name" type="number" [required]="field.required"
-                        [placeholder]="field.description" [(ngModel)]="data[field.name]"
+                        [(ngModel)]="data[field.name]"
                         [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
                     </ion-input>
                     <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
@@ -233,8 +231,8 @@ https://www.gnu.org/licenses.
                     <div *ngIf="field.bsonType=='array'" class="full-width">
                         <ion-input *ngIf="field?.manualAdd" name="arrayitem" [title]="field.name"
                             [type]="field.items.bsonType=='string' ? 'text' : 'number'" [required]="field.required"
-                            [placeholder]="field.description" auto-grow="true" [(ngModel)]="arrayitem[field.name]"
-                            [ngModelOptions]="{standalone: true}" class="add-and-enter"></ion-input>
+                            auto-grow="true" [(ngModel)]="arrayitem[field.name]" [ngModelOptions]="{standalone: true}"
+                            class="add-and-enter"></ion-input>
                         <ion-input [formControlName]="field.name" [(ngModel)]="data[field.name]"
                             class="hide"></ion-input>
                         <app-kov [data]="data" [field]="field" [properties]="property_list" [op]="op"> </app-kov>

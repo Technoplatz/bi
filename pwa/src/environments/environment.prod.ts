@@ -59,7 +59,7 @@ export const environment = {
         "maxLength": 32,
         "pattern": "^[a-z0-9-]{3,32}$",
         "title": "ID",
-        "description": "Storage ID",
+        "description": "Upload ID",
         "permanent": true,
         "required": true,
         "hidden": true
@@ -69,8 +69,8 @@ export const environment = {
         "minLength": 3,
         "maxLength": 32,
         "pattern": "^[a-z0-9-_]{3,32}$",
-        "title": "Collection ID",
-        "description": "Collection ID",
+        "title": "Collection",
+        "description": "ID of the target Collection",
         "collection": true,
         "required": true
       },
@@ -80,30 +80,14 @@ export const environment = {
         "maxLength": 64,
         "file": true,
         "title": "File",
-        "description": "File"
+        "description": "Excel, CSV or JSON File"
       }
     },
     "required": [
       "sto_id",
       "sto_collection_id",
       "sto_file"
-    ],
-    "unique": [
-      [
-        "sto_id"
-      ],
-      [
-        "sto_collection_id"
-      ]
-    ],
-    "index": [
-      [
-        "sto_collection_id"
-      ]
-    ],
-    "sort": {
-      "_modified_at": -1
-    }
+    ]
   },
   pivotvalueops: [
     { "key": "sum", "value": "sum" },

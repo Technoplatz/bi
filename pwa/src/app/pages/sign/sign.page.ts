@@ -392,7 +392,7 @@ export class SignPage implements OnInit {
 
   doForgot() {
     if (!this.forgotForm.valid) {
-      console.error("*** form is not valid");
+      console.error("form is not valid");
     } else {
       this.isInProgress = true;
       this.error = "";

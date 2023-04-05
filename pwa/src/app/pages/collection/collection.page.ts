@@ -217,24 +217,15 @@ export class CollectionPage implements OnInit {
   }
 
   doAction(ix: any) {
-    if (this.perm) {
-      if (!this.actions[ix].one_click && !this.sweeped[this.segment]) {
-        this.misc.doMessage("please make selection", "error");
+    if (this.perm && this.data?.length > 0) {
+      if (!this.actions[ix]?.one_click && !this.sweeped[this.segment]) {
+        this.misc.doMessage("please make a selection", "error");
       } else {
         this.actionix = ix;
-        this.storage.set("LSFILTER_" + this.id, this.actions[ix].filter).then(() => {
-          this.filter = this.actions[ix].filter;
-          this.RefreshData(0).then(() => {
-            this.data?.length > 0 ? this.goCrud(null, "action") : null;
-          }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
-          });
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-        });
+        this.goCrud(null, "action");
       }
     } else {
-      this.misc.doMessage("no permission", "error");
+      this.misc.doMessage("no permission to run action", "error");
     }
   }
 
@@ -311,44 +302,10 @@ export class CollectionPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
-        this.RefreshData(0);
+        this.doClearFilter().then(() => { });
       }
     });
     return await modal.present();
-  }
-
-  doCollectionSettings() {
-    if (this.perm && this.is_crud) {
-      this.master = {
-        collection: "_collection",
-        structure: this.collections_structure,
-        data: this.collections.find((obj: any) => obj.col_id === this.id)
-      }
-      this.modal.create({
-        component: CrudPage,
-        backdropDismiss: false,
-        cssClass: "crud-modal",
-        componentProps: {
-          shuttle: {
-            op: "update",
-            collection: this.master.collection,
-            collections: this.collections ? this.collections : [],
-            views: this.views ? this.views : [],
-            user: this.user,
-            data: this.master.data,
-            structure: this.master.structure,
-            direct: -1
-          }
-        }
-      }).then((modal: any) => {
-        modal.present();
-        modal.onDidDismiss().then((res: any) => {
-          if (res.data.modified) {
-            window.location.reload();
-          }
-        });
-      });
-    }
   }
 
   async GetIsSelectData() {
@@ -424,12 +381,19 @@ export class CollectionPage implements OnInit {
   }
 
   doClearFilter() {
-    this.filter = [];
-    this.storage.set("LSSFILTER_" + this.id, this.filter).then(() => {
-      this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
-        this.doResetSearch(true);
-        this.searched = {};
-        this.RefreshData(0);
+    return new Promise((resolve, reject) => {
+      this.filter = [];
+      this.storage.set("LSSFILTER_" + this.id, this.filter).then(() => {
+        this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
+          this.doResetSearch(true);
+          this.searched = {};
+          this.sweeped[this.segment] = [];
+          this.RefreshData(0).then(() => {
+            resolve(true);
+          }).catch((res: any) => {
+            this.misc.doMessage(res, "error");
+          });
+        });
       });
     });
   }
@@ -515,11 +479,11 @@ export class CollectionPage implements OnInit {
     this.jeopen = !this.jeopen;
   }
 
-  doSaveScheme() {
+  doSaveSchema() {
     if (this.perm) {
       this.is_saving = true;
       this.misc.apiCall("/crud", {
-        op: "savescheme",
+        op: "saveschema",
         collection: this.id,
         structure: this.structure
       }).then(() => {

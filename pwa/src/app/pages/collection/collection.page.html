@@ -92,21 +92,17 @@ https://www.gnu.org/licenses.
               <div *ngIf="perm && is_crud" (click)="doShowCode()" class="data-sq-button">
                 <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
                   <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
-                  {{ 'JSON' | translate }}<br />{{ 'Scheme' | translate }}
+                  {{ 'JSON' | translate }}<br />{{ 'Schema' | translate }}
                 </div>
                 <ng-template #nojeopen>
                   <ion-icon name="close-circle-outline"></ion-icon><br />
-                  {{ 'Cancel' | translate }}<br />{{ 'Scheme' | translate }}
+                  {{ 'Cancel' | translate }}<br />{{ 'Schema' | translate }}
                 </ng-template>
               </div>
-              <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger" (click)="doSaveScheme()">
+              <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger" (click)="doSaveSchema()">
                 <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
                 <ion-icon *ngIf="!is_saving" name="cloud-upload-outline"></ion-icon><br />
-                {{ 'Save' | translate }}<br />{{ 'Scheme' | translate }}
-              </div>
-              <div *ngIf="perm && is_crud" (click)="doCollectionSettings()" class="data-sq-button">
-                <ion-icon name="settings-outline"></ion-icon><br />
-                {{ 'Collection' | translate }}<br />{{ 'Settings' | translate }}
+                {{ 'Save' | translate }}<br />{{ 'Schema' | translate }}
               </div>
             </ion-col>
           </ion-row>
@@ -125,6 +121,8 @@ https://www.gnu.org/licenses.
               <div class="act-buttons-wrapper">
                 <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)"
                   class="action-button" color="dark">
+                  <ion-icon *ngIf="item?.rollback" name="arrow-back-outline"></ion-icon>
+                  <ion-icon *ngIf="item?.one_click" name="flash-outline"></ion-icon>
                   {{ item.title }}
                 </ion-button>
               </div>
@@ -132,7 +130,7 @@ https://www.gnu.org/licenses.
             <ng-template #noaction>
               <ion-col>
                 <h6>{{ 'No actions found' | translate }}</h6>
-                {{ 'To create an action please add an item into "actions" field of JSON Scheme' | translate }}.
+                {{ 'To create an action please add an item into "actions" field of JSON Schema' | translate }}.
               </ion-col>
             </ng-template>
           </ion-row>

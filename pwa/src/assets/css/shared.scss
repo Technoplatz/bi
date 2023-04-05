@@ -1859,11 +1859,12 @@ app-charts {
   border: 5px solid var(--ion-color-light);
   align-content: flex-start;
   width: 320px;
-  min-height: 140px;
+  min-height: 148px;
   white-space: nowrap !important;
 }
 
 .flash-sq h2 {
+  margin-top: 12px !important;
   color: var(--ion-color-primary);
 }
 
@@ -1876,7 +1877,7 @@ app-charts {
 }
 
 .flash-sq h6 {
-  margin-top: 14px !important;
+  margin-top: 8px !important;
   font-weight: 400 !important;
   font-size: small !important;
 }

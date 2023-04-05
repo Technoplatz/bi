@@ -90,6 +90,7 @@ export class CrudPage implements OnInit {
   public istrue_: boolean = true;
   public visible: string = "hide";
   public parent: any = {};
+  public aktions: any = [];
   private structure: any = {};
   private sweeped: any;
   private filter: any = [];
@@ -120,6 +121,10 @@ export class CrudPage implements OnInit {
     this.crudForm = this.formBuilder.group({}, {});
   }
 
+  ngOnDestroy() {
+    this.storage.remove("LSOP").then(() => { });
+  }
+
   ngOnInit() {
     this.modified = false;
     this.collection = this.shuttle.collection ? this.shuttle.collection : null;
@@ -140,38 +145,90 @@ export class CrudPage implements OnInit {
     this.options.mode = "code";
     this.options.statusBar = true;
     this.parents = this.structure?.parents ? this.structure.parents : [];
-    this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
-      this.tab = "data";
-      this.crudForm = res.form;
-      this.fields = res.fields;
-      this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? res.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
-      this.data = this.shuttle.data ? this.shuttle.data : res.init;
-      this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
-      this.doGetSubProperties(this.collection).then(() => {
+    this.doGetAllAktions(this.op).then((res: any) => {
+      this.aktions = res;
+      this.crud.initForm(this.op, this.structure, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
+        this.tab = "data";
+        this.crudForm = res.form;
+        this.fields = res.fields;
+        this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? res.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
+        this.data = this.shuttle.data ? this.shuttle.data : res.init;
+        this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
+        this.doGetSubProperties(this.collection).then(() => {
+          if (this.actionix >= 0) {
+            this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+            });
+          }
+        }).catch((error: any) => {
+          this.misc.doMessage(error, "error");
+        }).finally(() => {
+          this.visible = "show";
+          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
+        });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.visible = this.op === "action" ? "hide" : "show";
-        this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
       });
-    }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
     });
   }
 
-  ngOnDestroy() {
-    this.storage.remove("LSOP").then(() => { });
+  doGetAllAktions(op: string) {
+    return new Promise((resolve, reject) => {
+      if (op !== "action") {
+        resolve([]);
+      } else {
+        resolve(this.shuttle.actions && this.shuttle.actions.length > 0 ? this.shuttle.actions : []);
+      }
+    });
+  }
+
+  async propertiesAktionFilter(v: any) {
+    return Object.entries(this.properties).filter((obj: any) => v.set.some((f: any) => obj[0] === f.key));
+  }
+
+  doAktionChange(ix: number) {
+    return new Promise((resolve) => {
+      const v = this.aktions[ix];
+      let structure_: any = this.structure;
+      let controls_: any = {};
+      let fields_: any = {};
+      this.fieldsupd = this.fields.filter((obj: any) => v.set.some((f: any) => obj.name === f.key));
+      this.propertiesAktionFilter(v).then((properties_filter_: any) => {
+        for (let j = 0; j < properties_filter_.length; j++) {
+          fields_[properties_filter_[j][0]] = properties_filter_[j][1];
+          if (j === properties_filter_.length - 1) {
+            structure_.properties = fields_;
+            structure_.required = structure_.required ? structure_.required.filter((obj: any) => v.set.some((f: any) => obj.name === f.key)) : [];
+            const form_ctrl_filter_ = Object.entries(this.crudForm.controls).filter((obj: any) => v.set.some((f: any) => obj[0] === f.key));
+            for (let k = 0; k < form_ctrl_filter_.length; k++) {
+              controls_[form_ctrl_filter_[k][0]] = form_ctrl_filter_[k][1];
+              if (k === form_ctrl_filter_.length - 1) {
+                for (let f = 0; f < v.set.length; f++) {
+                  v.set[f].value === "$CURRENT_DATE" ? v.set[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 19) : null;
+                  this.data[v.set[f].key] = v.set[f].value;
+                  this.crudForm.get(v.set[f].key)?.setValue(v.set[f].value);
+                  if (f === v.set.length - 1) {
+                    this.crudForm.controls = controls_;
+                    this.visible = "show";
+                    resolve(true);
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+    });
   }
 
   doSubmit() {
-    this.error = "";
     if (!this.isInProgress) {
-      if (this.op !== "remove" && !this.crudForm.valid) {
+      if (!["remove", "action"].includes(this.op) && !this.crudForm.valid) {
         this.misc.doMessage("form is not valid", "error");
       } else {
         this.modified = true;
         this.isInProgress = true;
-        this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view).then((res: any) => {
+        this.crud.Submit(this.collection, this.structure, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix).then((res: any) => {
           this.crud.modalSubmitListener.next({ "result": true });
           if (this.barcoded_) {
             console.log("*** barcode is staying alive");
@@ -313,7 +370,7 @@ export class CrudPage implements OnInit {
         match: [{
           key: "col_id",
           op: "eq",
-          value: coll_ === "_collection" ? this.data["col_id"] : coll_ === "_permission" ? this.data["per_collection_id"] : coll_ === "_automation" ? this.data["aut_source_collection_id"] : coll_ === "_action" ? this.data["act_collection_id"] : coll_ === "_view" ? this.data["vie_collection_id"] : coll_
+          value: coll_ === "_collection" ? this.data["col_id"] : coll_ === "_permission" ? this.data["per_collection_id"] : coll_ === "_automation" ? this.data["aut_source_collection_id"] : coll_ === "_action" ? this.data["act_collection_id"] : coll_ === "_view" ? this.data["vie_collection_id"] : coll_ === "_action" ? this.data["act_collection_id"] : coll_
         }],
         sort: null,
         page: 1,

@@ -180,7 +180,7 @@ export class Crud {
     });
   }
 
-  Submit(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any) {
+  Submit(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any, actionix: any) {
     return new Promise((resolve, reject) => {
       const properties = structure.properties;
       let doc_: any = {};
@@ -208,7 +208,8 @@ export class Crud {
               match: match && match.length > 0 ? match : null,
               filter: filter ? filter : null,
               _id: _id ? _id : null,
-              view: view
+              view: view,
+              actionix: actionix
             }).then((res: any) => {
               resolve(res);
             }).catch((err: any) => {
