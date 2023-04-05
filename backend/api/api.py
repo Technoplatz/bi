@@ -3301,6 +3301,10 @@ class Crud():
             if not tags_:
                 raise APIError("no tags found in action")
             
+            fields_ = action_["fields"].replace(" ", "") if "fields" in action_ else None
+            if not fields_:
+                raise APIError("no fields found in action")
+            
             subject_ = action_["subject"] if "subject" in action_ else "Action Completed"
             html_ = action_["body"] if "body" in action_ else f"<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
 
@@ -3326,12 +3330,24 @@ class Crud():
             session_.start_transaction()
             session_db_[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, session=session_)
 
+            type_ = "csv"
+            file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
+            loc_ = f"/cron/{file_}"
+
+            # command_ = f"mongoexport --username={MONGO_INITDB_ROOT_USERNAME_} --password={MONGO_INITDB_ROOT_PASSWORD_} --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --host={MONGO_HOST_}:{MONGO_PORT_} --authenticationDatabase={MONGO_AUTH_DB_} --query={get_filtered_} --db={MONGO_DB_} --type={type_} --fields=dnn_no,dnn_status"
+
+            command_ = f"mongoexport --uri='mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type=csv --fields={fields_}"
+            os.system(command_)
+
+            files_ = [{"filename": file_, "filetype": type_}]
+
             # EMAIL SEND
             email_sent_ = Email().sendEmail_f({
                 "op": "action",
                 "tags": tags_,
                 "subject": subject_,
-                "html": html_
+                "html": html_,
+                "files": files_
             })
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
