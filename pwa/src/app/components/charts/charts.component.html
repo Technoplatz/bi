@@ -30,24 +30,24 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ngx-charts-pie-chart *ngIf="chartStyle=='Pie'" [scheme]="colorScheme" [results]="data" [gradient]="gradient"
+<ngx-charts-pie-chart *ngIf="chartStyle=='Pie'" [scheme]="colorSchema" [results]="data" [gradient]="gradient"
     [legend]="showLegend" [legendPosition]="legendPosition" [labels]="showDataLabel" [tooltipDisabled]="tooltipDisabled"
     [doughnut]="false" [view]="view" (select)="onSelect($event)">
 </ngx-charts-pie-chart>
 
-<ngx-charts-pie-chart *ngIf="chartStyle=='Doughnut'" [scheme]="colorScheme" [results]="data" [gradient]="gradient"
+<ngx-charts-pie-chart *ngIf="chartStyle=='Doughnut'" [scheme]="colorSchema" [results]="data" [gradient]="gradient"
     [legend]="showLegend" [legendPosition]="legendPosition" [labels]="showDataLabel" [tooltipDisabled]="tooltipDisabled"
     [doughnut]="true" [view]="view" (select)="onSelect($event)">
 </ngx-charts-pie-chart>
 
-<ngx-charts-bar-vertical *ngIf="chartStyle=='Vertical Bar'" [scheme]="colorScheme" [results]="data"
+<ngx-charts-bar-vertical *ngIf="chartStyle=='Vertical Bar'" [scheme]="colorSchema" [results]="data"
     [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [noBarWhenZero]="noBarWhenZero"
     [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel" [xAxisLabel]="xAxisLabel"
     [showGridLines]="showGridLines" [yAxisLabel]="yAxisLabel" [roundDomains]="roundDomains" [view]="view"
     (select)="onSelect($event)">
 </ngx-charts-bar-vertical>
 
-<ngx-charts-bar-vertical-normalized *ngIf="chartStyle=='Normalized Vertical Bar'" [scheme]="colorScheme"
+<ngx-charts-bar-vertical-normalized *ngIf="chartStyle=='Normalized Vertical Bar'" [scheme]="colorSchema"
     [results]="data" [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend"
     [legendTitle]="legendTitle" [legendPosition]="legendPosition" [noBarWhenZero]="noBarWhenZero"
     [showXAxisLabel]="showXAxisLabel" [showGridLines]="showGridLines" [showYAxisLabel]="showYAxisLabel"
@@ -55,7 +55,7 @@ https://www.gnu.org/licenses.
     (select)="onSelect($event)">
 </ngx-charts-bar-vertical-normalized>
 
-<ngx-charts-bar-vertical-stacked *ngIf="chartStyle=='Stacked Vertical Bar'" [scheme]="colorScheme" [results]="data"
+<ngx-charts-bar-vertical-stacked *ngIf="chartStyle=='Stacked Vertical Bar'" [scheme]="colorSchema" [results]="data"
     [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend" [legendTitle]="legendTitle"
     [legendPosition]="legendPosition" [noBarWhenZero]="noBarWhenZero" [showXAxisLabel]="showXAxisLabel"
     [showGridLines]="showGridLines" [showYAxisLabel]="showYAxisLabel" [xAxisLabel]="xAxisLabel"
@@ -63,21 +63,21 @@ https://www.gnu.org/licenses.
     (select)="onSelect($event)">
 </ngx-charts-bar-vertical-stacked>
 
-<ngx-charts-bar-vertical-2d *ngIf="chartStyle=='Grouped Vertical Bar'" [scheme]="colorScheme" [results]="data"
+<ngx-charts-bar-vertical-2d *ngIf="chartStyle=='Grouped Vertical Bar'" [scheme]="colorSchema" [results]="data"
     [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend" [legendTitle]="legendTitle"
     [legendPosition]="legendPosition" [noBarWhenZero]="noBarWhenZero" [showXAxisLabel]="showXAxisLabel"
     [showYAxisLabel]="showYAxisLabel" [showDataLabel]="showDataLabel" [xAxisLabel]="xAxisLabel"
     [yAxisLabel]="yAxisLabel" [roundDomains]="roundDomains" [view]="view" (select)="onSelect($event)">
 </ngx-charts-bar-vertical-2d>
 
-<ngx-charts-bar-horizontal *ngIf="chartStyle=='Horizontal Bar'" [scheme]="colorScheme" [results]="data"
+<ngx-charts-bar-horizontal *ngIf="chartStyle=='Horizontal Bar'" [scheme]="colorSchema" [results]="data"
     [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend" [legendTitle]="legendTitle"
     [legendPosition]="legendPosition" [noBarWhenZero]="noBarWhenZero" [showXAxisLabel]="showXAxisLabel"
     [showYAxisLabel]="showYAxisLabel" [xAxisLabel]="xAxisLabel" [showGridLines]="showGridLines"
     [yAxisLabel]="yAxisLabel" [roundDomains]="roundDomains" [view]="view" (select)="onSelect($event)">
 </ngx-charts-bar-horizontal>
 
-<ngx-charts-bar-horizontal-normalized *ngIf="chartStyle=='Normalized Horizontal Bar'" [scheme]="colorScheme"
+<ngx-charts-bar-horizontal-normalized *ngIf="chartStyle=='Normalized Horizontal Bar'" [scheme]="colorSchema"
     [results]="data" [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend"
     [legendTitle]="legendTitle" [legendPosition]="legendPosition" [noBarWhenZero]="noBarWhenZero"
     [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel" [xAxisLabel]="xAxisLabel"
@@ -85,7 +85,7 @@ https://www.gnu.org/licenses.
     (select)="onSelect($event)">
 </ngx-charts-bar-horizontal-normalized>
 
-<ngx-charts-bar-horizontal-stacked *ngIf="chartStyle=='Stacked Horizontal Bar'" [scheme]="colorScheme" [results]="data"
+<ngx-charts-bar-horizontal-stacked *ngIf="chartStyle=='Stacked Horizontal Bar'" [scheme]="colorSchema" [results]="data"
     [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend" [legendTitle]="legendTitle"
     [legendPosition]="legendPosition" [noBarWhenZero]="noBarWhenZero" [showXAxisLabel]="showXAxisLabel"
     [showDataLabel]="showDataLabel" [showYAxisLabel]="showYAxisLabel" [xAxisLabel]="xAxisLabel"
@@ -93,7 +93,7 @@ https://www.gnu.org/licenses.
     (select)="onSelect($event)">
 </ngx-charts-bar-horizontal-stacked>
 
-<ngx-charts-bar-horizontal-2d *ngIf="chartStyle=='Grouped Horizontal Bar'" [scheme]="colorScheme" [results]="data"
+<ngx-charts-bar-horizontal-2d *ngIf="chartStyle=='Grouped Horizontal Bar'" [scheme]="colorSchema" [results]="data"
     [gradient]="gradient" [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend" [legendTitle]="legendTitle"
     [legendPosition]="legendPosition" [noBarWhenZero]="noBarWhenZero" [showXAxisLabel]="showXAxisLabel"
     [showDataLabel]="showDataLabel" [showYAxisLabel]="showYAxisLabel" [xAxisLabel]="xAxisLabel"
@@ -101,7 +101,7 @@ https://www.gnu.org/licenses.
     (select)="onSelect($event)">
 </ngx-charts-bar-horizontal-2d>
 
-<ngx-charts-line-chart *ngIf="chartStyle=='Line'" [scheme]="colorScheme" [results]="data" [gradient]="gradient"
+<ngx-charts-line-chart *ngIf="chartStyle=='Line'" [scheme]="colorSchema" [results]="data" [gradient]="gradient"
     [xAxis]="showXAxis" [yAxis]="showYAxis" [legend]="showLegend" [legendTitle]="legendTitle"
     [legendPosition]="legendPosition" [showXAxisLabel]="showXAxisLabel" [showYAxisLabel]="showYAxisLabel"
     [xAxisLabel]="xAxisLabel" [showGridLines]="showGridLines" [yAxisLabel]="yAxisLabel" [roundDomains]="roundDomains"

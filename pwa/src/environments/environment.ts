@@ -127,11 +127,6 @@ export const environment = {
     { "id": "_backup", "title": "Backups" },
     { "id": "_log", "title": "Logs" }
   ],
-  charts: {
-    colorScheme: {
-      domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
-    }
-  },
   themes: [
     { "name": "Dark", "color": "#111111" },
     { "name": "Cobalt", "color": "#0047AB" },

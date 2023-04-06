@@ -62,7 +62,7 @@ export class ChartsComponent implements OnInit {
   public legendPosition: string = "right";
   public tooltipDisabled: boolean = false;
   public view: any[] = [0, 0];
-  public colorScheme: any = environment.charts.colorScheme;
+  public colorSchema: any = [];
   public curve: any;
   public ok: boolean = false;
   private minWidth: number = 16;
@@ -88,9 +88,9 @@ export class ChartsComponent implements OnInit {
     this.showGridLines = this.visual.grid_show;
     this.gradient = this.visual.gradient;
     this.curve = shape.curveCardinal;
-    this.colorScheme = {
-      domain: this.visual.color_scheme
-    }
+    this.colorSchema = this.visual.color_schema ? {
+      domain: this.visual.color_schema
+    } : null;
     this.view = this.width > this.minWidth ? [this.width - 16, this.width * 0.75] : [];
     this.ok = true;
   }

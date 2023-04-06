@@ -87,45 +87,50 @@ https://www.gnu.org/licenses.
           <div class="view-infos">
             <!-- PIVOT -->
             <div [innerHtml]="pivot_" class="pivot"></div>
+
             <!-- STAT -->
             <table *ngIf="statistics_" class="stat">
               <tr>
-                <th colspan="8">{{ 'DESCRIPTIVE STATISTICS' | translate }}<br />{{ statistics_key_ }}</th>
+                <td colspan="4">{{ 'DESCRIPTIVE STATISTICS' | translate }}<br />{{ statistics_key_ }}</td>
               </tr>
               <tr>
                 <th>
-                  <span>{{ 'COUNT' | translate }}</span>
+                  {{ 'CNT' | translate }}
                 </th>
                 <th>
-                  <span>{{ 'MEAN' | translate }}</span>
+                  {{ 'MEA' | translate }}
                 </th>
                 <th>
-                  <span>{{ 'STDEV' | translate }}</span>
+                  {{ 'STD' | translate }}
                 </th>
                 <th>
-                  <span>{{ 'MIN' | translate }}</span>
-                </th>
-                <th>
-                  <span>{{ 'MAX' | translate }}</span>
-                </th>
-                <th>
-                  <span>{{ 'TOP' | translate }}</span>
-                </th>
-                <th>
-                  <span>{{ 'UNIQUE' | translate }}</span>
-                </th>
-                <th>
-                  <span>{{ 'FREQ' | translate }}</span>
+                  {{ 'UNQ' | translate }}
                 </th>
               </tr>
               <tr>
                 <td>{{ statistics_.count}}</td>
-                <td>{{ statistics_.mean}}</td>
-                <td>{{ statistics_.std}}</td>
-                <td>{{ statistics_.min}}</td>
-                <td>{{ statistics_.max}}</td>
-                <td>{{ statistics_.top}}</td>
+                <td>{{ statistics_.mean.toFixed(2)}}</td>
+                <td>{{ statistics_.std.toFixed(2)}}</td>
                 <td>{{ statistics_.unique}}</td>
+              </tr>
+              <tr>
+                <th>
+                  {{ 'MIN' | translate }}
+                </th>
+                <th>
+                  {{ 'MAX' | translate }}
+                </th>
+                <th>
+                  {{ 'TOP' | translate }}
+                </th>
+                <th>
+                  {{ 'FRQ' | translate }}
+                </th>
+              </tr>
+              <tr>
+                <td>{{ statistics_.min.toFixed(2)}}</td>
+                <td>{{ statistics_.max.toFixed(2)}}</td>
+                <td>{{ statistics_.top}}</td>
                 <td>{{ statistics_.freq}}</td>
               </tr>
             </table>

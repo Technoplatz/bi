@@ -1789,7 +1789,6 @@ class Crud():
             id_ = obj["id"]
             user_ = obj["user"]
 
-            # checks enabled visuals
             doc_ = Mongo().db["_view"].find_one({"_id": ObjectId(id_)})
             if not doc_:
                 raise APIError("no view found")
@@ -1833,7 +1832,6 @@ class Crud():
             vie_p_yaxis_label_ = view_properties_[vie_chart_yaxis_]["title"] if vie_chart_yaxis_ in view_properties_ and "title" in view_properties_[vie_chart_yaxis_] else vie_chart_yaxis_
             vie_p_legend_title_ = view_properties_[vie_chart_legend_]["title"] if vie_chart_legend_ in view_properties_ and "title" in view_properties_[vie_chart_legend_] else vie_chart_legend_
 
-            # convert view data to pandas df
             df_ = pd.DataFrame(list(view_data_)).fillna(0)
 
             dropped_ = []
@@ -3319,12 +3317,7 @@ class Crud():
                     "properties": structure_["properties"] if "properties" in structure_ else None
                 })
 
-            match_ = action_["match"] if "match" in action_ else None
-            if not match_:
-                raise APIError("no action match not found")
-
-            if not len(action_["match"]) > 0:
-                raise APIError("action match is not an array")
+            match_ = action_["match"] if "match" in action_ and len(action_["match"]) > 0 else {}
 
             get_filtered_ = self.get_filtered_f({
                 "match": match_,

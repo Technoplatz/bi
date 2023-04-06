@@ -66,7 +66,7 @@
       "default": false,
       "width": 100
     },
-    "per_scheme": {
+    "per_schema": {
       "bsonType": "bool",
       "title": "Scheme",
       "description": "Scheme Permission",
