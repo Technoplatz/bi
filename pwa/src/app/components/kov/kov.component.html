@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-reorder-group *ngIf="ok; else loading" (ionItemReorder)="doReorder($event, fname)" class="ion-no-padding">
+<ion-reorder-group disabled="false" *ngIf="ok; else loading" (ionItemReorder)="doReorder($event, fname)" class="ion-no-padding">
   <ion-item *ngIf="!field.manualAdd && (!data[fname] || data[fname]?.length == 0)" lines="none"
     class="ion-no-margin ion-no-padding">
     <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
@@ -40,7 +40,7 @@ https://www.gnu.org/licenses.
   </ion-item>
   <ion-item *ngFor="let kv of data[fname]; let i = index" lines="full" class="ion-no-padding ion-no-margin">
     <ion-reorder slot="start"></ion-reorder>
-    <ion-grid class="kov-grid" fixed="true">
+    <ion-grid class="kov-grid">
       <ion-row>
         <!-- key -->
         <ion-col *ngIf="type=='key'" size="10.5">

@@ -132,7 +132,7 @@ https://www.gnu.org/licenses.
                         </ion-badge>
                     </div>
                 </ion-item>
-                <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index" class="ion-no-margin">
+                <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index" class="ion-no-margin full-width">
                     <ion-label position="stacked">
                         {{ field.title | translate }}
                         <sup *ngIf="field.required">
@@ -141,10 +141,10 @@ https://www.gnu.org/licenses.
                         </sup>
                     </ion-label>
                     <div *ngIf="field?.description" class="input-desc">{{ field.description | translate }}</div>
-                    <div *ngIf="field.bsonType=='string'">
-                        <div *ngIf="!field.file; else isfile" class="full-width">
+                    <div *ngIf="field.bsonType=='string'" class="full-width">
+                        <div *ngIf="!field.file; else isfile">
                             <div
-                                *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword">
+                                *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword" style="min-width: 100% !important">
                                 <ion-input #barcodefocus *ngIf="!field.textarea"
                                     [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                     [maxlength]="field.maxLength" [minlength]="field.minLength"
@@ -188,7 +188,6 @@ https://www.gnu.org/licenses.
                         </div>
                         <ng-template #isfile>
                             <div class="full-width">
-                                <!-- <p *ngIf="data[field.name]">{{ data[field.name] }}</p> -->
                                 <ion-input [id]="field.name" class="ion-no-padding" [formControlName]="field.name"
                                     type="file" [required]="field.required" (change)="onFileChange($event)">
                                 </ion-input>
