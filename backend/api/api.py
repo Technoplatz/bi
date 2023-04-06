@@ -58,6 +58,7 @@ import jwt
 import xlrd
 import asyncio
 import io
+from subprocess import call
 from pickle import TRUE
 from email import encoders
 from email.mime.base import MIMEBase
@@ -458,7 +459,7 @@ class Misc():
     def mongo_error_f(self, exc):
         try:
             self.post_notification(exc)
-            print("*** mongo error", exc, flush=True)
+            print("*** mongo error", str(exc), flush=True)
             # print("*** mongo error", type(exc).details, flush=True)
             # print("*** mongo error", type(exc).__name__, flush=True)
             # print("*** mongo error", __file__, flush=True)
@@ -1395,19 +1396,16 @@ class Crud():
             is_crud_ = True if vie_collection_id_[:1] != "_" else False
 
             vie_collection_ = Mongo().db["_collection"].find_one({"col_id": vie_collection_id_})
+            collection_ = f"{vie_collection_id_}_data" if is_crud_ else vie_collection_id_
 
-            # Get the collection structure of the query
             if is_crud_ and "col_structure" not in vie_collection_:
                 raise APIError("structure not found in collection")
 
             col_structure_ = vie_collection_["col_structure"] if is_crud_ else self.root_schemas_f(f"{vie_collection_id_}")
 
-            # Get properties of the structure
             if not "properties" in col_structure_:
                 raise APIError("properties not found in structure")
             properties_ = col_structure_["properties"]
-
-            # Set the properties of the all collections (own+parents)
             properties_master_ = {}
 
             for property_ in properties_:
@@ -1422,15 +1420,12 @@ class Crud():
                             for item_property_ in item_properties_:
                                 properties_master_[item_property_] = item_properties_[item_property_]
 
-            # Initializing of the aggregation elements
             pipe_ = []
             unset_ = []
 
-            # Adding master collection's _id first
             set_ = {"$set": {"_ID": {"$toObjectId": "$_id"}}}
             pipe_.append(set_)
 
-            # Get parents of the structure
             parents_ = []
             if "parents" in col_structure_:
                 parents_ = col_structure_["parents"]
@@ -1440,10 +1435,10 @@ class Crud():
                 vie_order_by_ = view_["vie_order_by"]
                 for ob_ in vie_order_by_:
                     sort_[ob_] = 1
-            elif "sort" in col_structure_ and col_structure_["sort"] != {}:
-                sort_ = col_structure_["sort"]
+            # elif "sort" in col_structure_ and col_structure_["sort"] != {}:
+            #     sort_ = col_structure_["sort"]
             else:
-                sort_ = {"_modified_at_": -1}
+                sort_ = {f"{collection_}._modified_at_": -1}
 
             unset_.append("_modified_by")
             unset_.append("_modified_at")
@@ -1452,7 +1447,6 @@ class Crud():
             unset_.append("_created_by")
             unset_.append("_structure")
             unset_.append("_tags")
-            # unset_.append("_id")
             unset_.append("_ID")
 
             for properties_master__ in properties_master_:
@@ -1529,8 +1523,7 @@ class Crud():
                 properties_master_ = properties_tmp_
 
             # Run aggregation
-            data_ = f"{vie_collection_id_}_data" if is_crud_ else vie_collection_id_
-            aggregate_ = list(Mongo().db[data_].aggregate(pipe_))
+            aggregate_ = list(Mongo().db[collection_].aggregate(pipe_))
 
             records_ = []
             if source_ != "propsonly":
@@ -1541,7 +1534,7 @@ class Crud():
             res_ = {
                 "result": True,
                 "record": json.loads(JSONEncoder().encode(view_)) if source_ == "internal" else None,
-                "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:10],
+                "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:50],
                 "count": count_,
                 "properties": properties_master_,
                 "structure": vie_structure_,
@@ -3300,20 +3293,41 @@ class Crud():
             tags_ = action_["_tags"] if "_tags" in action_ and len(action_["_tags"]) > 0 else None
             if not tags_:
                 raise APIError("no tags found in action")
-            
-            fields_ = action_["fields"].replace(" ", "") if "fields" in action_ else None
-            if not fields_:
-                raise APIError("no fields found in action")
-            
-            subject_ = action_["subject"] if "subject" in action_ else "Action Completed"
-            html_ = action_["body"] if "body" in action_ else f"<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
 
-            filter_ = action_["filter"] if "filter" in action_ and len(action_["filter"]) > 0 else None
-            if not (filter_ and len(filter_) > 0):
-                raise APIError("no action filter not found")
+            notify_ = False
+
+            notification_ = action_["notification"] if "notification" in action_ else None
+
+            if notification_:
+                if "notify" not in notification_:
+                    raise APIError("no notify field found in notification")
+                notify_ = True if notification_["notify"] == True else False
+                subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
+                if not subject_:
+                    raise APIError("no subject field found in notification")
+                body_ = notification_["body"] if "body" in notification_ else f"<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
+                if not body_:
+                    raise APIError("no body field found in notification")
+                fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
+                if not fields_:
+                    raise APIError("no fields field found in notification")
+                filter_ = notification_["filter"] if "filter" in notification_ and len(notification_["filter"]) > 0 else None
+                if not filter_:
+                    raise APIError("no filter array found in notification")
+                get_notification_filtered_ = self.get_filtered_f({
+                    "match": filter_,
+                    "properties": structure_["properties"] if "properties" in structure_ else None
+                })
+
+            match_ = action_["match"] if "match" in action_ else None
+            if not match_:
+                raise APIError("no action match not found")
+
+            if not len(action_["match"]) > 0:
+                raise APIError("action match is not an array")
 
             get_filtered_ = self.get_filtered_f({
-                "match": filter_,
+                "match": match_,
                 "properties": structure_["properties"] if "properties" in structure_ else None
             })
 
@@ -3328,32 +3342,28 @@ class Crud():
             session_db_ = session_client_[MONGO_DB_]
             session_ = session_client_.start_session()
             session_.start_transaction()
-            session_db_[collection_].update_many(get_filtered_, {"$set": doc_, "$inc": {"_modified_count": 1}}, session=session_)
-
-            type_ = "csv"
-            file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
-            loc_ = f"/cron/{file_}"
-
-            # command_ = f"mongoexport --username={MONGO_INITDB_ROOT_USERNAME_} --password={MONGO_INITDB_ROOT_PASSWORD_} --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --host={MONGO_HOST_}:{MONGO_PORT_} --authenticationDatabase={MONGO_AUTH_DB_} --query={get_filtered_} --db={MONGO_DB_} --type={type_} --fields=dnn_no,dnn_status"
-
-            command_ = f"mongoexport --uri='mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type=csv --fields={fields_}"
-            os.system(command_)
-
-            files_ = [{"filename": file_, "filetype": type_}]
-
-            # EMAIL SEND
-            email_sent_ = Email().sendEmail_f({
-                "op": "action",
-                "tags": tags_,
-                "subject": subject_,
-                "html": html_,
-                "files": files_
-            })
-            if not email_sent_["result"]:
-                raise APIError(email_sent_["msg"])
-            
+            set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
+            session_db_[collection_].update_many(get_filtered_, set_, session=session_)
             session_.commit_transaction()
             session_client_.close()
+
+            if notify_:
+                type_ = "csv"
+                file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
+                loc_ = f"/cron/{file_}"
+                query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
+                command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                call(command_, shell=True)
+                files_ = [{"filename": file_, "filetype": type_}]
+                email_sent_ = Email().sendEmail_f({
+                    "op": "action",
+                    "tags": tags_,
+                    "subject": subject_,
+                    "html": body_,
+                    "files": files_
+                })
+                if not email_sent_["result"]:
+                    raise APIError(email_sent_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",

@@ -381,6 +381,7 @@ export class CrudPage implements OnInit {
         let array_: any = [];
         for (let prop_ in properties) {
           if (i === Object.keys(properties).length - 1) {
+            array_.push({ key: prop_, value: properties[prop_]?.title });
             this.property_list = array_;
             resolve(this.property_list);
           } else {

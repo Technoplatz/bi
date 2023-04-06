@@ -503,12 +503,17 @@ form ion-item ion-label {
   color: var(--ion-color-primary) !important;
 }
 
-.stat {
-  min-width: 33%;
-  max-width: 85%;
+.view-infos {
+  display: flex;
   margin-top: 16px;
-  margin-bottom: 32px;
+  width: calc(100% - 20px);
+}
+
+.stat,
+.pivot {
   background-color: #efefef;
+  min-width: 50%;
+  max-width: 50%;
 }
 
 .stat th {
@@ -527,10 +532,7 @@ form ion-item ion-label {
 }
 
 .pivot .dataframe {
-  min-width: 33%;
-  max-width: 85%;
-  margin-top: 16px;
-  background-color: #efefef;
+  width: 100%;
 }
 
 .pivot .dataframe td,
