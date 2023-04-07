@@ -397,9 +397,10 @@ ion-note {
 
 .data-sq-button ion-img {
   width: 24px !important;
-  height: 24px !important;
+  height: 22px !important;
   margin: auto;
-  margin-bottom: 6px !important;
+  margin-top: 2px !important;
+  margin-bottom: 5px !important;
 }
 
 .data-sq-button.disabled {
@@ -1387,10 +1388,17 @@ sup {
   width: 100% !important;
 }
 
-.structureditor {
-  display: flex;
+.jeditor {
+  display: flex !important;
   flex-flow: column;
-  height: calc(90vh - 150px);
+  height: calc(90vh - 170px);
+  margin-top: -20px;
+  margin-bottom: 32px;
+  padding: 0px;
+}
+
+.jeditor-hide {
+  display: none;
 }
 
 json-editor,

@@ -3301,7 +3301,6 @@ class Crud():
                 raise AppException("no tags found in action")
 
             notify_ = False
-
             notification_ = action_["notification"] if "notification" in action_ else None
 
             if notification_:
@@ -3337,7 +3336,8 @@ class Crud():
 
             if ids_ and len(ids_) > 0:
                 get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
-                get_notification_filtered_ = {"$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]}
+                if notify_:
+                    get_notification_filtered_ = {"$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]}
 
             # DO ACTION ON DATABASE
             session_client_ = MongoClient(Mongo().connstr)

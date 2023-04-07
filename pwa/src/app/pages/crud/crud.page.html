@@ -83,7 +83,7 @@ https://www.gnu.org/licenses.
 </ion-header>
 <ion-content [class]="visible" class="ion-padding-start ion-padding-end">
     <ion-grid class="ion-no-padding" class="ion-no-padding">
-        <ion-row *ngIf="data && localfield && data[localfield]" class="ion-no-padding">
+        <ion-row *ngIf="data_ && localfield && data_[localfield]" class="ion-no-padding">
             <ion-col size="auto" class="ion-padding-top">
                 {{ 'Selected' | translate }}:
                 <strong>{{ parentkey }}</strong>
@@ -149,12 +149,12 @@ https://www.gnu.org/licenses.
                                     [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                     [maxlength]="field.maxLength" [minlength]="field.minLength"
                                     [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
-                                    [required]="field.required" [(ngModel)]="data[field.name]" auto-grow="true"
+                                    [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="true"
                                     [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
                                     [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
                                 </ion-input>
                                 <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
-                                    [(ngModel)]="data[field.name]"
+                                    [(ngModel)]="data_[field.name]"
                                     [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
                                     auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
                                     [formControlName]="field.name" [required]="field.required" spellcheck="false"
@@ -164,14 +164,14 @@ https://www.gnu.org/licenses.
                             <ng-template #checkpassword>
                                 <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
                                     [formControlName]="field.name" type="password" spellcheck="false" autocorrect="off"
-                                    [required]="field.required" [(ngModel)]="data[field.name]" auto-grow="true">
+                                    [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="true">
                                 </ion-input>
                             </ng-template>
                             <ng-template #checkenum>
                                 <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
                                     [required]="field.required" class="ion-no-padding ion-no-margin"
                                     [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                    [(ngModel)]="data[field.name]"
+                                    [(ngModel)]="data_[field.name]"
                                     (ionChange)="doChangeEnum(field, $event.target.value)">
                                     <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
                                     </ion-select-option>
@@ -180,8 +180,8 @@ https://www.gnu.org/licenses.
                             <ng-template #checkproperty>
                                 <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
                                     [required]="field.required" class="ion-no-padding ion-no-margin"
-                                    [(ngModel)]="data[field.name]">
-                                    <ion-select-option *ngFor="let item of properties" [value]="item"> {{ item }}
+                                    [(ngModel)]="data_[field.name]">
+                                    <ion-select-option *ngFor="let item of properties_" [value]="item"> {{ item }}
                                     </ion-select-option>
                                 </ion-select>
                             </ng-template>
@@ -195,7 +195,7 @@ https://www.gnu.org/licenses.
                         </ng-template>
                     </div>
                     <div *ngIf="field.bsonType=='date'">
-                        <div *ngIf="data[field.name]; else nodatevalue" class="datetime-class">
+                        <div *ngIf="data_[field.name]; else nodatevalue" class="datetime-class">
                             <ion-datetime-button [datetime]="field.name"> </ion-datetime-button>
                             <ion-button (click)="doCancelDate(field.name)" fill="clear"
                                 class="ion-no-padding datetime-button">
@@ -204,7 +204,7 @@ https://www.gnu.org/licenses.
                             <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
                                 <ng-template>
                                     <ion-datetime [id]="field.name" presentation="date-time" [multiple]="false"
-                                        [value]="data[field.name]?.replace(' ', 'T')" [showClearButton]="true"
+                                        [value]="data_[field.name]?.replace(' ', 'T')" [showClearButton]="true"
                                         (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
                                         [showDefaultButtons]="true">
                                         <span slot="title">{{ field.title }}</span>
@@ -221,53 +221,50 @@ https://www.gnu.org/licenses.
                     </div>
                     <ion-input *ngIf="['int','number','decimal','float'].includes(field.bsonType)"
                         class="ion-no-padding" [formControlName]="field.name" type="number" [required]="field.required"
-                        [(ngModel)]="data[field.name]"
+                        [(ngModel)]="data_[field.name]"
                         [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
                     </ion-input>
                     <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
-                        [(ngModel)]="data[field.name]">
+                        [(ngModel)]="data_[field.name]">
                     </ion-checkbox>
                     <div *ngIf="field.bsonType=='array'" class="full-width">
                         <ion-input *ngIf="field?.manualAdd" name="arrayitem" [title]="field.name"
                             [type]="field.items.bsonType=='string' ? 'text' : 'number'" [required]="field.required"
                             auto-grow="true" [(ngModel)]="arrayitem[field.name]" [ngModelOptions]="{standalone: true}"
                             class="add-and-enter"></ion-input>
-                        <ion-input [formControlName]="field.name" [(ngModel)]="data[field.name]"
+                        <ion-input [formControlName]="field.name" [(ngModel)]="data_[field.name]"
                             class="hide"></ion-input>
-                        <app-kov [data]="data" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
+                        <app-kov [data]="data_" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
                     </div>
-                    <json-editor *ngIf="field.bsonType=='object'" [id]="field.name" [options]="options"
-                        [formControlName]="field.name" class="ion-margin-top ion-margin-bottom"
-                        [data]="data[field.name]"></json-editor>
                 </ion-item>
             </ion-list>
             <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
-                <ion-item *ngIf="data['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
+                <ion-item *ngIf="data_['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
                     <ion-label position="stacked">{{ 'ID' }}</ion-label>
-                    <ion-input class="ion-no-padding" type="text" [value]="data['_id']" disabled> </ion-input>
+                    <ion-input class="ion-no-padding" type="text" [value]="data_['_id']" disabled> </ion-input>
                 </ion-item>
-                <ion-item *ngIf="data['_created_at']" lines="full" class="ion-no-margin">
+                <ion-item *ngIf="data_['_created_at']" lines="full" class="ion-no-margin">
                     <ion-label position="stacked">{{ 'Created At' }}</ion-label>
                     <ion-input class="ion-no-margin"
-                        [value]="data['_created_at'] && data['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
+                        [value]="data_['_created_at'] && data_['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
                         disabled>
                     </ion-input>
                 </ion-item>
-                <ion-item *ngIf="data['_created_by']" lines="full" class="ion-no-margin">
+                <ion-item *ngIf="data_['_created_by']" lines="full" class="ion-no-margin">
                     <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>
-                    <ion-input class="ion-no-padding" type="text" [value]="data['_created_by']" disabled>
+                    <ion-input class="ion-no-padding" type="text" [value]="data_['_created_by']" disabled>
                     </ion-input>
                 </ion-item>
-                <ion-item *ngIf="data['_modified_at']" lines="full" class="ion-no-margin">
+                <ion-item *ngIf="data_['_modified_at']" lines="full" class="ion-no-margin">
                     <ion-label position="stacked">{{ 'Modified At' }}</ion-label>
                     <ion-input class="ion-no-margin"
-                        [value]="data['_modified_at'] && data['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
+                        [value]="data_['_modified_at'] && data_['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
                         disabled>
                     </ion-input>
                 </ion-item>
-                <ion-item *ngIf="data['_modified_by']" lines="full" class="ion-no-margin">
+                <ion-item *ngIf="data_['_modified_by']" lines="full" class="ion-no-margin">
                     <ion-label position="stacked">{{ 'Modified By' | translate }}</ion-label>
-                    <ion-input class="ion-no-padding" type="text" [value]="data['_modified_by']" disabled>
+                    <ion-input class="ion-no-padding" type="text" [value]="data_['_modified_by']" disabled>
                     </ion-input>
                 </ion-item>
             </ion-list>

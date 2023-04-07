@@ -67,8 +67,6 @@ export class CollectionPage implements OnInit {
   public filter: any = [];
   public searched: any = null;
   public data: any = [];
-  public structure: any = {};
-  public structure_: any = {};
   public selected: any = [];
   private views: any = [];
   public pages: any = [];
@@ -106,6 +104,9 @@ export class CollectionPage implements OnInit {
   public is_deleting: boolean = false;
   public is_viewsaving: boolean = false;
   public sort: any = {};
+  public structure: any = {};
+  public structure_: any = {};
+  public schemevis: any = "hide";
 
   constructor(
     private storage: Storage,
@@ -127,7 +128,6 @@ export class CollectionPage implements OnInit {
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.mode = "code";
     this.jeoptions.statusBar = true;
-    this.jeoptions.onChange = () => this.structure = this.editor.get();
   }
 
   ngOnDestroy() {
@@ -286,12 +286,12 @@ export class CollectionPage implements OnInit {
       componentProps: {
         shuttle: {
           op: op,
-          collection: this.id,
+          collection: this.id ? this.id : null,
           collections: this.collections ? this.collections : [],
           views: this.views ? this.views : [],
           user: this.user,
           data: rec,
-          structure: this.structure,
+          structure: this.structure_,
           sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
           filter: op === "action" ? this.filter : null,
           actions: this.actions && this.actions.length > 0 ? this.actions : [],
@@ -479,8 +479,14 @@ export class CollectionPage implements OnInit {
     this.template_showed = !this.template_showed;
   }
 
-  doShowCode() {
-    this.jeopen = !this.jeopen;
+  doShowSchema() {
+    if (this.jeopen) {
+      this.jeopen = false;
+      this.schemevis = "hide"
+    } else {
+      this.jeopen = true;
+      this.schemevis = "show";
+    }
   }
 
   doSaveSchema() {
@@ -489,7 +495,7 @@ export class CollectionPage implements OnInit {
       this.misc.apiCall("/crud", {
         op: "saveschema",
         collection: this.id,
-        structure: this.structure
+        structure: this.structure_
       }).then(() => {
         window.location.reload();
       }).catch((error: any) => {

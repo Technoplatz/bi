@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2020-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -47,7 +47,6 @@ import { enableProdMode } from "@angular/core";
 import { PageComponentsModule } from "./components/page-components.module";
 import { SignPage } from "./pages/sign/sign.page";
 import { CrudPage } from "./pages/crud/crud.page";
-import { NgJsonEditorModule } from "ang-jsoneditor";
 import { ServiceWorkerModule } from "@angular/service-worker";
 import { DatePipe } from "@angular/common";
 import { ClipboardPluginWeb } from "@capacitor/core";
@@ -92,8 +91,7 @@ export function createTranslateLoader(http: HttpClient) {
         }),
         ServiceWorkerModule.register("ngsw-worker.js", {
             enabled: environment.production
-        }),
-        NgJsonEditorModule
+        })
     ],
     providers: [
         StatusBar,
