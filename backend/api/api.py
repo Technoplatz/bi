@@ -86,6 +86,10 @@ class AuthError(BaseException):
     pass
 
 
+class AppException(BaseException):
+    pass
+
+
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, ObjectId) or isinstance(o, datetime):
@@ -450,6 +454,10 @@ class Misc():
     def api_error_f(self, exc):
         print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
         self.post_notification(exc)
+        return {"result": False, "msg": str(exc)}
+
+    def app_exception_f(self, exc):
+        print("*** app error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
         return {"result": False, "msg": str(exc)}
 
     def auth_error_f(self, exc):
@@ -3162,12 +3170,12 @@ class Crud():
 
             # protect _log collection from clonning and deleting
             if collection_id_ in ["_log", "_backup", "_announcement"]:
-                raise APIError("this collection is protected is protected for bulk processes")
+                raise AppException("this collection is protected is protected for bulk processes")
 
             # protect _user collection from deleting requests
             if op_ == "delete":
                 if collection_id_ == "_user":
-                    raise APIError("user is protected to delete. please consider disabling user instead.")
+                    raise AppException("user is protected to delete. please consider disabling user instead.")
 
             # collect object ids of the records to be processed
             ids_ = []
@@ -3260,14 +3268,14 @@ class Crud():
 
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             if not email_:
-                raise APIError("user is not allowed")
+                raise AppException("user is not allowed")
 
             is_crud_ = True if collection_id_[:1] != "_" else False
             if not is_crud_:
-                raise APIError("operation is not allowed")
+                raise AppException("operation is not allowed")
 
             if int(actionix_) < 0:
-                raise APIError("please select an action to run")
+                raise AppException("please select an action to run")
             actionix_ = int(actionix_)
 
             ids_ = []
@@ -3278,19 +3286,19 @@ class Crud():
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             schema_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if not schema_:
-                raise APIError("schema not found")
+                raise AppException("schema not found")
 
             structure_ = schema_["col_structure"] if "col_structure" in schema_ else None
             if not structure_:
-                raise APIError(f"structure not found {collection_id_}")
+                raise AppException(f"structure not found {collection_id_}")
 
             action_ = structure_["actions"][actionix_] if "actions" in structure_ and len(structure_["actions"]) > 0 and structure_["actions"][actionix_] else None
             if not action_:
-                raise APIError("action not found")
+                raise AppException("action not found")
 
             tags_ = action_["_tags"] if "_tags" in action_ and len(action_["_tags"]) > 0 else None
             if not tags_:
-                raise APIError("no tags found in action")
+                raise AppException("no tags found in action")
 
             notify_ = False
 
@@ -3298,20 +3306,20 @@ class Crud():
 
             if notification_:
                 if "notify" not in notification_:
-                    raise APIError("no notify field found in notification")
+                    raise AppException("no notify field found in notification")
                 notify_ = True if notification_["notify"] == True else False
                 subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
                 if not subject_:
-                    raise APIError("no subject field found in notification")
+                    raise AppException("no subject field found in notification")
                 body_ = notification_["body"] if "body" in notification_ else f"<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
                 if not body_:
-                    raise APIError("no body field found in notification")
+                    raise AppException("no body field found in notification")
                 fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
                 if not fields_:
-                    raise APIError("no fields field found in notification")
+                    raise AppException("no fields field found in notification")
                 filter_ = notification_["filter"] if "filter" in notification_ and len(notification_["filter"]) > 0 else None
                 if not filter_:
-                    raise APIError("no filter array found in notification")
+                    raise AppException("no filter array found in notification")
                 get_notification_filtered_ = self.get_filtered_f({
                     "match": filter_,
                     "properties": structure_["properties"] if "properties" in structure_ else None
@@ -3336,27 +3344,29 @@ class Crud():
             session_ = session_client_.start_session()
             session_.start_transaction()
             set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
-            session_db_[collection_].update_many(get_filtered_, set_, session=session_)
-            session_.commit_transaction()
-            session_client_.close()
+            update_many_ = session_db_[collection_].update_many(get_filtered_, set_, session=session_)
 
-            if notify_:
-                type_ = "csv"
-                file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
-                loc_ = f"/cron/{file_}"
-                query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
-                command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
-                call(command_, shell=True)
-                files_ = [{"filename": file_, "filetype": type_}]
-                email_sent_ = Email().sendEmail_f({
-                    "op": "action",
-                    "tags": tags_,
-                    "subject": subject_,
-                    "html": body_,
-                    "files": files_
-                })
-                if not email_sent_["result"]:
-                    raise APIError(email_sent_["msg"])
+            if update_many_.matched_count:
+                session_.commit_transaction()
+                if notify_:
+                    type_ = "csv"
+                    file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
+                    loc_ = f"/cron/{file_}"
+                    query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
+                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                    call(command_, shell=True)
+                    files_ = [{"filename": file_, "filetype": type_}]
+                    email_sent_ = Email().sendEmail_f({
+                        "op": "action",
+                        "tags": tags_,
+                        "subject": subject_,
+                        "html": body_,
+                        "files": files_
+                    })
+                    if not email_sent_["result"]:
+                        raise APIError(email_sent_["msg"])
+            else:
+                raise AppException("no rows affected due to the match criteria")
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -3371,7 +3381,7 @@ class Crud():
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            res_ = {"result": True}
+            res_ = {"result": True, "count": update_many_.matched_count }
 
         except pymongo.errors.PyMongoError as exc:
             session_.abort_transaction() if session_ else None
@@ -3384,6 +3394,10 @@ class Crud():
             })
             res_ = Misc().mongo_error_f(exc)
 
+        except AppException as exc:
+            session_.abort_transaction() if session_ else None
+            res_ = Misc().app_exception_f(exc)
+
         except APIError as exc:
             session_.abort_transaction() if session_ else None
             res_ = Misc().api_error_f(exc)
@@ -3393,6 +3407,7 @@ class Crud():
             res_ = Misc().exception_f(exc)
 
         finally:
+            session_client_.close() if session_client_ else None
             return res_
 
     def insert_f(self, obj):

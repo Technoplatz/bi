@@ -219,14 +219,14 @@ export class CollectionPage implements OnInit {
 
   doAction(ix: any) {
     if (this.perm && this.data?.length > 0) {
-      if (!this.actions[ix]?.one_click && !this.sweeped[this.segment]) {
-        this.misc.doMessage("please make a selection", "error");
-      } else {
+      if (this.actions[ix]?.one_click || this.sweeped[this.segment]?.length > 0) {
         this.actionix = ix;
         this.goCrud(null, "action");
+      } else {
+        this.misc.doMessage("please make a selection to run this action", "error");
       }
     } else {
-      this.misc.doMessage("no permission to run action", "error");
+      this.misc.doMessage("no permission to run this action", "error");
     }
   }
 
@@ -303,6 +303,9 @@ export class CollectionPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified) {
+        if (op === "action" && res.data.res?.count > 0) {
+          this.misc.doMessage("action completed successfully. " + res.data.res.count + " records affected", "success");
+        }
         this.doClearFilter().then(() => { });
       }
     });

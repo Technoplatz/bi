@@ -77,7 +77,7 @@ https://www.gnu.org/licenses.
             <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
               {{ item.vie_collection_id }} | {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
               <h2>{{ item.visual.value }}</h2>
-              <h6>{{ 'Shared with' | translate }} {{ item._tags?.length }} {{ 'groups' | translate }}.</h6>
+              <h6>{{ 'Shared with' | translate }} {{ item._tags?.length }} {{ '#Hashtags' | translate }}.</h6>
             </div>
           </div>
         </div>

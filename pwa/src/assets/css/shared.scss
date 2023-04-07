@@ -1094,37 +1094,29 @@ sup {
 }
 
 .toast-class-success {
-  --min-width: 100%;
   --white-space: 0px;
-  --height: 60px;
   --background: var(--ion-color-success);
   --border-radius: 0px;
   --border-width: 0px;
-  --start: 0;
   --box-shadow: none;
   --color: var(--ion-color-white) !important;
   --button-color: var(--ion-color-white) !important;
   font-weight: 600;
-  text-align: center;
   padding: 0px !important;
-  margin-top: -8px;
+  top: -31px !important;
 }
 
 .toast-class-error {
-  --min-width: 100%;
   --white-space: 0px;
-  --height: 60px;
   --background: var(--ion-color-danger);
   --border-radius: 0px;
   --border-width: 0px;
-  --start: 0;
   --box-shadow: none;
   --color: var(--ion-color-white) !important;
   --button-color: var(--ion-color-white) !important;
   font-weight: 600;
-  text-align: center;
   padding: 0px !important;
-  margin-top: -8px;
+  top: -31px !important;
 }
 
 .toast-class-warning {

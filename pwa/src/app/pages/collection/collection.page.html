@@ -122,7 +122,7 @@ https://www.gnu.org/licenses.
               <div class="act-buttons-wrapper">
                 <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)"
                   class="action-button" color="dark">
-                  <ion-icon *ngIf="item?.rollback" name="arrow-back-outline"></ion-icon>
+                  <ion-icon *ngIf="item?.rollback" name="close-circle-outline"></ion-icon>
                   <ion-icon *ngIf="item?.one_click" name="flash-outline"></ion-icon>
                   {{ item.title }}
                 </ion-button>
