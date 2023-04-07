@@ -196,7 +196,7 @@ export class Miscellaneous {
 
   getLanguage() {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSLANG").then((LSLANG) => {
+      this.storage.get("LSLANG").then((LSLANG: any) => {
         resolve(LSLANG ? LSLANG : "en");
       }).catch(() => {
         resolve("en");
