@@ -3337,6 +3337,7 @@ class Crud():
 
             if ids_ and len(ids_) > 0:
                 get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
+                get_notification_filtered_ = {"$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]}
 
             # DO ACTION ON DATABASE
             session_client_ = MongoClient(Mongo().connstr)
