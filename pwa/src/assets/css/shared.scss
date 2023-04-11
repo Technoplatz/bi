@@ -134,7 +134,7 @@ ion-note {
   top: 14px;
   z-index: 99;
   border-bottom: 1px solid var(--ion-color-light);
-  ;
+  background-color: var(--ion-color-white);
 }
 
 .top-tools * {
@@ -917,6 +917,8 @@ app-menu {
 .action-button {
   max-width: 180px;
   overflow: hidden !important;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .app-footer {
@@ -1391,7 +1393,7 @@ sup {
 .jeditor {
   display: flex !important;
   flex-flow: column;
-  height: calc(90vh - 170px);
+  height: calc(90vh - 150px);
   margin-top: -20px;
   margin-bottom: 32px;
   padding: 0px;
@@ -1408,18 +1410,24 @@ json-editor jsoneditor-outer {
   width: 99.5%;
   height: 100%;
   min-height: 320px;
-  color: yellowgreen !important;
+  font-size: smaller !important;
 }
 
 .jsoneditor-menu {
-  background-color: var(--ion-color-primary) !important;
-  border-bottom: 1px solid var(--ion-color-primary) !important;
+  background-color: var(--ion-color-medium);
+  border: 1px solid var(--ion-color-medium);
 }
 
-.ace_editor * {
-  font-family: monospace, source-code-pro, consolas, menlo, monaco, Ubuntu Mono !important;
-  font-size: small !important;
-  font-weight: 600;
+.jsoneditor-value.jsoneditor-object {
+  color: var(--ion-color-white);
+}
+
+.jsoneditor-value.jsoneditor-array {
+  color: var(--ion-color-light);
+}
+
+.jsoneditor {
+  border: 1px solid var(--ion-color-medium);
 }
 
 ion-checkbox {

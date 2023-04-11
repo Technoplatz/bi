@@ -160,6 +160,7 @@ class Schedular():
                 if not target_properties_:
                     raise APIError(f"target properties not found: {aut_target_collection_id_}")
 
+            count_ = 0
             find_ = Mongo().db[source_data_file_].find(get_filtered_)
             for rec_ in find_:
                 target_match_ = {}
@@ -184,7 +185,6 @@ class Schedular():
                 if aut_source_set_ and len(aut_source_set_) > 0:
                     for aut_source_set__ in aut_source_set_:
                         key_ = aut_source_set__["key"]
-                        # value_ = aut_source_set__["value"]
                         value_ = Misc().string_to_formula_f(aut_source_set__, rec_, properties_)
                         set_source_[key_] = value_
                     Mongo().db[source_data_file_].update_one({"_id": id_}, {"$set": set_source_})
@@ -196,8 +196,9 @@ class Schedular():
                         set_target_[key_] = value_
 
                     update_many_ = Mongo().db[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=aut_target_upsert_)
+                    count_ = update_many_.matched_count
 
-            res_ = {"result": True}
+            res_ = {"result": True, "count": count_}
 
         except APIError as exc:
             res_ = Misc().api_error_f(exc)
@@ -917,8 +918,8 @@ class Crud():
                 if "bsonType" in property_:
                     if k in doc_.keys():
                         if property_["bsonType"] == "date":
-                            rgx_ = "%Y-%m-%d" if doc_[k] and len(doc_[k]) == 10 else "%Y-%m-%dT%H:%M:%S"
                             ln_ = 10 if doc_[k] and len(doc_[k]) == 10 else 19
+                            rgx_ = "%Y-%m-%d" if doc_[k] and ln_ == 10 else "%Y-%m-%dT%H:%M:%S"
                             if doc_[k] and isinstance(doc_[k], str) and self.validate_iso8601_f(doc_[k]):
                                 d[k] = datetime.strptime(doc_[k][:ln_], rgx_)
                             else:
@@ -3382,7 +3383,7 @@ class Crud():
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            res_ = {"result": True, "count": update_many_.matched_count }
+            res_ = {"result": True, "count": update_many_.matched_count}
 
         except pymongo.errors.PyMongoError as exc:
             session_.abort_transaction() if session_ else None

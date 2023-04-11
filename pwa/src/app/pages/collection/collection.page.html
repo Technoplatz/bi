@@ -124,7 +124,6 @@ https://www.gnu.org/licenses.
                 <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" class="action-button"
                   color="dark">
                   <ion-icon *ngIf="item?.rollback" name="close-circle-outline"></ion-icon>
-                  <ion-icon *ngIf="item?.one_click" name="flash-outline"></ion-icon>
                   {{ item.title }}
                 </ion-button>
               </div>
@@ -137,8 +136,10 @@ https://www.gnu.org/licenses.
             </ng-template>
           </ion-row>
         </ion-grid>
+
         <!-- CRUD GRID SECTION -->
         <ion-grid *ngIf="is_initialized; else dataloading" class="ion-no-padding ion-margin-top data-grid">
+          
           <!-- CRUD HEADERS -->
           <ion-row *ngIf="data && data.length >= 0" class="ion-nowrap search-row">
             <ion-col class="ion-text-center check-column">
@@ -148,7 +149,7 @@ https://www.gnu.org/licenses.
             <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
-                <span class="column-title">{{ item.value.title }}<br /> </span>
+                <span class="column-title">{{ item.value.title }} <span *ngIf="searched[item.key].f" class="danger">[ F ]</span><br /> </span>
                 {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
               </div>
               <div *ngIf="searched && searched[item.key] && searched[item.key].actived" class="search-box">

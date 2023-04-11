@@ -48,9 +48,8 @@ import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 })
 
 export class CollectionPage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false })
-  editor: JsonEditorComponent = new JsonEditorComponent;
-
+  @ViewChild(JsonEditorComponent, { static: false }) editor: JsonEditorComponent = new JsonEditorComponent;
+  public jeoptions: JsonEditorOptions;
   public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
@@ -97,8 +96,6 @@ export class CollectionPage implements OnInit {
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
-
-  public jeoptions?: JsonEditorOptions;
   public jeopen: boolean = false;
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
@@ -126,8 +123,13 @@ export class CollectionPage implements OnInit {
       this.perm = res && res.perm ? true : false;
     });
     this.jeoptions = new JsonEditorOptions();
-    this.jeoptions.mode = "code";
+    this.jeoptions.modes = ["code","tree","form"]
+    this.jeoptions.mode = "form";
     this.jeoptions.statusBar = true;
+    this.jeoptions.enableSort = false;
+    this.jeoptions.expandAll = false;
+    this.jeoptions.navigationBar = true;
+    this.jeoptions.name = "json-structure";
   }
 
   ngOnDestroy() {
