@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 #
 # Technoplatz BI
 #
@@ -41,7 +42,7 @@ EOF
 
 function helpBI() {
     echo "Available commands:"
-    echo -e "\n./bi.sh install"
+    echo "./bi.sh install"
     echo "./bi.sh start"
     echo "./bi.sh restart"
     echo "./bi.sh stop"
@@ -60,22 +61,22 @@ function installBI() {
                 if [[ -f $DIR/$DOTENV ]]; then
                     BKFILE=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
                     cp $DIR/$DOTENV $DIR/$BKFILE
-                    echo -e "\n✔ Existing parameter file ${COLOR}$DIR/$DOTENV${NOCOLOR} has been backed up as ${COLOR}$DIR/$BKFILE${NOCOLOR}."
+                    echo -e "✔ Existing parameter file ${COLOR}$DIR/$DOTENV${NOCOLOR} has been backed up as ${COLOR}$DIR/$BKFILE${NOCOLOR}."
                 fi
                 rm -rf $DIR
                 break
                 ;;
             [Nn]*)
-                echo -e "\n✘ Installation canceled."
+                echo -e "✘ Installation canceled."
                 return 0
                 ;;
             *)
-                echo -e "\n✘ Please enter ${COLOR}Y${NOCOLOR} or ${COLOR}n${NOCOLOR}.\n"
+                echo -e "✘ Please enter ${COLOR}Y${NOCOLOR} or ${COLOR}n${NOCOLOR}."
                 ;;
             esac
         done
     fi
-    echo -e "\n✔ Installation started."
+    echo -e "✔ Installation started."
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
     if [ $TOKEN ]; then
         curlHeaders+=("-H" "Authorization: token $TOKEN")
@@ -83,26 +84,26 @@ function installBI() {
     curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV $RAWREPO/{$DCYML,$DOTENV}
     CONTD=$(cat $DIR/$DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* || ! -z $DIR/$DCYML || -z $DIR/$DOTENV ]]; then
-        echo -e "\n✘ Sorry! Required files not received successfully $CONTD."
+        echo -e "✘ Sorry! Required files not received successfully $CONTD."
         echo -e "You can retry by adding a token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
     else
         echo "✔ Required files received successfully."
     fi
     echo "✔ The first step completed successfully."
-    echo "\n>>> NEXT STEPS:"
+    echo ">>> NEXT STEPS:"
     echo -e "${COLOR}>>> Please note that your project folder is $DIR${NOCOLOR}"
     echo -e ">>> 1. Open ${COLOR}$DIR$/.env${NOCOLOR} file with any text editor."
     echo ">>> 2. Apply the necessary changes and save it."
     echo -e ">>> 3. Run ${COLOR}./bi.sh start${NOCOLOR} to make containers up and keep them running."
-    echo "\nHere you go :)"
+    echo "Here you go :)"
     return 1
 }
 
 function updateBI() {
-    echo "\nUpdating platform...\n"
+    echo "Updating platform..."
     if [ ! -d $DIR ]; then
-        echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
+        echo -e "✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         return 0
     fi
     declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
@@ -130,14 +131,14 @@ function updateBI() {
     else
         mv -f $ROOTPATH/bi-sh.bak $ROOTPATH/bi.sh
         chmod +x $ROOTPATH/bi.sh
-        echo "✔ Service script received successfully.\n"
+        echo "✔ Service script received successfully."
     fi
     docker compose -f $DIR/$DCYML pull
     if [ $? -eq 0 ]; then
         startBI
-        echo -e "\n✔ The latest version received successfully."
+        echo -e "✔ The latest version received successfully."
     else
-        echo -e "\n✘ Sorry! Process was terminated ($?)."
+        echo -e "✘ Sorry! Process was terminated ($?)."
         return 0
     fi
     return 1
@@ -149,38 +150,38 @@ function pruneBI() {
     if [ $? -eq 0 ]; then
         echo "✔ Dangling and unused resources successfully removed."
     else
-        echo -e "\n✘ Sorry! Process was terminated ($?)."
+        echo -e "✘ Sorry! Process was terminated ($?)."
         return 0
     fi
     return 1
 }
 
 function startBI() {
-    echo "\nStarting containers...\n"
+    echo "Starting containers..."
     if [ ! -d $DIR ]; then
-        echo -e "\n✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
+        echo -e "✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
         echo -e "You need to start installation with ${COLOR}./bi.sh install${NOCOLOR} command."
         return 0
     fi
     docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
-        echo "\n✔ Platform is up and running."
+        echo -e "✔ Platform is up and running."
     else
-        echo "\n✘ Sorry! Process was terminated ($?)."
+        echo -e "✘ Sorry! Process was terminated ($?)."
         return 0
     fi
     return 1
 }
 
 function stopBI() {
-    echo "Stopping containers...\n"
+    echo "Stopping containers..."
     if [[ ! -z $(docker container ls -qa) ]]; then
         docker container stop $(docker container ls -qa)
         docker container rm $(docker container ls -qa)
         if [ $? -eq 0 ]; then
-            echo "\n✔ Running containers stopped and removed successfully."
+            echo "✔ Running containers stopped and removed successfully."
         else
-            echo "\n✘ Sorry! Process was terminated ($?)."
+            echo "✘ Sorry! Process was terminated ($?)."
             return 0
         fi
     else
@@ -191,7 +192,7 @@ function stopBI() {
 
 function logsBI() {
     if [ ! $1 ]; then
-        echo "\n✘ Sorry! You need to provide a docker service ID."
+        echo "✘ Sorry! You need to provide a docker service ID."
         echo "Command should be given like ./bi.sh logs api|pwa|init|replicaset"
         return 0
     fi
@@ -199,24 +200,24 @@ function logsBI() {
     if [[ ! -z $2 ]]; then
         TAIL=$2
     fi
-    echo "Getting the last $TAIL rows from $1 log...\n"
+    echo "Getting the last $TAIL rows from $1 log..."
     docker logs --tail $TAIL $1
     return 1
 }
 
 function buildBI() {
     if [ ! $1 ]; then
-        echo "\n✘ Sorry! You need to provide a image ID."
+        echo "✘ Sorry! You need to provide a image ID."
         return 0
     fi
     if [ ! $2 ]; then
-        echo "\n✘ Sorry! You need to provide a folder."
+        echo "✘ Sorry! You need to provide a folder."
         return 0
     fi
-    echo "Building $1 from $2...\n"
+    echo "Building $1 from $2..."
     docker build --tag $1 $2
     if [ $? -ne 0 ]; then
-        echo "\n✘ Sorry! An error occured."
+        echo "✘ Sorry! An error occured."
         return 0
     fi
     return 1

@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #
 # Technoplatz BI
 #
@@ -243,7 +244,7 @@ else
                 fwa_enabled: true,
                 _modified_at: new Date(),
                 _modified_by: 'saas'
-            }, "$inc": {"_modified_count": 1}}, { upsert: true });
+            }, \$inc: {"_modified_count": 1}}, { upsert: true });
             if(upsert_firewall_) {
                 print('firewall updated', '#Managers');
             }
@@ -254,7 +255,7 @@ else
                 fwa_enabled: true,
                 _modified_at: new Date(),
                 _modified_by: 'saas'
-            }, "$inc": {"_modified_count": 1}}, { upsert: true });
+            }, \$inc: {"_modified_count": 1}}, { upsert: true });
             if(upsert_firewall_) {
                 print('firewall updated', '#Administrators');
             }
@@ -276,8 +277,8 @@ else
             }}, { upsert: true });
         }
     "
-    sh -c "echo 'init completed successfully' > $CERTDIR/mongo-init.flag"
-    echo "init completed successfully :)"
+    sh -c "echo 'replicaset completed successfully' > $CERTDIR/mongo-init.flag"
+    echo "replicaset completed successfully :)"
 fi
 echo "DB REPLICASET ENDED"
 echo
