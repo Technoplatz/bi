@@ -129,7 +129,10 @@ export class CollectionPage implements OnInit {
     this.jeoptions.enableSort = false;
     this.jeoptions.expandAll = false;
     this.jeoptions.navigationBar = true;
-    this.jeoptions.name = "json-structure";
+    this.jeoptions.name = "schema-structure";
+    this.editor.onChange((e: any) => {
+      
+    });
   }
 
   ngOnDestroy() {
@@ -184,7 +187,7 @@ export class CollectionPage implements OnInit {
             this.reconfig = res.reconfig;
             this.structure = res.structure;
             this.structure_ = res.structure;
-            this.actions = this.structure && this.structure.actions ? this.structure.actions : [];
+            this.actions = this.structure.actions;
             this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
             this.columns_ = [];
             if (this.properites_) {
@@ -308,7 +311,7 @@ export class CollectionPage implements OnInit {
         if (op === "action" && res.data.res?.count > 0) {
           this.misc.doMessage("action completed successfully. " + res.data.res.count + " records affected", "success");
         }
-        this.doClearFilter().then(() => { });
+        this.RefreshData(0);
       }
     });
     return await modal.present();
@@ -392,7 +395,7 @@ export class CollectionPage implements OnInit {
       this.storage.set("LSSFILTER_" + this.id, this.filter).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
           this.doResetSearch(true);
-          this.searched = {};
+          this.searched = null;
           this.sweeped[this.segment] = [];
           this.RefreshData(0).then(() => {
             resolve(true);

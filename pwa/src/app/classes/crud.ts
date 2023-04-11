@@ -105,6 +105,7 @@ export class Crud {
         const permanent_ = p.permanent ? true : false;
         const collection_ = p.collection ? true : false;
         const textarea_ = p.textarea ? true : false;
+        const disabled_ = p.disabled && p.disabled === true ? true : false;
         const hashtag_ = p.hashtag ? true : false;
         const chips_ = p.chips ? true : false;
         const view_ = p.view ? true : false;
@@ -151,7 +152,7 @@ export class Crud {
           value: null
         }];
         init[item] = default_ ? default_ : arrayInc_ ? kv_ ? kvval_ : [] : objectInc_ ? {} : null;
-        form.addControl(item, new FormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": item === "id" && op === "update" && (data[item] || init[item]) ? true : false }, Validators.compose(v)));
+        form.addControl(item, new FormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": disabled_ || (item === "id" && op === "update" && (data[item] || init[item])) ? true : false }, Validators.compose(v)));
         if (i === Object.keys(structure.properties).length - 1) {
           resolve({
             form: form,

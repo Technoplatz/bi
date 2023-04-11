@@ -1,0 +1,86 @@
+#
+# Technoplatz BI
+#
+# Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see https://www.gnu.org/licenses.
+#
+# If your software can interact with users remotely through a computer
+# network, you should also make sure that it provides a way for users to
+# get its source.  For example, if your program is a web application, its
+# interface could display a "Source" link that leads users to an archive
+# of the code.  There are many ways you could offer source, and different
+# solutions will be better for different programs; see section 13 for the
+# specific requirements.
+#
+# You should also get your employer (if you work as a programmer) or school,
+# if any, to sign a "copyright disclaimer" for the program, if necessary.
+# For more information on this, and how to apply and follow the GNU AGPL, see
+# https://www.gnu.org/licenses.
+#
+
+name: Deploy API Image
+on:
+  push:
+    branches:
+      - dev0
+      - main
+    paths:
+      - "backend/stream/**"
+env:
+  DOCKER_IMAGE: bi-stream
+  FOLDER: backend/stream
+  DOCKERFILE: Dockerfile
+  VERSION: latest
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+jobs:
+  push-to-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: build-image
+        id: build-image
+        shell: bash
+        run: |
+          echo "GITHUB_REF: ${GITHUB_REF}"
+          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
+          if [ ${{ github.event_name }} != "pull_request" ]; then BRANCH=$(echo ${GITHUB_REF#refs/heads/}); else BRANCH=$(echo ${GITHUB_HEAD_REF}); fi
+          if [ $BRANCH != "main" ]; then IMAGE_NAME=$DOCKER_IMAGE-$BRANCH:$VERSION; else IMAGE_NAME=$DOCKER_IMAGE:$VERSION; fi
+          IMAGE_NAME=$(echo $IMAGE_NAME | tr '[A-Z]' '[a-z]')
+          cd $FOLDER
+          docker build . --file $DOCKERFILE --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+          echo "OIMAGE_NAME=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "OBRANCH=$BRANCH" >> $GITHUB_OUTPUT
+      - name: push-image-ghcr
+        id: push-image-ghcr
+        run: |
+          IMAGE_ID=ghcr.io/technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
+          docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
+          echo "$GHCR_TOKEN" | docker login ghcr.io -u $ --password-stdin
+          docker push $IMAGE_ID
+          docker logout ghcr.io
+      - name: push-image-dockerhub
+        id: push-image-dockerhub
+        run: |
+          if [ ${{ steps.build-image.outputs.OBRANCH }} == 'main' ]; then
+            IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
+            docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
+            echo "$DOCKERHUB_TOKEN" | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker push $IMAGE_ID
+            docker logout
+          else
+            echo "Branch ${{ steps.build-image.outputs.OBRANCH }} skipped"
+          fi

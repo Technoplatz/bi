@@ -61,8 +61,7 @@ export const environment = {
         "title": "ID",
         "description": "Upload ID",
         "permanent": true,
-        "required": true,
-        "hidden": true
+        "required": true
       },
       "sto_collection_id": {
         "bsonType": "string",
@@ -118,7 +117,6 @@ export const environment = {
   segmentsadm: [
     { "id": "_collection", "title": "Collections" },
     { "id": "_view", "title": "Shared Views" },
-    { "id": "_automation", "title": "Automations" },
     { "id": "_announcement", "title": "Announcements" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },

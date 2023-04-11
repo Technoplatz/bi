@@ -429,8 +429,8 @@ class Schedular():
 class Misc():
     def __init__(self):
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
-        self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "hidden", "default", "secret", "token", "file", "permanent",
-                            "objectId", "calc", "filter", "readonly", "color", "collection", "view", "property", "html", "object", "subscriber", "subType", "manualAdd", "barcoded", "exclude"]
+        self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "default", "token", "file", "permanent", "disabled",
+                            "objectId", "filter", "readonly", "color", "collection", "view", "property", "html", "object", "subType", "manualAdd", "barcoded", "exclude"]
 
     def post_notification(self, exc):
         ip_ = self.get_user_ip_f()
