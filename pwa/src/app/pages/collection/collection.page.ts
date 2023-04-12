@@ -209,6 +209,7 @@ export class CollectionPage implements OnInit {
               resolve(true);
             } else {
               this.misc.doMessage("no structure found", "error");
+              resolve(true);
             }
           }).catch((error: any) => {
             this.misc.doMessage(error, "error");
@@ -500,7 +501,7 @@ export class CollectionPage implements OnInit {
       this.misc.apiCall("/crud", {
         op: "saveschema",
         collection: this.id,
-        structure: this.structure_
+        structure: this.structure_ ? this.structure_ : this.structure
       }).then(() => {
         window.location.reload();
       }).catch((error: any) => {
@@ -515,6 +516,12 @@ export class CollectionPage implements OnInit {
     this.misc.doImport(this.id).then(() => {
       this.RefreshData(0).then(() => { });
     });
+  }
+
+  doChangeSchema(ev: any) {
+    if(ev && ev.properties) {
+      this.structure_ = ev;
+    }
   }
 
 }
