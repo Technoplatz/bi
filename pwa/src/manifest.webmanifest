@@ -10,7 +10,7 @@
   "start_url": "./",
   "icons": [
     {
-      "src": "assets/icons/favicon2.png",
+      "src": "assets/icon/favicon.png",
       "sizes": "50x50",
       "type": "image/png",
       "purpose": "favicon"
