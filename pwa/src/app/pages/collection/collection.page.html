@@ -112,7 +112,8 @@ https://www.gnu.org/licenses.
         <ion-grid [class]="schemevis" *ngIf="perm && is_crud">
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <json-editor id="struc" [options]="jeoptions" [data]="structure" (change)="doChangeSchema($event)" #editor></json-editor>
+              <json-editor id="struc" [options]="jeoptions" [data]="structure" (change)="doChangeSchema($event)"
+                #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -121,11 +122,14 @@ https://www.gnu.org/licenses.
             <ion-col *ngIf="perm && actions?.length > 0; else noaction">
               <h6>{{ 'ACTIONS' | translate }}</h6>
               <div class="act-buttons-wrapper">
-                <ion-button *ngFor="let item of actions; let ac = index" (click)="doAction(ac)" class="action-button"
-                  color="dark">
-                  <ion-icon *ngIf="item?.rollback" name="flash-off"></ion-icon>
-                  {{ item.title }}
-                </ion-button>
+                <span *ngFor="let item of actions; let ac = index">
+                    <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button" color="dark">
+                      <ion-icon *ngIf="item?.rollback" name="flash-off"></ion-icon>
+                      {{ item.title }}
+                    </ion-button>
+                    <ng-template #actionhide></ng-template>
+                </span>
+                
               </div>
             </ion-col>
             <ng-template #noaction>
@@ -139,7 +143,7 @@ https://www.gnu.org/licenses.
 
         <!-- CRUD GRID SECTION -->
         <ion-grid *ngIf="is_initialized; else dataloading" class="ion-no-padding ion-margin-top data-grid">
-          
+
           <!-- CRUD HEADERS -->
           <ion-row *ngIf="data && data.length >= 0" class="ion-nowrap search-row">
             <ion-col class="ion-text-center check-column">
@@ -149,7 +153,8 @@ https://www.gnu.org/licenses.
             <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
-                <span class="column-title">{{ item.value.title }} <span *ngIf="searched[item.key]?.f && is_loaded" class="danger">[ F ]</span><br /> </span>
+                <span class="column-title">{{ item.value.title }} <span *ngIf="searched[item.key]?.f && is_loaded"
+                    class="danger">[ F ]</span><br /> </span>
                 {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
               </div>
               <div *ngIf="searched[item.key]?.actived" class="search-box">

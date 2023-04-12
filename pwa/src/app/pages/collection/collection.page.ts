@@ -102,8 +102,8 @@ export class CollectionPage implements OnInit {
   public is_viewsaving: boolean = false;
   public sort: any = {};
   public structure: any = {};
-  public structure_: any = {};
   public schemevis: any = "hide";
+  private structure_: any = {};
 
   constructor(
     private storage: Storage,
@@ -123,16 +123,13 @@ export class CollectionPage implements OnInit {
       this.perm = res && res.perm ? true : false;
     });
     this.jeoptions = new JsonEditorOptions();
-    this.jeoptions.modes = ["code","tree"]
+    this.jeoptions.modes = ["code", "tree"]
     this.jeoptions.mode = "tree";
     this.jeoptions.statusBar = true;
     this.jeoptions.enableSort = false;
     this.jeoptions.expandAll = false;
     this.jeoptions.navigationBar = true;
     this.jeoptions.name = "schema-structure";
-    this.editor.onChange((e: any) => {
-      
-    });
   }
 
   ngOnDestroy() {
@@ -297,7 +294,7 @@ export class CollectionPage implements OnInit {
           views: this.views ? this.views : [],
           user: this.user,
           data: rec,
-          structure: this.structure_,
+          structure: this.structure,
           sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
           filter: op === "action" ? this.filter : null,
           actions: this.actions && this.actions.length > 0 ? this.actions : [],
@@ -492,6 +489,7 @@ export class CollectionPage implements OnInit {
     } else {
       this.jeopen = true;
       this.schemevis = "show";
+      this.editor.focus();
     }
   }
 
@@ -501,7 +499,7 @@ export class CollectionPage implements OnInit {
       this.misc.apiCall("/crud", {
         op: "saveschema",
         collection: this.id,
-        structure: this.structure_ ? this.structure_ : this.structure
+        structure: this.structure_
       }).then(() => {
         window.location.reload();
       }).catch((error: any) => {
@@ -519,7 +517,7 @@ export class CollectionPage implements OnInit {
   }
 
   doChangeSchema(ev: any) {
-    if(ev && ev.properties) {
+    if (ev && ev.properties) {
       this.structure_ = ev;
     }
   }
