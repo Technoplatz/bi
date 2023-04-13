@@ -42,25 +42,24 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="data-sq-container">
               <div (click)="doImport()" class="data-sq-button">
                 <ion-icon name="cloud-upload-outline"></ion-icon><br />
-                {{ 'File' | translate }}<br />{{ 'Upload' | translate }}
+                {{ 'Upload' | translate }}
               </div>
               <div (click)="Settings('_collection', 'insert', null, 0)" class="data-sq-button">
                 <ion-icon name="add-circle-outline"></ion-icon><br />
-                <span>{{ 'New' | translate }}<br />{{ 'Collection' | translate }}</span>
+                {{ 'Collection' | translate }}
               </div>
               <div (click)="doRefresh()" class="data-sq-button">
                 <ion-icon *ngIf="!is_refreshing" name="sync-circle-outline"></ion-icon>
-                <ion-icon *ngIf="is_refreshing" name="hourglass-outline"></ion-icon>
-                <br />
-                <span>{{ 'Refresh' | translate }}<br />{{ 'All' | translate }}</span>
+                <ion-icon *ngIf="is_refreshing" name="hourglass-outline"></ion-icon><br />
+                {{ 'Refresh' | translate }}
               </div>
               <div (click)="doResizeCharts()" class="data-sq-button">
                 <ion-icon name="expand-outline"></ion-icon><br />
-                <span>{{ 'Resize' | translate }}<br />{{ 'Charts' | translate }}</span>
+                {{ 'Resize' | translate }}
               </div>
               <div (click)="misc.navi.next('templates')" class="data-sq-button">
                 <ion-icon name="document-outline"></ion-icon><br />
-                <span>{{ 'Smart' | translate }}<br />{{ 'Templates' | translate }}</span>
+                {{ 'Templates' | translate }}
               </div>
             </ion-col>
           </ion-row>

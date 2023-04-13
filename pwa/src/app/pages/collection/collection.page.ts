@@ -122,7 +122,7 @@ export class CollectionPage implements OnInit {
       this.perm = res && res.perm ? true : false;
     });
     this.jeoptions = new JsonEditorOptions();
-    this.jeoptions.modes = ["code", "tree"]
+    this.jeoptions.modes = ["tree", "code", "text"]
     this.jeoptions.mode = "tree";
     this.jeoptions.statusBar = true;
     this.jeoptions.enableSort = false;

@@ -42,59 +42,59 @@ https://www.gnu.org/licenses.
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="doImport()" class="data-sq-button">
                 <ion-icon name="cloud-upload-outline"></ion-icon><br />
-                {{ 'File' | translate }}<br />{{ 'Upload' | translate }}
+                {{ 'Upload' | translate }}
               </div>
               <div *ngIf="barcoded_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="barcode"></ion-icon><br />
-                {{ 'Read' | translate }}<br />{{ 'Barcode' | translate }}
+                {{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  {{ 'Add' | translate }}<br />{{ 'Record' | translate }}
+                  {{ 'Add' | translate }}
                 </div>
               </ng-template>
               <div (click)="RefreshData(0)" class="data-sq-button">
                 <ion-icon *ngIf="is_loaded" name="sync-circle-outline"></ion-icon>
                 <ion-icon *ngIf="!is_loaded" name="hourglass-outline"></ion-icon>
                 <br />
-                {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
+                {{ 'Refresh' | translate }}
               </div>
               <div *ngIf="filter.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 <br />
-                <span>{{ 'Clear' | translate }}<br />{{ 'Filter' | translate }} </span>
+                <span>{{ 'Clear' | translate }}</span>
               </div>
               <div *ngIf="is_crud" (click)="doSaveAsView()" class="data-sq-button">
                 <ion-icon name="save-outline" *ngIf="!is_viewsaving"></ion-icon>
                 <ion-icon name="hourglass-outline" *ngIf="is_viewsaving"></ion-icon><br />
-                {{ 'Save' | translate }}<br />{{ 'as View' | translate }}
+                {{ 'Save' | translate }}
               </div>
               <div (click)="MultiCrud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
-                {{ 'Clone' | translate }}<br />{{ 'Selected' | translate }}
+                {{ 'Clone' | translate }}
               </div>
               <div (click)="MultiCrud('delete')" class="data-sq-button">
                 <ion-icon *ngIf="is_deleting" name="hourglass"></ion-icon>
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
-                {{ 'Delete' | translate }}<br />{{ 'Selected' | translate }}
+                {{ 'Delete' | translate }}
               </div>
               <div *ngIf="perm && is_crud" (click)="doShowSchema()" class="data-sq-button">
                 <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
                   <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
-                  {{ 'JSON' | translate }}<br />{{ 'Schema' | translate }}
+                  {{ 'Schema' | translate }}
                 </div>
                 <ng-template #nojeopen>
                   <ion-icon name="close-circle-outline"></ion-icon><br />
-                  {{ 'Close' | translate }}<br />{{ 'Schema' | translate }}
+                  {{ 'Close' | translate }}
                 </ng-template>
               </div>
               <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger"
                 (click)="doSaveSchema()">
                 <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
                 <ion-icon *ngIf="!is_saving" name="cloud-upload-outline"></ion-icon><br />
-                {{ 'Save' | translate }}<br />{{ 'Schema' | translate }}
+                {{ 'Save' | translate }}
               </div>
             </ion-col>
           </ion-row>
@@ -331,7 +331,7 @@ https://www.gnu.org/licenses.
         <ion-col class="console-right">
           <ion-item lines="none">
             <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-            <ion-label> {{ loadingText | translate }} </ion-label>
+            <ion-label>{{ loadingText | translate }}</ion-label>
           </ion-item>
         </ion-col>
       </ng-template>

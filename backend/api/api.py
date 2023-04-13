@@ -1837,7 +1837,6 @@ class Crud():
 
             view_data_ = generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
             view_properties_ = generate_view_data_f_["properties"] if generate_view_data_f_ and "properties" in generate_view_data_f_ else {}
-
             vie_p_xaxis_label_ = view_properties_[vie_chart_xaxis_]["title"] if vie_chart_xaxis_ in view_properties_ and "title" in view_properties_[vie_chart_xaxis_] else vie_chart_xaxis_
             vie_p_yaxis_label_ = view_properties_[vie_chart_yaxis_]["title"] if vie_chart_yaxis_ in view_properties_ and "title" in view_properties_[vie_chart_yaxis_] else vie_chart_yaxis_
             vie_p_legend_title_ = view_properties_[vie_chart_legend_]["title"] if vie_chart_legend_ in view_properties_ and "title" in view_properties_[vie_chart_legend_] else vie_chart_legend_
