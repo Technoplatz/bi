@@ -112,7 +112,7 @@ export class Crud {
         const manualAdd_ = p.manualAdd ? true : false;
         view_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < views.length; v++) { arr_.push(views[v].record.vie_id) } return arr_; })() : null;
         collection_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < collections.length; v++) { arr_.push(collections[v].col_id) } return arr_; })() : null;
-        const parents_ = structure.parents ? structure.parents.find((obj: any) => obj.lookup[0]?.local === item) : null;
+        const parents_ = structure.parents ? structure.parents.find((obj: any) => obj.match[0]?.key === item) : null;
         const v = [];
         required_ ? v.push(Validators.required) : null;
         minLength_ && bsonType_ !== "array" ? v.push(Validators.minLength(minLength_)) : null;

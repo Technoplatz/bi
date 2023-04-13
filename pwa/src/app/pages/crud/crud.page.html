@@ -96,25 +96,30 @@ https://www.gnu.org/licenses.
             <ion-label> {{ parent.collection }} {{ 'is loading' | translate }}... </ion-label>
         </ion-item>
         <ng-template #notreloading>
-            <ion-item class="clicked-item" lines="none">
-                <ion-searchbar showCancelButton="never" debounce="500" placeholder="Search" animated="true"
-                    class="ion-no-padding ion-no-margin brz-searchbar" (ionChange)="doStartSearch($event.detail.value)">
-                </ion-searchbar>
-            </ion-item>
-            <ion-grid class="ion-no-padding data-grid">
+            <ion-grid *ngIf="parent.get?.length > 0; else nogetfields" class="ion-no-padding data-grid">
+                <ion-item class="clicked-item" lines="none">
+                    <ion-searchbar showCancelButton="never" debounce="500" placeholder="Search" animated="true"
+                        class="ion-no-padding ion-no-margin brz-searchbar" (ionChange)="doStartSearch($event.detail.value)">
+                    </ion-searchbar>
+                </ion-item>
                 <ion-row class="list-header-row ion-nowrap">
-                    <ion-col *ngFor="let item of parent.lookup; let i = index" class="data-col-header"
-                        [size]="12/parent.lookup.length">{{ item.remote }}</ion-col>
+                    <ion-col *ngFor="let item of parent.get; let i = index" class="data-col-header"
+                        [size]="12/parent.get.length">{{ item }}</ion-col>
                 </ion-row>
                 <ion-row *ngFor="let item of related; let k=index" class="ion-no-padding ion-nowrap">
-                    <ion-col *ngFor="let rel of parent.lookup; let i = index" [size]="12/parent.lookup.length"
+                    <ion-col *ngFor="let rel of parent.get; let i = index" [size]="12/parent.get.length"
                         (click)="doSetRelated(item)" class="clicked-item">{{
-                        item[rel.remote] }}</ion-col>
+                        item[rel] }}</ion-col>
                 </ion-row>
                 <ion-row>
                     <ion-col size="12">{{ related.length }} {{ 'records found' | translate }}</ion-col>
                 </ion-row>
             </ion-grid>
+            <ng-template #nogetfields>
+                {{ 'SORRY' | translate }}<br />
+                {{ 'No parent fields defined to select' | translate }}.<br />
+                {{ 'Please add "get" into the related item of "parents" in the structure' | translate }}.
+            </ng-template>
         </ng-template>
     </div>
     <ng-template #norelation>
@@ -126,10 +131,8 @@ https://www.gnu.org/licenses.
                         {{ 'PARENTS' | translate }}
                     </ion-label>
                     <div class="ion-margin-top full-flex ion-margin-bottom">
-                        <ion-badge *ngFor="let parent of parents; let p = index"
-                            class="clicked-item ion-padding-end ion-padding-start parent-badge"
-                            (click)="doParent(parent)" color="medium">{{ parent.collection }}
-                        </ion-badge>
+                        <ion-button *ngFor="let parent of parents; let p = index" (click)="doParent(parent)" color="medium" size="small">{{ parent.collection }}
+                        </ion-button>
                     </div>
                 </ion-item>
                 <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index" class="ion-no-margin full-width">

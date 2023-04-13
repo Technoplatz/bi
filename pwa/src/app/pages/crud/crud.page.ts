@@ -327,13 +327,13 @@ export class CrudPage implements OnInit {
   doSubmitRelated() {
     this.tab = "data";
     this.related = this.relatedx;
-    this.data_[this.field_parents.lookup[0].local] = [];
+    this.data_[this.field_parents.match[0].key] = [];
     for (let k = 0; k < this.related.length; k++) {
       if (this.related[k].selected) {
-        this.data_[this.field_parents.lookup[0].local].push(this.related[k][this.field_parents.lookup[0].remote]);
+        this.data_[this.field_parents.match[0].key].push(this.related[k][this.field_parents.match[0].value]);
       }
       if (k === this.related.length - 1) {
-        this.crudForm.get(this.field_parents.lookup[0].local)?.setValue(this.data_[this.field_parents.lookup[0].local]);
+        this.crudForm.get(this.field_parents.match[0].key)?.setValue(this.data_[this.field_parents.match[0].key]);
       }
     }
   }
@@ -403,50 +403,54 @@ export class CrudPage implements OnInit {
   doParent(parent_: any) {
     this.parent = parent_;
     let projection_: any = {};
-    this.reloading = true;
     this.relact = true;
     this.tab = "relation";
-    let match_ = this.parent.match ? this.parent.match : [];
-    for (let p = 0; p < this.parent.lookup.length; p++) {
-      projection_[this.parent.lookup[p].remote] = 1
-      if (p === this.parent.lookup.length - 1) {
-        this.related = [];
-        this.misc.apiCall("crud", {
-          op: "read",
-          collection: this.parent.collection,
-          projection: projection_,
-          match: match_,
-          sort: null,
-          page: 1,
-          limit: 1000
-        }).then((res: any) => {
-          if (res && res.data) {
-            this.related = res.data;
-            for (let k = 0; k < this.related.length; k++) {
-              this.related[k].selected = true;
-              if (k === this.related.length - 1) {
-                this.relatedx = this.related = this.related.sort((a: any, b: any) => (a.selected ? -1 : 1));
-                this.reloading = false;
+    let filter_ = this.parent.filter ? this.parent.filter : [];
+    let matchkeys_: any = [];
+    this.parent.match.forEach((m: any) => matchkeys_.push(m.key));
+    if (this.parent.get && this.parent.get.length > 0) {
+      this.reloading = true;
+      for (let p = 0; p < this.parent.get.length; p++) {
+        projection_[this.parent.get[p]] = 1;
+        if (p === this.parent.get.length - 1) {
+          this.related = [];
+          this.misc.apiCall("crud", {
+            op: "read",
+            collection: this.parent.collection,
+            projection: projection_,
+            match: filter_,
+            sort: null,
+            page: 1,
+            limit: 1000
+          }).then((res: any) => {
+            if (res && res.data) {
+              this.related = res.data;
+              for (let k = 0; k < this.related.length; k++) {
+                this.related[k].selected = true;
+                if (k === this.related.length - 1) {
+                  this.relatedx = this.related = this.related.sort((a: any, b: any) => (a.selected ? -1 : 1));
+                  this.reloading = false;
+                }
               }
             }
-          }
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-        }).finally(() => {
-          this.field_parents = parent_;
-          this.reloading = false;
-        });
+          }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          }).finally(() => {
+            this.field_parents = parent_;
+            this.reloading = false;
+          });
+        }
       }
     }
   }
 
   doSetRelated(item_: any) {
-    for (let k = 0; k < this.field_parents.lookup.length; k++) {
-      if (this.field_parents.lookup[k].local) {
-        this.data_[this.field_parents.lookup[k].local] = item_[this.field_parents.lookup[k].remote];
-        this.crudForm.get(this.field_parents.lookup[k].local)?.setValue(item_[this.field_parents.lookup[k].remote]);
+    for (let k = 0; k < this.field_parents.match.length; k++) {
+      if (this.field_parents.match[k].key) {
+        this.data_[this.field_parents.match[k].key] = item_[this.field_parents.match[k].value];
+        this.crudForm.get(this.field_parents.match[k].key)?.setValue(item_[this.field_parents.match[k].value]);
       }
-      if (k === this.field_parents.lookup.length - 1) {
+      if (k === this.field_parents.match.length - 1) {
         this.tab = "data";
       }
     }
@@ -454,7 +458,7 @@ export class CrudPage implements OnInit {
 
   doStartSearch(e: any) {
     this.related = this.relatedx;
-    this.related = this.related.filter((obj: any) => (obj[this.field_parents.lookup[0].remote] + obj[this.field_parents.lookup[1]?.remote] + obj[this.field_parents.lookup[2]?.remote]).toLowerCase().indexOf(e.toLowerCase()) > -1);
+    this.related = this.related.filter((obj: any) => (obj[this.field_parents.get[0]] + obj[this.field_parents.get[1]] + obj[this.field_parents.get[2]]).toLowerCase().indexOf(e.toLowerCase()) > -1);
   }
 
   doCopyToken() {

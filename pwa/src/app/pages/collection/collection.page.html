@@ -52,17 +52,7 @@ https://www.gnu.org/licenses.
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  {{ 'Add' | translate }}<br />
-                  <span *ngIf="is_crud; else normale">{{ 'Record' | translate }}</span>
-                  <ng-template #normale>
-                    <span *ngIf="id=='_user'">{{ 'User' | translate }}</span>
-                    <span *ngIf="id=='_collection'">{{ 'Collection' | translate }}</span>
-                    <span *ngIf="id=='_view'">{{ 'View' | translate }}</span>
-                    <span *ngIf="id=='_automation'">{{ 'Trigger' | translate }}</span>
-                    <span *ngIf="id=='_backup'">{{ 'Backup' | translate }}</span>
-                    <span *ngIf="id=='_token'">{{ 'Token' | translate }}</span>
-                    <span *ngIf="['_firewall','_permission'].includes(id)">{{ 'Rule' | translate }}</span>
-                  </ng-template>
+                  {{ 'Add' | translate }}<br />{{ 'Record' | translate }}
                 </div>
               </ng-template>
               <div (click)="RefreshData(0)" class="data-sq-button">
@@ -97,7 +87,7 @@ https://www.gnu.org/licenses.
                 </div>
                 <ng-template #nojeopen>
                   <ion-icon name="close-circle-outline"></ion-icon><br />
-                  {{ 'Cancel' | translate }}<br />{{ 'Schema' | translate }}
+                  {{ 'Close' | translate }}<br />{{ 'Schema' | translate }}
                 </ng-template>
               </div>
               <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger"
@@ -112,8 +102,8 @@ https://www.gnu.org/licenses.
         <ion-grid [class]="schemevis" *ngIf="perm && is_crud">
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <json-editor id="struc" [options]="jeoptions" [data]="structure" (change)="doChangeSchema($event)"
-                #editor></json-editor>
+              <json-editor id="struc" [options]="jeoptions" [data]="structure ? structure : {}"
+                (change)="doChangeSchema($event)" #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -123,13 +113,14 @@ https://www.gnu.org/licenses.
               <h6>{{ 'ACTIONS' | translate }}</h6>
               <div class="act-buttons-wrapper">
                 <span *ngFor="let item of actions; let ac = index">
-                    <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button" color="dark">
-                      <ion-icon *ngIf="item?.rollback" name="flash-off"></ion-icon>
-                      {{ item.title }}
-                    </ion-button>
-                    <ng-template #actionhide></ng-template>
+                  <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button"
+                    color="dark">
+                    <ion-icon *ngIf="item?.rollback" name="flash-off"></ion-icon>
+                    {{ item.title }}
+                  </ion-button>
+                  <ng-template #actionhide></ng-template>
                 </span>
-                
+
               </div>
             </ion-col>
             <ng-template #noaction>
@@ -145,13 +136,13 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="is_initialized; else dataloading" class="ion-no-padding ion-margin-top data-grid">
 
           <!-- CRUD HEADERS -->
-          <ion-row *ngIf="data && data.length >= 0" class="ion-nowrap search-row">
+          <ion-row *ngIf="data.length >= 0" class="ion-nowrap search-row">
             <ion-col class="ion-text-center check-column">
               <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)" mode="md">
               </ion-checkbox>
             </ion-col>
-            <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex"
-              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
+            <ion-col *ngFor="let item of properties_ | keyvalue : orderByIndex"
+              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px;' : 'min-width: ' + default_width + 'px;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
                 <span class="column-title">{{ item.value.title }} <span *ngIf="searched[item.key]?.f && is_loaded"
                     class="danger">[ F ]</span><br /> </span>
@@ -248,8 +239,8 @@ https://www.gnu.org/licenses.
                 (ionChange)="SetSelectData(i,$event)" mode="md">
               </ion-checkbox>
             </ion-col>
-            <ion-col *ngFor="let item of columns_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
-              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
+            <ion-col *ngFor="let item of properties_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
+              [style]="item.value.width ? 'min-width: ' + item.value.width + 'px;' : 'min-width: ' + default_width + 'px;'">
               <span *ngIf="['date', 'array', 'object', 'decimal'].includes(item.value.bsonType); else othertype">
                 <span *ngIf="item.value.bsonType=='date' && record[item.key]">
                   {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}

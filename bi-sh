@@ -220,6 +220,7 @@ function buildBI() {
         echo "✘ Sorry! An error occured."
         return 0
     fi
+    startBI
     return 1
 }
 

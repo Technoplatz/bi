@@ -50,7 +50,7 @@ import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 export class CollectionPage implements OnInit {
   @ViewChild(JsonEditorComponent, { static: false }) editor: JsonEditorComponent = new JsonEditorComponent;
   public jeoptions: JsonEditorOptions;
-  public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
+  public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
@@ -62,7 +62,6 @@ export class CollectionPage implements OnInit {
   public paget: any = [];
   public id: string = "";
   private template_showed: boolean = false;
-  public reconfig: boolean = false;
   public filter: any = [];
   public searched: any = null;
   public data: any = [];
@@ -87,7 +86,6 @@ export class CollectionPage implements OnInit {
   private menu_toggle: boolean = false;
   public view_mode: any = {};
   private sweeped: any = [];
-  private properites_: any = {};
   private actionix: number = -1;
   private views_structure: any;
   private collections_structure: any;
@@ -96,6 +94,7 @@ export class CollectionPage implements OnInit {
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
+  public properties_: any = {};
   public jeopen: boolean = false;
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
@@ -180,16 +179,13 @@ export class CollectionPage implements OnInit {
             page: this.page,
             limit: this.limit
           }).then((res: any) => {
-            this.data = res.data;
-            this.reconfig = res.reconfig;
-            this.structure = res.structure;
-            this.structure_ = res.structure;
-            this.actions = this.structure.actions;
-            this.properites_ = res.structure && res.structure.properties ? res.structure.properties : null;
-            this.columns_ = [];
-            if (this.properites_) {
-              this.barcoded_ = true ? Object.keys(this.structure.properties).filter((key: any) => this.structure.properties[key].barcoded).length > 0 : false;
-              this.columns_ = Object.keys(this.structure.properties).filter((key: any) => !this.structure.properties[key].hidden).reduce((obj: any, key) => { obj[key] = this.structure.properties[key]; return obj; }, {});
+            if (res.structure.properties) {
+              this.data = res.data;
+              this.structure = res.structure;
+              this.structure_ = res.structure;
+              this.actions = this.structure.actions;
+              this.properties_ = res.structure.properties;
+              this.barcoded_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].barcoded).length > 0 : false;
               this.count = res.count;
               this.multicheckbox = false;
               this.multicheckbox ? this.multicheckbox = false : null;
@@ -215,6 +211,9 @@ export class CollectionPage implements OnInit {
             this.is_pane_ok = true;
             this.is_loaded = true;
           });
+        }).catch((error: any) => {
+          this.misc.doMessage(error, "error");
+          reject(error);
         });
       });
     });
@@ -294,7 +293,7 @@ export class CollectionPage implements OnInit {
           views: this.views ? this.views : [],
           user: this.user,
           data: rec,
-          structure: this.structure,
+          structure: this.editor.get(),
           sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
           filter: op === "action" ? this.filter : null,
           actions: this.actions && this.actions.length > 0 ? this.actions : [],

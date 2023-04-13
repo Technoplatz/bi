@@ -1463,24 +1463,24 @@ class Crud():
                     unset_.append(properties_master__)
 
             for parent_ in parents_:
-                if "lookup" in parent_ and "collection" in parent_:
+                if "match" in parent_ and "collection" in parent_:
                     parent_collection_ = parent_["collection"]
                     find_one_ = Mongo().db["_collection"].find_one({"col_id": parent_collection_})
                     if find_one_ and "col_structure" in find_one_ and "properties" in find_one_["col_structure"]:
                         for property_ in find_one_["col_structure"]["properties"]:
                             properties_master_[property_] = find_one_["col_structure"]["properties"][property_]
 
-                        look_ = parent_["lookup"]
+                        match_ = parent_["match"]
                         pipeline__ = []
                         let_ = {}
 
-                        for look__ in look_:
-                            if look__["local"] and look__["remote"]:
-                                local_ = look__["local"]
-                                remote_ = look__["remote"]
-                                let_[f"{local_}"] = f"${local_}"
-                                if local_:
-                                    pipeline__.append({"$eq": [f"$${local_}", f"${remote_}"]}),
+                        for match__ in match_:
+                            if match__["key"] and match__["value"]:
+                                key_ = match__["key"]
+                                value_ = match__["value"]
+                                let_[f"{key_}"] = f"${key_}"
+                                if key_:
+                                    pipeline__.append({"$eq": [f"$${key_}", f"${value_}"]}),
 
                         pipeline_ = [{"$match": {"$expr": {"$and": pipeline__}}}]
 
@@ -2603,9 +2603,9 @@ class Crud():
                         if "fie_parent_field_id" in doc_ and doc_["fie_parent_field_id"]:
                             parents_.append({
                                 "collection": doc_["fie_parent_collection_id"],
-                                "lookup": [{
-                                    "local": field_id_,
-                                    "remote": doc_["fie_parent_field_id"]
+                                "match": [{
+                                    "key": field_id_,
+                                    "value": doc_["fie_parent_field_id"]
                                 }]
                             })
 
@@ -2929,10 +2929,10 @@ class Crud():
                                     fie_indexed_add_ = ix_[1:]
                     if parents_ and len(parents_) > 0:
                         for parent_ in parents_:
-                            if "lookup" in parent_ and len(parent_["lookup"]) > 0 and parent_["lookup"][0]["local"] == prop_:
+                            if "match" in parent_ and len(parent_["match"]) > 0 and parent_["match"][0]["key"] == prop_:
                                 fie_has_parent_ = True
                                 fie_parent_collection_id_ = parent_["collection"]
-                                fie_parent_field_id_ = parent_["lookup"][0]["remote"] if "lookup" in parent_ and len(parent_["lookup"]) > 0 and parent_["lookup"][0]["remote"] else None
+                                fie_parent_field_id_ = parent_["match"][0]["value"] if "match" in parent_ and len(parent_["match"]) > 0 and parent_["match"][0]["value"] else None
 
                     doc_ = {
                         "fie_collection_id": collection_,
@@ -3034,8 +3034,7 @@ class Crud():
             collection_id_ = obj["collection"]
             col_check_ = self.inner_collection_f(collection_id_)
 
-            # protect _log collection from clonning and deleting
-            if collection_id_ in ["_log", "_backup", "_announcement"]:
+            if collection_id_ in ["_log", "_backup", "_event", "_announcement"]:
                 raise APIError("this collection is protected")
 
             if not col_check_["result"]:
@@ -3058,7 +3057,6 @@ class Crud():
             doc_["_modified_at"] = datetime.now()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
-            # add field prefix from the related collection
             if collection_id_ == "_field":
                 field_col_ = Mongo().db["_collection"].find_one({"col_id": doc_["fie_collection_id"]})
                 if not field_col_:
@@ -4789,14 +4787,21 @@ def crud_f():
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
         input_["userindb"] = validate_["user"]
 
+        """
+        gets the allowed matches from permissions
+        """
+        allowmatch_ = []
         permission_f_ = Auth().permission_f({"user": validate_["user"], "auth": validate_["auth"], "collection": collection_, "op": op_})
         if not permission_f_["result"]:
             raise AuthError(permission_f_["msg"])
-
-        allowmatch_ = []
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
-            match_ = allowmatch_ + match_
+            match_ += allowmatch_
+        input_["match"] = match_
+
+        """
+        checkout the document given
+        """
         if op_ in ["update", "upsert", "insert", "action"]:
             if not "doc" in input_:
                 raise APIError("document must be included in the request")
@@ -4810,13 +4815,9 @@ def crud_f():
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
 
-        input_["match"] = match_
-        input_["allowmatch"] = allowmatch_
-
-        # distributes the operation to the right function
         if op_ == "read":
             res_ = Crud().read_f(input_)
-        elif op_ in ["update", "import", "upload"]:
+        elif op_ == "update":
             res_ = Crud().upsert_f(input_)
         elif op_ == "insert":
             res_ = Crud().insert_f(input_)
