@@ -18,3 +18,4 @@ pyotp
 python-magic
 pyjwt
 get_docker_secret
+partial

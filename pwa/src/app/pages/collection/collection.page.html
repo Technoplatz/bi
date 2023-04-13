@@ -110,7 +110,7 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="is_pane_ok && is_crud" class="ion-no-padding">
           <ion-row class="ion-no-margin">
             <ion-col *ngIf="perm && actions?.length > 0; else noaction">
-              <h6>{{ 'ACTIONS' | translate }}</h6>
+              <!-- <h6>{{ 'ACTIONS' | translate }}</h6> -->
               <div class="act-buttons-wrapper">
                 <span *ngFor="let item of actions; let ac = index">
                   <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button"
@@ -120,7 +120,6 @@ https://www.gnu.org/licenses.
                   </ion-button>
                   <ng-template #actionhide></ng-template>
                 </span>
-
               </div>
             </ion-col>
             <ng-template #noaction>

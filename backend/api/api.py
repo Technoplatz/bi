@@ -58,6 +58,7 @@ import jwt
 import xlrd
 import asyncio
 import io
+from functools import partial
 from subprocess import call
 from pickle import TRUE
 from email import encoders
@@ -334,7 +335,7 @@ class Schedular():
 
     def schedule_automations_f(self, backgroundscheduler_):
         try:
-            print("*** schedule automations started", datetime.now(), flush=True)
+            print("*** schedule automations started", datetime.now())
             find_ = Mongo().db["_automation"].find({"aut_enabled": True})
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
@@ -356,7 +357,7 @@ class Schedular():
 
     def schedule_views_f(self, sched_):
         try:
-            print("*** schedule views restarted", datetime.now(), flush=True)
+            print("*** schedule views restarted", datetime.now())
             view_find_ = Mongo().db["_view"].find({})
             for doc_ in view_find_:
                 vie_id_ = doc_["vie_id"]
@@ -374,7 +375,7 @@ class Schedular():
                     vie_sched_hours_ = ",".join(vie_sched_hours_c_)
                     vie_sched_days_ = ",".join(doc_["vie_sched_days"]) if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0 else "mon"
                     sched_.add_job(self.announce_view_f, "cron", day_of_week=f"{vie_sched_days_}", hour=f"{vie_sched_hours_}", minute=f"{vie_sched_minutes_}", id=vie_id_, timezone=TZ_, replace_existing=True, args=[doc_, "live", None])
-                    print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now(), flush=True)
+                    print(f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]", datetime.now())
 
             res_ = {"result": True}
 
@@ -446,33 +447,33 @@ class Misc():
             }
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(exc_)}))
             if resp_.status_code != 200:
-                print("*** notification error", resp_, flush=True)
+                print("*** notification error", resp_)
 
     def exception_f(self, exc):
-        print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** exception", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
         return {"result": False, "msg": str(exc)}
 
     def api_error_f(self, exc):
-        print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** api error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
         self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def app_exception_f(self, exc):
-        print("*** app error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** app error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
         return {"result": False, "msg": str(exc)}
 
     def auth_error_f(self, exc):
-        print("*** auth error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno, flush=True)
+        print("*** auth error", str(exc), type(exc).__name__, __file__, exc.__traceback__.tb_lineno)
         return {"result": False, "msg": str(exc)}
 
     def mongo_error_f(self, exc):
         try:
             self.post_notification(exc)
-            print("*** mongo error", str(exc), flush=True)
-            # print("*** mongo error", type(exc).details, flush=True)
-            # print("*** mongo error", type(exc).__name__, flush=True)
-            # print("*** mongo error", __file__, flush=True)
-            # print("*** mongo error", type(exc).__traceback__.tb_lineno, flush=True)
+            print("*** mongo error", str(exc))
+            # print("*** mongo error", type(exc).details)
+            # print("*** mongo error", type(exc).__name__)
+            # print("*** mongo error", __file__)
+            # print("*** mongo error", type(exc).__traceback__.tb_lineno)
             notify_ = False
             errhtml_ = ""
             count_ = 0
@@ -1707,7 +1708,7 @@ class Crud():
                         else:
                             fres_ = {"$regex": f["value"], "$options": "i"} if f["value"] else {"$regex": "", "$options": "i"}
 
-                    if f["op"] in ["ne", "nc"]:
+                    elif f["op"] in ["ne", "nc"]:
                         if typ in ["number", "decimal"]:
                             fres_ = {"$not": {"$eq": float(f["value"])}}
                         elif typ == "bool":
@@ -5387,5 +5388,6 @@ def get_data_f(id):
 
 
 if __name__ == "__main__":
+    print = partial(print, flush=True)
     Schedular().main_f()
     app.run(host="0.0.0.0", port=80, debug=False)

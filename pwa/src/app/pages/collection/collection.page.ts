@@ -293,7 +293,7 @@ export class CollectionPage implements OnInit {
           views: this.views ? this.views : [],
           user: this.user,
           data: rec,
-          structure: this.editor.get(),
+          structure: this.editor ? this.editor.get() : this.structure,
           sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
           filter: op === "action" ? this.filter : null,
           actions: this.actions && this.actions.length > 0 ? this.actions : [],
