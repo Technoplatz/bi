@@ -44,35 +44,35 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!in_otp_process_test" name="megaphone"></ion-icon>
                 <ion-icon *ngIf="in_otp_process_test" name="hourglass"></ion-icon>
                 <br />
-                <span>{{ 'Share' | translate }}<br />{{ 'TEST' | translate }}</span>
+                {{ 'Test' | translate }}
               </div>
               <div (click)="doAnnounceNow(view, 'live')" class="data-sq-button required">
                 <ion-icon *ngIf="!in_otp_process" name="megaphone"></ion-icon>
                 <ion-icon *ngIf="in_otp_process" name="hourglass"></ion-icon>
                 <br />
-                <span>{{ 'Share' | translate }}<br />{{ 'LIVE' | translate }}</span>
+                {{ 'Live' | translate }}!
               </div>
               <div (click)="RefreshData(0)" class="data-sq-button">
                 <ion-icon *ngIf="is_loaded" name="sync-circle-outline"></ion-icon>
                 <ion-icon *ngIf="!is_loaded" name="hourglass-outline"></ion-icon>
                 <br />
-                {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
+                {{ 'Refresh' | translate }}
               </div>
               <div (click)="doCopy('view')" class="data-sq-button">
                 <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
                 <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
                 <br />
-                <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'Data URL' | translate }}</span>
-                <span *ngIf="is_url_copied">{{ 'Data URL' | translate }}<br />{{ 'Copied' | translate }}</span>
+                <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}</span>
+                <span *ngIf="is_url_copied">{{ 'Copied' | translate }}</span>
               </div>
               <div (click)="misc.navi.next('collection/'+ col_id)" class="data-sq-button">
                 <ion-icon name="server-outline"></ion-icon>
                 <br />
-                <span>{{ 'Go To' | translate }}<br />{{ 'Collection' | translate }}</span>
+                {{ 'Collection' | translate }}
               </div>
               <div (click)="doViewSettings()" class="data-sq-button">
                 <ion-icon name="settings-outline"></ion-icon><br />
-                <span>{{ 'View Settings' | translate }}</span>
+                {{ 'Settings' | translate }}
               </div>
             </ion-col>
           </ion-row>
