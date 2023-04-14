@@ -220,12 +220,15 @@ services:
       - MONGO_REPLICASET=${MONGO_REPLICASET}
       - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
       - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
-      - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
-      - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_TLS_CERT_KEY_PASSWORD=${MONGO_TLS_CERT_KEY_PASSWORD}
       - PERMISSIVE_TAGS=${PERMISSIVE_TAGS}
+      - MONGO_TLS=${MONGO_TLS}
+      - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
+      - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
+      - MONGO_TLS_CERT_KEY_PASSWORD=${MONGO_TLS_CERT_KEY_PASSWORD}
+      - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
+      - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
     links:
       - mongo0
       - mongo1
@@ -234,12 +237,55 @@ services:
       network0:
         ipv4_address: ${SUBNET_REPLICASET_IPV4}
 
+  stream:
+    image: ${HUB}technoplatz/bi-stream${IMGSUFFIX}:${VERSION}
+    container_name: stream
+    depends_on:
+      replicaset:
+        condition: service_completed_successfully
+    hostname: stream
+    restart: always
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+    volumes:
+      - bi-cert-volume:/cert
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${STREAM_PORT}:80"
+    environment:
+      - TZ=${TZ}
+      - MONGO_DB=${MONGO_DB}
+      - MONGO_AUTH_DB=${MONGO_AUTH_DB}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_REPLICASET=${MONGO_REPLICASET}
+      - MONGO_REPLICA1_HOST=${MONGO_REPLICA1_HOST}
+      - MONGO_REPLICA2_HOST=${MONGO_REPLICA2_HOST}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_TLS=${MONGO_TLS}
+      - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
+      - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
+      - MONGO_TLS_CERT_KEY_PASSWORD=${MONGO_TLS_CERT_KEY_PASSWORD}
+      - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
+      - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
+    links:
+      - replicaset
+    extra_hosts:
+      - mongo0:${SUBNET_MONGO_IPV4}
+      - mongo1:${SUBNET_MONGO_REPLICA1_IPV4}
+      - mongo2:${SUBNET_MONGO_REPLICA2_IPV4}
+    networks:
+      network0:
+        ipv4_address: ${SUBNET_STREAM_IPV4}
+
   api:
     image: ${HUB}technoplatz/bi-api${IMGSUFFIX}:${VERSION}
     container_name: api
     depends_on:
-      replicaset:
-        condition: service_completed_successfully
+      stream:
+        condition: service_started
     hostname: api
     restart: always
     labels:
@@ -281,11 +327,14 @@ services:
       - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
       - API_MAX_CONTENT_LENGTH=${API_MAX_CONTENT_LENGTH}
       - NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_SLACK_HOOK_URL}
-      - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
-      - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_TLS=${MONGO_TLS}
+      - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
+      - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_CERT_KEY_PASSWORD=${MONGO_TLS_CERT_KEY_PASSWORD}
+      - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
+      - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
       - PERMISSIVE_TAGS=${PERMISSIVE_TAGS}
       - SAAS=${SAAS}
     links:

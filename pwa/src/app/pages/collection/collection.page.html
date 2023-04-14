@@ -93,8 +93,8 @@ https://www.gnu.org/licenses.
               <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger"
                 (click)="doSaveSchema()">
                 <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
-                <ion-icon *ngIf="!is_saving" name="cloud-upload-outline"></ion-icon><br />
-                {{ 'Save' | translate }}
+                <ion-img *ngIf="!is_saving" src="../../../assets/icon/json-code.svg"></ion-img>
+                {{ 'SAVE' | translate }}
               </div>
             </ion-col>
           </ion-row>
