@@ -92,9 +92,14 @@ https://www.gnu.org/licenses.
               </div>
               <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger"
                 (click)="doSaveSchema()">
-                <ion-icon *ngIf="is_saving" name="hourglass"></ion-icon>
-                <ion-img *ngIf="!is_saving" src="../../../assets/icon/json-code.svg"></ion-img>
-                {{ 'SAVE' | translate }}
+                <span *ngIf="!is_saving">
+                  <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
+                  {{ 'Save' | translate }}
+                </span>
+                <span *ngIf="is_saving">
+                  <ion-icon name="hourglass"></ion-icon><br />
+                  {{ 'Saving' | translate }}...
+                </span>
               </div>
             </ion-col>
           </ion-row>

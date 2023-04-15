@@ -34,43 +34,44 @@
 
 echo "COMPANY_NAME=$COMPANY_NAME"
 echo "ADMIN_EMAIL=$ADMIN_EMAIL"
-echo "MONGO_HOST=$MONGO_HOST"
-echo "MONGO_REPLICA1_HOST=$MONGO_REPLICA1_HOST"
-echo "MONGO_REPLICA2_HOST=$MONGO_REPLICA2_HOST"
+echo "MONGO_HOST0=$MONGO_HOST0"
+echo "MONGO_HOST1=$MONGO_HOST1"
+echo "MONGO_HOST2=$MONGO_HOST2"
+echo "MONGO_PORT0=$MONGO_PORT0"
+echo "MONGO_PORT1=$MONGO_PORT1"
+echo "MONGO_PORT2=$MONGO_PORT2"
 echo "MONGO_TLS_CA_KEYFILE=$MONGO_TLS_CA_KEYFILE"
 echo "MONGO_TLS_CERT_KEYFILE=$MONGO_TLS_CERT_KEYFILE"
-echo "MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME"
-echo "MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD"
-echo "MONGO_TLS_CERT_KEY_PASSWORD=$MONGO_TLS_CERT_KEY_PASSWORD"
 echo "PERMISSIVE_TAGS=$PERMISSIVE_TAGS"
+# echo "MONGO_USERNAME=$MONGO_USERNAME"
+# echo "MONGO_PASSWORD=$MONGO_PASSWORD"
+# echo "MONGO_TLS_CERT_KEY_PASSWORD=$MONGO_TLS_CERT_KEY_PASSWORD"
 
-echo "DB REPLICASET STARTED"
+echo "REPLICASET STARTED"
 
-CERTDIR=/cert
-
-if [ ! -f $CERTDIR/mongo-init.flag ]; then
-    mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $CERTDIR/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $CERTDIR/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+if [ ! -f mongo-init.flag ]; then
+    mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
         rs_ = {
-            _id: '${MONGO_REPLICASET}',
+            _id: '${MONGO_RS}',
             version: 1,
             members: [
-                { _id: 0, host: '${MONGO_HOST}:${MONGO_PORT}', priority: 2 },
-                { _id: 1, host: '${MONGO_REPLICA1_HOST}:${MONGO_PORT}', priority: 0 },
-                { _id: 2, host: '${MONGO_REPLICA2_HOST}:${MONGO_PORT}', priority: 0 }
+                { _id: 0, host: '${MONGO_HOST0}:${MONGO_PORT0}', priority: 2 },
+                { _id: 1, host: '${MONGO_HOST1}:${MONGO_PORT0}', priority: 0 },
+                { _id: 2, host: '${MONGO_HOST2}:${MONGO_PORT0}', priority: 0 }
             ]
         }
         rs.initiate(rs_, { force: true });
     "
     echo "Replicaset was initiated successfully."
 else
-    mongosh "mongodb://$MONGO_HOST:$MONGO_PORT/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $CERTDIR/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $CERTDIR/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+    mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
         rs_ = {
-            _id: '${MONGO_REPLICASET}',
+            _id: '${MONGO_RS}',
             version: 1,
             members: [
-                { _id: 0, host: '${MONGO_HOST}:${MONGO_PORT}', priority: 2 },
-                { _id: 1, host: '${MONGO_REPLICA1_HOST}:${MONGO_PORT}', priority: 0 },
-                { _id: 2, host: '${MONGO_REPLICA2_HOST}:${MONGO_PORT}', priority: 0 }
+                { _id: 0, host: '${MONGO_HOST0}:${MONGO_PORT0}', priority: 2 },
+                { _id: 1, host: '${MONGO_HOST1}:${MONGO_PORT0}', priority: 0 },
+                { _id: 2, host: '${MONGO_HOST2}:${MONGO_PORT0}', priority: 0 }
             ]
         }
         rs.reconfig(rs_, { force: true });
@@ -81,7 +82,7 @@ fi
 RS_OK=""
 until [[ $RS_OK -eq "1" ]]; do
     echo "Checking replicaset status..."
-    RS_STATUS=$(mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $CERTDIR/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $CERTDIR/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+    RS_STATUS=$(mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
         JSON.stringify(rs.status());
     ")
     sleep 2s
@@ -89,20 +90,20 @@ until [[ $RS_OK -eq "1" ]]; do
     echo "RS_OK: $RS_OK"
 done
 
-MONGO_INDEXOF_DB=$(mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $CERTDIR/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $CERTDIR/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+MONGO_INDEXOF_DB=$(mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
     db.getMongo().getDBNames().indexOf('${MONGO_DB}');
 ")
 echo "MONGO_INDEXOF_DB $MONGO_INDEXOF_DB"
 
 if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
     echo "Database ${MONGO_DB} does not exist."
-    mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $CERTDIR/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $CERTDIR/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+    mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
         print('DB user creating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
-        db.createUser({ user: '${MONGO_INITDB_ROOT_USERNAME}', pwd: '${MONGO_INITDB_ROOT_PASSWORD}', roles: [{ role: 'root', db: '${MONGO_AUTH_DB}' },{ role: 'dbOwner', db: '${MONGO_DB}' }] });
+        db.createUser({ user: '${MONGO_USERNAME}', pwd: '${MONGO_PASSWORD}', roles: [{ role: 'root', db: '${MONGO_AUTH_DB}' },{ role: 'dbOwner', db: '${MONGO_DB}' }] });
         print('DB user created.');
     "
-    mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $CERTDIR/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $CERTDIR/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+    mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
         print('db connected.');
         print('update started.');
         db = db.getSiblingDB('${MONGO_DB}');
@@ -189,14 +190,14 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
         print('_firewall created.');
         print('update completed.');
     "
-    sh -c "echo 'replicaset initialized successfully' > $CERTDIR/mongo-init.flag"
+    sh -c "echo 'replicaset initialized successfully' > mongo-init.flag"
     echo "replicaset initialized successfully :)"
 else
     echo "Database ${MONGO_DB} already exists."
-    mongosh "mongodb://$MONGO_HOST:$MONGO_PORT,$MONGO_REPLICA1_HOST:$MONGO_PORT,$MONGO_REPLICA2_HOST:$MONGO_PORT/?replicaSet=$MONGO_REPLICASET&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $CERTDIR/$MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $CERTDIR/$MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+    mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
         print('db user credentials updating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
-        db.changeUserPassword('${MONGO_INITDB_ROOT_USERNAME}','${MONGO_INITDB_ROOT_PASSWORD}');
+        db.changeUserPassword('${MONGO_USERNAME}','${MONGO_PASSWORD}');
         print('db user credentials updated.');
         db = db.getSiblingDB('${MONGO_DB}');
         var saas_ = db.getCollection('_saas').findOne({ sas_id: 'saas' });
@@ -277,8 +278,8 @@ else
             }}, { upsert: true });
         }
     "
-    sh -c "echo 'replicaset completed successfully' > $CERTDIR/mongo-init.flag"
+    sh -c "echo 'replicaset completed successfully' > mongo-init.flag"
     echo "replicaset completed successfully :)"
 fi
-echo "DB REPLICASET ENDED"
+echo "REPLICASET ENDED"
 echo

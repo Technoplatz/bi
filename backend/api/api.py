@@ -430,7 +430,7 @@ class Schedular():
 class Misc():
     def __init__(self):
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
-        self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "default", "token", "file", "permanent", "disabled",
+        self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "default", "token", "file", "permanent", "disabled", "calc",
                             "objectId", "filter", "readonly", "color", "collection", "view", "property", "html", "object", "subType", "manualAdd", "barcoded", "exclude"]
 
     def post_notification(self, exc):
@@ -673,7 +673,7 @@ class Mongo():
         self.mongo_readpref_primary_ = "primary"
         self.mongo_readpref_secondary_ = "secondary"
         authSource_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
-        replicaset_ = f"&replicaSet={MONGO_REPLICASET_}" if MONGO_REPLICASET_ and MONGO_REPLICASET_ != "" else ""
+        replicaset_ = f"&replicaSet={MONGO_RS_}" if MONGO_RS_ and MONGO_RS_ != "" else ""
         readPreference_primary_ = f"&readPreference={self.mongo_readpref_primary_}" if self.mongo_readpref_primary_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true"
@@ -683,7 +683,7 @@ class Mongo():
         tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
 
         # PRIMARY CONNECTION STRING
-        self.connstr = f"mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}/?{authSource_}{replicaset_}{readPreference_primary_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
+        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{authSource_}{replicaset_}{readPreference_primary_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
 
         self.client = MongoClient(self.connstr)
         self.db = self.client[MONGO_DB_]
@@ -696,7 +696,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongodump --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_INITDB_ROOT_USERNAME_} --password \"{MONGO_INITDB_ROOT_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
+            command_ = f"mongodump --host \"{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -718,7 +718,7 @@ class Mongo():
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f"mongorestore --host \"{MONGO_HOST_}:{MONGO_PORT_},{MONGO_REPLICA1_HOST_}:{MONGO_PORT_},{MONGO_REPLICA2_HOST_}:{MONGO_PORT_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_INITDB_ROOT_USERNAME_} --password \"{MONGO_INITDB_ROOT_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
+            command_ = f"mongorestore --host \"{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}\" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password \"{MONGO_PASSWORD_}\" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude=\"{MONGO_DB_}._backup\" --nsExclude=\"{MONGO_DB_}._auth\" --nsExclude=\"{MONGO_DB_}._user\" --nsExclude=\"{MONGO_DB_}._log\" --drop --quiet"
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -1719,7 +1719,7 @@ class Crud():
                             fres_ = {"$not": {"$regex": f["value"], "$options": "i"}} if f["value"] else {"$not": {"$regex": "", "$options": "i"}}
 
                     elif f["op"] in ["in", "nin"]:
-                        separated_ = re.split(",|;|\n", f["value"])
+                        separated_ = re.split(",", f["value"])
                         list_ = [s.strip() for s in separated_] if f["key"] != "_id" else [ObjectId(s.strip()) for s in separated_]
                         if f["op"] == "in":
                             fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
@@ -3353,7 +3353,7 @@ class Crud():
                     file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
                     loc_ = f"/cron/{file_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
-                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_INITDB_ROOT_USERNAME_}:{MONGO_INITDB_ROOT_PASSWORD_}@{MONGO_HOST_}:{MONGO_PORT_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
                     files_ = [{"filename": file_, "filetype": type_}]
                     email_sent_ = Email().sendEmail_f({
@@ -4672,18 +4672,20 @@ API_KEY_ = os.environ.get("API_KEY")
 SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
 SAAS_ = os.environ.get("SAAS")
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
-MONGO_REPLICASET_ = os.environ.get("MONGO_REPLICASET")
-MONGO_HOST_ = os.environ.get("MONGO_HOST")
-MONGO_REPLICA1_HOST_ = os.environ.get("MONGO_REPLICA1_HOST")
-MONGO_REPLICA2_HOST_ = os.environ.get("MONGO_REPLICA2_HOST")
-MONGO_PORT_ = int(os.environ.get("MONGO_PORT"))
+MONGO_RS_ = os.environ.get("MONGO_RS")
+MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
+MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
+MONGO_HOST2_ = os.environ.get("MONGO_HOST2")
+MONGO_PORT0_ = int(os.environ.get("MONGO_PORT0"))
+MONGO_PORT1_ = int(os.environ.get("MONGO_PORT1"))
+MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
 MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-MONGO_INITDB_ROOT_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_INITDB_ROOT_USERNAME"))
-MONGO_INITDB_ROOT_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_INITDB_ROOT_PASSWORD"))
+MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
+MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
 MONGO_TLS_CERT_KEY_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_TLS_CERT_KEY_PASSWORD"))
-MONGO_TLS_CA_KEYFILE_ = f"/cert/{os.environ.get('MONGO_TLS_CA_KEYFILE')}"
-MONGO_TLS_CERT_KEYFILE_ = f"/cert/{os.environ.get('MONGO_TLS_CERT_KEYFILE')}"
+MONGO_TLS_CA_KEYFILE_ = os.environ.get('MONGO_TLS_CA_KEYFILE')
+MONGO_TLS_CERT_KEYFILE_ = os.environ.get('MONGO_TLS_CERT_KEYFILE')
 
 # CORS CHECKPOINT
 origins_ = [
