@@ -42,6 +42,7 @@ import { KovComponent } from "./kov/kov.component";
 import { InnerFooterComponent } from "./inner-footer/inner-footer.component";
 import { ModalFooterComponent } from "./modal-footer/modal-footer.component";
 import { ChartsComponent } from "./charts/charts.component";
+import { ChartComponent } from "./chart/chart.component";
 import { IonicModule } from "@ionic/angular";
 import { NgxChartsModule } from "@swimlane/ngx-charts";
 
@@ -53,7 +54,8 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
         KovComponent,
         InnerFooterComponent,
         ModalFooterComponent,
-        ChartsComponent
+        ChartsComponent,
+        ChartComponent
     ],
     imports: [
         RouterModule,
@@ -71,7 +73,8 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
         KovComponent,
         InnerFooterComponent,
         ModalFooterComponent,
-        ChartsComponent
+        ChartsComponent,
+        ChartComponent
     ]
 })
 

@@ -78,6 +78,7 @@ export class DashboardPage implements OnInit {
   public selected: any = [];
   public announcements: any = [];
   public views: any = [];
+  public charts: any = [];
   public viewsx: any = [];
   public views_dash: any = [];
   public views_pane: any = [];
@@ -106,7 +107,6 @@ export class DashboardPage implements OnInit {
   public master: any = {};
   public view_active: boolean = true;
   public collections: any = [];
-  public collections_: any = {};
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public is_url_copied: boolean = false;
@@ -143,8 +143,9 @@ export class DashboardPage implements OnInit {
   public announcementso: any;
   private views_structure: any;
   private collections_structure: any;
-  public viewso: any;
-  private collectionso: any;
+  public views_: any;
+  public collections_: any;
+  public charts_: any;
 
   constructor(
     private storage: Storage,
@@ -155,8 +156,9 @@ export class DashboardPage implements OnInit {
 
   ngOnDestroy() {
     this.announcementso = null;
-    this.collectionso = null;
-    this.viewso = null;
+    this.collections_ = null;
+    this.views_ = null;
+    this.charts_ = null;
   }
 
   ngOnInit() {
@@ -166,9 +168,22 @@ export class DashboardPage implements OnInit {
       this.accountf_apikey = LSUSERMETA.apikey;
 
       // collections subscribe
-      this.collectionso = this.crud.collections.subscribe((res: any) => {
+      this.collections_ = this.crud.collections.subscribe((res: any) => {
         this.collections = res && res.data ? res.data : [];
         this.collections_structure = res.structure;
+      });
+
+      // charts subscribe
+      this.charts_ = this.crud.charts.subscribe((res: any) => {
+        this.charts = res && res.views ? res.views : [];
+        this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
+          this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
+          this.chart_css = "chart-sq " + this.chart_size;
+          // for (let v_ = 0; v_ < this.views.length; v_++) {
+          //   this.doGetVisual(this.views[v_], v_);
+          // }
+        });
+        console.log("*** charts", res);
       });
 
       // announcements subscribe
@@ -177,21 +192,21 @@ export class DashboardPage implements OnInit {
       });
 
       // views subscription
-      this.viewso = this.crud.views.subscribe((res: any) => {
-        this.views = this.viewsx = res && res.data ? res.data : [];
-        this.views_structure = res && res.structure ? res.structure : null;
-        if (this.views.length > 0) {
-          this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style !== "Flashcard");
-          this.flashcards = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style === "Flashcard");
-          this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
-            this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
-            this.chart_css = "chart-sq " + this.chart_size;
-            for (let v_ = 0; v_ < this.views.length; v_++) {
-              this.doGetVisual(this.views[v_], v_);
-            }
-          });
-        }
-      });
+      // this.views_ = this.crud.views.subscribe((res: any) => {
+      //   this.views = this.viewsx = res && res.data ? res.data : [];
+      //   this.views_structure = res && res.structure ? res.structure : null;
+      //   if (this.views.length > 0) {
+      //     this.views_dash = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style !== "Flashcard");
+      //     this.flashcards = this.views.filter((obj: any) => obj.vie_dashboard && obj.vie_visual_style === "Flashcard");
+      //     this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
+      //       this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
+      //       this.chart_css = "chart-sq " + this.chart_size;
+      //       for (let v_ = 0; v_ < this.views.length; v_++) {
+      //         this.doGetVisual(this.views[v_], v_);
+      //       }
+      //     });
+      //   }
+      // });
     });
   }
 
@@ -236,30 +251,30 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  doGetVisual(data: any, v_: number) {
-    this.views[v_].loading = true;
-    this.views[v_].error = null;
-    if (this.accountf_apikey) {
-      this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
-        this.views[v_].visual = chart;
-      }).catch((error: any) => {
-        this.views[v_].visual = {};
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.views[v_].loading = false;
-      });
-    } else {
-      const error_ = "Please create an API key in the settings section";
-      this.views[v_].visual = {};
-      this.views[v_].error = error_;
-      this.misc.doMessage(error_, "error");
-    }
-  }
+  // doGetVisual(data: any, v_: number) {
+  //   this.views[v_].loading = true;
+  //   this.views[v_].error = null;
+  //   if (this.accountf_apikey) {
+  //     this.crud.Visual(data._id, this.accountf_apikey).then((chart: any) => {
+  //       this.views[v_].visual = chart;
+  //     }).catch((error: any) => {
+  //       this.views[v_].visual = {};
+  //       this.misc.doMessage(error, "error");
+  //     }).finally(() => {
+  //       this.views[v_].loading = false;
+  //     });
+  //   } else {
+  //     const error_ = "Please create an API key in the settings section";
+  //     this.views[v_].visual = {};
+  //     this.views[v_].error = error_;
+  //     this.misc.doMessage(error_, "error");
+  //   }
+  // }
 
-  doStartSearch(e: any) {
-    this.viewsx = this.views;
-    this.viewsx = this.viewsx.filter((obj: any) => (obj["vie_id"] + obj["vie_title"]).toLowerCase().indexOf(e.toLowerCase()) > -1);
-  }
+  // doStartSearch(e: any) {
+  //   this.viewsx = this.views;
+  //   this.viewsx = this.viewsx.filter((obj: any) => (obj["vie_id"] + obj["vie_title"]).toLowerCase().indexOf(e.toLowerCase()) > -1);
+  // }
 
   doResizeCharts() {
     this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: string) => {

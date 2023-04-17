@@ -43,7 +43,7 @@ h4,
 h5,
 h6 {
   margin-top: auto !important;
-  margin-bottom: auto !important;
+  margin-bottom: 4px !important;
   line-height: normal !important;
   font-weight: bolder;
 }
@@ -1827,6 +1827,10 @@ app-charts {
   margin-left: -14px;
 }
 
+app-chart {
+  margin-left: -16px;
+}
+
 .flash-rec {
   margin-bottom: 8px;
   margin-right: 8px;
@@ -1887,7 +1891,7 @@ app-charts {
 
 .chart-sq.small {
   width: 320px;
-  height: 320px;
+  height: 340px;
 }
 
 .chart-sq.medium {
@@ -1953,7 +1957,7 @@ app-charts {
   position: absolute;
   max-width: 80px;
   top: 0;
-  right: 0;
+  right: 8px;
   margin: 0px;
   padding-top: 8px !important;
 }

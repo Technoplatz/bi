@@ -64,6 +64,8 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
+
+        <!-- flashcards -->
         <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
           <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer>
             <h5>{{ item.vie_title }}</h5>
@@ -80,7 +82,39 @@ https://www.gnu.org/licenses.
             </div>
           </div>
         </div>
-        <div *ngIf="views_dash && views_dash.length > 0" class="brz-visual-group ion-margin-bottom">
+
+        <!-- charts -->
+        <div *ngIf="charts && charts.length > 0" class="brz-visual-group ion-margin-bottom">
+          <div *ngFor="let item of charts; let i = index" [class]="chart_css" #chcontainer>
+            <div class="visual-buttons">
+              <ion-button *ngIf="perm" size="small" fill="clear" (click)="misc.navi.next('collection/delivery')"
+                class="clear-dark-button" color="dark" mode="ios">
+                <ion-icon name="list-outline"></ion-icon>
+              </ion-button>
+            </div>
+            <div class="clicked-item" (click)="misc.navi.next('collection/' + item.collection)">
+              <h5>{{ item.view.title }}</h5>
+              <div class="full-width">
+                {{ item.view.description }}<br />
+                {{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}
+              </div>
+              <div class="app-charts">
+                <app-chart *ngIf="item.data && item.data.length > 0; else noviewdata"
+                  [item]="item" [width]="chcontainer.offsetWidth"></app-chart>
+                <ng-template #noviewdata>
+                  <div class="visual-error">
+                    {{ 'CHART NOT GENERATED' | translate }}<br />
+                    {{ 'Check your filter or selected fields' | translate }}.<br />
+                    {{ item?.error | translate }}
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- views -->
+        <!-- <div *ngIf="views_dash && views_dash.length > 0" class="brz-visual-group ion-margin-bottom">
           <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
             <div *ngIf="item && item.visual">
               <div class="visual-buttons">
@@ -114,7 +148,8 @@ https://www.gnu.org/licenses.
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
+        
         <!-- RECENT ANNOUNCEMENTS -->
         <h4>{{ 'Recent Announcements' | translate }}</h4>
         <div class="filler"></div>

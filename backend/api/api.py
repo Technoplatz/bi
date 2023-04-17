@@ -1415,9 +1415,9 @@ class Crud():
 
             if not "properties" in col_structure_:
                 raise APIError("properties not found in structure")
+
             properties_ = col_structure_["properties"]
             properties_master_ = {}
-
             for property_ in properties_:
                 properties_property_ = properties_[property_]
                 properties_master_[property_] = properties_property_
@@ -1445,14 +1445,13 @@ class Crud():
                 vie_order_by_ = view_["vie_order_by"]
                 for ob_ in vie_order_by_:
                     sort_[ob_] = 1
-            # elif "sort" in col_structure_ and col_structure_["sort"] != {}:
-            #     sort_ = col_structure_["sort"]
             else:
                 sort_ = {f"{collection_}._modified_at_": -1}
 
             unset_.append("_modified_by")
             unset_.append("_modified_at")
             unset_.append("_modified_count")
+            unset_.append("_resume_token")
             unset_.append("_created_at")
             unset_.append("_created_by")
             unset_.append("_structure")
@@ -1513,10 +1512,8 @@ class Crud():
                 unset_ = list(dict.fromkeys(unset_))
                 pipe_.append({"$unset": unset_})
 
-            # Append limit and skip
             pipe_.append({"$skip": 0})
 
-            # if view has a projection response will be limited according to projection keys
             if vie_projection_ and len(vie_projection_) > 0:
 
                 project_ = {}
@@ -1532,7 +1529,6 @@ class Crud():
 
                 properties_master_ = properties_tmp_
 
-            # Run aggregation
             aggregate_ = list(Mongo().db[collection_].aggregate(pipe_))
 
             records_ = []
@@ -2198,6 +2194,261 @@ class Crud():
                 "result": True,
                 "data": json.loads(JSONEncoder().encode(list(records_))),
                 "structure": vie_structure_
+            }
+
+        except pymongo.errors.PyMongoError as exc:
+            res_ = Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
+    def get_view_data_f(self, collection_, ix_):
+
+        try:
+            collection_id_ = f"{collection_['col_id']}_data"
+            view_ = collection_["col_structure"]["views"][ix_]
+            col_structure_ = collection_["col_structure"]
+            properties_ = col_structure_["properties"]
+            properties_master_ = {}
+            for property_ in properties_:
+                properties_property_ = properties_[property_]
+                properties_master_[property_] = properties_property_
+                bsonType_ = properties_property_["bsonType"] if "bsonType" in properties_property_ else None
+                if bsonType_ == "array":
+                    if "items" in properties_property_:
+                        items_ = properties_property_["items"]
+                        if "properties" in items_:
+                            item_properties_ = items_["properties"]
+                            for item_property_ in item_properties_:
+                                properties_master_[item_property_] = item_properties_[item_property_]
+
+            parents_ = []
+            if "parents" in col_structure_:
+                parents_ = col_structure_["parents"]
+
+            pipe_ = []
+            set_ = {"$set": {"_ID": {"$toObjectId": "$_id"}}}
+            pipe_.append(set_)
+
+            unset_ = []
+            unset_.append("_modified_by")
+            unset_.append("_modified_at")
+            unset_.append("_modified_count")
+            unset_.append("_resume_token")
+            unset_.append("_created_at")
+            unset_.append("_created_by")
+            unset_.append("_structure")
+            unset_.append("_tags")
+            unset_.append("_ID")
+
+            for properties_master__ in properties_master_:
+                if properties_master__[:1] == "_" and properties_master__ not in Misc().get_except_underdashes():
+                    unset_.append(properties_master__)
+
+            for parent_ in parents_:
+                if "match" in parent_ and "collection" in parent_:
+                    parent_collection_ = parent_["collection"]
+                    find_one_ = Mongo().db["_collection"].find_one({"col_id": parent_collection_})
+                    if find_one_ and "col_structure" in find_one_ and "properties" in find_one_["col_structure"]:
+                        for property_ in find_one_["col_structure"]["properties"]:
+                            properties_master_[property_] = find_one_["col_structure"]["properties"][property_]
+                        match_ = parent_["match"]
+                        pipeline__ = []
+                        let_ = {}
+                        for match__ in match_:
+                            if match__["key"] and match__["value"]:
+                                key_ = match__["key"]
+                                value_ = match__["value"]
+                                let_[f"{key_}"] = f"${key_}"
+                                if key_:
+                                    pipeline__.append({"$eq": [f"$${key_}", f"${value_}"]}),
+                        pipeline_ = [{"$match": {"$expr": {"$and": pipeline__}}}]
+                        lookup_ = {
+                            "from": f"{parent_collection_}_data",
+                            "let": let_,
+                            "pipeline": pipeline_,
+                            "as": parent_collection_
+                        }
+                        unwind_ = {"path": f"${parent_collection_}", "preserveNullAndEmptyArrays": True}
+                        replace_with_ = {"$mergeObjects": ["$$ROOT", f"${parent_collection_}"]}
+                        pipe_.append({"$lookup": lookup_})
+                        pipe_.append({"$unwind": unwind_})
+                        pipe_.append({"$replaceWith": replace_with_})
+                        unset_.append(parent_collection_)
+
+            # sort_ = col_structure_["sort"] if "sort" in col_structure_ else { "_modified_at": -1 }
+            # pipe_.append({"$sort": sort_})
+
+            vie_filter_ = view_["data_filter"] if "data_filter" in view_ else []
+            if len(vie_filter_) > 0:
+                get_filtered_ = self.get_filtered_f({
+                    "match": vie_filter_,
+                    "properties": properties_master_ if properties_master_ else None
+                })
+                pipe_.append({"$match": get_filtered_})
+
+            if unset_ and len(unset_) > 0:
+                unset_ = list(dict.fromkeys(unset_))
+                pipe_.append({"$unset": unset_})
+
+            # pipe_.append({"$skip": 0})
+
+            print("\n*** pipe", pipe_)
+            records_ = list(Mongo().db[collection_id_].aggregate(pipe_))
+            count_ = len(records_) if records_ else 0
+
+            print("\n*** records_", records_)
+            print("\n*** count_", count_)
+
+            df_ = pd.DataFrame(records_).fillna(0)
+
+            vie_visual_style_ = view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
+            vie_chart_xaxis_ = view_["data_index"][0] if "data_index" in view_ and len(view_["data_index"]) > 0 else None
+            vie_chart_yaxis_ = view_["data_values"][0]["key"] if "data_values" in view_ and len(view_["data_values"]) > 0 and "key" in view_["data_values"][0] else None
+            vie_chart_function_ = view_["data_values"][0]["value"] if "data_values" in view_ and len(view_["data_values"]) > 0 and "value" in view_["data_values"][0] else "sum"
+            vie_chart_legend_ = view_["data_columns"][0] if "data_columns" in view_ and len(view_["data_columns"]) > 0 else None
+
+            print("\n*** vie_visual_style_", vie_visual_style_)
+            print("\n*** vie_chart_xaxis_", vie_chart_xaxis_)
+            print("\n*** vie_chart_yaxis_", vie_chart_yaxis_)
+            print("\n*** vie_chart_function_", vie_chart_function_)
+            print("\n*** vie_chart_legend_", vie_chart_legend_)
+
+            dropped_ = []
+            dropped_.append(vie_chart_xaxis_)
+            dropped_.append(vie_chart_yaxis_)
+            dropped_.append(vie_chart_legend_)
+
+            groupby_ = []
+            sort_ = None
+
+            if vie_visual_style_ == "Line":
+                if vie_chart_legend_ in df_:
+                    groupby_.append(vie_chart_legend_)
+                if vie_chart_xaxis_ in df_:
+                    groupby_.append(vie_chart_xaxis_)
+                    sort_ = vie_chart_xaxis_
+            else:
+                if vie_chart_xaxis_ in df_:
+                    groupby_.append(vie_chart_xaxis_)
+                if vie_chart_legend_ in df_:
+                    groupby_.append(vie_chart_legend_)
+
+            df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
+
+            print("\n*** df1_", df_)
+
+            count_ = 0
+            if df_ is not None:
+                count_ = len(df_)
+                if count_ > 0 and vie_chart_yaxis_:
+                    if vie_chart_function_ == "sum":
+                        value_ = float(df_[vie_chart_yaxis_].sum())
+                    elif vie_chart_function_ == "count":
+                        value_ = int(len(df_[vie_chart_yaxis_]))
+                    elif vie_chart_function_ == "unique":
+                        value_ = int(df_[vie_chart_yaxis_].nunique())
+                    elif vie_chart_function_ in ["mean", "avg"]:
+                        value_ = float(df_[vie_chart_yaxis_].mean())
+                    elif vie_chart_function_ in ["stdev", "std"]:
+                        value_ = float(df_[vie_chart_yaxis_].std())
+                    elif vie_chart_function_ == "var":
+                        value_ = float(df_[vie_chart_yaxis_].var())
+                    else:
+                        raise APIError("invalid visual function")
+
+                if len(groupby_) > 0:
+                    df_ = df_.groupby(groupby_, as_index=False).sum() if vie_chart_function_ == "sum" else df_.groupby(groupby_, as_index=False).count()
+
+            dfj_ = json.loads(df_.to_json(orient="records"))
+
+            print("\n*** df2_", dfj_)
+
+            series_ = []
+            series_sub_ = []
+            xaxis_ = None
+            legend_ = None
+
+            if vie_chart_xaxis_:
+                if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
+                    for idx_, item_ in enumerate(dfj_):
+                        xaxis_ = item_[vie_chart_xaxis_] if vie_chart_xaxis_ in item_ else None
+                        yaxis_ = item_[vie_chart_yaxis_] if vie_chart_yaxis_ in item_ else None
+                        if xaxis_ and yaxis_:
+                            series_.append({"name": xaxis_, "value": yaxis_})
+                elif vie_visual_style_ == "Line":
+                    for idx_, item_ in enumerate(dfj_):
+                        if idx_ > 0 and item_[vie_chart_legend_] != legend_:
+                            series_.append({"name": legend_, "series": series_sub_})
+                            series_sub_ = []
+                        series_sub_.append({"name": item_[vie_chart_xaxis_], "value": item_[vie_chart_yaxis_]})
+                        legend_ = item_[vie_chart_legend_] if vie_chart_legend_ in item_ else None
+                    if legend_:
+                        series_.append({"name": legend_, "series": series_sub_})
+                else:
+                    for idx_, item_ in enumerate(dfj_):
+                        if idx_ > 0 and item_[vie_chart_xaxis_] != xaxis_:
+                            series_.append({"name": xaxis_, "series": series_sub_})
+                            series_sub_ = []
+                        if vie_chart_legend_ in item_ and item_[vie_chart_legend_] is not None:
+                            series_sub_.append({"name": item_[vie_chart_legend_], "value": item_[vie_chart_yaxis_]})
+                        xaxis_ = item_[vie_chart_xaxis_] if vie_chart_xaxis_ in item_ else None
+                    if xaxis_:
+                        series_.append({"name": xaxis_, "series": series_sub_})
+
+            res_ = {
+                "result": True,
+                "data": series_,
+                "count": count_
+            }
+
+        except pymongo.errors.PyMongoError as exc:
+            res_ = Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            res_ = Misc().api_error_f(exc)
+
+        except Exception as exc:
+            res_ = Misc().exception_f(exc)
+
+        finally:
+            return res_
+
+    def charts_f(self, obj):
+        try:
+            views_ = []
+            user_ = obj["userindb"]
+            collections_ = list(Mongo().db["_collection"].aggregate([{
+                "$match": {"col_structure.views": {
+                    "$elemMatch": {
+                        "enabled": True,
+                        "_tags": {"$elemMatch": {"$in": user_["_tags"]}}
+                    }
+                }}}
+            ]))
+            for collection_ in collections_:
+                cursor_ = collection_["col_structure"]["views"] if "col_structure" in collection_ and "views" in collection_["col_structure"] and len(collection_["col_structure"]["views"]) > 0 else None
+                if cursor_:
+                    for ix_, view_ in enumerate(cursor_):
+                        get_view_data_f_ = self.get_view_data_f(collection_, ix_)
+                        if not get_view_data_f_["result"]:
+                            raise APIError(f"get view data error {get_view_data_f_['msg']}")
+                        view_data_ = get_view_data_f_["data"] if "data" in get_view_data_f_ else None
+                        views_.append({
+                            "collection": collection_["col_id"],
+                            "view": view_,
+                            "data": view_data_
+                        })
+
+            res_ = {
+                "result": True,
+                "views": views_
             }
 
         except pymongo.errors.PyMongoError as exc:
@@ -4841,6 +5092,8 @@ def crud_f():
             res_ = Crud().view_f(input_)
         elif op_ == "views":
             res_ = Crud().views_f(input_)
+        elif op_ == "charts":
+            res_ = Crud().charts_f(input_)
         elif op_ == "announce":
             res_ = Crud().announce_f(input_)
         elif op_ == "collections":

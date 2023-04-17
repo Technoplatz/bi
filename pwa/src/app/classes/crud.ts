@@ -53,6 +53,7 @@ export class Crud {
   public objects = this.objectsListener.asObservable();
   public collections = new BehaviorSubject<any>([]);
   public views = new BehaviorSubject<any>([]);
+  public charts = new BehaviorSubject<any>([]);
   public visuals = new BehaviorSubject<any>([]);
   public saas = new BehaviorSubject(null);
   public announcements = new BehaviorSubject<any>([]);
@@ -329,6 +330,19 @@ export class Crud {
     });
   }
 
+  getCharts() {
+    return new Promise((resolve, reject) => {
+      this.misc.apiCall("crud", {
+        op: "charts",
+        dashboard: false
+      }).then((res: any) => {
+        resolve(this.charts.next(res));
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
   getAnnouncements(LSUSERMETA: any) {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
@@ -360,6 +374,11 @@ export class Crud {
           reject(err);
         });
         this.getViews().then(() => {
+          resolve(true);
+        }).catch((err: any) => {
+          reject(err);
+        });
+        this.getCharts().then(() => {
           resolve(true);
         }).catch((err: any) => {
           reject(err);

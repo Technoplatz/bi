@@ -44,7 +44,7 @@ If you plan to use the Community Edition in production, there are certain topics
 
 ## Licensing Options
 
-The 4-cylinder core engine of Technoplatz BI is provided as a community edition which is free as far as the GNU Affero GPL-v3 Licensing terms. Meaning, it is open to everyone who are open and will remain open too.
+The 4-cylinder core engine of Technoplatz BI is provided as a community edition which is free as far as the GNU Affero GPL-v3 Licensing terms. Meaning, it is open to everyone who are open and will remain open as well.
 
 The platform is also provided as a service for the organizations demanding prefessional support in terms of managed hosting, custom development and integration services.
 
@@ -59,8 +59,8 @@ The platform is also provided as a service for the organizations demanding prefe
 |  Technical Support | ✘ | ✔ |
 |  Custom Integration Services | ✘ | ✔ |
 |  Custom Domain | ✘ | ✔ |
-|  License | GNU Affero GPL v3 | GNU Affero GPL v3 + SLA |
-|  Pricing | Free | [Contact Us](https://bi.technoplatz.de/start) |
+|  Licensing | GNU Affero GPL v3 | +Project Agreement/SLA |
+|  Pricing | Free | [Get a Quote](https://bi.technoplatz.de/start) |
 
 ## Impressum
 
