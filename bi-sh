@@ -165,9 +165,9 @@ function startBI() {
     fi
     docker compose -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
-        echo -e "✔ Platform is up and running."
+        echo -e "\n✔ Platform is up and running."
     else
-        echo -e "✘ Sorry! Process was terminated ($?)."
+        echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
     fi
     return 1
@@ -179,13 +179,13 @@ function stopBI() {
         docker container stop $(docker container ls -qa)
         docker container rm $(docker container ls -qa)
         if [ $? -eq 0 ]; then
-            echo "✔ Running containers stopped and removed successfully."
+            echo -e "\n✔ Running containers stopped and removed successfully."
         else
             echo "✘ Sorry! Process was terminated ($?)."
             return 0
         fi
     else
-        echo -e "✘ No active container found!"
+        echo -e "\n✘ No active container(s) found!"
     fi
     return 1
 }
@@ -206,18 +206,9 @@ function logsBI() {
 }
 
 function buildBI() {
-    if [ ! $1 ]; then
-        echo "✘ Sorry! You need to provide a image ID."
-        return 0
-    fi
-    if [ ! $2 ]; then
-        echo "✘ Sorry! You need to provide a folder."
-        return 0
-    fi
-    echo "Building $1 from $2..."
-    docker build --tag $1 $2
+    docker compose -f $ROOTPATH/$DCYML build
     if [ $? -ne 0 ]; then
-        echo "✘ Sorry! An error occured."
+        echo -e "\n✘ Sorry! An error occured."
         return 0
     fi
     startBI
@@ -274,7 +265,7 @@ case $1 in
     logsBI "$2" "$3"
     ;;
 "build")
-    buildBI "$2" "$3"
+    buildBI
     ;;
 "help")
     helpBI
