@@ -37,10 +37,10 @@ on:
       - dev0
       - main
     paths:
-      - "_init/**"
+      - "init/**"
 env:
   DOCKER_IMAGE: bi-init
-  FOLDER: _init
+  FOLDER: init
   DOCKERFILE: Dockerfile
   VERSION: latest
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

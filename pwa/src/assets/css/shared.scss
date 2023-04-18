@@ -372,7 +372,7 @@ ion-note {
   color: var(--ion-color-white);
   overflow: hidden;
   flex-basis: 82px;
-  min-width: 82px;
+  min-width: 86px;
   flex-grow: 0;
 }
 
@@ -1421,7 +1421,8 @@ json-editor jsoneditor-outer {
   color: #FFC300;
 }
 
-.ace_editor, .jsoneditor-tree {
+.ace_editor,
+.jsoneditor-tree {
   font-family: source-code-pro, monospace, consolas, menlo, monaco, Ubuntu Mono;
   font-size: 13px !important;
   font-weight: 600;

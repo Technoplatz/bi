@@ -116,7 +116,6 @@ export const environment = {
   ],
   segmentsadm: [
     { "id": "_collection", "title": "Collections" },
-    { "id": "_view", "title": "Shared Views" },
     { "id": "_announcement", "title": "Announcements" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },

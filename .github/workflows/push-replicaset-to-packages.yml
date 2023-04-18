@@ -37,10 +37,10 @@ on:
       - dev0
       - main
     paths:
-      - "_replicaset/**"
+      - "replicaset/**"
 env:
   DOCKER_IMAGE: bi-replicaset
-  FOLDER: _replicaset
+  FOLDER: replicaset
   DOCKERFILE: Dockerfile
   VERSION: latest
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

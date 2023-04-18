@@ -1,0 +1,45 @@
+{
+  "properties": {
+    "prd_no": {
+      "bsonType": "string",
+      "title": "Product ID",
+      "description": "Product ID",
+      "minLength": 1,
+      "maxLength": 64,
+      "replacement": [
+        {
+          "find": "-",
+          "replace": ""
+        },
+        {
+          "find": "_",
+          "replace": ""
+        }
+      ],
+      "width": 120
+    },
+    "prd_description": {
+      "bsonType": "string",
+      "title": "Description",
+      "description": "Product Description",
+      "minLength": 1,
+      "maxLength": 256,
+      "width": 350
+    }
+  },
+  "required": [
+    "prd_no",
+    "prd_description"
+  ],
+  "index": [],
+  "unique": [
+    [
+      "prd_no"
+    ]
+  ],
+  "parents": [],
+  "actions": [],
+  "sort": {
+    "_modified_at": -1
+  }
+}

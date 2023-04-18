@@ -1,0 +1,273 @@
+{
+  "properties": {
+    "man_no": {
+      "bsonType": "string",
+      "title": "Manifest No",
+      "description": "Customs Manifest Number",
+      "minLength": 18,
+      "maxLength": 20,
+      "width": 160
+    },
+    "man_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Manifest Status",
+      "enum": [
+        "00-Open",
+        "10-OnCustomsProcess",
+        "20-Closed"
+      ],
+      "default": "00-Open",
+      "width": 160
+    },
+    "man_opening_date": {
+      "bsonType": "date",
+      "title": "Manifest Date",
+      "description": "Manifest Opening Date",
+      "width": 150
+    },
+    "man_file_no": {
+      "bsonType": "string",
+      "title": "File No",
+      "description": "Internal File Number",
+      "minLength": 1,
+      "maxLength": 7,
+      "width": 110
+    },
+    "man_odi_no": {
+      "bsonType": "string",
+      "title": "Ordino No",
+      "description": "Ana Konsimento No",
+      "minLength": 10,
+      "maxLength": 20,
+      "width": 170
+    },
+    "man_odi_sub_no": {
+      "bsonType": "string",
+      "title": "Ordino Sub No",
+      "description": "Ara Konşimento No",
+      "minLength": 6,
+      "maxLength": 20
+    },
+    "man_case_no": {
+      "bsonType": "number",
+      "title": "Case Number",
+      "description": "Total of Case Number",
+      "width": 120
+    },
+    "man_amount": {
+      "bsonType": "number",
+      "title": "Expenses",
+      "description": "Tax and Expenses",
+      "default": 0
+    },
+    "man_closing_date": {
+      "bsonType": "date",
+      "title": "Closing Date",
+      "description": "Manifest Closing Date",
+      "width": 150
+    },
+    "man_clearance_completed": {
+      "bsonType": "bool",
+      "title": "Completed",
+      "description": "Customs Clearance Completed",
+      "width": 200
+    }
+  },
+  "required": [
+    "man_no",
+    "man_opening_date",
+    "man_file_no",
+    "man_status",
+    "man_case_no"
+  ],
+  "index": [
+    [
+      "man_no"
+    ],
+    [
+      "man_odi_no",
+      "man_odi_sub_no"
+    ],
+    [
+      "man_status"
+    ],
+    [
+      "man_odi_no"
+    ],
+    [
+      "man_file_no"
+    ]
+  ],
+  "unique": [
+    [
+      "man_no"
+    ],
+    [
+      "man_no",
+      "man_odi_no",
+      "man_odi_sub_no"
+    ],
+    [
+      "man_file_no"
+    ]
+  ],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [
+    {
+      "collection": "ordino",
+      "match": [
+        {
+          "key": "man_odi_no",
+          "value": "odi_no"
+        },
+        {
+          "key": "man_odi_sub_no",
+          "value": "odi_sub_no"
+        }
+      ],
+      "get": [
+        "odi_no",
+        "odi_sub_no"
+      ],
+      "filter": [
+        {
+          "key": "odi_status",
+          "op": "in",
+          "value": "00-Open,10-OnTheWay"
+        }
+      ]
+    }
+  ],
+  "actions": [],
+  "triggers": [
+    {
+      "name": "Manifest in Action",
+      "enabled": true,
+      "operations": [
+        "update",
+        "insert"
+      ],
+      "changes": [
+        {
+          "key": "man_status",
+          "op": "eq",
+          "value": "10-OnCustomsProcess"
+        }
+      ],
+      "conditions": [
+        {
+          "key": "man_status",
+          "op": "in",
+          "value": "00-Open,10-OnCustomsProcess"
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_man_no",
+              "value": "man_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "dnn_status",
+              "op": "in",
+              "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+            }
+          ],
+          "set": [
+            {
+              "key": "dnn_status",
+              "value": "30-OnCustomsProcess"
+            }
+          ],
+          "upsert": false
+        }
+      ]
+    },
+    {
+      "name": "Manifest Completed",
+      "enabled": true,
+      "operations": [
+        "update",
+        "insert"
+      ],
+      "changes": [
+        {
+          "key": "man_status",
+          "op": "eq",
+          "value": "20-Closed"
+        },
+        {
+          "key": "man_clearance_completed",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "conditions": [
+        {
+          "key": "man_status",
+          "op": "in",
+          "value": "00-Open,10-OnCustomsProcess,20-Closed"
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_man_no",
+              "value": "man_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "dnn_status",
+              "op": "in",
+              "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+            }
+          ],
+          "set": [
+            {
+              "key": "dnn_status",
+              "value": "40-ClearanceCompleted"
+            }
+          ],
+          "upsert": false
+        },
+        {
+          "collection": "ordino",
+          "match": [
+            {
+              "key": "odi_no",
+              "value": "man_odi_no"
+            },
+            {
+              "key": "odi_sub_no",
+              "value": "man_odi_sub_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "odi_status",
+              "op": "in",
+              "value": "00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+            }
+          ],
+          "set": [
+            {
+              "key": "odi_status",
+              "value": "40-ClearanceCompleted"
+            }
+          ],
+          "upsert": false
+        }
+      ]
+    }
+  ]
+}

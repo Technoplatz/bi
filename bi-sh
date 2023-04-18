@@ -248,7 +248,7 @@ if [[ ! -z $2 ]]; then
 fi
 
 ROOTPATH="."
-DIR=$ROOTPATH/_bi
+DIR=$ROOTPATH/__bi
 
 case $1 in
 "install")

@@ -431,7 +431,7 @@ class Misc():
     def __init__(self):
         self.props_ = ["bsonType", "title", "description", "pattern", "minimum", "maximum", "minLength", "maxLength", "enum"]
         self.xtra_props_ = ["index", "width", "required", "password", "textarea", "hashtag", "map", "default", "token", "file", "permanent", "disabled", "calc",
-                            "objectId", "filter", "readonly", "color", "collection", "view", "property", "html", "object", "subType", "manualAdd", "barcoded", "exclude"]
+                            "objectId", "filter", "readonly", "color", "collection", "view", "property", "html", "object", "subType", "manualAdd", "barcoded", "replacement"]
 
     def post_notification(self, exc):
         ip_ = self.get_user_ip_f()

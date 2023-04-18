@@ -44,9 +44,9 @@ https://www.gnu.org/licenses.
                 <ion-icon name="cloud-upload-outline"></ion-icon><br />
                 {{ 'Upload' | translate }}
               </div>
-              <div (click)="Settings('_collection', 'insert', null, 0)" class="data-sq-button">
+              <div (click)="misc.navi.next('admin/_collection')" class="data-sq-button">
                 <ion-icon name="add-circle-outline"></ion-icon><br />
-                {{ 'Collection' | translate }}
+                {{ 'Collections' | translate }}
               </div>
               <div (click)="doRefresh()" class="data-sq-button">
                 <ion-icon *ngIf="!is_refreshing" name="sync-circle-outline"></ion-icon>
@@ -70,12 +70,12 @@ https://www.gnu.org/licenses.
           <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer>
             <h5>{{ item.vie_title }}</h5>
             <div class="visual-buttons">
-              <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, f)"
+              <ion-button size="small" fill="clear"
                 class="clear-dark-button" color="dark" mode="ios">
                 <ion-icon name="settings-outline"></ion-icon>
               </ion-button>
             </div>
-            <div *ngIf="item && item.visual" (click)="doEnterViewMode(item)" class="clicked-item">
+            <div *ngIf="item && item.visual" class="clicked-item">
               {{ item.vie_collection_id }} | {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
               <h2>{{ item.visual.value }}</h2>
               <h6>{{ 'Shared with' | translate }} {{ item._tags?.length }} {{ '#Hashtags' | translate }}.</h6>
@@ -87,7 +87,7 @@ https://www.gnu.org/licenses.
         <div *ngIf="charts && charts.length > 0" class="brz-visual-group ion-margin-bottom">
           <div *ngFor="let item of charts; let i = index" [class]="chart_css" #chcontainer>
             <div class="visual-buttons">
-              <ion-button *ngIf="perm" size="small" fill="clear" (click)="misc.navi.next('collection/delivery')"
+              <ion-button size="small" fill="clear" (click)="misc.navi.next('collection/' + item.collection)"
                 class="clear-dark-button" color="dark" mode="ios">
                 <ion-icon name="list-outline"></ion-icon>
               </ion-button>
@@ -112,43 +112,6 @@ https://www.gnu.org/licenses.
             </div>
           </div>
         </div>
-
-        <!-- views -->
-        <!-- <div *ngIf="views_dash && views_dash.length > 0" class="brz-visual-group ion-margin-bottom">
-          <div *ngFor="let item of views_dash; let i = index" [class]="chart_css" #chcontainer>
-            <div *ngIf="item && item.visual">
-              <div class="visual-buttons">
-                <ion-button *ngIf="perm" size="small" fill="clear" (click)="Settings('_view', 'update', item, i)"
-                  class="clear-dark-button" color="dark" mode="ios">
-                  <ion-icon name="settings-outline"></ion-icon>
-                </ion-button>
-              </div>
-              <div class="clicked-item" (click)="doEnterViewMode(item)">
-                <h6>{{ item.vie_title }}</h6>
-                <div class="full-width">
-                  {{ item.vie_collection_id }}
-                  <span *ngIf="item.visual.function && item.visual.yaxis">
-                    | {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
-                  </span>
-                  <span *ngIf="item.visual.kpi_target_value; else notargetv">&rarr; {{ item.visual.kpi_target_value
-                    }}</span>
-                  <ng-template #notargetv><br /></ng-template>
-                </div>
-                <div class="app-charts">
-                  <app-charts *ngIf="item.visual.data && item.visual.data.length > 0; else nochartdata"
-                    [visual]="item.visual" [width]="chcontainer.offsetWidth"></app-charts>
-                  <ng-template #nochartdata>
-                    <div class="visual-error">
-                      {{ 'CHART NOT GENERATED' | translate }}<br />
-                      {{ 'Check your filter or selected fields' | translate }}.<br />
-                      {{ item?.error | translate }}
-                    </div>
-                  </ng-template>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> -->
         
         <!-- RECENT ANNOUNCEMENTS -->
         <h4>{{ 'Recent Announcements' | translate }}</h4>
