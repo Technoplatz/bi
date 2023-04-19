@@ -49,6 +49,7 @@ function helpBI() {
     echo "./bi.sh update"
     echo "./bi.sh prune [--all]"
     echo "./bi.sh logs api|pwa|init|replicaset [last n rows]"
+    echo "./bi.sh build [api|pwa|init|replicaset]"
     echo "./bi.sh help"
 }
 
@@ -206,7 +207,7 @@ function logsBI() {
 }
 
 function buildBI() {
-    docker compose -f $ROOTPATH/$DCYML build
+    docker compose -f $ROOTPATH/$DCYML build $1
     if [ $? -ne 0 ]; then
         echo -e "\n✘ Sorry! An error occured."
         return 0
@@ -265,7 +266,7 @@ case $1 in
     logsBI "$2" "$3"
     ;;
 "build")
-    buildBI
+    buildBI "$2"
     ;;
 "help")
     helpBI

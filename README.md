@@ -1,16 +1,19 @@
 # Technoplatz BI
 
-Technoplatz BI is an open source, multi-container, no-code data application and sharing platform designed for business professionals to build unique data driven solutions without developing software from scratch.
+Willkommen.
+
+Technoplatz BI is an open source, multi-container, JSON schema oriented application platform designed for business professionals to build boutique data-driven solutions without dealing with software development from scratch.
 
 - [How to get started](#how-to-get-started)
+- [Installation](#installation)
+- [Licensing Options](#licensing-options)
 - [Caveats](#caveats)
-- [Licensing Options](#license)
 - [Impressum](#impressum)
 - [Author](#author)
 
 ## How to get started
 
-Technoplatz BI requires Docker platform to run. Docker is the leading virtualization technology for developing, shipping and running business grade applications. Before getting started what you need to do is to create a Docker instance on the cloud or on-premises. There are many options with different configurations are sold on the marketplaces of the leading Cloud providers.
+Technoplatz BI works on [Docker](#) which is the leading virtualization technology for developing, shipping and running business grade applications. Before getting started what you need to do is to create a Docker instance on the cloud or on-premises. There are many options with different configurations are sold on the marketplaces of the leading Cloud providers.
 
 Here's the guides you need;
 
@@ -21,14 +24,14 @@ Here's the guides you need;
 [Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
 
 - System Requirements\
-The optimum configuration for a Docker instance to run the system properly is given below. The initial resources should be increased as far as the workload and the number of connections to be established.
+The minimum configuration for a Docker instance is for a basic workload should be increased as far as the required workload and the number of connections to be established.
 
     - 2 vCPU
     - 4 GB of RAM
-    - 30 GB Premium SSD
-    - Ubuntu Linux 22.04 LTS
+    - 30 GB Hard Disk
+    - Internet Connection
 
-### Installation
+## Installation
 
 ## Caveats
 
@@ -37,8 +40,8 @@ The optimum configuration for a Docker instance to run the system properly is gi
 If you plan to use the Community Edition in production, there are certain topics that you need to consider before go live in terms of the total accomplishment of the services. Please read Technoplatz's recommendations below;
 
 - Hosting
-- Database Replication
-- Indexes and Performance
+- Replication
+- Performance
 - Maintenance
 - Security
 

@@ -66,25 +66,19 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- flashcards -->
-        <div *ngIf="flashcards && flashcards.length > 0" class="brz-visual-group">
-          <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer>
-            <h5>{{ item.vie_title }}</h5>
-            <div class="visual-buttons">
-              <ion-button size="small" fill="clear"
-                class="clear-dark-button" color="dark" mode="ios">
-                <ion-icon name="settings-outline"></ion-icon>
-              </ion-button>
-            </div>
-            <div *ngIf="item && item.visual" class="clicked-item">
-              {{ item.vie_collection_id }} | {{ item.visual.function }} {{ 'of' | translate }} {{ item.visual.yaxis }}
-              <h2>{{ item.visual.value }}</h2>
-              <h6>{{ 'Shared with' | translate }} {{ item._tags?.length }} {{ '#Hashtags' | translate }}.</h6>
-            </div>
+        <div class="brz-visual-group">
+          <div *ngFor="let item of flashcards; let f = index" class="flash-sq clicked-item" #chcontainer
+            (click)="misc.navi.next('collection/' + item.collection)">
+            <h5>{{ item.view.title }}</h5>
+            {{ item.collection }} | {{ item.view.data_values[0].value }} {{ 'of' | translate }} {{
+            item.view.data_values[0].key }}
+            <h2>{{ item.stats[item.view.data_values[0].value] }}</h2>
+            <h6>{{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}.</h6>
           </div>
         </div>
 
         <!-- charts -->
-        <div *ngIf="charts && charts.length > 0" class="brz-visual-group ion-margin-bottom">
+        <div class="brz-visual-group ion-margin-bottom">
           <div *ngFor="let item of charts; let i = index" [class]="chart_css" #chcontainer>
             <div class="visual-buttons">
               <ion-button size="small" fill="clear" (click)="misc.navi.next('collection/' + item.collection)"
@@ -99,8 +93,8 @@ https://www.gnu.org/licenses.
                 {{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}
               </div>
               <div class="app-charts">
-                <app-chart *ngIf="item.data && item.data.length > 0; else noviewdata"
-                  [item]="item" [width]="chcontainer.offsetWidth"></app-chart>
+                <app-chart *ngIf="item.data && item.data.length > 0; else noviewdata" [item]="item"
+                  [width]="chcontainer.offsetWidth"></app-chart>
                 <ng-template #noviewdata>
                   <div class="visual-error">
                     {{ 'CHART NOT GENERATED' | translate }}<br />
@@ -112,7 +106,7 @@ https://www.gnu.org/licenses.
             </div>
           </div>
         </div>
-        
+
         <!-- RECENT ANNOUNCEMENTS -->
         <h4>{{ 'Recent Announcements' | translate }}</h4>
         <div class="filler"></div>

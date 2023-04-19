@@ -68,7 +68,10 @@ export class DashboardPage implements OnInit {
 
   ngOnInit() {
     this.charts_ = this.crud.charts.subscribe((res: any) => {
-      this.charts = res && res.views ? res.views : [];
+      this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard") : [];
+      this.flashcards =  res && res.views ? res.views.filter((obj: any) => obj.view.chart_type === "Flashcard" ) : [];
+      console.log("*** charts", this.charts);
+      console.log("*** flashcards", this.flashcards);
       this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
         this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
         this.chart_css = "chart-sq " + this.chart_size;

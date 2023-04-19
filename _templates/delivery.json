@@ -102,10 +102,10 @@
       "enum": [
         "Consumer",
         "Retail",
-        "Cons",
-        "Rel",
         "SMB",
-        "Enterprise"
+        "Enterprise",
+        "Cons",
+        "Rel"
       ],
       "width": 120
     },
@@ -802,6 +802,195 @@
       "pivot_totals": true,
       "chart": true,
       "chart_type": "Pie",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": [
+        "#fd7f6f",
+        "#7eb0d5",
+        "#b2e061",
+        "#bd7ebe",
+        "#ffb55a",
+        "#ffee65",
+        "#beb9db",
+        "#fdcce5",
+        "#8bd3c7"
+      ],
+      "schedule": false,
+      "schedule_cron": "* 2 * * *",
+      "schedule_tz": "Europe/Istanbul",
+      "_tags": [
+        "#Technoplatz",
+        "#Managers",
+        "#Administrators"
+      ]
+    },
+    {
+      "id": "921834750192834012",
+      "title": "StandBy & On the Way",
+      "description": "Open DN Statuses",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "01-StandBy,10-OnTheWay"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": [
+        "dnn_status"
+      ],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": [
+        "#fd7f6f",
+        "#7eb0d5",
+        "#b2e061",
+        "#bd7ebe",
+        "#ffb55a",
+        "#ffee65",
+        "#beb9db",
+        "#fdcce5",
+        "#8bd3c7"
+      ],
+      "schedule": false,
+      "schedule_cron": "* 2 * * *",
+      "schedule_tz": "Europe/Istanbul",
+      "_tags": [
+        "#Technoplatz",
+        "#Managers",
+        "#Administrators"
+      ]
+    },
+    {
+      "id": "921834750192834012",
+      "title": "On Customs",
+      "description": "DNs in Progress",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "20-OnCustoms,30-OnCustomsProcess"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": [
+        "dnn_status"
+      ],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": [
+        "#fd7f6f",
+        "#7eb0d5",
+        "#b2e061",
+        "#bd7ebe",
+        "#ffb55a",
+        "#ffee65",
+        "#beb9db",
+        "#fdcce5",
+        "#8bd3c7"
+      ],
+      "schedule": false,
+      "schedule_cron": "* 2 * * *",
+      "schedule_tz": "Europe/Istanbul",
+      "_tags": [
+        "#Technoplatz",
+        "#Managers",
+        "#Administrators"
+      ]
+    },
+    {
+      "id": "921834750192834012",
+      "title": "Clearance Completed",
+      "description": "DNs are Ready to be received ",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "40-ClearanceCompleted"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": [
+        "dnn_status"
+      ],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
       "chart_grid": true,

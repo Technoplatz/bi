@@ -389,7 +389,7 @@ export class Crud {
           reject(err);
         });
       });
-    })
+    });
   }
 
   getSaas() {

@@ -2299,12 +2299,8 @@ class Crud():
 
             # pipe_.append({"$skip": 0})
 
-            print("\n*** pipe", pipe_)
             records_ = list(Mongo().db[collection_id_].aggregate(pipe_))
             count_ = len(records_) if records_ else 0
-
-            print("\n*** records_", records_)
-            print("\n*** count_", count_)
 
             df_ = pd.DataFrame(records_).fillna(0)
 
@@ -2313,12 +2309,6 @@ class Crud():
             vie_chart_yaxis_ = view_["data_values"][0]["key"] if "data_values" in view_ and len(view_["data_values"]) > 0 and "key" in view_["data_values"][0] else None
             vie_chart_function_ = view_["data_values"][0]["value"] if "data_values" in view_ and len(view_["data_values"]) > 0 and "value" in view_["data_values"][0] else "sum"
             vie_chart_legend_ = view_["data_columns"][0] if "data_columns" in view_ and len(view_["data_columns"]) > 0 else None
-
-            print("\n*** vie_visual_style_", vie_visual_style_)
-            print("\n*** vie_chart_xaxis_", vie_chart_xaxis_)
-            print("\n*** vie_chart_yaxis_", vie_chart_yaxis_)
-            print("\n*** vie_chart_function_", vie_chart_function_)
-            print("\n*** vie_chart_legend_", vie_chart_legend_)
 
             dropped_ = []
             dropped_.append(vie_chart_xaxis_)
@@ -2342,33 +2332,27 @@ class Crud():
 
             df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
 
-            print("\n*** df1_", df_)
-
-            count_ = 0
+            count_ = None
+            sum_ = None
+            unique_ = None
+            mean_ = None
+            stdev_ = None
+            var_ = None
+            
             if df_ is not None:
                 count_ = len(df_)
-                if count_ > 0 and vie_chart_yaxis_:
-                    if vie_chart_function_ == "sum":
-                        value_ = float(df_[vie_chart_yaxis_].sum())
-                    elif vie_chart_function_ == "count":
-                        value_ = int(len(df_[vie_chart_yaxis_]))
-                    elif vie_chart_function_ == "unique":
-                        value_ = int(df_[vie_chart_yaxis_].nunique())
-                    elif vie_chart_function_ in ["mean", "avg"]:
-                        value_ = float(df_[vie_chart_yaxis_].mean())
-                    elif vie_chart_function_ in ["stdev", "std"]:
-                        value_ = float(df_[vie_chart_yaxis_].std())
-                    elif vie_chart_function_ == "var":
-                        value_ = float(df_[vie_chart_yaxis_].var())
-                    else:
-                        raise APIError("invalid visual function")
+                if count_ > 0 and vie_chart_yaxis_ and vie_chart_yaxis_ in df_:
+                    count_ = int(len(df_[vie_chart_yaxis_]))
+                    sum_ = float(pd.to_numeric(df_[vie_chart_yaxis_], errors='coerce').sum())
+                    unique_ = float(pd.to_numeric(df_[vie_chart_yaxis_], errors='coerce').nunique())
+                    mean_ = float(pd.to_numeric(df_[vie_chart_yaxis_], errors='coerce').mean())
+                    stdev_ = float(pd.to_numeric(df_[vie_chart_yaxis_], errors='coerce').std())
+                    var_ = float(pd.to_numeric(df_[vie_chart_yaxis_], errors='coerce').var())
 
                 if len(groupby_) > 0:
                     df_ = df_.groupby(groupby_, as_index=False).sum() if vie_chart_function_ == "sum" else df_.groupby(groupby_, as_index=False).count()
 
             dfj_ = json.loads(df_.to_json(orient="records"))
-
-            print("\n*** df2_", dfj_)
 
             series_ = []
             series_sub_ = []
@@ -2405,7 +2389,14 @@ class Crud():
             res_ = {
                 "result": True,
                 "data": series_,
-                "count": count_
+                "stats": {
+                    "count": count_,
+                    "sum": sum_,
+                    "unique": unique_,
+                    "mean": mean_,
+                    "stdev": stdev_,
+                    "var": var_
+                }
             }
 
         except pymongo.errors.PyMongoError as exc:
@@ -2440,10 +2431,12 @@ class Crud():
                         if not get_view_data_f_["result"]:
                             raise APIError(f"get view data error {get_view_data_f_['msg']}")
                         view_data_ = get_view_data_f_["data"] if "data" in get_view_data_f_ else None
+                        stats_ = get_view_data_f_["stats"] if "stats" in get_view_data_f_ else None
                         views_.append({
                             "collection": collection_["col_id"],
                             "view": view_,
-                            "data": view_data_
+                            "data": view_data_,
+                            "stats": stats_
                         })
 
             res_ = {
