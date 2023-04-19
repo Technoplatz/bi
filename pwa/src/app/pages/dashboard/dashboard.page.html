@@ -69,11 +69,14 @@ https://www.gnu.org/licenses.
         <div class="brz-visual-group">
           <div *ngFor="let item of flashcards; let f = index" class="flash-sq clicked-item" #chcontainer
             (click)="misc.navi.next('collection/' + item.collection)">
+            <div class="visual-buttons">
+              # {{ item.view._tags?.length }}
+            </div>
             <h5>{{ item.view.title }}</h5>
+            {{ item.view.description }}<br />
             {{ item.collection }} | {{ item.view.data_values[0].value }} {{ 'of' | translate }} {{
             item.view.data_values[0].key }}
-            <h2>{{ item.stats[item.view.data_values[0].value] }}</h2>
-            <h6>{{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}.</h6>
+            <h1>{{ item.stats[item.view.data_values[0].value] }}</h1>
           </div>
         </div>
 
@@ -93,7 +96,7 @@ https://www.gnu.org/licenses.
                 {{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}
               </div>
               <div class="app-charts">
-                <app-chart *ngIf="item.data && item.data.length > 0; else noviewdata" [item]="item"
+                <app-chart *ngIf="item.series && item.series.length > 0; else noviewdata" [item]="item"
                   [width]="chcontainer.offsetWidth"></app-chart>
                 <ng-template #noviewdata>
                   <div class="visual-error">

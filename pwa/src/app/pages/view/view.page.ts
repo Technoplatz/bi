@@ -53,8 +53,6 @@ export class ViewPage implements OnInit {
   public header: string = "Views";
   public subheader: string = "";
   public user: any = null;
-  public is_crud: boolean = false;
-  public paget: any = [];
   public id: string = "";
   public reconfig: boolean = false;
   public searched: any = null;
@@ -82,16 +80,13 @@ export class ViewPage implements OnInit {
   public view_count: number = 0;
   public view_properties: any = {};
   public view_properties_: any = {};
-  public subscribers: string = "";
   public view: any = null;
   public is_url_copied: boolean = false;
-  public is_apikey_enabled: boolean = false;
   public accountf_apikey: string = "";
   public viewurl_: string = "";
   public viewurl_masked_: string = "";
   public is_apikey_copied: boolean = false;
   private segment = "data";
-  private page_start: number = 1;
   private is_selected: boolean = false;
   private views: any = [];
   private submenu: string = "";
@@ -100,8 +95,6 @@ export class ViewPage implements OnInit {
   private sweeped: any = [];
   private view_structure: any;
   private menu: string = "";
-  private page_end: number = 1;
-
   private col_structure: any = {};
   public col_id: string = "";
   public collections_: any;
@@ -152,6 +145,7 @@ export class ViewPage implements OnInit {
         page: p,
         limit: this.limit
       }).then((res: any) => {
+        console.log("viewres", res);
         this.col_structure = res && res.col_structure ? res.col_structure : null;
         this.col_id = res && res.col_id ? res.col_id : null;
         this.view = res && res.record ? res.record : null;

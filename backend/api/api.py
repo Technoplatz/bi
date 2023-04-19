@@ -2208,7 +2208,7 @@ class Crud():
         finally:
             return res_
 
-    def get_view_data_f(self, collection_, ix_):
+    def get_view_data_f(self, collection_, ix_, source_):
 
         try:
             collection_id_ = f"{collection_['col_id']}_data"
@@ -2388,7 +2388,9 @@ class Crud():
 
             res_ = {
                 "result": True,
-                "data": series_,
+                "series": series_,
+                "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:50],
+                "properties": properties_master_,
                 "stats": {
                     "count": count_,
                     "sum": sum_,
@@ -2411,10 +2413,14 @@ class Crud():
         finally:
             return res_
 
-    def charts_f(self, obj):
+    def charts_f(self, input_):
         try:
             views_ = []
-            user_ = obj["userindb"]
+            user_ = input_["userindb"]
+            source_ = input_["source"]
+            if source_ not in ["internal", "external", "propsonly"]:
+                raise APIError("invalid source")
+
             collections_ = list(Mongo().db["_collection"].aggregate([{
                 "$match": {"col_structure.views": {
                     "$elemMatch": {
@@ -2427,15 +2433,16 @@ class Crud():
                 cursor_ = collection_["col_structure"]["views"] if "col_structure" in collection_ and "views" in collection_["col_structure"] and len(collection_["col_structure"]["views"]) > 0 else None
                 if cursor_:
                     for ix_, view_ in enumerate(cursor_):
-                        get_view_data_f_ = self.get_view_data_f(collection_, ix_)
+                        get_view_data_f_ = self.get_view_data_f(collection_, ix_, source_)
                         if not get_view_data_f_["result"]:
                             raise APIError(f"get view data error {get_view_data_f_['msg']}")
-                        view_data_ = get_view_data_f_["data"] if "data" in get_view_data_f_ else None
                         stats_ = get_view_data_f_["stats"] if "stats" in get_view_data_f_ else None
                         views_.append({
                             "collection": collection_["col_id"],
+                            "properties": get_view_data_f_["properties"],
                             "view": view_,
-                            "data": view_data_,
+                            "data": get_view_data_f_["data"],
+                            "series": get_view_data_f_["series"],
                             "stats": stats_
                         })
 

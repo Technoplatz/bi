@@ -308,6 +308,7 @@ export class CollectionPage implements OnInit {
         if (op === "action" && res.data.res?.count > 0) {
           this.misc.doMessage("action completed successfully. " + res.data.res.count + " records affected", "success");
         }
+        this.id === "_collection" ? this.crud.getAll().then(() => { }) : null;
         this.RefreshData(0);
       }
     });

@@ -361,6 +361,7 @@ ion-note {
 .data-sq-button {
   vertical-align: top !important;
   text-align: center;
+  font-size: 11px;
   padding-top: 16px;
   padding-bottom: 16px;
   padding-right: 8px;
@@ -949,8 +950,7 @@ app-menu {
 
 .inner-footer a {
   text-decoration: none;
-  font-weight: bold;
-  color: var(--ion-color-primary) !important;
+  color: var(--ion-color-primary);
 }
 
 .modal-header {
@@ -1853,10 +1853,11 @@ app-chart {
   margin-right: 8px;
   overflow: hidden;
   padding: 12px;
-  border: 5px solid var(--ion-color-light);
+  border: 5px solid #f0f0f0;
+  background-color: #f0f0f0;
   align-content: flex-start;
   width: 320px;
-  min-height: 148px;
+  height: 130px;
   white-space: nowrap !important;
 }
 

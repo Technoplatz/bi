@@ -66,11 +66,11 @@ https://www.gnu.org/licenses.
                 <br />
                 <span>{{ 'Clear' | translate }}</span>
               </div>
-              <div *ngIf="is_crud" (click)="doSaveAsView()" class="data-sq-button">
+              <!-- <div *ngIf="is_crud" (click)="doSaveAsView()" class="data-sq-button">
                 <ion-icon name="save-outline" *ngIf="!is_viewsaving"></ion-icon>
                 <ion-icon name="hourglass-outline" *ngIf="is_viewsaving"></ion-icon><br />
                 {{ 'Save' | translate }}
-              </div>
+              </div> -->
               <div (click)="MultiCrud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone' | translate }}
@@ -93,7 +93,7 @@ https://www.gnu.org/licenses.
               <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger"
                 (click)="doSaveSchema()">
                 <span *ngIf="!is_saving">
-                  <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
+                  <ion-icon name="save-outline"></ion-icon><br />
                   {{ 'Save' | translate }}
                 </span>
                 <span *ngIf="is_saving">

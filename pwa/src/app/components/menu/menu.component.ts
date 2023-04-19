@@ -45,13 +45,15 @@ import { Crud } from "../../classes/crud";
 export class MenuComponent implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
-  public collections_: any;
-  public collections: any = [];
-  public views_: any;
   public views: any = [];
+  public charts: any = [];
+  public collections: any = [];
   public segmentsadm: any;
   public saas_: any;
   public user_: any;
+  public charts_: any = null;
+  public collections_: any = null;
+  public views_: any = null;
 
   constructor(
     public misc: Miscellaneous,
@@ -59,12 +61,19 @@ export class MenuComponent implements OnInit {
     private crud: Crud
   ) { }
 
+  ngOnDestroy() {
+    this.crud.charts.unsubscribe;
+    this.crud.saas.unsubscribe;
+    this.crud.collections.unsubscribe;
+    this.auth.user.unsubscribe;
+  }
+
   ngOnInit() {
-    this.collections_ = this.crud.collections.subscribe((res: any) => {
-      res && res.data ? this.collections = res.data : null;
+    this.collections_ ? null : this.collections_ = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
     });
-    this.views_ = this.crud.views.subscribe((res: any) => {
-      res && res.data ? this.views = res.data : null;
+    this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
+      this.views = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard") : [];
     });
     this.crud.saas.subscribe((res: any) => {
       this.saas_ = res;
@@ -75,15 +84,8 @@ export class MenuComponent implements OnInit {
     });
   }
 
-  ngOnDestroy() {
-    this.collections_ = null;
-    this.views_ = null;
-  }
-
   Signout() {
-    this.auth.Signout().then(() => {
-      console.log("*** signed out");
-    }).catch((error: any) => {
+    this.auth.Signout().then(() => { }).catch((error: any) => {
       console.error(error);
     });
   }

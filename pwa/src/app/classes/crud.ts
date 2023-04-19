@@ -334,6 +334,7 @@ export class Crud {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
         op: "charts",
+        source: "internal",
         dashboard: false
       }).then((res: any) => {
         resolve(this.charts.next(res));

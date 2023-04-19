@@ -3,22 +3,24 @@
     "odi_no": {
       "bsonType": "string",
       "title": "Ordino No",
-      "description": "Main Ordino Number",
+      "description": "Ana Konsimento No",
       "minLength": 10,
       "maxLength": 20,
+      "pattern": "^[0-9A-Z-]{10,20}$",
       "width": 170
     },
     "odi_sub_no": {
       "bsonType": "string",
       "title": "Ordino Sub No",
-      "description": "Ordino Sub Number",
+      "description": "Ara Konşimento No",
       "minLength": 6,
-      "maxLength": 20
+      "maxLength": 20,
+      "pattern": "^[0-9A-Z-]{6,20}$"
     },
     "odi_status": {
       "bsonType": "string",
       "title": "Status",
-      "description": "Ordino Status",
+      "description": "Konşimento Statüsü",
       "enum": [
         "00-Open",
         "10-OnTheWay",
@@ -32,65 +34,60 @@
     "odi_date": {
       "bsonType": "date",
       "title": "Ordino Date",
-      "description": "Ordino Opening Date"
+      "description": "Konşimento Tarihi"
     },
     "odi_customs": {
       "bsonType": "string",
       "title": "Customs",
-      "description": "Customs Location",
+      "description": "Gümrük Yeri",
       "enum": [
-        "Location-1",
-        "Location-2",
-        "Location-3"
+        "AHL",
+        "Halkalı",
+        "Ambarlı"
       ],
       "width": 120
     },
     "odi_from": {
       "bsonType": "string",
       "title": "Shipped From",
-      "description": "Country where the goods are loaded",
+      "description": "Çıkış Yeri",
       "enum": [
         "China",
-        "Hungary",
-        "Germany",
-        "USA",
-        "Netherlands",
-        "UK"
+        "Hungary"
       ],
       "width": 110
     },
     "odi_eta_date": {
       "bsonType": "date",
       "title": "ETA Date",
-      "description": "Estimated Date of Arrival",
+      "description": "Varış Tarihi",
       "width": 110
     },
     "odi_ship_type": {
       "bsonType": "string",
       "title": "Ship Type",
-      "description": "Shipping Type",
+      "description": "Sevk Tipi",
       "enum": [
         "Sea",
         "Air",
-        "Truck",
-        "Railway"
+        "Truck"
       ],
       "width": 120
     },
     "odi_transfer_date": {
       "bsonType": "date",
       "title": "Trasfer Date",
-      "description": "Transfer Date"
+      "description": "Transfer Tarihi"
     },
     "odi_arrived_date": {
       "bsonType": "date",
       "title": "Arrived Date",
-      "description": "Date of Arrival"
+      "description": "Varış Tarihi"
     },
     "odi_amount": {
       "bsonType": "number",
       "title": "Amount",
-      "description": "Ordino Amount",
+      "description": "Amount",
       "default": 0
     }
   },
@@ -186,9 +183,7 @@
       ],
       "one_click": false,
       "_tags": [
-        "#Managers",
-        "#Technoplatz",
-        "#Operation"
+        "#Technoplatz"
       ],
       "notification": {
         "notify": false,

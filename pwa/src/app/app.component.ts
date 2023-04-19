@@ -63,14 +63,36 @@ export class AppComponent implements OnInit {
     private misc: Miscellaneous,
     private storage: Storage,
     private nav: NavController
-  ) { }
-
-  ngOnInit() {
+  ) {
     this.misc.menutoggle.subscribe((res: any) => {
       this.menutoggle = res === undefined ? true : res;
       this.storage.set("LSMENUTOGGLE", res).then(() => { });
     });
+    this.auth.user.subscribe((user: any) => {
+      this.user_ = user;
+      if (!user) {
+        this.misc.navi.next("/");
+      }
+    });
+    this.misc.navi.subscribe((path: any) => {
+      this.router.navigateByUrl(path).then(() => { }).catch((error: any) => {
+        console.error(error);
+      });
+    });
+    this.router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationError) {
+        console.error("*** navigation error", event.url, event.error);
+      } else if (event instanceof NavigationStart) {
+      } else if (event instanceof NavigationEnd) {
+        const urlpart1_ = event.url.split("/")[1];
+        if (!urlpart1_) {
+          this.menutoggle = false;
+        }
+      }
+    });
+  }
 
+  ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.auth.user.next(LSUSERMETA);
       this.misc.user.next(LSUSERMETA);
@@ -83,20 +105,6 @@ export class AppComponent implements OnInit {
         });
       }
     });
-
-    this.auth.user.subscribe((user: any) => {
-      this.user_ = user;
-      if (!user) {
-        this.misc.navi.next("");
-      }
-    });
-
-    this.misc.navi.subscribe((path: any) => {
-      this.nav.navigateRoot(path).then(() => { }).catch((error: any) => {
-        console.error(error);
-      });
-    });
-
     this.storage.get("LSTHEME").then((res: any) => {
       if (res) {
         document.documentElement.style.setProperty("--ion-color-primary", res.color);
@@ -106,19 +114,6 @@ export class AppComponent implements OnInit {
         });
       }
     });
-
-    this.router.events.subscribe((event: Event) => {
-      if (event instanceof NavigationError) {
-        console.error("*** navigation error", event.url, event.error);
-      } else if (event instanceof NavigationStart) {
-      } else if (event instanceof NavigationEnd) {
-        const urlpart1_ = event.url.split("/")[1];
-        if (!urlpart1_) {
-          this.menutoggle = false;
-        }
-      }
-    });
-
     Network.addListener("networkStatusChange", (status: any) => {
       if (!status.connected) {
         this.net_ = false;
@@ -131,14 +126,12 @@ export class AppComponent implements OnInit {
         }, 3000);
       }
     });
-
     this.misc.getLanguage().then((res: any) => {
       this.translate.setDefaultLang(res ? res : "en");
       this.translate.use(res ? res : "en");
     }).catch((error: any) => {
       console.error(error);
     });
-
     this.storage.get("LSMENUTOGGLE").then((res: any) => {
       this.misc.menutoggle.next(res);
     });

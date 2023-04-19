@@ -42,7 +42,7 @@ import * as shape from "d3-shape";
 export class ChartComponent implements OnInit {
   @Input() item: any;
   @Input() width: any;
-  public data: any = [];
+  public series: any = [];
   public chartStyle: string = "";
   public publicshowXAxis: boolean = false;
   public showXAxis: boolean = false;
@@ -74,7 +74,7 @@ export class ChartComponent implements OnInit {
 
   ngOnChanges() {
     const view_ = this.item.view;
-    this.data = this.item.data;
+    this.series = this.item.series;
     this.chartStyle = view_.chart_type;
     this.showXAxis = view_.chart_xaxis;
     this.showYAxis = view_.chart_yaxis;

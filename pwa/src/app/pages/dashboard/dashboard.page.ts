@@ -46,39 +46,34 @@ export class DashboardPage implements OnInit {
   public data: any = [];
   public flashcards: any = [];
   public chart_size: string = "small";
-  public chart_css: string = "";
+  public chart_css: string = "chart-sq small";
   public is_refreshing: boolean = false;
   public view: any = null;
   public chart: any = null;
   public announcements: any = [];
-  public announcements_: any;
-  public charts_: any;
   public charts: any = [];
+  public announcements_: any = null;
+  public charts_: any = null;
 
   constructor(
     private storage: Storage,
     private crud: Crud,
     public misc: Miscellaneous
-  ) { }
-
-  ngOnDestroy() {
-    this.announcements_ = null;
-    this.charts_ = null;
+  ) {
+    this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
+      this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard") : [];
+      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type === "Flashcard") : [];
+      // console.log("*** charts", this.charts);
+    });
+    this.announcements_ ? null : this.crud.announcements.subscribe((res: any) => {
+      this.announcements = res && res.data ? res.data : [];
+    });
   }
 
   ngOnInit() {
-    this.charts_ = this.crud.charts.subscribe((res: any) => {
-      this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard") : [];
-      this.flashcards =  res && res.views ? res.views.filter((obj: any) => obj.view.chart_type === "Flashcard" ) : [];
-      console.log("*** charts", this.charts);
-      console.log("*** flashcards", this.flashcards);
-      this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
-        this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
-        this.chart_css = "chart-sq " + this.chart_size;
-      });
-    });
-    this.announcements_ = this.crud.announcements.subscribe((res: any) => {
-      this.announcements = res && res.data ? res.data : [];
+    this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
+      this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
+      this.chart_css = "chart-sq " + this.chart_size;
     });
   }
 
@@ -92,11 +87,9 @@ export class DashboardPage implements OnInit {
   }
 
   doResizeCharts() {
-    this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: string) => {
-      this.chart_size = LSCHARTSIZE === "small" ? "medium" : LSCHARTSIZE === "medium" ? "large" : LSCHARTSIZE === "large" ? "small" : "small";
-      this.storage.set("LSCHARTSIZE", this.chart_size).then(() => {
-        this.chart_css = "chart-sq " + this.chart_size;
-      });
+    this.chart_size = this.chart_size === "small" ? "medium" : this.chart_size === "medium" ? "large" : this.chart_size === "large" ? "small" : "small";
+    this.storage.set("LSCHARTSIZE", this.chart_size).then(() => {
+      this.chart_css = "chart-sq " + this.chart_size;
     });
   }
 
