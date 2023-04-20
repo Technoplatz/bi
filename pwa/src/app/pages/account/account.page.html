@@ -122,7 +122,7 @@ https://www.gnu.org/licenses.
             </qrcode>
             <ion-note slot="start" class="ion-margin-start">{{ 'Read QR code to use this 2FA code with any Authenticator
               App.' | translate }}</ion-note>
-            <div class="filler"></div>
+            <div class="filler-8"></div>
           </div>
           <ion-button *ngIf="!otp_show" (click)="doOTP({ op: 'show' })" size="small" slot="end">
             <ion-spinner *ngIf="otp_process; else noprocess" name="dots"></ion-spinner>

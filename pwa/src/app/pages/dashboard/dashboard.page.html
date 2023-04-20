@@ -35,9 +35,9 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
-        <h6>{{ 'DASHBOARD' | translate }}</h6>
-        <h1>{{ 'Welcome aboard' | translate }}</h1>
-        <ion-grid class="ion-no-padding ion-margin-top">
+        <h6>{{ 'WELCOME ABOARD' | translate }}</h6>
+        <h1>{{ 'Shared Views' | translate }}</h1>
+        <!-- <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div (click)="doImport()" class="data-sq-button">
@@ -63,12 +63,13 @@ https://www.gnu.org/licenses.
               </div>
             </ion-col>
           </ion-row>
-        </ion-grid>
+        </ion-grid> -->
 
         <!-- flashcards -->
+        <div class="filler-16"></div>
         <div class="brz-visual-group">
           <div *ngFor="let item of flashcards; let f = index" class="flash-sq clicked-item" #chcontainer
-            (click)="misc.navi.next('collection/' + item.collection)">
+            (click)="misc.navi.next('view/' + item.id)">
             <div class="visual-buttons">
               # {{ item.view._tags?.length }}
             </div>
@@ -84,12 +85,12 @@ https://www.gnu.org/licenses.
         <div class="brz-visual-group ion-margin-bottom">
           <div *ngFor="let item of charts; let i = index" [class]="chart_css" #chcontainer>
             <div class="visual-buttons">
-              <ion-button size="small" fill="clear" (click)="misc.navi.next('collection/' + item.collection)"
+              <ion-button size="small" fill="clear" (click)="misc.navi.next('view/' + item.id)"
                 class="clear-dark-button" color="dark" mode="ios">
                 <ion-icon name="list-outline"></ion-icon>
               </ion-button>
             </div>
-            <div class="clicked-item" (click)="misc.navi.next('collection/' + item.collection)">
+            <div class="clicked-item" (click)="misc.navi.next('view/' + item.id)">
               <h5>{{ item.view.title }}</h5>
               <div class="full-width">
                 {{ item.view.description }}<br />
@@ -111,8 +112,10 @@ https://www.gnu.org/licenses.
         </div>
 
         <!-- RECENT ANNOUNCEMENTS -->
-        <h4>{{ 'Recent Announcements' | translate }}</h4>
-        <div class="filler"></div>
+        <h4>{{ 'Recent Data Announcements' | translate }}</h4>
+        <div class="filler-4"></div>
+        <ion-button size="small" (click)="misc.navi.next('admin/_announcement')">{{ 'Show All' | translate }}</ion-button>
+        <div class="filler-16"></div>
         <ion-grid *ngIf="announcements?.length > 0; else noannouncement" class="ion-no-padding data-grid">
           <ion-row>
             <ion-col size="2">

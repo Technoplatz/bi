@@ -51,9 +51,9 @@ export class DashboardPage implements OnInit {
   public view: any = null;
   public chart: any = null;
   public announcements: any = [];
-  public charts: any = [];
   public announcements_: any = null;
   public charts_: any = null;
+  public charts: any = [];
 
   constructor(
     private storage: Storage,
@@ -63,7 +63,7 @@ export class DashboardPage implements OnInit {
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
       this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard") : [];
       this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type === "Flashcard") : [];
-      // console.log("*** charts", this.charts);
+      console.log("*** charts", this.charts);
     });
     this.announcements_ ? null : this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];

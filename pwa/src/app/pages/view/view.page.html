@@ -70,16 +70,16 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Collection' | translate }}
               </div>
-              <div (click)="doViewSettings()" class="data-sq-button">
+              <!-- <div (click)="doViewSettings()" class="data-sq-button">
                 <ion-icon name="settings-outline"></ion-icon><br />
                 {{ 'Settings' | translate }}
-              </div>
+              </div> -->
             </ion-col>
           </ion-row>
         </ion-grid>
 
         <!-- VIEW GRID SECTION -->
-        <div class="ion-margin-bottom">
+        <div *ngIf="view" class="ion-margin-bottom">
           {{ 'Shared with' | translate }} {{ view["_tags"]?.join(' ') }}<br />
           <span *ngIf="view.vie_scheduled; else notscheduled">{{ 'Scheduled' | translate }}</span>
           <ng-template #notscheduled> {{ 'Not Scheduled' | translate }} </ng-template>
@@ -139,11 +139,6 @@ https://www.gnu.org/licenses.
           <!-- LIST -->
           <ion-grid class="data-grid ion-no-padding ion-margin-top">
             <ion-row class="ion-nowrap">
-              <ion-col class="ion-text-center check-column">
-                <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)"
-                  mode="md">
-                </ion-checkbox>
-              </ion-col>
               <ion-col *ngFor="let item of view_properties_"
                 [style]="view_properties[item].width ? 'min-width: ' + view_properties[item].width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
                 <span class="column-title">{{ view_properties[item].title }}<br /> </span>
@@ -151,14 +146,8 @@ https://www.gnu.org/licenses.
               </ion-col>
             </ion-row>
             <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item">
-              <ion-col class="ion-text-center check-column">
-                <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
-                  (ionChange)="SetSelectData(i,$event)" mode="md">
-                </ion-checkbox>
-              </ion-col>
               <ion-col *ngFor="let item of view_properties_"
-                [style]="view_properties[item].width ? 'min-width: ' + view_properties[item].width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'"
-                (click)="goCrud(record, 'update')">
+                [style]="view_properties[item].width ? 'min-width: ' + view_properties[item].width + 'px !important;' : 'min-width: ' + defaultColumnWidth + 'px !important;'">
                 {{ record[item] }}
               </ion-col>
             </ion-row>
@@ -172,8 +161,8 @@ https://www.gnu.org/licenses.
               </ion-col>
             </ion-row>
           </ion-grid>
-
         </div>
+
       </ion-col>
     </ion-row>
     <ng-template #dataloading>

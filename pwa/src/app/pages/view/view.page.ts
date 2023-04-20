@@ -30,15 +30,14 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { ModalController, AlertController, IonSelect } from "@ionic/angular";
+import { Component, OnInit } from "@angular/core";
+import { AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
-import { CrudPage } from "../crud/crud.page";
 
 @Component({
   selector: "app-view",
@@ -47,7 +46,6 @@ import { CrudPage } from "../crud/crud.page";
 })
 
 export class ViewPage implements OnInit {
-  @ViewChild("select0") selectRef?: IonSelect;
   public loadingText: string = environment.misc.loadingText;
   public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Views";
@@ -55,18 +53,12 @@ export class ViewPage implements OnInit {
   public user: any = null;
   public id: string = "";
   public reconfig: boolean = false;
-  public searched: any = null;
   public data: any = [];
-  public selected: any = [];
-  public pages: any = [];
   public limit: number = environment.misc.limit;
-  public page: number = 1;
   public count: number = 0;
   public is_loaded: boolean = true;
   public multicheckbox: boolean = false;
   public is_initialized: boolean = false;
-  public is_pane_ok: boolean = false;
-  public actions: any = [];
   public columns_: any;
   public view_mode: any = {};
   public otp_show: boolean = false;
@@ -98,13 +90,13 @@ export class ViewPage implements OnInit {
   private col_structure: any = {};
   public col_id: string = "";
   public collections_: any;
-  public user_: any;
+  public charts_: any = null;
+  public charts: any = null;
 
   constructor(
     private storage: Storage,
     private crud: Crud,
     private auth: Auth,
-    private modal: ModalController,
     private alert: AlertController,
     private router: Router,
     public misc: Miscellaneous
@@ -112,25 +104,32 @@ export class ViewPage implements OnInit {
     this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;
     });
-    this.collections_ = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
-    });
-    this.user_ = this.auth.user.subscribe((res: any) => {
-      this.user = res ? res : null;
-      this.accountf_apikey = res && res.apikey ? res.apikey : null;
-    });
   }
 
   ngOnDestroy() {
-    this.collections_ = null;
-    this.user_ = null;
+    this.crud.charts.unsubscribe;
   }
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
-    this.RefreshData(0).then(() => { }).finally(() => {
-      this.is_initialized = true;
+    this.is_loaded = false;
+    this.is_initialized = false;
+    this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
+      if(res && res.views) {
+        this.charts = res && res.views ? res.views : null;
+        this.view = this.charts.filter((obj: any) => obj.id === this.id)[0];
+        this.subheader = this.view.view.title;
+        this.data = this.view.data ? this.view.data : [];
+        this.view_properties = this.view.properties;
+        this.view_properties_ = Object.keys(this.view.properties);
+        this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
+        this.col_id = this.view.collection;
+        this.is_loaded = true;
+        this.is_initialized = true;
+        this.crud.charts.unsubscribe;
+        this.charts_ = null;
+      }
     });
   }
 
@@ -173,67 +172,6 @@ export class ViewPage implements OnInit {
         this.is_loaded = true;
       });
     });
-  }
-
-  async goCrud(rec: any, op: string) {
-    const modal = await this.modal.create({
-      component: CrudPage,
-      backdropDismiss: false,
-      cssClass: "crud-modal",
-      componentProps: {
-        shuttle: {
-          op: op,
-          collection: this.col_id,
-          collections: this.collections ? this.collections : [],
-          views: this.views ? this.views : [],
-          user: this.user,
-          data: rec,
-          structure: this.col_structure,
-          sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
-          filter: [],
-          actions: this.actions && this.actions.length > 0 ? this.actions : [],
-          actionix: -1,
-          view: this.view,
-          barcoded: null
-        }
-      }
-    });
-    modal.onDidDismiss().then((res: any) => {
-      if (res.data.modified) {
-        this.RefreshData(0);
-      }
-    });
-    return await modal.present();
-  }
-
-  async doViewSettings() {
-    const modal = await this.modal.create({
-      component: CrudPage,
-      backdropDismiss: false,
-      cssClass: "crud-modal",
-      componentProps: {
-        shuttle: {
-          op: "update",
-          collection: "_view",
-          collections: this.collections ? this.collections : [],
-          views: this.views ? this.views : [],
-          user: this.user,
-          data: this.view,
-          structure: this.view_structure,
-          direct: -1
-        }
-      }
-    });
-    modal.onDidDismiss().then((res: any) => {
-      if (res.data.modified) {
-        if (["remove", "restore"].includes(res.data.op)) {
-          this.misc.navi.next("dashboard");
-        } else {
-          window.location.reload();
-        }
-      }
-    });
-    return await modal.present();
   }
 
   doOTP(obj: any) {
@@ -351,25 +289,6 @@ export class ViewPage implements OnInit {
       this.is_apikey_copied = false;
       this.is_url_copied = false;
     });
-  }
-
-  SwitchSelectData(event: any) {
-    this.selected = new Array(this.data.length).fill(event);
-    this.GetIsSelectData();
-  }
-
-  async GetIsSelectData() {
-    this.sweeped[this.segment] = [];
-    const q = await this.selected.findIndex((obj: boolean) => obj === true);
-    q >= 0 ? (this.is_selected = true) : (this.is_selected = false);
-    const r = await this.selected.reduce((acc: any, val: any, index: number) => {
-      const q = val === true ? this.sweeped[this.segment].push(this.data[index]._id) : null;
-    }, []);
-  }
-
-  SetSelectData(i: number, event: any) {
-    this.selected[i] = event.detail.checked;
-    this.GetIsSelectData();
   }
 
 }
