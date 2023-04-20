@@ -161,6 +161,11 @@ https://www.gnu.org/licenses.
                   <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
                     <ion-icon name="arrow-up"></ion-icon>
                   </ion-button>
+                  <ion-button color="light" size="small" (click)="setCopy(item.key)">
+                    <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-outline"></ion-icon>
+                    <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
+                    <ion-icon *ngIf="is_key_copying" name="hourglass-outline"></ion-icon>
+                  </ion-button>
                   <br />
                   <div *ngIf="item.value.bsonType!='bool'">
                     <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"

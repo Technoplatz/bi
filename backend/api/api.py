@@ -1593,6 +1593,39 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def copykey_f(self, obj):
+        """
+        docstring is in progress
+        """
+        try:
+            collection_ = obj["collection"]
+            properties_ = obj["properties"]
+            key_ = obj["key"]
+            match_ = obj["match"] if "match" in obj and obj["match"] != [] else []
+
+            get_filtered_ = {}
+            if len(match_) > 0:
+                get_filtered_ = self.get_filtered_f({
+                    "match": match_,
+                    "properties": properties_ if properties_ else None
+                })
+
+            distinct_ = ""
+            cursora_ = Mongo().db[f"{collection_}_data"].distinct(key_, get_filtered_)
+            if cursora_ and len(cursora_) > 0:
+                distinct_ = "\n".join(map(str, cursora_))
+
+            return {"result": True, "copied": distinct_}
+
+        except pymongo.errors.PyMongoError as exc:
+            return Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
     def saveasview_f(self, obj):
         """
         docstring is in progress
@@ -1698,14 +1731,12 @@ class Crud:
             "ş": "s",
             "ü": "u",
             "ö": "o",
-            "ü": "u",
             "Ç": "c",
             "Ğ": "g",
             "İ": "i",
             "Ş": "s",
             "Ü": "u",
             "Ö": "o",
-            "Ü": "u",
             " ": "_",
         }
         str_ = str_.replace("\t", " ")
@@ -6965,6 +6996,8 @@ def crud_f():
             res_ = Crud().reconfigure_f(input_)
         elif op_ == "saveasview":
             res_ = Crud().saveasview_f(input_)
+        elif op_ == "copykey":
+            res_ = Crud().copykey_f(input_)
         elif op_ == "purge":
             res_ = Crud().purge_f(input_)
         elif op_ == "view":

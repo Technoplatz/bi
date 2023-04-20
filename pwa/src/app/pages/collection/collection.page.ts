@@ -103,6 +103,8 @@ export class CollectionPage implements OnInit {
   public structure: any = {};
   public schemevis: any = "hide";
   private structure_: any = {};
+  public is_key_copied: boolean = false;
+  public is_key_copying: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -513,6 +515,36 @@ export class CollectionPage implements OnInit {
   doImport() {
     this.misc.doImport(this.id).then(() => {
       this.RefreshData(0).then(() => { });
+    });
+  }
+
+  setCopy(key: any) {
+    this.is_key_copying = true;
+    this.is_key_copied = false;
+    this.misc.apiCall("crud", {
+      op: "copykey",
+      collection: this.id,
+      properties: this.structure.properties,
+      match: this.filter,
+      key: key
+    }).then((res: any) => {
+      this.misc.copyToClipboard(res.copied).then(() => {
+        this.is_key_copying = false;
+        this.is_key_copied = true;
+      }).catch((error: any) => {
+        console.error("not copied", key, error);
+      }).finally(() => {
+        setTimeout(() => {
+          this.is_key_copied = false;
+          this.is_key_copying = false;
+          this.searched[key].actived = false;
+        }, 1000);
+      });
+    }).catch((error: any) => {
+      this.is_key_copied = false;
+      this.is_key_copying = false;
+      this.searched[key].actived = false;
+      this.misc.doMessage(error, "error");
     });
   }
 
