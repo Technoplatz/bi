@@ -115,6 +115,7 @@
       "description": "Main Ordino Number",
       "minLength": 10,
       "maxLength": 24,
+      "pattern": "^[0-9A-Z-]{10,20}$",
       "width": 170
     },
     "dnn_odi_sub_no": {
@@ -122,7 +123,8 @@
       "title": "Ordino Sub No",
       "description": "Sub Ordino Number",
       "minLength": 6,
-      "maxLength": 20
+      "maxLength": 20,
+      "pattern": "^[0-9A-Z-]{6,20}$"
     },
     "dnn_man_no": {
       "bsonType": "string",
@@ -656,7 +658,7 @@
   ],
   "views": [
     {
-      "id": "921834750192834012",
+      "id": "dnn-git-view",
       "title": "GiT 2023",
       "description": "Good in Transit Internal Report",
       "priority": 2000,
@@ -715,7 +717,7 @@
       ]
     },
     {
-      "id": "921834750192834012",
+      "id": "dnn-buid-view",
       "title": "BU ID View",
       "description": "DN statuses by BUID's",
       "priority": 2000,
@@ -774,13 +776,19 @@
       ]
     },
     {
-      "id": "921834750192834012",
+      "id": "dn-statuses-view",
       "title": "Statuses",
       "description": "DN Statuses",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "ne",
+          "value": "00-Open"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
@@ -831,9 +839,9 @@
       ]
     },
     {
-      "id": "921834750192834012",
-      "title": "StandBy & On the Way",
-      "description": "Open DN Statuses",
+      "id": "fc-on-the-way",
+      "title": "On the Way",
+      "description": "DNs on the way",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -894,9 +902,9 @@
       ]
     },
     {
-      "id": "921834750192834012",
+      "id": "fc-on-customs",
       "title": "On Customs",
-      "description": "DNs in Progress",
+      "description": "DNs have just arrived",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -904,7 +912,7 @@
         {
           "key": "dnn_status",
           "op": "in",
-          "value": "20-OnCustoms,30-OnCustomsProcess"
+          "value": "20-OnCustoms"
         }
       ],
       "data_sort": {
@@ -957,9 +965,9 @@
       ]
     },
     {
-      "id": "921834750192834012",
-      "title": "Clearance Completed",
-      "description": "DNs are Ready to be received ",
+      "id": "fc-on-custom-process",
+      "title": "On Customs Process",
+      "description": "DNs on customs process or completed",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -967,7 +975,7 @@
         {
           "key": "dnn_status",
           "op": "in",
-          "value": "40-ClearanceCompleted"
+          "value": "30-OnCustomsProcess,40-ClearanceCompleted"
         }
       ],
       "data_sort": {

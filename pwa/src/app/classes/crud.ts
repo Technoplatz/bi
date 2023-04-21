@@ -243,23 +243,6 @@ export class Crud {
     });
   }
 
-  Visual(_id: string, apikey_: string) {
-    return new Promise((resolve, reject) => {
-      const url_ = this.apiHost + "/get/visual" + "/" + _id + "?k=" + apikey_;
-      this.http.get(url_, {
-        headers: new HttpHeaders(this.crudHeaders)
-      }).subscribe((res: any) => {
-        if (res && res.result) {
-          resolve(res.visual);
-        } else {
-          reject(res.msg);
-        }
-      }, (err: any) => {
-        reject(err);
-      });
-    });
-  }
-
   Download(obj: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {

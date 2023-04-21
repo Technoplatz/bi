@@ -88,6 +88,7 @@ export class ViewPage implements OnInit {
   private view_structure: any;
   private menu: string = "";
   private col_structure: any = {};
+  private user_: any;
   public col_id: string = "";
   public collections_: any;
   public charts_: any = null;
@@ -103,6 +104,10 @@ export class ViewPage implements OnInit {
   ) {
     this.misc.getAPIHost().then((apiHost: any) => {
       this.apiHost = apiHost;
+    });
+    this.user_ ? null : this.user_ = this.auth.user.subscribe((res: any) => {
+      this.user = res ? res : null;
+      this.accountf_apikey = res && res.apikey ? res.apikey : null;
     });
   }
 
@@ -127,6 +132,7 @@ export class ViewPage implements OnInit {
         this.col_id = this.view.collection;
         this.is_loaded = true;
         this.is_initialized = true;
+        this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_apikey;
         this.crud.charts.unsubscribe;
         this.charts_ = null;
       }

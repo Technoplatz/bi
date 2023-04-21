@@ -62,7 +62,7 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
                 <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
                 <br />
-                <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}</span>
+                <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
                 <span *ngIf="is_url_copied">{{ 'Copied' | translate }}</span>
               </div>
               <div (click)="misc.navi.next('collection/'+ col_id)" class="data-sq-button">

@@ -1222,7 +1222,7 @@ class Crud:
             match_iso8601 = re.compile(regex).match
             if match_iso8601(strv) is not None:
                 return True
-        except:
+        except Exception:
             pass
 
         return False
@@ -1864,18 +1864,10 @@ class Crud:
                     if "bsonType" in property_:
                         if property_["bsonType"] == "date":
                             try:
-                                df_[column_] = df_[column_].apply(
-                                    self.frame_convert_datetime_f
-                                )
-                            except:
-                                if (
-                                    "required" in structure_
-                                    and len(structure_["required"]) > 0
-                                    and column_ in structure_["required"]
-                                ):
-                                    raise Exception(
-                                        f"invalid or empty date in {column_} column"
-                                    )
+                                df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                            except Exception:
+                                if "required" in structure_ and len(structure_["required"]) > 0 and column_ in structure_["required"]:
+                                    raise Exception(f"invalid or empty date in {column_} column")
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(
                                 self.frame_convert_string_f
@@ -1963,15 +1955,17 @@ class Crud:
 
                 res_["msg"] = "please check your inbox to get the error details."
 
+                return res_
+
         except APIError as exc:
-            res_ = Misc().api_error_f(exc)
+            return Misc().api_error_f(exc)
 
         except Exception as exc:
-            res_ = Misc().exception_f(exc)
+            return Misc().exception_f(exc)
 
         finally:
-            session_.abort_transaction() if session_ else None
-            return res_
+            if session_:
+                session_.abort_transaction()
 
     def view_f(self, input_):
         """
@@ -2011,7 +2005,7 @@ class Crud:
                 if vie_id_ is not None:
                     view_ = Mongo().db["_view"].find_one({"vie_id": vie_id_})
                 else:
-                    raise APIError(f"view is not recognized")
+                    raise APIError("view is not recognized")
 
             if not view_:
                 raise APIError(f"view not found {vie_id_}")
@@ -2021,7 +2015,7 @@ class Crud:
 
             vie_collection_id_ = view_["vie_collection_id"]
 
-            if not "_tags" in view_:
+            if "_tags" not in view_:
                 raise APIError("no tags found")
 
             view_tags_ = view_["_tags"]
@@ -2067,12 +2061,12 @@ class Crud:
             for property_ in properties_:
                 properties_property_ = properties_[property_]
                 properties_master_[property_] = properties_property_
-                bsonType_ = (
+                bson_type_ = (
                     properties_property_["bsonType"]
                     if "bsonType" in properties_property_
                     else None
                 )
-                if bsonType_ == "array":
+                if bson_type_ == "array":
                     if "items" in properties_property_:
                         items_ = properties_property_["items"]
                         if "properties" in items_:
@@ -2252,7 +2246,7 @@ class Crud:
         docstring is in progress
         """
         try:
-            if not "user" in input_:
+            if "user" not in input_:
                 raise APIError("user not found in the input")
 
             if "tfac" not in input_:
@@ -3160,13 +3154,21 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def get_view_data_f(self, collection_, ix_, source_):
+    def get_view_data_f(self, user_, view_id_, source_):
         """
         docstring is in progress
         """
         try:
+            filter_ = {}
+            filter_[f"col_structure.views.{view_id_}.enabled"] = True
+            filter_[f"col_structure.views.{view_id_}._tags"] = {
+                "$elemMatch": {"$in": user_["_tags"]}
+            }
+            collection_ = Mongo().db["_collection"].find_one(filter_)
+            if not collection_:
+                raise APIError(f"collection not found {view_id_}")
             collection_id_ = f"{collection_['col_id']}_data"
-            view_ = collection_["col_structure"]["views"][ix_]
+            view_ = collection_["col_structure"]["views"][view_id_]
             col_structure_ = collection_["col_structure"]
             properties_ = col_structure_["properties"]
             properties_master_ = {}
@@ -3240,9 +3242,8 @@ class Crud:
                                 value_ = match__["value"]
                                 let_[f"{key_}"] = f"${key_}"
                                 if key_:
-                                    pipeline__.append(
-                                        {"$eq": [f"$${key_}", f"${value_}"]}
-                                    ),
+                                    pipeline__.append({"$eq": [f"$${key_}", f"${value_}"]})
+
                         pipeline_ = [{"$match": {"$expr": {"$and": pipeline__}}}]
                         lookup_ = {
                             "from": f"{parent_collection_}_data",
@@ -3252,7 +3253,7 @@ class Crud:
                         }
                         unwind_ = {
                             "path": f"${parent_collection_}",
-                            "preserveNullAndEmptyArrays": True,
+                            "preserveNullAndEmptyArrays": True
                         }
                         replace_with_ = {
                             "$mergeObjects": ["$$ROOT", f"${parent_collection_}"]
@@ -3269,7 +3270,7 @@ class Crud:
                         "match": vie_filter_,
                         "properties": properties_master_
                         if properties_master_
-                        else None,
+                        else None
                     }
                 )
                 pipe_.append({"$match": get_filtered_})
@@ -3278,7 +3279,7 @@ class Crud:
                 unset_ = list(dict.fromkeys(unset_))
                 pipe_.append({"$unset": unset_})
 
-            records_ = list(Mongo().db[collection_id_].aggregate(pipe_))
+            records_ = json.loads(JSONEncoder().encode(list(Mongo().db[collection_id_].aggregate(pipe_))))
             count_ = len(records_) if records_ else 0
 
             df_ = pd.DataFrame(records_).fillna(0)
@@ -3431,14 +3432,10 @@ class Crud:
 
             pivot_table_ = None
 
-            res_ = {
+            return {
                 "result": True,
                 "series": series_,
-                "data": records_
-                if source_ == "external"
-                else []
-                if source_ == "propsonly"
-                else records_[:50],
+                "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:50],
                 "properties": properties_master_,
                 "pivot": pivot_table_,
                 "stats": {
@@ -3450,93 +3447,6 @@ class Crud:
                     "var": var_,
                 },
             }
-
-            df_.insert(0, "number_of_rows", "data")
-            vie_pivot_values_ = (
-                vie_chart_yaxis_
-                if vie_chart_yaxis_
-                else [{"key": "number_of_rows", "value": "count"}]
-            )
-
-            # to sort pivot columns #1
-            # vie_pivot_values_.reverse()
-
-            pvs_ = []
-            aggfunc_ = {}
-
-            for idx_, f_ in enumerate(vie_pivot_values_):
-                if "key" in f_ and "value" in f_:
-                    key_ = f_["key"]
-                    value_ = f_["value"]
-                    r_ = " " * idx_
-                    nc_ = f"{r_}{key_} [{value_}]"
-                    df_[nc_] = df_[key_]
-                    pvs_.append(nc_)
-                    if value_ in [
-                        "sum",
-                        "mean",
-                        "average",
-                        "stdev",
-                        "var",
-                        "max",
-                        "min",
-                    ]:
-                        df_[nc_] = pd.to_numeric(df_[nc_], errors="coerce")
-                    if value_ == "count":
-                        aggfunc_[nc_] = "count"
-                    elif value_ == "size":
-                        aggfunc_[nc_] = np.size
-                    elif value_ == "sum":
-                        aggfunc_[nc_] = np.sum
-                    elif value_ == "mean":
-                        aggfunc_[nc_] = np.mean
-                    elif value_ == "average":
-                        aggfunc_[nc_] = np.average
-                    elif value_ == "stdev":
-                        aggfunc_[nc_] = np.std
-                    elif value_ == "var":
-                        aggfunc_[nc_] = np.var
-                    elif value_ == "unique":
-                        aggfunc_[nc_] = lambda x: len(x.unique())
-                    elif value_ == "max":
-                        aggfunc_[nc_] = np.max
-                    elif value_ == "min":
-                        aggfunc_[nc_] = np.min
-                    else:
-                        aggfunc_[nc_] = "count"
-
-            pvs_ = list(dict.fromkeys(pvs_))
-
-            # for index_ in vie_chart_xaxis_:
-            #     if index_ not in df_.columns:
-            #         vie_chart_xaxis_.remove(index_)
-
-            # for index_ in vie_chart_legend_:
-            #     if index_ not in df_.columns:
-            #         vie_chart_legend_.remove(index_)
-
-            # for index_ in vie_pivot_values_:
-            #     if index_["key"] not in df_.columns:
-            #         vie_pivot_values_.remove(index_)
-
-            pd.set_option("display.float_format", lambda x: "%.2f" % x)
-
-            # pivot_table_ = pd.pivot_table(
-            #     df_,
-            #     values=pvs_,
-            #     index=vie_chart_xaxis_,
-            #     columns=vie_chart_legend_,
-            #     aggfunc=aggfunc_,
-            #     margins=vie_pivot_totals_,
-            #     margins_name="Total",
-            #     fill_value=0,
-            # )
-
-            # res_["pivot"] = pivot_table_
-
-            res_["pivot"] = None
-
-            return res_
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -3552,75 +3462,63 @@ class Crud:
         docstring is in progress
         """
         try:
-            views_ = []
             user_ = input_["userindb"]
             source_ = input_["source"]
             if source_ not in ["internal", "external", "propsonly"]:
                 raise APIError("invalid source")
 
-            collections_ = list(
-                Mongo()
-                .db["_collection"]
-                .aggregate(
-                    [
-                        {
-                            "$match": {
-                                "col_structure.views": {
-                                    "$elemMatch": {
-                                        "enabled": True,
-                                        "_tags": {
-                                            "$elemMatch": {"$in": user_["_tags"]}
-                                        },
-                                    }
+            collections_ = list(Mongo().db["_collection"].aggregate([
+                {
+                    "$project": {
+                        "col_id": 1,
+                        "col_structure": 1,
+                        "views": {"$objectToArray": "$col_structure.views"}
+                    }
+                }, {
+                    "$match": {
+                        "views": {
+                            "$elemMatch": {
+                                "v.enabled": True,
+                                "v._tags": {
+                                    "$elemMatch": {"$in": user_["_tags"]}
                                 }
                             }
                         }
-                    ]
-                )
-            )
+                    }
+                }
+            ]))
 
-            noid_ = False
+            returned_views_ = []
             for collection_ in collections_:
-                cursor_ = (
-                    collection_["col_structure"]["views"]
-                    if "col_structure" in collection_
-                    and "views" in collection_["col_structure"]
-                    and len(collection_["col_structure"]["views"]) > 0
-                    else None
-                )
-                if cursor_:
-                    for ix_, view_ in enumerate(cursor_):
-                        if "id" in view_ and view_["id"] is not None:
-                            get_view_data_f_ = self.get_view_data_f(
-                                collection_, ix_, source_
+                views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
+                if views_:
+                    for view_ in views_:
+                        id__ = view_["k"]
+                        view__ = view_["v"]
+                        get_view_data_f_ = self.get_view_data_f(
+                            user_, id__, source_
+                        )
+                        if not get_view_data_f_["result"]:
+                            raise APIError(
+                                f"get view data error {get_view_data_f_['msg']}"
                             )
-                            if not get_view_data_f_["result"]:
-                                raise APIError(
-                                    f"get view data error {get_view_data_f_['msg']}"
-                                )
-                            stats_ = (
-                                get_view_data_f_["stats"]
-                                if "stats" in get_view_data_f_
-                                else None
-                            )
-                            views_.append(
-                                {
-                                    "id": view_["id"],
-                                    "collection": collection_["col_id"],
-                                    "properties": get_view_data_f_["properties"],
-                                    "view": view_,
-                                    "data": get_view_data_f_["data"],
-                                    "series": get_view_data_f_["series"],
-                                    "stats": stats_,
-                                }
-                            )
-                        else:
-                            noid_ = True
+                        stats_ = (
+                            get_view_data_f_["stats"]
+                            if "stats" in get_view_data_f_
+                            else None
+                        )
+                        returned_views_.append({
+                            "id": id__,
+                            "collection": collection_["col_id"],
+                            "properties": get_view_data_f_["properties"],
+                            "view": view__,
+                            "data": get_view_data_f_["data"],
+                            "series": get_view_data_f_["series"],
+                            "stats": stats_,
+                        }
+                        )
 
-            if noid_:
-                raise APIError("warning! there are views that 'id' is missing")
-
-            return {"result": True, "views": views_}
+            return {"result": True, "views": returned_views_}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -3763,24 +3661,16 @@ class Crud:
                 else []
             )
 
-            # generates the data collection name according to the collection id
             is_crud_ = True if collection_id_[:1] != "_" else False
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            # sets the sort collation up to the user preferences
             collation_ = (
                 {"locale": user_["locale"]}
                 if user_ and "locale" in user_
                 else {"locale": "tr"}
             )
 
-            # created a cursor for retrieve the collection structure will be added into the respone
-            cursor_ = (
-                Mongo().db["_collection"].find_one({"col_id": collection_id_})
-                if is_crud_
-                else self.root_schemas_f(f"{collection_id_}")
-            )
-
+            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
 
@@ -3791,7 +3681,6 @@ class Crud:
                 else False
             )
 
-            # combines view filter and user filter in view mode
             if view_ is not None and collection_id_ == view_["vie_collection_id"]:
                 cursor_ = (
                     Mongo()
@@ -3823,7 +3712,6 @@ class Crud:
                 else [("_modified_at", -1)]
             )
 
-            # create cursor for the query
             cursor_ = (
                 Mongo()
                 .db[collection_]
@@ -3836,11 +3724,7 @@ class Crud:
                 .skip(skip_)
                 .limit(limit_)
             )
-            docs_ = (
-                json.loads(JSONEncoder().encode(list(cursor_)))[:limit_]
-                if cursor_
-                else []
-            )
+            docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
             count_ = Mongo().db[collection_].count_documents(get_filtered_)
 
             return {
@@ -5367,7 +5251,7 @@ class Email:
         self.disclaimer_ = f"<p>Sincerely,</p><p>{COMPANY_NAME_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
         self.disclaimer_text_ = f"\n\nSincerely,\n\n{COMPANY_NAME_}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
 
-    def sendEmail_SMTP_f(self, msg):
+    def send_email_smtp_f(self, msg):
         """
         docstring is in progress
         """
@@ -5475,10 +5359,10 @@ class Email:
                 "files": files_,
                 "personalizations": personalizations_,
                 "subject": subject_,
-                "html": html_,
+                "html": html_
             }
 
-            email_sent_ = self.sendEmail_SMTP_f(msg_)
+            email_sent_ = self.send_email_smtp_f(msg_)
 
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
@@ -5493,6 +5377,10 @@ class Email:
 
 
 class Security:
+    """
+    docstring is in progress
+    """
+
     def __init__(self):
         """
         docstring is in progress
@@ -5786,6 +5674,10 @@ class OTP:
 
 
 class Auth:
+    """
+    docstring is in progress
+    """
+
     def saas_f(self):
         """
         docstring is in progress
@@ -5884,15 +5776,15 @@ class Auth:
         docstring is in progress
         """
         try:
-            input = request.json
-            if not "email" in input or input["email"] is None:
+            input_ = request.json
+            if "email" not in input_ or input_["email"] is None:
                 raise APIError("E-mail is missing")
-            if not "name" in input or input["name"] is None:
+            if "name" not in input_ or input_["name"] is None:
                 raise APIError("Full name is missing")
             pat = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
-            if not re.search(pat, input["email"]):
+            if not re.search(pat, input_["email"]):
                 raise APIError("Invalid e-mail address")
-            if not "password" in input or input["password"] is None:
+            if "password" not in input_ or input_["password"] is None:
                 raise APIError("Invalid email or password")
 
             return {"result": True}
@@ -6069,7 +5961,7 @@ class Auth:
                         permission_ = True
                         break
 
-            if permission_ == False:
+            if permission_ is False:
                 raise AuthError(f"no {op_} permission for {collection_id_}")
 
             return {"result": permission_, "allowmatch": allowmatch_}
@@ -6284,7 +6176,7 @@ class Auth:
         """
         try:
             input_ = request.json
-            if not "email" in input_ or input_["email"] is None:
+            if "email" not in input_ or input_["email"] is None:
                 raise APIError("e-mail is missing")
 
             email_ = bleach.clean(input_["email"])
@@ -6489,6 +6381,7 @@ class Auth:
                 bleach.clean(input_["password"]) if "password" in input_ else None
             )
             token_ = bleach.clean(input_["token"]) if "token" in input_ else None
+            type_ = "auth"
 
             if not user_id_:
                 raise APIError("email must be provided")
@@ -6499,7 +6392,6 @@ class Auth:
 
             auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
-                type_ = "auth"
                 raise AuthError("account not found")
 
             if "aut_salt" not in auth_ or auth_["aut_salt"] is None:
@@ -6581,31 +6473,22 @@ class Auth:
         docstring is in progress
         """
         try:
-            # sets the required variables
             apikey_ = bleach.clean(input_["apikey"]) if "apikey" in input_ else None
-
-            # user id must not be empty
             if not apikey_ or apikey_ is None:
                 raise APIError("api key must be provided")
 
-            # checks if user exists in the auth
             auth_ = Mongo().db["_auth"].find_one({"aut_apikey": apikey_})
             if not auth_:
-                raise APIError("account or apikey not found")
-
+                raise APIError("not authenticated")
             user_id_ = auth_["aut_id"]
 
-            # checks if user exists in the users
             user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError("user not found for api")
-
-            # checks if user is enabled or not
             usr_enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
             if not usr_enabled_:
                 raise APIError("user not validated")
 
-            # checks if firewall entry exists
             firewall_ = self.firewall_f(user_)
             if not firewall_["result"]:
                 raise APIError(firewall_["msg"])
@@ -6660,18 +6543,15 @@ class Auth:
             if not checkup_["result"]:
                 raise APIError(checkup_["msg"])
 
-            # gets the required variables
             input_ = request.json
             email_ = bleach.clean(input_["email"])
             password_ = bleach.clean(input_["password"])
             passcode_ = bleach.clean(input_["passcode"])
 
-            # checks if the user account was created already
             auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
             if auth_:
                 raise APIError("account already exist")
 
-            # checks if the user was created already
             user_ = Mongo().db["_user"].find_one({"usr_id": email_})
             if not user_ or user_ is None:
                 raise APIError("user invitation not found")
@@ -6682,7 +6562,6 @@ class Auth:
             if "usr_enabled" not in user_ or not user_["usr_enabled"]:
                 raise APIError("user status is disabled to get logged in")
 
-            # creates an encrypter password
             hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
                 raise APIError(hash_f_["msg"])
@@ -6889,10 +6768,6 @@ def storage_f():
     except Exception as exc:
         return {"msg": str(exc), "status": 500}
 
-    finally:
-        if Mongo().client:
-            Mongo().client.close()
-
 
 @app.route("/crud", methods=["POST"], endpoint="crud")
 def crud_f():
@@ -6907,20 +6782,18 @@ def crud_f():
                 validate_["msg"] if "msg" in validate_ else "validation error"
             )
 
-        # gets and cleans user input
         input_ = request.json
 
-        # checks and set if the operator exists in request
-        if not "op" in input_:
+        if "op" not in input_:
             raise APIError("no operation found")
         op_ = input_["op"]
 
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("user info not found")
-
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
+
         collection_ = input_["collection"] if "collection" in input_ else None
         match_ = (
             input_["match"]
@@ -6939,9 +6812,6 @@ def crud_f():
             )
         input_["userindb"] = validate_["user"]
 
-        """
-        gets the allowed matches from permissions
-        """
         allowmatch_ = []
         permission_f_ = Auth().permission_f(
             {
@@ -6953,6 +6823,7 @@ def crud_f():
         )
         if not permission_f_["result"]:
             raise AuthError(permission_f_["msg"])
+
         allowmatch_ = (
             permission_f_["allowmatch"]
             if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0
@@ -6962,19 +6833,15 @@ def crud_f():
             match_ += allowmatch_
         input_["match"] = match_
 
-        """
-        checkout the document given
-        """
         if op_ in ["update", "upsert", "insert", "action"]:
-            if not "doc" in input_:
+            if "doc" not in input_:
                 raise APIError("document must be included in the request")
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_["msg"] if "msg" in decode_ else "decode error")
             input_["doc"] = decode_["doc"]
         elif op_ in ["remove", "clone", "delete"]:
-            c_ = input_["collection"]
-            col_check_ = Crud().inner_collection_f(c_)
+            col_check_ = Crud().inner_collection_f(input_["collection"])
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
 
@@ -7038,10 +6905,6 @@ def crud_f():
     except Exception as exc:
         return {"msg": str(exc), "status": 500}
 
-    finally:
-        if Mongo().client:
-            Mongo().client.close()
-
 
 @app.route("/otp", methods=["POST"])
 def otp_f():
@@ -7049,33 +6912,26 @@ def otp_f():
     docstring is in progress
     """
     try:
-        # validates restapi request
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "web validation error"
             )
 
-        # gets and cleans user input
         input_ = request.json
-
-        # checks input is set
         if not input_:
             raise APIError("input missing")
 
-        # gets the email and user token
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("credentials are missing")
+        email_ = user_["email"] if "email" in user_ else None
+        token_ = user_["token"] if "token" in user_ else None
 
         request_ = input_["request"] if "request" in input_ else None
         if not request_:
             raise APIError("request is nissing")
 
-        email_ = user_["email"] if "email" in user_ else None
-        token_ = user_["token"] if "token" in user_ else None
-
-        # validates restapi request
         validate_ = Auth().user_validate_by_basic_auth_f(
             {"userid": email_, "token": token_}, "otp"
         )
@@ -7084,8 +6940,7 @@ def otp_f():
                 validate_["msg"] if "msg" in validate_ else "otp validation error"
             )
 
-        # checks and set if the operator exists in request
-        if not "op" in request_:
+        if "op" not in request_:
             raise APIError("no operation found")
 
         op_ = request_["op"]
@@ -7117,10 +6972,6 @@ def otp_f():
     except Exception as exc:
         return {"msg": str(exc), "status": 500}
 
-    finally:
-        if Mongo().client:
-            Mongo().client.close()
-
 
 @app.route("/auth", methods=["POST"], endpoint="auth")
 def auth_f():
@@ -7128,25 +6979,20 @@ def auth_f():
     docstring is in progress
     """
     try:
-        # validates restapi request
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "web validation error"
             )
 
-        # gets and cleans user input
         input_ = request.json
-
-        # checks input is set
         if not input_:
             raise APIError("input missing")
 
-        # checks and set if the operator exists in request
-        if not "op" in input_:
+        if "op" not in input_:
             raise APIError("no operation found")
-
         op_ = input_["op"]
+
         token_ = None
 
         if op_ == "signup":
@@ -7193,10 +7039,10 @@ def auth_f():
             json.dumps(
                 {"result": True, "user": user_, "saas": saas_},
                 default=json_util.default,
-                sort_keys=False,
+                sort_keys=False
             ),
             200,
-            header_,
+            header_
         )
 
     except APIError as exc:
@@ -7205,66 +7051,9 @@ def auth_f():
     except Exception as exc:
         return {"msg": str(exc), "status": 500}
 
-    finally:
-        if Mongo().client:
-            Mongo().client.close()
 
-
-@app.route("/get/visual/<string:id>", methods=["GET"])
-def get_visual_f(id):
-    """
-    docstring is in progress
-    """
-    try:
-        web_validate_ = Security().validate_request_f()
-        if not web_validate_["result"]:
-            raise APIError(
-                web_validate_["msg"] if "msg" in web_validate_ else "validation error"
-            )
-
-        if not request.headers:
-            raise AuthError("no header provided")
-
-        apikey_ = request.args.get("k", default=None, type=str)
-
-        if not apikey_:
-            raise AuthError("no api key provided")
-
-        user_validate_ = Auth().user_validate_by_apikey_f({"apikey": apikey_})
-        if not user_validate_["result"]:
-            raise AuthError(user_validate_["msg"])
-
-        user_ = user_validate_["user"] if "user" in user_validate_ else None
-        if not user_ or not user_["usr_id"] or "usr_id" not in user_:
-            raise AuthError("user not found for visual")
-
-        view_to_visual_f_ = Crud().visual_f({"id": id, "user": user_})
-
-        if not view_to_visual_f_["result"]:
-            raise APIError(view_to_visual_f_["msg"])
-
-        return (
-            {"result": True, "visual": view_to_visual_f_},
-            200,
-            Security().header_simple_f(),
-        )
-
-    except AuthError as exc:
-        return {"msg": str(exc), "status": 401}
-
-    except APIError as exc:
-        return {"msg": str(exc), "status": 400}
-
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
-
-    finally:
-        if Mongo().client:
-            Mongo().client.close()
-
-
-@app.route("/get/pivot/<string:id>", methods=["GET"])
-def get_pivot_f(id):
+@app.route("/get/pivot/<string:id_>", methods=["GET"])
+def get_pivot_f(id_):
     """
     docstring is in progress
     """
@@ -7291,7 +7080,7 @@ def get_pivot_f(id):
         if not user_ or not user_["usr_id"] or "usr_id" not in user_:
             raise AuthError("user not found for pivot")
 
-        view_to_dataset_f_ = Crud().view_to_dataset_f({"id": id, "user": user_})
+        view_to_dataset_f_ = Crud().view_to_dataset_f({"id": id_, "user": user_})
 
         if not view_to_dataset_f_["result"]:
             raise APIError(view_to_dataset_f_["msg"])
@@ -7620,8 +7409,8 @@ def get_dump_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/get/view/<string:id>", methods=["GET"])
-def get_data_f(id):
+@app.route("/get/view/<string:id_>", methods=["GET"])
+def get_data_f(id_):
     """
     docstring is in progress
     """
@@ -7629,56 +7418,36 @@ def get_data_f(id):
         if not request.headers:
             raise AuthError("no header provided")
 
+        id_ = bleach.clean(id_)
         arg_ = request.args.get("k", default=None, type=str)
+        if not arg_:
+            raise APIError("missing argument")
 
         apikey_ = (
-            request.headers["X-Api-Key"]
-            if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != ""
-            else arg_
+            request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
         )
-        if not apikey_:
-            raise AuthError("no api key provided")
-
         user_validate_ = Auth().user_validate_by_apikey_f({"apikey": apikey_})
         if not user_validate_["result"]:
-            if not arg_:
-                raise AuthError("no argument provided")
-            else:
-                user_validate_ = Auth().user_validate_by_apikey_f({"apikey": arg_})
-                if not user_validate_["result"]:
-                    raise AuthError(user_validate_["msg"])
-
-        id_ = bleach.clean(id)
+            user_validate_ = Auth().user_validate_by_apikey_f({"apikey": arg_})
+            if not user_validate_["result"]:
+                raise AuthError(user_validate_["msg"])
         user_ = user_validate_["user"] if "user" in user_validate_ else None
-
         if not user_:
             raise AuthError("user not found for view")
 
-        if not user_["usr_id"] or "usr_id" not in user_:
-            raise AuthError("user id not found")
-
-        email_ = user_["usr_id"]
-
-        generate_view_data_f_ = Crud().view_f(
-            {"email": email_, "source": "external", "vie_id": None, "_id": id_}
-        )
-
+        generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")
         if not generate_view_data_f_["result"]:
             raise APIError(generate_view_data_f_["msg"])
 
         return (
             json.dumps(
-                (
-                    generate_view_data_f_["data"]
-                    if generate_view_data_f_ and "data" in generate_view_data_f_
-                    else []
-                ),
+                generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else [],
                 default=json_util.default,
                 ensure_ascii=False,
                 sort_keys=False,
             ),
             200,
-            Security().header_simple_f(),
+            Security().header_simple_f()
         )
 
     except AuthError as exc:
