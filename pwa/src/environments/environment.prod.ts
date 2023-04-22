@@ -114,9 +114,48 @@ export const environment = {
     { "key": "true", "op": "", "value": "true" },
     { "key": "false", "op": "", "value": "false" }
   ],
+  admin_collections: {
+    "_collection": {
+      "title": "Collections",
+      "description": "User defined database collections."
+    },
+    "_announcement": {
+      "title": "Announcements",
+      "description": "Data announcements log of the shared views."
+    },
+    "_kav": {
+      "title": "KaV",
+      "description": "Essential environment variables as key=value pairs."
+    },
+    "_user": {
+      "title": "Users",
+      "description": "Internal users and Data subscribers."
+    },
+    "_permission": {
+      "title": "Permissions",
+      "description": "User permissions of the database collections."
+    },
+    "_firewall": {
+      "title": "Firewall",
+      "description": "IP Firewall"
+    },
+    "_token": {
+      "title": "API Tokens",
+      "description": "Access tokens of the built-in API functions."
+    },
+    "_backup": {
+      "title": "Backups",
+      "description": "Database backups and restoring."
+    },
+    "_log": {
+      "title": "Logs",
+      "description": "Transaction logs in detail."
+    }
+  },
   segmentsadm: [
     { "id": "_collection", "title": "Collections" },
     { "id": "_announcement", "title": "Announcements" },
+    { "id": "_kav", "title": "KV" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },
     { "id": "_firewall", "title": "Firewall" },

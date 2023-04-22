@@ -66,8 +66,6 @@ export class ViewPage implements OnInit {
   public in_otp_process: boolean = false;
   public in_otp_process_test: boolean = false;
   public pivot_: string = "";
-  public statistics_key_: string = "";
-  public statistics_: any = null;
   public view_id: string = "";
   public view_count: number = 0;
   public view_properties: any = {};
@@ -92,7 +90,6 @@ export class ViewPage implements OnInit {
   public col_id: string = "";
   public collections_: any;
   public charts_: any = null;
-  public charts: any = null;
 
   constructor(
     private storage: Storage,
@@ -122,9 +119,8 @@ export class ViewPage implements OnInit {
     this.is_initialized = false;
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
       if(res && res.views) {
-        this.charts = res && res.views ? res.views : null;
-        this.view = this.charts.filter((obj: any) => obj.id === this.id)[0];
-        this.subheader = this.view.view.title;
+        this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
+        this.subheader = this.view.self.title;
         this.data = this.view.data ? this.view.data : [];
         this.view_properties = this.view.properties;
         this.view_properties_ = Object.keys(this.view.properties);
@@ -132,51 +128,11 @@ export class ViewPage implements OnInit {
         this.col_id = this.view.collection;
         this.is_loaded = true;
         this.is_initialized = true;
+        this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
         this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_apikey;
         this.crud.charts.unsubscribe;
         this.charts_ = null;
       }
-    });
-  }
-
-  RefreshData(p: number) {
-    return new Promise((resolve, reject) => {
-      this.is_loaded = this.is_selected = false;
-      this.misc.apiCall("crud", {
-        op: "view",
-        _id: "",
-        vie_id: this.id,
-        source: "internal",
-        page: p,
-        limit: this.limit
-      }).then((res: any) => {
-        console.log("viewres", res);
-        this.col_structure = res && res.col_structure ? res.col_structure : null;
-        this.col_id = res && res.col_id ? res.col_id : null;
-        this.view = res && res.record ? res.record : null;
-        this.data = res && res.data ? res.data : [];
-        this.view_count = res && res.count ? res.count : 0;
-        this.view_properties = res.properties;
-        this.view_properties_ = Object.keys(res.properties);
-        this.view_structure = res.structure;
-        this.subheader = this.view.vie_title;
-        this.viewurl_ = this.apiHost + "/get/view/" + this.view._id + "?k=" + this.accountf_apikey;
-        this.storage.set("LSVIEW-" + this.id, this.view).then(() => {
-          this.crud.Pivot(this.view._id, this.accountf_apikey).then((res: any) => {
-            this.pivot_ = res && res.pivot ? res.pivot : null;
-            const statistics_ = res && res.statistics ? res.statistics : null;
-            this.statistics_key_ = this.view.vie_pivot_values ? this.view.vie_pivot_values[0].key : null;
-            this.statistics_ = statistics_ && this.statistics_key_ ? statistics_[this.statistics_key_] : null;
-          }).catch((error: any) => {
-            console.error("*** view mode", error);
-            this.misc.doMessage(error.error.msg, "error");
-          }).finally(() => {
-            resolve(true);
-          });
-        });
-      }).finally(() => {
-        this.is_loaded = true;
-      });
     });
   }
 
@@ -231,7 +187,8 @@ export class ViewPage implements OnInit {
     });
   }
 
-  async doAnnounceNow(view: any, scope: string) {
+  async doAnnounceNow(scope: string) {
+    console.log("*** view", this.view);
     if (!this.in_otp_process) {
       scope === "live" ? this.in_otp_process = true : this.in_otp_process_test = true;
       this.doOTP({
@@ -261,8 +218,8 @@ export class ViewPage implements OnInit {
               handler: (announceData: any) => {
                 this.misc.apiCall("crud", {
                   op: "announce",
-                  collection: this.id,
-                  view: view,
+                  collection: this.view.collection,
+                  id: this.view.id,
                   tfac: announceData && announceData.id ? announceData.id : null,
                   scope: scope
                 }).then(() => {

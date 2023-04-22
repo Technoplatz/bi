@@ -7,6 +7,7 @@
       "pattern": "^[a-z0-9-_]{3,64}$",
       "title": "ID",
       "description": "Collection ID",
+      "permanent": true,
       "width": 150
     },
     "col_title": {
@@ -17,6 +18,14 @@
       "description": "Collection Title",
       "width": 150
     },
+    "col_description": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 256,
+      "title": "Description",
+      "description": "Collection Description",
+      "width": 220
+    },
     "col_prefix": {
       "bsonType": "string",
       "minLength": 3,
@@ -24,6 +33,7 @@
       "pattern": "^[a-z]{3,3}$",
       "title": "Prefix",
       "description": "Column Prefix",
+      "permanent": true,
       "width": 110
     },
     "col_structure": {

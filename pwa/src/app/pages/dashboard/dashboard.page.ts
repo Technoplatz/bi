@@ -34,6 +34,7 @@ import { Component, OnInit } from "@angular/core";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Miscellaneous } from "../../classes/misc";
+import { environment } from "../../../environments/environment";
 
 @Component({
   selector: "app-dashboard",
@@ -54,6 +55,7 @@ export class DashboardPage implements OnInit {
   public announcements_: any = null;
   public charts_: any = null;
   public charts: any = [];
+  public loadingText: string = environment.misc.loadingText;
 
   constructor(
     private storage: Storage,
@@ -61,8 +63,8 @@ export class DashboardPage implements OnInit {
     public misc: Miscellaneous
   ) {
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
-      this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard") : [];
-      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type === "Flashcard") : [];
+      this.charts = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard") : [];
+      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type === "Flashcard") : [];
       console.log("*** charts", this.charts);
     });
     this.announcements_ ? null : this.crud.announcements.subscribe((res: any) => {
@@ -78,12 +80,16 @@ export class DashboardPage implements OnInit {
   }
 
   doRefresh() {
-    this.is_refreshing = true;
-    this.crud.getAll().then(() => { }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
-    }).finally(() => {
-      this.is_refreshing = false;
-    });
+    if (this.is_refreshing) {
+      console.log("*** already refreshed");
+    } else {
+      this.is_refreshing = true;
+      this.crud.getAll().then(() => { }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.is_refreshing = false;
+      });
+    }
   }
 
   doResizeCharts() {

@@ -225,24 +225,6 @@ export class Crud {
     });
   }
 
-  Pivot(_id: any, apikey_: string) {
-    return new Promise((resolve, reject) => {
-      const __id = typeof _id === 'object' && "$oid" in _id && _id["$oid"] ? _id["$oid"] : _id;
-      const url_ = this.apiHost + "/get/pivot" + "/" + __id + "?k=" + apikey_;
-      this.http.get(url_, {
-        headers: new HttpHeaders(this.crudHeaders)
-      }).subscribe((res: any) => {
-        if (res && res.result) {
-          resolve(res);
-        } else {
-          reject(res.msg);
-        }
-      }, (err: any) => {
-        reject(err);
-      });
-    });
-  }
-
   Download(obj: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
@@ -300,19 +282,6 @@ export class Crud {
     });
   }
 
-  getViews() {
-    return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
-        op: "views",
-        dashboard: false
-      }).then((res: any) => {
-        resolve(this.views.next(res));
-      }).catch((err: any) => {
-        reject(err);
-      });
-    });
-  }
-
   getCharts() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
@@ -358,12 +327,12 @@ export class Crud {
           this.misc.doMessage(error, "error");
           reject(error);
         });
-        this.getViews().then(() => {
-          resolve(true);
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-          reject(error);
-        });
+        // this.getViews().then(() => {
+        //   resolve(true);
+        // }).catch((error: any) => {
+        //   this.misc.doMessage(error, "error");
+        //   reject(error);
+        // });
         this.getCharts().then(() => {
           resolve(true);
         }).catch((error: any) => {

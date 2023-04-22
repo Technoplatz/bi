@@ -523,27 +523,6 @@ form ion-item ion-label {
   gap: 12px;
 }
 
-.stat {
-  align-content: flex-start;
-  background-color: #f3f3f3;
-}
-
-.stat th {
-  color: var(--ion-color-dark);
-}
-
-.stat th span {
-  color: var(--ion-color-primary) !important;
-}
-
-.stat th,
-.stat td {
-  padding-left: 24px;
-  padding-right: 24px;
-  text-align: center;
-  border: 1px solid var(--ion-color-white);
-}
-
 .pivot {
   align-content: flex-start;
   overflow: hidden;

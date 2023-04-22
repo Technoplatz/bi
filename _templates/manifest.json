@@ -12,11 +12,7 @@
       "bsonType": "string",
       "title": "Status",
       "description": "Manifest Status",
-      "enum": [
-        "00-Open",
-        "10-OnCustomsProcess",
-        "20-Closed"
-      ],
+      "enum": ["00-Open", "10-OnCustomsProcess", "20-Closed"],
       "default": "00-Open",
       "width": 160
     },
@@ -74,44 +70,9 @@
       "width": 200
     }
   },
-  "required": [
-    "man_no",
-    "man_opening_date",
-    "man_file_no",
-    "man_status",
-    "man_case_no"
-  ],
-  "index": [
-    [
-      "man_no"
-    ],
-    [
-      "man_odi_no",
-      "man_odi_sub_no"
-    ],
-    [
-      "man_status"
-    ],
-    [
-      "man_odi_no"
-    ],
-    [
-      "man_file_no"
-    ]
-  ],
-  "unique": [
-    [
-      "man_no"
-    ],
-    [
-      "man_no",
-      "man_odi_no",
-      "man_odi_sub_no"
-    ],
-    [
-      "man_file_no"
-    ]
-  ],
+  "required": ["man_no", "man_opening_date", "man_file_no", "man_status", "man_case_no"],
+  "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_status"], ["man_odi_no"], ["man_file_no"]],
+  "unique": [["man_no"], ["man_no", "man_odi_no", "man_odi_sub_no"], ["man_file_no"]],
   "sort": {
     "_modified_at": -1
   },
@@ -128,10 +89,7 @@
           "value": "odi_sub_no"
         }
       ],
-      "get": [
-        "odi_no",
-        "odi_sub_no"
-      ],
+      "get": ["odi_no", "odi_sub_no"],
       "filter": [
         {
           "key": "odi_status",
@@ -146,10 +104,7 @@
     {
       "name": "Manifest in Action",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "man_status",
@@ -193,10 +148,7 @@
     {
       "name": "Manifest Completed",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "man_status",

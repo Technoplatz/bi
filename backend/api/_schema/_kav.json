@@ -1,0 +1,37 @@
+{
+  "properties": {
+    "kav_key": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Z0-9_]{1,64}$",
+      "title": "Key",
+      "description": "Key Name",
+      "width": 180
+    },
+    "kav_as": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 16,
+      "title": "As",
+      "description": "As",
+      "enum": ["string", "number", "int", "float", "date", "boolean", "array"],
+      "width": 160
+    },
+    "kav_value": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9_]{1,64}$",
+      "title": "Value",
+      "description": "Value",
+      "width": 120
+    }
+  },
+  "required": ["kav_key", "kav_as", "kav_value"],
+  "index": [["kav_key"]],
+  "unique": [["kav_key", "kav_as", "kav_value"]],
+  "sort": {
+    "_modified_at": -1
+  }
+}

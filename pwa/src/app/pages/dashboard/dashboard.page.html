@@ -37,7 +37,7 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <h6>{{ 'WELCOME ABOARD' | translate }}</h6>
         <h1>{{ 'Shared Views' | translate }}</h1>
-        
+
         <!-- flashcards -->
         <div class="filler-16"></div>
         <div class="brz-visual-group">
@@ -48,11 +48,11 @@ https://www.gnu.org/licenses.
                 <ion-icon name="list-outline"></ion-icon>
               </ion-button>
             </div>
-            <h5>{{ item.view.title }}</h5>
-            {{ item.view.description }}<br />
-            {{ item.collection }} | {{ item.view.data_values[0].value }} {{ 'of' | translate }} {{
-            item.view.data_values[0].key }}
-            <h1>{{ item.stats[item.view.data_values[0].value] }}</h1>
+            <h5>{{ item.self.title }}</h5>
+            {{ item.self.description }}<br />
+            {{ item.collection }} | {{ item.self.data_values[0].value }} {{ 'of' | translate }} {{
+            item.self.data_values[0].key }}
+            <h1>{{ item.stats[item.self.data_values[0].value] }}</h1>
           </div>
         </div>
 
@@ -60,6 +60,10 @@ https://www.gnu.org/licenses.
         <div class="brz-visual-group ion-margin-bottom">
           <div *ngFor="let item of charts; let i = index" [class]="chart_css" #chcontainer>
             <div class="visual-buttons">
+              <ion-button size="small" fill="clear" (click)="doRefresh()" class="clear-dark-button" color="dark"
+                mode="ios">
+                <ion-icon name="sync-outline"></ion-icon>
+              </ion-button>
               <ion-button size="small" fill="clear" (click)="doResizeCharts()" class="clear-dark-button" color="dark"
                 mode="ios">
                 <ion-icon name="expand-outline"></ion-icon>
@@ -69,24 +73,30 @@ https://www.gnu.org/licenses.
                 <ion-icon name="list-outline"></ion-icon>
               </ion-button>
             </div>
-            <!-- <div class="clicked-item" (click)="misc.navi.next('view/' + item.id)"> -->
-            <h5>{{ item.view.title }}</h5>
+            <h5>{{ item.self.title }}</h5>
             <div class="full-width">
-              {{ item.view.description }}<br />
-              {{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}
+              {{ item.self.description }}<br />
+              {{ 'Shared with' | translate }} {{ item.self._tags?.length }} {{ '#Hashtags' | translate }}
             </div>
-            <div class="app-charts">
-              <app-chart *ngIf="item.series && item.series.length > 0; else noviewdata" [item]="item"
-                [width]="chcontainer.offsetWidth"></app-chart>
-              <ng-template #noviewdata>
-                <div class="visual-error">
-                  {{ 'CHART NOT GENERATED' | translate }}<br />
-                  {{ 'Check your filter or selected fields' | translate }}.<br />
-                  {{ item?.error | translate }}
-                </div>
-              </ng-template>
+            <div *ngIf="is_refreshing; else showchart" class="app-charts">
+              <ion-item lines="none">
+                <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
+                <ion-label>{{ loadingText | translate }}</ion-label>
+              </ion-item>
             </div>
-            <!-- </div> -->
+            <ng-template #showchart>
+              <div class="app-charts">
+                <app-chart *ngIf="item.series && item.series.length > 0; else noviewdata" [item]="item"
+                  [width]="chcontainer.offsetWidth"></app-chart>
+                <ng-template #noviewdata>
+                  <div class="visual-error">
+                    {{ 'CHART NOT GENERATED' | translate }}<br />
+                    {{ 'Check your filter or selected fields' | translate }}.<br />
+                    {{ item?.error | translate }}
+                  </div>
+                </ng-template>
+              </div>
+            </ng-template>
           </div>
         </div>
 

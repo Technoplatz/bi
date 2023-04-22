@@ -21,13 +21,7 @@
       "bsonType": "string",
       "title": "Status",
       "description": "Konşimento Statüsü",
-      "enum": [
-        "00-Open",
-        "10-OnTheWay",
-        "20-OnCustoms",
-        "30-OnCustomsProcess",
-        "40-ClearanceCompleted"
-      ],
+      "enum": ["00-Open", "10-OnTheWay", "20-OnCustoms", "30-OnCustomsProcess", "40-ClearanceCompleted"],
       "default": "00-Open",
       "width": 160
     },
@@ -40,21 +34,14 @@
       "bsonType": "string",
       "title": "Customs",
       "description": "Gümrük Yeri",
-      "enum": [
-        "AHL",
-        "Halkalı",
-        "Ambarlı"
-      ],
+      "enum": ["AHL", "Halkalı", "Ambarlı"],
       "width": 120
     },
     "odi_from": {
       "bsonType": "string",
       "title": "Shipped From",
       "description": "Çıkış Yeri",
-      "enum": [
-        "China",
-        "Hungary"
-      ],
+      "enum": ["China", "Hungary"],
       "width": 110
     },
     "odi_eta_date": {
@@ -67,11 +54,7 @@
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Sevk Tipi",
-      "enum": [
-        "Sea",
-        "Air",
-        "Truck"
-      ],
+      "enum": ["Sea", "Air", "Truck"],
       "width": 120
     },
     "odi_transfer_date": {
@@ -91,31 +74,9 @@
       "default": 0
     }
   },
-  "required": [
-    "odi_sub_no",
-    "odi_date",
-    "odi_no",
-    "odi_from",
-    "odi_ship_type",
-    "odi_customs"
-  ],
-  "index": [
-    [
-      "odi_no"
-    ],
-    [
-      "odi_no",
-      "odi_sub_no"
-    ],
-    [
-      "odi_from"
-    ]
-  ],
-  "unique": [
-    [
-      "odi_sub_no"
-    ]
-  ],
+  "required": ["odi_sub_no", "odi_date", "odi_no", "odi_from", "odi_ship_type", "odi_customs"],
+  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"]],
+  "unique": [["odi_sub_no"]],
   "sort": {
     "_modified_at": -1
   },
@@ -143,9 +104,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Technoplatz"],
       "notification": {
         "notify": false,
         "subject": "Ordino is on the way",
@@ -182,9 +141,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Technoplatz"],
       "notification": {
         "notify": false,
         "subject": "Ordino is on customs",
@@ -204,10 +161,7 @@
     {
       "name": "Set DNs 10-OnTheWay",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "odi_status",
@@ -255,10 +209,7 @@
     {
       "name": "Set DNs 20-OnCustoms",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "odi_status",

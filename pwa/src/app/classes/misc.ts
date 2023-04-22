@@ -83,28 +83,24 @@ export class Miscellaneous {
 
   apiCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
-      const collection_ = posted.collection ? posted.collection : "";
-      this.storage.get("LSVIEW-" + collection_).then((LSVIEW: any) => {
-        posted.user = this.user_;
-        posted.email = this.user_.email;
-        posted.view = LSVIEW ? LSVIEW : null;
-        this.getAPIHost().then((apiHost) => {
-          this.http.post<any>(apiHost + "/" + url, posted, {
-            headers: new HttpHeaders({
-              "Content-Type": "application/json",
-              "X-Api-Key": environment.apiKey
-            })
-          }).subscribe((res: any) => {
-            if (res && res.result) {
-              resolve(res);
-            } else {
-              console.error("*** api result", res);
-              reject(res && res.msg ? res.msg : res);
-            }
-          }, (res: any) => {
-            console.error("*** api error", res);
-            reject(res.error && res.error.msg ? res.error.msg : res);
-          });
+      posted.user = this.user_;
+      posted.email = this.user_.email;
+      this.getAPIHost().then((apiHost) => {
+        this.http.post<any>(apiHost + "/" + url, posted, {
+          headers: new HttpHeaders({
+            "Content-Type": "application/json",
+            "X-Api-Key": environment.apiKey
+          })
+        }).subscribe((res: any) => {
+          if (res && res.result) {
+            resolve(res);
+          } else {
+            console.error("*** api result", res);
+            reject(res && res.msg ? res.msg : res);
+          }
+        }, (res: any) => {
+          console.error("*** api error", res);
+          reject(res.error && res.error.msg ? res.error.msg : res);
         });
       });
     });

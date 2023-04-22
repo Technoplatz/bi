@@ -27,16 +27,9 @@
       "width": 350
     }
   },
-  "required": [
-    "prd_no",
-    "prd_description"
-  ],
+  "required": ["prd_no", "prd_description"],
   "index": [],
-  "unique": [
-    [
-      "prd_no"
-    ]
-  ],
+  "unique": [["prd_no"]],
   "parents": [],
   "actions": [],
   "sort": {

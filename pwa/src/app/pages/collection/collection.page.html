@@ -37,6 +37,7 @@ https://www.gnu.org/licenses.
       <ion-col *ngIf="is_initialized; else dataloading" class="console-right">
         <h6>{{ header | translate }}</h6>
         <h1>{{ subheader }}</h1>
+        {{ description }}
         <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
@@ -66,11 +67,6 @@ https://www.gnu.org/licenses.
                 <br />
                 <span>{{ 'Clear' | translate }}</span>
               </div>
-              <!-- <div *ngIf="is_crud" (click)="doSaveAsView()" class="data-sq-button">
-                <ion-icon name="save-outline" *ngIf="!is_viewsaving"></ion-icon>
-                <ion-icon name="hourglass-outline" *ngIf="is_viewsaving"></ion-icon><br />
-                {{ 'Save' | translate }}
-              </div> -->
               <div (click)="MultiCrud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone' | translate }}

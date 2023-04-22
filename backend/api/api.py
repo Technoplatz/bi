@@ -55,7 +55,6 @@ import urllib
 import hashlib
 import jwt
 import xlrd
-import asyncio
 import io
 from functools import partial
 from subprocess import call
@@ -108,10 +107,6 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, ObjectId) or isinstance(o, datetime):
             return str(o)
         return json.JSONEncoder.default(self, o)
-
-
-def print(*args, **kwargs):
-    return partial(print, flush=True)
 
 
 class Schedular:
@@ -173,7 +168,7 @@ class Schedular:
 
             collection_ = (
                 Mongo()
-                .db["_collection"]
+                .db_["_collection"]
                 .find_one({"col_id": aut_source_collection_id_})
             )
             if not collection_:
@@ -205,7 +200,7 @@ class Schedular:
             )
 
             source_data_file_ = f"{aut_source_collection_id_}_data"
-            if source_data_file_ not in Mongo().db.list_collection_names():
+            if source_data_file_ not in Mongo().db_.list_collection_names():
                 raise APIError("collection data is missing")
 
             target_data_file_ = None
@@ -213,14 +208,14 @@ class Schedular:
 
             if aut_target_:
                 target_data_file_ = f"{aut_target_collection_id_}_data"
-                if target_data_file_ not in Mongo().db.list_collection_names():
+                if target_data_file_ not in Mongo().db_.list_collection_names():
                     raise APIError(
                         f"target collection data is missing {target_data_file_}"
                     )
 
                 collection_ = (
                     Mongo()
-                    .db["_collection"]
+                    .db_["_collection"]
                     .find_one({"col_id": aut_target_collection_id_})
                 )
                 if not collection_:
@@ -249,7 +244,7 @@ class Schedular:
                     )
 
             count_ = 0
-            find_ = Mongo().db[source_data_file_].find(get_filtered_)
+            find_ = Mongo().db_[source_data_file_].find(get_filtered_)
             for rec_ in find_:
                 target_match_ = {}
                 id_ = rec_["_id"]
@@ -281,7 +276,7 @@ class Schedular:
                             aut_source_set__, rec_, properties_
                         )
                         set_source_[key_] = value_
-                    Mongo().db[source_data_file_].update_one(
+                    Mongo().db_[source_data_file_].update_one(
                         {"_id": id_}, {"$set": set_source_}
                     )
 
@@ -295,7 +290,7 @@ class Schedular:
 
                     update_many_ = (
                         Mongo()
-                        .db[target_data_file_]
+                        .db_[target_data_file_]
                         .update_many(
                             target_match_,
                             {"$set": set_target_},
@@ -312,180 +307,13 @@ class Schedular:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def announce_view_f(self, doc_, scope_, email_):
-        """
-        docstring is in progress
-        """
-        try:
-            vie_title_ = doc_["vie_title"] if "vie_title" in doc_ else "view"
-            vie_id_ = doc_["vie_id"] if "vie_id" in doc_ else vie_title_
-            vie_attach_pivot_ = (
-                doc_["vie_attach_pivot"] if "vie_attach_pivot" in doc_ else False
-            )
-            vie_attach_csv_ = (
-                doc_["vie_attach_csv"] if "vie_attach_csv" in doc_ else False
-            )
-            vie_attach_excel_ = (
-                doc_["vie_attach_excel"] if "vie_attach_excel" in doc_ else False
-            )
-            user_id_ = (
-                email_
-                if email_
-                else doc_["_created_by"]
-                if "_created_by" in doc_
-                else doc_["_modified_by"]
-                if "_modified_by" in doc_
-                else None
-            )
-            vie_tags_ = (
-                doc_["_tags"]
-                if "_tags" in doc_ and scope_ == "live"
-                else PERMISSIVE_TAGS_
-            )
-
-            if not user_id_:
-                raise APIError("no user provided")
-
-            if len(vie_tags_) == 0:
-                raise APIError("no subscribers found")
-
-            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
-            if not user_:
-                raise APIError(f"user not found {user_id_}")
-
-            personalizations_to_ = []
-            to_ = []
-
-            users_ = (
-                Mongo().db["_user"].find({"_tags": {"$elemMatch": {"$in": vie_tags_}}})
-            )
-            if users_:
-                for member_ in users_:
-                    if member_["usr_id"] not in to_:
-                        to_.append(member_["usr_id"])
-                        personalizations_to_.append(
-                            {"email": member_["usr_id"], "name": member_["usr_name"]}
-                        )
-
-            if scope_ == "test" and user_id_ not in to_:
-                to_.append(user_id_)
-                personalizations_to_.append({"email": user_id_, "name": "Test"})
-
-            _id = doc_["_id"]
-            view_to_pivot_f_ = Crud().view_to_dataset_f({"id": _id, "user": user_})
-
-            personalizations_ = {"to": personalizations_to_}
-
-            if not view_to_pivot_f_["result"]:
-                raise APIError(view_to_pivot_f_["msg"])
-
-            df_pivot_ = view_to_pivot_f_["pivot"]
-
-            file_csv_ = view_to_pivot_f_["file_csv"]
-            file_excel_ = view_to_pivot_f_["file_excel"]
-            file_csv_raw_ = view_to_pivot_f_["file_csv_raw"]
-            file_excel_raw_ = view_to_pivot_f_["file_excel_raw"]
-
-            # style applying to pivot
-            strftime_ = datetime.now().strftime("%d.%m.%Y %H:%M")
-            padding_ = 8
-            padding_r_ = 2 * padding_
-            font_size_body_ = 13
-            font_size_table_ = 13
-            background_ = "#eee"
-            style_div_ = f"font-size: {font_size_body_}px;"
-            header_ = f"{vie_title_}"
-            styles_ = [
-                dict(
-                    selector="th",
-                    props=[
-                        ("background", f"{background_}"),
-                        ("padding", f"{padding_}px {padding_r_}px"),
-                        ("font-size", f"{font_size_table_}px"),
-                    ],
-                ),
-                dict(
-                    selector="td",
-                    props=[
-                        ("background", f"{background_}"),
-                        ("padding", f"{padding_}px {padding_r_}px"),
-                        ("text-align", "right"),
-                        ("font-size", f"{font_size_table_}px"),
-                    ],
-                ),
-                dict(selector="table", props=[("font-size", f"{font_size_table_}px")]),
-                dict(selector="caption", props=[("caption-side", "top")]),
-            ]
-
-            files_ = []
-
-            if df_pivot_ is not None:
-                df_pivot_ = df_pivot_.style.set_table_styles(styles_)
-                pivot_ = df_pivot_.to_html().replace('border="1"', "")
-                if vie_attach_csv_:
-                    files_.append({"filename": file_csv_, "filetype": "csv"})
-                    files_.append({"filename": file_csv_raw_, "filetype": "csv"})
-                if vie_attach_excel_:
-                    files_.append({"filename": file_excel_, "filetype": "xlsx"})
-                    files_.append({"filename": file_excel_raw_, "filetype": "xlsx"})
-            else:
-                pivot_ = "NO DATA FOUND MATCHING THE CRITERIA"
-                raise APIError("No data found matching the criteria")
-
-            body_ = ""
-            if vie_attach_pivot_:
-                body_ += f"{pivot_}"
-
-            footer_ = f"<br />Generated at {strftime_}"
-            html_ = (
-                f'<div style="{style_div_}"><p>{header_}</p><p>{body_}</p><p>{footer_}</p></div>'
-                if scope_ == "live"
-                else f"<div style=\"{style_div_}\"><p style='color:#c00; font-weight: bold;'>THIS IS A TEST MESSAGE</p><p>{header_}</p><p>{body_}</p><p>{footer_}</p></div>"
-            )
-
-            email_sent_ = Email().sendEmail_f(
-                {
-                    "personalizations": personalizations_,
-                    "op": "view",
-                    "html": html_,
-                    "subject": vie_title_
-                    if scope_ == "live"
-                    else f"TEST: {vie_title_}",
-                    "files": files_,
-                }
-            )
-
-            if not email_sent_["result"]:
-                raise APIError(email_sent_["msg"])
-
-            Mongo().db["_announcement"].insert_one(
-                {
-                    "ano_id": f"ano-{Misc().get_timestamp_f()}",
-                    "ano_scope": scope_,
-                    "ano_vie_id": vie_id_,
-                    "ano_vie_title": vie_title_,
-                    "ano_to": to_,
-                    "_tags": vie_tags_,
-                    "_created_at": datetime.now(),
-                    "_created_by": user_id_,
-                }
-            )
-
-            return {"result": True}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def schedule_automations_f(self, backgroundscheduler_):
         """
         docstring is in progress
         """
         try:
             print("*** schedule automations started", datetime.now())
-            find_ = Mongo().db["_automation"].find({"aut_enabled": True})
+            find_ = Mongo().db_["_automation"].find({"aut_enabled": True})
             for doc_ in find_:
                 aut_id_ = doc_["aut_id"]
                 if backgroundscheduler_.get_job(aut_id_):
@@ -516,8 +344,8 @@ class Schedular:
         docstring is in progress
         """
         try:
-            print("*** schedule views restarted", datetime.now())
-            view_find_ = Mongo().db["_view"].find({})
+            print("*** schedule views started", datetime.now())
+            view_find_ = Mongo().db_["_view"].find({})
             for doc_ in view_find_:
                 vie_id_ = doc_["vie_id"]
                 if sched_.get_job(vie_id_):
@@ -560,17 +388,17 @@ class Schedular:
                         if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0
                         else "mon"
                     )
-                    sched_.add_job(
-                        self.announce_view_f,
-                        "cron",
-                        day_of_week=f"{vie_sched_days_}",
-                        hour=f"{vie_sched_hours_}",
-                        minute=f"{vie_sched_minutes_}",
-                        id=vie_id_,
-                        timezone=TZ_,
-                        replace_existing=True,
-                        args=[doc_, "live", None],
-                    )
+                    # sched_.add_job(
+                    #     self.announce_view_f,
+                    #     "cron",
+                    #     day_of_week=f"{vie_sched_days_}",
+                    #     hour=f"{vie_sched_hours_}",
+                    #     minute=f"{vie_sched_minutes_}",
+                    #     id=vie_id_,
+                    #     timezone=TZ_,
+                    #     replace_existing=True,
+                    #     args=[doc_, "live", None],
+                    # )
                     print(
                         f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]",
                         datetime.now(),
@@ -918,7 +746,7 @@ class Misc:
                 "_created_by": obj["user"],
             }
 
-            Mongo().db["_log"].insert_one(doc_)
+            Mongo().db_["_log"].insert_one(doc_)
             return {"result": True}
 
         except APIError as exc:
@@ -996,7 +824,7 @@ class Misc:
         try:
             find_ = (
                 Mongo()
-                .db["_token"]
+                .db_["_token"]
                 .find_one({"_id": ObjectId(base64.b64decode(token_).decode())})
             )
             if not find_:
@@ -1047,6 +875,9 @@ class Misc:
         return properties_new_
 
     def string_to_formula_f(self, set_, rec_, properties_):
+        """
+        docstring is in progress
+        """
         key_ = set_["key"]
         value_ = set_["value"]
         if value_[:1] == "$":
@@ -1083,7 +914,7 @@ class Misc:
         try:
             personalizations_ = []
             to_ = []
-            users_ = Mongo().db["_user"].find({"_tags": {"$elemMatch": {"$in": tags_}}})
+            users_ = Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": tags_}}})
             if users_:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
@@ -1110,37 +941,36 @@ class Mongo:
         self.mongo_appname_ = "api"
         self.mongo_readpref_primary_ = "primary"
         self.mongo_readpref_secondary_ = "secondary"
-        authSource_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
+
+        auth_source_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
         replicaset_ = (
             f"&replicaSet={MONGO_RS_}" if MONGO_RS_ and MONGO_RS_ != "" else ""
         )
-        readPreference_primary_ = (
+        read_preference_primary_ = (
             f"&readPreference={self.mongo_readpref_primary_}"
             if self.mongo_readpref_primary_
             else ""
         )
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true"
-        tlsCertificateKeyFile_ = (
+        tls_certificate_key_file_ = (
             f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}"
             if MONGO_TLS_CERT_KEYFILE_
             else ""
         )
-        tlsCertificateKeyFilePassword_ = (
+        tls_certificate_key_file_password_ = (
             f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEY_PASSWORD_}"
             if MONGO_TLS_CERT_KEY_PASSWORD_
             else ""
         )
-        tlsCAFile_ = (
+        tls_ca_file_ = (
             f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         )
-        tlsAllowInvalidCertificates_ = "&tlsAllowInvalidCertificates=true"
+        tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
 
-        # PRIMARY CONNECTION STRING
-        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{authSource_}{replicaset_}{readPreference_primary_}{appname_}{tls_}{tlsCertificateKeyFile_}{tlsCertificateKeyFilePassword_}{tlsCAFile_}{tlsAllowInvalidCertificates_}"
-
-        self.client = MongoClient(self.connstr)
-        self.db = self.client[MONGO_DB_]
+        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}"
+        self.client_ = MongoClient(self.connstr)
+        self.db_ = self.client_[MONGO_DB_]
 
     def backup_f(self):
         """
@@ -1187,9 +1017,6 @@ class Mongo:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    async def async_obj_f(obj):
-        await asyncio.sleep(1)
-
 
 class Crud:
     """
@@ -1197,6 +1024,9 @@ class Crud:
     """
 
     def __init__(self):
+        """
+        docstring is in progress
+        """
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
 
@@ -1233,7 +1063,7 @@ class Crud:
         """
         try:
             cursor_ = (
-                Mongo().db["_collection"].find_one({"col_id": collection})
+                Mongo().db_["_collection"].find_one({"col_id": collection})
                 if collection[:1] != "_"
                 else self.root_schemas_f(f"{collection}")
             )
@@ -1300,14 +1130,14 @@ class Crud:
 
                 prefix_ = template_["prefix"] if "prefix" in template_ else "foo"
 
-                find_one_ = Mongo().db["_collection"].find_one({"col_id": col_id_})
+                find_one_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
 
                 if find_one_:
                     raise APIError("collection name already exists")
-                if col_id_ in Mongo().db.list_collection_names():
+                if col_id_ in Mongo().db_.list_collection_names():
                     raise APIError("collection data already exists")
 
-                find_one_ = Mongo().db["_collection"].find_one({"col_prefix": prefix_})
+                find_one_ = Mongo().db_["_collection"].find_one({"col_prefix": prefix_})
                 if find_one_:
                     raise APIError(f"collection prefix already exists: {prefix_}")
 
@@ -1320,7 +1150,7 @@ class Crud:
 
                 find_one_ = (
                     Mongo()
-                    .db["_collection"]
+                    .db_["_collection"]
                     .insert_one(
                         {
                             "col_id": col_id_,
@@ -1360,7 +1190,7 @@ class Crud:
         try:
             is_crud_ = True if c[:1] != "_" else False
             collection_ = (
-                Mongo().db["_collection"].find_one({"col_id": c})
+                Mongo().db_["_collection"].find_one({"col_id": c})
                 if is_crud_
                 else self.root_schemas_f(f"{c}")
             )
@@ -1526,7 +1356,7 @@ class Crud:
             match_ = obj["match"]
             tfac_ = obj["tfac"] if "tfac" in obj and obj["tfac"] else None
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
@@ -1538,7 +1368,7 @@ class Crud:
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             cursor_ = (
-                Mongo().db["_collection"].find_one({"col_id": collection_id_})
+                Mongo().db_["_collection"].find_one({"col_id": collection_id_})
                 if is_crud_
                 else self.root_schemas_f(f"{collection_}")
             )
@@ -1558,8 +1388,8 @@ class Crud:
 
             ts_ = Misc().get_timestamp_f()
             bin_ = f"{collection_id_}_bin_{ts_}"
-            Mongo().db[bin_].insert_many(Mongo().db[collection_].find(get_filtered_))
-            Mongo().db[collection_].delete_many(get_filtered_)
+            Mongo().db_[bin_].insert_many(Mongo().db_[collection_].find(get_filtered_))
+            Mongo().db_[collection_].delete_many(get_filtered_)
 
             log_ = Misc().log_f(
                 {
@@ -1611,105 +1441,13 @@ class Crud:
                 })
 
             distinct_ = ""
-            cursora_ = Mongo().db[f"{collection_}_data"].distinct(key_, get_filtered_)
+            cursora_ = Mongo().db_[f"{collection_}_data"].distinct(key_, get_filtered_)
             if cursora_ and len(cursora_) > 0:
                 distinct_ = "\n".join(map(str, cursora_))
 
             return {"result": True, "copied": distinct_}
 
         except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def saveasview_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            collection_ = obj["collection"]
-            user_ = obj["user"] if "user" in obj else None
-            email_ = user_["email"] if user_ and "email" in user_ else None
-            match_ = obj["match"] if "match" in obj and obj["match"] != [] else []
-
-            userindb_ = Mongo().db["_user"].find_one({"usr_id": email_})
-            if not userindb_:
-                raise APIError(f"no owner user found")
-
-            _tags = userindb_["_tags"] if userindb_ and "_tags" in userindb_ else []
-
-            aggregate_ = (
-                Mongo()
-                .db["_view"]
-                .aggregate(
-                    [
-                        {"$match": {"vie_collection_id": collection_}},
-                        {"$group": {"_id": None, "count": {"$sum": 1}}},
-                        {"$project": {"_id": 0}},
-                    ]
-                )
-            )
-
-            json_ = json.loads(JSONEncoder().encode(list(aggregate_)))
-
-            if json_ and "count" in json_[0]:
-                next_ = int(json_[0]["count"]) + 1
-            else:
-                next_ = 1
-
-            ts_ = Misc().get_timestamp_f()
-            id_ = f"vie-{collection_}-{ts_}"
-            vie_title_ = f"{collection_.title()} View {next_}"
-
-            doc_ = {
-                "vie_id": id_,
-                "vie_collection_id": collection_,
-                "vie_title": vie_title_,
-                "vie_priority": 1000,
-                "vie_dashboard": False,
-                "vie_filter": match_,
-                "vie_sched_timezone": TZ_,
-                "vie_scheduled": False,
-                "vie_attach_pivot": True,
-                "vie_attach_csv": True,
-                "vie_attach_excel": True,
-                "vie_pivot_totals": False,
-                "_tags": _tags,
-            }
-            doc_["_created_at"] = doc_["_modified_at"] = datetime.now()
-            doc_["_created_by"] = doc_["_modified_by"] = email_
-            doc_["_modified_count"] = 0
-
-            Mongo().db["_view"].insert_one(doc_)
-
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": "_view",
-                    "op": "insert",
-                    "user": email_,
-                    "document": doc_,
-                }
-            )
-            if not log_["result"]:
-                raise APIError(log_["msg"])
-
-            return {"result": True, "id": id_, "view": doc_}
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": "_query",
-                    "op": "insert",
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -1744,54 +1482,8 @@ class Crud:
         str_ = re.sub(cleanptrn_, "", str_)
         str_ = str_[:32]
         str_ = re.sub(" +", " ", str_)
-        str_ = re.sub(
-            ".", lambda char_: exceptions_.get(char_.group(), char_.group()), str_
-        )
-        str_ = str_.lower().strip().encode("ascii", "ignore").decode("ascii")
-        return str_
-
-    def save_file_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            form_ = obj["form"]
-            file_ = obj["file"]
-            email_ = form_["email"]
-
-            filename_ = file_.filename
-            if file_ and Misc().allowed_file(filename_):
-                file_.save(os.path.join(app.config["UPLOAD_FOLDER"], filename_))
-                secure_filename_ = secure_filename(filename_).lower()
-                os.rename(
-                    app.config["UPLOAD_FOLDER"] + filename_,
-                    app.config["UPLOAD_FOLDER"] + secure_filename_,
-                )
-                mime_ = magic.from_file(
-                    app.config["UPLOAD_FOLDER"] + secure_filename_, mime=True
-                )
-            else:
-                raise APIError(f"file type not supported {filename_}")
-
-            return {"result": True, "filename": secure_filename_, "mime": mime_}
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": "_query",
-                    "op": "insert",
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        str_ = re.sub(".", lambda char_: exceptions_.get(char_.group(), char_.group()), str_)
+        return str_.lower().strip().encode("ascii", "ignore").decode("ascii")
 
     def import_f(self, obj):
         """
@@ -1807,7 +1499,7 @@ class Crud:
 
             # GETTING COLLECTION PROPERTIES
             collection__ = f"{collection_}_data"
-            find_one_ = Mongo().db["_collection"].find_one({"col_id": collection_})
+            find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
             structure_ = find_one_["col_structure"]
@@ -1842,7 +1534,7 @@ class Crud:
                     session_.start_transaction()
                     insert_many_ = (
                         Mongo()
-                        .db[collection__]
+                        .db_[collection__]
                         .insert_many(content_, ordered=False, session=session_)
                     )
                     session_.commit_transaction()
@@ -1967,316 +1659,41 @@ class Crud:
             if session_:
                 session_.abort_transaction()
 
-    def view_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            email_ = input_["email"] if "email" in input_ else None
-            if not email_:
-                raise APIError("email not found in the object")
-
-            user_ = Mongo().db["_user"].find_one({"usr_id": email_})
-            if not user_ or user_ is None:
-                raise APIError("user not found for view")
-
-            user_tags_ = user_["_tags"]
-
-            vie_structure_ = self.root_schemas_f("_view")
-            if not vie_structure_:
-                raise APIError("view structure not found")
-
-            _id = None
-            vie_id_ = None
-
-            if "_id" in input_:
-                _id = input_["_id"]
-
-            if "vie_id" in input_:
-                vie_id_ = input_["vie_id"]
-
-            source_ = input_["source"]
-            if source_ not in ["internal", "external", "propsonly"]:
-                raise APIError("invalid source")
-
-            if _id not in [None, ""]:
-                view_ = Mongo().db["_view"].find_one({"_id": ObjectId(_id)})
-            else:
-                if vie_id_ is not None:
-                    view_ = Mongo().db["_view"].find_one({"vie_id": vie_id_})
-                else:
-                    raise APIError("view is not recognized")
-
-            if not view_:
-                raise APIError(f"view not found {vie_id_}")
-
-            if "vie_collection_id" not in view_:
-                raise APIError("collection not found")
-
-            vie_collection_id_ = view_["vie_collection_id"]
-
-            if "_tags" not in view_:
-                raise APIError("no tags found")
-
-            view_tags_ = view_["_tags"]
-            if not view_tags_ or view_tags_ == []:
-                raise APIError("no subscriber found")
-
-            matches_ = [key for key, val in enumerate(user_tags_) if val in view_tags_]
-
-            if len(matches_) == 0:
-                raise APIError("user is not a subscriber")
-
-            if not "vie_filter" in view_:
-                raise APIError("filter not found in view")
-            vie_filter_ = view_["vie_filter"]
-
-            vie_projection_ = (
-                view_["vie_projection"] if "vie_projection" in view_ else []
-            )
-
-            is_crud_ = True if vie_collection_id_[:1] != "_" else False
-
-            vie_collection_ = (
-                Mongo().db["_collection"].find_one({"col_id": vie_collection_id_})
-            )
-            collection_ = (
-                f"{vie_collection_id_}_data" if is_crud_ else vie_collection_id_
-            )
-
-            if is_crud_ and "col_structure" not in vie_collection_:
-                raise APIError("structure not found in collection")
-
-            col_structure_ = (
-                vie_collection_["col_structure"]
-                if is_crud_
-                else self.root_schemas_f(f"{vie_collection_id_}")
-            )
-
-            if not "properties" in col_structure_:
-                raise APIError("properties not found in structure")
-
-            properties_ = col_structure_["properties"]
-            properties_master_ = {}
-            for property_ in properties_:
-                properties_property_ = properties_[property_]
-                properties_master_[property_] = properties_property_
-                bson_type_ = (
-                    properties_property_["bsonType"]
-                    if "bsonType" in properties_property_
-                    else None
-                )
-                if bson_type_ == "array":
-                    if "items" in properties_property_:
-                        items_ = properties_property_["items"]
-                        if "properties" in items_:
-                            item_properties_ = items_["properties"]
-                            for item_property_ in item_properties_:
-                                properties_master_[item_property_] = item_properties_[
-                                    item_property_
-                                ]
-
-            pipe_ = []
-            unset_ = []
-
-            set_ = {"$set": {"_ID": {"$toObjectId": "$_id"}}}
-            pipe_.append(set_)
-
-            parents_ = []
-            if "parents" in col_structure_:
-                parents_ = col_structure_["parents"]
-
-            if "vie_order_by" in view_ and len(view_["vie_order_by"]) > 0:
-                sort_ = {}
-                vie_order_by_ = view_["vie_order_by"]
-                for ob_ in vie_order_by_:
-                    sort_[ob_] = 1
-            else:
-                sort_ = {f"{collection_}._modified_at_": -1}
-
-            unset_.append("_modified_by")
-            unset_.append("_modified_at")
-            unset_.append("_modified_count")
-            unset_.append("_resume_token")
-            unset_.append("_created_at")
-            unset_.append("_created_by")
-            unset_.append("_structure")
-            unset_.append("_tags")
-            unset_.append("_ID")
-
-            for properties_master__ in properties_master_:
-                if (
-                    properties_master__[:1] == "_"
-                    and properties_master__ not in Misc().get_except_underdashes()
-                ):
-                    unset_.append(properties_master__)
-
-            for parent_ in parents_:
-                if "match" in parent_ and "collection" in parent_:
-                    parent_collection_ = parent_["collection"]
-                    find_one_ = (
-                        Mongo()
-                        .db["_collection"]
-                        .find_one({"col_id": parent_collection_})
-                    )
-                    if (
-                        find_one_
-                        and "col_structure" in find_one_
-                        and "properties" in find_one_["col_structure"]
-                    ):
-                        for property_ in find_one_["col_structure"]["properties"]:
-                            properties_master_[property_] = find_one_["col_structure"][
-                                "properties"
-                            ][property_]
-
-                        match_ = parent_["match"]
-                        pipeline__ = []
-                        let_ = {}
-
-                        for match__ in match_:
-                            if match__["key"] and match__["value"]:
-                                key_ = match__["key"]
-                                value_ = match__["value"]
-                                let_[f"{key_}"] = f"${key_}"
-                                if key_:
-                                    pipeline__.append(
-                                        {"$eq": [f"$${key_}", f"${value_}"]}
-                                    ),
-
-                        pipeline_ = [{"$match": {"$expr": {"$and": pipeline__}}}]
-
-                        lookup_ = {
-                            "from": f"{parent_collection_}_data",
-                            "let": let_,
-                            "pipeline": pipeline_,
-                            "as": parent_collection_,
-                        }
-
-                        unwind_ = {
-                            "path": f"${parent_collection_}",
-                            "preserveNullAndEmptyArrays": True,
-                        }
-                        replace_with_ = {
-                            "$mergeObjects": ["$$ROOT", f"${parent_collection_}"]
-                        }
-                        pipe_.append({"$lookup": lookup_})
-                        pipe_.append({"$unwind": unwind_})
-                        pipe_.append({"$replaceWith": replace_with_})
-                        unset_.append(parent_collection_)
-
-            pipe_.append({"$sort": sort_})
-
-            if len(vie_filter_) > 0:
-                get_filtered_ = self.get_filtered_f(
-                    {
-                        "match": vie_filter_,
-                        "properties": properties_master_
-                        if properties_master_
-                        else None,
-                    }
-                )
-
-                pipe_.append({"$match": get_filtered_})
-
-            if unset_ and len(unset_) > 0:
-                unset_ = list(dict.fromkeys(unset_))
-                pipe_.append({"$unset": unset_})
-
-            pipe_.append({"$skip": 0})
-
-            if vie_projection_ and len(vie_projection_) > 0:
-                project_ = {}
-                for p_ in vie_projection_:
-                    project_[p_] = 1
-                pipe_.append({"$project": project_})
-
-                properties_tmp_ = {}
-                for p_ in properties_master_:
-                    property_ = properties_master_[p_]
-                    if p_ in vie_projection_:
-                        properties_tmp_[p_] = properties_master_[p_]
-
-                properties_master_ = properties_tmp_
-
-            aggregate_ = list(Mongo().db[collection_].aggregate(pipe_))
-
-            records_ = []
-            if source_ != "propsonly":
-                records_ = json.loads(JSONEncoder().encode(aggregate_))
-
-            count_ = len(records_) if records_ else 0
-
-            return {
-                "result": True,
-                "record": json.loads(JSONEncoder().encode(view_))
-                if source_ == "internal"
-                else None,
-                "data": records_
-                if source_ == "external"
-                else []
-                if source_ == "propsonly"
-                else records_[:50],
-                "count": count_,
-                "properties": properties_master_,
-                "structure": vie_structure_,
-                "col_id": vie_collection_id_,
-                "col_structure": col_structure_,
-            }
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": vie_collection_id_,
-                    "op": "view",
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def announce_f(self, input_):
         """
         docstring is in progress
         """
         try:
             if "user" not in input_:
-                raise APIError("user not found in the input")
+                raise APIError("user is missing")
 
             if "tfac" not in input_:
-                raise APIError("tfac not found in the input")
+                raise APIError("tfac is missing")
 
-            if "view" not in input_:
-                raise APIError("view not found in the input")
+            if "collection" not in input_:
+                raise APIError("collection is missing")
+
+            if "id" not in input_:
+                raise APIError("id is missing")
 
             if "email" not in input_["user"]:
-                raise APIError("email not found in user")
+                raise APIError("email is missing")
 
             if "scope" not in input_:
-                raise APIError("scope found in the input")
+                raise APIError("scope is missing")
 
             email_ = input_["user"]["email"]
             tfac_ = input_["tfac"]
-            view_ = input_["view"]
+            collection_ = input_["collection"]
+            id_ = input_["id"]
             scope_ = input_["scope"]
 
             if scope_ not in ["test", "live"]:
-                raise APIError("scope is invalid")
+                raise APIError("invalid scope")
 
-            # verify OTP
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
-
-            announce_view_f_ = Schedular().announce_view_f(view_, scope_, email_)
-            if not announce_view_f_["result"]:
-                raise APIError(announce_view_f_["msg"])
 
             return {"result": True}
 
@@ -2316,7 +1733,7 @@ class Crud:
                 "_modified_by": email_,
             }
 
-            Mongo().db["_backup"].insert_one(doc_)
+            Mongo().db_["_backup"].insert_one(doc_)
 
             return {"result": True}
 
@@ -2341,7 +1758,7 @@ class Crud:
 
             cursor_ = (
                 Mongo()
-                .db[data_collection_]
+                .db_[data_collection_]
                 .find(filter={}, projection=projection_)
                 .limit(1000)
             )
@@ -2503,658 +1920,7 @@ class Crud:
 
         return filtered_
 
-    def visual_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            id_ = obj["id"]
-            user_ = obj["user"]
-
-            doc_ = Mongo().db["_view"].find_one({"_id": ObjectId(id_)})
-            if not doc_:
-                raise APIError("no view found")
-
-            value_ = 0
-            perchange_ = 0
-            color_schema_def_ = [
-                "FireBrick",
-                "DarkSeaGreen",
-                "CornFlowerBlue",
-                "LightSkyBlue",
-            ]
-            vie_p_xaxis_show_ = (
-                True
-                if "vie_p_xaxis_show" in doc_
-                and doc_["vie_p_xaxis_show"] in ["true", True]
-                else False
-            )
-            vie_p_yaxis_show_ = (
-                True
-                if "vie_p_yaxis_show" in doc_
-                and doc_["vie_p_yaxis_show"] in ["true", True]
-                else False
-            )
-            vie_p_xaxis_label_show_ = (
-                True
-                if "vie_p_xaxis_label_show" in doc_
-                and doc_["vie_p_xaxis_label_show"] in ["true", True]
-                else False
-            )
-            vie_p_yaxis_label_show_ = (
-                True
-                if "vie_p_yaxis_label_show" in doc_
-                and doc_["vie_p_yaxis_label_show"] in ["true", True]
-                else False
-            )
-            vie_p_legend_show_ = (
-                True
-                if "vie_p_legend_show" in doc_
-                and doc_["vie_p_legend_show"] in ["true", True]
-                else False
-            )
-            vie_p_gradient_ = (
-                True
-                if "vie_p_gradient" in doc_ and doc_["vie_p_gradient"] in ["true", True]
-                else False
-            )
-            vie_p_datalabel_show_ = (
-                True
-                if "vie_p_datalabel_show" in doc_
-                and doc_["vie_p_datalabel_show"] in ["true", True]
-                else False
-            )
-            vie_p_grid_show_ = (
-                True
-                if "vie_p_grid_show" in doc_ and doc_["vie_p_grid_show"] is True
-                else False
-            )
-            vie_p_kpi_ = (
-                True
-                if "vie_p_kpi" in doc_ and doc_["vie_p_kpi"] in ["true", True]
-                else False
-            )
-            vie_kpi_target_value_ = (
-                doc_["vie_kpi_target_value"] if "vie_kpi_target_value" in doc_ else 0
-            )
-            vie_visual_style_ = (
-                doc_["vie_visual_style"]
-                if "vie_visual_style" in doc_
-                else "Vertical Bar"
-            )
-            vie_chart_xaxis_ = (
-                doc_["vie_pivot_index"][0]
-                if "vie_pivot_index" in doc_ and len(doc_["vie_pivot_index"]) > 0
-                else None
-            )
-            vie_chart_yaxis_ = (
-                doc_["vie_pivot_values"][0]["key"]
-                if "vie_pivot_values" in doc_
-                and len(doc_["vie_pivot_values"]) > 0
-                and "key" in doc_["vie_pivot_values"][0]
-                else None
-            )
-            vie_chart_function_ = (
-                doc_["vie_pivot_values"][0]["value"]
-                if "vie_pivot_values" in doc_
-                and len(doc_["vie_pivot_values"]) > 0
-                and "value" in doc_["vie_pivot_values"][0]
-                else "sum"
-            )
-            vie_chart_legend_ = (
-                doc_["vie_pivot_columns"][0]
-                if "vie_pivot_columns" in doc_ and len(doc_["vie_pivot_columns"]) > 0
-                else None
-            )
-            vie_p_color_schema_ = (
-                doc_["vie_p_color_schema"]
-                if "vie_p_color_schema" in doc_ and len(doc_["vie_p_color_schema"]) > 0
-                else []
-            )
-            vie_p_color_schema_ += color_schema_def_
-            view_id_ = doc_["vie_id"]
-
-            generate_view_data_f_ = Crud().view_f(
-                {
-                    "email": user_["usr_id"],
-                    "source": "external",
-                    "vie_id": view_id_,
-                    "_id": None,
-                }
-            )
-
-            if not generate_view_data_f_["result"]:
-                raise APIError(generate_view_data_f_["msg"])
-
-            view_data_ = (
-                generate_view_data_f_["data"]
-                if generate_view_data_f_ and "data" in generate_view_data_f_
-                else []
-            )
-            view_properties_ = (
-                generate_view_data_f_["properties"]
-                if generate_view_data_f_ and "properties" in generate_view_data_f_
-                else {}
-            )
-            vie_p_xaxis_label_ = (
-                view_properties_[vie_chart_xaxis_]["title"]
-                if vie_chart_xaxis_ in view_properties_
-                and "title" in view_properties_[vie_chart_xaxis_]
-                else vie_chart_xaxis_
-            )
-            vie_p_yaxis_label_ = (
-                view_properties_[vie_chart_yaxis_]["title"]
-                if vie_chart_yaxis_ in view_properties_
-                and "title" in view_properties_[vie_chart_yaxis_]
-                else vie_chart_yaxis_
-            )
-            vie_p_legend_title_ = (
-                view_properties_[vie_chart_legend_]["title"]
-                if vie_chart_legend_ in view_properties_
-                and "title" in view_properties_[vie_chart_legend_]
-                else vie_chart_legend_
-            )
-
-            df_ = pd.DataFrame(list(view_data_)).fillna(0)
-
-            dropped_ = []
-            dropped_.append(vie_chart_xaxis_)
-            dropped_.append(vie_chart_yaxis_)
-            dropped_.append(vie_chart_legend_)
-
-            groupby_ = []
-            sort_ = None
-
-            if vie_visual_style_ == "Line":
-                if vie_chart_legend_ in df_:
-                    groupby_.append(vie_chart_legend_)
-                if vie_chart_xaxis_ in df_:
-                    groupby_.append(vie_chart_xaxis_)
-                    sort_ = vie_chart_xaxis_
-            else:
-                if vie_chart_xaxis_ in df_:
-                    groupby_.append(vie_chart_xaxis_)
-                if vie_chart_legend_ in df_:
-                    groupby_.append(vie_chart_legend_)
-
-            df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
-
-            count_ = 0
-            if df_ is not None:
-                count_ = len(df_)
-                if count_ > 0 and vie_chart_yaxis_:
-                    if vie_chart_function_ == "sum":
-                        value_ = float(df_[vie_chart_yaxis_].sum())
-                    elif vie_chart_function_ == "count":
-                        value_ = int(len(df_[vie_chart_yaxis_]))
-                    elif vie_chart_function_ == "unique":
-                        value_ = int(df_[vie_chart_yaxis_].nunique())
-                    elif vie_chart_function_ in ["mean", "avg"]:
-                        value_ = float(df_[vie_chart_yaxis_].mean())
-                    elif vie_chart_function_ in ["stdev", "std"]:
-                        value_ = float(df_[vie_chart_yaxis_].std())
-                    elif vie_chart_function_ == "var":
-                        value_ = float(df_[vie_chart_yaxis_].var())
-                    else:
-                        raise APIError("invalid visual function")
-
-                if vie_p_kpi_ and value_ >= 0 and vie_kpi_target_value_ > 0:
-                    perchange_ = float(
-                        ((value_ - vie_kpi_target_value_) / vie_kpi_target_value_) * 100
-                    )
-
-                if sort_:
-                    df_ = df_.sort_values(by=sort_)
-
-                if len(groupby_) > 0:
-                    df_ = (
-                        df_.groupby(groupby_, as_index=False).sum()
-                        if vie_chart_function_ == "sum"
-                        else df_.groupby(groupby_, as_index=False).count()
-                    )
-
-            dfj_ = json.loads(df_.to_json(orient="records"))
-
-            series_ = []
-            series_sub_ = []
-            xaxis_ = None
-            legend_ = None
-
-            if vie_chart_xaxis_:
-                if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
-                    for idx_, item_ in enumerate(dfj_):
-                        xaxis_ = (
-                            item_[vie_chart_xaxis_]
-                            if vie_chart_xaxis_ in item_
-                            else None
-                        )
-                        yaxis_ = (
-                            item_[vie_chart_yaxis_]
-                            if vie_chart_yaxis_ in item_
-                            else None
-                        )
-                        if xaxis_ and yaxis_:
-                            series_.append({"name": xaxis_, "value": yaxis_})
-                elif vie_visual_style_ == "Line":
-                    for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[vie_chart_legend_] != legend_:
-                            series_.append({"name": legend_, "series": series_sub_})
-                            series_sub_ = []
-                        series_sub_.append(
-                            {
-                                "name": item_[vie_chart_xaxis_],
-                                "value": item_[vie_chart_yaxis_],
-                            }
-                        )
-                        legend_ = (
-                            item_[vie_chart_legend_]
-                            if vie_chart_legend_ in item_
-                            else None
-                        )
-                    if legend_:
-                        series_.append({"name": legend_, "series": series_sub_})
-                else:
-                    for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[vie_chart_xaxis_] != xaxis_:
-                            series_.append({"name": xaxis_, "series": series_sub_})
-                            series_sub_ = []
-                        if (
-                            vie_chart_legend_ in item_
-                            and item_[vie_chart_legend_] is not None
-                        ):
-                            series_sub_.append(
-                                {
-                                    "name": item_[vie_chart_legend_],
-                                    "value": item_[vie_chart_yaxis_],
-                                }
-                            )
-                        xaxis_ = (
-                            item_[vie_chart_xaxis_]
-                            if vie_chart_xaxis_ in item_
-                            else None
-                        )
-                    if xaxis_:
-                        series_.append({"name": xaxis_, "series": series_sub_})
-
-            return {
-                "result": True,
-                "data": series_,
-                "value": value_,
-                "count": count_,
-                "perchange": perchange_,
-                "properties": view_properties_,
-                "style": vie_visual_style_,
-                "xaxis": vie_chart_xaxis_,
-                "yaxis": vie_chart_yaxis_,
-                "function": vie_chart_function_,
-                "legend": vie_chart_legend_,
-                "kpi": vie_p_kpi_,
-                "kpi_target_value": vie_kpi_target_value_,
-                "xaxis_label": vie_p_xaxis_label_,
-                "yaxis_label": vie_p_yaxis_label_,
-                "xaxis_show": vie_p_xaxis_show_,
-                "xaxis_label_show": vie_p_xaxis_label_show_,
-                "yaxis_show": vie_p_yaxis_show_,
-                "yaxis_label_show": vie_p_yaxis_label_show_,
-                "legend_show": vie_p_legend_show_,
-                "legend_title": vie_p_legend_title_,
-                "gradient": vie_p_gradient_,
-                "datalabel_show": vie_p_datalabel_show_,
-                "grid_show": vie_p_grid_show_,
-                "color_schema": vie_p_color_schema_,
-            }
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def view_to_dataset_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            id_ = obj["id"]
-            user_ = obj["user"]
-
-            doc_ = (
-                Mongo()
-                .db["_view"]
-                .find_one(
-                    {
-                        "_id": ObjectId(id_),
-                        "_tags": {"$elemMatch": {"$in": user_["_tags"]}},
-                    }
-                )
-            )
-            if not doc_:
-                raise APIError("pivot view not found")
-
-            vie_id_ = doc_["vie_id"]
-            vie_collection_id_ = doc_["vie_collection_id"]
-            vie_excluded_columns_ = (
-                doc_["vie_excluded_columns"]
-                if "vie_excluded_columns" in doc_
-                and doc_["vie_excluded_columns"] != []
-                and len(doc_["vie_excluded_columns"]) > 0
-                else []
-            )
-
-            col_id_ = f"{vie_collection_id_}_data"
-            is_crud_ = True if vie_collection_id_[:1] != "_" else False
-
-            # starting pivot
-            collection_find_one_ = (
-                Mongo().db["_collection"].find_one({"col_id": vie_collection_id_})
-            )
-            if is_crud_ and not collection_find_one_:
-                raise APIError(f"collection not found to view: {col_id_}")
-
-            generate_view_data_f_ = Crud().view_f(
-                {
-                    "email": user_["usr_id"],
-                    "source": "external",
-                    "vie_id": vie_id_,
-                    "_id": None,
-                }
-            )
-            if not generate_view_data_f_["result"]:
-                raise APIError(generate_view_data_f_["msg"])
-
-            view_data_ = (
-                generate_view_data_f_["data"]
-                if generate_view_data_f_ and "data" in generate_view_data_f_
-                else []
-            )
-
-            if not view_data_ or len(view_data_) == 0:
-                return {
-                    "result": True,
-                    "pivot": None,
-                    "file_csv": None,
-                    "file_excel": None,
-                    "file_csv_raw": None,
-                    "file_excel_raw": None,
-                    "count": 0,
-                    "statistics": None,
-                    "df": None,
-                }
-
-            df_ = pd.DataFrame(list(view_data_)).fillna("")
-
-            dropped_ = [
-                "_id",
-                "_ID",
-                "_created_at",
-                "_created_by",
-                "_modified_at",
-                "_modified_by",
-                "_modified_count",
-                "_structure",
-            ]
-
-            df_.insert(0, "number_of_rows", "data")
-
-            view_properties_ = (
-                generate_view_data_f_["properties"]
-                if generate_view_data_f_ and "properties" in generate_view_data_f_
-                else {}
-            )
-
-            for prop_ in view_properties_:
-                property_ = view_properties_[prop_]
-                if "bsonType" in property_:
-                    if prop_ in df_:
-                        if property_["bsonType"] == "array":
-                            df_[prop_] = df_[prop_].apply(",".join)
-                        if property_["bsonType"] in ["number", "decimal"]:
-                            df_[prop_] = pd.to_numeric(df_[prop_], errors="coerce")
-                    if property_["bsonType"] in ["object", "array"]:
-                        dropped_.append(prop_)
-
-            for dropped__ in dropped_:
-                if dropped__ not in df_:
-                    dropped_.remove(dropped__)
-
-            pvs_ = []
-            aggfunc_ = {}
-
-            vie_pivot_index_ = (
-                doc_["vie_pivot_index"]
-                if "vie_pivot_index" in doc_ and len(doc_["vie_pivot_index"]) > 0
-                else ["number_of_rows"]
-            )
-            vie_pivot_columns_ = (
-                doc_["vie_pivot_columns"]
-                if "vie_pivot_columns" in doc_ and len(doc_["vie_pivot_columns"]) > 0
-                else []
-            )
-            vie_pivot_totals_ = (
-                doc_["vie_pivot_totals"] if "vie_pivot_totals" in doc_ else False
-            )
-            vie_pivot_values_ = (
-                doc_["vie_pivot_values"]
-                if "vie_pivot_values" in doc_
-                else [{"key": "number_of_rows", "value": "count"}]
-            )
-
-            for idx_, f_ in enumerate(vie_pivot_values_):
-                if "key" in f_ and "value" in f_:
-                    key_ = f_["key"]
-                    value_ = f_["value"]
-
-                    # to sort pivot columns #2
-                    r_ = " " * idx_
-                    nc_ = f"{r_}{key_} [{value_}]"
-
-                    df_[nc_] = df_[key_]
-                    pvs_.append(nc_)
-
-                    if value_ in [
-                        "sum",
-                        "mean",
-                        "average",
-                        "stdev",
-                        "var",
-                        "max",
-                        "min",
-                    ]:
-                        df_[nc_] = pd.to_numeric(df_[nc_], errors="coerce")
-                    if value_ == "count":
-                        aggfunc_[nc_] = "count"
-                    elif value_ == "size":
-                        aggfunc_[nc_] = np.size
-                    elif value_ == "sum":
-                        aggfunc_[nc_] = np.sum
-                    elif value_ == "mean":
-                        aggfunc_[nc_] = np.mean
-                    elif value_ == "average":
-                        aggfunc_[nc_] = np.average
-                    elif value_ == "stdev":
-                        aggfunc_[nc_] = np.std
-                    elif value_ == "var":
-                        aggfunc_[nc_] = np.var
-                    elif value_ == "unique":
-                        aggfunc_[nc_] = lambda x: len(x.unique())
-                    elif value_ == "max":
-                        aggfunc_[nc_] = np.max
-                    elif value_ == "min":
-                        aggfunc_[nc_] = np.min
-                    else:
-                        aggfunc_[nc_] = "count"
-
-            if dropped_ and len(dropped_) > 0:
-                df_ = df_.drop([x for x in dropped_ if x in df_.columns], axis=1)
-
-            pvs_ = list(dict.fromkeys(pvs_))
-
-            for index_ in vie_pivot_index_:
-                if index_ not in df_.columns:
-                    vie_pivot_index_.remove(index_)
-
-            for index_ in vie_pivot_columns_:
-                if index_ not in df_.columns:
-                    vie_pivot_columns_.remove(index_)
-
-            for index_ in vie_pivot_values_:
-                if index_["key"] not in df_.columns:
-                    vie_pivot_values_.remove(index_)
-
-            df_raw_ = df_.groupby(
-                list(
-                    df_.select_dtypes(
-                        exclude=["float", "int", "float64", "int64"]
-                    ).columns
-                ),
-                as_index=False,
-            ).sum()
-
-            if vie_excluded_columns_ and len(vie_excluded_columns_) > 0:
-                df_.drop(vie_excluded_columns_, axis=1, inplace=True)
-
-            df_ = df_.groupby(
-                list(
-                    df_.select_dtypes(
-                        exclude=["float", "int", "float64", "int64"]
-                    ).columns
-                ),
-                as_index=False,
-            ).sum()
-
-            pd.set_option("display.float_format", lambda x: "%.2f" % x)
-
-            pivot_table_ = pd.pivot_table(
-                df_,
-                values=pvs_,
-                index=vie_pivot_index_,
-                columns=vie_pivot_columns_,
-                aggfunc=aggfunc_,
-                margins=vie_pivot_totals_,
-                margins_name="Total",
-                fill_value=0,
-            )
-
-            if "number_of_rows" in df_.columns:
-                df_.drop("number_of_rows", axis=1, inplace=True)
-                df_raw_.drop("number_of_rows", axis=1, inplace=True)
-
-            for c_ in df_.columns:
-                if c_.find("[") != -1:
-                    df_.drop(c_, axis=1, inplace=True)
-                    df_raw_.drop(c_, axis=1, inplace=True)
-
-            file_csv_ = f"{doc_['vie_id']}.csv"
-            file_excel_ = f"{doc_['vie_id']}.xlsx"
-            file_csv_raw_ = f"{doc_['vie_id']}-detail.csv"
-            file_excel_raw_ = f"{doc_['vie_id']}-detail.xlsx"
-
-            df_.to_csv(
-                f"/cron/{file_csv_}",
-                sep=";",
-                encoding="utf-8",
-                header=True,
-                decimal=".",
-                index=False,
-            )
-
-            df_.to_excel(
-                f"/cron/{file_excel_}",
-                sheet_name=col_id_,
-                engine="xlsxwriter",
-                header=True,
-                index=False,
-            )
-
-            df_raw_.to_csv(
-                f"/cron/{file_csv_raw_}",
-                sep=";",
-                encoding="utf-8",
-                header=True,
-                decimal=".",
-                index=False,
-            )
-
-            df_raw_.to_excel(
-                f"/cron/{file_excel_raw_}",
-                sheet_name=col_id_,
-                engine="xlsxwriter",
-                header=True,
-                index=False,
-            )
-
-            dfj_ = df_raw_.head(10).to_json(orient="records")
-            describe_ = df_.describe(include="all") if df_ is not None else None
-            statistics_ = (
-                json.loads(describe_.to_json()) if describe_ is not None else None
-            )
-
-            return {
-                "result": True,
-                "pivot": pivot_table_,
-                "file_csv": file_csv_,
-                "file_excel": file_excel_,
-                "file_csv_raw": file_csv_raw_,
-                "file_excel_raw": file_excel_raw_,
-                "count": len(df_),
-                "statistics": statistics_,
-                "df": dfj_,
-            }
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def views_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = obj["userindb"]
-            records_ = []
-
-            vie_structure_ = self.root_schemas_f("_view")
-            if not vie_structure_:
-                raise APIError("view structure not found")
-
-            views_ = (
-                Mongo()
-                .db["_view"]
-                .find(
-                    {"_tags": {"$elemMatch": {"$in": user_["_tags"]}}},
-                    sort=[("vie_priority", 1)],
-                )
-            )
-            for view_ in views_:
-                vie_collection_id_ = view_["vie_collection_id"]
-                is_crud_ = True if vie_collection_id_[:1] != "_" else False
-                collection_ = (
-                    Mongo().db["_collection"].find_one({"col_id": vie_collection_id_})
-                    if is_crud_
-                    else self.root_schemas_f(f"{vie_collection_id_}")
-                )
-                if not collection_:
-                    continue
-                records_.append(view_)
-
-            return {
-                "result": True,
-                "data": json.loads(JSONEncoder().encode(list(records_))),
-                "structure": vie_structure_,
-            }
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def get_view_data_f(self, user_, view_id_, source_):
+    def get_view_data_f(self, user_, view_id_, scope_):
         """
         docstring is in progress
         """
@@ -3164,9 +1930,12 @@ class Crud:
             filter_[f"col_structure.views.{view_id_}._tags"] = {
                 "$elemMatch": {"$in": user_["_tags"]}
             }
-            collection_ = Mongo().db["_collection"].find_one(filter_)
+            collection_ = Mongo().db_["_collection"].find_one(filter_)
             if not collection_:
-                raise APIError(f"collection not found {view_id_}")
+                return {
+                    "result": True,
+                    "skip": True
+                }
             collection_id_ = f"{collection_['col_id']}_data"
             view_ = collection_["col_structure"]["views"][view_id_]
             col_structure_ = collection_["col_structure"]
@@ -3221,7 +1990,7 @@ class Crud:
                     parent_collection_ = parent_["collection"]
                     find_one_ = (
                         Mongo()
-                        .db["_collection"]
+                        .db_["_collection"]
                         .find_one({"col_id": parent_collection_})
                     )
                     if (
@@ -3279,7 +2048,7 @@ class Crud:
                 unset_ = list(dict.fromkeys(unset_))
                 pipe_.append({"$unset": unset_})
 
-            records_ = json.loads(JSONEncoder().encode(list(Mongo().db[collection_id_].aggregate(pipe_))))
+            records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
             count_ = len(records_) if records_ else 0
 
             df_ = pd.DataFrame(records_).fillna(0)
@@ -3288,50 +2057,57 @@ class Crud:
                 view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
             )
 
-            vie_chart_xaxis_ = (
+            data_index_0_ = (
                 view_["data_index"][0]
                 if "data_index" in view_ and len(view_["data_index"]) > 0
                 else None
             )
-            vie_chart_yaxis_ = (
+            data_values_0_k_ = (
                 view_["data_values"][0]["key"]
                 if "data_values" in view_
                 and len(view_["data_values"]) > 0
                 and "key" in view_["data_values"][0]
                 else None
             )
-            vie_chart_function_ = (
+            data_values_0_v_ = (
                 view_["data_values"][0]["value"]
                 if "data_values" in view_
                 and len(view_["data_values"]) > 0
                 and "value" in view_["data_values"][0]
                 else "sum"
             )
-            vie_chart_legend_ = (
+            data_columns_0_ = (
                 view_["data_columns"][0]
                 if "data_columns" in view_ and len(view_["data_columns"]) > 0
                 else None
             )
 
+            if data_values_0_k_ not in df_.columns:
+                raise APIError(f"key for data value is missing: {data_values_0_k_}")
+
+            pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ else False
+            data_values_ = view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
+
             dropped_ = []
-            dropped_.append(vie_chart_xaxis_)
-            dropped_.append(vie_chart_yaxis_)
-            dropped_.append(vie_chart_legend_)
+            dropped_.append(data_index_0_)
+            dropped_.append(data_values_0_k_)
+            dropped_.append(data_columns_0_)
 
             groupby_ = []
 
             if vie_visual_style_ == "Line":
-                if vie_chart_legend_ in df_:
-                    groupby_.append(vie_chart_legend_)
-                if vie_chart_xaxis_ in df_:
-                    groupby_.append(vie_chart_xaxis_)
+                if data_columns_0_ in df_:
+                    groupby_.append(data_columns_0_)
+                if data_index_0_ in df_:
+                    groupby_.append(data_index_0_)
             else:
-                if vie_chart_xaxis_ in df_:
-                    groupby_.append(vie_chart_xaxis_)
-                if vie_chart_legend_ in df_:
-                    groupby_.append(vie_chart_legend_)
+                if data_index_0_ in df_:
+                    groupby_.append(data_index_0_)
+                if data_columns_0_ in df_:
+                    groupby_.append(data_columns_0_)
 
             df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
+            df_raw_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
 
             count_ = None
             sum_ = None
@@ -3342,28 +2118,28 @@ class Crud:
 
             if df_ is not None:
                 count_ = len(df_)
-                if count_ > 0 and vie_chart_yaxis_ and vie_chart_yaxis_ in df_:
-                    count_ = int(len(df_[vie_chart_yaxis_]))
+                if count_ > 0 and data_values_0_k_ and data_values_0_k_ in df_:
+                    count_ = int(len(df_[data_values_0_k_]))
                     sum_ = float(
-                        pd.to_numeric(df_[vie_chart_yaxis_], errors="coerce").sum()
+                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").sum()
                     )
                     unique_ = float(
-                        pd.to_numeric(df_[vie_chart_yaxis_], errors="coerce").nunique()
+                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").nunique()
                     )
                     mean_ = float(
-                        pd.to_numeric(df_[vie_chart_yaxis_], errors="coerce").mean()
+                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").mean()
                     )
                     stdev_ = float(
-                        pd.to_numeric(df_[vie_chart_yaxis_], errors="coerce").std()
+                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").std()
                     )
                     var_ = float(
-                        pd.to_numeric(df_[vie_chart_yaxis_], errors="coerce").var()
+                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").var()
                     )
 
                 if len(groupby_) > 0:
                     df_ = (
                         df_.groupby(groupby_, as_index=False).sum()
-                        if vie_chart_function_ == "sum"
+                        if data_values_0_v_ == "sum"
                         else df_.groupby(groupby_, as_index=False).count()
                     )
 
@@ -3374,78 +2150,159 @@ class Crud:
             xaxis_ = None
             legend_ = None
 
-            if vie_chart_xaxis_:
+            if data_index_0_:
                 if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
                     for idx_, item_ in enumerate(dfj_):
                         xaxis_ = (
-                            item_[vie_chart_xaxis_]
-                            if vie_chart_xaxis_ in item_
+                            item_[data_index_0_]
+                            if data_index_0_ in item_
                             else None
                         )
                         yaxis_ = (
-                            item_[vie_chart_yaxis_]
-                            if vie_chart_yaxis_ in item_
+                            item_[data_values_0_k_]
+                            if data_values_0_k_ in item_
                             else None
                         )
                         if xaxis_ and yaxis_:
                             series_.append({"name": xaxis_, "value": yaxis_})
                 elif vie_visual_style_ == "Line":
                     for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[vie_chart_legend_] != legend_:
+                        if idx_ > 0 and item_[data_columns_0_] != legend_:
                             series_.append({"name": legend_, "series": series_sub_})
                             series_sub_ = []
                         series_sub_.append(
                             {
-                                "name": item_[vie_chart_xaxis_],
-                                "value": item_[vie_chart_yaxis_],
+                                "name": item_[data_index_0_],
+                                "value": item_[data_values_0_k_],
                             }
                         )
                         legend_ = (
-                            item_[vie_chart_legend_]
-                            if vie_chart_legend_ in item_
+                            item_[data_columns_0_]
+                            if data_columns_0_ in item_
                             else None
                         )
                     if legend_:
                         series_.append({"name": legend_, "series": series_sub_})
                 else:
                     for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[vie_chart_xaxis_] != xaxis_:
+                        if idx_ > 0 and item_[data_index_0_] != xaxis_:
                             series_.append({"name": xaxis_, "series": series_sub_})
                             series_sub_ = []
                         if (
-                            vie_chart_legend_ in item_
-                            and item_[vie_chart_legend_] is not None
+                            data_columns_0_ in item_
+                            and item_[data_columns_0_] is not None
                         ):
                             series_sub_.append(
                                 {
-                                    "name": item_[vie_chart_legend_],
-                                    "value": item_[vie_chart_yaxis_],
+                                    "name": item_[data_columns_0_],
+                                    "value": item_[data_values_0_k_],
                                 }
                             )
                         xaxis_ = (
-                            item_[vie_chart_xaxis_]
-                            if vie_chart_xaxis_ in item_
+                            item_[data_index_0_]
+                            if data_index_0_ in item_
                             else None
                         )
                     if xaxis_:
                         series_.append({"name": xaxis_, "series": series_sub_})
 
-            pivot_table_ = None
+            pvs_ = []
+            aggfunc_ = {}
+
+            for idx_, kv_ in enumerate(data_values_):
+                if "key" in kv_ and "value" in kv_:
+                    key_ = kv_["key"]
+                    value_ = kv_["value"]
+                    if key_ in df_.columns and value_ in ["count", "size", "sum", "mean", "average", "stdev", "var", "max", "min", "unique"]:
+                        prfx_ = " " * idx_
+                        nc_ = f"{prfx_}{key_} [{value_}]"
+                        df_[nc_] = df_[key_]
+                        pvs_.append(nc_)
+                        df_[nc_] = pd.to_numeric(df_[nc_], errors="coerce")
+                        if value_ == "count":
+                            aggfunc_[nc_] = "count"
+                        elif value_ == "size":
+                            aggfunc_[nc_] = np.size
+                        elif value_ == "sum":
+                            aggfunc_[nc_] = np.sum
+                        elif value_ == "mean":
+                            aggfunc_[nc_] = np.mean
+                        elif value_ == "average":
+                            aggfunc_[nc_] = np.average
+                        elif value_ == "stdev":
+                            aggfunc_[nc_] = np.std
+                        elif value_ == "var":
+                            aggfunc_[nc_] = np.var
+                        elif value_ == "unique":
+                            aggfunc_[nc_] = lambda x: len(x.unique())
+                        elif value_ == "max":
+                            aggfunc_[nc_] = np.max
+                        elif value_ == "min":
+                            aggfunc_[nc_] = np.min
+                        else:
+                            aggfunc_[nc_] = "count"
+
+            pivot_html_ = ""
+            pivotify_html_ = ""
+            if pvs_ and data_index_0_ and data_columns_0_ and aggfunc_ and pivot_totals_:
+                pivot_table_ = pd.pivot_table(
+                    df_,
+                    values=pvs_,
+                    index=data_index_0_,
+                    columns=data_columns_0_,
+                    aggfunc=aggfunc_,
+                    margins=pivot_totals_,
+                    margins_name="Total",
+                    fill_value=0
+                )
+
+                background_ = "#eee"
+                padding_ = 8
+                padding_r_ = 2 * padding_
+                font_size_table_ = 13
+                styles_ = [
+                    dict(
+                        selector="th",
+                        props=[
+                            ("background", f"{background_}"),
+                            ("padding", f"{padding_}px {padding_r_}px"),
+                            ("font-size", f"{font_size_table_}px"),
+                        ],
+                    ),
+                    dict(
+                        selector="td",
+                        props=[
+                            ("background", f"{background_}"),
+                            ("padding", f"{padding_}px {padding_r_}px"),
+                            ("text-align", "right"),
+                            ("font-size", f"{font_size_table_}px"),
+                        ],
+                    ),
+                    dict(selector="table", props=[("font-size", f"{font_size_table_}px")]),
+                    dict(selector="caption", props=[("caption-side", "top")]),
+                ]
+
+                pivot_html_ = pivot_table_.to_html().replace('border="1"', "")
+                pivot_table_ = pivot_table_.style.set_table_styles(styles_)
+                pivotify_html_ = pivot_table_.to_html().replace('border="1"', "")
 
             return {
                 "result": True,
                 "series": series_,
-                "data": records_ if source_ == "external" else [] if source_ == "propsonly" else records_[:50],
+                "data": records_ if scope_ == "external" else [] if scope_ == "propsonly" else records_[:50],
                 "properties": properties_master_,
-                "pivot": pivot_table_,
+                "pivot": pivot_html_,
+                "pivotify": pivotify_html_,
+                "df": df_ if scope_ == "announcement" else None,
+                "dfraw": df_raw_ if scope_ == "announcement" else None,
                 "stats": {
                     "count": count_,
                     "sum": sum_,
                     "unique": unique_,
                     "mean": mean_,
                     "stdev": stdev_,
-                    "var": var_,
-                },
+                    "var": var_
+                }
             }
 
         except pymongo.errors.PyMongoError as exc:
@@ -3467,7 +2324,7 @@ class Crud:
             if source_ not in ["internal", "external", "propsonly"]:
                 raise APIError("invalid source")
 
-            collections_ = list(Mongo().db["_collection"].aggregate([
+            collections_ = list(Mongo().db_["_collection"].aggregate([
                 {
                     "$project": {
                         "col_id": 1,
@@ -3498,25 +2355,22 @@ class Crud:
                         get_view_data_f_ = self.get_view_data_f(
                             user_, id__, source_
                         )
+                        if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
+                            continue
                         if not get_view_data_f_["result"]:
                             raise APIError(
                                 f"get view data error {get_view_data_f_['msg']}"
                             )
-                        stats_ = (
-                            get_view_data_f_["stats"]
-                            if "stats" in get_view_data_f_
-                            else None
-                        )
                         returned_views_.append({
                             "id": id__,
                             "collection": collection_["col_id"],
                             "properties": get_view_data_f_["properties"],
-                            "view": view__,
+                            "self": view__,
                             "data": get_view_data_f_["data"],
                             "series": get_view_data_f_["series"],
-                            "stats": stats_,
-                        }
-                        )
+                            "pivot": get_view_data_f_["pivot"],
+                            "stats": get_view_data_f_["stats"]
+                        })
 
             return {"result": True, "views": returned_views_}
 
@@ -3541,7 +2395,7 @@ class Crud:
             if Misc().permitted_user_f(user_):
                 data_ = list(
                     Mongo()
-                    .db["_collection"]
+                    .db_["_collection"]
                     .find(filter={}, sort=[("_updated_at", -1)])
                 )
             else:
@@ -3560,17 +2414,9 @@ class Crud:
                             {"per_delete": True},
                         ],
                     }
-                    permissions_ = (
-                        Mongo()
-                        .db["_permission"]
-                        .find(filter=filter_, sort=[("per_collection_id", 1)])
-                    )
+                    permissions_ = Mongo().db_["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
                     for permission_ in permissions_:
-                        collection_ = (
-                            Mongo()
-                            .db["_collection"]
-                            .find_one({"col_id": permission_["per_collection_id"]})
-                        )
+                        collection_ = Mongo().db_["_collection"].find_one({"col_id": permission_["per_collection_id"]})
                         data_.append(collection_)
 
             return {
@@ -3607,7 +2453,7 @@ class Crud:
                 for usr_tag_ in usr_tags_:
                     permissions_ = (
                         Mongo()
-                        .db["_permission"]
+                        .db_["_permission"]
                         .find_one(
                             {
                                 "per_collection_id": col_id_,
@@ -3626,7 +2472,7 @@ class Crud:
                         break
 
             if permitted_:
-                data_ = Mongo().db["_collection"].find_one({"col_id": col_id_})
+                data_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
             else:
                 raise APIError(f"no permission for {col_id_}")
 
@@ -3653,7 +2499,6 @@ class Crud:
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]
             skip_ = limit_ * (page - 1)
-            view_ = input_["view"]
             userindb_ = input_["userindb"]
             match_ = (
                 input_["match"]
@@ -3670,7 +2515,7 @@ class Crud:
                 else {"locale": "tr"}
             )
 
-            cursor_ = Mongo().db["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
+            cursor_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
 
@@ -3680,20 +2525,6 @@ class Crud:
                 if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True
                 else False
             )
-
-            if view_ is not None and collection_id_ == view_["vie_collection_id"]:
-                cursor_ = (
-                    Mongo()
-                    .db["_view"]
-                    .find_one(
-                        {
-                            "vie_id": view_["vie_id"],
-                            "_tags": {"$elemMatch": {"$in": userindb_["_tags"]}},
-                        }
-                    )
-                )
-                if cursor_:
-                    match_ += cursor_["vie_filter"]
 
             get_filtered_ = self.get_filtered_f(
                 {
@@ -3714,7 +2545,7 @@ class Crud:
 
             cursor_ = (
                 Mongo()
-                .db[collection_]
+                .db_[collection_]
                 .find(
                     filter=get_filtered_,
                     projection=projection_,
@@ -3725,7 +2556,7 @@ class Crud:
                 .limit(limit_)
             )
             docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
-            count_ = Mongo().db[collection_].count_documents(get_filtered_)
+            count_ = Mongo().db_[collection_].count_documents(get_filtered_)
 
             return {
                 "result": True,
@@ -3772,7 +2603,7 @@ class Crud:
             collection_ = obj["collection"]
 
             if (
-                collection_ in Mongo().db.list_collection_names()
+                collection_ in Mongo().db_.list_collection_names()
                 and "properties" in structure_
             ):
                 properties_ = structure_["properties"]
@@ -3802,9 +2633,9 @@ class Crud:
                 if required_:
                     validator_["$jsonSchema"].update({"required": required_})
 
-                Mongo().db.command({"collMod": collection_, "validator": validator_})
+                Mongo().db_.command({"collMod": collection_, "validator": validator_})
 
-                Mongo().db[collection_].drop_indexes()
+                Mongo().db_[collection_].drop_indexes()
                 if "index" in structure_ and len(structure_["index"]) > 0:
                     break_ = False
                     err_ = None
@@ -3821,7 +2652,7 @@ class Crud:
                         if break_:
                             raise APIError(err_)
                         ix_name_ = f"ix_{collection_}{ix_name_}"
-                        Mongo().db[collection_].create_index(
+                        Mongo().db_[collection_].create_index(
                             ixs, unique=False, name=ix_name_
                         )
 
@@ -3841,7 +2672,7 @@ class Crud:
                         if break_:
                             raise APIError(err_)
                         uq_name_ = f"uq_{collection_}{uq_name_}"
-                        Mongo().db[collection_].create_index(
+                        Mongo().db_[collection_].create_index(
                             uqs, unique=True, name=uq_name_
                         )
 
@@ -3892,7 +2723,7 @@ class Crud:
                 raise APIError("not authorized")
 
             # read collection existing structure
-            doc_ = Mongo().db["_collection"].find_one({"col_id": cid_})
+            doc_ = Mongo().db_["_collection"].find_one({"col_id": cid_})
             if not doc_:
                 raise APIError("collection not found")
 
@@ -3908,7 +2739,7 @@ class Crud:
 
             cursor_ = (
                 Mongo()
-                .db["_field"]
+                .db_["_field"]
                 .find(filter={"fie_collection_id": cid_}, sort=[("fie_priority", 1)])
             )
 
@@ -4076,7 +2907,7 @@ class Crud:
             # set actions
             cursor_ = (
                 Mongo()
-                .db["_action"]
+                .db_["_action"]
                 .find(
                     filter={"act_collection_id": cid_, "act_enabled": True},
                     sort=[("act_title", 1)],
@@ -4105,7 +2936,7 @@ class Crud:
             structure_["parents"] = parents_
             structure_["actions"] = actions_
 
-            Mongo().db["_collection"].update_one(
+            Mongo().db_["_collection"].update_one(
                 {"col_id": cid_},
                 {
                     "$set": {
@@ -4164,7 +2995,7 @@ class Crud:
             if not is_crud_:
                 raise APIError("collection is not allowed to update")
 
-            doc_ = Mongo().db["_collection"].find_one({"col_id": cid_})
+            doc_ = Mongo().db_["_collection"].find_one({"col_id": cid_})
             if not doc_:
                 raise APIError("no collection found")
 
@@ -4255,7 +3086,7 @@ class Crud:
                 user_["email"] if user_ and "email" in user_ else None
             )
 
-            Mongo().db["_collection"].update_one(
+            Mongo().db_["_collection"].update_one(
                 {"col_id": cid_}, {"$set": doc_}, upsert=False
             )
 
@@ -4273,16 +3104,16 @@ class Crud:
 
             datac_ = f"{cid_}_data"
             datac_not_found_ = False
-            if datac_ not in Mongo().db.list_collection_names():
+            if datac_ not in Mongo().db_.list_collection_names():
                 datac_not_found_ = True
-                Mongo().db[datac_].insert_one({})
+                Mongo().db_[datac_].insert_one({})
             schemavalidate_ = self.crudschema_validate_f(
                 {"collection": datac_, "structure": doc_["col_structure"]}
             )
             if not schemavalidate_["result"]:
                 raise APIError(schemavalidate_["msg"])
             if datac_not_found_:
-                Mongo().db[datac_].delete_one({})
+                Mongo().db_[datac_].delete_one({})
 
             return {"result": True}
 
@@ -4330,7 +3161,7 @@ class Crud:
                 doc_["_reconfig_set_at"] = datetime.now()
                 doc_["_reconfig_set_by"] = email_
 
-            Mongo().db["_collection"].update_one(
+            Mongo().db_["_collection"].update_one(
                 {"col_id": collection_id_},
                 {"$set": doc_, "$inc": {"_modified_count": 1}},
             )
@@ -4371,7 +3202,7 @@ class Crud:
             )
             structure_ = obj["structure"]
 
-            Mongo().db["_collection"].update_one(
+            Mongo().db_["_collection"].update_one(
                 {"col_id": collection_id_},
                 {"$set": {"col_structure": structure_}, "$inc": {"_modified_count": 1}},
             )
@@ -4410,7 +3241,7 @@ class Crud:
         """
         try:
             collection_ = obj["collection"]
-            doc_ = Mongo().db["_collection"].find_one({"col_id": collection_})
+            doc_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not doc_:
                 raise APIError("no collection found")
             user_ = obj["user"] if "user" in obj else None
@@ -4550,7 +3381,7 @@ class Crud:
                         if user_ and "email" in user_
                         else None,
                     }
-                    Mongo().db["_field"].update_one(
+                    Mongo().db_["_field"].update_one(
                         {"fie_collection_id": collection_, "fie_id": prop_},
                         {"$set": doc_, "$inc": {"_modified_count": 1}},
                         upsert=True,
@@ -4594,7 +3425,7 @@ class Crud:
                             if user_ and "email" in user_
                             else None,
                         }
-                        Mongo().db["_action"].update_one(
+                        Mongo().db_["_action"].update_one(
                             {
                                 "act_collection_id": act_collection_id_,
                                 "act_id": act_id_,
@@ -4681,7 +3512,7 @@ class Crud:
             if collection_id_ == "_field":
                 field_col_ = (
                     Mongo()
-                    .db["_collection"]
+                    .db_["_collection"]
                     .find_one({"col_id": doc_["fie_collection_id"]})
                 )
                 if not field_col_:
@@ -4692,7 +3523,7 @@ class Crud:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            Mongo().db[collection_].update_one(
+            Mongo().db_[collection_].update_one(
                 match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False
             )
 
@@ -4749,7 +3580,7 @@ class Crud:
             doc_["_removed_at"] = datetime.now()
             doc_["_removed_by"] = user_["email"] if user_ and "email" in user_ else None
 
-            Mongo().db[collection_].delete_one(match_)
+            Mongo().db_[collection_].delete_one(match_)
 
             log_ = Misc().log_f(
                 {
@@ -4765,12 +3596,12 @@ class Crud:
 
             if collection_ == "_collection":
                 c_ = doc_["col_id"]
-                Mongo().db[f"{c_}_data"].aggregate(
+                Mongo().db_[f"{c_}_data"].aggregate(
                     [{"$match": {}}, {"$out": f"{c_}_data_removed"}]
                 )
-                Mongo().db[f"{c_}_data"].drop()
-                Mongo().db["_field"].delete_many({"fie_collection_id": c_})
-                Mongo().db["_automation"].update_many(
+                Mongo().db_[f"{c_}_data"].drop()
+                Mongo().db_["_field"].delete_many({"fie_collection_id": c_})
+                Mongo().db_["_automation"].update_many(
                     {
                         "$or": [
                             {"aut_source_collection_id": c_},
@@ -4836,7 +3667,7 @@ class Crud:
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             structure__ = (
-                Mongo().db["_collection"].find_one({"col_id": collection_id_})
+                Mongo().db_["_collection"].find_one({"col_id": collection_id_})
                 if is_crud_
                 else self.root_schemas_f(f"{collection_id_}")
             )
@@ -4856,7 +3687,7 @@ class Crud:
                     raise APIError("unique in structure not found")
 
             # creates a cursor from the object ids proceed to be cloned or deleted
-            cursor = Mongo().db[collection_].find({"_id": {"$in": ids_}})
+            cursor = Mongo().db_[collection_].find({"_id": {"$in": ids_}})
             for index, doc in enumerate(cursor, start=1):
                 if op_ == "clone":
                     doc["_created_at"] = doc["_modified_at"] = datetime.now()
@@ -4881,16 +3712,16 @@ class Crud:
                                         if "_" in doc[uq[0]]
                                         else f"{doc[uq[0]]}-{index}"
                                     )
-                    Mongo().db[collection_].insert_one(doc)
+                    Mongo().db_[collection_].insert_one(doc)
 
                 elif op_ == "delete":
-                    Mongo().db[collection_].delete_one({"_id": doc["_id"]})
+                    Mongo().db_[collection_].delete_one({"_id": doc["_id"]})
                     doc["_deleted_at"] = datetime.now()
                     doc["_deleted_by"] = (
                         user_["email"] if user_ and "email" in user_ else None
                     )
                     bin = f"{collection_id_}_bin"
-                    Mongo().db[bin].insert_one(doc)
+                    Mongo().db_[bin].insert_one(doc)
 
                 log_ = Misc().log_f(
                     {
@@ -4954,7 +3785,7 @@ class Crud:
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             schema_ = (
-                Mongo().db["_collection"].find_one({"col_id": collection_id_})
+                Mongo().db_["_collection"].find_one({"col_id": collection_id_})
                 if is_crud_
                 else self.root_schemas_f(f"{collection_id_}")
             )
@@ -5171,7 +4002,7 @@ class Crud:
                     structure_ = json.loads(jtxt_)
                 doc_["col_structure"] = structure_
 
-            Mongo().db[collection_].insert_one(doc_)
+            Mongo().db_[collection_].insert_one(doc_)
 
             if collection_id_ == "_collection":
                 col_id_ = doc_["col_id"] if "col_id" in doc_ else None
@@ -5182,15 +4013,15 @@ class Crud:
                 if (
                     col_structure_
                     and col_structure_ != {}
-                    and datac_ not in Mongo().db.list_collection_names()
+                    and datac_ not in Mongo().db_.list_collection_names()
                 ):
-                    Mongo().db[datac_].insert_one({})
+                    Mongo().db_[datac_].insert_one({})
                     schemavalidate_ = self.crudschema_validate_f(
                         {"collection": datac_, "structure": col_structure_}
                     )
                     if not schemavalidate_["result"]:
                         raise APIError(schemavalidate_["msg"])
-                    Mongo().db[datac_].delete_one({})
+                    Mongo().db_[datac_].delete_one({})
             elif collection_id_ in ["_field", "_action"]:
                 cid_ = (
                     doc_["fie_collection_id"]
@@ -5438,7 +4269,7 @@ class OTP:
         """
         try:
             # read auth
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
@@ -5448,7 +4279,7 @@ class OTP:
                 name=email_, issuer_name="Technoplatz-BI"
             )
 
-            Mongo().db["_auth"].update_one(
+            Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
                 {
                     "$set": {
@@ -5498,7 +4329,7 @@ class OTP:
         """
         try:
             # read auth
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
@@ -5525,7 +4356,7 @@ class OTP:
 
             if totp_.verify(otp_):
                 validated_ = True
-                Mongo().db["_auth"].update_one(
+                Mongo().db_["_auth"].update_one(
                     {"aut_id": email_},
                     {
                         "$set": {
@@ -5539,7 +4370,7 @@ class OTP:
                 )
             else:
                 if not aut_otp_validated_:
-                    Mongo().db["_auth"].update_one(
+                    Mongo().db_["_auth"].update_one(
                         {"aut_id": email_},
                         {
                             "$set": {
@@ -5590,7 +4421,7 @@ class OTP:
         """
         try:
             # read auth
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
@@ -5628,7 +4459,7 @@ class OTP:
         """
         try:
             # checks if the user was created already
-            user_ = Mongo().db["_user"].find_one({"usr_id": email_})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": email_})
             if not user_ or user_ is None:
                 raise APIError("user not found for otp")
 
@@ -5639,7 +4470,7 @@ class OTP:
             name_ = user_["usr_name"]
 
             tfac_ = randint(100001, 999999)
-            Mongo().db["_auth"].update_one(
+            Mongo().db_["_auth"].update_one(
                 {"aut_id": usr_id_},
                 {
                     "$set": {
@@ -5703,7 +4534,7 @@ class Auth:
         docstring is in progress
         """
         try:
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError(f"user auth not found {email_}")
 
@@ -5730,7 +4561,7 @@ class Auth:
                 else:
                     raise AuthError("Invalid OTP")
 
-            Mongo().db["_auth"].update_one(
+            Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
                 {
                     "$set": {
@@ -5827,7 +4658,7 @@ class Auth:
             email_ = input_["email"]
 
             # sets None to auth token and TFAC code
-            Mongo().db["_auth"].update_one(
+            Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
                 {
                     "$set": {
@@ -5889,7 +4720,7 @@ class Auth:
             if collection_id_[:1] == "_" and op_ == "read":
                 return {"result": True, "allowmatch": allowmatch_}
 
-            collection_ = Mongo().db["_collection"].find_one({"col_id": collection_id_})
+            collection_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_})
             if not collection_:
                 raise APIError(f"no collection found {collection_id_}/{op_}")
 
@@ -5898,7 +4729,7 @@ class Auth:
             for ix_, usr_tag_ in enumerate(usr_tags_):
                 permission_check_ = (
                     Mongo()
-                    .db["_permission"]
+                    .db_["_permission"]
                     .find_one(
                         {"per_tag": usr_tag_, "per_collection_id": collection_id_}
                     )
@@ -5989,7 +4820,7 @@ class Auth:
             )
             allowed_ = (
                 Mongo()
-                .db["_firewall"]
+                .db_["_firewall"]
                 .find_one(
                     {
                         "$or": [
@@ -6049,7 +4880,7 @@ class Auth:
             if not email_ or not token_:
                 raise APIError("invalid session parameters")
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
@@ -6072,7 +4903,7 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            Mongo().db["_auth"].update_one(
+            Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
                 {
                     "$set": {
@@ -6101,7 +4932,7 @@ class Auth:
 
             email_ = user_["email"]
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
@@ -6110,7 +4941,7 @@ class Auth:
 
             if op_ == "apikeygen":
                 apikey_ = secrets.token_hex(16)
-                Mongo().db["_auth"].update_one(
+                Mongo().db_["_auth"].update_one(
                     {"aut_id": email_},
                     {
                         "$set": {
@@ -6181,7 +5012,7 @@ class Auth:
 
             email_ = bleach.clean(input_["email"])
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
@@ -6214,7 +5045,7 @@ class Auth:
             password_ = input_["password"]
             tfac_ = input_["tfac"]
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
@@ -6229,7 +5060,7 @@ class Auth:
             salt_ = hash_f_["salt"]
             key_ = hash_f_["key"]
 
-            Mongo().db["_auth"].update_one(
+            Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
                 {
                     "$set": {
@@ -6323,7 +5154,7 @@ class Auth:
             jdate_ = Misc().get_jdate_f()
             token_ = jwt.encode({"some": "payload"}, password_, algorithm="HS256")
 
-            Mongo().db["_auth"].update_one(
+            Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
                 {
                     "$set": {
@@ -6390,7 +5221,7 @@ class Auth:
             if not re.search(pat, user_id_):
                 raise APIError("invalid e-mail address")
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": user_id_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
                 raise AuthError("account not found")
 
@@ -6402,7 +5233,7 @@ class Auth:
                 type_ = "key"
                 raise AuthError("please set a new password")
 
-            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 type_ = "user"
                 raise AuthError("user not found for validate")
@@ -6477,12 +5308,12 @@ class Auth:
             if not apikey_ or apikey_ is None:
                 raise APIError("api key must be provided")
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_apikey": apikey_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_apikey": apikey_})
             if not auth_:
                 raise APIError("not authenticated")
             user_id_ = auth_["aut_id"]
 
-            user_ = Mongo().db["_user"].find_one({"usr_id": user_id_})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_})
             if not user_:
                 raise APIError("user not found for api")
             usr_enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
@@ -6548,11 +5379,11 @@ class Auth:
             password_ = bleach.clean(input_["password"])
             passcode_ = bleach.clean(input_["passcode"])
 
-            auth_ = Mongo().db["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if auth_:
                 raise APIError("account already exist")
 
-            user_ = Mongo().db["_user"].find_one({"usr_id": email_})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": email_})
             if not user_ or user_ is None:
                 raise APIError("user invitation not found")
 
@@ -6575,7 +5406,7 @@ class Auth:
             )
             apikey_ = secrets.token_hex(16)
 
-            Mongo().db["_auth"].insert_one(
+            Mongo().db_["_auth"].insert_one(
                 {
                     "aut_id": email_,
                     "aut_salt": salt_,
@@ -6861,16 +5692,10 @@ def crud_f():
             res_ = Crud().setprop_f(input_)
         elif op_ == "reconfigure":
             res_ = Crud().reconfigure_f(input_)
-        elif op_ == "saveasview":
-            res_ = Crud().saveasview_f(input_)
         elif op_ == "copykey":
             res_ = Crud().copykey_f(input_)
         elif op_ == "purge":
             res_ = Crud().purge_f(input_)
-        elif op_ == "view":
-            res_ = Crud().view_f(input_)
-        elif op_ == "views":
-            res_ = Crud().views_f(input_)
         elif op_ == "charts":
             res_ = Crud().charts_f(input_)
         elif op_ == "announce":
@@ -7050,85 +5875,6 @@ def auth_f():
 
     except Exception as exc:
         return {"msg": str(exc), "status": 500}
-
-
-@app.route("/get/pivot/<string:id_>", methods=["GET"])
-def get_pivot_f(id_):
-    """
-    docstring is in progress
-    """
-    try:
-        validate_ = Security().validate_request_f()
-        if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "validation error"
-            )
-
-        if not request.headers:
-            raise AuthError("no header provided")
-
-        apikey_ = request.args.get("k", default=None, type=str)
-
-        if not apikey_:
-            raise AuthError("no api key provided")
-
-        user_validate_ = Auth().user_validate_by_apikey_f({"apikey": apikey_})
-        if not user_validate_["result"]:
-            raise AuthError(user_validate_["msg"])
-
-        user_ = user_validate_["user"] if "user" in user_validate_ else None
-        if not user_ or not user_["usr_id"] or "usr_id" not in user_:
-            raise AuthError("user not found for pivot")
-
-        view_to_dataset_f_ = Crud().view_to_dataset_f({"id": id_, "user": user_})
-
-        if not view_to_dataset_f_["result"]:
-            raise APIError(view_to_dataset_f_["msg"])
-
-        pivot_ = (
-            view_to_dataset_f_["pivot"].to_html().replace('border="1"', "")
-            if "pivot" in view_to_dataset_f_ and view_to_dataset_f_["pivot"] is not None
-            else ""
-        )
-        statistics_ = (
-            view_to_dataset_f_["statistics"]
-            if "statistics" in view_to_dataset_f_
-            else None
-        )
-        count_ = (
-            view_to_dataset_f_["count"]
-            if "count" in view_to_dataset_f_ and view_to_dataset_f_["count"] > 0
-            else 0
-        )
-
-        return (
-            json.dumps(
-                {
-                    "result": True,
-                    "pivot": pivot_,
-                    "statistics": statistics_,
-                    "count": count_,
-                },
-                default=json_util.default,
-                ensure_ascii=False,
-                sort_keys=False,
-            ),
-            200,
-            Security().header_simple_f(),
-        )
-
-    except AuthError as exc:
-        return {"msg": str(exc), "status": 401}
-
-    except APIError as exc:
-        return {"msg": str(exc), "status": 400}
-
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
-
-    finally:
-        if Mongo().client:
-            Mongo().client.close()
 
 
 @app.route("/post", methods=["POST"])
@@ -7439,16 +6185,7 @@ def get_data_f(id_):
         if not generate_view_data_f_["result"]:
             raise APIError(generate_view_data_f_["msg"])
 
-        return (
-            json.dumps(
-                generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else [],
-                default=json_util.default,
-                ensure_ascii=False,
-                sort_keys=False,
-            ),
-            200,
-            Security().header_simple_f()
-        )
+        return json.dumps(generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else [], default=json_util.default, ensure_ascii=False, sort_keys=False,), 200, Security().header_simple_f()
 
     except AuthError as exc:
         return {"msg": str(exc), "status": 401}
@@ -7461,5 +6198,6 @@ def get_data_f(id_):
 
 
 if __name__ == "__main__":
+    print = partial(print, flush=True)
     Schedular().main_f()
     app.run(host="0.0.0.0", port=80, debug=False)

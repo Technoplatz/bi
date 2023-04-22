@@ -40,24 +40,24 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div (click)="doAnnounceNow(view, 'test')" class="data-sq-button">
+              <div (click)="doAnnounceNow('test')" class="data-sq-button">
                 <ion-icon *ngIf="!in_otp_process_test" name="megaphone"></ion-icon>
                 <ion-icon *ngIf="in_otp_process_test" name="hourglass"></ion-icon>
                 <br />
                 {{ 'Test' | translate }}
               </div>
-              <div (click)="doAnnounceNow(view, 'live')" class="data-sq-button required">
+              <div (click)="doAnnounceNow('live')" class="data-sq-button required">
                 <ion-icon *ngIf="!in_otp_process" name="megaphone"></ion-icon>
                 <ion-icon *ngIf="in_otp_process" name="hourglass"></ion-icon>
                 <br />
                 {{ 'LIVE' | translate }}!
               </div>
-              <div (click)="RefreshData(0)" class="data-sq-button">
+              <!-- <div (click)="RefreshData(0)" class="data-sq-button">
                 <ion-icon *ngIf="is_loaded" name="sync-circle-outline"></ion-icon>
                 <ion-icon *ngIf="!is_loaded" name="hourglass-outline"></ion-icon>
                 <br />
                 {{ 'Refresh' | translate }}
-              </div>
+              </div> -->
               <div (click)="doCopy('view')" class="data-sq-button">
                 <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
                 <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
@@ -83,57 +83,9 @@ https://www.gnu.org/licenses.
           {{ 'Shared with' | translate }} {{ view["_tags"]?.join(' ') }}<br />
           <span *ngIf="view.vie_scheduled; else notscheduled">{{ 'Scheduled' | translate }}</span>
           <ng-template #notscheduled> {{ 'Not Scheduled' | translate }} </ng-template>
-
           <div class="view-infos">
             <!-- PIVOT -->
-            <div [innerHtml]="pivot_" class="pivot"></div>
-
-            <!-- STAT -->
-            <table *ngIf="statistics_" class="stat">
-              <tr>
-                <td colspan="4">{{ 'DESCRIPTIVE STATISTICS' | translate }}<br />{{ statistics_key_ }}</td>
-              </tr>
-              <tr>
-                <th>
-                  {{ 'CNT' | translate }}
-                </th>
-                <th>
-                  {{ 'MEA' | translate }}
-                </th>
-                <th>
-                  {{ 'STD' | translate }}
-                </th>
-                <th>
-                  {{ 'UNQ' | translate }}
-                </th>
-              </tr>
-              <tr>
-                <td>{{ statistics_.count}}</td>
-                <td>{{ statistics_.mean?.toFixed(2)}}</td>
-                <td>{{ statistics_.std?.toFixed(2)}}</td>
-                <td>{{ statistics_.unique}}</td>
-              </tr>
-              <tr>
-                <th>
-                  {{ 'MIN' | translate }}
-                </th>
-                <th>
-                  {{ 'MAX' | translate }}
-                </th>
-                <th>
-                  {{ 'TOP' | translate }}
-                </th>
-                <th>
-                  {{ 'FRQ' | translate }}
-                </th>
-              </tr>
-              <tr>
-                <td>{{ statistics_.min?.toFixed(2)}}</td>
-                <td>{{ statistics_.max?.toFixed(2)}}</td>
-                <td>{{ statistics_.top}}</td>
-                <td>{{ statistics_.freq}}</td>
-              </tr>
-            </table>
+            <div [innerHtml]="pivot_" class="pivot"></div>            
           </div>
 
           <!-- LIST -->

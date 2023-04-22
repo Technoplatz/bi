@@ -53,6 +53,7 @@ export class CollectionPage implements OnInit {
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
+  public description: string = "";
   public loadingText: string = environment.misc.loadingText;
   private submenu: string = "";
   private segment = "data";
@@ -105,6 +106,7 @@ export class CollectionPage implements OnInit {
   private structure_: any = {};
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
+  private admin_collections: any = environment.admin_collections;
 
   constructor(
     private storage: Storage,
@@ -145,6 +147,7 @@ export class CollectionPage implements OnInit {
     this.crud.getCollection(this.id).then((res: any) => {
       this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
       this.subheader = res && res.data ? res.data.col_title : this.id;
+      this.description = res && res.data ? res.data.col_description : this.admin_collections[this.id].description;
       this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
         this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
           this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
@@ -325,27 +328,6 @@ export class CollectionPage implements OnInit {
     const r = await this.selected.reduce((acc: any, val: any, index: number) => {
       const q = val === true ? this.sweeped[this.segment].push(this.data[index]._id) : null;
     }, []);
-  }
-
-  doSaveAsView() {
-    if (this.perm && this.data.length > 0 && this.is_crud) {
-      this.is_viewsaving = true;
-      this.misc.apiCall("crud", {
-        op: "saveasview",
-        collection: this.id,
-        match: this.filter
-      }).then((res: any) => {
-        this.crud.getAll().then(() => {
-          this.is_viewsaving = false;
-          this.misc.navi.next("view/" + res.id);
-        });
-      }).catch((error: any) => {
-        this.is_viewsaving = false;
-        this.misc.doMessage(error, "error");
-      });
-    } else {
-      this.misc.doMessage("you must apply a filter prior to save", "error");
-    }
   }
 
   SwitchSelectData(event: any) {
