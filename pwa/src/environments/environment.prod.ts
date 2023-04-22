@@ -123,13 +123,13 @@ export const environment = {
       "title": "Announcements",
       "description": "Data announcements log of the shared views."
     },
-    "_kav": {
-      "title": "KaV",
-      "description": "Essential environment variables as key=value pairs."
+    "_kv": {
+      "title": "KV",
+      "description": "Essential environment variables as KEY=VALUE pairs."
     },
     "_user": {
       "title": "Users",
-      "description": "Internal users and Data subscribers."
+      "description": "Internal users, data subscribers and hashtags."
     },
     "_permission": {
       "title": "Permissions",
@@ -155,7 +155,7 @@ export const environment = {
   segmentsadm: [
     { "id": "_collection", "title": "Collections" },
     { "id": "_announcement", "title": "Announcements" },
-    { "id": "_kav", "title": "KV" },
+    { "id": "_kv", "title": "KV" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },
     { "id": "_firewall", "title": "Firewall" },

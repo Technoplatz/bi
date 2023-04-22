@@ -31,50 +31,45 @@ https://www.gnu.org/licenses.
 """
 
 import os
-import pandas as pd
-import numpy as np
-import numexpr as ne
-import openpyxl
-import stat
-import bson
-import json
-import operator
-import random
-import re
-import secrets
-import string
-import pymongo
-import requests
-import bleach
+import io
 import logging
 import base64
-import magic
-import pyotp
+import re
+import secrets
+import json
+import operator
 import smtplib
 import urllib
 import hashlib
-import jwt
-import xlrd
-import io
-from functools import partial
-from subprocess import call
-from pickle import TRUE
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from functools import partial
+from subprocess import call
+from random import randint
+from datetime import datetime
+from pymongo import MongoClient
+import pymongo
+import bson
+from bson import json_util
+from bson.objectid import ObjectId
+
+import pandas as pd
+import numpy as np
+import bleach
+import pyotp
+import jwt
+import xlrd
+import numexpr as ne
 from get_docker_secret import get_docker_secret
-from pymongo import MongoClient, ASCENDING
 from werkzeug.utils import secure_filename
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS, cross_origin
-from random import randint
-from bson import json_util
-from bson.objectid import ObjectId
-from datetime import datetime, timedelta
-from dateutil import tz
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+import requests
+import openpyxl
 
 
 class APIError(BaseException):
@@ -607,112 +602,44 @@ class Misc:
         )
         return {"result": False, "msg": str(exc)}
 
-    def mongo_error_f(self, exc):
+    def mongo_error_f(self, exc_):
         """
         docstring is in progress
         """
         try:
-            self.post_notification(exc)
+            self.post_notification(exc_)
             notify_ = False
             errhtml_ = ""
             count_ = 0
-            excdetails_ = str(exc)
-            write_errors_ = (
-                excdetails_["writeErrors"]
-                if excdetails_ and "writeErrors" in excdetails_
-                else None
-            )
+            write_errors_ = exc_["writeErrors"] if exc_ and "writeErrors" in exc_ else None
+            # exc_ = str(exc_)
             if write_errors_:
                 notify_ = True
                 errhtml_ += "<ul>"
                 count_ = len(write_errors_)
                 for error_ in write_errors_:
                     errmsg_ = str(error_["errmsg"]) if "errmsg" in error_ else ""
-                    errInfo_ = (
-                        str(
-                            error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0][
-                                "propertiesNotSatisfied"
-                            ]
-                        )
-                        if "errInfo" in error_
-                        and "details" in error_["errInfo"]
-                        and "schemaRulesNotSatisfied" in error_["errInfo"]["details"]
-                        and error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]
-                        and "propertiesNotSatisfied"
-                        in error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]
-                        else ""
-                    )
-                    err_ = f"{errmsg_} {errInfo_}"
+                    err_info_ = str(error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]["propertiesNotSatisfied"]) if "errInfo" in error_ and "details" in error_["errInfo"] and "schemaRulesNotSatisfied" in error_["errInfo"]["details"] and error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] and "propertiesNotSatisfied" in error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] else ""
+                    err_ = f"{errmsg_} {err_info_}"
                     errhtml_ += f"<li>{err_}</li>"
                 errhtml_ += "</ul>"
             else:
-                errmsg_ = excdetails_["errmsg"] if "errmsg" in excdetails_ else None
-                errInfo_ = excdetails_["errInfo"] if "errInfo" in excdetails_ else None
-                details_ = (
-                    errInfo_["details"] if errInfo_ and "details" in errInfo_ else None
-                )
-                schemaRulesNotSatisfied_ = (
-                    details_["schemaRulesNotSatisfied"][0]
-                    if details_
-                    and "schemaRulesNotSatisfied" in details_
-                    and len(details_["schemaRulesNotSatisfied"]) > 0
-                    else None
-                )
-                propertiesNotSatisfied_ = (
-                    schemaRulesNotSatisfied_["propertiesNotSatisfied"][0]
-                    if schemaRulesNotSatisfied_
-                    and "propertiesNotSatisfied" in schemaRulesNotSatisfied_
-                    and len(schemaRulesNotSatisfied_["propertiesNotSatisfied"]) > 0
-                    else None
-                )
-                if propertiesNotSatisfied_:
-                    err_property_name_ = (
-                        propertiesNotSatisfied_["propertyName"]
-                        if "propertyName" in propertiesNotSatisfied_
-                        else None
-                    )
-                    err_details_ = (
-                        propertiesNotSatisfied_["details"][0]
-                        if "details" in propertiesNotSatisfied_
-                        and len(propertiesNotSatisfied_["details"]) > 0
-                        else None
-                    )
-                    err_details__ = (
-                        err_details_["details"][0]
-                        if err_details_
-                        and "details" in err_details_
-                        and len(err_details_["details"]) > 0
-                        else None
-                    )
-                    reason_ = (
-                        err_details__["reason"]
-                        if err_details__ and "reason" in err_details__
-                        else None
-                    )
-                    consideredValue_ = (
-                        err_details__["consideredValue"]
-                        if err_details__ and "consideredValue" in err_details__
-                        else None
-                    )
-                    specifiedAs_ = (
-                        err_details__["specifiedAs"]
-                        if err_details__ and "specifiedAs" in err_details__
-                        else None
-                    )
-                    pattern_ = (
-                        specifiedAs_["pattern"]
-                        if specifiedAs_ and "pattern" in specifiedAs_
-                        else None
-                    )
-                    errhtml_ = ""
-                    errhtml_ += (
-                        f"Property validation of {err_property_name_} failed."
-                        if err_property_name_
-                        else ""
-                    )
-                    errhtml_ += (
-                        f", value: {str(consideredValue_)}" if consideredValue_ else ""
-                    )
+                errmsg_ = exc_["errmsg"] if "errmsg" in exc_ else None
+                err_info_ = exc_["errInfo"] if "errInfo" in exc_ else None
+                details_ = err_info_["details"] if err_info_ and "details" in err_info_ else None
+                schema_rules_not_satisfied_ = details_["schemaRulesNotSatisfied"][0] if details_ and "schemaRulesNotSatisfied" in details_ and len(details_["schemaRulesNotSatisfied"]) > 0 else None
+                properties_not_satisfied_ = schema_rules_not_satisfied_["propertiesNotSatisfied"][0] if schema_rules_not_satisfied_ and "propertiesNotSatisfied" in schema_rules_not_satisfied_ and len(schema_rules_not_satisfied_["propertiesNotSatisfied"]) > 0 else None
+
+                if properties_not_satisfied_:
+                    err_property_name_ = properties_not_satisfied_["propertyName"] if "propertyName" in properties_not_satisfied_ else None
+                    err_details_ = properties_not_satisfied_["details"][0] if "details" in properties_not_satisfied_ and len(properties_not_satisfied_["details"]) > 0 else None
+                    err_details__ = err_details_["details"][0] if err_details_ and "details" in err_details_ and len(err_details_["details"]) > 0 else None
+                    reason_ = err_details__["reason"] if err_details__ and "reason" in err_details__ else None
+                    considered_value_ = err_details__["consideredValue"] if err_details__ and "consideredValue" in err_details__ else None
+                    specified_as_ = err_details__["specifiedAs"] if err_details__ and "specifiedAs" in err_details__ else None
+                    pattern_ = specified_as_["pattern"] if specified_as_ and "pattern" in specified_as_ else None
+                    errhtml_= f"Property validation of {err_property_name_} failed." if err_property_name_ else ""
+                    errhtml_ += f", value: {str(considered_value_)}" if considered_value_ else ""
                     errhtml_ += f", reason: {str(reason_)}" if reason_ else ""
                     errhtml_ += f", pattern: {str(pattern_)}" if pattern_ else ""
                 else:
@@ -914,7 +841,7 @@ class Misc:
         try:
             personalizations_ = []
             to_ = []
-            users_ = Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": tags_}}})
+            users_ = Mongo().db_["_user"].find({"usr_enabled": True, "_tags": {"$elemMatch": {"$in": tags_}}})
             if users_:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
@@ -1491,52 +1418,48 @@ class Crud:
         """
         try:
             # INPUTS
-            form_ = obj["form"]
-            file_ = obj["file"]
-            collection_ = obj["collection"]
-            email_ = form_["email"]
-            mimetype_ = file_.content_type
+            form_=obj["form"]
+            file_=obj["file"]
+            collection_=obj["collection"]
+            email_=form_["email"]
+            mimetype_=file_.content_type
 
             # GETTING COLLECTION PROPERTIES
-            collection__ = f"{collection_}_data"
-            find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
+            collection__=f"{collection_}_data"
+            find_one_=Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
-            structure_ = find_one_["col_structure"]
-            get_properties_ = self.get_properties_f(collection_)
+            structure_=find_one_["col_structure"]
+            get_properties_=self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
-            properties_ = get_properties_["properties"]
+            properties_=get_properties_["properties"]
 
             # CREATE A DATAFRAME
             if mimetype_ in [
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "application/vnd.ms-excel",
             ]:
-                filesize_ = file_.tell()
+                filesize_=file_.tell()
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                 file_.seek(0, os.SEEK_END)
-                df_ = pd.read_excel(
+                df_=pd.read_excel(
                     file_, sheet_name=collection_, header=0, engine="openpyxl"
                 )
             elif mimetype_ in ["text/csv", "application/json"]:
-                content_ = file_.read().decode("utf-8")
-                filesize_ = file_.content_length
+                content_=file_.read().decode("utf-8")
+                filesize_=file_.content_length
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                 if mimetype_ == "text/csv":
-                    df_ = pd.read_csv(io.StringIO(content_), header=0)
+                    df_=pd.read_csv(io.StringIO(content_), header=0)
                 else:
-                    session_client_ = MongoClient(Mongo().connstr)
-                    session_db_ = session_client_[MONGO_DB_]
-                    session_ = session_client_.start_session()
+                    session_client_=MongoClient(Mongo().connstr)
+                    session_db_=session_client_[MONGO_DB_]
+                    session_=session_client_.start_session()
                     session_.start_transaction()
-                    insert_many_ = (
-                        Mongo()
-                        .db_[collection__]
-                        .insert_many(content_, ordered=False, session=session_)
-                    )
+                    insert_many_= Mongo().db_[collection__].insert_many(content_, ordered=False, session=session_)
                     session_.commit_transaction()
                     session_client_.close()
                     raise
@@ -1544,32 +1467,28 @@ class Crud:
                 raise APIError("file type is not supported")
 
             # MAKING COLUMN NAMES PRETTY
-            df_ = df_.rename(
-                lambda column_: self.convert_column_name_f(column_), axis="columns"
-            )
+            df_= df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
 
             # CONVERTING DATASET COLUMNS
-            columns_tobe_deleted_ = []
+            columns_tobe_deleted_=[]
             for column_ in df_.columns:
                 if column_ in properties_:
-                    property_ = properties_[column_]
+                    property_=properties_[column_]
                     if "bsonType" in property_:
                         if property_["bsonType"] == "date":
                             try:
-                                df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                                df_[column_]=df_[column_].apply(self.frame_convert_datetime_f)
                             except Exception:
                                 if "required" in structure_ and len(structure_["required"]) > 0 and column_ in structure_["required"]:
                                     raise Exception(f"invalid or empty date in {column_} column")
                         elif property_["bsonType"] == "string":
-                            df_[column_] = df_[column_].apply(
-                                self.frame_convert_string_f
-                            )
+                            df_[column_]=df_[column_].apply(self.frame_convert_string_f)
                             if "exclude" in property_ and len(property_["exclude"]) > 0:
-                                df_[column_] = df_[column_].str.replace(
+                                df_[column_]=df_[column_].str.replace(
                                     "|".join(property_["exclude"]), "", regex=False
                                 )
                         elif property_["bsonType"] in ["number", "int", "decimal"]:
-                            df_[column_] = df_[column_].apply(
+                            df_[column_]=df_[column_].apply(
                                 self.frame_convert_number_f
                             )
                     else:
@@ -1585,7 +1504,7 @@ class Crud:
 
             # SUM OF ALL NUMERICS BY COMBINING DUPLICATE ITEMS
             # ITS OBVIOUS BUT TRUE :)
-            df_ = df_.groupby(
+            df_=df_.groupby(
                 list(
                     df_.select_dtypes(
                         exclude=["float", "int", "float64", "int64"]
@@ -1601,30 +1520,30 @@ class Crud:
             )
 
             # SETTING THE DEFAULTS
-            df_["_created_at"] = datetime.now()
-            df_["_created_by"] = email_
-            df_["_modified_at"] = None
-            df_["_modified_by"] = None
-            df_["_modified_count"] = 0
+            df_["_created_at"]=datetime.now()
+            df_["_created_by"]=email_
+            df_["_modified_at"]=None
+            df_["_modified_by"]=None
+            df_["_modified_count"]=0
 
             # BULK INSERT DF INTO DATABASE
-            payload_ = df_.to_dict("records")
+            payload_=df_.to_dict("records")
 
-            session_client_ = MongoClient(Mongo().connstr)
-            session_db_ = session_client_[MONGO_DB_]
-            session_ = session_client_.start_session()
+            session_client_=MongoClient(Mongo().connstr)
+            session_db_=session_client_[MONGO_DB_]
+            session_=session_client_.start_session()
             session_.start_transaction()
-            insert_many_ = session_db_[collection__].insert_many(
+            insert_many_=session_db_[collection__].insert_many(
                 payload_, ordered=False, session=session_
             )
             session_.commit_transaction()
-            count_ = len(insert_many_.inserted_ids)
+            count_=len(insert_many_.inserted_ids)
             session_client_.close()
 
-            res_ = {"result": True, "count": count_}
+            res_={"result": True, "count": count_}
 
         except pymongo.errors.PyMongoError as exc:
-            res_ = Misc().mongo_error_f(exc)
+            res_=Misc().mongo_error_f(exc)
             Misc().log_f(
                 {
                     "type": "Error",
@@ -1635,7 +1554,7 @@ class Crud:
                 }
             )
             if "notify" in res_ and res_["notify"]:
-                email_sent_ = Email().sendEmail_f(
+                email_sent_=Email().sendEmail_f(
                     {
                         "personalizations": {"to": [{"email": email_, "name": None}]},
                         "op": "importerr",
@@ -1645,7 +1564,7 @@ class Crud:
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
 
-                res_["msg"] = "please check your inbox to get the error details."
+                res_["msg"]="please check your inbox to get the error details."
 
                 return res_
 
@@ -1682,16 +1601,16 @@ class Crud:
             if "scope" not in input_:
                 raise APIError("scope is missing")
 
-            email_ = input_["user"]["email"]
-            tfac_ = input_["tfac"]
-            collection_ = input_["collection"]
-            id_ = input_["id"]
-            scope_ = input_["scope"]
+            email_=input_["user"]["email"]
+            tfac_=input_["tfac"]
+            collection_=input_["collection"]
+            id_=input_["id"]
+            scope_=input_["scope"]
 
             if scope_ not in ["test", "live"]:
                 raise APIError("invalid scope")
 
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
+            verify_2fa_f_=Auth().verify_otp_f(email_, tfac_, "announce")
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
 
@@ -1708,20 +1627,20 @@ class Crud:
         docstring is in progress
         """
         try:
-            op_ = obj["op"] if "op" in obj else None
+            op_=obj["op"] if "op" in obj else None
 
-            dump_f_ = Mongo().backup_f() if op_ == "backup" else Mongo().restore_f(obj)
+            dump_f_=Mongo().backup_f() if op_ == "backup" else Mongo().restore_f(obj)
             if not dump_f_["result"]:
                 raise APIError(dump_f_["msg"])
 
-            id_ = dump_f_["id"]
-            type_ = dump_f_["type"]
-            size_ = dump_f_["size"]
-            op_ = obj["op"] if "op" in obj else None
-            email_ = obj["user"]["email"] if obj and obj["user"] else "cron"
-            description_ = "On Demand" if op_ == "backup" else "Automatic"
+            id_=dump_f_["id"]
+            type_=dump_f_["type"]
+            size_=dump_f_["size"]
+            op_=obj["op"] if "op" in obj else None
+            email_=obj["user"]["email"] if obj and obj["user"] else "cron"
+            description_="On Demand" if op_ == "backup" else "Automatic"
 
-            doc_ = {
+            doc_={
                 "bak_id": id_,
                 "bak_type": type_,
                 "bak_size": size_,
@@ -1748,21 +1667,21 @@ class Crud:
         docstring is in progress
         """
         try:
-            collection_ = obji["collection"]
-            fields_ = obji["fields"]
+            collection_=obji["collection"]
+            fields_=obji["fields"]
 
-            data_collection_ = f"{collection_}_data"
-            projection_ = {}
+            data_collection_=f"{collection_}_data"
+            projection_={}
             for field_ in fields_:
-                projection_[field_] = 1
+                projection_[field_]=1
 
-            cursor_ = (
+            cursor_=(
                 Mongo()
                 .db_[data_collection_]
                 .find(filter={}, projection=projection_)
                 .limit(1000)
             )
-            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            docs_=json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
 
             return {"result": True, "data": docs_}
 
@@ -1776,15 +1695,15 @@ class Crud:
         """
         docstring is in progress
         """
-        match_ = obj["match"]
-        properties_ = obj["properties"] if "properties" in obj else None
-        fand_ = []
-        filtered_ = {}
+        match_=obj["match"]
+        properties_=obj["properties"] if "properties" in obj else None
+        fand_=[]
+        filtered_={}
         if properties_:
             for f in match_:
                 if f["key"] and f["op"] and f["key"] in properties_:
-                    fres_ = None
-                    typ = (
+                    fres_=None
+                    typ=(
                         properties_[f["key"]]["bsonType"]
                         if f["key"] in properties_
                         else "string"
@@ -1792,13 +1711,13 @@ class Crud:
 
                     if f["op"] in ["eq", "contains"]:
                         if typ in ["number", "int", "decimal"]:
-                            fres_ = float(f["value"])
+                            fres_=float(f["value"])
                         elif typ == "bool":
-                            fres_ = bool(f["value"])
+                            fres_=bool(f["value"])
                         elif typ == "date":
-                            fres_ = datetime.strptime(f["value"][:10], "%Y-%m-%d")
+                            fres_=datetime.strptime(f["value"][:10], "%Y-%m-%d")
                         else:
-                            fres_ = (
+                            fres_=(
                                 {"$regex": f["value"], "$options": "i"}
                                 if f["value"]
                                 else {"$regex": "", "$options": "i"}
@@ -1806,11 +1725,11 @@ class Crud:
 
                     elif f["op"] in ["ne", "nc"]:
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$not": {"$eq": float(f["value"])}}
+                            fres_={"$not": {"$eq": float(f["value"])}}
                         elif typ == "bool":
-                            fres_ = {"$not": {"$eq": bool(f["value"])}}
+                            fres_={"$not": {"$eq": bool(f["value"])}}
                         elif typ == "date":
-                            fres_ = {
+                            fres_={
                                 "$not": {
                                     "$eq": datetime.strptime(
                                         f["value"][:10], "%Y-%m-%d"
@@ -1818,27 +1737,27 @@ class Crud:
                                 }
                             }
                         else:
-                            fres_ = (
+                            fres_=(
                                 {"$not": {"$regex": f["value"], "$options": "i"}}
                                 if f["value"]
                                 else {"$not": {"$regex": "", "$options": "i"}}
                             )
 
                     elif f["op"] in ["in", "nin"]:
-                        separated_ = re.split(",", f["value"])
-                        list_ = (
+                        separated_=re.split(",", f["value"])
+                        list_=(
                             [s.strip() for s in separated_]
                             if f["key"] != "_id"
                             else [ObjectId(s.strip()) for s in separated_]
                         )
                         if f["op"] == "in":
-                            fres_ = {
+                            fres_={
                                 "$in": list_
                                 if typ != "number"
                                 else list(map(float, list_))
                             }
                         else:
-                            fres_ = {
+                            fres_={
                                 "$nin": list_
                                 if typ != "number"
                                 else list(map(float, list_))
@@ -1846,77 +1765,77 @@ class Crud:
 
                     elif f["op"] == "gt":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$gt": float(f["value"])}
+                            fres_={"$gt": float(f["value"])}
                         elif typ == "date":
-                            fres_ = {
+                            fres_={
                                 "$gt": datetime.strptime(f["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$gt": f["value"]}
+                            fres_={"$gt": f["value"]}
 
                     elif f["op"] == "gte":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$gte": float(f["value"])}
+                            fres_={"$gte": float(f["value"])}
                         elif typ == "date":
-                            fres_ = {
+                            fres_={
                                 "$gte": datetime.strptime(f["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$gte": f["value"]}
+                            fres_={"$gte": f["value"]}
 
                     elif f["op"] == "lt":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$lt": float(f["value"])}
+                            fres_={"$lt": float(f["value"])}
                         elif typ == "date":
-                            fres_ = {
+                            fres_={
                                 "$lt": datetime.strptime(f["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$lt": f["value"]}
+                            fres_={"$lt": f["value"]}
 
                     elif f["op"] == "lte":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$lte": float(f["value"])}
+                            fres_={"$lte": float(f["value"])}
                         elif typ == "date":
-                            fres_ = {
+                            fres_={
                                 "$lte": datetime.strptime(f["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$lte": f["value"]}
+                            fres_={"$lte": f["value"]}
 
                     elif f["op"] == "true":
-                        fres_ = {"$eq": True}
+                        fres_={"$eq": True}
 
                     elif f["op"] == "false":
-                        fres_ = {"$eq": False}
+                        fres_={"$eq": False}
 
                     elif f["op"] == "nnull":
-                        array_ = []
-                        array1_ = {}
-                        array2_ = {}
-                        array1_[f["key"]] = {"$ne": None}
-                        array2_[f["key"]] = {"$exists": True}
+                        array_=[]
+                        array1_={}
+                        array2_={}
+                        array1_[f["key"]]={"$ne": None}
+                        array2_[f["key"]]={"$exists": True}
                         array_.append(array1_)
                         array_.append(array2_)
 
                     elif f["op"] == "null":
-                        array_ = []
-                        array1_ = {}
-                        array2_ = {}
-                        array1_[f["key"]] = {"$eq": None}
-                        array2_[f["key"]] = {"$exists": False}
+                        array_=[]
+                        array1_={}
+                        array2_={}
+                        array1_[f["key"]]={"$eq": None}
+                        array2_[f["key"]]={"$exists": False}
                         array_.append(array1_)
                         array_.append(array2_)
 
-                    fpart_ = {}
+                    fpart_={}
                     if f["op"] in ["null", "nnull"]:
-                        fpart_["$or"] = array_
+                        fpart_["$or"]=array_
                     else:
-                        fpart_[f["key"]] = fres_
+                        fpart_[f["key"]]=fres_
 
                     fand_.append(fpart_)
 
-            filtered_ = {"$and": fand_} if fand_ and len(fand_) > 0 else {}
+            filtered_={"$and": fand_} if fand_ and len(fand_) > 0 else {}
 
         return filtered_
 
@@ -1925,49 +1844,49 @@ class Crud:
         docstring is in progress
         """
         try:
-            filter_ = {}
-            filter_[f"col_structure.views.{view_id_}.enabled"] = True
-            filter_[f"col_structure.views.{view_id_}._tags"] = {
+            filter_={}
+            filter_[f"col_structure.views.{view_id_}.enabled"]=True
+            filter_[f"col_structure.views.{view_id_}._tags"]={
                 "$elemMatch": {"$in": user_["_tags"]}
             }
-            collection_ = Mongo().db_["_collection"].find_one(filter_)
+            collection_=Mongo().db_["_collection"].find_one(filter_)
             if not collection_:
                 return {
                     "result": True,
                     "skip": True
                 }
-            collection_id_ = f"{collection_['col_id']}_data"
-            view_ = collection_["col_structure"]["views"][view_id_]
-            col_structure_ = collection_["col_structure"]
-            properties_ = col_structure_["properties"]
-            properties_master_ = {}
+            collection_id_=f"{collection_['col_id']}_data"
+            view_=collection_["col_structure"]["views"][view_id_]
+            col_structure_=collection_["col_structure"]
+            properties_=col_structure_["properties"]
+            properties_master_={}
             for property_ in properties_:
-                properties_property_ = properties_[property_]
-                properties_master_[property_] = properties_property_
-                bson_type_ = (
+                properties_property_=properties_[property_]
+                properties_master_[property_]=properties_property_
+                bson_type_=(
                     properties_property_["bsonType"]
                     if "bsonType" in properties_property_
                     else None
                 )
                 if bson_type_ == "array":
                     if "items" in properties_property_:
-                        items_ = properties_property_["items"]
+                        items_=properties_property_["items"]
                         if "properties" in items_:
-                            item_properties_ = items_["properties"]
+                            item_properties_=items_["properties"]
                             for item_property_ in item_properties_:
-                                properties_master_[item_property_] = item_properties_[
+                                properties_master_[item_property_]=item_properties_[
                                     item_property_
                                 ]
 
-            parents_ = []
+            parents_=[]
             if "parents" in col_structure_:
-                parents_ = col_structure_["parents"]
+                parents_=col_structure_["parents"]
 
-            pipe_ = []
-            set_ = {"$set": {"_ID": {"$toObjectId": "$_id"}}}
+            pipe_=[]
+            set_={"$set": {"_ID": {"$toObjectId": "$_id"}}}
             pipe_.append(set_)
 
-            unset_ = []
+            unset_=[]
             unset_.append("_modified_by")
             unset_.append("_modified_at")
             unset_.append("_modified_count")
@@ -1987,8 +1906,8 @@ class Crud:
 
             for parent_ in parents_:
                 if "match" in parent_ and "collection" in parent_:
-                    parent_collection_ = parent_["collection"]
-                    find_one_ = (
+                    parent_collection_=parent_["collection"]
+                    find_one_=(
                         Mongo()
                         .db_["_collection"]
                         .find_one({"col_id": parent_collection_})
@@ -1999,32 +1918,32 @@ class Crud:
                         and "properties" in find_one_["col_structure"]
                     ):
                         for property_ in find_one_["col_structure"]["properties"]:
-                            properties_master_[property_] = find_one_["col_structure"][
+                            properties_master_[property_]=find_one_["col_structure"][
                                 "properties"
                             ][property_]
-                        match_ = parent_["match"]
-                        pipeline__ = []
-                        let_ = {}
+                        match_=parent_["match"]
+                        pipeline__=[]
+                        let_={}
                         for match__ in match_:
                             if match__["key"] and match__["value"]:
-                                key_ = match__["key"]
-                                value_ = match__["value"]
-                                let_[f"{key_}"] = f"${key_}"
+                                key_=match__["key"]
+                                value_=match__["value"]
+                                let_[f"{key_}"]=f"${key_}"
                                 if key_:
                                     pipeline__.append({"$eq": [f"$${key_}", f"${value_}"]})
 
-                        pipeline_ = [{"$match": {"$expr": {"$and": pipeline__}}}]
-                        lookup_ = {
+                        pipeline_=[{"$match": {"$expr": {"$and": pipeline__}}}]
+                        lookup_={
                             "from": f"{parent_collection_}_data",
                             "let": let_,
                             "pipeline": pipeline_,
                             "as": parent_collection_,
                         }
-                        unwind_ = {
+                        unwind_={
                             "path": f"${parent_collection_}",
                             "preserveNullAndEmptyArrays": True
                         }
-                        replace_with_ = {
+                        replace_with_={
                             "$mergeObjects": ["$$ROOT", f"${parent_collection_}"]
                         }
                         pipe_.append({"$lookup": lookup_})
@@ -2032,9 +1951,9 @@ class Crud:
                         pipe_.append({"$replaceWith": replace_with_})
                         unset_.append(parent_collection_)
 
-            vie_filter_ = view_["data_filter"] if "data_filter" in view_ else []
+            vie_filter_=view_["data_filter"] if "data_filter" in view_ else []
             if len(vie_filter_) > 0:
-                get_filtered_ = self.get_filtered_f(
+                get_filtered_=self.get_filtered_f(
                     {
                         "match": vie_filter_,
                         "properties": properties_master_
@@ -2045,38 +1964,38 @@ class Crud:
                 pipe_.append({"$match": get_filtered_})
 
             if unset_ and len(unset_) > 0:
-                unset_ = list(dict.fromkeys(unset_))
+                unset_=list(dict.fromkeys(unset_))
                 pipe_.append({"$unset": unset_})
 
-            records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
-            count_ = len(records_) if records_ else 0
+            records_=json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
+            count_=len(records_) if records_ else 0
 
-            df_ = pd.DataFrame(records_).fillna(0)
+            df_=pd.DataFrame(records_).fillna(0)
 
-            vie_visual_style_ = (
+            vie_visual_style_=(
                 view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
             )
 
-            data_index_0_ = (
+            data_index_0_=(
                 view_["data_index"][0]
                 if "data_index" in view_ and len(view_["data_index"]) > 0
                 else None
             )
-            data_values_0_k_ = (
+            data_values_0_k_=(
                 view_["data_values"][0]["key"]
                 if "data_values" in view_
                 and len(view_["data_values"]) > 0
                 and "key" in view_["data_values"][0]
                 else None
             )
-            data_values_0_v_ = (
+            data_values_0_v_=(
                 view_["data_values"][0]["value"]
                 if "data_values" in view_
                 and len(view_["data_values"]) > 0
                 and "value" in view_["data_values"][0]
                 else "sum"
             )
-            data_columns_0_ = (
+            data_columns_0_=(
                 view_["data_columns"][0]
                 if "data_columns" in view_ and len(view_["data_columns"]) > 0
                 else None
@@ -2085,15 +2004,15 @@ class Crud:
             if data_values_0_k_ not in df_.columns:
                 raise APIError(f"key for data value is missing: {data_values_0_k_}")
 
-            pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ else False
-            data_values_ = view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
+            pivot_totals_=view_["pivot_totals"] if "pivot_totals" in view_ else False
+            data_values_=view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
 
-            dropped_ = []
+            dropped_=[]
             dropped_.append(data_index_0_)
             dropped_.append(data_values_0_k_)
             dropped_.append(data_columns_0_)
 
-            groupby_ = []
+            groupby_=[]
 
             if vie_visual_style_ == "Line":
                 if data_columns_0_ in df_:
@@ -2106,59 +2025,59 @@ class Crud:
                 if data_columns_0_ in df_:
                     groupby_.append(data_columns_0_)
 
-            df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
-            df_raw_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
+            df_=df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
+            df_raw_=df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
 
-            count_ = None
-            sum_ = None
-            unique_ = None
-            mean_ = None
-            stdev_ = None
-            var_ = None
+            count_=None
+            sum_=None
+            unique_=None
+            mean_=None
+            stdev_=None
+            var_=None
 
             if df_ is not None:
-                count_ = len(df_)
+                count_=len(df_)
                 if count_ > 0 and data_values_0_k_ and data_values_0_k_ in df_:
-                    count_ = int(len(df_[data_values_0_k_]))
-                    sum_ = float(
+                    count_=int(len(df_[data_values_0_k_]))
+                    sum_=float(
                         pd.to_numeric(df_[data_values_0_k_], errors="coerce").sum()
                     )
-                    unique_ = float(
+                    unique_=float(
                         pd.to_numeric(df_[data_values_0_k_], errors="coerce").nunique()
                     )
-                    mean_ = float(
+                    mean_=float(
                         pd.to_numeric(df_[data_values_0_k_], errors="coerce").mean()
                     )
-                    stdev_ = float(
+                    stdev_=float(
                         pd.to_numeric(df_[data_values_0_k_], errors="coerce").std()
                     )
-                    var_ = float(
+                    var_=float(
                         pd.to_numeric(df_[data_values_0_k_], errors="coerce").var()
                     )
 
                 if len(groupby_) > 0:
-                    df_ = (
+                    df_=(
                         df_.groupby(groupby_, as_index=False).sum()
                         if data_values_0_v_ == "sum"
                         else df_.groupby(groupby_, as_index=False).count()
                     )
 
-            dfj_ = json.loads(df_.to_json(orient="records"))
+            dfj_=json.loads(df_.to_json(orient="records"))
 
-            series_ = []
-            series_sub_ = []
-            xaxis_ = None
-            legend_ = None
+            series_=[]
+            series_sub_=[]
+            xaxis_=None
+            legend_=None
 
             if data_index_0_:
                 if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
                     for idx_, item_ in enumerate(dfj_):
-                        xaxis_ = (
+                        xaxis_=(
                             item_[data_index_0_]
                             if data_index_0_ in item_
                             else None
                         )
-                        yaxis_ = (
+                        yaxis_=(
                             item_[data_values_0_k_]
                             if data_values_0_k_ in item_
                             else None
@@ -2169,14 +2088,14 @@ class Crud:
                     for idx_, item_ in enumerate(dfj_):
                         if idx_ > 0 and item_[data_columns_0_] != legend_:
                             series_.append({"name": legend_, "series": series_sub_})
-                            series_sub_ = []
+                            series_sub_=[]
                         series_sub_.append(
                             {
                                 "name": item_[data_index_0_],
                                 "value": item_[data_values_0_k_],
                             }
                         )
-                        legend_ = (
+                        legend_=(
                             item_[data_columns_0_]
                             if data_columns_0_ in item_
                             else None
@@ -2187,7 +2106,7 @@ class Crud:
                     for idx_, item_ in enumerate(dfj_):
                         if idx_ > 0 and item_[data_index_0_] != xaxis_:
                             series_.append({"name": xaxis_, "series": series_sub_})
-                            series_sub_ = []
+                            series_sub_=[]
                         if (
                             data_columns_0_ in item_
                             and item_[data_columns_0_] is not None
@@ -2198,7 +2117,7 @@ class Crud:
                                     "value": item_[data_values_0_k_],
                                 }
                             )
-                        xaxis_ = (
+                        xaxis_=(
                             item_[data_index_0_]
                             if data_index_0_ in item_
                             else None
@@ -2206,46 +2125,46 @@ class Crud:
                     if xaxis_:
                         series_.append({"name": xaxis_, "series": series_sub_})
 
-            pvs_ = []
-            aggfunc_ = {}
+            pvs_=[]
+            aggfunc_={}
 
             for idx_, kv_ in enumerate(data_values_):
                 if "key" in kv_ and "value" in kv_:
-                    key_ = kv_["key"]
-                    value_ = kv_["value"]
+                    key_=kv_["key"]
+                    value_=kv_["value"]
                     if key_ in df_.columns and value_ in ["count", "size", "sum", "mean", "average", "stdev", "var", "max", "min", "unique"]:
-                        prfx_ = " " * idx_
-                        nc_ = f"{prfx_}{key_} [{value_}]"
-                        df_[nc_] = df_[key_]
+                        prfx_=" " * idx_
+                        nc_=f"{prfx_}{key_} [{value_}]"
+                        df_[nc_]=df_[key_]
                         pvs_.append(nc_)
-                        df_[nc_] = pd.to_numeric(df_[nc_], errors="coerce")
+                        df_[nc_]=pd.to_numeric(df_[nc_], errors="coerce")
                         if value_ == "count":
-                            aggfunc_[nc_] = "count"
+                            aggfunc_[nc_]="count"
                         elif value_ == "size":
-                            aggfunc_[nc_] = np.size
+                            aggfunc_[nc_]=np.size
                         elif value_ == "sum":
-                            aggfunc_[nc_] = np.sum
+                            aggfunc_[nc_]=np.sum
                         elif value_ == "mean":
-                            aggfunc_[nc_] = np.mean
+                            aggfunc_[nc_]=np.mean
                         elif value_ == "average":
-                            aggfunc_[nc_] = np.average
+                            aggfunc_[nc_]=np.average
                         elif value_ == "stdev":
-                            aggfunc_[nc_] = np.std
+                            aggfunc_[nc_]=np.std
                         elif value_ == "var":
-                            aggfunc_[nc_] = np.var
+                            aggfunc_[nc_]=np.var
                         elif value_ == "unique":
-                            aggfunc_[nc_] = lambda x: len(x.unique())
+                            aggfunc_[nc_]=lambda x: len(x.unique())
                         elif value_ == "max":
-                            aggfunc_[nc_] = np.max
+                            aggfunc_[nc_]=np.max
                         elif value_ == "min":
-                            aggfunc_[nc_] = np.min
+                            aggfunc_[nc_]=np.min
                         else:
-                            aggfunc_[nc_] = "count"
+                            aggfunc_[nc_]="count"
 
-            pivot_html_ = ""
-            pivotify_html_ = ""
+            pivot_html_=""
+            pivotify_html_=""
             if pvs_ and data_index_0_ and data_columns_0_ and aggfunc_ and pivot_totals_:
-                pivot_table_ = pd.pivot_table(
+                pivot_table_=pd.pivot_table(
                     df_,
                     values=pvs_,
                     index=data_index_0_,
@@ -2256,11 +2175,11 @@ class Crud:
                     fill_value=0
                 )
 
-                background_ = "#eee"
-                padding_ = 8
-                padding_r_ = 2 * padding_
-                font_size_table_ = 13
-                styles_ = [
+                background_="#eee"
+                padding_=8
+                padding_r_=2 * padding_
+                font_size_table_=13
+                styles_=[
                     dict(
                         selector="th",
                         props=[
@@ -2282,9 +2201,9 @@ class Crud:
                     dict(selector="caption", props=[("caption-side", "top")]),
                 ]
 
-                pivot_html_ = pivot_table_.to_html().replace('border="1"', "")
-                pivot_table_ = pivot_table_.style.set_table_styles(styles_)
-                pivotify_html_ = pivot_table_.to_html().replace('border="1"', "")
+                pivot_html_=pivot_table_.to_html().replace('border="1"', "")
+                pivot_table_=pivot_table_.style.set_table_styles(styles_)
+                pivotify_html_=pivot_table_.to_html().replace('border="1"', "")
 
             return {
                 "result": True,
@@ -2319,12 +2238,12 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = input_["userindb"]
-            source_ = input_["source"]
+            user_=input_["userindb"]
+            source_=input_["source"]
             if source_ not in ["internal", "external", "propsonly"]:
                 raise APIError("invalid source")
 
-            collections_ = list(Mongo().db_["_collection"].aggregate([
+            collections_=list(Mongo().db_["_collection"].aggregate([
                 {
                     "$project": {
                         "col_id": 1,
@@ -2345,14 +2264,14 @@ class Crud:
                 }
             ]))
 
-            returned_views_ = []
+            returned_views_=[]
             for collection_ in collections_:
-                views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
+                views_=collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
                 if views_:
                     for view_ in views_:
-                        id__ = view_["k"]
-                        view__ = view_["v"]
-                        get_view_data_f_ = self.get_view_data_f(
+                        id__=view_["k"]
+                        view__=view_["v"]
+                        get_view_data_f_=self.get_view_data_f(
                             user_, id__, source_
                         )
                         if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
@@ -2388,24 +2307,24 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["userindb"]
-            data_ = []
-            structure_ = self.root_schemas_f("_collection")
+            user_=obj["userindb"]
+            data_=[]
+            structure_=self.root_schemas_f("_collection")
 
             if Misc().permitted_user_f(user_):
-                data_ = list(
+                data_=list(
                     Mongo()
                     .db_["_collection"]
                     .find(filter={}, sort=[("_updated_at", -1)])
                 )
             else:
-                usr_tags_ = (
+                usr_tags_=(
                     user_["_tags"]
                     if "_tags" in user_ and len(user_["_tags"]) > 0
                     else []
                 )
                 for usr_tag_ in usr_tags_:
-                    filter_ = {
+                    filter_={
                         "per_tag": usr_tag_,
                         "$or": [
                             {"per_insert": True},
@@ -2414,9 +2333,9 @@ class Crud:
                             {"per_delete": True},
                         ],
                     }
-                    permissions_ = Mongo().db_["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
+                    permissions_=Mongo().db_["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
                     for permission_ in permissions_:
-                        collection_ = Mongo().db_["_collection"].find_one({"col_id": permission_["per_collection_id"]})
+                        collection_=Mongo().db_["_collection"].find_one({"col_id": permission_["per_collection_id"]})
                         data_.append(collection_)
 
             return {
@@ -2439,19 +2358,19 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["userindb"]
-            col_id_ = obj["collection"]
-            data_ = {}
-            usr_tags_ = (
+            user_=obj["userindb"]
+            col_id_=obj["collection"]
+            data_={}
+            usr_tags_=(
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
 
             if Misc().permitted_user_f(user_):
-                permitted_ = True
+                permitted_=True
             else:
-                permitted_ = False
+                permitted_=False
                 for usr_tag_ in usr_tags_:
-                    permissions_ = (
+                    permissions_=(
                         Mongo()
                         .db_["_permission"]
                         .find_one(
@@ -2468,11 +2387,11 @@ class Crud:
                         )
                     )
                     if permissions_:
-                        permitted_ = True
+                        permitted_=True
                         break
 
             if permitted_:
-                data_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
+                data_=Mongo().db_["_collection"].find_one({"col_id": col_id_})
             else:
                 raise APIError(f"no permission for {col_id_}")
 
@@ -2493,40 +2412,40 @@ class Crud:
         """
         try:
             # gets the parameters required
-            user_ = input_["user"]
-            limit_ = input_["limit"]
-            page = input_["page"]
-            collection_id_ = input_["collection"]
-            projection_ = input_["projection"]
-            skip_ = limit_ * (page - 1)
-            userindb_ = input_["userindb"]
-            match_ = (
+            user_=input_["user"]
+            limit_=input_["limit"]
+            page=input_["page"]
+            collection_id_=input_["collection"]
+            projection_=input_["projection"]
+            skip_=limit_ * (page - 1)
+            userindb_=input_["userindb"]
+            match_=(
                 input_["match"]
                 if "match" in input_ and len(input_["match"]) > 0
                 else []
             )
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
-            collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
+            is_crud_=True if collection_id_[:1] != "_" else False
+            collection_=f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            collation_ = (
+            collation_=(
                 {"locale": user_["locale"]}
                 if user_ and "locale" in user_
                 else {"locale": "tr"}
             )
 
-            cursor_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
+            cursor_=Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
 
-            structure_ = cursor_["col_structure"] if is_crud_ else cursor_
-            reconfig_ = (
+            structure_=cursor_["col_structure"] if is_crud_ else cursor_
+            reconfig_=(
                 cursor_["_reconfig_req"]
                 if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True
                 else False
             )
 
-            get_filtered_ = self.get_filtered_f(
+            get_filtered_=self.get_filtered_f(
                 {
                     "match": match_,
                     "properties": structure_["properties"]
@@ -2535,7 +2454,7 @@ class Crud:
                 }
             )
 
-            sort_ = (
+            sort_=(
                 list(input_["sort"].items())
                 if "sort" in input_ and input_["sort"]
                 else list(structure_["sort"].items())
@@ -2543,7 +2462,7 @@ class Crud:
                 else [("_modified_at", -1)]
             )
 
-            cursor_ = (
+            cursor_=(
                 Mongo()
                 .db_[collection_]
                 .find(
@@ -2555,8 +2474,8 @@ class Crud:
                 .skip(skip_)
                 .limit(limit_)
             )
-            docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
-            count_ = Mongo().db_[collection_].count_documents(get_filtered_)
+            docs_=json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
+            count_=Mongo().db_[collection_].count_documents(get_filtered_)
 
             return {
                 "result": True,
@@ -2589,9 +2508,9 @@ class Crud:
         docstring is in progress
         """
         try:
-            properties_ = {}
-            required_ = []
-            validator_ = {
+            properties_={}
+            required_=[]
+            validator_={
                 "$jsonSchema": {
                     "bsonType": "object",
                     "properties": {},
@@ -2599,33 +2518,33 @@ class Crud:
                 }
             }
 
-            structure_ = obj["structure"]
-            collection_ = obj["collection"]
+            structure_=obj["structure"]
+            collection_=obj["collection"]
 
             if (
                 collection_ in Mongo().db_.list_collection_names()
                 and "properties" in structure_
             ):
-                properties_ = structure_["properties"]
-                properties_ = Misc().properties_cleaner_f(properties_)
+                properties_=structure_["properties"]
+                properties_=Misc().properties_cleaner_f(properties_)
 
                 if (
                     "required" in structure_
                     and structure_["required"]
                     and len(structure_["required"]) > 0
                 ):
-                    break_ = False
-                    err_ = None
+                    break_=False
+                    err_=None
                     for req_ in structure_["required"]:
                         if req_ not in properties_:
-                            break_ = True
-                            err_ = f"{req_} is required but not found in the structure"
+                            break_=True
+                            err_=f"{req_} is required but not found in the structure"
                             break
                     if break_:
                         raise APIError(err_)
-                    required_ = structure_["required"]
+                    required_=structure_["required"]
                 else:
-                    required_ = None
+                    required_=None
 
                 if properties_:
                     validator_["$jsonSchema"].update({"properties": properties_})
@@ -2637,41 +2556,41 @@ class Crud:
 
                 Mongo().db_[collection_].drop_indexes()
                 if "index" in structure_ and len(structure_["index"]) > 0:
-                    break_ = False
-                    err_ = None
+                    break_=False
+                    err_=None
                     for indexes in structure_["index"]:
-                        ixs = []
-                        ix_name_ = ""
+                        ixs=[]
+                        ix_name_=""
                         for ix in indexes:
                             if ix not in properties_:
-                                break_ = True
-                                err_ = f"{ix} is index but not found in the structure"
+                                break_=True
+                                err_=f"{ix} is index but not found in the structure"
                                 break
                             ixs.append((ix, pymongo.ASCENDING))
                             ix_name_ += f"_{ix}"
                         if break_:
                             raise APIError(err_)
-                        ix_name_ = f"ix_{collection_}{ix_name_}"
+                        ix_name_=f"ix_{collection_}{ix_name_}"
                         Mongo().db_[collection_].create_index(
                             ixs, unique=False, name=ix_name_
                         )
 
                 if "unique" in structure_ and len(structure_["unique"]) > 0:
-                    break_ = False
-                    err_ = None
+                    break_=False
+                    err_=None
                     for uniques in structure_["unique"]:
-                        uqs = []
-                        uq_name_ = ""
+                        uqs=[]
+                        uq_name_=""
                         for uq in uniques:
                             if uq not in properties_:
-                                break_ = True
-                                err_ = f"{uq} is unique but not found in the structure"
+                                break_=True
+                                err_=f"{uq} is unique but not found in the structure"
                                 break
                             uqs.append((uq, pymongo.ASCENDING))
                             uq_name_ += f"_{uq}"
                         if break_:
                             raise APIError(err_)
-                        uq_name_ = f"uq_{collection_}{uq_name_}"
+                        uq_name_=f"uq_{collection_}{uq_name_}"
                         Mongo().db_[collection_].create_index(
                             uqs, unique=True, name=uq_name_
                         )
@@ -2692,11 +2611,11 @@ class Crud:
         docstring is in progress
         """
         try:
-            collection_ = obj["collection"]
+            collection_=obj["collection"]
 
-            structure_ = self.root_schemas_f(f"{collection_}")
+            structure_=self.root_schemas_f(f"{collection_}")
 
-            schemavalidate_ = self.crudschema_validate_f(
+            schemavalidate_=self.crudschema_validate_f(
                 {"collection": collection_, "structure": structure_}
             )
             if not schemavalidate_["result"]:
@@ -2715,19 +2634,19 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["userindb"] if "userindb" in obj else None
-            cid_ = obj["collection"]
+            user_=obj["userindb"] if "userindb" in obj else None
+            cid_=obj["collection"]
 
-            permitted_ = Misc().permitted_user_f(user_)
+            permitted_=Misc().permitted_user_f(user_)
             if not permitted_:
                 raise APIError("not authorized")
 
             # read collection existing structure
-            doc_ = Mongo().db_["_collection"].find_one({"col_id": cid_})
+            doc_=Mongo().db_["_collection"].find_one({"col_id": cid_})
             if not doc_:
                 raise APIError("collection not found")
 
-            structure_ = {
+            structure_={
                 "properties": {},
                 "required": [],
                 "index": [],
@@ -2737,34 +2656,34 @@ class Crud:
                 "sort": {},
             }
 
-            cursor_ = (
+            cursor_=(
                 Mongo()
                 .db_["_field"]
                 .find(filter={"fie_collection_id": cid_}, sort=[("fie_priority", 1)])
             )
 
-            required_ = []
-            unique_ = []
-            indexed_ = []
-            parents_ = []
-            actions_ = []
-            sort_ = {}
+            required_=[]
+            unique_=[]
+            indexed_=[]
+            parents_=[]
+            actions_=[]
+            sort_={}
 
             for doc_ in cursor_:
-                field_ = {}
-                field_id_ = doc_["fie_id"]
-                field_["bsonType"] = (
+                field_={}
+                field_id_=doc_["fie_id"]
+                field_["bsonType"]=(
                     doc_["fie_type"] if "fie_type" in doc_ else "string"
                 )
-                field_["title"] = doc_["fie_title"] if "fie_title" in doc_ else "Title"
-                field_["description"] = (
+                field_["title"]=doc_["fie_title"] if "fie_title" in doc_ else "Title"
+                field_["description"]=(
                     doc_["fie_description"]
                     if "fie_description" in doc_
                     else doc_["fie_title"]
                 )
-                field_["width"] = doc_["fie_width"] if "fie_width" in doc_ else 110
+                field_["width"]=doc_["fie_width"] if "fie_width" in doc_ else 110
                 if "fie_barcoded" in doc_ and doc_["fie_barcoded"] is True:
-                    field_["barcoded"] = True
+                    field_["barcoded"]=True
 
                 if field_["bsonType"] in ["number", "int", "decimal"]:
                     if (
@@ -2772,13 +2691,13 @@ class Crud:
                         and doc_["fie_minimum"] is not None
                         and doc_["fie_minimum"] > 0
                     ):
-                        field_["minimum"] = int(doc_["fie_minimum"])
+                        field_["minimum"]=int(doc_["fie_minimum"])
                     if (
                         "fie_maximum" in doc_
                         and doc_["fie_minimum"] is not None
                         and doc_["fie_maximum"] > 0
                     ):
-                        field_["maximum"] = int(doc_["fie_maximum"])
+                        field_["maximum"]=int(doc_["fie_maximum"])
 
                 if field_["bsonType"] == "string":
                     if (
@@ -2786,52 +2705,52 @@ class Crud:
                         and doc_["fie_min_length"] is not None
                         and doc_["fie_min_length"] > 0
                     ):
-                        field_["minLength"] = int(doc_["fie_min_length"])
+                        field_["minLength"]=int(doc_["fie_min_length"])
                     if (
                         "fie_max_length" in doc_
                         and doc_["fie_max_length"] is not None
                         and doc_["fie_max_length"] > 0
                     ):
-                        field_["maxLength"] = int(doc_["fie_max_length"])
+                        field_["maxLength"]=int(doc_["fie_max_length"])
                     if (
                         "fie_options" in doc_
                         and doc_["fie_options"]
                         and len(doc_["fie_options"]) > 0
                     ):
-                        field_["enum"] = doc_["fie_options"]
+                        field_["enum"]=doc_["fie_options"]
 
                 if field_["bsonType"] == "array":
                     if (
                         "fie_array_unique_items" in doc_
                         and doc_["fie_array_unique_items"]
                     ):
-                        field_["uniqueItems"] = True
+                        field_["uniqueItems"]=True
                     if (
                         "fie_array_min_items" in doc_
                         and doc_["fie_array_min_items"] is not None
                         and doc_["fie_array_min_items"] > 0
                     ):
-                        field_["minItems"] = int(doc_["fie_array_min_items"])
+                        field_["minItems"]=int(doc_["fie_array_min_items"])
                     if (
                         "fie_array_max_items" in doc_
                         and doc_["fie_array_max_items"] is not None
                         and doc_["fie_array_max_items"] > 0
                     ):
-                        field_["maxItems"] = int(doc_["fie_array_max_items"])
+                        field_["maxItems"]=int(doc_["fie_array_max_items"])
                     if (
                         "fie_array_manual_add" in doc_
                         and doc_["fie_array_manual_add"] is True
                     ):
-                        field_["manualAdd"] = True
+                        field_["manualAdd"]=True
 
-                    field_["items"] = {}
+                    field_["items"]={}
                     if "fie_array_items_type" in doc_ and doc_["fie_array_items_type"]:
-                        field_["items"]["bsonType"] = doc_["fie_array_items_type"]
+                        field_["items"]["bsonType"]=doc_["fie_array_items_type"]
                     else:
-                        field_["items"]["bsonType"] = "string"
+                        field_["items"]["bsonType"]="string"
 
                 if "fie_default" in doc_ and doc_["fie_default"]:
-                    field_["default"] = (
+                    field_["default"]=(
                         float(doc_["fie_default"])
                         if field_["bsonType"] in ["number", "decimal"]
                         else int(doc_["fie_default"])
@@ -2840,11 +2759,11 @@ class Crud:
                     )
 
                 if "fie_required" in doc_ and doc_["fie_required"]:
-                    field_["required"] = True
+                    field_["required"]=True
                     required_.append(field_id_)
 
                 if "fie_unique" in doc_ and doc_["fie_unique"]:
-                    uq_ = []
+                    uq_=[]
                     uq_.append(field_id_)
                     if (
                         "fie_unique_add" in doc_
@@ -2853,11 +2772,11 @@ class Crud:
                     ):
                         for uadd_ in doc_["fie_unique_add"]:
                             uq_.append(uadd_)
-                    uq_ = Misc().make_array_unique_f(uq_)
+                    uq_=Misc().make_array_unique_f(uq_)
                     unique_.append(uq_)
 
                 if "fie_indexed" in doc_ and doc_["fie_indexed"]:
-                    ix_ = []
+                    ix_=[]
                     ix_.append(field_id_)
                     if (
                         "fie_indexed_add" in doc_
@@ -2866,11 +2785,11 @@ class Crud:
                     ):
                         for ixadd_ in doc_["fie_indexed_add"]:
                             ix_.append(ixadd_)
-                    ix_ = Misc().make_array_unique_f(ix_)
+                    ix_=Misc().make_array_unique_f(ix_)
                     indexed_.append(ix_)
 
                 if "fie_permanent" in doc_ and doc_["fie_permanent"]:
-                    field_["permanent"] = True
+                    field_["permanent"]=True
 
                 if "fie_has_parent" in doc_ and doc_["fie_has_parent"]:
                     if (
@@ -2895,17 +2814,17 @@ class Crud:
 
                 if "fie_sort" in doc_ and doc_["fie_sort"]:
                     if doc_["fie_sort"] == "ascending":
-                        sort_[field_id_] = 1
+                        sort_[field_id_]=1
                     elif doc_["fie_sort"] == "descending":
-                        sort_[field_id_] = -1
+                        sort_[field_id_]=-1
 
-                structure_["properties"][field_id_] = field_
+                structure_["properties"][field_id_]=field_
 
             if not sort_:
-                sort_["_modified_at"] = -1
+                sort_["_modified_at"]=-1
 
             # set actions
-            cursor_ = (
+            cursor_=(
                 Mongo()
                 .db_["_action"]
                 .find(
@@ -2929,12 +2848,12 @@ class Crud:
                         }
                     )
 
-            structure_["required"] = Misc().make_array_unique_f(required_)
-            structure_["unique"] = unique_
-            structure_["index"] = indexed_
-            structure_["sort"] = sort_
-            structure_["parents"] = parents_
-            structure_["actions"] = actions_
+            structure_["required"]=Misc().make_array_unique_f(required_)
+            structure_["unique"]=unique_
+            structure_["index"]=indexed_
+            structure_["sort"]=sort_
+            structure_["parents"]=parents_
+            structure_["actions"]=actions_
 
             Mongo().db_["_collection"].update_one(
                 {"col_id": cid_},
@@ -2950,7 +2869,7 @@ class Crud:
                 },
             )
 
-            reconfig_set_f_ = self.config_field_to_structure_f(
+            reconfig_set_f_=self.config_field_to_structure_f(
                 {"op": "set", "collection": cid_, "user": user_}
             )
 
@@ -2982,20 +2901,20 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["user"] if "user" in obj else None
-            cid_ = obj["collection"]
-            properties_ = obj["properties"]
-            key_ = obj["key"]
+            user_=obj["user"] if "user" in obj else None
+            cid_=obj["collection"]
+            properties_=obj["properties"]
+            key_=obj["key"]
 
-            collection_f_ = self.inner_collection_f(cid_)
+            collection_f_=self.inner_collection_f(cid_)
             if not collection_f_["result"]:
                 raise APIError("collection not found")
 
-            is_crud_ = True if cid_[:1] != "_" else False
+            is_crud_=True if cid_[:1] != "_" else False
             if not is_crud_:
                 raise APIError("collection is not allowed to update")
 
-            doc_ = Mongo().db_["_collection"].find_one({"col_id": cid_})
+            doc_=Mongo().db_["_collection"].find_one({"col_id": cid_})
             if not doc_:
                 raise APIError("no collection found")
 
@@ -3009,11 +2928,11 @@ class Crud:
                     and len(doc_["col_structure"]["required"]) > 0
                 ):
                     doc_["col_structure"]["required"].append(key_)
-                    doc_["col_structure"]["required"] = Misc().make_array_unique_f(
+                    doc_["col_structure"]["required"]=Misc().make_array_unique_f(
                         doc_["col_structure"]["required"]
                     )
                 else:
-                    doc_["col_structure"]["required"] = [key_]
+                    doc_["col_structure"]["required"]=[key_]
             else:
                 if (
                     "required" in doc_["col_structure"]
@@ -3078,11 +2997,11 @@ class Crud:
                 properties_[key_].pop("maxLength", None)
 
             if "width" not in properties_[key_]:
-                properties_[key_]["width"] = 100
+                properties_[key_]["width"]=100
 
-            doc_["col_structure"]["properties"][key_] = properties_[key_]
-            doc_["_modified_at"] = datetime.now()
-            doc_["_modified_by"] = (
+            doc_["col_structure"]["properties"][key_]=properties_[key_]
+            doc_["_modified_at"]=datetime.now()
+            doc_["_modified_by"]=(
                 user_["email"] if user_ and "email" in user_ else None
             )
 
@@ -3090,7 +3009,7 @@ class Crud:
                 {"col_id": cid_}, {"$set": doc_}, upsert=False
             )
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": cid_,
@@ -3102,12 +3021,12 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            datac_ = f"{cid_}_data"
-            datac_not_found_ = False
+            datac_=f"{cid_}_data"
+            datac_not_found_=False
             if datac_ not in Mongo().db_.list_collection_names():
-                datac_not_found_ = True
+                datac_not_found_=True
                 Mongo().db_[datac_].insert_one({})
-            schemavalidate_ = self.crudschema_validate_f(
+            schemavalidate_=self.crudschema_validate_f(
                 {"collection": datac_, "structure": doc_["col_structure"]}
             )
             if not schemavalidate_["result"]:
@@ -3140,10 +3059,10 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["user"] if "user" in obj else None
-            collection_id_ = obj["collection"]
-            op_ = obj["op"]
-            email_ = (
+            user_=obj["user"] if "user" in obj else None
+            collection_id_=obj["collection"]
+            op_=obj["op"]
+            email_=(
                 user_["email"]
                 if user_ and "email" in user_
                 else user_["usr_id"]
@@ -3151,15 +3070,15 @@ class Crud:
                 else None
             )
 
-            doc_ = {}
+            doc_={}
             if op_ == "request":
-                doc_["_reconfig_req"] = True
-                doc_["_reconfig_req_at"] = datetime.now()
-                doc_["_reconfig_req_by"] = email_
+                doc_["_reconfig_req"]=True
+                doc_["_reconfig_req_at"]=datetime.now()
+                doc_["_reconfig_req_by"]=email_
             else:
-                doc_["_reconfig_req"] = False
-                doc_["_reconfig_set_at"] = datetime.now()
-                doc_["_reconfig_set_by"] = email_
+                doc_["_reconfig_req"]=False
+                doc_["_reconfig_set_at"]=datetime.now()
+                doc_["_reconfig_set_by"]=email_
 
             Mongo().db_["_collection"].update_one(
                 {"col_id": collection_id_},
@@ -3190,42 +3109,32 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["user"] if "user" in obj else None
-            op_ = obj["op"]
-            collection_id_ = obj["collection"]
-            email_ = (
-                user_["email"]
-                if user_ and "email" in user_
-                else user_["usr_id"]
-                if user_ and "usr_id" in user_
-                else None
-            )
-            structure_ = obj["structure"]
+            user_=obj["user"] if "user" in obj else None
+            op_=obj["op"]
+            collection_id_=obj["collection"]
+            email_=user_["email"] if user_ and "email" in user_ else user_["usr_id"] if user_ and "usr_id" in user_ else None
+            structure_=obj["structure"]
 
-            Mongo().db_["_collection"].update_one(
-                {"col_id": collection_id_},
-                {"$set": {"col_structure": structure_}, "$inc": {"_modified_count": 1}},
-            )
+            Mongo().db_["_collection"].update_one({
+                "col_id": collection_id_},
+                {"$set": {"col_structure": structure_},
+                "$inc": {"_modified_count": 1}
+            })
 
-            f_ = self.crudschema_validate_f(
-                {"collection": f"{collection_id_}_data", "structure": structure_}
-            )
-
-            if not f_["result"]:
-                raise APIError(f_["msg"])
+            func_=self.crudschema_validate_f({"collection": f"{collection_id_}_data", "structure": structure_})
+            if not func_["result"]:
+                raise APIError(func_["msg"])
 
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_id_,
-                    "op": op_,
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": op_,
+                "user": email_,
+                "document": str(exc),
+            })
 
             return Misc().mongo_error_f(exc)
 
@@ -3240,48 +3149,48 @@ class Crud:
         docstring is in progress
         """
         try:
-            collection_ = obj["collection"]
-            doc_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
+            collection_=obj["collection"]
+            doc_=Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not doc_:
                 raise APIError("no collection found")
-            user_ = obj["user"] if "user" in obj else None
-            structure_ = obj["structure"] if "structure" in obj else None
-            properties_ = (
+            user_=obj["user"] if "user" in obj else None
+            structure_=obj["structure"] if "structure" in obj else None
+            properties_=(
                 structure_["properties"] if "properties" in structure_ else None
             )
-            actions_ = (
+            actions_=(
                 structure_["actions"]
                 if "actions" in structure_ and len(structure_["actions"]) > 0
                 else None
             )
-            sort_ = structure_["sort"] if "sort" in structure_ else None
-            index_ = structure_["index"] if "index" in structure_ else None
-            unique_ = structure_["unique"] if "unique" in structure_ else None
-            parents_ = structure_["parents"] if "parents" in structure_ else None
+            sort_=structure_["sort"] if "sort" in structure_ else None
+            index_=structure_["index"] if "index" in structure_ else None
+            unique_=structure_["unique"] if "unique" in structure_ else None
+            parents_=structure_["parents"] if "parents" in structure_ else None
             if properties_:
-                priority_ = 0
+                priority_=0
                 for prop_ in properties_:
-                    property_ = properties_[prop_]
+                    property_=properties_[prop_]
                     priority_ += 100
-                    fie_indexed_ = False
-                    fie_indexed_add_ = None
-                    fie_unique_ = False
-                    fie_unique_add_ = None
-                    fie_has_parent_ = False
-                    fie_parent_collection_id_ = None
-                    fie_parent_field_id_ = None
+                    fie_indexed_=False
+                    fie_indexed_add_=None
+                    fie_unique_=False
+                    fie_unique_add_=None
+                    fie_has_parent_=False
+                    fie_parent_collection_id_=None
+                    fie_parent_field_id_=None
                     if unique_ and len(unique_) > 0:
                         for uq_ in unique_:
                             if uq_[0] == prop_:
-                                fie_unique_ = True
+                                fie_unique_=True
                                 if len(uq_) > 1:
-                                    fie_unique_add_ = uq_[1:]
+                                    fie_unique_add_=uq_[1:]
                     if index_ and len(index_) > 0:
                         for ix_ in index_:
                             if ix_[0] == prop_:
-                                fie_indexed_ = True
+                                fie_indexed_=True
                                 if len(ix_) > 1:
-                                    fie_indexed_add_ = ix_[1:]
+                                    fie_indexed_add_=ix_[1:]
                     if parents_ and len(parents_) > 0:
                         for parent_ in parents_:
                             if (
@@ -3289,9 +3198,9 @@ class Crud:
                                 and len(parent_["match"]) > 0
                                 and parent_["match"][0]["key"] == prop_
                             ):
-                                fie_has_parent_ = True
-                                fie_parent_collection_id_ = parent_["collection"]
-                                fie_parent_field_id_ = (
+                                fie_has_parent_=True
+                                fie_parent_collection_id_=parent_["collection"]
+                                fie_parent_field_id_=(
                                     parent_["match"][0]["value"]
                                     if "match" in parent_
                                     and len(parent_["match"]) > 0
@@ -3299,7 +3208,7 @@ class Crud:
                                     else None
                                 )
 
-                    doc_ = {
+                    doc_={
                         "fie_collection_id": collection_,
                         "fie_id": prop_,
                         "fie_type": property_["bsonType"]
@@ -3389,21 +3298,21 @@ class Crud:
 
             if actions_:
                 for action_ in actions_:
-                    act_id_ = action_["id"] if "id" in action_ else None
-                    act_collection_id_ = collection_
-                    act_title_ = action_["title"] if "title" in action_ else None
-                    act_enabled_ = (
+                    act_id_=action_["id"] if "id" in action_ else None
+                    act_collection_id_=collection_
+                    act_title_=action_["title"] if "title" in action_ else None
+                    act_enabled_=(
                         True
                         if "enabled" in action_ and action_["enabled"] is True
                         else False
                     )
-                    act_one_click_ = (
+                    act_one_click_=(
                         True
                         if "one_click" in action_ and action_["one_click"] is True
                         else False
                     )
-                    act_filter_ = action_["filter"] if "filter" in action_ else None
-                    act_set_ = action_["set"] if "set" in action_ else None
+                    act_filter_=action_["filter"] if "filter" in action_ else None
+                    act_set_=action_["set"] if "set" in action_ else None
                     if (
                         act_id_
                         and act_collection_id_
@@ -3412,7 +3321,7 @@ class Crud:
                         and act_set_
                         and len(act_set_) > 0
                     ):
-                        doc_ = {
+                        doc_={
                             "act_id": act_id_,
                             "act_collection_id": act_collection_id_,
                             "act_title": act_title_,
@@ -3469,9 +3378,9 @@ class Crud:
         docstring is in progress
         """
         try:
-            doc = obj["doc"]
-            _id = ObjectId(doc["_id"]) if "_id" in doc else None
-            match_ = (
+            doc=obj["doc"]
+            _id=ObjectId(doc["_id"]) if "_id" in doc else None
+            match_=(
                 {"_id": _id}
                 if _id
                 else obj["match"]
@@ -3480,9 +3389,9 @@ class Crud:
                 if "filter" in obj
                 else None
             )
-            user_ = obj["user"] if "user" in obj else None
-            collection_id_ = obj["collection"]
-            col_check_ = self.inner_collection_f(collection_id_)
+            user_=obj["user"] if "user" in obj else None
+            collection_id_=obj["collection"]
+            col_check_=self.inner_collection_f(collection_id_)
 
             if collection_id_ in ["_log", "_backup", "_event", "_announcement"]:
                 raise APIError("this collection is protected")
@@ -3490,27 +3399,27 @@ class Crud:
             if not col_check_["result"]:
                 raise APIError("collection not found")
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_=True if collection_id_[:1] != "_" else False
 
             if not is_crud_:
-                schemavalidate_ = self.nocrudschema_validate_f(
+                schemavalidate_=self.nocrudschema_validate_f(
                     {"collection": collection_id_}
                 )
                 if not schemavalidate_["result"]:
                     raise APIError(schemavalidate_["msg"])
 
-            doc_ = {}
+            doc_={}
             for item in doc:
                 if item[:1] != "_" or item in Misc().get_except_underdashes():
-                    doc_[item] = doc[item] if doc[item] != "" else None
+                    doc_[item]=doc[item] if doc[item] != "" else None
 
-            doc_["_modified_at"] = datetime.now()
-            doc_["_modified_by"] = (
+            doc_["_modified_at"]=datetime.now()
+            doc_["_modified_by"]=(
                 user_["email"] if user_ and "email" in user_ else None
             )
 
             if collection_id_ == "_field":
-                field_col_ = (
+                field_col_=(
                     Mongo()
                     .db_["_collection"]
                     .find_one({"col_id": doc_["fie_collection_id"]})
@@ -3520,14 +3429,14 @@ class Crud:
                         f"collection not found to upsert: {doc_['fie_collection_id']}"
                     )
                 if doc_["fie_id"][:3] != field_col_["col_prefix"]:
-                    doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
+                    doc_["fie_id"]=f"{field_col_['col_prefix']}_{doc_['fie_id']}"
 
-            collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
+            collection_=f"{collection_id_}_data" if is_crud_ else collection_id_
             Mongo().db_[collection_].update_one(
                 match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False
             )
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": collection_id_,
@@ -3564,25 +3473,25 @@ class Crud:
         docstring is in progress
         """
         try:
-            doc_ = obj["doc"]
-            _id = ObjectId(doc_["_id"]) if "_id" in doc_ else None
-            match_ = {"_id": _id} if _id else obj["match"]
-            user_ = obj["user"] if "user" in obj else None
-            collection_id_ = obj["collection"]
+            doc_=obj["doc"]
+            _id=ObjectId(doc_["_id"]) if "_id" in doc_ else None
+            match_={"_id": _id} if _id else obj["match"]
+            user_=obj["user"] if "user" in obj else None
+            collection_id_=obj["collection"]
 
             # protect _log collection from delete requests
             if collection_id_ in ["_log", "_backup", "_announcement"]:
                 raise APIError("this collection is protected to delete")
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
-            collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
+            is_crud_=True if collection_id_[:1] != "_" else False
+            collection_=f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            doc_["_removed_at"] = datetime.now()
-            doc_["_removed_by"] = user_["email"] if user_ and "email" in user_ else None
+            doc_["_removed_at"]=datetime.now()
+            doc_["_removed_by"]=user_["email"] if user_ and "email" in user_ else None
 
             Mongo().db_[collection_].delete_one(match_)
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": collection_id_,
@@ -3595,7 +3504,7 @@ class Crud:
                 raise APIError(log_["msg"])
 
             if collection_ == "_collection":
-                c_ = doc_["col_id"]
+                c_=doc_["col_id"]
                 Mongo().db_[f"{c_}_data"].aggregate(
                     [{"$match": {}}, {"$out": f"{c_}_data_removed"}]
                 )
@@ -3636,12 +3545,12 @@ class Crud:
         docstring is in progress
         """
         try:
-            collection_id_ = obj["collection"]
-            user_ = obj["user"] if "user" in obj else None
-            match_ = obj["match"] if "match" in obj else None
+            collection_id_=obj["collection"]
+            user_=obj["user"] if "user" in obj else None
+            match_=obj["match"] if "match" in obj else None
 
             # checks if the operator is either clone or delete
-            op_ = obj["op"]
+            op_=obj["op"]
             if op_ != "clone" and op_ != "delete":
                 raise APIError("operation not supported")
 
@@ -3659,20 +3568,20 @@ class Crud:
                     )
 
             # collect object ids of the records to be processed
-            ids_ = []
+            ids_=[]
             for _id in match_:
                 ids_.append(ObjectId(_id))
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
-            collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
+            is_crud_=True if collection_id_[:1] != "_" else False
+            collection_=f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            structure__ = (
+            structure__=(
                 Mongo().db_["_collection"].find_one({"col_id": collection_id_})
                 if is_crud_
                 else self.root_schemas_f(f"{collection_id_}")
             )
             if structure__:
-                structure_ = structure__["col_structure"] if is_crud_ else structure__
+                structure_=structure__["col_structure"] if is_crud_ else structure__
             else:
                 raise APIError(f"collection structure not found: {collection_id_}")
             if not structure_:
@@ -3680,21 +3589,21 @@ class Crud:
 
             # checks the unique key of the collection to generate a new key for the clone operation
             if "unique" in structure_ and "properties" in structure_:
-                properties = structure_["properties"]
-                unique = structure_["unique"]
+                properties=structure_["properties"]
+                unique=structure_["unique"]
             else:
                 if op_ == "clone":
                     raise APIError("unique in structure not found")
 
             # creates a cursor from the object ids proceed to be cloned or deleted
-            cursor = Mongo().db_[collection_].find({"_id": {"$in": ids_}})
+            cursor=Mongo().db_[collection_].find({"_id": {"$in": ids_}})
             for index, doc in enumerate(cursor, start=1):
                 if op_ == "clone":
-                    doc["_created_at"] = doc["_modified_at"] = datetime.now()
-                    doc["_created_by"] = doc["_modified_by"] = (
+                    doc["_created_at"]=doc["_modified_at"]=datetime.now()
+                    doc["_created_by"]=doc["_modified_by"]=(
                         user_["email"] if user_ and "email" in user_ else None
                     )
-                    doc["_modified_count"] = 0
+                    doc["_modified_count"]=0
                     doc.pop("_id", None)
                     if unique:
                         for uq in unique:
@@ -3703,11 +3612,11 @@ class Crud:
                                     "objectId" in properties[uq[0]]
                                     and properties[uq[0]]["objectId"] is True
                                 ):
-                                    doc[uq[0]] = str(bson.objectid.ObjectId())
+                                    doc[uq[0]]=str(bson.objectid.ObjectId())
                                 elif properties[uq[0]]["bsonType"] == "string":
                                     # concat a suffix index no to field
                                     # doc[uq[0]] = f"{doc[uq[0]]}{index}"
-                                    doc[uq[0]] = (
+                                    doc[uq[0]]=(
                                         f"{doc[uq[0]]}_x"
                                         if "_" in doc[uq[0]]
                                         else f"{doc[uq[0]]}-{index}"
@@ -3716,14 +3625,14 @@ class Crud:
 
                 elif op_ == "delete":
                     Mongo().db_[collection_].delete_one({"_id": doc["_id"]})
-                    doc["_deleted_at"] = datetime.now()
-                    doc["_deleted_by"] = (
+                    doc["_deleted_at"]=datetime.now()
+                    doc["_deleted_by"]=(
                         user_["email"] if user_ and "email" in user_ else None
                     )
-                    bin = f"{collection_id_}_bin"
+                    bin=f"{collection_id_}_bin"
                     Mongo().db_[bin].insert_one(doc)
 
-                log_ = Misc().log_f(
+                log_=Misc().log_f(
                     {
                         "type": "Info",
                         "collection": collection_,
@@ -3760,31 +3669,31 @@ class Crud:
         docstring is in progress
         """
         try:
-            collection_id_ = obj["collection"]
-            user_ = obj["userindb"] if "userindb" in obj else None
-            match_ = obj["match"] if "match" in obj else None
-            actionix_ = obj["actionix"] if "actionix" in obj else None
-            doc_ = obj["doc"] if "doc" in obj else None
+            collection_id_=obj["collection"]
+            user_=obj["userindb"] if "userindb" in obj else None
+            match_=obj["match"] if "match" in obj else None
+            actionix_=obj["actionix"] if "actionix" in obj else None
+            doc_=obj["doc"] if "doc" in obj else None
 
-            email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
+            email_=user_["usr_id"] if user_ and "usr_id" in user_ else None
             if not email_:
                 raise AppException("user is not allowed")
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_=True if collection_id_[:1] != "_" else False
             if not is_crud_:
                 raise AppException("operation is not allowed")
 
             if int(actionix_) < 0:
                 raise AppException("please select an action to run")
-            actionix_ = int(actionix_)
+            actionix_=int(actionix_)
 
-            ids_ = []
+            ids_=[]
             if match_ and len(match_) > 0:
                 for _id in match_:
                     ids_.append(ObjectId(_id))
 
-            collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            schema_ = (
+            collection_=f"{collection_id_}_data" if is_crud_ else collection_id_
+            schema_=(
                 Mongo().db_["_collection"].find_one({"col_id": collection_id_})
                 if is_crud_
                 else self.root_schemas_f(f"{collection_id_}")
@@ -3792,13 +3701,13 @@ class Crud:
             if not schema_:
                 raise AppException("schema not found")
 
-            structure_ = (
+            structure_=(
                 schema_["col_structure"] if "col_structure" in schema_ else None
             )
             if not structure_:
                 raise AppException(f"structure not found {collection_id_}")
 
-            action_ = (
+            action_=(
                 structure_["actions"][actionix_]
                 if "actions" in structure_
                 and len(structure_["actions"]) > 0
@@ -3808,7 +3717,7 @@ class Crud:
             if not action_:
                 raise AppException("action not found")
 
-            tags_ = (
+            tags_=(
                 action_["_tags"]
                 if "_tags" in action_ and len(action_["_tags"]) > 0
                 else None
@@ -3816,44 +3725,44 @@ class Crud:
             if not tags_:
                 raise AppException("no tags found in action")
 
-            notify_ = False
-            notification_ = (
+            notify_=False
+            notification_=(
                 action_["notification"] if "notification" in action_ else None
             )
 
             if notification_:
                 if "notify" not in notification_:
                     raise AppException("no notify field found in notification")
-                notify_ = True if notification_["notify"] is True else False
-                subject_ = (
+                notify_=True if notification_["notify"] is True else False
+                subject_=(
                     notification_["subject"]
                     if "subject" in notification_
                     else "Action Completed"
                 )
                 if not subject_:
                     raise AppException("no subject field found in notification")
-                body_ = (
+                body_=(
                     notification_["body"]
                     if "body" in notification_
                     else f"<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
                 )
                 if not body_:
                     raise AppException("no body field found in notification")
-                fields_ = (
+                fields_=(
                     notification_["fields"].replace(" ", "")
                     if "fields" in notification_
                     else None
                 )
                 if not fields_:
                     raise AppException("no fields field found in notification")
-                filter_ = (
+                filter_=(
                     notification_["filter"]
                     if "filter" in notification_ and len(notification_["filter"]) > 0
                     else None
                 )
                 if not filter_:
                     raise AppException("no filter array found in notification")
-                get_notification_filtered_ = self.get_filtered_f(
+                get_notification_filtered_=self.get_filtered_f(
                     {
                         "match": filter_,
                         "properties": structure_["properties"]
@@ -3862,13 +3771,13 @@ class Crud:
                     }
                 )
 
-            match_ = (
+            match_=(
                 action_["match"]
                 if "match" in action_ and len(action_["match"]) > 0
                 else {}
             )
 
-            get_filtered_ = self.get_filtered_f(
+            get_filtered_=self.get_filtered_f(
                 {
                     "match": match_,
                     "properties": structure_["properties"]
@@ -3877,33 +3786,33 @@ class Crud:
                 }
             )
 
-            doc_["_modified_at"] = datetime.now()
-            doc_["_modified_by"] = email_
+            doc_["_modified_at"]=datetime.now()
+            doc_["_modified_by"]=email_
 
             if ids_ and len(ids_) > 0:
-                get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
+                get_filtered_={"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
                 if notify_:
-                    get_notification_filtered_ = {
+                    get_notification_filtered_={
                         "$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]
                     }
 
             # DO ACTION ON DATABASE
-            session_client_ = MongoClient(Mongo().connstr)
-            session_db_ = session_client_[MONGO_DB_]
-            session_ = session_client_.start_session()
+            session_client_=MongoClient(Mongo().connstr)
+            session_db_=session_client_[MONGO_DB_]
+            session_=session_client_.start_session()
             session_.start_transaction()
-            set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
-            update_many_ = session_db_[collection_].update_many(
+            set_={"$set": doc_, "$inc": {"_modified_count": 1}}
+            update_many_=session_db_[collection_].update_many(
                 get_filtered_, set_, session=session_
             )
 
             if update_many_.matched_count:
                 session_.commit_transaction()
                 if notify_:
-                    type_ = "csv"
-                    file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
-                    loc_ = f"/cron/{file_}"
-                    query_ = (
+                    type_="csv"
+                    file_=f"action-{Misc().get_timestamp_f()}.{type_}"
+                    loc_=f"/cron/{file_}"
+                    query_=(
                         "'"
                         + json.dumps(
                             get_notification_filtered_,
@@ -3912,10 +3821,10 @@ class Crud:
                         )
                         + "'"
                     )
-                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                    command_=f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
-                    files_ = [{"filename": file_, "filetype": type_}]
-                    email_sent_ = Email().sendEmail_f(
+                    files_=[{"filename": file_, "filetype": type_}]
+                    email_sent_=Email().sendEmail_f(
                         {
                             "op": "action",
                             "tags": tags_,
@@ -3929,7 +3838,7 @@ class Crud:
             else:
                 raise AppException("no rows affected due to the match criteria")
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": collection_,
@@ -3973,9 +3882,9 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["user"] if "user" in obj else None
-            collection_id_ = obj["collection"]
-            doc_ = obj["doc"]
+            user_=obj["user"] if "user" in obj else None
+            collection_id_=obj["collection"]
+            doc_=obj["doc"]
 
             if "_id" in doc_:
                 doc_.pop("_id", None)
@@ -3983,47 +3892,47 @@ class Crud:
             if "_structure" in doc_:
                 doc_.pop("_structure", None)
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
-            collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            doc_["_created_at"] = doc_["_modified_at"] = datetime.now()
+            is_crud_=True if collection_id_[:1] != "_" else False
+            collection_=f"{collection_id_}_data" if is_crud_ else collection_id_
+            doc_["_created_at"]=doc_["_modified_at"]=datetime.now()
 
-            doc_["_created_by"] = doc_["_modified_by"] = (
+            doc_["_created_by"]=doc_["_modified_by"]=(
                 user_["email"] if user_ and "email" in user_ else None
             )
 
             if collection_id_ == "_collection":
-                file_ = "template-foo.json"
-                prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
-                path_ = f"/app/_template/{file_}"
+                file_="template-foo.json"
+                prefix_=doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
+                path_=f"/app/_template/{file_}"
                 if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    jtxt_ = f_.read()
-                    jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
-                    structure_ = json.loads(jtxt_)
-                doc_["col_structure"] = structure_
+                    f_=open(path_, "r")
+                    jtxt_=f_.read()
+                    jtxt_=jtxt_.replace("foo_", f"{prefix_}_")
+                    structure_=json.loads(jtxt_)
+                doc_["col_structure"]=structure_
 
             Mongo().db_[collection_].insert_one(doc_)
 
             if collection_id_ == "_collection":
-                col_id_ = doc_["col_id"] if "col_id" in doc_ else None
-                col_structure_ = (
+                col_id_=doc_["col_id"] if "col_id" in doc_ else None
+                col_structure_=(
                     doc_["col_structure"] if "col_structure" in doc_ else None
                 )
-                datac_ = f"{col_id_}_data"
+                datac_=f"{col_id_}_data"
                 if (
                     col_structure_
                     and col_structure_ != {}
                     and datac_ not in Mongo().db_.list_collection_names()
                 ):
                     Mongo().db_[datac_].insert_one({})
-                    schemavalidate_ = self.crudschema_validate_f(
+                    schemavalidate_=self.crudschema_validate_f(
                         {"collection": datac_, "structure": col_structure_}
                     )
                     if not schemavalidate_["result"]:
                         raise APIError(schemavalidate_["msg"])
                     Mongo().db_[datac_].delete_one({})
             elif collection_id_ in ["_field", "_action"]:
-                cid_ = (
+                cid_=(
                     doc_["fie_collection_id"]
                     if collection_id_ == "_field" and "fie_collection_id" in doc_
                     else doc_["act_collection_id"]
@@ -4031,13 +3940,13 @@ class Crud:
                     else None
                 )
                 if cid_:
-                    config_structure_f_ = self.config_field_to_structure_f(
+                    config_structure_f_=self.config_field_to_structure_f(
                         {"op": "request", "collection": cid_, "user": user_}
                     )
                     if not config_structure_f_["result"]:
                         raise APIError(config_structure_f_["msg"])
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": collection_id_,
@@ -4079,29 +3988,29 @@ class Email:
         """
         docstring is in progress
         """
-        self.disclaimer_ = f"<p>Sincerely,</p><p>{COMPANY_NAME_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
-        self.disclaimer_text_ = f"\n\nSincerely,\n\n{COMPANY_NAME_}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
+        self.disclaimer_=f"<p>Sincerely,</p><p>{COMPANY_NAME_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
+        self.disclaimer_text_=f"\n\nSincerely,\n\n{COMPANY_NAME_}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
 
     def send_email_smtp_f(self, msg):
         """
         docstring is in progress
         """
         try:
-            email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
-            html_ = f"{msg['html']} {self.disclaimer_}"
-            server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
+            email_from_=f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
+            html_=f"{msg['html']} {self.disclaimer_}"
+            server_=smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
             server_.ehlo()
             server_.login(SMTP_USERID_, SMTP_PASSWORD_)
 
-            message_ = MIMEMultipart()
-            message_["From"] = email_from_
-            message_["Subject"] = msg["subject"]
+            message_=MIMEMultipart()
+            message_["From"]=email_from_
+            message_["Subject"]=msg["subject"]
             message_.attach(MIMEText(html_, "html"))
 
             for file_ in msg["files"]:
-                filename_ = file_["filename"]
+                filename_=file_["filename"]
                 with open(f"/cron/{filename_}", "rb") as attachment_:
-                    part_ = MIMEBase("application", "octet-stream")
+                    part_=MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
                 part_.add_header(
@@ -4110,10 +4019,10 @@ class Email:
                 )
                 message_.attach(part_)
 
-            recipients_ = []
-            recipients_str_ = ""
+            recipients_=[]
+            recipients_str_=""
             for recipient_ in msg["personalizations"]["to"]:
-                email_to_ = (
+                email_to_=(
                     f"{recipient_['name']} <{recipient_['email']}>"
                     if recipient_["name"] and "name" in recipient_
                     else recipient_["email"]
@@ -4123,7 +4032,7 @@ class Email:
                 )
                 recipients_.append(recipient_["email"])
 
-            message_["To"] = recipients_str_
+            message_["To"]=recipients_str_
             server_.sendmail(email_from_, recipients_, message_.as_string())
             server_.close()
 
@@ -4140,17 +4049,17 @@ class Email:
         docstring is in progress
         """
         try:
-            op_ = msg["op"] if "op" in msg else None
-            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
-            html_ = f"{msg['html']}" if "html" in msg else None
-            tags_ = msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
-            personalizations_ = (
+            op_=msg["op"] if "op" in msg else None
+            files_=msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
+            html_=f"{msg['html']}" if "html" in msg else None
+            tags_=msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
+            personalizations_=(
                 msg["personalizations"] if "personalizations" in msg else None
             )
-            subject_ = msg["subject"] if "subject" in msg else None
+            subject_=msg["subject"] if "subject" in msg else None
 
             if subject_ is None:
-                subject_ = (
+                subject_=(
                     EMAIL_UPLOADERR_SUBJECT_
                     if op_ in ["uploaderr", "importerr"]
                     else EMAIL_SIGNIN_SUBJECT_
@@ -4174,10 +4083,10 @@ class Email:
                 raise APIError("email message is missing")
 
             if tags_:
-                f_ = Misc().get_users_from_tags_f(tags_)
+                f_=Misc().get_users_from_tags_f(tags_)
                 if not f_["result"]:
                     raise APIError(f"personalizations error {f_['msg']}")
-                personalizations_ = f_ if "to" in f_ else None
+                personalizations_=f_ if "to" in f_ else None
 
             if personalizations_ is None:
                 raise APIError("email personalizations is missing")
@@ -4185,7 +4094,7 @@ class Email:
             if "to" not in personalizations_ or len(personalizations_["to"]) == 0:
                 raise APIError("to list is missing")
 
-            msg_ = {
+            msg_={
                 "op": op_,
                 "files": files_,
                 "personalizations": personalizations_,
@@ -4193,7 +4102,7 @@ class Email:
                 "html": html_
             }
 
-            email_sent_ = self.send_email_smtp_f(msg_)
+            email_sent_=self.send_email_smtp_f(msg_)
 
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
@@ -4216,13 +4125,13 @@ class Security:
         """
         docstring is in progress
         """
-        self.HEADERS = request.headers
-        self.URL = request.url
-        self.QSTRING = request.query_string.decode()
-        self.XAPIKEY = (
+        self.HEADERS=request.headers
+        self.URL=request.url
+        self.QSTRING=request.query_string.decode()
+        self.XAPIKEY=(
             self.HEADERS["X-Api-Key"] if "X-Api-Key" in self.HEADERS else None
         )
-        self.ORIGIN = (
+        self.ORIGIN=(
             self.HEADERS["Origin"]
             .replace("https://", "")
             .replace("http://", "")
@@ -4269,13 +4178,13 @@ class OTP:
         """
         try:
             # read auth
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
-            aut_otp_secret_ = pyotp.random_base32()
+            aut_otp_secret_=pyotp.random_base32()
 
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
+            qr_=pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
                 name=email_, issuer_name="Technoplatz-BI"
             )
 
@@ -4294,7 +4203,7 @@ class OTP:
                 },
             )
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": "_auth",
@@ -4329,33 +4238,33 @@ class OTP:
         """
         try:
             # read auth
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
-            aut_otp_secret_ = (
+            aut_otp_secret_=(
                 auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
             )
-            aut_otp_validated_ = (
+            aut_otp_validated_=(
                 auth_["aut_otp_validated"] if "aut_otp_validated" in auth_ else False
             )
 
             if not aut_otp_secret_:
                 raise AuthError("OTP secret is missing")
 
-            otp_ = request_["otp"] if "otp" in request_ else None
+            otp_=request_["otp"] if "otp" in request_ else None
             if not otp_:
                 raise AuthError("OTP is missing")
 
-            totp_ = pyotp.TOTP(aut_otp_secret_)
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
+            totp_=pyotp.TOTP(aut_otp_secret_)
+            qr_=pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
                 name=email_, issuer_name="BI"
             )
 
-            validated_ = False
+            validated_=False
 
             if totp_.verify(otp_):
-                validated_ = True
+                validated_=True
                 Mongo().db_["_auth"].update_one(
                     {"aut_id": email_},
                     {
@@ -4383,7 +4292,7 @@ class OTP:
                         },
                     )
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": "_auth",
@@ -4421,21 +4330,21 @@ class OTP:
         """
         try:
             # read auth
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
-            aut_otp_secret_ = (
+            aut_otp_secret_=(
                 auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
             )
 
             if not aut_otp_secret_:
-                reset_otp_f_ = self.reset_otp_f(email_)
+                reset_otp_f_=self.reset_otp_f(email_)
                 if not reset_otp_f_["result"]:
                     raise APIError(reset_otp_f_["msg"])
-                qr_ = reset_otp_f_["qr"]
+                qr_=reset_otp_f_["qr"]
             else:
-                qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
+                qr_=pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
                     name=email_, issuer_name="Technoplatz-BI"
                 )
 
@@ -4458,18 +4367,14 @@ class OTP:
         docstring is in progress
         """
         try:
-            # checks if the user was created already
-            user_ = Mongo().db_["_user"].find_one({"usr_id": email_})
+            user_=Mongo().db_["_user"].find_one({"usr_id": email_, "usr_enabled": True})
             if not user_ or user_ is None:
-                raise APIError("user not found for otp")
+                raise APIError("user not found")
 
-            if "usr_enabled" not in user_ or not user_["usr_enabled"]:
-                raise APIError("user status is disabled to get logged in")
+            usr_id_=user_["usr_id"]
+            name_=user_["usr_name"]
 
-            usr_id_ = user_["usr_id"]
-            name_ = user_["usr_name"]
-
-            tfac_ = randint(100001, 999999)
+            tfac_=randint(100001, 999999)
             Mongo().db_["_auth"].update_one(
                 {"aut_id": usr_id_},
                 {
@@ -4481,7 +4386,7 @@ class OTP:
                 },
             )
 
-            email_sent_ = Email().sendEmail_f(
+            email_sent_=Email().sendEmail_f(
                 {
                     "op": "tfa",
                     "personalizations": {"to": [{"email": usr_id_, "name": name_}]},
@@ -4514,7 +4419,7 @@ class Auth:
         docstring is in progress
         """
         try:
-            saas_ = {
+            saas_={
                 "company": COMPANY_NAME_,
                 "version": "Technoplatz BI - Enterprise Edition"
                 if SAAS_.lower() == "ee"
@@ -4534,28 +4439,28 @@ class Auth:
         docstring is in progress
         """
         try:
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError(f"user auth not found {email_}")
 
             # checks if tfac is valid format
-            compile_ = re.compile("^[0-9]{6,6}$")
+            compile_=re.compile("^[0-9]{6,6}$")
             if not re.search(compile_, str(tfac_)):
                 raise AuthError("invalid TFAC")
 
-            aut_otp_secret_ = (
+            aut_otp_secret_=(
                 auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
             )
-            aut_otp_validated_ = (
+            aut_otp_validated_=(
                 auth_["aut_otp_validated"] if "aut_otp_validated" in auth_ else False
             )
-            aut_tfac_ = auth_["aut_tfac"] if "aut_tfac" in auth_ else None
+            aut_tfac_=auth_["aut_tfac"] if "aut_tfac" in auth_ else None
 
             if aut_tfac_ and str(aut_tfac_) == str(tfac_):
                 pass
             else:
                 if aut_otp_secret_ and aut_otp_validated_:
-                    validate_otp_f_ = OTP().validate_otp_f(email_, {"otp": tfac_})
+                    validate_otp_f_=OTP().validate_otp_f(email_, {"otp": tfac_})
                     if not validate_otp_f_["result"]:
                         raise AuthError("Invalid OTP code")
                 else:
@@ -4607,12 +4512,12 @@ class Auth:
         docstring is in progress
         """
         try:
-            input_ = request.json
+            input_=request.json
             if "email" not in input_ or input_["email"] is None:
                 raise APIError("E-mail is missing")
             if "name" not in input_ or input_["name"] is None:
                 raise APIError("Full name is missing")
-            pat = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
+            pat=re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
             if not re.search(pat, input_["email"]):
                 raise APIError("Invalid e-mail address")
             if "password" not in input_ or input_["password"] is None:
@@ -4631,13 +4536,13 @@ class Auth:
         docstring is in progress
         """
         try:
-            pat = re.compile(
+            pat=re.compile(
                 "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*.-_?&]{8,32}$"
             )
             if not re.search(pat, password_):
                 raise APIError("Invalid password")
-            salt_ = os.urandom(32) if salted_ is None else salted_
-            key_ = hashlib.pbkdf2_hmac(
+            salt_=os.urandom(32) if salted_ is None else salted_
+            key_=hashlib.pbkdf2_hmac(
                 "sha512", password_.encode("utf-8"), salt_, 101010, dklen=128
             )
             return {"result": True, "salt": salt_, "key": key_}
@@ -4654,8 +4559,8 @@ class Auth:
         """
         try:
             # gets the required parameters
-            input_ = request.json
-            email_ = input_["email"]
+            input_=request.json
+            email_=input_["email"]
 
             # sets None to auth token and TFAC code
             Mongo().db_["_auth"].update_one(
@@ -4686,21 +4591,21 @@ class Auth:
         docstring is in progress
         """
         try:
-            user_ = input_["user"]
-            user_id_ = user_["usr_id"] if "usr_id" in user_ else None
-            usr_tags_ = (
+            user_=input_["user"]
+            user_id_=user_["usr_id"] if "usr_id" in user_ else None
+            usr_tags_=(
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
-            collection_id_ = input_["collection"] if "collection" in input_ else None
-            op_ = input_["op"] if "op" in input_ else None
-            administratives_ = ["dump", "backup", "restore"]
-            permissive_ = ["view", "views", "collections", "template"]
-            allowmatch_ = []
+            collection_id_=input_["collection"] if "collection" in input_ else None
+            op_=input_["op"] if "op" in input_ else None
+            administratives_=["dump", "backup", "restore"]
+            permissive_=["view", "views", "collections", "template"]
+            allowmatch_=[]
 
             if not user_id_:
                 raise APIError(f"user not found {user_id_}")
 
-            op_ = "read" if op_ in ["collection"] else input_["op"]
+            op_="read" if op_ in ["collection"] else input_["op"]
             if not op_:
                 raise APIError(f"operation is missing {op_}")
 
@@ -4720,14 +4625,14 @@ class Auth:
             if collection_id_[:1] == "_" and op_ == "read":
                 return {"result": True, "allowmatch": allowmatch_}
 
-            collection_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_})
+            collection_=Mongo().db_["_collection"].find_one({"col_id": collection_id_})
             if not collection_:
                 raise APIError(f"no collection found {collection_id_}/{op_}")
 
-            permission_ = False
+            permission_=False
 
             for ix_, usr_tag_ in enumerate(usr_tags_):
-                permission_check_ = (
+                permission_check_=(
                     Mongo()
                     .db_["_permission"]
                     .find_one(
@@ -4735,37 +4640,37 @@ class Auth:
                     )
                 )
                 if permission_check_:
-                    per_insert_ = (
+                    per_insert_=(
                         True
                         if "per_insert" in permission_check_
                         and permission_check_["per_insert"] is True
                         else False
                     )
-                    per_read_ = (
+                    per_read_=(
                         True
                         if "per_read" in permission_check_
                         and permission_check_["per_read"] is True
                         else False
                     )
-                    per_update_ = (
+                    per_update_=(
                         True
                         if "per_update" in permission_check_
                         and permission_check_["per_update"] is True
                         else False
                     )
-                    per_delete_ = (
+                    per_delete_=(
                         True
                         if "per_delete" in permission_check_
                         and permission_check_["per_delete"] is True
                         else False
                     )
-                    per_share_ = (
+                    per_share_=(
                         True
                         if "per_share" in permission_check_
                         and permission_check_["per_share"] is True
                         else False
                     )
-                    per_schema_ = (
+                    per_schema_=(
                         True
                         if "per_schema" in permission_check_
                         and permission_check_["per_schema"] is True
@@ -4783,13 +4688,13 @@ class Auth:
                         or (op_ == "delete" and per_read_ and per_delete_)
                     ):
                         if ix_ == 0:
-                            allowmatch_ = (
+                            allowmatch_=(
                                 permission_check_["per_match"]
                                 if "per_match" in permission_check_
                                 and len(permission_check_["per_match"]) > 0
                                 else []
                             )
-                        permission_ = True
+                        permission_=True
                         break
 
             if permission_ is False:
@@ -4814,11 +4719,11 @@ class Auth:
         docstring is in progress
         """
         try:
-            ip_ = Misc().get_user_ip_f()
-            tags_ = (
+            ip_=Misc().get_user_ip_f()
+            tags_=(
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
-            allowed_ = (
+            allowed_=(
                 Mongo()
                 .db_["_firewall"]
                 .find_one(
@@ -4872,27 +4777,27 @@ class Auth:
         """
         try:
             # gets the email and user token
-            user_ = input_["user"] if "user" in input_ else input_
-            email_ = user_["email"] if "email" in user_ else None
-            token_ = user_["token"] if "token" in user_ else None
-            jdate_curr_ = Misc().get_jdate_f()
+            user_=input_["user"] if "user" in input_ else input_
+            email_=user_["email"] if "email" in user_ else None
+            token_=user_["token"] if "token" in user_ else None
+            jdate_curr_=Misc().get_jdate_f()
 
             if not email_ or not token_:
                 raise APIError("invalid session parameters")
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
-            token_db_ = auth_["aut_token"] if "aut_token" in auth_ else None
+            token_db_=auth_["aut_token"] if "aut_token" in auth_ else None
 
             if not token_db_ or token_ != token_db_:
                 raise APIError(f"session closed for {email_}")
 
             if "jdate" not in user_:
-                user_["jdate"] = jdate_curr_
+                user_["jdate"]=jdate_curr_
 
-            jdate_exp_ = int(user_["jdate"]) + int(SECUR_MAX_AGE_)
+            jdate_exp_=int(user_["jdate"]) + int(SECUR_MAX_AGE_)
 
             if jdate_curr_ > jdate_exp_:
                 raise APIError(f"session expired")
@@ -4927,20 +4832,20 @@ class Auth:
         docstring is in progress
         """
         try:
-            user_ = input_["user"]
-            op_ = input_["op"]
+            user_=input_["user"]
+            op_=input_["op"]
 
-            email_ = user_["email"]
+            email_=user_["email"]
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
-            response_ = {}
-            apikey_ = None
+            response_={}
+            apikey_=None
 
             if op_ == "apikeygen":
-                apikey_ = secrets.token_hex(16)
+                apikey_=secrets.token_hex(16)
                 Mongo().db_["_auth"].update_one(
                     {"aut_id": email_},
                     {
@@ -4953,7 +4858,7 @@ class Auth:
                     },
                     upsert=False,
                 )
-                log_ = Misc().log_f(
+                log_=Misc().log_f(
                     {
                         "type": "Info",
                         "collection": "_auth",
@@ -4970,16 +4875,16 @@ class Auth:
                 if not log_["result"]:
                     raise APIError(log_["msg"])
 
-                response_ = {"apikey": apikey_, "_modified_at": datetime.now()}
+                response_={"apikey": apikey_, "_modified_at": datetime.now()}
 
             elif op_ == "apikeyget":
-                apikey_modified_at_ = (
+                apikey_modified_at_=(
                     auth_["_apikey_modified_at"]
                     if "_apikey_modified_at" in auth_
                     else None
                 )
-                apikey_ = auth_["aut_apikey"] if "aut_apikey" in auth_ else None
-                response_ = {
+                apikey_=auth_["aut_apikey"] if "aut_apikey" in auth_ else None
+                response_={
                     "apikey": apikey_,
                     "apikey_modified_at": apikey_modified_at_,
                 }
@@ -5006,17 +4911,17 @@ class Auth:
         docstring is in progress
         """
         try:
-            input_ = request.json
+            input_=request.json
             if "email" not in input_ or input_["email"] is None:
                 raise APIError("e-mail is missing")
 
-            email_ = bleach.clean(input_["email"])
+            email_=bleach.clean(input_["email"])
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
-            otp_send_ = OTP().request_otp_f(email_)
+            otp_send_=OTP().request_otp_f(email_)
             if not otp_send_["result"]:
                 raise APIError(otp_send_["msg"])
 
@@ -5039,26 +4944,26 @@ class Auth:
         docstring is in progress
         """
         try:
-            input_ = request.json
+            input_=request.json
 
-            email_ = input_["email"]
-            password_ = input_["password"]
-            tfac_ = input_["tfac"]
+            email_=input_["email"]
+            password_=input_["password"]
+            tfac_=input_["tfac"]
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "reset")
+            verify_2fa_f_=Auth().verify_otp_f(email_, tfac_, "reset")
             if not verify_2fa_f_["result"]:
                 raise AuthError(verify_2fa_f_["msg"])
 
-            hash_f_ = self.password_hash_f(password_, None)
+            hash_f_=self.password_hash_f(password_, None)
             if not hash_f_["result"]:
                 raise APIError(hash_f_["msg"])
 
-            salt_ = hash_f_["salt"]
-            key_ = hash_f_["key"]
+            salt_=hash_f_["salt"]
+            key_=hash_f_["key"]
 
             Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
@@ -5077,7 +4982,7 @@ class Auth:
                 upsert=False,
             )
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": "_auth",
@@ -5112,25 +5017,25 @@ class Auth:
         docstring is in progress
         """
         try:
-            input_ = request.json
-            email_ = input_["email"]
-            password_ = input_["password"]
-            tfac_ = input_["tfac"]
+            input_=request.json
+            email_=input_["email"]
+            password_=input_["password"]
+            tfac_=input_["tfac"]
 
-            user_validate_ = self.user_validate_by_basic_auth_f(
+            user_validate_=self.user_validate_by_basic_auth_f(
                 {"userid": email_, "password": password_}, "tfac"
             )
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
-            user_ = user_validate_["user"] if "user" in user_validate_ else None
+            user_=user_validate_["user"] if "user" in user_validate_ else None
 
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
+            verify_2fa_f_=Auth().verify_otp_f(email_, tfac_, "signin")
             if not verify_2fa_f_["result"]:
                 raise AuthError(verify_2fa_f_["msg"])
 
-            verification_content_ = {"tfac": str(tfac_)}
+            verification_content_={"tfac": str(tfac_)}
 
-            log_ = Misc().log_f(
+            log_=Misc().log_f(
                 {
                     "type": "Info",
                     "collection": "_auth",
@@ -5148,11 +5053,11 @@ class Auth:
                 raise APIError(log_["msg"])
 
             # GENERATING JWT FOR USER
-            name_db_ = user_["usr_name"]
-            perm_ = True if Misc().permitted_user_f(user_) else False
-            apikey_ = user_["aut_apikey"]
-            jdate_ = Misc().get_jdate_f()
-            token_ = jwt.encode({"some": "payload"}, password_, algorithm="HS256")
+            name_db_=user_["usr_name"]
+            perm_=True if Misc().permitted_user_f(user_) else False
+            apikey_=user_["aut_apikey"]
+            jdate_=Misc().get_jdate_f()
+            token_=jwt.encode({"some": "payload"}, password_, algorithm="HS256")
 
             Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
@@ -5167,7 +5072,7 @@ class Auth:
                 upsert=False,
             )
 
-            user_ = {
+            user_={
                 "token": token_,
                 "name": name_db_,
                 "email": email_,
@@ -5176,9 +5081,9 @@ class Auth:
                 "jdate": jdate_,
             }
 
-            ip_ = Misc().get_user_ip_f()
+            ip_=Misc().get_user_ip_f()
 
-            email_sent_ = Email().sendEmail_f(
+            email_sent_=Email().sendEmail_f(
                 {
                     "op": "signin",
                     "personalizations": {"to": [{"email": email_, "name": name_db_}]},
@@ -5207,72 +5112,68 @@ class Auth:
         docstring is in progress
         """
         try:
-            user_id_ = bleach.clean(input_["userid"]) if "userid" in input_ else None
-            password_ = (
+            type_="auth"
+
+            user_id_=bleach.clean(input_["userid"]) if "userid" in input_ else None
+            password_=(
                 bleach.clean(input_["password"]) if "password" in input_ else None
             )
-            token_ = bleach.clean(input_["token"]) if "token" in input_ else None
-            type_ = "auth"
+            token_=bleach.clean(input_["token"]) if "token" in input_ else None
 
             if not user_id_:
                 raise APIError("email must be provided")
 
-            pat = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
+            pat=re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
             if not re.search(pat, user_id_):
                 raise APIError("invalid e-mail address")
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
                 raise AuthError("account not found")
 
             if "aut_salt" not in auth_ or auth_["aut_salt"] is None:
-                type_ = "salt"
+                type_="salt"
                 raise AuthError("please set a password")
 
             if "aut_key" not in auth_ or auth_["aut_key"] is None:
-                type_ = "key"
+                type_="key"
                 raise AuthError("please set a new password")
 
-            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_})
+            user_=Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
             if not user_:
-                type_ = "user"
+                type_="user"
                 raise AuthError("user not found for validate")
 
-            user_["aut_apikey"] = (
+            user_["aut_apikey"]=(
                 auth_["aut_apikey"]
                 if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None
                 else None
             )
 
-            enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
-            if not enabled_:
-                type_ = "disabled"
-                raise AuthError("user is disabled")
-
-            salt_ = auth_["aut_salt"]
-            key_ = auth_["aut_key"]
-            token_db_ = auth_["aut_token"] if "aut_token" in auth_ else None
+            salt_=auth_["aut_salt"]
+            key_=auth_["aut_key"]
+            token_db_=auth_["aut_token"] if "aut_token" in auth_ else None
 
             if not password_:
                 if not token_:
-                    type_ = "token"
+                    type_="token"
                     raise AuthError("no credentials provided")
                 else:
                     if token_db_ != token_:
-                        type_ = "token"
+                        type_="token"
                         raise AuthError("session closed")
             else:
-                hash_f_ = self.password_hash_f(password_, salt_)
+                hash_f_=self.password_hash_f(password_, salt_)
                 if not hash_f_["result"]:
                     raise APIError(hash_f_["msg"])
-                new_key_ = hash_f_["key"]
+                new_key_=hash_f_["key"]
                 if new_key_ != key_:
-                    type_ = "hash"
+                    type_="hash"
                     raise AuthError("invalid email or password")
 
-            firewall_ = self.firewall_f(user_)
+            firewall_=self.firewall_f(user_)
             if not firewall_["result"]:
-                type_ = "firewall"
+                type_="firewall"
                 raise AuthError(firewall_["msg"])
 
             return {"result": True, "user": user_, "auth": auth_}
@@ -5304,23 +5205,20 @@ class Auth:
         docstring is in progress
         """
         try:
-            apikey_ = bleach.clean(input_["apikey"]) if "apikey" in input_ else None
+            apikey_=bleach.clean(input_["apikey"]) if "apikey" in input_ else None
             if not apikey_ or apikey_ is None:
                 raise APIError("api key must be provided")
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_apikey": apikey_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_apikey": apikey_})
             if not auth_:
                 raise APIError("not authenticated")
-            user_id_ = auth_["aut_id"]
+            user_id_=auth_["aut_id"]
 
-            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_})
+            user_=Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
             if not user_:
                 raise APIError("user not found for api")
-            usr_enabled_ = user_["usr_enabled"] if "usr_enabled" in user_ else False
-            if not usr_enabled_:
-                raise APIError("user not validated")
 
-            firewall_ = self.firewall_f(user_)
+            firewall_=self.firewall_f(user_)
             if not firewall_["result"]:
                 raise APIError(firewall_["msg"])
 
@@ -5340,17 +5238,17 @@ class Auth:
         docstring is in progress
         """
         try:
-            input_ = request.json
-            email_ = input_["email"]
-            password_ = input_["password"]
+            input_=request.json
+            email_=input_["email"]
+            password_=input_["password"]
 
-            user_validate_ = self.user_validate_by_basic_auth_f(
+            user_validate_=self.user_validate_by_basic_auth_f(
                 {"userid": email_, "password": password_}, "signin"
             )
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
 
-            otp_send_ = OTP().request_otp_f(email_)
+            otp_send_=OTP().request_otp_f(email_)
             if not otp_send_["result"]:
                 raise APIError(otp_send_["msg"])
 
@@ -5370,41 +5268,38 @@ class Auth:
         docstring is in progress
         """
         try:
-            checkup_ = self.checkup_f()
+            checkup_=self.checkup_f()
             if not checkup_["result"]:
                 raise APIError(checkup_["msg"])
 
-            input_ = request.json
-            email_ = bleach.clean(input_["email"])
-            password_ = bleach.clean(input_["password"])
-            passcode_ = bleach.clean(input_["passcode"])
+            input_=request.json
+            email_=bleach.clean(input_["email"])
+            password_=bleach.clean(input_["password"])
+            passcode_=bleach.clean(input_["passcode"])
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_=Mongo().db_["_auth"].find_one({"aut_id": email_})
             if auth_:
                 raise APIError("account already exist")
 
-            user_ = Mongo().db_["_user"].find_one({"usr_id": email_})
+            user_=Mongo().db_["_user"].find_one({"usr_id": email_, "usr_enabled": True})
             if not user_ or user_ is None:
                 raise APIError("user invitation not found")
 
             if passcode_ != str(user_["_id"]):
                 raise APIError("invitation codes do not match")
 
-            if "usr_enabled" not in user_ or not user_["usr_enabled"]:
-                raise APIError("user status is disabled to get logged in")
-
-            hash_f_ = self.password_hash_f(password_, None)
+            hash_f_=self.password_hash_f(password_, None)
             if not hash_f_["result"]:
                 raise APIError(hash_f_["msg"])
 
-            salt_ = hash_f_["salt"]
-            key_ = hash_f_["key"]
+            salt_=hash_f_["salt"]
+            key_=hash_f_["key"]
 
-            aut_otp_secret_ = pyotp.random_base32()
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
+            aut_otp_secret_=pyotp.random_base32()
+            qr_=pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
                 name=email_, issuer_name="Technoplatz-BI"
             )
-            apikey_ = secrets.token_hex(16)
+            apikey_=secrets.token_hex(16)
 
             Mongo().db_["_auth"].insert_one(
                 {
@@ -5442,63 +5337,63 @@ class Auth:
 
 # IDENTIFICATION DIVISION
 
-TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
-DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
-API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
-NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
-COMPANY_NAME_ = (
+TZ_=os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
+DOMAIN_=os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
+API_OUTPUT_ROWS_LIMIT_=os.environ.get("API_OUTPUT_ROWS_LIMIT")
+NOTIFICATION_SLACK_HOOK_URL_=os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
+COMPANY_NAME_=(
     os.environ.get("COMPANY_NAME")
     if os.environ.get("COMPANY_NAME")
     else "Technoplatz BI"
 )
-SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
-SMTP_PORT_ = os.environ.get("SMTP_PORT")
-SMTP_USERID_ = os.environ.get("SMTP_USERID")
-SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
-FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
-EMAIL_TFA_SUBJECT_ = "Your Backup OTP"
-EMAIL_SIGNUP_SUBJECT_ = "Welcome"
-EMAIL_SIGNIN_SUBJECT_ = "New Sign-in"
-EMAIL_UPLOADERR_SUBJECT_ = "File Upload Result"
-EMAIL_DEFAULT_SUBJECT_ = "Hello"
-API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
-API_DUMP_HOURS_ = (
+SMTP_SERVER_=os.environ.get("SMTP_SERVER")
+SMTP_PORT_=os.environ.get("SMTP_PORT")
+SMTP_USERID_=os.environ.get("SMTP_USERID")
+SMTP_PASSWORD_=os.environ.get("SMTP_PASSWORD")
+FROM_EMAIL_=os.environ.get("FROM_EMAIL")
+EMAIL_TFA_SUBJECT_="Your Backup OTP"
+EMAIL_SIGNUP_SUBJECT_="Welcome"
+EMAIL_SIGNIN_SUBJECT_="New Sign-in"
+EMAIL_UPLOADERR_SUBJECT_="File Upload Result"
+EMAIL_DEFAULT_SUBJECT_="Hello"
+API_SCHEDULE_INTERVAL_MIN_=os.environ.get("API_SCHEDULE_INTERVAL_MIN")
+API_DUMP_HOURS_=(
     os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
 )
-API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
-API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
-API_KEY_ = os.environ.get("API_KEY")
-SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
-SAAS_ = os.environ.get("SAAS")
-PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
-MONGO_RS_ = os.environ.get("MONGO_RS")
-MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
-MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
-MONGO_HOST2_ = os.environ.get("MONGO_HOST2")
-MONGO_PORT0_ = int(os.environ.get("MONGO_PORT0"))
-MONGO_PORT1_ = int(os.environ.get("MONGO_PORT1"))
-MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
-MONGO_DB_ = os.environ.get("MONGO_DB")
-MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
-MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
-MONGO_TLS_CERT_KEY_PASSWORD_ = urllib.parse.quote_plus(
+API_UPLOAD_LIMIT_BYTES_=int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
+API_MAX_CONTENT_LENGTH_=int(os.environ.get("API_MAX_CONTENT_LENGTH"))
+API_KEY_=os.environ.get("API_KEY")
+SECUR_MAX_AGE_=os.environ.get("SECUR_MAX_AGE")
+SAAS_=os.environ.get("SAAS")
+PERMISSIVE_TAGS_=["#Managers", "#Administrators"]
+MONGO_RS_=os.environ.get("MONGO_RS")
+MONGO_HOST0_=os.environ.get("MONGO_HOST0")
+MONGO_HOST1_=os.environ.get("MONGO_HOST1")
+MONGO_HOST2_=os.environ.get("MONGO_HOST2")
+MONGO_PORT0_=int(os.environ.get("MONGO_PORT0"))
+MONGO_PORT1_=int(os.environ.get("MONGO_PORT1"))
+MONGO_PORT2_=int(os.environ.get("MONGO_PORT2"))
+MONGO_DB_=os.environ.get("MONGO_DB")
+MONGO_AUTH_DB_=os.environ.get("MONGO_AUTH_DB")
+MONGO_USERNAME_=urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
+MONGO_PASSWORD_=urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
+MONGO_TLS_CERT_KEY_PASSWORD_=urllib.parse.quote_plus(
     os.environ.get("MONGO_TLS_CERT_KEY_PASSWORD")
 )
-MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
-MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
+MONGO_TLS_CA_KEYFILE_=os.environ.get("MONGO_TLS_CA_KEYFILE")
+MONGO_TLS_CERT_KEYFILE_=os.environ.get("MONGO_TLS_CERT_KEYFILE")
 
 # CORS CHECKPOINT
-origins_ = [
+origins_=[
     f"http://{DOMAIN_}",
     f"https://{DOMAIN_}",
     f"http://{DOMAIN_}:8100",
     f"http://{DOMAIN_}:8101",
 ]
 
-app = Flask(__name__)
-app.config["CORS_ORIGINS"] = origins_
-app.config["CORS_HEADERS"] = [
+app=Flask(__name__)
+app.config["CORS_ORIGINS"]=origins_
+app.config["CORS_HEADERS"]=[
     "Content-Type",
     "Origin",
     "Authorization",
@@ -5506,9 +5401,9 @@ app.config["CORS_HEADERS"] = [
     "Accept",
     "x-auth",
 ]
-app.config["CORS_SUPPORTS_CREDENTIALS"] = True
-app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_
-app.config["UPLOAD_EXTENSIONS"] = [
+app.config["CORS_SUPPORTS_CREDENTIALS"]=True
+app.config["MAX_CONTENT_LENGTH"]=API_MAX_CONTENT_LENGTH_
+app.config["UPLOAD_EXTENSIONS"]=[
     "pdf",
     "png",
     "jpg",
@@ -5520,52 +5415,52 @@ app.config["UPLOAD_EXTENSIONS"] = [
     "csv",
     "txt",
 ]
-app.config["UPLOAD_FOLDER"] = "/vault/"
+app.config["UPLOAD_FOLDER"]="/vault/"
 CORS(app)
 
-log = logging.getLogger("werkzeug")
+log=logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
-@app.route("/import", methods=["POST"], endpoint="import")
+@ app.route("/import", methods=["POST"], endpoint="import")
 def storage_f():
     """
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
+        validate_=Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "validation error"
             )
 
-        form_ = request.form.to_dict(flat=True)
+        form_=request.form.to_dict(flat=True)
         if not form_:
             raise APIError("no form found")
 
-        file_ = request.files["file"]
+        file_=request.files["file"]
         if not file_:
             raise APIError("no file found")
 
-        collection__ = form_["collection"]
-        col_check_ = Crud().inner_collection_f(collection__)
+        collection__=form_["collection"]
+        col_check_=Crud().inner_collection_f(collection__)
         if not col_check_["result"]:
             raise APIError(col_check_["msg"])
 
-        prefix_ = col_check_["collection"]["col_prefix"]
-        email_ = form_["email"] if "email" in form_ else None
-        token_ = form_["token"] if "token" in form_ else None
+        prefix_=col_check_["collection"]["col_prefix"]
+        email_=form_["email"] if "email" in form_ else None
+        token_=form_["token"] if "token" in form_ else None
 
-        validate_ = Auth().user_validate_by_basic_auth_f(
+        validate_=Auth().user_validate_by_basic_auth_f(
             {"userid": email_, "token": token_}, "import"
         )
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "crud validation error"
             )
-        user_ = validate_["user"]
+        user_=validate_["user"]
 
-        import_f_ = Crud().import_f(
+        import_f_=Crud().import_f(
             {
                 "form": form_,
                 "file": file_,
@@ -5600,33 +5495,33 @@ def storage_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/crud", methods=["POST"], endpoint="crud")
+@ app.route("/crud", methods=["POST"], endpoint="crud")
 def crud_f():
     """
     docstring is in progress
     """
     try:
         # validates restapi request
-        validate_ = Security().validate_request_f()
+        validate_=Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "validation error"
             )
 
-        input_ = request.json
+        input_=request.json
 
         if "op" not in input_:
             raise APIError("no operation found")
-        op_ = input_["op"]
+        op_=input_["op"]
 
-        user_ = input_["user"] if "user" in input_ else None
+        user_=input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("user info not found")
-        email_ = user_["email"] if "email" in user_ else None
-        token_ = user_["token"] if "token" in user_ else None
+        email_=user_["email"] if "email" in user_ else None
+        token_=user_["token"] if "token" in user_ else None
 
-        collection_ = input_["collection"] if "collection" in input_ else None
-        match_ = (
+        collection_=input_["collection"] if "collection" in input_ else None
+        match_=(
             input_["match"]
             if "match" in input_
             and input_["match"] is not None
@@ -5634,17 +5529,17 @@ def crud_f():
             else []
         )
 
-        validate_ = Auth().user_validate_by_basic_auth_f(
+        validate_=Auth().user_validate_by_basic_auth_f(
             {"userid": email_, "token": token_}, "op"
         )
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "crud validation error"
             )
-        input_["userindb"] = validate_["user"]
+        input_["userindb"]=validate_["user"]
 
-        allowmatch_ = []
-        permission_f_ = Auth().permission_f(
+        allowmatch_=[]
+        permission_f_=Auth().permission_f(
             {
                 "user": validate_["user"],
                 "auth": validate_["auth"],
@@ -5655,63 +5550,63 @@ def crud_f():
         if not permission_f_["result"]:
             raise AuthError(permission_f_["msg"])
 
-        allowmatch_ = (
+        allowmatch_=(
             permission_f_["allowmatch"]
             if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0
             else []
         )
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ += allowmatch_
-        input_["match"] = match_
+        input_["match"]=match_
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
                 raise APIError("document must be included in the request")
-            decode_ = Crud().decode_crud_input_f(input_)
+            decode_=Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_["msg"] if "msg" in decode_ else "decode error")
-            input_["doc"] = decode_["doc"]
+            input_["doc"]=decode_["doc"]
         elif op_ in ["remove", "clone", "delete"]:
-            col_check_ = Crud().inner_collection_f(input_["collection"])
+            col_check_=Crud().inner_collection_f(input_["collection"])
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
 
         if op_ == "read":
-            res_ = Crud().read_f(input_)
+            res_=Crud().read_f(input_)
         elif op_ == "update":
-            res_ = Crud().upsert_f(input_)
+            res_=Crud().upsert_f(input_)
         elif op_ == "insert":
-            res_ = Crud().insert_f(input_)
+            res_=Crud().insert_f(input_)
         elif op_ in ["clone", "delete"]:
-            res_ = Crud().multiple_f(input_)
+            res_=Crud().multiple_f(input_)
         elif op_ == "action":
-            res_ = Crud().action_f(input_)
+            res_=Crud().action_f(input_)
         elif op_ == "remove":
-            res_ = Crud().remove_f(input_)
+            res_=Crud().remove_f(input_)
         elif op_ == "setprop":
-            res_ = Crud().setprop_f(input_)
+            res_=Crud().setprop_f(input_)
         elif op_ == "reconfigure":
-            res_ = Crud().reconfigure_f(input_)
+            res_=Crud().reconfigure_f(input_)
         elif op_ == "copykey":
-            res_ = Crud().copykey_f(input_)
+            res_=Crud().copykey_f(input_)
         elif op_ == "purge":
-            res_ = Crud().purge_f(input_)
+            res_=Crud().purge_f(input_)
         elif op_ == "charts":
-            res_ = Crud().charts_f(input_)
+            res_=Crud().charts_f(input_)
         elif op_ == "announce":
-            res_ = Crud().announce_f(input_)
+            res_=Crud().announce_f(input_)
         elif op_ == "collections":
-            res_ = Crud().collections_f(input_)
+            res_=Crud().collections_f(input_)
         elif op_ == "collection":
-            res_ = Crud().collection_f(input_)
+            res_=Crud().collection_f(input_)
         elif op_ == "parent":
-            res_ = Crud().parent_f(input_)
+            res_=Crud().parent_f(input_)
         elif op_ in ["backup", "restore"]:
-            res_ = Crud().dump_f(input_)
+            res_=Crud().dump_f(input_)
         elif op_ == "template":
-            res_ = Crud().template_f(input_)
+            res_=Crud().template_f(input_)
         elif op_ == "saveschema":
-            res_ = Crud().saveschema_f(input_)
+            res_=Crud().saveschema_f(input_)
         else:
             raise APIError(f"{op_} is not a supported operation")
 
@@ -5731,33 +5626,33 @@ def crud_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/otp", methods=["POST"])
+@ app.route("/otp", methods=["POST"])
 def otp_f():
     """
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
+        validate_=Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "web validation error"
             )
 
-        input_ = request.json
+        input_=request.json
         if not input_:
             raise APIError("input missing")
 
-        user_ = input_["user"] if "user" in input_ else None
+        user_=input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("credentials are missing")
-        email_ = user_["email"] if "email" in user_ else None
-        token_ = user_["token"] if "token" in user_ else None
+        email_=user_["email"] if "email" in user_ else None
+        token_=user_["token"] if "token" in user_ else None
 
-        request_ = input_["request"] if "request" in input_ else None
+        request_=input_["request"] if "request" in input_ else None
         if not request_:
             raise APIError("request is nissing")
 
-        validate_ = Auth().user_validate_by_basic_auth_f(
+        validate_=Auth().user_validate_by_basic_auth_f(
             {"userid": email_, "token": token_}, "otp"
         )
         if not validate_["result"]:
@@ -5768,23 +5663,23 @@ def otp_f():
         if "op" not in request_:
             raise APIError("no operation found")
 
-        op_ = request_["op"]
+        op_=request_["op"]
 
         if op_ == "reset":
-            res_ = OTP().reset_otp_f(email_)
+            res_=OTP().reset_otp_f(email_)
         elif op_ == "show":
-            res_ = OTP().show_otp_f(email_)
+            res_=OTP().show_otp_f(email_)
         elif op_ == "request":
-            res_ = OTP().request_otp_f(email_)
+            res_=OTP().request_otp_f(email_)
         elif op_ == "validate":
-            res_ = OTP().validate_otp_f(email_, request_)
+            res_=OTP().validate_otp_f(email_, request_)
         else:
             raise APIError(f"operation not supported {op_}")
 
         if not res_["result"]:
             raise APIError(res_["msg"])
 
-        status_ = res_["status"] if "status" in res_ else 200
+        status_=res_["status"] if "status" in res_ else 200
         return (
             json.dumps(res_, default=json_util.default),
             status_,
@@ -5798,67 +5693,67 @@ def otp_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/auth", methods=["POST"], endpoint="auth")
+@ app.route("/auth", methods=["POST"], endpoint="auth")
 def auth_f():
     """
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
+        validate_=Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "web validation error"
             )
 
-        input_ = request.json
+        input_=request.json
         if not input_:
             raise APIError("input missing")
 
         if "op" not in input_:
             raise APIError("no operation found")
-        op_ = input_["op"]
+        op_=input_["op"]
 
-        token_ = None
+        token_=None
 
         if op_ == "signup":
-            auth_ = Auth().signup_f()
+            auth_=Auth().signup_f()
         elif op_ == "saas":
-            auth_ = Auth().saas_f()
+            auth_=Auth().saas_f()
         elif op_ == "signin":
-            auth_ = Auth().signin_f()
+            auth_=Auth().signin_f()
         elif op_ == "tfac":
-            auth_ = Auth().tfac_f()
+            auth_=Auth().tfac_f()
         elif op_ == "signout":
-            auth_ = Auth().signout_f()
+            auth_=Auth().signout_f()
         elif op_ == "forgot":
-            auth_ = Auth().forgot_f()
+            auth_=Auth().forgot_f()
         elif op_ == "reset":
-            auth_ = Auth().reset_f()
+            auth_=Auth().reset_f()
         elif op_ in ["apikeygen", "apikeyget"]:
-            auth_ = Auth().account_f(input_)
+            auth_=Auth().account_f(input_)
         elif op_ == "session":
-            auth_ = Auth().session_f(input_)
+            auth_=Auth().session_f(input_)
         else:
             raise APIError(f"operation not supported {op_}")
 
         if not auth_["result"]:
             raise APIError(auth_["msg"])
 
-        user_ = auth_["user"] if auth_ and "user" in auth_ else None
-        saas_ = auth_["saas"] if auth_ and "saas" in auth_ else None
+        user_=auth_["user"] if auth_ and "user" in auth_ else None
+        saas_=auth_["saas"] if auth_ and "saas" in auth_ else None
 
         if op_ == "tfac":
-            token_ = (
+            token_=(
                 user_["token"]
                 if "token" in user_ and user_["token"] is not None
                 else None
             )
 
-        header_ = Security().header_simple_f()
+        header_=Security().header_simple_f()
         if token_ is not None:
             header_[
                 "Set-Cookie"
-            ] = f"technoplatz-bi-session={token_}; path=/; samesite=strict; httponly"
+            ]=f"technoplatz-bi-session={token_}; path=/; samesite=strict; httponly"
 
         return (
             json.dumps(
@@ -5877,7 +5772,7 @@ def auth_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/post", methods=["POST"])
+@ app.route("/post", methods=["POST"])
 def post_f():
     """
     docstring is in progress
@@ -5893,7 +5788,7 @@ def post_f():
             raise APIError("no api rows limit defined")
 
         # checks the authorization from the request header
-        rh_apikey_ = (
+        rh_apikey_=(
             request.headers.get("x-api-key", None)
             if "x-api-key" in request.headers and request.headers["x-api-key"] != ""
             else None
@@ -5902,7 +5797,7 @@ def post_f():
             raise AuthError("no api key provided")
 
         # checks the token
-        rh_authorization_ = (
+        rh_authorization_=(
             request.headers.get("Authorization", None)
             if "Authorization" in request.headers
             and request.headers["Authorization"] != ""
@@ -5910,15 +5805,15 @@ def post_f():
         )
         if not rh_authorization_:
             raise AuthError("no authorization provided")
-        auth_parts_ = rh_authorization_.split()
+        auth_parts_=rh_authorization_.split()
         if len(auth_parts_) == 1:
             raise AuthError("no access token provided")
         elif auth_parts_[0].lower() != "bearer":
             raise AuthError("invalid authorization format")
-        rh_token_ = auth_parts_[1]
+        rh_token_=auth_parts_[1]
 
         # gets operation
-        operation_ = (
+        operation_=(
             request.headers.get("operation", None)
             if "operation" in request.headers and request.headers["operation"] != ""
             else None
@@ -5932,66 +5827,66 @@ def post_f():
         ]:
             raise APIError("invalid operation")
 
-        user_validate_ = Auth().user_validate_by_apikey_f({"apikey": rh_apikey_})
+        user_validate_=Auth().user_validate_by_apikey_f({"apikey": rh_apikey_})
         if not user_validate_["result"]:
             raise AuthError(user_validate_["msg"])
 
-        token_validate_f_ = Misc().token_validate_f(rh_token_, operation_)
+        token_validate_f_=Misc().token_validate_f(rh_token_, operation_)
         if not token_validate_f_["result"]:
             raise AuthError(f"token is not permitted to {operation_}")
 
-        rh_collection_ = (
+        rh_collection_=(
             request.headers.get("collection", None)
             if "collection" in request.headers and request.headers["collection"] != ""
             else None
         )
         if not rh_collection_:
             raise APIError("no collection found")
-        collection_f_ = Crud().inner_collection_f(rh_collection_)
+        collection_f_=Crud().inner_collection_f(rh_collection_)
         if not collection_f_["result"]:
             raise AuthError(collection_f_["msg"])
 
-        collection_ = (
+        collection_=(
             collection_f_["collection"] if "collection" in collection_f_ else None
         )
         if not collection_:
             raise APIError("collection not found")
-        structure_ = (
+        structure_=(
             collection_["col_structure"] if "col_structure" in collection_ else None
         )
         if not collection_:
             raise APIError("structure not found")
 
-        properties_ = structure_["properties"] if "properties" in structure_ else None
+        properties_=structure_["properties"] if "properties" in structure_ else None
         if not properties_:
             raise APIError("properties not found")
 
-        unique_ = structure_["unique"] if "unique" in structure_ else []
+        unique_=structure_["unique"] if "unique" in structure_ else []
 
-        is_crud_ = True if rh_collection_[:1] != "_" else False
-        collection_data_ = f"{rh_collection_}_data" if is_crud_ else rh_collection_
+        is_crud_=True if rh_collection_[:1] != "_" else False
+        collection_data_=f"{rh_collection_}_data" if is_crud_ else rh_collection_
 
-        body_ = request.json
-        type_ = str(type(body_))
+        body_=request.json
+        type_=str(type(body_))
 
         if type_ != "<class 'list'>":
             if operation_ == "read":
-                body_ = [body_]
+                body_=[body_]
             else:
                 raise APIError("data must be in an array")
 
-        output_ = []
-        count_ = 0
+        output_=[]
+        count_=0
 
-        session_client_ = MongoClient(Mongo().connstr)
-        session_db_ = session_client_[MONGO_DB_]
-        session_ = session_client_.start_session()
+        session_client_=MongoClient(Mongo().connstr)
+        session_db_=session_client_[MONGO_DB_]
+        session_=session_client_.start_session()
         session_.start_transaction()
 
         if operation_ == "read":
             for item_ in body_:
-                cursor_ = session_db_[collection_data_].find(item_)
-                docs_ = (
+                cursor_=session_db_[collection_data_].find(item_)
+                docs_=(
                     json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
                 )
                 for doc_ in docs_:
@@ -6000,33 +5895,33 @@ def post_f():
                     if count_ >= int(API_OUTPUT_ROWS_LIMIT_):
                         break
         elif operation_ in ["insert", "update", "upsert", "delete"]:
-            filter_ = {}
+            filter_={}
             if operation_ in ["update", "upsert", "delete"]:
                 if len(unique_) > 0:
                     for uq_ in unique_:
                         for uq__ in uq_:
-                            filter_[uq__] = None
+                            filter_[uq__]=None
                 else:
                     raise APIError(
                         f"at leat one unique field must be provided for {operation_}"
                     )
             for ix_, item_ in enumerate(body_):
-                filter__ = {}
+                filter__={}
                 if operation_ in ["update", "upsert", "delete"]:
                     for key_ in filter_.keys():
                         if key_ in item_ and item_[key_] is not None:
-                            filter__[key_] = item_[key_]
+                            filter__[key_]=item_[key_]
                     if not filter__:
                         raise APIError(
                             f"at least one unique field must be provided for {operation_} index {ix_}"
                         )
                 # decode document
-                decode_crud_doc_f_ = Crud().decode_crud_doc_f(item_, properties_)
+                decode_crud_doc_f_=Crud().decode_crud_doc_f(item_, properties_)
                 if not decode_crud_doc_f_["result"]:
                     raise APIError(decode_crud_doc_f_["msg"])
-                doc__ = decode_crud_doc_f_["doc"]
-                doc__["_modified_at"] = datetime.now()
-                doc__["_modified_by"] = "API"
+                doc__=decode_crud_doc_f_["doc"]
+                doc__["_modified_at"]=datetime.now()
+                doc__["_modified_by"]="API"
                 if operation_ == "upsert":
                     session_db_[collection_data_].update_many(
                         filter__,
@@ -6052,7 +5947,7 @@ def post_f():
                     break
                 output_.append(item_)
 
-        log_ = Misc().log_f(
+        log_=Misc().log_f(
             {
                 "type": "Info",
                 "collection": rh_collection_,
@@ -6064,7 +5959,7 @@ def post_f():
         if not log_["result"]:
             raise APIError(log_["msg"])
 
-        response_ = json.loads(
+        response_=json.loads(
             JSONEncoder().encode(
                 {
                     "collection": rh_collection_,
@@ -6103,28 +5998,28 @@ def post_f():
             session_.abort_transaction()
 
 
-@app.route("/get/dump", methods=["POST"])
+@ app.route("/get/dump", methods=["POST"])
 def get_dump_f():
     """
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
+        validate_=Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
                 validate_["msg"] if "msg" in validate_ else "validation error"
             )
 
-        input_ = request.json
+        input_=request.json
 
-        user_ = input_["user"] if "user" in input_ else None
+        user_=input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("invalid credentials")
 
-        email_ = user_["email"] if "email" in user_ else None
-        token_ = user_["token"] if "token" in user_ else None
+        email_=user_["email"] if "email" in user_ else None
+        token_=user_["token"] if "token" in user_ else None
 
-        validate_ = Auth().user_validate_by_basic_auth_f(
+        validate_=Auth().user_validate_by_basic_auth_f(
             {"userid": email_, "token": token_}, "backup"
         )
         if not validate_["result"]:
@@ -6132,12 +6027,12 @@ def get_dump_f():
                 validate_["msg"] if "msg" in validate_ else "request not validated"
             )
 
-        id_ = bleach.clean(input_["id"])
+        id_=bleach.clean(input_["id"])
         if not id_:
             raise APIError("dump not selected")
 
-        file_ = f"{id_}.gz"
-        directory_ = "/dump"
+        file_=f"{id_}.gz"
+        directory_="/dump"
 
         return (
             send_from_directory(directory=directory_, path=file_, as_attachment=True),
@@ -6155,7 +6050,7 @@ def get_dump_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/get/view/<string:id_>", methods=["GET"])
+@ app.route("/get/view/<string:id_>", methods=["GET"])
 def get_data_f(id_):
     """
     docstring is in progress
@@ -6164,24 +6059,24 @@ def get_data_f(id_):
         if not request.headers:
             raise AuthError("no header provided")
 
-        id_ = bleach.clean(id_)
-        arg_ = request.args.get("k", default=None, type=str)
+        id_=bleach.clean(id_)
+        arg_=request.args.get("k", default=None, type=str)
         if not arg_:
             raise APIError("missing argument")
 
-        apikey_ = (
+        apikey_=(
             request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
         )
-        user_validate_ = Auth().user_validate_by_apikey_f({"apikey": apikey_})
+        user_validate_=Auth().user_validate_by_apikey_f({"apikey": apikey_})
         if not user_validate_["result"]:
-            user_validate_ = Auth().user_validate_by_apikey_f({"apikey": arg_})
+            user_validate_=Auth().user_validate_by_apikey_f({"apikey": arg_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
-        user_ = user_validate_["user"] if "user" in user_validate_ else None
+        user_=user_validate_["user"] if "user" in user_validate_ else None
         if not user_:
             raise AuthError("user not found for view")
 
-        generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")
+        generate_view_data_f_=Crud().get_view_data_f(user_, id_, "external")
         if not generate_view_data_f_["result"]:
             raise APIError(generate_view_data_f_["msg"])
 
@@ -6198,6 +6093,6 @@ def get_data_f(id_):
 
 
 if __name__ == "__main__":
-    print = partial(print, flush=True)
+    print=partial(print, flush=True)
     Schedular().main_f()
     app.run(host="0.0.0.0", port=80, debug=False)

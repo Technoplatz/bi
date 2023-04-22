@@ -519,17 +519,19 @@ form ion-item ion-label {
 .view-infos {
   display: flex;
   margin-top: 16px;
-  max-width: calc(100% - 20px);
+  width: calc(100% - 20px);
   gap: 12px;
 }
 
 .pivot {
   align-content: flex-start;
   overflow: hidden;
+  width: 100% !important;
 }
 
 .pivot .dataframe {
   background-color: #f3f3f3;
+  width: 100% !important;
 }
 
 .pivot .dataframe td,

@@ -37,7 +37,7 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <h6>{{ 'SHARED VIEW' | translate }}</h6>
         <h1>{{ subheader }}</h1>
-        <ion-grid class="ion-no-padding ion-margin-top ion-margin-bottom">
+        <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div (click)="doAnnounceNow('test')" class="data-sq-button">
@@ -70,14 +70,38 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Collection' | translate }}
               </div>
-              <!-- <div (click)="doViewSettings()" class="data-sq-button">
-                <ion-icon name="settings-outline"></ion-icon><br />
-                {{ 'Settings' | translate }}
-              </div> -->
+              <div (click)="doShowSchema()" class="data-sq-button">
+                <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
+                  <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
+                  {{ 'Schema' | translate }}
+                </div>
+                <ng-template #nojeopen>
+                  <ion-icon name="close-circle-outline"></ion-icon><br />
+                  {{ 'Close' | translate }}
+                </ng-template>
+              </div>
+              <div *ngIf="jeopen" class="data-sq-button ion-no-padding danger"
+                (click)="doSaveView()">
+                <span *ngIf="!is_saving">
+                  <ion-icon name="save-outline"></ion-icon><br />
+                  {{ 'Save' | translate }}
+                </span>
+                <span *ngIf="is_saving">
+                  <ion-icon name="hourglass"></ion-icon><br />
+                  {{ 'Saving' | translate }}...
+                </span>
+              </div>
             </ion-col>
           </ion-row>
         </ion-grid>
-
+        <ion-grid [class]="schemevis">
+          <ion-row>
+            <ion-col size="12" class="jeditor">
+              <json-editor id="struc" [options]="jeoptions" [data]="view && view['self'] ? view['self'] : {}"
+                (change)="doChangeSchema($event)" #editor></json-editor>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
         <!-- VIEW GRID SECTION -->
         <div *ngIf="view" class="ion-margin-bottom">
           {{ 'Shared with' | translate }} {{ view["_tags"]?.join(' ') }}<br />

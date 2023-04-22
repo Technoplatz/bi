@@ -30,14 +30,14 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
-import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
+import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 
 @Component({
   selector: "app-view",
@@ -46,6 +46,8 @@ import { environment } from "../../../environments/environment";
 })
 
 export class ViewPage implements OnInit {
+  @ViewChild(JsonEditorComponent, { static: false }) editor: JsonEditorComponent = new JsonEditorComponent;
+  public jeoptions: JsonEditorOptions;
   public loadingText: string = environment.misc.loadingText;
   public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Views";
@@ -70,7 +72,6 @@ export class ViewPage implements OnInit {
   public view_count: number = 0;
   public view_properties: any = {};
   public view_properties_: any = {};
-  public view: any = null;
   public is_url_copied: boolean = false;
   public accountf_apikey: string = "";
   public viewurl_: string = "";
@@ -90,9 +91,13 @@ export class ViewPage implements OnInit {
   public col_id: string = "";
   public collections_: any;
   public charts_: any = null;
+  public is_saving: boolean = false;
+  public jeopen: boolean = false;
+  public schemevis: any = "hide";
+  public view: any = null;
+  private view_: any = {};
 
   constructor(
-    private storage: Storage,
     private crud: Crud,
     private auth: Auth,
     private alert: AlertController,
@@ -106,6 +111,14 @@ export class ViewPage implements OnInit {
       this.user = res ? res : null;
       this.accountf_apikey = res && res.apikey ? res.apikey : null;
     });
+    this.jeoptions = new JsonEditorOptions();
+    this.jeoptions.modes = ["tree", "code", "text"]
+    this.jeoptions.mode = "tree";
+    this.jeoptions.statusBar = true;
+    this.jeoptions.enableSort = false;
+    this.jeoptions.expandAll = false;
+    this.jeoptions.navigationBar = true;
+    this.jeoptions.name = "schema-structure";
   }
 
   ngOnDestroy() {
@@ -118,7 +131,7 @@ export class ViewPage implements OnInit {
     this.is_loaded = false;
     this.is_initialized = false;
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
-      if(res && res.views) {
+      if (res && res.views) {
         this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
         this.subheader = this.view.self.title;
         this.data = this.view.data ? this.view.data : [];
@@ -252,6 +265,40 @@ export class ViewPage implements OnInit {
       this.is_apikey_copied = false;
       this.is_url_copied = false;
     });
+  }
+
+  doSaveView() {
+    console.log("*** save", this.col_id, this.id, this.view_);
+    this.is_saving = true;
+    this.misc.apiCall("/crud", {
+      op: "saveview",
+      id: this.id,
+      view: this.view_,
+      collection: this.col_id
+    }).then(() => {
+      window.location.reload();
+    }).catch((error: any) => {
+      this.misc.doMessage(error, "error");
+    }).finally(() => {
+      this.is_saving = false;
+    });
+  }
+
+  doShowSchema() {
+    if (this.jeopen) {
+      this.jeopen = false;
+      this.schemevis = "hide"
+    } else {
+      this.jeopen = true;
+      this.schemevis = "show";
+      this.editor.focus();
+    }
+  }
+
+  doChangeSchema(ev: any) {
+    if (ev) {
+      this.view_ = ev;
+    }
   }
 
 }

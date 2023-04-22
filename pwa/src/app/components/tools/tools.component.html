@@ -31,6 +31,9 @@ https://www.gnu.org/licenses.
 -->
 
 <div class="top-tools">
+  <ion-button fill="clear" (click)="misc.navi.next('dashboard')" size="large">
+    <ion-icon name="home-outline" size="medium"></ion-icon>
+  </ion-button>
   <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small">
     <ion-label class="ion-padding-start ion-padding-end">{{ 'NEW VERSION AVAILABLE' | translate }}</ion-label>
   </ion-button>
