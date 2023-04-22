@@ -7,11 +7,9 @@ bleach
 pandas
 numpy
 numexpr
-openpyxl
 apscheduler
 Jinja2
-xlrd
 pyotp
-pyjwt
-get_docker_secret
+PyJWT
+xlsxwriter
 partial

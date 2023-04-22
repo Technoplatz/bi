@@ -201,7 +201,6 @@ export class ViewPage implements OnInit {
   }
 
   async doAnnounceNow(scope: string) {
-    console.log("*** view", this.view);
     if (!this.in_otp_process) {
       scope === "live" ? this.in_otp_process = true : this.in_otp_process_test = true;
       this.doOTP({
@@ -209,7 +208,7 @@ export class ViewPage implements OnInit {
       }).then(() => {
         this.in_otp_process = this.in_otp_process_test = false;
         this.alert.create({
-          cssClass: "my-custom-class",
+          cssClass: "alert-class",
           header: scope === "live" ? "LIVE Announcement!" : "TEST Announcement",
           subHeader: "Please enter your Two-Factor Authorization Code",
           inputs: [
@@ -217,7 +216,7 @@ export class ViewPage implements OnInit {
               name: "id",
               value: null,
               type: "text",
-              placeholder: "Enter your OTP"
+              placeholder: "000000"
             }
           ],
           buttons: [
