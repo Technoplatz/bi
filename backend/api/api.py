@@ -1594,12 +1594,14 @@ class Crud:
                 raise APIError(get_view_data_f_["msg"])
 
             df_ = get_view_data_f_["df"]
+            df_grp_ = get_view_data_f_["dfgrp"]
             df_raw_ = get_view_data_f_["dfraw"]
             pivotify_ = get_view_data_f_["pivotify"]
 
             self_ = get_view_data_f_["self"]
             _tags = self_["_tags"]
             vie_title_ = self_["title"]
+            data_json_ = self_["data_json"]
             data_excel_ = self_["data_excel"]
             data_csv_ = self_["data_csv"]
             vie_attach_pivot_ = self_["pivot"]
@@ -1618,6 +1620,13 @@ class Crud:
             personalizations_ = {"to": personalizations_to_}
 
             files_ = []
+            if data_json_:
+                file_json_ = f"{id_}.json"
+                file_json_raw_ = f"{id_}-detail.json"
+                df_.to_json(f"/cron/{file_json_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
+                df_raw_.to_json(f"/cron/{file_json_raw_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
+                files_.append({"filename": file_json_, "filetype": "json"})
+                files_.append({"filename": file_json_raw_, "filetype": "json"})
             if data_csv_:
                 file_csv_ = f"{id_}.csv"
                 file_csv_raw_ = f"{id_}-detail.csv"
@@ -1660,7 +1669,7 @@ class Crud:
                 "_tags": _tags,
                 "_created_at": datetime.now(),
                 "_created_by": email_
-             })
+            })
 
             return {"result": True}
 
@@ -2019,6 +2028,7 @@ class Crud:
             count_ = len(records_) if records_ else 0
 
             df_ = pd.DataFrame(records_).fillna(0)
+            df_raw_ = pd.DataFrame(records_).fillna('')
 
             vie_visual_style_ = (
                 view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
@@ -2074,7 +2084,7 @@ class Crud:
                     groupby_.append(data_columns_0_)
 
             df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
-            df_raw_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
+            df_grp_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
 
             count_ = None
             sum_ = None
@@ -2104,11 +2114,7 @@ class Crud:
                     )
 
                 if len(groupby_) > 0:
-                    df_ = (
-                        df_.groupby(groupby_, as_index=False).sum()
-                        if data_values_0_v_ == "sum"
-                        else df_.groupby(groupby_, as_index=False).count()
-                    )
+                    df_ = df_.groupby(groupby_, as_index=False).sum() if data_values_0_v_ == "sum" else df_.groupby(groupby_, as_index=False).count()
 
             dfj_ = json.loads(df_.to_json(orient="records"))
 
@@ -2261,6 +2267,7 @@ class Crud:
                 "pivot": pivot_html_,
                 "pivotify": pivotify_html_,
                 "df": df_ if scope_ == "announcement" else None,
+                "dfgrp": df_grp_ if scope_ == "announcement" else None,
                 "dfraw": df_raw_ if scope_ == "announcement" else None,
                 "self": view_,
                 "stats": {
