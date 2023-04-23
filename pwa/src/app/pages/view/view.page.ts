@@ -95,7 +95,8 @@ export class ViewPage implements OnInit {
   public jeopen: boolean = false;
   public schemevis: any = "hide";
   public view: any = null;
-  private view_: any = {};
+  public view_: any = {};
+  public cron_: string = "";
 
   constructor(
     private crud: Crud,
@@ -136,6 +137,8 @@ export class ViewPage implements OnInit {
         this.view_ = this.view.self;
         this.subheader = this.view.self.title;
         this.data = this.view.data ? this.view.data : [];
+        const crontab_ = this.view_.scheduled_cron.split(' ');
+        this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
         this.view_properties = this.view.properties;
         this.view_properties_ = Object.keys(this.view.properties);
         this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;

@@ -364,7 +364,7 @@ export class CrudPage implements OnInit {
         match: [{
           key: "col_id",
           op: "eq",
-          value: coll_ === "_collection" ? this.data_["col_id"] : coll_ === "_permission" ? this.data_["per_collection_id"] : coll_ === "_automation" ? this.data_["aut_source_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_
+          value: coll_ === "_collection" ? this.data_["col_id"] : coll_ === "_permission" ? this.data_["per_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_
         }],
         sort: null,
         page: 1,

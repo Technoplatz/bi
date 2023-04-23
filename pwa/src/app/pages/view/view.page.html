@@ -80,8 +80,7 @@ https://www.gnu.org/licenses.
                   {{ 'Close' | translate }}
                 </ng-template>
               </div>
-              <div *ngIf="jeopen" class="data-sq-button ion-no-padding danger"
-                (click)="doSaveView()">
+              <div *ngIf="jeopen" class="data-sq-button ion-no-padding danger" (click)="doSaveView()">
                 <span *ngIf="!is_saving">
                   <ion-icon name="save-outline"></ion-icon><br />
                   {{ 'Save' | translate }}
@@ -97,19 +96,20 @@ https://www.gnu.org/licenses.
         <ion-grid [class]="schemevis">
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <json-editor id="struc" [options]="jeoptions" [data]="view && view['self'] ? view['self'] : {}"
+              <json-editor id="struc" [options]="jeoptions" [data]="view && view.self ? view.self : {}"
                 (change)="doChangeSchema($event)" #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
+
         <!-- VIEW GRID SECTION -->
         <div *ngIf="view" class="ion-margin-bottom">
-          {{ 'Shared with' | translate }} {{ view["_tags"]?.join(' ') }}<br />
-          <span *ngIf="view.vie_scheduled; else notscheduled">{{ 'Scheduled' | translate }}</span>
-          <ng-template #notscheduled> {{ 'Not Scheduled' | translate }} </ng-template>
+          <h4>{{ 'Shared with' | translate }} {{ view_._tags?.join(' ') }}</h4>
+          <h6 *ngIf="view_.scheduled; else notscheduled">{{ 'Scheduled' | translate }} at {{ cron_ }}</h6>
+          <ng-template #notscheduled><h5>{{ 'Not Scheduled' | translate }}</h5></ng-template>
           <div class="view-infos">
             <!-- PIVOT -->
-            <div [innerHtml]="pivot_" class="pivot"></div>            
+            <div [innerHtml]="pivot_" class="pivot"></div>
           </div>
 
           <!-- LIST -->
