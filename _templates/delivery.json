@@ -602,11 +602,10 @@
       ]
     }
   ],
-  "views": [
-    {
-      "id": "dnn-git-view",
+  "views": {
+    "dn-git-view": {
       "title": "GiT 2023",
-      "description": "Good in Transit Internal Report",
+      "description": "GiT Report",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -640,15 +639,14 @@
       "chart_yaxis_label": false,
       "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
       "schedule": false,
-      "schedule_cron": "* 2 * * *",
+      "schedule_cron": "* 3 * * *",
       "schedule_tz": "Europe/Istanbul",
-      "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
+      "_tags": ["#Technoplatz"]
     },
-    {
-      "id": "dnn-buid-view",
+    "dn-buid-view": {
       "title": "BU ID View",
-      "description": "DN statuses by BUID's",
-      "priority": 2000,
+      "description": "Git Report",
+      "priority": 1000,
       "enabled": true,
       "dashboard": true,
       "data_filter": [],
@@ -681,12 +679,11 @@
       "chart_yaxis_label": false,
       "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
       "schedule": false,
-      "schedule_cron": "* 2 * * *",
+      "schedule_cron": "* 4 * * *",
       "schedule_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
-    {
-      "id": "dn-statuses-view",
+    "dn-statuses-view": {
       "title": "Statuses",
       "description": "DN Statuses",
       "priority": 2000,
@@ -732,8 +729,7 @@
       "schedule_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
-    {
-      "id": "fc-on-the-way",
+    "fc-on-the-way": {
       "title": "On the Way",
       "description": "DNs on the way",
       "priority": 2000,
@@ -779,8 +775,7 @@
       "schedule_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
-    {
-      "id": "fc-on-customs",
+    "fc-on-customs": {
       "title": "On Customs",
       "description": "DNs have just arrived",
       "priority": 2000,
@@ -826,8 +821,7 @@
       "schedule_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
-    {
-      "id": "fc-on-custom-process",
+    "fc-on-custom-process": {
       "title": "On Customs Process",
       "description": "DNs on customs process or completed",
       "priority": 2000,
@@ -873,5 +867,5 @@
       "schedule_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     }
-  ]
+  }
 }

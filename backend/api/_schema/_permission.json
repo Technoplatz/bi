@@ -68,7 +68,7 @@
     },
     "per_schema": {
       "bsonType": "bool",
-      "title": "Scheme",
+      "title": "Scheme Update",
       "description": "Scheme Permission",
       "default": false,
       "width": 100

@@ -133,6 +133,7 @@ export class ViewPage implements OnInit {
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
       if (res && res.views) {
         this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
+        this.view_ = this.view.self;
         this.subheader = this.view.self.title;
         this.data = this.view.data ? this.view.data : [];
         this.view_properties = this.view.properties;

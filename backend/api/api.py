@@ -503,50 +503,30 @@ class Misc:
         """
         docstring is in progress
         """
-        ip_ = self.get_user_ip_f()
         if NOTIFICATION_SLACK_HOOK_URL_:
-            exc_ = {
-                "ip": ip_,
-                "domain": DOMAIN_,
-                "company": COMPANY_NAME_,
-                "file": __file__ if __file__ else None,
-                "line": exc.__traceback__.tb_lineno
-                if hasattr(exc, "__traceback__")
-                and hasattr(exc.__traceback__, "tb_lineno")
-                else None,
-                "name": type(exc).__name__ if hasattr(exc, "__name__") else None,
-                "details": str(exc) if hasattr(exc, "details") else exc,
-            }
-            resp_ = requests.post(
-                NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(exc_)})
-            )
+            ip_ = self.get_user_ip_f()
+            file_ = __file__ if __file__ else "file not detected"
+            line_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else "line not detected"
+            name_ = type(exc).__name__ if hasattr(type(exc), "__name__") else "Exception"
+            exception_ = str(exc)
+            notification_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, NAME: {name_}, FILE: {file_}, LINE: {line_}, EXCEPTION: {exception_}"
+            print("*** notification_", notification_)
+            resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_)}), timeout=10)
             if resp_.status_code != 200:
                 print("*** notification error", resp_)
+        return True
 
     def exception_f(self, exc):
         """
         docstring is in progress
         """
-        print(
-            "*** exception",
-            str(exc),
-            type(exc).__name__,
-            __file__,
-            exc.__traceback__.tb_lineno,
-        )
+        self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def api_error_f(self, exc):
         """
         docstring is in progress
         """
-        print(
-            "*** api error",
-            str(exc),
-            type(exc).__name__,
-            __file__,
-            exc.__traceback__.tb_lineno,
-        )
         self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
@@ -554,82 +534,23 @@ class Misc:
         """
         docstring is in progress
         """
-        print(
-            "*** app error",
-            str(exc),
-            type(exc).__name__,
-            __file__,
-            exc.__traceback__.tb_lineno,
-        )
+        self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
     def auth_error_f(self, exc):
         """
         docstring is in progress
         """
-        print(
-            "*** auth error",
-            str(exc),
-            type(exc).__name__,
-            __file__,
-            exc.__traceback__.tb_lineno,
-        )
+        self.post_notification(exc)
         return {"result": False, "msg": str(exc)}
 
-    def mongo_error_f(self, exc_):
+    def mongo_error_f(self, exc):
         """
         docstring is in progress
         """
-        try:
-            self.post_notification(exc_)
-            notify_ = False
-            errhtml_ = ""
-            count_ = 0
-            write_errors_ = exc_["writeErrors"] if exc_ and "writeErrors" in exc_ else None
-            # exc_ = str(exc_)
-            if write_errors_:
-                notify_ = True
-                errhtml_ += "<ul>"
-                count_ = len(write_errors_)
-                for error_ in write_errors_:
-                    errmsg_ = str(error_["errmsg"]) if "errmsg" in error_ else ""
-                    err_info_ = str(error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0]["propertiesNotSatisfied"]) if "errInfo" in error_ and "details" in error_["errInfo"] and "schemaRulesNotSatisfied" in error_[
-                        "errInfo"]["details"] and error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] and "propertiesNotSatisfied" in error_["errInfo"]["details"]["schemaRulesNotSatisfied"][0] else ""
-                    err_ = f"{errmsg_} {err_info_}"
-                    errhtml_ += f"<li>{err_}</li>"
-                errhtml_ += "</ul>"
-            else:
-                errmsg_ = exc_["errmsg"] if "errmsg" in exc_ else None
-                err_info_ = exc_["errInfo"] if "errInfo" in exc_ else None
-                details_ = err_info_["details"] if err_info_ and "details" in err_info_ else None
-                schema_rules_not_satisfied_ = details_["schemaRulesNotSatisfied"][0] if details_ and "schemaRulesNotSatisfied" in details_ and len(details_["schemaRulesNotSatisfied"]) > 0 else None
-                properties_not_satisfied_ = schema_rules_not_satisfied_["propertiesNotSatisfied"][0] if schema_rules_not_satisfied_ and "propertiesNotSatisfied" in schema_rules_not_satisfied_ and len(schema_rules_not_satisfied_[
-                                                                                                                                                                                                        "propertiesNotSatisfied"]) > 0 else None
-
-                if properties_not_satisfied_:
-                    err_property_name_ = properties_not_satisfied_["propertyName"] if "propertyName" in properties_not_satisfied_ else None
-                    err_details_ = properties_not_satisfied_["details"][0] if "details" in properties_not_satisfied_ and len(properties_not_satisfied_["details"]) > 0 else None
-                    err_details__ = err_details_["details"][0] if err_details_ and "details" in err_details_ and len(err_details_["details"]) > 0 else None
-                    reason_ = err_details__["reason"] if err_details__ and "reason" in err_details__ else None
-                    considered_value_ = err_details__["consideredValue"] if err_details__ and "consideredValue" in err_details__ else None
-                    specified_as_ = err_details__["specifiedAs"] if err_details__ and "specifiedAs" in err_details__ else None
-                    pattern_ = specified_as_["pattern"] if specified_as_ and "pattern" in specified_as_ else None
-                    errhtml_ = f"Property validation of {err_property_name_} failed." if err_property_name_ else ""
-                    errhtml_ += f", value: {str(considered_value_)}" if considered_value_ else ""
-                    errhtml_ += f", reason: {str(reason_)}" if reason_ else ""
-                    errhtml_ += f", pattern: {str(pattern_)}" if pattern_ else ""
-                else:
-                    errhtml_ = errmsg_
-
-            return {
-                "result": False,
-                "msg": errhtml_,
-                "notify": notify_,
-                "count": count_,
-            }
-
-        except Exception as exc:
-            return self.exception_f(exc)
+        self.post_notification(exc)
+        notify_ = False
+        return {"result": False, "msg": str(exc), "notify": notify_, "count": 0}
 
     def log_f(self, obj):
         """
@@ -3160,6 +3081,91 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def schema_ext_validate_f(self, structure_):
+        """
+        docstring is in progress
+        """
+        try:
+
+            views_ = structure_["views"] if structure_ and "views" in structure_ else None
+            if not views_:
+                raise APIError("no views found")
+
+            errstr_ = ""
+            for vie_ in views_:
+                view_ = views_[vie_]
+                title_ = view_["title"] if "title" in view_ and view_["title"] != "" else None
+                description_ = view_["description"] if "description" in view_ and view_["description"] != "" else None
+                priority_ = view_["priority"] if "priority" in view_ and isinstance(view_["priority"], int) else None
+                enabled_ = view_["enabled"] if "enabled" in view_ and view_["enabled"] in [True, False] else None
+                dashboard_ = view_["dashboard"] if "dashboard" in view_ and view_["dashboard"] in [True, False] else None
+                data_json_ = view_["data_json"] if "data_json" in view_ and view_["data_json"] in [True, False] else None
+                data_excel_ = view_["data_excel"] if "data_excel" in view_ and view_["data_excel"] in [True, False] else None
+                data_csv_ = view_["data_csv"] if "data_csv" in view_ and view_["data_csv"] in [True, False] else None
+                pivot_ = view_["pivot"] if "pivot" in view_ and view_["pivot"] in [True, False] else None
+                pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ and view_["pivot_totals"] in [True, False] else None
+                chart_ = view_["chart"] if "chart" in view_ and view_["chart"] in [True, False] else None
+                chart_type_ = view_["chart_type"] if "chart_type" in view_ and view_["chart_type"] in ["Flashcard", "Vertical Bar", "Normalized Vertical Bar", "Stacked Vertical Bar",
+                                                                                                       "Grouped Vertical Bar", "Horizontal Bar", "Normalized Horizontal Bar", "Stacked Horizontal Bar", "Grouped Horizontal Bar", "Line", "Pie", "Doughnut"] else None
+                chart_label_ = view_["chart_label"] if "chart_label" in view_ and view_["chart_label"] in [True, False] else None
+                chart_gradient_ = view_["chart_gradient"] if "chart_gradient" in view_ and view_["chart_gradient"] in [True, False] else None
+                chart_grid_ = view_["chart_grid"] if "chart_grid" in view_ and view_["chart_grid"] in [True, False] else None
+                chart_legend_ = view_["chart_legend"] if "chart_legend" in view_ and view_["chart_legend"] in [True, False] else None
+                chart_xaxis_ = view_["chart_xaxis"] if "chart_xaxis" in view_ and view_["chart_xaxis"] in [True, False] else None
+                chart_xaxis_label_ = view_["chart_xaxis_label"] if "chart_xaxis_label" in view_ and view_["chart_xaxis_label"] in [True, False] else None
+                chart_yaxis_ = view_["chart_yaxis"] if "chart_yaxis" in view_ and view_["chart_yaxis"] in [True, False] else None
+                chart_yaxis_label_ = view_["chart_yaxis_label"] if "chart_yaxis_label" in view_ and view_["chart_yaxis_label"] in [True, False] else None
+                chart_colors_ = view_["chart_colors"] if "chart_colors" in view_ else None
+                schedule_ = view_["schedule"] if "schedule" in view_ and view_["schedule"] in [True, False] else None
+                data_filter_ = view_["data_filter"] if "data_filter" in view_ else None
+                data_sort_ = view_["data_sort"] if "data_sort" in view_ else None
+                data_excluded = view_["data_excluded"] if "data_excluded" in view_ else None
+                data_index_ = view_["data_index"] if "data_index" in view_ and len(view_["data_index"]) > 0 else None
+                data_columns_ = view_["data_columns"] if "data_columns" in view_ and len(view_["data_columns"]) > 0 else None
+                data_values_ = view_["data_values"] if "data_values" in view_ and len(view_["data_values"]) > 0 else None
+                errarr_ = []
+                errarr_.append("title is missing") if title_ is None else _Noop()
+                errarr_.append("description is missing") if description_ is None else _Noop()
+                errarr_.append("priority is missing") if priority_ is None else _Noop()
+                errarr_.append("enabled is missing") if enabled_ is None else _Noop()
+                errarr_.append("dashboard is missing") if dashboard_ is None else _Noop()
+                errarr_.append("data_json is missing") if data_json_ is None else _Noop()
+                errarr_.append("data_excel is missing") if data_excel_ is None else _Noop()
+                errarr_.append("data_csv is missing") if data_csv_ is None else _Noop()
+                errarr_.append("pivot is missing") if pivot_ is None else _Noop()
+                errarr_.append("pivot_totals is missing") if pivot_totals_ is None else _Noop()
+                errarr_.append("chart is missing") if chart_ is None else _Noop()
+                errarr_.append("chart_type is missing") if chart_type_ is None else _Noop()
+                errarr_.append("chart_label is missing") if chart_label_ is None else _Noop()
+                errarr_.append("chart_gradient is missing") if chart_gradient_ is None else _Noop()
+                errarr_.append("chart_grid is missing") if chart_grid_ is None else _Noop()
+                errarr_.append("chart_legend is missing") if chart_legend_ is None else _Noop()
+                errarr_.append("chart_xaxis is missing") if chart_xaxis_ is None else _Noop()
+                errarr_.append("chart_xaxis_label is missing") if chart_xaxis_label_ is None else _Noop()
+                errarr_.append("chart_yaxis is missing") if chart_yaxis_ is None else _Noop()
+                errarr_.append("chart_yaxis_label is missing") if chart_yaxis_label_ is None else _Noop()
+                errarr_.append("chart_colors is missing") if chart_colors_ is None else _Noop()
+                errarr_.append("schedule is missing") if schedule_ is None else _Noop()
+                errarr_.append("data_filter is missing") if data_filter_ is None else _Noop()
+                errarr_.append("data_sort is missing") if data_sort_ is None else _Noop()
+                errarr_.append("data_excluded is missing") if data_excluded is None else _Noop()
+                errarr_.append("data_values is missing") if data_values_ is None else _Noop()
+                errarr_.append("data_columns is missing") if data_columns_ is None and chart_type_ not in ["Flashcard", "Pie"] else _Noop()
+                errarr_.append("data_index is missing") if data_index_ is None and chart_type_ not in ["Flashcard"] else _Noop()
+
+                if len(errarr_) > 0:
+                    errstr_ += f"{vie_}: "
+                    errstr_ += ", ".join(errarr_) + " "
+
+            if errstr_ != "":
+                errstr_ = f"SCHEMA ERROR(S): {errstr_}"
+                raise APIError(errstr_)
+
+            return {"result": True}
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
     def saveschema_f(self, obj):
         """
         docstring is in progress
@@ -3188,6 +3194,69 @@ class Crud:
                 "type": "Error",
                 "collection": collection_id_,
                 "op": op_,
+                "user": email_,
+                "document": str(exc)
+            })
+
+            return Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
+    def saveview_f(self, obj):
+        """
+        docstring is in progress
+        """
+        try:
+            user_ = obj["userindb"] if "userindb" in obj else None
+            col_id_ = obj["collection"]
+            view_ = obj["view"]
+            view_id_ = obj["id"]
+            email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
+            _tags = user_["_tags"]
+
+            permission_ = Mongo().db_["_permission"].find_one({
+                "per_collection_id": col_id_,
+                "per_tag": {"$in": _tags},
+                "per_schema": True
+            })
+            if not permission_:
+                raise APIError("no permission")
+
+            doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
+            if not doc_:
+                raise APIError("collection not found")
+            doc_["col_structure"]["views"][view_id_] = view_
+            structure_ = doc_["col_structure"]
+
+            schema_ext_validate_f_ = self.schema_ext_validate_f(structure_)
+            if not schema_ext_validate_f_["result"]:
+                raise APIError(schema_ext_validate_f_["msg"])
+
+            Mongo().db_["_collection"].update_one({"col_id": col_id_}, {"$set": doc_})
+
+            func_ = self.crudschema_validate_f({"collection": f"{col_id_}_data", "structure": structure_})
+            if not func_["result"]:
+                raise APIError(func_["msg"])
+
+            Misc().log_f({
+                "type": "Info",
+                "collection": col_id_,
+                "op": "saveview",
+                "user": email_,
+                "document": doc_
+            })
+
+            return {"result": True}
+
+        except pymongo.errors.PyMongoError as exc:
+            Misc().log_f({
+                "type": "Error",
+                "collection": col_id_,
+                "op": "saveview",
                 "user": email_,
                 "document": str(exc)
             })
@@ -4033,6 +4102,14 @@ class Crud:
 
         except Exception as exc:
             return Misc().exception_f(exc)
+
+
+class _Noop:
+    def __init__(self, level=0):
+        self.level = level
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
 
 class Email:
@@ -5660,6 +5737,8 @@ def crud_f():
             res_ = Crud().template_f(input_)
         elif op_ == "saveschema":
             res_ = Crud().saveschema_f(input_)
+        elif op_ == "saveview":
+            res_ = Crud().saveview_f(input_)
         else:
             raise APIError(f"{op_} is not a supported operation")
 
