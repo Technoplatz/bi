@@ -65,6 +65,7 @@ from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
+from croniter import croniter
 
 
 class APIError(BaseException):
@@ -104,274 +105,78 @@ class Schedular:
     docstring is in progress
     """
 
-    def schedule_automation_f(self, doc_):
+    def cron_looker_f(self, view_):
         """
         docstring is in progress
         """
-        try:
-            aut_id_ = doc_["aut_id"] if "aut_id" in doc_ else None
-            aut_source_collection_id_ = (
-                doc_["aut_source_collection_id"]
-                if "aut_source_collection_id" in doc_
-                else None
-            )
-            aut_source_filter_ = (
-                doc_["aut_source_filter"]
-                if "aut_source_filter" in doc_ and len(doc_["aut_source_filter"]) > 0
-                else None
-            )
-            aut_source_set_ = (
-                doc_["aut_source_set"]
-                if "aut_source_set" in doc_ and len(doc_["aut_source_set"]) > 0
-                else None
-            )
-            aut_target_set_ = (
-                doc_["aut_target_set"]
-                if "aut_target_set" in doc_ and len(doc_["aut_target_set"]) > 0
-                else None
-            )
-            aut_target_collection_id_ = (
-                doc_["aut_target_collection_id"]
-                if "aut_target_collection_id" in doc_
-                else None
-            )
-            aut_target_match_ = (
-                doc_["aut_target_match"]
-                if "aut_target_match" in doc_ and len(doc_["aut_target_match"]) > 0
-                else None
-            )
-            aut_target_ = doc_["aut_target"] if "aut_target" in doc_ else False
-            aut_target_upsert_ = (
-                True
-                if "aut_target_upsert" in doc_ and doc_["aut_target_upsert"] is True
-                else False
-            )
-
-            if not aut_id_ or not aut_source_collection_id_ or not aut_source_filter_:
-                raise APIError("automation info is missing")
-
-            if aut_target_:
-                if not aut_target_match_ or not aut_target_collection_id_:
-                    raise APIError("match info is missing")
-                if not len(aut_target_match_) > 0:
-                    raise APIError("matched fields is missing")
-
-            collection_ = (
-                Mongo()
-                .db_["_collection"]
-                .find_one({"col_id": aut_source_collection_id_})
-            )
-            if not collection_:
-                raise APIError(
-                    f"collection not found to schedule {aut_source_collection_id_}"
-                )
-
-            structure_ = (
-                collection_["col_structure"] if "col_structure" in collection_ else None
-            )
-            if not structure_:
-                raise APIError(f"structure not found: {aut_source_collection_id_}")
-
-            properties_ = (
-                structure_["properties"] if "properties" in structure_ else None
-            )
-            if not properties_:
-                raise APIError(
-                    f"source properties not found: {aut_source_collection_id_}"
-                )
-
-            get_filtered_ = Crud().get_filtered_f(
-                {
-                    "match": aut_source_filter_,
-                    "properties": structure_["properties"]
-                    if "properties" in structure_
-                    else None,
-                }
-            )
-
-            source_data_file_ = f"{aut_source_collection_id_}_data"
-            if source_data_file_ not in Mongo().db_.list_collection_names():
-                raise APIError("collection data is missing")
-
-            target_data_file_ = None
-            target_structure_ = None
-
-            if aut_target_:
-                target_data_file_ = f"{aut_target_collection_id_}_data"
-                if target_data_file_ not in Mongo().db_.list_collection_names():
-                    raise APIError(
-                        f"target collection data is missing {target_data_file_}"
-                    )
-
-                collection_ = (
-                    Mongo()
-                    .db_["_collection"]
-                    .find_one({"col_id": aut_target_collection_id_})
-                )
-                if not collection_:
-                    raise APIError(
-                        f"target collection not found to schedule: {aut_target_collection_id_}"
-                    )
-
-                target_structure_ = (
-                    collection_["col_structure"]
-                    if "col_structure" in collection_
-                    else None
-                )
-                if not target_structure_:
-                    raise APIError(
-                        f"target structure not found: {aut_target_collection_id_}"
-                    )
-
-                target_properties_ = target_structure_["properties"] if "properties" in target_structure_ else None
-                if not target_properties_:
-                    raise APIError(f"target properties not found: {aut_target_collection_id_}")
-
-            count_ = 0
-            find_ = Mongo().db_[source_data_file_].find(get_filtered_)
-            for rec_ in find_:
-                target_match_ = {}
-                id_ = rec_["_id"]
-                if aut_target_ and target_structure_:
-                    for match_ in aut_target_match_:
-                        m_key_ = match_["key"]
-                        m_value_ = match_["value"]
-                        if m_value_[:1] == "$":
-                            val_ = m_value_[1:]
-                            m_value_ = rec_[val_]
-                        target_match_[m_key_] = m_value_
-
-                    if not target_match_:
-                        raise APIError("The first item of the target filter must be the matching field")
-
-                set_source_ = {}
-                set_target_ = {}
-                set_source_["_modified_by"] = set_target_["_modified_by"] = "Automation"
-                set_source_["_modified_at"] = set_target_["_modified_at"] = datetime.now()
-
-                if aut_source_set_ and len(aut_source_set_) > 0:
-                    for aut_source_set__ in aut_source_set_:
-                        key_ = aut_source_set__["key"]
-                        value_ = Misc().string_to_formula_f(
-                            aut_source_set__, rec_, properties_
-                        )
-                        set_source_[key_] = value_
-                    Mongo().db_[source_data_file_].update_one(
-                        {"_id": id_}, {"$set": set_source_}
-                    )
-
-                if aut_target_set_ and len(aut_target_set_) > 0:
-                    for aut_target_set__ in aut_target_set_:
-                        key_ = aut_target_set__["key"]
-                        value_ = Misc().string_to_formula_f(aut_target_set__, rec_, target_properties_)
-                        set_target_[key_] = value_
-                    update_many_ = Mongo().db_[target_data_file_].update_many(target_match_, {"$set": set_target_}, upsert=aut_target_upsert_)
-                    count_ = update_many_.matched_count
-
-            return {"result": True, "count": count_}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def schedule_automations_f(self, backgroundscheduler_):
-        """
-        docstring is in progress
-        """
-        try:
-            print("*** schedule automations started", datetime.now())
-            find_ = Mongo().db_["_automation"].find({"aut_enabled": True})
-            for doc_ in find_:
-                aut_id_ = doc_["aut_id"]
-                if backgroundscheduler_.get_job(aut_id_):
-                    backgroundscheduler_.remove_job(aut_id_)
-
-                backgroundscheduler_.add_job(
-                    self.schedule_automation_f,
-                    "cron",
-                    day_of_week="*",
-                    hour="*",
-                    minute="*",
-                    id=aut_id_,
-                    timezone=TZ_,
-                    replace_existing=True,
-                    args=[doc_],
-                )
-
-            return {"result": True}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        scheduled_ = view_["scheduled"] if "scheduled" in view_ else None
+        scheduled_cron_ = view_["scheduled_cron"] if "scheduled_cron" in view_ else None
+        scheduled_tz_ = view_["scheduled_tz"] if "scheduled_tz" in view_ else "Europe/Berlin"
+        if not (scheduled_ and scheduled_cron_ and scheduled_tz_):
+            return {"result": False, "msg": "not scheduled"}
+        if not croniter.is_valid(scheduled_cron_):
+            return {"result": False, "msg": "invalid crontab"}
+        separated_ = re.split(" ", scheduled_cron_)
+        if not (separated_ and len(separated_) == 5):
+            return {"result": False, "msg": "invalid cron separation"}
+        minute_ = separated_[0].strip()
+        hour_ = separated_[1].strip()
+        day_ = separated_[2].strip()
+        month_ = separated_[3].strip()
+        day_of_week_ = separated_[4].lower().strip()
+        return {"result": True, "minute": str(minute_), "hour": str(hour_), "day": str(day_), "month": str(month_), "day_of_week": str(day_of_week_), "tz": scheduled_tz_}
 
     def schedule_views_f(self, sched_):
         """
         docstring is in progress
         """
         try:
-            print("*** schedule views started", datetime.now())
-            view_find_ = Mongo().db_["_view"].find({})
-            for doc_ in view_find_:
-                vie_id_ = doc_["vie_id"]
-                if sched_.get_job(vie_id_):
-                    sched_.remove_job(vie_id_)
-                vie_scheduled_ = (
-                    doc_["vie_scheduled"]
-                    if "vie_scheduled" in doc_ and doc_["vie_scheduled"]
-                    else False
-                )
-                vie_pivot_values_ = (
-                    doc_["vie_pivot_values"] if "vie_pivot_values" in doc_ else []
-                )
-                vie_pivot_index_ = (
-                    doc_["vie_pivot_index"] if "vie_pivot_index" in doc_ else []
-                )
-                _tags = doc_["_tags"] if "_tags" in doc_ else []
+            print("*** scheduled views started", datetime.now())
+            collections_ = list(Mongo().db_["_collection"].aggregate([{
+                "$project": {
+                    "col_id": 1,
+                    "col_structure": 1,
+                    "views": {"$objectToArray": "$col_structure.views"}
+                }},{
+                "$match": {
+                    "views": {
+                        "$elemMatch": {
+                            "$and": [{"v.enabled": True}, {"v.scheduled": True}]
+                        }
+                    }
+                }
+            }]))
 
-                if (
-                    vie_scheduled_
-                    and len(vie_pivot_values_) > 0
-                    and len(vie_pivot_index_) > 0
-                    and len(_tags) > 0
-                ):
-                    vie_sched_minutes_c_ = (
-                        [str(element) for element in doc_["vie_sched_minutes"]]
-                        if "vie_sched_minutes" in doc_
-                        and len(doc_["vie_sched_minutes"]) > 0
-                        else ["0"]
-                    )
-                    vie_sched_hours_c_ = (
-                        [str(element) for element in doc_["vie_sched_hours"]]
-                        if "vie_sched_hours" in doc_
-                        and len(doc_["vie_sched_hours"]) > 0
-                        else ["12"]
-                    )
-                    vie_sched_minutes_ = ",".join(vie_sched_minutes_c_)
-                    vie_sched_hours_ = ",".join(vie_sched_hours_c_)
-                    vie_sched_days_ = (
-                        ",".join(doc_["vie_sched_days"])
-                        if "vie_sched_days" in doc_ and len(doc_["vie_sched_days"]) > 0
-                        else "mon"
-                    )
-                    # sched_.add_job(
-                    #     self.announce_view_f,
-                    #     "cron",
-                    #     day_of_week=f"{vie_sched_days_}",
-                    #     hour=f"{vie_sched_hours_}",
-                    #     minute=f"{vie_sched_minutes_}",
-                    #     id=vie_id_,
-                    #     timezone=TZ_,
-                    #     replace_existing=True,
-                    #     args=[doc_, "live", None],
-                    # )
-                    print(
-                        f"*** job added: {vie_id_} D[{vie_sched_days_}] H[{vie_sched_hours_}] M[{vie_sched_minutes_}]",
-                        datetime.now(),
-                    )
+            if not collections_:
+                print("*** no view found to schedule")
+                return {"result": True}
+
+            for collection_ in collections_:
+                views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
+                if not views_:
+                    print(f"!!! no view found to schedule for {collection_['col_id']}")
+                    continue
+                for view_ in views_:
+                    id__ = view_["k"]
+                    view__ = view_["v"]
+                    cron_looker_f_ = self.cron_looker_f(view__)
+                    print("*** cron_looker_f_", cron_looker_f_)
+                    if not cron_looker_f_["result"]:
+                        continue
+                    minute_ = cron_looker_f_["minute"]
+                    hour_ = cron_looker_f_["hour"]
+                    day_ = cron_looker_f_["day"]
+                    month_ = cron_looker_f_["month"]
+                    day_of_week_ = cron_looker_f_["day_of_week"]
+                    tz_ = cron_looker_f_["tz"]
+                    args_ = [{
+                        "collection": collection_["col_id"],
+                        "id": id__,
+                        "scope": "live"
+                    }]
+                    print("args_", args_)
+                    sched_.add_job(Crud().announce_f, "cron", minute=f"{minute_}", hour=f"{hour_}", day=f"{day_}", month=f"{month_}", day_of_week=f"{day_of_week_}", id=id__, timezone=tz_, replace_existing=True, args=args_)
+                    print("scheduled", id__)
 
             return {"result": True}
 
@@ -389,58 +194,14 @@ class Schedular:
             sched_ = BackgroundScheduler(timezone=TZ_, daemon=True)
             sched_.remove_all_jobs()
 
-            # schedule automations initially
-            schedule_automations_f_ = self.schedule_automations_f(sched_)
-            if not schedule_automations_f_["result"]:
-                raise APIError(schedule_automations_f_["msg"])
-
-            # schedule views initially
             schedule_views_f_ = self.schedule_views_f(sched_)
             if not schedule_views_f_["result"]:
                 raise APIError(schedule_views_f_["msg"])
 
-            # reschedule views regularly
-            sched_.add_job(
-                self.schedule_automations_f,
-                "cron",
-                day_of_week="*",
-                hour="*",
-                minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}",
-                id="schedule_automations",
-                timezone=TZ_,
-                replace_existing=True,
-                args=[sched_],
-            )
-
-            # reschedule views regularly
-            sched_.add_job(
-                self.schedule_views_f,
-                "cron",
-                day_of_week="*",
-                hour="*",
-                minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}",
-                id="schedule_views",
-                timezone=TZ_,
-                replace_existing=True,
-                args=[sched_],
-            )
-
-            # schedule database dumps
             args_ = {"user": {"email": "cron"}, "op": "backup"}
-            sched_.add_job(
-                Crud().dump_f,
-                "cron",
-                day_of_week="*",
-                hour=f"{API_DUMP_HOURS_}",
-                minute="0",
-                id="schedule_dump",
-                timezone=TZ_,
-                replace_existing=True,
-                args=[args_],
-            )
-
+            sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ_, replace_existing=True, args=[args_])
+            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", timezone=TZ_, replace_existing=True, args=[sched_])
             sched_.start()
-
             return True
 
         except APIError as exc:
@@ -967,8 +728,8 @@ class Crud:
 
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    jtxt_ = f_.read()
+                    fopen_ = open(path_, "r")
+                    jtxt_ = ffopen__.read()
                     jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
                     structure_ = json.loads(jtxt_)
 
@@ -1478,11 +1239,6 @@ class Crud:
         docstring is in progress
         """
         try:
-            if "user" not in input_:
-                raise APIError("user is missing")
-
-            if "tfac" not in input_:
-                raise APIError("tfac is missing")
 
             if "collection" not in input_:
                 raise APIError("collection is missing")
@@ -1490,25 +1246,21 @@ class Crud:
             if "id" not in input_:
                 raise APIError("id is missing")
 
-            if "email" not in input_["user"]:
-                raise APIError("email is missing")
-
             if "scope" not in input_:
                 raise APIError("scope is missing")
 
-            tfac_ = input_["tfac"]
             id_ = input_["id"]
-            user_ = input_["userindb"]
             scope_ = input_["scope"]
             col_id_ = input_["collection"]
-            email_ = user_["usr_id"]
+
+            user_ = None
+            email_ = None
+            if "user" in input_:
+                user_ = input_["userindb"]
+                email_ = user_["usr_id"]
 
             if scope_ not in ["test", "live"]:
                 raise APIError("invalid scope")
-
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
-            if not verify_2fa_f_["result"]:
-                raise APIError(verify_2fa_f_["msg"])
 
             get_view_data_f_ = self.get_view_data_f(user_, id_, "announcement")
             if not get_view_data_f_["result"]:
@@ -1535,9 +1287,6 @@ class Crud:
                     if member_["usr_id"] not in to_:
                         to_.append(member_["usr_id"])
                         personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
-            if scope_ == "test" and email_ not in to_:
-                to_.append(email_)
-                personalizations_to_.append({"email": email_, "name": "Test"})
             personalizations_ = {"to": personalizations_to_}
 
             files_ = []
@@ -1589,7 +1338,7 @@ class Crud:
                 "ano_to": to_,
                 "_tags": _tags,
                 "_created_at": datetime.now(),
-                "_created_by": email_
+                "_created_by": email_ if email_ else "cronjob"
             })
 
             return {"result": True}
@@ -1824,9 +1573,10 @@ class Crud:
         try:
             filter_ = {}
             filter_[f"col_structure.views.{view_id_}.enabled"] = True
-            filter_[f"col_structure.views.{view_id_}._tags"] = {
-                "$elemMatch": {"$in": user_["_tags"]}
-            }
+            if user_:
+                filter_[f"col_structure.views.{view_id_}._tags"] = {
+                    "$elemMatch": {"$in": user_["_tags"]}
+                }
             collection_ = Mongo().db_["_collection"].find_one(filter_)
             if not collection_:
                 return {
@@ -3116,13 +2866,16 @@ class Crud:
                 chart_yaxis_ = view_["chart_yaxis"] if "chart_yaxis" in view_ and view_["chart_yaxis"] in [True, False] else None
                 chart_yaxis_label_ = view_["chart_yaxis_label"] if "chart_yaxis_label" in view_ and view_["chart_yaxis_label"] in [True, False] else None
                 chart_colors_ = view_["chart_colors"] if "chart_colors" in view_ else None
-                schedule_ = view_["schedule"] if "schedule" in view_ and view_["schedule"] in [True, False] else None
+                scheduled_ = view_["scheduled"] if "scheduled" in view_ and view_["scheduled"] in [True, False] else None
+                scheduled_cron_ = view_["scheduled_cron"] if "scheduled_cron" in view_ else None
+                scheduled_tz_ = view_["scheduled_tz"] if "scheduled_tz" in view_ else None
                 data_filter_ = view_["data_filter"] if "data_filter" in view_ else None
                 data_sort_ = view_["data_sort"] if "data_sort" in view_ else None
                 data_excluded = view_["data_excluded"] if "data_excluded" in view_ else None
                 data_index_ = view_["data_index"] if "data_index" in view_ and len(view_["data_index"]) > 0 else None
                 data_columns_ = view_["data_columns"] if "data_columns" in view_ and len(view_["data_columns"]) > 0 else None
                 data_values_ = view_["data_values"] if "data_values" in view_ and len(view_["data_values"]) > 0 else None
+
                 errarr_ = []
                 errarr_.append("title is missing") if title_ is None else _Noop()
                 errarr_.append("description is missing") if description_ is None else _Noop()
@@ -3145,7 +2898,9 @@ class Crud:
                 errarr_.append("chart_yaxis is missing") if chart_yaxis_ is None else _Noop()
                 errarr_.append("chart_yaxis_label is missing") if chart_yaxis_label_ is None else _Noop()
                 errarr_.append("chart_colors is missing") if chart_colors_ is None else _Noop()
-                errarr_.append("schedule is missing") if schedule_ is None else _Noop()
+                errarr_.append("scheduled is missing") if scheduled_ is None else _Noop()
+                errarr_.append("scheduled_cron is missing") if scheduled_cron_ is None else _Noop()
+                errarr_.append("scheduled_tz is missing") if scheduled_tz_ is None else _Noop()
                 errarr_.append("data_filter is missing") if data_filter_ is None else _Noop()
                 errarr_.append("data_sort is missing") if data_sort_ is None else _Noop()
                 errarr_.append("data_excluded is missing") if data_excluded is None else _Noop()
@@ -3630,20 +3385,9 @@ class Crud:
 
             if collection_ == "_collection":
                 c_ = doc_["col_id"]
-                Mongo().db_[f"{c_}_data"].aggregate(
-                    [{"$match": {}}, {"$out": f"{c_}_data_removed"}]
-                )
+                Mongo().db_[f"{c_}_data"].aggregate([{"$match": {}}, {"$out": f"{c_}_data_removed"}])
                 Mongo().db_[f"{c_}_data"].drop()
                 Mongo().db_["_field"].delete_many({"fie_collection_id": c_})
-                Mongo().db_["_automation"].update_many(
-                    {
-                        "$or": [
-                            {"aut_source_collection_id": c_},
-                            {"aut_target_collection_id": c_},
-                        ]
-                    },
-                    {"$set": {"aut_enabled": False}},
-                )
 
             return {"result": True}
 
@@ -3674,25 +3418,18 @@ class Crud:
             user_ = obj["user"] if "user" in obj else None
             match_ = obj["match"] if "match" in obj else None
 
-            # checks if the operator is either clone or delete
             op_ = obj["op"]
             if op_ != "clone" and op_ != "delete":
                 raise APIError("operation not supported")
 
-            # protect _log collection from clonning and deleting
             if collection_id_ in ["_log", "_backup", "_announcement"]:
+                raise AppException("this collection is protected is protected for bulk processes")
+
+            if op_ == "delete" and collection_id_ == "_user":
                 raise AppException(
-                    "this collection is protected is protected for bulk processes"
+                    "user is protected to delete. please consider disabling user instead."
                 )
 
-            # protect _user collection from deleting requests
-            if op_ == "delete":
-                if collection_id_ == "_user":
-                    raise AppException(
-                        "user is protected to delete. please consider disabling user instead."
-                    )
-
-            # collect object ids of the records to be processed
             ids_ = []
             for _id in match_:
                 ids_.append(ObjectId(_id))
@@ -3712,7 +3449,6 @@ class Crud:
             if not structure_:
                 raise APIError("structure not found")
 
-            # checks the unique key of the collection to generate a new key for the clone operation
             if "unique" in structure_ and "properties" in structure_:
                 properties = structure_["properties"]
                 unique = structure_["unique"]
@@ -3720,7 +3456,6 @@ class Crud:
                 if op_ == "clone":
                     raise APIError("unique in structure not found")
 
-            # creates a cursor from the object ids proceed to be cloned or deleted
             cursor = Mongo().db_[collection_].find({"_id": {"$in": ids_}})
             for index, doc in enumerate(cursor, start=1):
                 if op_ == "clone":
@@ -3739,8 +3474,6 @@ class Crud:
                                 ):
                                     doc[uq[0]] = str(bson.objectid.ObjectId())
                                 elif properties[uq[0]]["bsonType"] == "string":
-                                    # concat a suffix index no to field
-                                    # doc[uq[0]] = f"{doc[uq[0]]}{index}"
                                     doc[uq[0]] = (
                                         f"{doc[uq[0]]}_x"
                                         if "_" in doc[uq[0]]
@@ -4030,8 +3763,8 @@ class Crud:
                 prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
-                    f_ = open(path_, "r")
-                    jtxt_ = f_.read()
+                    fopen_ = open(path_, "r")
+                    jtxt_ = fopen_.read()
                     jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
                     structure_ = json.loads(jtxt_)
                 doc_["col_structure"] = structure_
@@ -5166,8 +4899,6 @@ class Auth:
             if not verify_2fa_f_["result"]:
                 raise AuthError(verify_2fa_f_["msg"])
 
-            verification_content_ = {"tfac": str(tfac_)}
-
             log_ = Misc().log_f(
                 {
                     "type": "Info",
@@ -5175,7 +4906,6 @@ class Auth:
                     "op": "signin",
                     "user": email_,
                     "document": {
-                        "verification": verification_content_,
                         "_modified_at": datetime.now(),
                         "_modified_by": email_,
                     },
@@ -5631,7 +5361,6 @@ def crud_f():
     docstring is in progress
     """
     try:
-        # validates restapi request
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
             raise APIError(
@@ -5700,6 +5429,12 @@ def crud_f():
             col_check_ = Crud().inner_collection_f(input_["collection"])
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
+
+        if op_ in ["announce"]:
+            tfac_ = input_["tfac"]
+            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
+            if not verify_2fa_f_["result"]:
+                raise APIError(verify_2fa_f_["msg"])
 
         if op_ == "read":
             res_ = Crud().read_f(input_)

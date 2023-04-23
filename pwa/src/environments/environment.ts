@@ -123,10 +123,6 @@ export const environment = {
       "title": "Announcements",
       "description": "Data announcements log of the shared views."
     },
-    "_kv": {
-      "title": "KV",
-      "description": "Essential environment variables as KEY=VALUE pairs."
-    },
     "_user": {
       "title": "Users",
       "description": "Internal users, data subscribers and hashtags."
@@ -150,18 +146,22 @@ export const environment = {
     "_log": {
       "title": "Logs",
       "description": "Transaction logs in detail."
-    }
+    },
+    "_kv": {
+      "title": "Key:Value",
+      "description": "Basic environment variables defined as KEY:VALUE pairs."
+    },
   },
   segmentsadm: [
     { "id": "_collection", "title": "Collections", "description": "Database collections stores records as documents." },
     { "id": "_announcement", "title": "Announcements", "description": "Data announcements of the shared views." },
-    { "id": "_kv", "title": "KV" },
     { "id": "_user", "title": "Users", "description": "Internal users and data subscribers." },
     { "id": "_permission", "title": "Permissions", "description": "Database collection permissions." },
     { "id": "_firewall", "title": "Firewall", "description": "IP Firewall" },
     { "id": "_token", "title": "API Tokens", "description": "Access tokens of built-in API functions." },
     { "id": "_backup", "title": "Backups", "description": "Database backup and restore." },
-    { "id": "_log", "title": "Logs", "description": "Transaction logs in detail" }
+    { "id": "_log", "title": "Logs", "description": "Transaction logs in detail" },
+    { "id": "_kv", "title": "Key:Value" }
   ],
   themes: [
     { "name": "Dark", "color": "#111111" },

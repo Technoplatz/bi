@@ -73,7 +73,7 @@ export class MenuComponent implements OnInit {
       this.collections = res && res.data ? res.data : [];
     });
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
-      this.views = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard") : [];
+      this.views = res && res.views ? res.views : [];
     });
     this.crud.saas.subscribe((res: any) => {
       this.saas_ = res;

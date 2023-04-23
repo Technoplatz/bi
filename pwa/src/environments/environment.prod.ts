@@ -123,10 +123,6 @@ export const environment = {
       "title": "Announcements",
       "description": "Data announcements log of the shared views."
     },
-    "_kv": {
-      "title": "KV",
-      "description": "Essential environment variables as KEY=VALUE pairs."
-    },
     "_user": {
       "title": "Users",
       "description": "Internal users, data subscribers and hashtags."
@@ -150,18 +146,22 @@ export const environment = {
     "_log": {
       "title": "Logs",
       "description": "Transaction logs in detail."
+    },
+    "_kv": {
+      "title": "Key:Value",
+      "description": "Basic environment variables defined as KEY:VALUE pairs."
     }
   },
   segmentsadm: [
     { "id": "_collection", "title": "Collections" },
     { "id": "_announcement", "title": "Announcements" },
-    { "id": "_kv", "title": "KV" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },
     { "id": "_firewall", "title": "Firewall" },
     { "id": "_token", "title": "API Tokens" },
     { "id": "_backup", "title": "Backups" },
-    { "id": "_log", "title": "Logs" }
+    { "id": "_log", "title": "Logs" },
+    { "id": "_kv", "title": "Key:Value" }
   ],
   themes: [
     { "name": "Dark", "color": "#111111" },
