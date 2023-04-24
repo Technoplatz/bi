@@ -137,7 +137,7 @@ export class ViewPage implements OnInit {
         this.view_ = this.view.self;
         this.subheader = this.view.self.title;
         this.data = this.view.data ? this.view.data : [];
-        const crontab_ = this.view_.scheduled_cron.split(' ');
+        const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
         this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
         this.view_properties = this.view.properties;
         this.view_properties_ = Object.keys(this.view.properties);

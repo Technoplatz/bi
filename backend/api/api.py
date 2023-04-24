@@ -620,7 +620,7 @@ class Crud:
         docstring is in progress
         """
         try:
-            return json.loads(open(f"/app/_schema/{schema}.json", "r").read())
+            return json.loads(open(f"/app/_schema/{schema}.json", "r", encoding="utf-8").read())
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -692,11 +692,11 @@ class Crud:
                 raise APIError("user not found")
 
             data_ = None
-            path_ = f"/app/_template/templates.json"
+            path_ = "/app/_template/templates.json"
             if not os.path.isfile(path_):
                 raise APIError("no templates found")
 
-            data_ = json.loads(open(path_, "r").read())
+            data_ = json.loads(open(path_, "r", encoding="utf-8").read())
 
             if proc_ == "list":
                 data_ = [item_ for item_ in data_]
@@ -728,8 +728,8 @@ class Crud:
 
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
-                    fopen_ = open(path_, "r")
-                    jtxt_ = ffopen__.read()
+                    fopen_ = open(path_, "r", encoding="utf-8")
+                    jtxt_ = fopen_.read()
                     jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
                     structure_ = json.loads(jtxt_)
 
@@ -1132,11 +1132,7 @@ class Crud:
                     property_ = properties_[column_]
                     if "bsonType" in property_:
                         if property_["bsonType"] == "date":
-                            try:
-                                df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
-                            except Exception:
-                                if "required" in structure_ and len(structure_["required"]) > 0 and column_ in structure_["required"]:
-                                    raise Exception(f"invalid or empty date in {column_} column")
+                            df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
                             if "exclude" in property_ and len(property_["exclude"]) > 0:
@@ -2831,7 +2827,7 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def schema_ext_validate_f(self, structure_):
+    def schema_ext_validate_f(self, structure_, _id):
         """
         docstring is in progress
         """
@@ -2843,6 +2839,8 @@ class Crud:
 
             errstr_ = ""
             for vie_ in views_:
+                if _id is not None and vie_ != _id:
+                    continue
                 view_ = views_[vie_]
                 title_ = view_["title"] if "title" in view_ and view_["title"] != "" else None
                 description_ = view_["description"] if "description" in view_ and view_["description"] != "" else None
@@ -2913,7 +2911,7 @@ class Crud:
                     errstr_ += ", ".join(errarr_) + " "
 
             if errstr_ != "":
-                errstr_ = f"SCHEMA ERROR(S): {errstr_}"
+                errstr_ = f"!!! view schema error: {errstr_}"
                 raise APIError(errstr_)
 
             return {"result": True}
@@ -2987,7 +2985,7 @@ class Crud:
             doc_["col_structure"]["views"][view_id_] = view_
             structure_ = doc_["col_structure"]
 
-            schema_ext_validate_f_ = self.schema_ext_validate_f(structure_)
+            schema_ext_validate_f_ = self.schema_ext_validate_f(structure_, view_id_)
             if not schema_ext_validate_f_["result"]:
                 raise APIError(schema_ext_validate_f_["msg"])
 
@@ -3763,7 +3761,7 @@ class Crud:
                 prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
-                    fopen_ = open(path_, "r")
+                    fopen_ = open(path_, "r", encoding="utf-8")
                     jtxt_ = fopen_.read()
                     jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
                     structure_ = json.loads(jtxt_)
