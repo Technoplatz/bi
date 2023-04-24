@@ -32,7 +32,7 @@
       "maxLength": 3,
       "pattern": "^[a-z]{3,3}$",
       "title": "Prefix",
-      "description": "Column Prefix - 3 characters lowercase",
+      "description": "Column Prefix - 3 characters lower case",
       "permanent": true,
       "width": 110
     },

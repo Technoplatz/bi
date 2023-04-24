@@ -638,9 +638,9 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
-      "scheduled": false,
-      "scheduled_cron": "* 3 * * *",
-      "scheduled_tz": "Europe/Istanbul",
+      "scheduled": true,
+      "scheduled_cron": "15 14,15,16 * * mon,tue",
+      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Technoplatz"]
     },
     "dn-buid-view": {
@@ -678,9 +678,9 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
-      "scheduled": false,
-      "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Istanbul",
+      "schedule": false,
+      "schedule_cron": "* 4 * * *",
+      "schedule_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
     "dn-statuses-view": {
@@ -724,14 +724,14 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
-      "scheduled": false,
-      "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Istanbul",
+      "schedule": false,
+      "schedule_cron": "* 2 * * *",
+      "schedule_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
     "fc-on-the-way": {
-      "title": "On the Way",
-      "description": "DNs on the way",
+      "title": "STby + On the Way",
+      "description": "DNs stand-by and on the way",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -769,10 +769,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
-      "scheduled": false,
-      "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Istanbul",
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
+      "scheduled": true,
+      "scheduled_cron": "0 10 * 1-5 *",
+      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
     "fc-on-customs": {
@@ -815,15 +815,15 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
-      "scheduled": false,
-      "scheduled_cron": "* 2 * * *",
+      "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
+      "scheduled": true,
+      "scheduled_cron": "0 10 * 1-5 *",
       "scheduled_tz": "Europe/Istanbul",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     },
     "fc-on-custom-process": {
       "title": "On Customs Process",
-      "description": "DNs on customs process or completed",
+      "description": "DNs currently on customs process",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -861,10 +861,148 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
+      "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
       "scheduled_tz": "Europe/Istanbul",
+      "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
+    },
+    "fc-status-40": {
+      "title": "Clearance Completed",
+      "description": "DNs clearance have been completed",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "40-ClearanceCompleted"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "scheduled": false,
+      "scheduled_cron": "* 2 * * *",
+      "scheduled_tz": "Europe/Istanbul",
+      "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
+    },
+    "fc-status-50": {
+      "title": "On The Touchpoint",
+      "description": "DNs on the Touchpoint",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "50-OnTheTouchpoint"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "scheduled": true,
+      "scheduled_cron": "30 9,17 * 1-5 *",
+      "scheduled_tz": "Europe/Istanbul",
+      "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
+    },
+    "fc-status-60": {
+      "title": "Ready To Be Delivered",
+      "description": "DNs awaiting shipment",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "scheduled": false,
+      "scheduled_cron": "* 23 * * sun",
+      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Technoplatz", "#Managers", "#Administrators"]
     }
   }

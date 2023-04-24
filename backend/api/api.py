@@ -166,7 +166,8 @@ class Schedular:
                         "id": id__,
                         "scope": "live"
                     }]
-                    sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_["month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, timezone=cron_looker_f_["tz"], replace_existing=True, args=args_)
+                    sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_[
+                                   "month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, timezone=cron_looker_f_["tz"], replace_existing=True, args=args_)
                     print("scheduled", id__)
 
             return {"result": True}
@@ -759,19 +760,15 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def inner_collection_f(self, c):
+    def inner_collection_f(self, cid_):
         """
         docstring is in progress
         """
         try:
-            is_crud_ = True if c[:1] != "_" else False
-            collection_ = (
-                Mongo().db_["_collection"].find_one({"col_id": c})
-                if is_crud_
-                else self.root_schemas_f(f"{c}")
-            )
+            is_crud_ = cid_[:1] != "_"
+            collection_ = Mongo().db_["_collection"].find_one({"col_id": cid_}) if is_crud_ else self.root_schemas_f(f"{cid_}")
             if not collection_:
-                raise APIError(f"collection not found to root: {c}")
+                raise APIError(f"collection not found to root: {cid_}")
 
             return {"result": True, "collection": collection_}
 
@@ -789,7 +786,7 @@ class Crud:
         docstring is in progress
         """
         try:
-            d = doc_
+            document_ = doc_
             for k in properties_:
                 property_ = properties_[k]
                 if "bsonType" in property_:
@@ -806,35 +803,35 @@ class Crud:
                                 and isinstance(doc_[k], str)
                                 and self.validate_iso8601_f(doc_[k])
                             ):
-                                d[k] = datetime.strptime(doc_[k][:ln_], rgx_)
+                                document_[k] = datetime.strptime(doc_[k][:ln_], rgx_)
                             else:
-                                d[k] = (
+                                document_[k] = (
                                     datetime.strptime(doc_[k][:ln_], rgx_)
                                     if doc_[k] is not None
                                     else None
                                 )
                         elif property_["bsonType"] == "string":
-                            d[k] = str(doc_[k]) if doc_[k] is not None else doc_[k]
+                            document_[k] = str(doc_[k]) if doc_[k] is not None else doc_[k]
                         elif property_["bsonType"] in [
                             "number",
                             "int",
                             "float",
                             "double",
                         ]:
-                            d[k] = doc_[k] * 1 if d[k] is not None else d[k]
+                            document_[k] = doc_[k] * 1 if document_[k] is not None else document_[k]
                         elif property_["bsonType"] == "decimal":
-                            d[k] = doc_[k] * 1.00 if d[k] is not None else d[k]
+                            document_[k] = doc_[k] * 1.00 if document_[k] is not None else document_[k]
                         elif property_["bsonType"] == "bool":
-                            d[k] = (
+                            document_[k] = (
                                 True
-                                if d[k] and d[k] in [True, "true", "True", "TRUE"]
+                                if document_[k] and document_[k] in [True, "true", "True", "TRUE"]
                                 else False
                             )
                     else:
                         if property_["bsonType"] == "bool":
-                            d[k] = False
+                            document_[k] = False
 
-            return {"result": True, "doc": d}
+            return {"result": True, "doc": document_}
 
         except Exception as exc:
             return Misc().exception_f(exc)
@@ -844,22 +841,15 @@ class Crud:
         docstring is in progress
         """
         try:
-            # gets the required varaibles
             collection_id_ = input_["collection"]
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_ = collection_id_[:1] != "_"
             doc_ = input_["doc"]
 
-            # retrieves the collection structure and properties
             col_check_ = self.inner_collection_f(collection_id_)
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
-
-            collection__ = (
-                col_check_["collection"] if "collection" in col_check_ else None
-            )
+            collection__ = col_check_["collection"] if "collection" in col_check_ else None
             structure_ = collection__["col_structure"] if is_crud_ else collection__
-
-            # gets the properties
             if "properties" not in structure_:
                 raise APIError("properties not found in the structure")
             properties_ = structure_["properties"]
@@ -868,9 +858,7 @@ class Crud:
             if not decode_crud_doc_f_["result"]:
                 raise APIError(decode_crud_doc_f_["msg"])
 
-            d_ = decode_crud_doc_f_["doc"]
-
-            return {"result": True, "doc": d_}
+            return {"result": True, "doc": decode_crud_doc_f_["doc"]}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -885,27 +873,8 @@ class Crud:
         """
         docstring is in progress
         """
-        try:
-            str_ = str(data_).strip()
-            return (
-                datetime.fromisoformat(str_)
-                if str_
-                not in [
-                    " ",
-                    "0",
-                    "0.0",
-                    "NaT",
-                    "NaN",
-                    "nat",
-                    "nan",
-                    np.nan,
-                    np.double,
-                    None,
-                ]
-                else None
-            )
-        except ValueError as exc:
-            raise APIError(str(exc))
+        str_ = str(data_).strip()
+        return datetime.fromisoformat(str_) if str_ not in [" ", "0", "0.0", "NaT", "NaN", "nat", "nan", np.nan,np.double,None] else None
 
     def frame_convert_string_f(self, data_):
         """
@@ -1690,16 +1659,16 @@ class Crud:
                 else None
             )
 
-            if data_values_0_k_ not in df_.columns:
-                raise APIError(f"key for data value is missing: {data_values_0_k_}")
+            # if data_values_0_k_ not in df_.columns:
+            #     raise APIError(f"key for data value is missing: {data_values_0_k_}")
 
             pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ else False
             data_values_ = view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
 
             dropped_ = []
-            dropped_.append(data_index_0_)
-            dropped_.append(data_values_0_k_)
-            dropped_.append(data_columns_0_)
+            dropped_.append(data_index_0_) if data_index_0_ in df_.columns else None
+            dropped_.append(data_values_0_k_) if data_values_0_k_ in df_.columns else None
+            dropped_.append(data_columns_0_) if data_columns_0_ in df_.columns else None
 
             groupby_ = []
 
@@ -1726,7 +1695,7 @@ class Crud:
 
             if df_ is not None:
                 count_ = len(df_)
-                if count_ > 0 and data_values_0_k_ and data_values_0_k_ in df_:
+                if count_ > 0 and data_values_0_k_ in df_.columns:
                     count_ = int(len(df_[data_values_0_k_]))
                     sum_ = float(
                         pd.to_numeric(df_[data_values_0_k_], errors="coerce").sum()
@@ -1754,7 +1723,7 @@ class Crud:
             xaxis_ = None
             legend_ = None
 
-            if data_index_0_:
+            if data_index_0_ and data_values_0_k_ in df_.columns:
                 if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
                     for idx_, item_ in enumerate(dfj_):
                         xaxis_ = (
@@ -2893,7 +2862,7 @@ class Crud:
                 "col_id": collection_id_},
                 {"$set": {"col_structure": structure_},
                  "$inc": {"_modified_count": 1}
-            })
+                 })
 
             func_ = self.crudschema_validate_f({"collection": f"{collection_id_}_data", "structure": structure_})
             if not func_["result"]:

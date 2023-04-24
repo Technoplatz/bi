@@ -305,7 +305,7 @@ export class Crud {
         match: [],
         sort: { "_created_at": -1 },
         page: 1,
-        limit: 10
+        limit: 5
       }).then((res: any) => {
         resolve(this.announcements.next(res));
       }).catch((err: any) => {

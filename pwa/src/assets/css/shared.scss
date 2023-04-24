@@ -1848,6 +1848,13 @@ app-chart {
   white-space: nowrap !important;
 }
 
+.flash-cron {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  text-align: right;
+}
+
 .flash-sq {
   position: relative;
   margin-bottom: 8px;
@@ -1958,10 +1965,10 @@ app-chart {
   flex-wrap: nowrap;
   position: absolute;
   max-width: 80px;
-  top: 0;
+  top: 0px;
   right: 8px;
   margin: 0px;
-  padding-top: 8px !important;
+  padding-top: 10px !important;
 }
 
 .visual-buttons ion-button {

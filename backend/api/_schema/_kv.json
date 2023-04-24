@@ -22,7 +22,6 @@
       "bsonType": "string",
       "minLength": 1,
       "maxLength": 64,
-      "pattern": "^[a-zA-Z0-9_.- ]{1,64}$",
       "title": "Value",
       "description": "Value",
       "width": 120

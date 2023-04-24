@@ -53,6 +53,7 @@ https://www.gnu.org/licenses.
             {{ item.collection }} | {{ item.self.data_values[0].value }} {{ 'of' | translate }} {{
             item.self.data_values[0].key }}
             <h1>{{ item.stats[item.self.data_values[0].value] }}</h1>
+            <div *ngIf="item.self && item.self.scheduled && item.self.scheduled_cron" class="flash-cron"><ion-icon name="alarm-outline" size="large"></ion-icon><br />{{ item.self.scheduled_cron }} </div>
           </div>
         </div>
 
@@ -101,7 +102,7 @@ https://www.gnu.org/licenses.
         </div>
 
         <!-- RECENT ANNOUNCEMENTS -->
-        <h4>{{ 'Recent Data Announcements' | translate }}</h4>
+        <h4>{{ 'The most recent Announcements' | translate }}</h4>
         <div class="filler-4"></div>
         <ion-button size="small" (click)="misc.navi.next('admin/_announcement')">{{ 'Show All' | translate
           }}</ion-button>
@@ -132,7 +133,7 @@ https://www.gnu.org/licenses.
             <ion-col size="4"> {{ item._tags?.join(' ') }} </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col size="12"> {{ announcements.length }} {{ 'rows' | translate }} </ion-col>
+            <ion-col size="12">{{ 'The latest' | translate }} {{ announcements.length }} {{ 'announcements' | translate }}.</ion-col>
           </ion-row>
         </ion-grid>
         <ng-template #noannouncement>
