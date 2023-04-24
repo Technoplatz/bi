@@ -923,7 +923,6 @@ app-menu {
 .app-footer {
   position: fixed;
   bottom: 0px;
-  background-color: #efefef;
   padding-top: 32px;
   padding-bottom: 32px;
 }
@@ -1855,11 +1854,10 @@ app-chart {
   margin-right: 8px;
   overflow: hidden;
   padding: 12px;
-  border: 5px solid #f0f0f0;
-  background-color: #f0f0f0;
+  background-color: #e6e6e6;
   align-content: flex-start;
   width: 320px;
-  height: 130px;
+  height: 122px;
   white-space: nowrap !important;
 }
 

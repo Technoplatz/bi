@@ -123,7 +123,7 @@ class Schedular:
         day_ = separated_[2].strip()
         month_ = separated_[3].strip()
         day_of_week_ = separated_[4].lower().strip()
-        return {"result": True, "minute": str(minute_), "hour": str(hour_), "day": str(day_), "month": str(month_), "day_of_week": str(day_of_week_), "tz": scheduled_tz_}
+        return {"result": True, "minute": str(minute_), "hour": str(hour_), "day": str(day_), "month": str(month_), "day_of_week": str(day_of_week_), "tz": str(scheduled_tz_)}
 
     def schedule_views_f(self, sched_):
         """
@@ -159,22 +159,14 @@ class Schedular:
                     id__ = view_["k"]
                     view__ = view_["v"]
                     cron_looker_f_ = self.cron_looker_f(view__)
-                    print("*** cron_looker_f_", cron_looker_f_)
                     if not cron_looker_f_["result"]:
                         continue
-                    minute_ = cron_looker_f_["minute"]
-                    hour_ = cron_looker_f_["hour"]
-                    day_ = cron_looker_f_["day"]
-                    month_ = cron_looker_f_["month"]
-                    day_of_week_ = cron_looker_f_["day_of_week"]
-                    tz_ = cron_looker_f_["tz"]
                     args_ = [{
                         "collection": collection_["col_id"],
                         "id": id__,
                         "scope": "live"
                     }]
-                    print("args_", args_)
-                    sched_.add_job(Crud().announce_f, "cron", minute=f"{minute_}", hour=f"{hour_}", day=f"{day_}", month=f"{month_}", day_of_week=f"{day_of_week_}", id=id__, timezone=tz_, replace_existing=True, args=args_)
+                    sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_["month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, timezone=cron_looker_f_["tz"], replace_existing=True, args=args_)
                     print("scheduled", id__)
 
             return {"result": True}
@@ -1406,57 +1398,54 @@ class Crud:
         fand_ = []
         filtered_ = {}
         if properties_:
-            for f in match_:
-                if f["key"] and f["op"] and f["key"] in properties_:
+            for mat_ in match_:
+                if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
                     fres_ = None
                     typ = (
-                        properties_[f["key"]]["bsonType"]
-                        if f["key"] in properties_
+                        properties_[mat_["key"]]["bsonType"]
+                        if mat_["key"] in properties_
                         else "string"
                     )
-
-                    if f["op"] in ["eq", "contains"]:
+                    if mat_["op"] in ["eq", "contains"]:
                         if typ in ["number", "int", "decimal"]:
-                            fres_ = float(f["value"])
+                            fres_ = float(mat_["value"])
                         elif typ == "bool":
-                            fres_ = bool(f["value"])
+                            fres_ = bool(mat_["value"])
                         elif typ == "date":
-                            fres_ = datetime.strptime(f["value"][:10], "%Y-%m-%d")
+                            fres_ = datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
                         else:
                             fres_ = (
-                                {"$regex": f["value"], "$options": "i"}
-                                if f["value"]
+                                {"$regex": mat_["value"], "$options": "i"}
+                                if mat_["value"]
                                 else {"$regex": "", "$options": "i"}
                             )
-
-                    elif f["op"] in ["ne", "nc"]:
+                    elif mat_["op"] in ["ne", "nc"]:
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$not": {"$eq": float(f["value"])}}
+                            fres_ = {"$not": {"$eq": float(mat_["value"])}}
                         elif typ == "bool":
-                            fres_ = {"$not": {"$eq": bool(f["value"])}}
+                            fres_ = {"$not": {"$eq": bool(mat_["value"])}}
                         elif typ == "date":
                             fres_ = {
                                 "$not": {
                                     "$eq": datetime.strptime(
-                                        f["value"][:10], "%Y-%m-%d"
+                                        mat_["value"][:10], "%Y-%m-%d"
                                     )
                                 }
                             }
                         else:
                             fres_ = (
-                                {"$not": {"$regex": f["value"], "$options": "i"}}
-                                if f["value"]
+                                {"$not": {"$regex": mat_["value"], "$options": "i"}}
+                                if mat_["value"]
                                 else {"$not": {"$regex": "", "$options": "i"}}
                             )
-
-                    elif f["op"] in ["in", "nin"]:
-                        separated_ = re.split(",", f["value"])
+                    elif mat_["op"] in ["in", "nin"]:
+                        separated_ = re.split(",", mat_["value"])
                         list_ = (
                             [s.strip() for s in separated_]
-                            if f["key"] != "_id"
+                            if mat_["key"] != "_id"
                             else [ObjectId(s.strip()) for s in separated_]
                         )
-                        if f["op"] == "in":
+                        if mat_["op"] == "in":
                             fres_ = {
                                 "$in": list_
                                 if typ != "number"
@@ -1468,76 +1457,68 @@ class Crud:
                                 if typ != "number"
                                 else list(map(float, list_))
                             }
-
-                    elif f["op"] == "gt":
+                    elif mat_["op"] == "gt":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$gt": float(f["value"])}
+                            fres_ = {"$gt": float(mat_["value"])}
                         elif typ == "date":
                             fres_ = {
-                                "$gt": datetime.strptime(f["value"][:10], "%Y-%m-%d")
+                                "$gt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$gt": f["value"]}
-
-                    elif f["op"] == "gte":
+                            fres_ = {"$gt": mat_["value"]}
+                    elif mat_["op"] == "gte":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$gte": float(f["value"])}
+                            fres_ = {"$gte": float(mat_["value"])}
                         elif typ == "date":
                             fres_ = {
-                                "$gte": datetime.strptime(f["value"][:10], "%Y-%m-%d")
+                                "$gte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$gte": f["value"]}
-
-                    elif f["op"] == "lt":
+                            fres_ = {"$gte": mat_["value"]}
+                    elif mat_["op"] == "lt":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$lt": float(f["value"])}
+                            fres_ = {"$lt": float(mat_["value"])}
                         elif typ == "date":
                             fres_ = {
-                                "$lt": datetime.strptime(f["value"][:10], "%Y-%m-%d")
+                                "$lt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$lt": f["value"]}
-
-                    elif f["op"] == "lte":
+                            fres_ = {"$lt": mat_["value"]}
+                    elif mat_["op"] == "lte":
                         if typ in ["number", "decimal"]:
-                            fres_ = {"$lte": float(f["value"])}
+                            fres_ = {"$lte": float(mat_["value"])}
                         elif typ == "date":
                             fres_ = {
-                                "$lte": datetime.strptime(f["value"][:10], "%Y-%m-%d")
+                                "$lte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
                             }
                         else:
-                            fres_ = {"$lte": f["value"]}
-
-                    elif f["op"] == "true":
+                            fres_ = {"$lte": mat_["value"]}
+                    elif mat_["op"] == "true":
                         fres_ = {"$eq": True}
-
-                    elif f["op"] == "false":
+                    elif mat_["op"] == "false":
                         fres_ = {"$eq": False}
-
-                    elif f["op"] == "nnull":
+                    elif mat_["op"] == "nnull":
                         array_ = []
                         array1_ = {}
                         array2_ = {}
-                        array1_[f["key"]] = {"$ne": None}
-                        array2_[f["key"]] = {"$exists": True}
+                        array1_[mat_["key"]] = {"$ne": None}
+                        array2_[mat_["key"]] = {"$exists": True}
                         array_.append(array1_)
                         array_.append(array2_)
-
-                    elif f["op"] == "null":
+                    elif mat_["op"] == "null":
                         array_ = []
                         array1_ = {}
                         array2_ = {}
-                        array1_[f["key"]] = {"$eq": None}
-                        array2_[f["key"]] = {"$exists": False}
+                        array1_[mat_["key"]] = {"$eq": None}
+                        array2_[mat_["key"]] = {"$exists": False}
                         array_.append(array1_)
                         array_.append(array2_)
 
                     fpart_ = {}
-                    if f["op"] in ["null", "nnull"]:
+                    if mat_["op"] in ["null", "nnull"]:
                         fpart_["$or"] = array_
                     else:
-                        fpart_[f["key"]] = fres_
+                        fpart_[mat_["key"]] = fres_
 
                     fand_.append(fpart_)
 
@@ -2154,8 +2135,7 @@ class Crud:
                 {
                     "match": match_,
                     "properties": structure_["properties"]
-                    if "properties" in structure_
-                    else None,
+                    if "properties" in structure_ else None
                 }
             )
 

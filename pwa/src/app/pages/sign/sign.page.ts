@@ -59,7 +59,7 @@ export class SignPage implements OnInit {
   public successMessage: string = "";
   public signupForm: FormGroup;
   public forgotForm: FormGroup;
-  public signinForm?: FormGroup;
+  public signinForm: FormGroup;
   public resetForm: FormGroup;
   public TFACForm: FormGroup;
   public successForm: FormGroup;
@@ -94,10 +94,86 @@ export class SignPage implements OnInit {
                   : null;
     }
   }
-
   constructor(private formBuilder: FormBuilder, private auth: Auth, private misc: Miscellaneous, private storage: Storage) {
-    this.resetForm = this.formBuilder.group(
-      {
+    this.resetForm = this.formBuilder.group({
+      password: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(32),
+          Validators.pattern(this.passwordpttrn_)
+        ]),
+      ],
+      tfac: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.pattern(/^\d{6}$/)
+        ])]
+    },
+    {}
+  );
+  this.signupForm = this.formBuilder.group({
+      name: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(5),
+          Validators.maxLength(32)
+        ])
+      ],
+      email: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(32)
+        ])
+      ],
+      password: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(32),
+          Validators.pattern(this.passwordpttrn_)
+        ]),
+      ],
+      passcode: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(16),
+          Validators.maxLength(32)
+        ])
+      ]
+    },
+    {}
+  );
+  this.TFACForm = this.formBuilder.group({
+      tfac: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.pattern(/^\d{6}$/)
+        ])],
+    },
+    {}
+  );
+  this.forgotForm = this.formBuilder.group({
+      email: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(64)]
+        )]
+    },
+    {}
+  );
+  this.successForm = this.formBuilder.group({}, {});
+    this.resetForm = this.formBuilder.group({
         password: [
           null,
           Validators.compose([
@@ -116,8 +192,27 @@ export class SignPage implements OnInit {
       },
       {}
     );
-    this.signupForm = this.formBuilder.group(
-      {
+    this.signinForm = this.formBuilder.group({
+      email: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(64)
+        ])],
+      password: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(32),
+          Validators.pattern(this.passwordpttrn_)
+        ])],
+      isRememberMe: [this.isRememberMe, Validators.compose([])],
+    },
+      {}
+    );
+    this.signupForm = this.formBuilder.group({
         name: [
           null,
           Validators.compose([
@@ -154,34 +249,7 @@ export class SignPage implements OnInit {
       },
       {}
     );
-    this.storage.get("LSUSEREMAIL").then((LSUSEREMAIL: string) => {
-      this.storage.get("LSREMEMBERME").then((LSREMEMBERME: boolean) => {
-        this.email = LSUSEREMAIL;
-        this.isRememberMe = LSREMEMBERME;
-        this.signinForm = this.formBuilder.group({
-          email: [
-            this.email,
-            Validators.compose([
-              Validators.required,
-              Validators.email,
-              Validators.maxLength(64)
-            ])],
-          password: [
-            null,
-            Validators.compose([
-              Validators.required,
-              Validators.minLength(8),
-              Validators.maxLength(32),
-              Validators.pattern(this.passwordpttrn_)
-            ])],
-          isRememberMe: [this.isRememberMe, Validators.compose([])],
-        },
-          {}
-        );
-      });
-    });
-    this.TFACForm = this.formBuilder.group(
-      {
+    this.TFACForm = this.formBuilder.group({
         tfac: [
           null,
           Validators.compose([
@@ -191,8 +259,7 @@ export class SignPage implements OnInit {
       },
       {}
     );
-    this.forgotForm = this.formBuilder.group(
-      {
+    this.forgotForm = this.formBuilder.group({
         email: [
           null,
           Validators.compose([
@@ -207,7 +274,15 @@ export class SignPage implements OnInit {
   }
 
   ngOnInit() {
-    this.doSetOp(this.op);
+    this.storage.get("LSUSEREMAIL").then((LSUSEREMAIL: string) => {
+      this.storage.get("LSREMEMBERME").then((LSREMEMBERME: boolean) => {
+        this.email = LSUSEREMAIL;
+        this.isRememberMe = LSREMEMBERME ? true : false;
+        LSREMEMBERME ? this.signinForm.get("email")?.setValue(this.email) : null;
+        this.signinForm.get("isRememberMe")?.setValue(this.isRememberMe);
+        this.doSetOp(this.op);
+      });
+    });
   }
 
   ngOnDestroy() {
@@ -329,6 +404,8 @@ export class SignPage implements OnInit {
       }).then(() => {
         this.storage.set("LSREMEMBERME", this.signinForm?.get("isRememberMe")?.value).then(() => {
           this.storage.set("LSUSEREMAIL", this.signinForm?.get("email")?.value).then(() => {
+            this.email = this.signinForm.get("email")?.value;
+            console.log("*** email1", this.email);
             this.doSetFormType("tfac").then(() => {
               setTimeout(() => {
                 this.tfacfocus?.setFocus().then(() => { });
@@ -355,9 +432,10 @@ export class SignPage implements OnInit {
     this.isInProgress = true;
     this.error = "";
     this.success_str = "";
+    console.log("*** email2", this.email);
     this.auth.TFAC({
-      email: this.signinForm?.get("email")?.value,
-      password: this.signinForm?.get("password")?.value,
+      email: this.email,
+      password: this.signinForm.get("password")?.value,
       tfac: this.TFACForm.get("tfac")?.value
     }).then(() => {
       this.doDismissModal();

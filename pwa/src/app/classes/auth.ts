@@ -102,9 +102,10 @@ export class Auth {
         headers: new HttpHeaders(this.authHeaders)
       }).subscribe((res: any) => {
         if (res.result) {
+          console.log("*** res.user", res.user);
+          this.user.next(res.user);
           this.storage.set("LSUSERMETA", res.user).then(() => {
             this.crud.getAll().then(() => {
-              this.user.next(res.user);
               setTimeout(() => {
                 this.misc.navi.next("/dashboard");
                 this.misc.menutoggle.next(true);

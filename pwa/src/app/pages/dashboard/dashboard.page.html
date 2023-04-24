@@ -41,7 +41,7 @@ https://www.gnu.org/licenses.
         <!-- flashcards -->
         <div class="filler-16"></div>
         <div class="brz-visual-group">
-          <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer>
+          <div *ngFor="let item of flashcards; let f = index" class="flash-sq" [style]="'background-color:' + (item.self && item.self.chart_colors && item.self.chart_colors[0] ? item.self.chart_colors[0] : '#eee') + ' !important;'" #chcontainer>
             <div class="visual-buttons">
               <ion-button size="small" fill="clear" (click)="misc.navi.next('view/' + item.id)"
                 class="clear-dark-button" color="dark" mode="ios">

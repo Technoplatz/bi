@@ -302,12 +302,8 @@ export class Crud {
         op: "read",
         collection: "_announcement",
         projection: null,
-        match: [{
-          key: "ano_to",
-          op: "eq",
-          value: LSUSERMETA.email
-        }],
-        sort: { "log_date": -1 },
+        match: [],
+        sort: { "_created_at": -1 },
         page: 1,
         limit: 10
       }).then((res: any) => {
