@@ -59,7 +59,6 @@ import numpy as np
 import bleach
 import pyotp
 import jwt
-import xlsxwriter
 import numexpr as ne
 from flask import Flask, request, send_from_directory
 from flask_cors import CORS
@@ -137,7 +136,7 @@ class Schedular:
                     "col_id": 1,
                     "col_structure": 1,
                     "views": {"$objectToArray": "$col_structure.views"}
-                }},{
+                }}, {
                 "$match": {
                     "views": {
                         "$elemMatch": {
@@ -848,15 +847,15 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def decode_crud_input_f(self, input):
+    def decode_crud_input_f(self, input_):
         """
         docstring is in progress
         """
         try:
             # gets the required varaibles
-            collection_id_ = input["collection"]
+            collection_id_ = input_["collection"]
             is_crud_ = True if collection_id_[:1] != "_" else False
-            doc_ = input["doc"]
+            doc_ = input_["doc"]
 
             # retrieves the collection structure and properties
             col_check_ = self.inner_collection_f(collection_id_)
@@ -1087,38 +1086,25 @@ class Crud:
             find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
-            structure_ = find_one_["col_structure"]
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
             properties_ = get_properties_["properties"]
 
             # CREATE A DATAFRAME
-            if mimetype_ in [
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "application/vnd.ms-excel",
-            ]:
+            if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
                 filesize_ = file_.tell()
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                 file_.seek(0, os.SEEK_END)
                 df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl")
-            elif mimetype_ in ["text/csv", "application/json"]:
+            elif mimetype_ == "text/csv":
                 content_ = file_.read().decode("utf-8")
                 filesize_ = file_.content_length
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                 if mimetype_ == "text/csv":
                     df_ = pd.read_csv(io.StringIO(content_), header=0)
-                else:
-                    session_client_ = MongoClient(Mongo().connstr)
-                    session_db_ = session_client_[MONGO_DB_]
-                    session_ = session_client_.start_session()
-                    session_.start_transaction()
-                    insert_many_ = Mongo().db_[collection__].insert_many(content_, ordered=False, session=session_)
-                    session_.commit_transaction()
-                    session_client_.close()
-                    raise
             else:
                 raise APIError("file type is not supported")
 
@@ -1206,13 +1192,11 @@ class Crud:
                 }
             )
             if "notify" in res_ and res_["notify"]:
-                email_sent_ = Email().sendEmail_f(
-                    {
-                        "personalizations": {"to": [{"email": email_, "name": None}]},
-                        "op": "importerr",
-                        "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}",
-                    }
-                )
+                email_sent_ = Email().sendEmail_f({
+                    "personalizations": {"to": [{"email": email_, "name": None}]},
+                    "op": "importerr",
+                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}"
+                })
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
 
@@ -1263,7 +1247,6 @@ class Crud:
                 raise APIError(get_view_data_f_["msg"])
 
             df_ = get_view_data_f_["df"]
-            df_grp_ = get_view_data_f_["dfgrp"]
             df_raw_ = get_view_data_f_["dfraw"]
             pivotify_ = get_view_data_f_["pivotify"]
 
@@ -2141,7 +2124,6 @@ class Crud:
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]
             skip_ = limit_ * (page - 1)
-            userindb_ = input_["userindb"]
             match_ = (
                 input_["match"]
                 if "match" in input_ and len(input_["match"]) > 0
@@ -2924,17 +2906,14 @@ class Crud:
         docstring is in progress
         """
         try:
-            user_ = obj["user"] if "user" in obj else None
-            op_ = obj["op"]
             collection_id_ = obj["collection"]
-            email_ = user_["email"] if user_ and "email" in user_ else user_["usr_id"] if user_ and "usr_id" in user_ else None
             structure_ = obj["structure"]
 
             Mongo().db_["_collection"].update_one({
                 "col_id": collection_id_},
                 {"$set": {"col_structure": structure_},
                  "$inc": {"_modified_count": 1}
-                 })
+            })
 
             func_ = self.crudschema_validate_f({"collection": f"{collection_id_}_data", "structure": structure_})
             if not func_["result"]:
@@ -2943,14 +2922,6 @@ class Crud:
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_id_,
-                "op": op_,
-                "user": email_,
-                "document": str(exc)
-            })
-
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -3485,8 +3456,7 @@ class Crud:
                     doc["_deleted_by"] = (
                         user_["email"] if user_ and "email" in user_ else None
                     )
-                    bin = f"{collection_id_}_bin"
-                    Mongo().db_[bin].insert_one(doc)
+                    Mongo().db_[f"{collection_id_}_bin"].insert_one(doc)
 
                 log_ = Misc().log_f(
                     {
@@ -3600,7 +3570,7 @@ class Crud:
                 body_ = (
                     notification_["body"]
                     if "body" in notification_
-                    else f"<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
+                    else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
                 )
                 if not body_:
                     raise AppException("no body field found in notification")
@@ -4664,7 +4634,7 @@ class Auth:
             jdate_exp_ = int(user_["jdate"]) + int(SECUR_MAX_AGE_)
 
             if jdate_curr_ > jdate_exp_:
-                raise APIError(f"session expired")
+                raise APIError("session expired")
 
             return {"result": True, "user": user_}
 
@@ -4973,8 +4943,6 @@ class Auth:
         docstring is in progress
         """
         try:
-            type_ = "auth"
-
             user_id_ = bleach.clean(input_["userid"]) if "userid" in input_ else None
             password_ = (
                 bleach.clean(input_["password"]) if "password" in input_ else None
@@ -4993,16 +4961,13 @@ class Auth:
                 raise AuthError("account not found")
 
             if "aut_salt" not in auth_ or auth_["aut_salt"] is None:
-                type_ = "salt"
                 raise AuthError("please set a password")
 
             if "aut_key" not in auth_ or auth_["aut_key"] is None:
-                type_ = "key"
                 raise AuthError("please set a new password")
 
             user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
             if not user_:
-                type_ = "user"
                 raise AuthError("user not found for validate")
 
             user_["aut_apikey"] = (
@@ -5017,11 +4982,9 @@ class Auth:
 
             if not password_:
                 if not token_:
-                    type_ = "token"
                     raise AuthError("no credentials provided")
                 else:
                     if token_db_ != token_:
-                        type_ = "token"
                         raise AuthError("session closed")
             else:
                 hash_f_ = self.password_hash_f(password_, salt_)
@@ -5029,12 +4992,10 @@ class Auth:
                     raise APIError(hash_f_["msg"])
                 new_key_ = hash_f_["key"]
                 if new_key_ != key_:
-                    type_ = "hash"
                     raise AuthError("invalid email or password")
 
             firewall_ = self.firewall_f(user_)
             if not firewall_["result"]:
-                type_ = "firewall"
                 raise AuthError(firewall_["msg"])
 
             return {"result": True, "user": user_, "auth": auth_}
@@ -5048,7 +5009,7 @@ class Auth:
                 "collection": "_auth",
                 "op": op_,
                 "user": user_id_,
-                "document": {"type": type_, "exception": str(exc)}
+                "document": {"type": "auth", "exception": str(exc)}
             })
             return Misc().auth_error_f(exc)
 
