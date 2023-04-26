@@ -106,7 +106,7 @@ export class Miscellaneous {
     });
   }
 
-  doImport(id: any) {
+  doUploadModal(id: any) {
     return new Promise((resolve, reject) => {
       this.modal.create({
         component: CrudPage,
@@ -159,9 +159,11 @@ export class Miscellaneous {
           if (res && res.result) {
             resolve(res);
           } else {
-            reject(res);
+            console.error("*** error0", res);
+            reject(res && res.msg ? res.msg : res);
           }
         }, (res: any) => {
+          console.error("*** error1", res);
           reject(res.error && res.error.msg ? res.error.msg : "please click cancel and try again");
         });
       });

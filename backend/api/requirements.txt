@@ -14,3 +14,4 @@ PyJWT
 xlsxwriter
 partial
 croniter
+openpyxl

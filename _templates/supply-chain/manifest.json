@@ -6,13 +6,17 @@
       "description": "Customs Manifest Number",
       "minLength": 18,
       "maxLength": 20,
-      "width": 160
+      "width": 150
     },
     "man_status": {
       "bsonType": "string",
       "title": "Status",
       "description": "Manifest Status",
-      "enum": ["00-Open", "10-OnCustomsProcess", "20-Closed"],
+      "enum": [
+        "00-Open",
+        "10-OnCustomsProcess",
+        "20-Closed"
+      ],
       "default": "00-Open",
       "width": 160
     },
@@ -29,6 +33,12 @@
       "minLength": 1,
       "maxLength": 7,
       "width": 110
+    },
+    "man_case_no": {
+      "bsonType": "number",
+      "title": "Case Number",
+      "description": "Total of Case Number",
+      "width": 120
     },
     "man_odi_no": {
       "bsonType": "string",
@@ -47,15 +57,9 @@
       "minLength": 6,
       "maxLength": 20
     },
-    "man_case_no": {
-      "bsonType": "number",
-      "title": "Case Number",
-      "description": "Total of Case Number",
-      "width": 120
-    },
     "man_amount": {
       "bsonType": "number",
-      "title": "Expenses",
+      "title": "Manifest Amount",
       "description": "Tax and Expenses",
       "default": 0
     },
@@ -72,9 +76,44 @@
       "width": 200
     }
   },
-  "required": ["man_no", "man_opening_date", "man_file_no", "man_status", "man_case_no"],
-  "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_status"], ["man_odi_no"], ["man_file_no"]],
-  "unique": [["man_no"], ["man_no", "man_odi_no", "man_odi_sub_no"], ["man_file_no"]],
+  "required": [
+    "man_no",
+    "man_opening_date",
+    "man_file_no",
+    "man_status",
+    "man_case_no"
+  ],
+  "index": [
+    [
+      "man_no"
+    ],
+    [
+      "man_odi_no",
+      "man_odi_sub_no"
+    ],
+    [
+      "man_status"
+    ],
+    [
+      "man_odi_no"
+    ],
+    [
+      "man_file_no"
+    ]
+  ],
+  "unique": [
+    [
+      "man_no"
+    ],
+    [
+      "man_no",
+      "man_odi_no",
+      "man_odi_sub_no"
+    ],
+    [
+      "man_file_no"
+    ]
+  ],
   "sort": {
     "_modified_at": -1
   },
@@ -91,7 +130,10 @@
           "value": "odi_sub_no"
         }
       ],
-      "get": ["odi_no", "odi_sub_no"],
+      "get": [
+        "odi_no",
+        "odi_sub_no"
+      ],
       "filter": [
         {
           "key": "odi_status",
@@ -104,9 +146,59 @@
   "actions": [],
   "triggers": [
     {
+      "name": "Manifest Open",
+      "enabled": true,
+      "operations": [
+        "update",
+        "insert"
+      ],
+      "changes": [
+        {
+          "key": "man_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
+      "conditions": [
+        {
+          "key": "man_status",
+          "op": "in",
+          "value": "00-Open,10-OnCustomsProcess"
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_man_no",
+              "value": "man_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "dnn_status",
+              "op": "in",
+              "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+            }
+          ],
+          "set": [
+            {
+              "key": "dnn_status",
+              "value": "20-OnCustoms"
+            }
+          ],
+          "upsert": false
+        }
+      ]
+    },
+    {
       "name": "Manifest in Action",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
           "key": "man_status",
@@ -150,7 +242,10 @@
     {
       "name": "Manifest Completed",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
           "key": "man_status",
@@ -196,6 +291,7 @@
         },
         {
           "collection": "ordino",
+          "on_changes_all": true,
           "match": [
             {
               "key": "odi_no",
@@ -208,15 +304,15 @@
           ],
           "filter": [
             {
-              "key": "odi_status",
-              "op": "in",
-              "value": "00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+              "key": "odi_completed",
+              "op": "eq",
+              "value": false
             }
           ],
           "set": [
             {
-              "key": "odi_status",
-              "value": "40-ClearanceCompleted"
+              "key": "odi_completed",
+              "value": true
             }
           ],
           "upsert": false

@@ -99,10 +99,4 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  doImport() {
-    this.misc.doImport(null).then((id: any) => {
-      this.misc.navi.next("collection/" + id);
-    });
-  }
-
 }

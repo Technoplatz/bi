@@ -1,0 +1,4 @@
+asyncio
+pymongo[tls]
+dnspython
+partial

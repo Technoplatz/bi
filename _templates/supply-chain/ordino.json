@@ -17,123 +17,125 @@
       "minLength": 6,
       "maxLength": 20
     },
-    "odi_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Ordino Status",
-      "enum": ["00-Open", "10-OnTheWay", "20-OnCustoms", "30-OnCustomsProcess", "40-ClearanceCompleted"],
-      "default": "00-Open",
-      "width": 160
-    },
     "odi_date": {
       "bsonType": "date",
       "title": "Ordino Date",
       "description": "Ordino Opening Date"
     },
-    "odi_eta_date": {
-      "bsonType": "date",
-      "title": "ETA Date",
-      "description": "Estimated Date of Arrival",
+    "odi_from": {
+      "bsonType": "string",
+      "title": "Shipped From",
+      "description": "Country where the goods are loaded",
+      "enum": [
+        "China",
+        "Hungary",
+        "Germany",
+        "USA",
+        "Netherlands",
+        "UK"
+      ],
       "width": 110
     },
     "odi_customs": {
       "bsonType": "string",
       "title": "Customs",
       "description": "Customs Location",
-      "enum": ["AHL", "Halkalı", "Ambarlı"],
+      "enum": [
+        "AHL",
+        "Halkalı",
+        "Ambarlı"
+      ],
       "width": 120
     },
     "odi_ship_type": {
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping Type",
-      "enum": ["Sea", "Air", "Truck", "Railway"],
+      "enum": [
+        "Sea",
+        "Air",
+        "Truck",
+        "Railway"
+      ],
       "width": 120
     },
-    "odi_from": {
-      "bsonType": "string",
-      "title": "Shipped From",
-      "description": "Country where the goods are loaded",
-      "enum": ["China", "Hungary", "Germany", "USA", "Netherlands", "UK"],
-      "width": 110
-    },
-    "odi_transfer_date": {
-      "bsonType": "date",
-      "title": "Trasfer Date",
-      "description": "Transfer Date"
+    "odi_arrived": {
+      "bsonType": "bool",
+      "title": "Arrived",
+      "description": "Ordino Arrival Date",
+      "width": 130,
+      "default": false
     },
     "odi_arrived_date": {
       "bsonType": "date",
       "title": "Arrived Date",
       "description": "Date of Arrival"
     },
-    "odi_amount": {
-      "bsonType": "number",
-      "title": "Amount",
-      "description": "Ordino Amount",
-      "default": 0
+    "odi_eta_date": {
+      "bsonType": "date",
+      "title": "ETA Date",
+      "description": "Estimated Date of Arrival",
+      "width": 120
+    },
+    "odi_transfer_date": {
+      "bsonType": "date",
+      "title": "Trasfer Date",
+      "description": "Transfer Date",
+      "width": 150
+    },
+    "odi_completed": {
+      "bsonType": "bool",
+      "title": "Completed",
+      "description": "Customs Clearance Completed",
+      "width": 130,
+      "default": false
     }
   },
-  "required": ["odi_sub_no", "odi_date", "odi_no", "odi_from", "odi_ship_type", "odi_customs"],
-  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"]],
-  "unique": [["odi_sub_no"]],
+  "required": [
+    "odi_no",
+    "odi_sub_no",
+    "odi_date",
+    "odi_from",
+    "odi_ship_type",
+    "odi_customs"
+  ],
+  "index": [
+    [
+      "odi_no"
+    ],
+    [
+      "odi_no",
+      "odi_sub_no"
+    ],
+    [
+      "odi_from"
+    ]
+  ],
+  "unique": [
+    [
+      "odi_sub_no"
+    ]
+  ],
   "sort": {
     "_modified_at": -1
   },
   "parents": [],
   "actions": [
     {
-      "id": "act-ordnio-on-the-way",
-      "title": "On The Way",
+      "id": "act-ordino-arrived",
+      "title": "Arrived (On Customs)",
       "enabled": true,
       "match": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "00-Open,10-OnTheWay,20-OnCustoms"
-        }
-      ],
-      "set": [
-        {
-          "key": "odi_status",
-          "value": "10-OnTheWay"
-        },
-        {
-          "key": "odi_date",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Technoplatz"],
-      "notification": {
-        "notify": false,
-        "subject": "Ordino is on the way",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been changed from 00-Open to 10-OnTheWay at once.",
-        "fields": "odi_no,odi_sub_no,odi_ship_type",
-        "filter": [
-          {
-            "key": "odi_status",
-            "op": "eq",
-            "value": "10-OnTheWay"
-          }
-        ]
-      }
-    },
-    {
-      "id": "act-ordnio-arrived",
-      "title": "On Customs (Arrived)",
-      "enabled": true,
-      "match": [
-        {
-          "key": "odi_status",
+          "key": "odi_arrived",
           "op": "eq",
-          "value": "10-OnTheWay"
+          "value": false
         }
       ],
       "set": [
         {
-          "key": "odi_status",
-          "value": "20-OnCustoms"
+          "key": "odi_arrived",
+          "value": true
         },
         {
           "key": "odi_arrived_date",
@@ -141,17 +143,63 @@
         }
       ],
       "one_click": false,
-      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
+      "_tags": [
+        "#Managers",
+        "#Technoplatz",
+        "#Operation"
+      ],
       "notification": {
         "notify": false,
         "subject": "Ordino is on customs",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been changed from 10-OnTheWay to 20-OnCustoms at once.",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been arrived.",
         "fields": "odi_no,odi_sub_no,odi_ship_type",
         "filter": [
           {
-            "key": "odi_status",
+            "key": "odi_arrived",
             "op": "eq",
-            "value": "20-OnCustoms"
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "act-ordino-arrived-cancel",
+      "title": "Arrived Cancel",
+      "enabled": true,
+      "rollback": true,
+      "match": [
+        {
+          "key": "odi_arrived",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "set": [
+        {
+          "key": "odi_arrived",
+          "value": false
+        },
+        {
+          "key": "odi_arrived_date",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "_tags": [
+        "#Managers",
+        "#Technoplatz",
+        "#Operation"
+      ],
+      "notification": {
+        "notify": false,
+        "subject": "Ordino Arrival Canceled",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been rolled back.",
+        "fields": "odi_no,odi_sub_no,odi_ship_type",
+        "filter": [
+          {
+            "key": "odi_arrived",
+            "op": "eq",
+            "value": false
           }
         ]
       }
@@ -159,21 +207,24 @@
   ],
   "triggers": [
     {
-      "name": "Set DNs 10-OnTheWay",
+      "name": "Ordino Arrived",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
-          "key": "odi_status",
+          "key": "odi_arrived",
           "op": "eq",
-          "value": "10-OnTheWay"
+          "value": true
         }
       ],
       "conditions": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess"
+          "key": "odi_arrived",
+          "op": "eq",
+          "value": false
         }
       ],
       "targets": [
@@ -193,13 +244,13 @@
             {
               "key": "dnn_status",
               "op": "in",
-              "value": "10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+              "value": "01-StandBy,10-OnTheWay,20-OnCustoms"
             }
           ],
           "set": [
             {
               "key": "dnn_status",
-              "value": "10-OnTheWay"
+              "value": "20-OnCustoms"
             }
           ],
           "upsert": false
@@ -207,21 +258,24 @@
       ]
     },
     {
-      "name": "Set DNs 20-OnCustoms",
+      "name": "Ordino Arrived Cancel",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
-          "key": "odi_status",
+          "key": "odi_arrived",
           "op": "eq",
-          "value": "20-OnCustoms"
+          "value": false
         }
       ],
       "conditions": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+          "key": "odi_arrived",
+          "op": "eq",
+          "value": true
         }
       ],
       "targets": [
@@ -241,13 +295,13 @@
             {
               "key": "dnn_status",
               "op": "in",
-              "value": "01-StandBy,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+              "value": "01-StandBy,10-OnTheWay,20-OnCustoms"
             }
           ],
           "set": [
             {
               "key": "dnn_status",
-              "value": "20-OnCustoms"
+              "value": "10-OnTheWay"
             }
           ],
           "upsert": false

@@ -494,8 +494,8 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  doImport() {
-    this.misc.doImport(this.id).then(() => {
+  doUploadModal() {
+    this.misc.doUploadModal(this.id).then(() => {
       this.RefreshData(0).then(() => { });
     });
   }

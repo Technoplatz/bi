@@ -65,6 +65,7 @@ from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 from croniter import croniter
+import openpyxl
 
 
 class APIError(BaseException):
@@ -1115,48 +1116,33 @@ class Crud:
             session_db_ = session_client_[MONGO_DB_]
             session_ = session_client_.start_session()
             session_.start_transaction()
-            insert_many_ = session_db_[collection__].insert_many(
-                payload_, ordered=False, session=session_
-            )
+            insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
             session_.commit_transaction()
             count_ = len(insert_many_.inserted_ids)
             session_client_.close()
 
-            res_ = {"result": True, "count": count_}
+            return {"result": True, "count": count_, "msg": "file was imported successfully"}
 
         except pymongo.errors.PyMongoError as exc:
+            session_.abort_transaction()
             res_ = Misc().mongo_error_f(exc)
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_,
-                    "op": "import",
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
-            if "notify" in res_ and res_["notify"]:
-                email_sent_ = Email().sendEmail_f({
-                    "personalizations": {"to": [{"email": email_, "name": None}]},
-                    "op": "importerr",
-                    "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}"
-                })
-                if not email_sent_["result"]:
-                    raise APIError(email_sent_["msg"])
 
-                res_["msg"] = "please check your inbox to get the error details."
+            email_sent_ = Email().sendEmail_f({
+                "personalizations": {"to": [{"email": email_, "name": None}]},
+                "op": "importerr",
+                "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}"
+            })
+            if not email_sent_["result"]:
+                raise APIError(email_sent_["msg"])
 
-                return res_
+            res_["msg"] = "file upload error! we have just sent an email with the error details."
+            return res_
 
         except APIError as exc:
             return Misc().api_error_f(exc)
 
         except Exception as exc:
             return Misc().exception_f(exc)
-
-        finally:
-            if session_:
-                session_.abort_transaction()
 
     def announce_f(self, input_):
         """
@@ -5192,42 +5178,23 @@ def storage_f():
         email_ = form_["email"] if "email" in form_ else None
         token_ = form_["token"] if "token" in form_ else None
 
-        validate_ = Auth().user_validate_by_basic_auth_f(
-            {"userid": email_, "token": token_}, "import"
-        )
+        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "import")
         if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "crud validation error"
-            )
+            raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
         user_ = validate_["user"]
 
-        import_f_ = Crud().import_f(
-            {
-                "form": form_,
-                "file": file_,
-                "collection": collection__,
-                "user": user_,
-                "prefix": prefix_,
-            }
-        )
+        import_f_ = Crud().import_f({
+            "form": form_,
+            "file": file_,
+            "collection": collection__,
+            "user": user_,
+            "prefix": prefix_,
+        })
+
         if not import_f_["result"]:
             raise APIError(import_f_["msg"])
 
-        return (
-            json.dumps(
-                {
-                    "result": import_f_["result"],
-                    "count": import_f_["count"]
-                    if "count" in import_f_ and import_f_["count"] >= 0
-                    else 0,
-                    "msg": import_f_["msg"] if "msg" in import_f_ else None,
-                },
-                default=json_util.default,
-                sort_keys=False,
-            ),
-            200,
-            Security().header_simple_f(),
-        )
+        return json.dumps({"result": import_f_["result"], "count": import_f_["count"] if "count" in import_f_ and import_f_["count"] >= 0 else 0, "msg": import_f_["msg"] if "msg" in import_f_ else None}, default=json_util.default, sort_keys=False), 200, Security().header_simple_f()
 
     except APIError as exc:
         return {"msg": str(exc), "status": 400}
