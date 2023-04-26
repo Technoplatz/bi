@@ -405,7 +405,6 @@ export class SignPage implements OnInit {
         this.storage.set("LSREMEMBERME", this.signinForm?.get("isRememberMe")?.value).then(() => {
           this.storage.set("LSUSEREMAIL", this.signinForm?.get("email")?.value).then(() => {
             this.email = this.signinForm.get("email")?.value;
-            console.log("*** email1", this.email);
             this.doSetFormType("tfac").then(() => {
               setTimeout(() => {
                 this.tfacfocus?.setFocus().then(() => { });
@@ -432,7 +431,6 @@ export class SignPage implements OnInit {
     this.isInProgress = true;
     this.error = "";
     this.success_str = "";
-    console.log("*** email2", this.email);
     this.auth.TFAC({
       email: this.email,
       password: this.signinForm.get("password")?.value,

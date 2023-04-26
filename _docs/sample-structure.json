@@ -1,0 +1,11 @@
+{
+  "properties": { "field": {} },
+  "required": [],
+  "index": [[], []],
+  "unique": [[], []],
+  "sort": {},
+  "parents": [],
+  "actions": [],
+  "triggers": [],
+  "views": {}
+}

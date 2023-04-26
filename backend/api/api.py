@@ -421,7 +421,9 @@ class Misc:
         docstring is in progress
         """
         tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-        return True if any(i in tags_ for i in PERMISSIVE_TAGS_) else False
+        ptags__ = PERMISSIVE_TAGS_.split(",")
+        ptags_ = ptags__ if ptags__ and len(ptags__) > 0 else []
+        return any(i in tags_ for i in ptags_)
 
     def properties_cleaner_f(self, properties):
         """
@@ -518,34 +520,17 @@ class Mongo:
         self.mongo_appname_ = "api"
         self.mongo_readpref_primary_ = "primary"
         self.mongo_readpref_secondary_ = "secondary"
-
         auth_source_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
-        replicaset_ = (
-            f"&replicaSet={MONGO_RS_}" if MONGO_RS_ and MONGO_RS_ != "" else ""
-        )
-        read_preference_primary_ = (
-            f"&readPreference={self.mongo_readpref_primary_}"
-            if self.mongo_readpref_primary_
-            else ""
-        )
+        replicaset_ = f"&replicaSet={MONGO_RS_}" if MONGO_RS_ and MONGO_RS_ != "" else ""
+        read_preference_primary_ = f"&readPreference={self.mongo_readpref_primary_}" if self.mongo_readpref_primary_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
-        tls_ = "&tls=true"
-        tls_certificate_key_file_ = (
-            f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}"
-            if MONGO_TLS_CERT_KEYFILE_
-            else ""
-        )
-        tls_certificate_key_file_password_ = (
-            f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEY_PASSWORD_}"
-            if MONGO_TLS_CERT_KEY_PASSWORD_
-            else ""
-        )
-        tls_ca_file_ = (
-            f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
-        )
+        tls_ = "&tls=true" if MONGO_TLS_ else "&tls=false"
+        tls_certificate_key_file_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}" if MONGO_TLS_CERT_KEYFILE_ else ""
+        tls_certificate_key_file_password_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEY_PASSWORD_}" if MONGO_TLS_CERT_KEY_PASSWORD_ else ""
+        tls_ca_file_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
-
-        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}"
+        retry_writes_ = "&retryWrites=true" if MONGO_RETRY_WRITES_ else "&retryWrites=false"
+        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}"
         self.client_ = MongoClient(self.connstr)
         self.db_ = self.client_[MONGO_DB_]
 
@@ -559,10 +544,8 @@ class Mongo:
             file_ = f"{id_}.gz"
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
-
             command_ = f'mongodump --host "{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password "{MONGO_PASSWORD_}" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}'
             os.system(command_)
-
             size_ = os.path.getsize(loc_)
             return {"result": True, "id": id_, "type": type_, "size": size_}
 
@@ -874,7 +857,7 @@ class Crud:
         docstring is in progress
         """
         str_ = str(data_).strip()
-        return datetime.fromisoformat(str_) if str_ not in [" ", "0", "0.0", "NaT", "NaN", "nat", "nan", np.nan,np.double,None] else None
+        return datetime.fromisoformat(str_) if str_ not in [" ", "0", "0.0", "NaT", "NaN", "nat", "nan", np.nan, np.double, None] else None
 
     def frame_convert_string_f(self, data_):
         """
@@ -4832,9 +4815,8 @@ class Auth:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            # GENERATING JWT FOR USER
             name_db_ = user_["usr_name"]
-            perm_ = True if Misc().permitted_user_f(user_) else False
+            perm_ = Misc().permitted_user_f(user_)
             apikey_ = user_["aut_apikey"]
             jdate_ = Misc().get_jdate_f()
             token_ = jwt.encode({"some": "payload"}, password_, algorithm="HS256")
@@ -5103,17 +5085,11 @@ class Auth:
             return Misc().exception_f(exc)
 
 
-# IDENTIFICATION DIVISION
-
 TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
-COMPANY_NAME_ = (
-    os.environ.get("COMPANY_NAME")
-    if os.environ.get("COMPANY_NAME")
-    else "Technoplatz BI"
-)
+COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
 SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
 SMTP_PORT_ = os.environ.get("SMTP_PORT")
 SMTP_USERID_ = os.environ.get("SMTP_USERID")
@@ -5125,15 +5101,13 @@ EMAIL_SIGNIN_SUBJECT_ = "New Sign-in"
 EMAIL_UPLOADERR_SUBJECT_ = "File Upload Result"
 EMAIL_DEFAULT_SUBJECT_ = "Hello"
 API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
-API_DUMP_HOURS_ = (
-    os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
-)
+API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_KEY_ = os.environ.get("API_KEY")
 SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
 SAAS_ = os.environ.get("SAAS")
-PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
+PERMISSIVE_TAGS_ = str(os.environ.get("PERMISSIVE_TAGS"))
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -5145,13 +5119,12 @@ MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
 MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
 MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
-MONGO_TLS_CERT_KEY_PASSWORD_ = urllib.parse.quote_plus(
-    os.environ.get("MONGO_TLS_CERT_KEY_PASSWORD")
-)
+MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
+MONGO_TLS_CERT_KEY_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_TLS_CERT_KEY_PASSWORD"))
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
+MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 
-# CORS CHECKPOINT
 origins_ = [
     f"http://{DOMAIN_}",
     f"https://{DOMAIN_}",
@@ -5385,11 +5358,7 @@ def crud_f():
         else:
             raise APIError(f"{op_} is not a supported operation")
 
-        return (
-            json.dumps(res_, default=json_util.default, sort_keys=False),
-            200,
-            Security().header_simple_f(),
-        )
+        return json.dumps(res_, default=json_util.default, sort_keys=False), 200, Security().header_simple_f()
 
     except APIError as exc:
         return {"msg": str(exc), "status": 400}

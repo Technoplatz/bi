@@ -1,0 +1,34 @@
+{
+  "properties": {
+    "dnn_no": {
+      "bsonType": "string",
+      "title": "DN No",
+      "description": "Delivery Note Number",
+      "minLength": 10,
+      "maxLength": 16,
+      "pattern": "^[0-9-]{10,16}$",
+      "width": 110
+    },
+    "dnn_line_no": {
+      "bsonType": "number",
+      "title": "Line",
+      "description": "Line Number",
+      "minimum": 10,
+      "maximum": 9990,
+      "width": 110
+    },
+    "dnn_bu_name": {
+      "bsonType": "string",
+      "title": "BU Name",
+      "description": "Business Unit Name",
+      "enum": ["Consumer", "Retail", "SMB", "Enterprise"],
+      "width": 120
+    }
+  },
+  "required": ["dnn_no", "dnn_line_no"],
+  "index": [["dnn_bu_name"], ["dnn_line_no"], ["dnn_no", "dnn_line_no"]],
+  "unique": [["dnn_no", "dnn_line_no"]],
+  "sort": {
+    "_modified_at": -1
+  }
+}

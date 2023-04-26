@@ -33,7 +33,8 @@
     "man_odi_no": {
       "bsonType": "string",
       "title": "Ordino No",
-      "description": "Ana Konsimento No",
+      "description": "Main Ordino Number",
+      "pattern": "^[0-9A-Z-]{10,20}$",
       "minLength": 10,
       "maxLength": 20,
       "width": 170
@@ -41,7 +42,8 @@
     "man_odi_sub_no": {
       "bsonType": "string",
       "title": "Ordino Sub No",
-      "description": "Ara Konşimento No",
+      "description": "Sub Ordino Number",
+      "pattern": "^[0-9A-Z-]{6,20}$",
       "minLength": 6,
       "maxLength": 20
     },
@@ -94,7 +96,7 @@
         {
           "key": "odi_status",
           "op": "in",
-          "value": "00-Open,10-OnTheWay"
+          "value": "00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess"
         }
       ]
     }
