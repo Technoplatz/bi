@@ -99,14 +99,7 @@
       "bsonType": "string",
       "title": "BU Name",
       "description": "Business Unit Name",
-      "enum": [
-        "Consumer",
-        "Retail",
-        "SMB",
-        "Enterprise",
-        "Cons",
-        "Rel"
-      ],
+      "enum": ["Consumer", "Retail", "SMB", "Enterprise", "Cons", "Rel"],
       "width": 120
     },
     "dnn_odi_no": {
@@ -233,33 +226,9 @@
       "width": 140
     }
   },
-  "required": [
-    "dnn_no",
-    "dnn_acc_no",
-    "dnn_status",
-    "dnn_prd_no"
-  ],
-  "index": [
-    [
-      "dnn_acc_no"
-    ],
-    [
-      "dnn_status"
-    ],
-    [
-      "dnn_prd_no"
-    ],
-    [
-      "dnn_acc_no",
-      "dnn_status"
-    ]
-  ],
-  "unique": [
-    [
-      "dnn_no",
-      "dnn_line_no"
-    ]
-  ],
+  "required": ["dnn_no", "dnn_acc_no", "dnn_status", "dnn_prd_no"],
+  "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_prd_no"], ["dnn_acc_no", "dnn_status"]],
+  "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
     "_modified_at": -1
   },
@@ -283,11 +252,7 @@
           "value": "00-Open,10-OnTheWay,20-Arrived"
         }
       ],
-      "get": [
-        "odi_no",
-        "odi_sub_no",
-        "odi_customs"
-      ]
+      "get": ["odi_no", "odi_sub_no", "odi_customs"]
     },
     {
       "collection": "manifest",
@@ -304,10 +269,7 @@
           "value": "00-Open,10-InProgress"
         }
       ],
-      "get": [
-        "man_no",
-        "man_opening_date"
-      ]
+      "get": ["man_no", "man_opening_date"]
     },
     {
       "collection": "account",
@@ -324,10 +286,7 @@
           "value": "1-Arrived"
         }
       ],
-      "get": [
-        "acc_no",
-        "acc_name"
-      ]
+      "get": ["acc_no", "acc_name"]
     }
   ],
   "actions": [
@@ -349,9 +308,7 @@
         }
       ],
       "one_click": true,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "DNs are stand by",
@@ -385,9 +342,7 @@
         }
       ],
       "one_click": true,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "DNs stand by canceled",
@@ -428,9 +383,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "DNs on the way",
@@ -472,9 +425,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "DNs rolled back to stand by",
@@ -511,9 +462,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "DNs on customs process",
@@ -551,9 +500,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "DNs customs process canceled",
@@ -573,10 +520,7 @@
     {
       "name": "Amounts updater",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "dnn_qty",
@@ -681,12 +625,8 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_acc_no"
-      ],
-      "data_columns": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_acc_no"],
+      "data_columns": ["dnn_status"],
       "data_values": [
         {
           "key": "dnn_no",
@@ -708,23 +648,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#ea5545",
-        "#f46a9b",
-        "#ef9b20",
-        "#edbf33",
-        "#ede15b",
-        "#bdcf32",
-        "#87bc45",
-        "#27aeef",
-        "#b33dc6"
-      ],
+      "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
       "scheduled": true,
       "scheduled_cron": "15 14,15,16 * * mon,tue",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": [
-        "#Technoplatz"
-      ]
+      "_tags": ["#Managers", "#Administrators"]
     },
     "dn-buid-view": {
       "title": "BU ID View",
@@ -737,12 +665,8 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_bu_name"
-      ],
-      "data_columns": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_bu_name"],
+      "data_columns": ["dnn_status"],
       "data_values": [
         {
           "key": "dnn_no",
@@ -764,25 +688,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#e60049",
-        "#0bb4ff",
-        "#50e991",
-        "#e6d800",
-        "#9b19f5",
-        "#ffa300",
-        "#dc0ab4",
-        "#b3d4ff",
-        "#00bfa0"
-      ],
+      "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Istanbul",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
     },
     "dn-statuses-view": {
       "title": "Statuses",
@@ -793,17 +703,15 @@
       "data_filter": [
         {
           "key": "dnn_status",
-          "op": "ne",
-          "value": "00-Open"
+          "op": "in",
+          "value": "00-Open,01-StandBy,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted, 50-OnTheTouchpoint,60-ReadyToBeDelivered"
         }
       ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
       "data_values": [
         {
@@ -826,25 +734,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#bd7ebe",
-        "#ffb55a",
-        "#ffee65",
-        "#beb9db",
-        "#fdcce5",
-        "#8bd3c7"
-      ],
+      "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Istanbul",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
     },
     "fc-on-the-way": {
       "title": "STby + On the Way",
@@ -863,9 +757,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
       "data_values": [
         {
@@ -888,25 +780,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#bad7fb",
-        "#ffee65",
-        "#fdcce5",
-        "#8bd3c7",
-        "#b2e061",
-        "#ffb55a",
-        "#7eb0d5",
-        "#fd7f6f",
-        "#bd7ebe"
-      ],
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": true,
       "scheduled_cron": "0 10 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "_tags": ["#Managers", "#Administrators"]
     },
     "fc-on-customs": {
       "title": "On Customs",
@@ -925,9 +803,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
       "data_values": [
         {
@@ -950,25 +826,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#b2e061",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#bd7ebe",
-        "#ffb55a",
-        "#ffee65",
-        "#beb9db",
-        "#fdcce5",
-        "#8bd3c7"
-      ],
+      "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": true,
       "scheduled_cron": "0 10 * 1-5 *",
-      "scheduled_tz": "Europe/Istanbul",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
     },
     "fc-on-custom-process": {
       "title": "On Customs Process",
@@ -987,9 +849,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
       "data_values": [
         {
@@ -1012,25 +872,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#8bd3c7",
-        "#bd7ebe",
-        "#fdcce5",
-        "#ffee65",
-        "#e4e4e4",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Istanbul",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-40": {
       "title": "Clearance Completed",
@@ -1049,9 +895,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
       "data_values": [
         {
@@ -1074,25 +918,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#fdcce5",
-        "#8bd3c7",
-        "#bd7ebe",
-        "#ffee65",
-        "#e4e4e4",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Istanbul",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-50": {
       "title": "On The Touchpoint",
@@ -1111,9 +941,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
       "data_values": [
         {
@@ -1136,25 +964,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#e4e4e4",
-        "#fdcce5",
-        "#8bd3c7",
-        "#bd7ebe",
-        "#ffee65",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": true,
       "scheduled_cron": "30 9,17 * 1-5 *",
-      "scheduled_tz": "Europe/Istanbul",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-60": {
       "title": "Ready To Be Delivered",
@@ -1173,9 +987,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
       "data_values": [
         {
@@ -1198,25 +1010,11 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#d5d5d5",
-        "#fdcce5",
-        "#8bd3c7",
-        "#bd7ebe",
-        "#ffee65",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": [
-        "#Technoplatz",
-        "#Managers",
-        "#Administrators"
-      ]
+      "_tags": ["#Managers", "#Administrators"]
     }
   }
 }

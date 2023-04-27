@@ -893,7 +893,7 @@ class Crud:
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_["msg"])
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             cursor_ = (
@@ -1320,6 +1320,47 @@ class Crud:
             docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
 
             return {"result": True, "data": docs_}
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
+    def link_f(self, obj_):
+        """
+        docstring is in progress
+        """
+        try:
+            link_ = obj_["link"] if "link" in obj_ else None
+            data_ = obj_["data"] if "data" in obj_ and len(obj_["data"]) > 0 else None
+
+            if link_ is None:
+                raise APIError("required parameter (link) is missing")
+            if data_ is None:
+                 raise APIError("required parameter (data) is missing")
+
+            collection_ = link_["collection"] if "collection" in link_ else None
+            get_ = link_["get"] if "get" in link_ else None
+            set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
+
+            if collection_ is None:
+                raise APIError("required parameter (collection) is missing")
+            if get_ is None:
+                raise APIError("required parameter (get) is missing")
+            if set_ is None:
+                raise APIError("required parameter (set) is missing")
+
+            data_collection_ = f"{collection_}_data"
+            setc_ = {}
+            for set__ in set_:
+                if "key" in set__ and "value" in set__:
+                    setc_[set__["key"]] = set__["value"]
+
+            if not setc_:
+                raise APIError(f"assignments are missing in the set cluster {data_collection_}")
+
+            return {"result": True, "data": setc_}
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -2049,7 +2090,7 @@ class Crud:
                 else []
             )
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             collation_ = (
@@ -2181,22 +2222,20 @@ class Crud:
                 if "index" in structure_ and len(structure_["index"]) > 0:
                     break_ = False
                     err_ = None
-                    for indexes in structure_["index"]:
+                    for indexes_ in structure_["index"]:
                         ixs = []
                         ix_name_ = ""
-                        for ix in indexes:
-                            if ix not in properties_:
+                        for ix_ in indexes_:
+                            if ix_ not in properties_:
                                 break_ = True
-                                err_ = f"{ix} is index but not found in the structure"
+                                err_ = f"{ix_} was indexed but not found in properties"
                                 break
-                            ixs.append((ix, pymongo.ASCENDING))
-                            ix_name_ += f"_{ix}"
+                            ixs.append((ix_, pymongo.ASCENDING))
+                            ix_name_ += f"_{ix_}"
                         if break_:
                             raise APIError(err_)
                         ix_name_ = f"ix_{collection_}{ix_name_}"
-                        Mongo().db_[collection_].create_index(
-                            ixs, unique=False, name=ix_name_
-                        )
+                        Mongo().db_[collection_].create_index(ixs, unique=False, name=ix_name_)
 
                 if "unique" in structure_ and len(structure_["unique"]) > 0:
                     break_ = False
@@ -2204,19 +2243,17 @@ class Crud:
                     for uniques in structure_["unique"]:
                         uqs = []
                         uq_name_ = ""
-                        for uq in uniques:
-                            if uq not in properties_:
+                        for uq_ in uniques:
+                            if uq_ not in properties_:
                                 break_ = True
-                                err_ = f"{uq} is unique but not found in the structure"
+                                err_ = f"{uq_} is unique but not found in properties"
                                 break
-                            uqs.append((uq, pymongo.ASCENDING))
-                            uq_name_ += f"_{uq}"
+                            uqs.append((uq_, pymongo.ASCENDING))
+                            uq_name_ += f"_{uq_}"
                         if break_:
                             raise APIError(err_)
                         uq_name_ = f"uq_{collection_}{uq_name_}"
-                        Mongo().db_[collection_].create_index(
-                            uqs, unique=True, name=uq_name_
-                        )
+                        Mongo().db_[collection_].create_index(uqs, unique=True, name=uq_name_)
 
             return {"result": True}
 
@@ -2252,273 +2289,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def reconfigure_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = obj["userindb"] if "userindb" in obj else None
-            cid_ = obj["collection"]
-
-            permitted_ = Misc().permitted_user_f(user_)
-            if not permitted_:
-                raise APIError("not authorized")
-
-            # read collection existing structure
-            doc_ = Mongo().db_["_collection"].find_one({"col_id": cid_})
-            if not doc_:
-                raise APIError("collection not found")
-
-            structure_ = {
-                "properties": {},
-                "required": [],
-                "index": [],
-                "unique": [],
-                "parents": [],
-                "actions": [],
-                "sort": {},
-            }
-
-            cursor_ = (
-                Mongo()
-                .db_["_field"]
-                .find(filter={"fie_collection_id": cid_}, sort=[("fie_priority", 1)])
-            )
-
-            required_ = []
-            unique_ = []
-            indexed_ = []
-            parents_ = []
-            actions_ = []
-            sort_ = {}
-
-            for doc_ in cursor_:
-                field_ = {}
-                field_id_ = doc_["fie_id"]
-                field_["bsonType"] = (
-                    doc_["fie_type"] if "fie_type" in doc_ else "string"
-                )
-                field_["title"] = doc_["fie_title"] if "fie_title" in doc_ else "Title"
-                field_["description"] = (
-                    doc_["fie_description"]
-                    if "fie_description" in doc_
-                    else doc_["fie_title"]
-                )
-                field_["width"] = doc_["fie_width"] if "fie_width" in doc_ else 110
-                if "fie_barcoded" in doc_ and doc_["fie_barcoded"] is True:
-                    field_["barcoded"] = True
-
-                if field_["bsonType"] in ["number", "int", "decimal"]:
-                    if (
-                        "fie_minimum" in doc_
-                        and doc_["fie_minimum"] is not None
-                        and doc_["fie_minimum"] > 0
-                    ):
-                        field_["minimum"] = int(doc_["fie_minimum"])
-                    if (
-                        "fie_maximum" in doc_
-                        and doc_["fie_minimum"] is not None
-                        and doc_["fie_maximum"] > 0
-                    ):
-                        field_["maximum"] = int(doc_["fie_maximum"])
-
-                if field_["bsonType"] == "string":
-                    if (
-                        "fie_min_length" in doc_
-                        and doc_["fie_min_length"] is not None
-                        and doc_["fie_min_length"] > 0
-                    ):
-                        field_["minLength"] = int(doc_["fie_min_length"])
-                    if (
-                        "fie_max_length" in doc_
-                        and doc_["fie_max_length"] is not None
-                        and doc_["fie_max_length"] > 0
-                    ):
-                        field_["maxLength"] = int(doc_["fie_max_length"])
-                    if (
-                        "fie_options" in doc_
-                        and doc_["fie_options"]
-                        and len(doc_["fie_options"]) > 0
-                    ):
-                        field_["enum"] = doc_["fie_options"]
-
-                if field_["bsonType"] == "array":
-                    if (
-                        "fie_array_unique_items" in doc_
-                        and doc_["fie_array_unique_items"]
-                    ):
-                        field_["uniqueItems"] = True
-                    if (
-                        "fie_array_min_items" in doc_
-                        and doc_["fie_array_min_items"] is not None
-                        and doc_["fie_array_min_items"] > 0
-                    ):
-                        field_["minItems"] = int(doc_["fie_array_min_items"])
-                    if (
-                        "fie_array_max_items" in doc_
-                        and doc_["fie_array_max_items"] is not None
-                        and doc_["fie_array_max_items"] > 0
-                    ):
-                        field_["maxItems"] = int(doc_["fie_array_max_items"])
-                    if (
-                        "fie_array_manual_add" in doc_
-                        and doc_["fie_array_manual_add"] is True
-                    ):
-                        field_["manualAdd"] = True
-
-                    field_["items"] = {}
-                    if "fie_array_items_type" in doc_ and doc_["fie_array_items_type"]:
-                        field_["items"]["bsonType"] = doc_["fie_array_items_type"]
-                    else:
-                        field_["items"]["bsonType"] = "string"
-
-                if "fie_default" in doc_ and doc_["fie_default"]:
-                    field_["default"] = (
-                        float(doc_["fie_default"])
-                        if field_["bsonType"] in ["number", "decimal"]
-                        else int(doc_["fie_default"])
-                        if field_["bsonType"] == "int"
-                        else str(doc_["fie_default"])
-                    )
-
-                if "fie_required" in doc_ and doc_["fie_required"]:
-                    field_["required"] = True
-                    required_.append(field_id_)
-
-                if "fie_unique" in doc_ and doc_["fie_unique"]:
-                    uq_ = []
-                    uq_.append(field_id_)
-                    if (
-                        "fie_unique_add" in doc_
-                        and doc_["fie_unique_add"]
-                        and len(doc_["fie_unique_add"]) > 0
-                    ):
-                        for uadd_ in doc_["fie_unique_add"]:
-                            uq_.append(uadd_)
-                    uq_ = Misc().make_array_unique_f(uq_)
-                    unique_.append(uq_)
-
-                if "fie_indexed" in doc_ and doc_["fie_indexed"]:
-                    ix_ = []
-                    ix_.append(field_id_)
-                    if (
-                        "fie_indexed_add" in doc_
-                        and doc_["fie_indexed_add"]
-                        and len(doc_["fie_indexed_add"]) > 0
-                    ):
-                        for ixadd_ in doc_["fie_indexed_add"]:
-                            ix_.append(ixadd_)
-                    ix_ = Misc().make_array_unique_f(ix_)
-                    indexed_.append(ix_)
-
-                if "fie_permanent" in doc_ and doc_["fie_permanent"]:
-                    field_["permanent"] = True
-
-                if "fie_has_parent" in doc_ and doc_["fie_has_parent"]:
-                    if (
-                        "fie_parent_collection_id" in doc_
-                        and doc_["fie_parent_collection_id"]
-                    ):
-                        if (
-                            "fie_parent_field_id" in doc_
-                            and doc_["fie_parent_field_id"]
-                        ):
-                            parents_.append(
-                                {
-                                    "collection": doc_["fie_parent_collection_id"],
-                                    "match": [
-                                        {
-                                            "key": field_id_,
-                                            "value": doc_["fie_parent_field_id"],
-                                        }
-                                    ],
-                                }
-                            )
-
-                if "fie_sort" in doc_ and doc_["fie_sort"]:
-                    if doc_["fie_sort"] == "ascending":
-                        sort_[field_id_] = 1
-                    elif doc_["fie_sort"] == "descending":
-                        sort_[field_id_] = -1
-
-                structure_["properties"][field_id_] = field_
-
-            if not sort_:
-                sort_["_modified_at"] = -1
-
-            # set actions
-            cursor_ = (
-                Mongo()
-                .db_["_action"]
-                .find(
-                    filter={"act_collection_id": cid_, "act_enabled": True},
-                    sort=[("act_title", 1)],
-                )
-            )
-
-            if cursor_:
-                for doc_ in cursor_:
-                    actions_.append(
-                        {
-                            "id": doc_["act_id"],
-                            "title": doc_["act_title"],
-                            "enabled": doc_["act_enabled"],
-                            "filter": doc_["act_filter"],
-                            "set": doc_["act_set"],
-                            "one_click": True
-                            if doc_["act_one_click"] and doc_["act_one_click"] is True
-                            else False,
-                        }
-                    )
-
-            structure_["required"] = Misc().make_array_unique_f(required_)
-            structure_["unique"] = unique_
-            structure_["index"] = indexed_
-            structure_["sort"] = sort_
-            structure_["parents"] = parents_
-            structure_["actions"] = actions_
-
-            Mongo().db_["_collection"].update_one(
-                {"col_id": cid_},
-                {
-                    "$set": {
-                        "col_structure": structure_,
-                        "_modified_at": datetime.now(),
-                        "_modified_by": user_["email"]
-                        if user_ and "email" in user_
-                        else None,
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-            )
-
-            reconfig_set_f_ = self.config_field_to_structure_f(
-                {"op": "set", "collection": cid_, "user": user_}
-            )
-
-            if not reconfig_set_f_["result"]:
-                raise APIError(reconfig_set_f_["msg"])
-
-            return {"result": True, "structure": structure_}
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": cid_,
-                    "op": "reconfigure",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def setprop_f(self, obj):
         """
         docstring is in progress
@@ -2533,7 +2303,7 @@ class Crud:
             if not collection_f_["result"]:
                 raise APIError("collection not found")
 
-            is_crud_ = True if cid_[:1] != "_" else False
+            is_crud_ = cid_[:1] != "_"
             if not is_crud_:
                 raise APIError("collection is not allowed to update")
 
@@ -3166,8 +2936,7 @@ class Crud:
             if not col_check_["result"]:
                 raise APIError("collection not found")
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
-
+            is_crud_ = collection_id_[:1] != "_"
             if not is_crud_:
                 schemavalidate_ = self.nocrudschema_validate_f(
                     {"collection": collection_id_}
@@ -3246,11 +3015,10 @@ class Crud:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
 
-            # protect _log collection from delete requests
             if collection_id_ in ["_log", "_backup", "_announcement"]:
                 raise APIError("this collection is protected to delete")
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             doc_["_removed_at"] = datetime.now()
@@ -3271,10 +3039,10 @@ class Crud:
                 raise APIError(log_["msg"])
 
             if collection_ == "_collection":
-                c_ = doc_["col_id"]
-                Mongo().db_[f"{c_}_data"].aggregate([{"$match": {}}, {"$out": f"{c_}_data_removed"}])
-                Mongo().db_[f"{c_}_data"].drop()
-                Mongo().db_["_field"].delete_many({"fie_collection_id": c_})
+                col_id_ = doc_["col_id"]
+                Mongo().db_[f"{col_id_}_data"].aggregate([{"$match": {}}, {"$out": f"{col_id_}_data_removed"}])
+                Mongo().db_[f"{col_id_}_data"].drop()
+                Mongo().db_["_field"].delete_many({"fie_collection_id": col_id_})
 
             return {"result": True}
 
@@ -3321,7 +3089,7 @@ class Crud:
             for _id in match_:
                 ids_.append(ObjectId(_id))
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             structure__ = (
@@ -3423,7 +3191,7 @@ class Crud:
             if not email_:
                 raise AppException("user is not allowed")
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_ = collection_id_[:1] != "_"
             if not is_crud_:
                 raise AppException("operation is not allowed")
 
@@ -3636,7 +3404,7 @@ class Crud:
             if "_structure" in doc_:
                 doc_.pop("_structure", None)
 
-            is_crud_ = True if collection_id_[:1] != "_" else False
+            is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             doc_["_created_at"] = doc_["_modified_at"] = datetime.now()
 
@@ -5298,8 +5066,6 @@ def crud_f():
             res_ = Crud().remove_f(input_)
         elif op_ == "setprop":
             res_ = Crud().setprop_f(input_)
-        elif op_ == "reconfigure":
-            res_ = Crud().reconfigure_f(input_)
         elif op_ == "copykey":
             res_ = Crud().copykey_f(input_)
         elif op_ == "purge":
@@ -5314,6 +5080,8 @@ def crud_f():
             res_ = Crud().collection_f(input_)
         elif op_ == "parent":
             res_ = Crud().parent_f(input_)
+        elif op_ == "link":
+            res_ = Crud().link_f(input_)
         elif op_ in ["backup", "restore"]:
             res_ = Crud().dump_f(input_)
         elif op_ == "template":
@@ -5574,7 +5342,7 @@ def post_f():
 
         unique_ = structure_["unique"] if "unique" in structure_ else []
 
-        is_crud_ = True if rh_collection_[:1] != "_" else False
+        is_crud_ = rh_collection_[:1] != "_"
         collection_data_ = f"{rh_collection_}_data" if is_crud_ else rh_collection_
 
         body_ = request.json

@@ -48,7 +48,6 @@ export class CrudPage implements OnInit {
   @Input() modified: boolean = false;
   @ViewChild("barcodefocus", { static: false }) barcodefocus: any;
   public crudForm: FormGroup;
-
   public novalue: any = null;
   public required: any = [];
   public property_list: any = [];
@@ -86,9 +85,14 @@ export class CrudPage implements OnInit {
   public istrue_: boolean = true;
   public visible: string = "hide";
   public parent: any = {};
+  public link: any = {};
   public aktions: any = [];
   public properties_: any = {};
+  public links: any = [];
+  public counter: number = 0;
   private sweeped: any;
+  public link_text: any = null;
+  public link_data: any = [];
   private filter: any = [];
   private file: any = null;
   private relatedx: any = []
@@ -118,6 +122,10 @@ export class CrudPage implements OnInit {
     this.crudForm = this.formBuilder.group({}, {});
   }
 
+  customCounterFormatter(inputLength: number, maxLength: number) {
+    return `${maxLength - inputLength} characters remaining`;
+  }
+
   ngOnDestroy() {
     this.storage.remove("LSOP").then(() => { });
   }
@@ -137,7 +145,7 @@ export class CrudPage implements OnInit {
     this.actionix = this.shuttle.actionix;
     this.view = this.shuttle.view;
     this.barcoded_ = this.shuttle.barcoded;
-
+    this.links = this.shuttle.structure.links;
     this.parents = this.structure__?.parents ? this.structure__.parents : [];
     this.doGetAllAktions(this.op).then((res: any) => {
       this.aktions = res;
@@ -338,6 +346,35 @@ export class CrudPage implements OnInit {
     }
   }
 
+  doSubmitLink() {
+    if (this.link_text) {
+      this.link_data = this.link_text.split('\n').filter((e: any) => { return e });
+      if (this.link_data.length > 0) {
+        this.isInProgress = true;
+        this.modified = false;
+        this.misc.apiCall("crud", {
+          "op": "link",
+          "link": this.link,
+          "data": this.link_data
+        }).then((res: any) => {
+          if (res && res.result) {
+            this.modified = true;
+            this.misc.doMessage("collections were linked successfully", "success");
+            this.doDismissModal({ op: "link", modified: this.modified, filter: [] });
+          }
+        }).catch((error: any) => {
+          this.misc.doMessage(error, "error");
+        }).finally(() => {
+          this.isInProgress = false;
+        });
+      } else {
+        this.misc.doMessage("please enter data with lines", "error");
+      }
+    } else {
+      this.misc.doMessage("please enter data", "error");
+    }
+  }
+
   doDismissModal(obj: any) {
     this.misc.dismissModal(obj ? obj : { modified: false, filter: [] }).then(() => { }).catch((error: any) => {
       this.misc.doMessage(error, "error");
@@ -398,6 +435,11 @@ export class CrudPage implements OnInit {
         this.misc.doMessage(res, "error");
       });
     }
+  }
+
+  doLink(link_: any) {
+    this.tab = "link";
+    this.link = link_;
   }
 
   doParent(parent_: any) {

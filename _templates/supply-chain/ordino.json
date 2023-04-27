@@ -26,37 +26,21 @@
       "bsonType": "string",
       "title": "Shipped From",
       "description": "Country where the goods are loaded",
-      "enum": [
-        "China",
-        "Hungary",
-        "Germany",
-        "USA",
-        "Netherlands",
-        "UK"
-      ],
+      "enum": ["China", "Hungary", "Germany", "USA", "Netherlands", "UK"],
       "width": 110
     },
     "odi_customs": {
       "bsonType": "string",
       "title": "Customs",
       "description": "Customs Location",
-      "enum": [
-        "AHL",
-        "Halkalı",
-        "Ambarlı"
-      ],
+      "enum": ["AHL", "Halkalı", "Ambarlı"],
       "width": 120
     },
     "odi_ship_type": {
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping Type",
-      "enum": [
-        "Sea",
-        "Air",
-        "Truck",
-        "Railway"
-      ],
+      "enum": ["Sea", "Air", "Truck", "Railway"],
       "width": 120
     },
     "odi_arrived": {
@@ -91,31 +75,9 @@
       "default": false
     }
   },
-  "required": [
-    "odi_no",
-    "odi_sub_no",
-    "odi_date",
-    "odi_from",
-    "odi_ship_type",
-    "odi_customs"
-  ],
-  "index": [
-    [
-      "odi_no"
-    ],
-    [
-      "odi_no",
-      "odi_sub_no"
-    ],
-    [
-      "odi_from"
-    ]
-  ],
-  "unique": [
-    [
-      "odi_sub_no"
-    ]
-  ],
+  "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_ship_type", "odi_customs"],
+  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_ship_type"], ["odi_customs"]],
+  "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
     "_modified_at": -1
   },
@@ -143,11 +105,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Managers",
-        "#Technoplatz",
-        "#Operation"
-      ],
+      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
         "notify": false,
         "subject": "Ordino is on customs",
@@ -185,11 +143,7 @@
         }
       ],
       "one_click": false,
-      "_tags": [
-        "#Managers",
-        "#Technoplatz",
-        "#Operation"
-      ],
+      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
         "notify": false,
         "subject": "Ordino Arrival Canceled",
@@ -209,10 +163,7 @@
     {
       "name": "Ordino Arrived",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "odi_arrived",
@@ -260,10 +211,7 @@
     {
       "name": "Ordino Arrived Cancel",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "odi_arrived",

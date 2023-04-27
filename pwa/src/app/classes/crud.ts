@@ -167,21 +167,6 @@ export class Crud {
     });
   }
 
-  Reconfigure(collection_: string) {
-    return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
-        op: "reconfigure",
-        collection: collection_
-      }).then((res: any) => {
-        this.storage.remove("LSFILTER_" + collection_).then(() => {
-          resolve(res);
-        });
-      }).catch((err: any) => {
-        reject(err);
-      });
-    });
-  }
-
   Submit(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any, actionix: any) {
     return new Promise((resolve, reject) => {
       const properties = structure.properties;

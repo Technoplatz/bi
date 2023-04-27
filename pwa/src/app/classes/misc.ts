@@ -53,7 +53,6 @@ export class Miscellaneous {
   public version = new BehaviorSubject<boolean>(false);
   public saas = new BehaviorSubject<any>(null);
   public toggle: boolean = true;
-
   private user_: any;
   private collections_: any;
 
@@ -220,7 +219,7 @@ export class Miscellaneous {
   }
 
   async doMessage(msg: string, type: string) {
-    type === "error" ? console.error("*** " + msg) : null;
+    type === "error" ? console.error(msg) : null;
     const typed: any = {
       message: msg + ".",
       duration: type === "success" ? 15000 : 10000,

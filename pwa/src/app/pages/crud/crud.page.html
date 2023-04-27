@@ -79,6 +79,17 @@ https://www.gnu.org/licenses.
                 <ion-button size="small" (click)="goTab('data')"> {{ 'CANCEL' | translate }} </ion-button>
             </ion-col>
         </ion-row>
+        <ion-row *ngIf="tab=='link'" class="ion-padding-top ion-padding-bottom" (click)="doSubmitLink()">
+            <ion-col size="12">
+                <ion-button size="small">
+                    <ion-spinner *ngIf="isInProgress; else noattachinprocess" name="dots"></ion-spinner>
+                    <ng-template #noattachinprocess>
+                        {{ 'ATTACH' | translate }}
+                    </ng-template>
+                </ion-button>
+                <ion-button size="small" (click)="goTab('data')"> {{ 'CANCEL' | translate }} </ion-button>
+            </ion-col>
+        </ion-row>
     </ion-grid>
 </ion-header>
 <ion-content [class]="visible" class="ion-padding-start ion-padding-end">
@@ -99,7 +110,8 @@ https://www.gnu.org/licenses.
             <ion-grid *ngIf="parent.get?.length > 0; else nogetfields" class="ion-no-padding data-grid">
                 <ion-item class="clicked-item" lines="none">
                     <ion-searchbar showCancelButton="never" debounce="500" placeholder="Search" animated="true"
-                        class="ion-no-padding ion-no-margin brz-searchbar" (ionChange)="doStartSearch($event.detail.value)">
+                        class="ion-no-padding ion-no-margin brz-searchbar"
+                        (ionChange)="doStartSearch($event.detail.value)">
                     </ion-searchbar>
                 </ion-item>
                 <ion-row class="list-header-row ion-nowrap">
@@ -123,155 +135,179 @@ https://www.gnu.org/licenses.
         </ng-template>
     </div>
     <ng-template #norelation>
-        <form [formGroup]="crudForm" enctype="multipart/form-data">
-            <ion-list *ngIf="fieldsupd && fieldsupd.length > 0" class="ion-no-padding ion-margin-bottom crud-form-list"
-                [class]="visible">
-                <ion-item *ngIf="parents?.length > 0">
-                    <ion-label position="stacked">
-                        {{ 'PARENTS' | translate }}
-                    </ion-label>
-                    <div class="ion-margin-top full-flex ion-margin-bottom">
-                        <ion-button *ngFor="let parent of parents; let p = index" (click)="doParent(parent)" color="medium" size="small">{{ parent.collection }}
-                        </ion-button>
-                    </div>
-                </ion-item>
-                <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index" class="ion-no-margin full-width">
-                    <ion-label position="stacked">
-                        {{ field.title | translate }}
-                        <sup *ngIf="field.required">
-                            <ion-icon name="star"></ion-icon>
-                            <ion-icon *ngIf="field.readonly" name="star"></ion-icon>
-                        </sup>
-                    </ion-label>
-                    <div *ngIf="field?.description" class="input-desc">{{ field.description | translate }}</div>
-                    <div *ngIf="field.bsonType=='string'" class="full-width">
-                        <div *ngIf="!field.file; else isfile">
-                            <div
-                                *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword" style="min-width: 100% !important">
-                                <ion-input #barcodefocus *ngIf="!field.textarea"
-                                    [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
-                                    [maxlength]="field.maxLength" [minlength]="field.minLength"
-                                    [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
-                                    [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="true"
-                                    [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                    [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
-                                </ion-input>
-                                <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
-                                    [(ngModel)]="data_[field.name]"
-                                    [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                    auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
-                                    [formControlName]="field.name" [required]="field.required" spellcheck="false"
-                                    debounce="500">
-                                </ion-textarea>
-                            </div>
-                            <ng-template #checkpassword>
-                                <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
-                                    [formControlName]="field.name" type="password" spellcheck="false" autocorrect="off"
-                                    [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="true">
-                                </ion-input>
-                            </ng-template>
-                            <ng-template #checkenum>
-                                <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
-                                    [required]="field.required" class="ion-no-padding ion-no-margin"
-                                    [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                    [(ngModel)]="data_[field.name]"
-                                    (ionChange)="doChangeEnum(field, $event.target.value)">
-                                    <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
-                                    </ion-select-option>
-                                </ion-select>
-                            </ng-template>
-                            <ng-template #checkproperty>
-                                <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
-                                    [required]="field.required" class="ion-no-padding ion-no-margin"
-                                    [(ngModel)]="data_[field.name]">
-                                    <ion-select-option *ngFor="let item of properties_" [value]="item"> {{ item }}
-                                    </ion-select-option>
-                                </ion-select>
-                            </ng-template>
-                        </div>
-                        <ng-template #isfile>
-                            <div class="full-width">
-                                <ion-input [id]="field.name" class="ion-no-padding" [formControlName]="field.name"
-                                    type="file" [required]="field.required" (change)="onFileChange($event)">
-                                </ion-input>
-                            </div>
-                        </ng-template>
-                    </div>
-                    <div *ngIf="field.bsonType=='date'">
-                        <div *ngIf="data_[field.name]; else nodatevalue" class="datetime-class">
-                            <ion-datetime-button [datetime]="field.name"> </ion-datetime-button>
-                            <ion-button (click)="doCancelDate(field.name)" fill="clear"
-                                class="ion-no-padding datetime-button">
-                                <ion-icon name="close-circle-outline"></ion-icon>
+        <div *ngIf="tab=='link'; else nolink" class="ion-padding-bottom ion-margin-top">
+            <ion-item lines="full" class="ion-no-margin ion-margin-bottom full-width">
+                <h6>{{ 'LINKED ITEMS' | translate }}</h6>
+                <ion-label position="stacked">
+                    {{ 'Below' | translate }} <span class="danger">{{ link?.get }}</span> {{ 'items' | translate }} in
+                    <span class="danger">{{ link?.collection }}</span> {{ 'collection will be attached' | translate }}.
+                </ion-label>
+                <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
+                    spellcheck="false" class="link-data" counter="true" maxlength="512" clearOnEdit="true"
+                    autofocus="true" placeholder="{{ 'Paste or enter your data here' | translate }}" maxlength="512"
+                    counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
+                </ion-textarea>
+            </ion-item>
+            {{ 'Maximum number of lines allowed is 256' | translate }}.<br />{{ 'Please provide your data and click
+            ATTACH button' | translate }}.
+        </div>
+        <ng-template #nolink>
+            <form [formGroup]="crudForm" enctype="multipart/form-data">
+                <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
+                    class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
+                    <ion-item>
+                        <ion-label position="stacked">
+                            {{ 'PARENTS & LINKS' | translate }}
+                        </ion-label>
+                        <div class="ion-margin-top full-flex ion-margin-bottom">
+                            <ion-button *ngFor="let item of parents; let p = index" (click)="doParent(item)"
+                                color="medium" size="small">{{ item.collection }}
                             </ion-button>
-                            <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
-                                <ng-template>
-                                    <ion-datetime [id]="field.name" presentation="date-time" [multiple]="false"
-                                        [value]="data_[field.name]?.replace(' ', 'T')" [showClearButton]="true"
-                                        (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
-                                        [showDefaultButtons]="true">
-                                        <span slot="title">{{ field.title }}</span>
-                                    </ion-datetime>
+                            <ion-button *ngFor="let item of links" (click)="doLink(item)" color="dark" size="small">{{
+                                item.collection }}
+                            </ion-button>
+                        </div>
+                    </ion-item>
+                    <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index"
+                        class="ion-no-margin full-width">
+                        <ion-label position="stacked">
+                            {{ field.title | translate }}
+                            <sup *ngIf="field.required">
+                                <ion-icon name="star"></ion-icon>
+                                <ion-icon *ngIf="field.readonly" name="star"></ion-icon>
+                            </sup>
+                        </ion-label>
+                        <div *ngIf="field?.description" class="input-desc">{{ field.description | translate }}</div>
+                        <div *ngIf="field.bsonType=='string'" class="full-width">
+                            <div *ngIf="!field.file; else isfile">
+                                <div *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword"
+                                    style="min-width: 100% !important">
+                                    <ion-input #barcodefocus *ngIf="!field.textarea"
+                                        [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
+                                        [maxlength]="field.maxLength" [minlength]="field.minLength"
+                                        [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
+                                        [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="true"
+                                        [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                        [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
+                                    </ion-input>
+                                    <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
+                                        [(ngModel)]="data_[field.name]"
+                                        [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                        auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
+                                        [formControlName]="field.name" [required]="field.required" spellcheck="false"
+                                        debounce="500">
+                                    </ion-textarea>
+                                </div>
+                                <ng-template #checkpassword>
+                                    <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
+                                        [formControlName]="field.name" type="password" spellcheck="false"
+                                        autocorrect="off" [required]="field.required" [(ngModel)]="data_[field.name]"
+                                        auto-grow="true">
+                                    </ion-input>
                                 </ng-template>
-                            </ion-modal>
+                                <ng-template #checkenum>
+                                    <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
+                                        [required]="field.required" class="ion-no-padding ion-no-margin"
+                                        [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                        [(ngModel)]="data_[field.name]"
+                                        (ionChange)="doChangeEnum(field, $event.target.value)">
+                                        <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
+                                        </ion-select-option>
+                                    </ion-select>
+                                </ng-template>
+                                <ng-template #checkproperty>
+                                    <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
+                                        [required]="field.required" class="ion-no-padding ion-no-margin"
+                                        [(ngModel)]="data_[field.name]">
+                                        <ion-select-option *ngFor="let item of properties_" [value]="item"> {{ item }}
+                                        </ion-select-option>
+                                    </ion-select>
+                                </ng-template>
+                            </div>
+                            <ng-template #isfile>
+                                <div class="full-width">
+                                    <ion-input [id]="field.name" class="ion-no-padding" [formControlName]="field.name"
+                                        type="file" [required]="field.required" (change)="onFileChange($event)">
+                                    </ion-input>
+                                </div>
+                            </ng-template>
                         </div>
-                        <ng-template #nodatevalue>
-                            <ion-button (click)="doInitDate(field.name)" fill="clear"
-                                class="ion-no-padding datetime-button">
-                                <ion-icon name="calendar-outline"></ion-icon>
-                            </ion-button>
-                        </ng-template>
-                    </div>
-                    <ion-input *ngIf="['int','number','decimal','float'].includes(field.bsonType)"
-                        class="ion-no-padding" [formControlName]="field.name" type="number" [required]="field.required"
-                        [(ngModel)]="data_[field.name]"
-                        [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
-                    </ion-input>
-                    <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
-                        [(ngModel)]="data_[field.name]">
-                    </ion-checkbox>
-                    <div *ngIf="field.bsonType=='array'" class="full-width">
-                        <ion-input *ngIf="field?.manualAdd" name="arrayitem" [title]="field.name"
-                            [type]="field.items.bsonType=='string' ? 'text' : 'number'" [required]="field.required"
-                            auto-grow="true" [(ngModel)]="arrayitem[field.name]" [ngModelOptions]="{standalone: true}"
-                            class="add-and-enter"></ion-input>
-                        <ion-input [formControlName]="field.name" [(ngModel)]="data_[field.name]"
-                            class="hide"></ion-input>
-                        <app-kov [data]="data_" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
-                    </div>
-                </ion-item>
-            </ion-list>
-            <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
-                <ion-item *ngIf="data_['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
-                    <ion-label position="stacked">{{ 'ID' }}</ion-label>
-                    <ion-input class="ion-no-padding" type="text" [value]="data_['_id']" disabled> </ion-input>
-                </ion-item>
-                <ion-item *ngIf="data_['_created_at']" lines="full" class="ion-no-margin">
-                    <ion-label position="stacked">{{ 'Created At' }}</ion-label>
-                    <ion-input class="ion-no-margin"
-                        [value]="data_['_created_at'] && data_['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
-                        disabled>
-                    </ion-input>
-                </ion-item>
-                <ion-item *ngIf="data_['_created_by']" lines="full" class="ion-no-margin">
-                    <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>
-                    <ion-input class="ion-no-padding" type="text" [value]="data_['_created_by']" disabled>
-                    </ion-input>
-                </ion-item>
-                <ion-item *ngIf="data_['_modified_at']" lines="full" class="ion-no-margin">
-                    <ion-label position="stacked">{{ 'Modified At' }}</ion-label>
-                    <ion-input class="ion-no-margin"
-                        [value]="data_['_modified_at'] && data_['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
-                        disabled>
-                    </ion-input>
-                </ion-item>
-                <ion-item *ngIf="data_['_modified_by']" lines="full" class="ion-no-margin">
-                    <ion-label position="stacked">{{ 'Modified By' | translate }}</ion-label>
-                    <ion-input class="ion-no-padding" type="text" [value]="data_['_modified_by']" disabled>
-                    </ion-input>
-                </ion-item>
-            </ion-list>
-        </form>
+                        <div *ngIf="field.bsonType=='date'">
+                            <div *ngIf="data_[field.name]; else nodatevalue" class="datetime-class">
+                                <ion-datetime-button [datetime]="field.name"> </ion-datetime-button>
+                                <ion-button (click)="doCancelDate(field.name)" fill="clear"
+                                    class="ion-no-padding datetime-button">
+                                    <ion-icon name="close-circle-outline"></ion-icon>
+                                </ion-button>
+                                <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
+                                    <ng-template>
+                                        <ion-datetime [id]="field.name" presentation="date-time" [multiple]="false"
+                                            [value]="data_[field.name]?.replace(' ', 'T')" [showClearButton]="true"
+                                            (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
+                                            [showDefaultButtons]="true">
+                                            <span slot="title">{{ field.title }}</span>
+                                        </ion-datetime>
+                                    </ng-template>
+                                </ion-modal>
+                            </div>
+                            <ng-template #nodatevalue>
+                                <ion-button (click)="doInitDate(field.name)" fill="clear"
+                                    class="ion-no-padding datetime-button">
+                                    <ion-icon name="calendar-outline"></ion-icon>
+                                </ion-button>
+                            </ng-template>
+                        </div>
+                        <ion-input *ngIf="['int','number','decimal','float'].includes(field.bsonType)"
+                            class="ion-no-padding" [formControlName]="field.name" type="number"
+                            [required]="field.required" [(ngModel)]="data_[field.name]"
+                            [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
+                        </ion-input>
+                        <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
+                            [(ngModel)]="data_[field.name]">
+                        </ion-checkbox>
+                        <div *ngIf="field.bsonType=='array'" class="full-width">
+                            <ion-input *ngIf="field?.manualAdd" name="arrayitem" [title]="field.name"
+                                [type]="field.items.bsonType=='string' ? 'text' : 'number'" [required]="field.required"
+                                auto-grow="true" [(ngModel)]="arrayitem[field.name]"
+                                [ngModelOptions]="{standalone: true}" class="add-and-enter"></ion-input>
+                            <ion-input [formControlName]="field.name" [(ngModel)]="data_[field.name]"
+                                class="hide"></ion-input>
+                            <app-kov [data]="data_" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
+                        </div>
+                    </ion-item>
+                </ion-list>
+                <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
+                    <ion-item *ngIf="data_['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
+                        <ion-label position="stacked">{{ 'ID' }}</ion-label>
+                        <ion-input class="ion-no-padding" type="text" [value]="data_['_id']" disabled> </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="data_['_created_at']" lines="full" class="ion-no-margin">
+                        <ion-label position="stacked">{{ 'Created At' }}</ion-label>
+                        <ion-input class="ion-no-margin"
+                            [value]="data_['_created_at'] && data_['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
+                            disabled>
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="data_['_created_by']" lines="full" class="ion-no-margin">
+                        <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>
+                        <ion-input class="ion-no-padding" type="text" [value]="data_['_created_by']" disabled>
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="data_['_modified_at']" lines="full" class="ion-no-margin">
+                        <ion-label position="stacked">{{ 'Modified At' }}</ion-label>
+                        <ion-input class="ion-no-margin"
+                            [value]="data_['_modified_at'] && data_['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
+                            disabled>
+                        </ion-input>
+                    </ion-item>
+                    <ion-item *ngIf="data_['_modified_by']" lines="full" class="ion-no-margin">
+                        <ion-label position="stacked">{{ 'Modified By' | translate }}</ion-label>
+                        <ion-input class="ion-no-padding" type="text" [value]="data_['_modified_by']" disabled>
+                        </ion-input>
+                    </ion-item>
+                </ion-list>
+            </form>
+        </ng-template>
     </ng-template>
 </ion-content>
 <ion-content *ngIf="visible=='hide'" class="ion-padding-start ion-padding-end">

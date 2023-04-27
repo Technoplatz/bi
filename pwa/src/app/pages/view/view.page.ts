@@ -75,7 +75,6 @@ export class ViewPage implements OnInit {
   public is_url_copied: boolean = false;
   public accountf_apikey: string = "";
   public viewurl_: string = "";
-  public viewurl_masked_: string = "";
   public is_apikey_copied: boolean = false;
   private segment = "data";
   private is_selected: boolean = false;
@@ -105,9 +104,6 @@ export class ViewPage implements OnInit {
     private router: Router,
     public misc: Miscellaneous
   ) {
-    this.misc.getAPIHost().then((apiHost: any) => {
-      this.apiHost = apiHost;
-    });
     this.user_ ? null : this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res ? res : null;
       this.accountf_apikey = res && res.apikey ? res.apikey : null;
@@ -131,25 +127,28 @@ export class ViewPage implements OnInit {
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_loaded = false;
     this.is_initialized = false;
-    this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
-      if (res && res.views) {
-        this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
-        this.view_ = this.view.self;
-        this.subheader = this.view.self.title;
-        this.data = this.view.data ? this.view.data : [];
-        const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
-        this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
-        this.view_properties = this.view.properties;
-        this.view_properties_ = Object.keys(this.view.properties);
-        this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
-        this.col_id = this.view.collection;
-        this.is_loaded = true;
-        this.is_initialized = true;
-        this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
-        this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_apikey;
-        this.crud.charts.unsubscribe;
-        this.charts_ = null;
-      }
+    this.misc.getAPIHost().then((apiHost: any) => {
+      this.apiHost = apiHost;
+      this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
+        if (res && res.views) {
+          this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
+          this.view_ = this.view.self;
+          this.subheader = this.view.self.title;
+          this.data = this.view.data ? this.view.data : [];
+          const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
+          this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
+          this.view_properties = this.view.properties;
+          this.view_properties_ = Object.keys(this.view.properties);
+          this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
+          this.col_id = this.view.collection;
+          this.is_loaded = true;
+          this.is_initialized = true;
+          this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
+          this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_apikey;
+          this.crud.charts.unsubscribe;
+          this.charts_ = null;
+        }
+      });
     });
   }
 
