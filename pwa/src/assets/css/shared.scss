@@ -913,14 +913,13 @@ ion-label {
 
 .toggler {
   position: fixed !important;
-  background-color: var(--ion-color-medium);
-  width: 16px;
+  background-color: var(--ion-color-light);
+  width: 14px;
   height: 32px;
-  margin-left: 259px;
-  top: 16px;
+  margin-left: 260px;
+  top: 18px;
   cursor: pointer;
   padding: 0px !important;
-  color: var(--ion-color-white) !important;
   z-index: 999999;
 }
 
