@@ -48,7 +48,7 @@ import { SignPage } from "../pages/sign/sign.page";
 export class Miscellaneous {
   public collections = new BehaviorSubject<any>([]);
   public navi = new Subject<any>();
-  public menutoggle = new Subject<any>();
+  public menutoggle = new BehaviorSubject<boolean>(false);
   public version = new BehaviorSubject<boolean>(false);
   public saas = new BehaviorSubject<any>(null);
   public toggle: boolean = true;
@@ -167,13 +167,6 @@ export class Miscellaneous {
           });
         });
       });
-    });
-  }
-
-  doMenuToggle() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.toggle = !LSMENUTOGGLE;
-      this.menutoggle.next(this.toggle);
     });
   }
 

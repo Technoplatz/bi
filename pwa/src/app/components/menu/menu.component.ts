@@ -31,6 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
+import { Storage } from "@ionic/storage";
 import { environment } from "../../../environments/environment";
 import { Miscellaneous } from "../../classes/misc";
 import { Auth } from "../../classes/auth";
@@ -59,12 +60,9 @@ export class MenuComponent implements OnInit {
   constructor(
     public misc: Miscellaneous,
     private auth: Auth,
-    private crud: Crud
-  ) {
-    this.misc.menutoggle.subscribe((res: any) => {
-      this.menutoggle = res === undefined ? true : res;
-    });
-  }
+    private crud: Crud,
+    private storage: Storage
+  ) { }
 
   ngOnDestroy() {
     this.crud.charts.unsubscribe;
@@ -92,6 +90,15 @@ export class MenuComponent implements OnInit {
   Signout() {
     this.auth.Signout().then(() => { }).catch((error: any) => {
       console.error(error);
+    });
+  }
+
+  doMenuToggle() {
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      this.menutoggle = !LSMENUTOGGLE;
+      this.misc.menutoggle.next(this.menutoggle);
+      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
+      });
     });
   }
 

@@ -50,9 +50,8 @@ const { Network } = Plugins;
 
 export class AppComponent implements OnInit {
   public user_: any = null;
-  public swu_: boolean = false;
   public net_: boolean = true;
-  public menutoggle: boolean = true;
+  public menutoggle: boolean = false;
 
   constructor(
     private translate: TranslateService,
@@ -63,8 +62,7 @@ export class AppComponent implements OnInit {
     private storage: Storage
   ) {
     this.misc.menutoggle.subscribe((res: any) => {
-      this.menutoggle = res === undefined ? true : res;
-      this.storage.set("LSMENUTOGGLE", res).then(() => { });
+      this.menutoggle = res ? false : true;
     });
     this.auth.user.subscribe((user: any) => {
       this.user_ = user;
@@ -91,48 +89,47 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.auth.user.next(LSUSERMETA);
-      if (LSUSERMETA) {
-        this.crud.getSaas().then((saas: any) => {
-          this.misc.saas.next(saas);
-          this.crud.getAll().then(() => { }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: any) => {
+      this.menutoggle = LSMENUTOGGLE ? false : true;
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        this.auth.user.next(LSUSERMETA);
+        if (LSUSERMETA) {
+          this.crud.getSaas().then((saas: any) => {
+            this.misc.saas.next(saas);
+            this.crud.getAll().then(() => { }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+            });
           });
-        });
-      }
+        }
+      });
+      this.storage.get("LSTHEME").then((res: any) => {
+        if (res) {
+          document.documentElement.style.setProperty("--ion-color-primary", res.color);
+        } else {
+          this.storage.set("LSTHEME", environment.themes[0]).then(() => {
+            document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
+          });
+        }
+      });
+      Network.addListener("networkStatusChange", (status: any) => {
+        if (!status.connected) {
+          this.net_ = false;
+          console.error("*** internet connection is lost");
+        } else {
+          setTimeout(() => {
+            console.log("*** internet connection is back again");
+            this.net_ = true;
+            location.reload();
+          }, 3000);
+        }
+      });
+      this.misc.getLanguage().then((res: any) => {
+        this.translate.setDefaultLang(res ? res : "en");
+        this.translate.use(res ? res : "en");
+      }).catch((error: any) => {
+        console.error(error);
+      });
     });
-    this.storage.get("LSTHEME").then((res: any) => {
-      if (res) {
-        document.documentElement.style.setProperty("--ion-color-primary", res.color);
-      } else {
-        this.storage.set("LSTHEME", environment.themes[0]).then(() => {
-          document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
-        });
-      }
-    });
-    Network.addListener("networkStatusChange", (status: any) => {
-      if (!status.connected) {
-        this.net_ = false;
-        console.error("*** internet connection is lost");
-      } else {
-        setTimeout(() => {
-          console.log("*** internet connection is back again");
-          this.net_ = true;
-          location.reload();
-        }, 3000);
-      }
-    });
-    this.misc.getLanguage().then((res: any) => {
-      this.translate.setDefaultLang(res ? res : "en");
-      this.translate.use(res ? res : "en");
-    }).catch((error: any) => {
-      console.error(error);
-    });
-    this.storage.get("LSMENUTOGGLE").then((res: any) => {
-      this.misc.menutoggle.next(res);
-    });
-
   }
 
 }

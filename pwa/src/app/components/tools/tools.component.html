@@ -31,17 +31,17 @@ https://www.gnu.org/licenses.
 -->
 
 <div class="top-tools">
-  <ion-button fill="clear" (click)="misc.navi.next('dashboard')" size="large">
-    <ion-icon name="home-outline" size="medium"></ion-icon>
+  <ion-button fill="clear" (click)="misc.navi.next('dashboard')">
+    <ion-icon name="home-outline"></ion-icon>
   </ion-button>
-  <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()" size="small">
+  <ion-button *ngIf="newVersion" fill="outline" color="danger" (click)="doSetVersion()">
     <ion-label class="ion-padding-start ion-padding-end">{{ 'NEW VERSION AVAILABLE' | translate }}</ion-label>
   </ion-button>
-  <ion-button fill="clear" (click)="misc.navi.next('support')" size="large">
-    <ion-icon name="help-circle-outline" size="large"></ion-icon>
+  <ion-button fill="clear" (click)="misc.navi.next('support')">
+    <ion-icon name="help-circle-outline"></ion-icon>
   </ion-button>
   <ion-button fill="clear" (click)="misc.navi.next('account/profile-settings')">
-    <ion-icon name="person-circle-outline" size="large"></ion-icon>
+    <ion-icon name="person-circle-outline"></ion-icon>
     <ion-label>&nbsp;{{ name }}</ion-label>
   </ion-button>
 </div>
