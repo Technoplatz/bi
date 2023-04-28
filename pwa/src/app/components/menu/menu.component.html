@@ -30,6 +30,10 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
+<div class="toggler" (click)="misc.doMenuToggle()">
+  <ion-icon *ngIf="menutoggle" name="caret-forward-outline"></ion-icon>
+  <ion-icon *ngIf="!menutoggle" name="caret-back-outline"></ion-icon>
+</div>
 <ion-content>
   <ion-header class="ion-no-border">
     <ion-toolbar class="clicked-item" (click)="misc.navi.next('dashboard')">

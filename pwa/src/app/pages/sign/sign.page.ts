@@ -112,9 +112,9 @@ export class SignPage implements OnInit {
           Validators.pattern(/^\d{6}$/)
         ])]
     },
-    {}
-  );
-  this.signupForm = this.formBuilder.group({
+      {}
+    );
+    this.signupForm = this.formBuilder.group({
       name: [
         null,
         Validators.compose([
@@ -149,9 +149,9 @@ export class SignPage implements OnInit {
         ])
       ]
     },
-    {}
-  );
-  this.TFACForm = this.formBuilder.group({
+      {}
+    );
+    this.TFACForm = this.formBuilder.group({
       tfac: [
         null,
         Validators.compose([
@@ -159,9 +159,9 @@ export class SignPage implements OnInit {
           Validators.pattern(/^\d{6}$/)
         ])],
     },
-    {}
-  );
-  this.forgotForm = this.formBuilder.group({
+      {}
+    );
+    this.forgotForm = this.formBuilder.group({
       email: [
         null,
         Validators.compose([
@@ -170,26 +170,26 @@ export class SignPage implements OnInit {
           Validators.maxLength(64)]
         )]
     },
-    {}
-  );
-  this.successForm = this.formBuilder.group({}, {});
+      {}
+    );
+    this.successForm = this.formBuilder.group({}, {});
     this.resetForm = this.formBuilder.group({
-        password: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.minLength(8),
-            Validators.maxLength(32),
-            Validators.pattern(this.passwordpttrn_)
-          ]),
-        ],
-        tfac: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.pattern(/^\d{6}$/)
-          ])]
-      },
+      password: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(32),
+          Validators.pattern(this.passwordpttrn_)
+        ]),
+      ],
+      tfac: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.pattern(/^\d{6}$/)
+        ])]
+    },
       {}
     );
     this.signinForm = this.formBuilder.group({
@@ -213,70 +213,70 @@ export class SignPage implements OnInit {
       {}
     );
     this.signupForm = this.formBuilder.group({
-        name: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.minLength(5),
-            Validators.maxLength(32)
-          ])
-        ],
-        email: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.email,
-            Validators.maxLength(32)
-          ])
-        ],
-        password: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.minLength(8),
-            Validators.maxLength(32),
-            Validators.pattern(this.passwordpttrn_)
-          ]),
-        ],
-        passcode: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.minLength(16),
-            Validators.maxLength(32)
-          ])
-        ]
-      },
+      name: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(5),
+          Validators.maxLength(32)
+        ])
+      ],
+      email: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(32)
+        ])
+      ],
+      password: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(8),
+          Validators.maxLength(32),
+          Validators.pattern(this.passwordpttrn_)
+        ]),
+      ],
+      passcode: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.minLength(16),
+          Validators.maxLength(32)
+        ])
+      ]
+    },
       {}
     );
     this.TFACForm = this.formBuilder.group({
-        tfac: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.pattern(/^\d{6}$/)
-          ])],
-      },
+      tfac: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.pattern(/^\d{6}$/)
+        ])],
+    },
       {}
     );
     this.forgotForm = this.formBuilder.group({
-        email: [
-          null,
-          Validators.compose([
-            Validators.required,
-            Validators.email,
-            Validators.maxLength(64)]
-          )]
-      },
+      email: [
+        null,
+        Validators.compose([
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(64)]
+        )]
+    },
       {}
     );
     this.successForm = this.formBuilder.group({}, {});
   }
 
   ngOnInit() {
-    this.storage.get("LSUSEREMAIL").then((LSUSEREMAIL: string) => {
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.email = LSUSERMETA?.email;
       this.storage.get("LSREMEMBERME").then((LSREMEMBERME: boolean) => {
-        this.email = LSUSEREMAIL;
         this.isRememberMe = LSREMEMBERME ? true : false;
         LSREMEMBERME ? this.signinForm.get("email")?.setValue(this.email) : null;
         this.signinForm.get("isRememberMe")?.setValue(this.isRememberMe);
@@ -392,9 +392,9 @@ export class SignPage implements OnInit {
     this.success_str = "";
     const r = this.isRememberMe
       ? this.storage.set("LSREMEMBERME", this.isRememberMe).then(() => {
-        this.storage.set("LSUSEREMAIL", this.signinForm?.get("email")?.value).then(() => { });
+        this.storage.set("LSUSERMETA", { email: this.signinForm?.get("email")?.value }).then(() => { });
       })
-      : this.storage.set("LSUSEREMAIL", null).then(() => {
+      : this.storage.set("LSUSERMETA", null).then(() => {
         this.storage.set("LSREMEMBERME", null).then(() => { });
       });
     if (this.signinForm?.get("email")?.valid && this.signinForm?.get("password")?.valid) {
@@ -403,7 +403,7 @@ export class SignPage implements OnInit {
         password: this.signinForm.get("password")?.value
       }).then(() => {
         this.storage.set("LSREMEMBERME", this.signinForm?.get("isRememberMe")?.value).then(() => {
-          this.storage.set("LSUSEREMAIL", this.signinForm?.get("email")?.value).then(() => {
+          this.storage.set("LSUSERMETA", { email: this.signinForm?.get("email")?.value }).then(() => {
             this.email = this.signinForm.get("email")?.value;
             this.doSetFormType("tfac").then(() => {
               setTimeout(() => {
@@ -505,14 +505,9 @@ export class SignPage implements OnInit {
         password: this.signupForm.get("password")?.value,
         passcode: this.signupForm.get("passcode")?.value
       }).then((res: any) => {
-        this.storage.set("LSUSEREMAIL", this.signupForm.get("email")?.value).then(() => {
-          this.isInProgress = false;
-          this.successMessage = res.msg;
-          this.formtype = "success";
-        }).catch((error: any) => {
-          console.error("storage error", error);
-          this.error = error;
-        });
+        this.isInProgress = false;
+        this.successMessage = res.msg;
+        this.formtype = "success";
       }).catch((error: any) => {
         this.isInProgress = false;
         this.signinForm?.controls["password"].setValue(null);

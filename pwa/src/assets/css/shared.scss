@@ -906,10 +906,27 @@ ion-label {
   position: relative !important;
 }
 
+.toggler {
+  position: absolute;
+  background-color: var(--ion-color-light);
+  width: 14px;
+  height: 32px;
+  left: 269px;
+  top: 18px;
+  cursor: pointer;
+  padding: 0px !important;
+  color: var(--ion-color-white) !important;
+}
+
+.toggler ion-icon {
+  margin-top: 8px;
+}
+
 app-menu {
   margin-top: 0px;
   width: 260px;
   border-right: 1px solid var(--ion-color-light) !important;
+  z-index: 999;
 }
 
 .input-desc {

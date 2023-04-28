@@ -40,10 +40,6 @@ https://www.gnu.org/licenses.
   <ion-button fill="clear" (click)="misc.navi.next('support')" size="large">
     <ion-icon name="help-circle-outline" size="large"></ion-icon>
   </ion-button>
-  <ion-button fill="clear" (click)="misc.doMenuToggle()" size="large">
-    <ion-icon *ngIf="misc.toggle" name="expand" size="medium"></ion-icon>
-    <ion-icon *ngIf="!misc.toggle" name="contract" size="medium"></ion-icon>
-  </ion-button>
   <ion-button fill="clear" (click)="misc.navi.next('account/profile-settings')">
     <ion-icon name="person-circle-outline" size="large"></ion-icon>
     <ion-label>&nbsp;{{ name }}</ion-label>

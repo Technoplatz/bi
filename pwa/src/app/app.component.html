@@ -32,7 +32,7 @@ https://www.gnu.org/licenses.
 
 <ion-app>
   <ion-split-pane contentId="main-content">
-    <app-menu *ngIf="menutoggle"></app-menu>
+    <app-menu [style]="menutoggle ? 'margin-left: -270px' : 'margin-left: 0px'"></app-menu>
     <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>
 </ion-app>

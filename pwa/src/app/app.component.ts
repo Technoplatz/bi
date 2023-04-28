@@ -32,7 +32,6 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
-import { NavController } from "@ionic/angular";
 import { Router, Event, NavigationError, NavigationEnd, NavigationStart } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./classes/misc";
@@ -61,8 +60,7 @@ export class AppComponent implements OnInit {
     private auth: Auth,
     private crud: Crud,
     private misc: Miscellaneous,
-    private storage: Storage,
-    private nav: NavController
+    private storage: Storage
   ) {
     this.misc.menutoggle.subscribe((res: any) => {
       this.menutoggle = res === undefined ? true : res;
@@ -95,7 +93,6 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.auth.user.next(LSUSERMETA);
-      this.misc.user.next(LSUSERMETA);
       if (LSUSERMETA) {
         this.crud.getSaas().then((saas: any) => {
           this.misc.saas.next(saas);

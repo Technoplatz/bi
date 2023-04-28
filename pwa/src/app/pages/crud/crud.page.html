@@ -155,7 +155,7 @@ https://www.gnu.org/licenses.
             <form [formGroup]="crudForm" enctype="multipart/form-data">
                 <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
                     class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
-                    <ion-item>
+                    <ion-item *ngIf="parents?.length > 0 || links?.length > 0; else noparentlinks">
                         <ion-label position="stacked">
                             {{ 'PARENTS & LINKS' | translate }}
                         </ion-label>
@@ -164,10 +164,17 @@ https://www.gnu.org/licenses.
                                 color="medium" size="small">{{ item.collection }}
                             </ion-button>
                             <ion-button *ngFor="let item of links" (click)="doLink(item)" color="dark" size="small">{{
-                                item.collection }}
+                                item.get }}
                             </ion-button>
                         </div>
                     </ion-item>
+                    <ng-template #noparentlinks>
+                        <ion-item>
+                            <ion-label position="stacked">
+                                &#9432; {{ 'No parent or link found' | translate }}.
+                            </ion-label>
+                        </ion-item>
+                    </ng-template>
                     <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index"
                         class="ion-no-margin full-width">
                         <ion-label position="stacked">

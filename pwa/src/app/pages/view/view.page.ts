@@ -270,7 +270,6 @@ export class ViewPage implements OnInit {
   }
 
   doSaveView() {
-    console.log("*** save", this.col_id, this.id, this.view_);
     this.is_saving = true;
     this.misc.apiCall("/crud", {
       op: "saveview",

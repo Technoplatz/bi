@@ -616,7 +616,7 @@
   "views": {
     "dn-git-view": {
       "title": "GiT 2023",
-      "description": "GiT Report",
+      "description": "GiT by account and statuses",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -655,8 +655,8 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "dn-buid-view": {
-      "title": "BU ID View",
-      "description": "Git Report",
+      "title": "Business Units",
+      "description": "GiT by BU Id's",
       "priority": 1000,
       "enabled": true,
       "dashboard": true,
@@ -698,8 +698,8 @@
       "title": "Statuses",
       "description": "DN Statuses",
       "priority": 2000,
-      "enabled": true,
-      "dashboard": true,
+      "enabled": false,
+      "dashboard": false,
       "data_filter": [
         {
           "key": "dnn_status",

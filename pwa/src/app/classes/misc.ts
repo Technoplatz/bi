@@ -46,14 +46,12 @@ import { SignPage } from "../pages/sign/sign.page";
 })
 
 export class Miscellaneous {
-  public user = new BehaviorSubject<any>(null);
   public collections = new BehaviorSubject<any>([]);
   public navi = new Subject<any>();
   public menutoggle = new Subject<any>();
   public version = new BehaviorSubject<boolean>(false);
   public saas = new BehaviorSubject<any>(null);
   public toggle: boolean = true;
-  private user_: any;
   private collections_: any;
 
   constructor(
@@ -64,9 +62,6 @@ export class Miscellaneous {
     private cb: ClipboardPluginWeb,
     private http: HttpClient
   ) {
-    this.user.subscribe((user: any) => {
-      this.user_ = user;
-    });
     this.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
     });
@@ -82,24 +77,26 @@ export class Miscellaneous {
 
   apiCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
-      posted.user = this.user_;
-      posted.email = this.user_.email;
-      this.getAPIHost().then((apiHost) => {
-        this.http.post<any>(apiHost + "/" + url, posted, {
-          headers: new HttpHeaders({
-            "Content-Type": "application/json",
-            "X-Api-Key": environment.apiKey
-          })
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            console.error("*** api result", res);
-            reject(res && res.msg ? res.msg : res);
-          }
-        }, (res: any) => {
-          console.error("*** api error", res);
-          reject(res.error && res.error.msg ? res.error.msg : res);
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        posted.user = LSUSERMETA;
+        posted.email = LSUSERMETA.email;
+        this.getAPIHost().then((apiHost) => {
+          this.http.post<any>(apiHost + "/" + url, posted, {
+            headers: new HttpHeaders({
+              "Content-Type": "application/json",
+              "X-Api-Key": environment.apiKey
+            })
+          }).subscribe((res: any) => {
+            if (res && res.result) {
+              resolve(res);
+            } else {
+              console.error("*** api result", res);
+              reject(res && res.msg ? res.msg : res);
+            }
+          }, (res: any) => {
+            console.error("*** api error", res);
+            reject(res.error && res.error.msg ? res.error.msg : res);
+          });
         });
       });
     });
@@ -107,38 +104,40 @@ export class Miscellaneous {
 
   doUploadModal(id: any) {
     return new Promise((resolve, reject) => {
-      this.modal.create({
-        component: CrudPage,
-        backdropDismiss: false,
-        cssClass: "crud-modal",
-        componentProps: {
-          shuttle: {
-            op: "import",
-            collection: "_storage",
-            collections: this.collections_ ? this.collections_ : [],
-            views: [],
-            user: this.user_,
-            data: {
-              "sto_id": "data-import",
-              "sto_collection_id": id,
-              "sto_file": null
-            },
-            structure: environment.import_structure,
-            sweeped: [],
-            filter: {},
-            actions: [],
-            direct: -1
-          }
-        }
-      }).then((modal: any) => {
-        modal.present().then(() => {
-          modal.onDidDismiss().then((res: any) => {
-            if (res.data && res.data.modified) {
-              this.doMessage("file imported successfully", "success");
-              resolve(res.data.cid);
-            } else {
-              reject(res);
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        this.modal.create({
+          component: CrudPage,
+          backdropDismiss: false,
+          cssClass: "crud-modal",
+          componentProps: {
+            shuttle: {
+              op: "import",
+              collection: "_storage",
+              collections: this.collections_ ? this.collections_ : [],
+              views: [],
+              user: LSUSERMETA,
+              data: {
+                "sto_id": "data-import",
+                "sto_collection_id": id,
+                "sto_file": null
+              },
+              structure: environment.import_structure,
+              sweeped: [],
+              filter: {},
+              actions: [],
+              direct: -1
             }
+          }
+        }).then((modal: any) => {
+          modal.present().then(() => {
+            modal.onDidDismiss().then((res: any) => {
+              if (res.data && res.data.modified) {
+                this.doMessage("file imported successfully", "success");
+                resolve(res.data.cid);
+              } else {
+                reject(res);
+              }
+            });
           });
         });
       });
@@ -147,23 +146,25 @@ export class Miscellaneous {
 
   apiFileCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
-      posted.append("email", this.user_.email);
-      posted.append("token", this.user_.token);
-      this.getAPIHost().then((apiHost) => {
-        this.http.post<any>(apiHost + "/" + url, posted, {
-          headers: new HttpHeaders({
-            "X-Api-Key": environment.apiKey
-          })
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            console.error("*** error0", res);
-            reject(res && res.msg ? res.msg : res);
-          }
-        }, (res: any) => {
-          console.error("*** error1", res);
-          reject(res.error && res.error.msg ? res.error.msg : "please click cancel and try again");
+      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+        posted.append("email", LSUSERMETA.email);
+        posted.append("token", LSUSERMETA.token);
+        this.getAPIHost().then((apiHost) => {
+          this.http.post<any>(apiHost + "/" + url, posted, {
+            headers: new HttpHeaders({
+              "X-Api-Key": environment.apiKey
+            })
+          }).subscribe((res: any) => {
+            if (res && res.result) {
+              resolve(res);
+            } else {
+              console.error("*** api call negative", res);
+              reject(res && res.msg ? res.msg : res);
+            }
+          }, (res: any) => {
+            console.error("*** api call error", res);
+            reject(res.error && res.error.msg ? res.error.msg : "please click cancel and try again");
+          });
         });
       });
     });

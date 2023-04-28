@@ -54,12 +54,17 @@ export class MenuComponent implements OnInit {
   public charts_: any = null;
   public collections_: any = null;
   public views_: any = null;
+  public menutoggle: boolean = true;
 
   constructor(
     public misc: Miscellaneous,
     private auth: Auth,
     private crud: Crud
-  ) { }
+  ) {
+    this.misc.menutoggle.subscribe((res: any) => {
+      this.menutoggle = res === undefined ? true : res;
+    });
+  }
 
   ngOnDestroy() {
     this.crud.charts.unsubscribe;

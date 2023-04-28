@@ -80,9 +80,7 @@ export class DashboardPage implements OnInit {
   }
 
   doRefresh() {
-    if (this.is_refreshing) {
-      console.log("*** already refreshed");
-    } else {
+    if (!this.is_refreshing) {
       this.is_refreshing = true;
       this.crud.getAll().then(() => { }).catch((error: any) => {
         this.misc.doMessage(error, "error");

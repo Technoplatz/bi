@@ -35,7 +35,7 @@ import { Storage } from "@ionic/storage";
 import { BehaviorSubject } from "rxjs";
 import { Crud } from "./crud";
 import { Miscellaneous } from "./misc";
-import { HttpClient, HttpHeaders, HttpResponse } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { environment } from "../../environments/environment";
 
 @Injectable({
@@ -43,12 +43,12 @@ import { environment } from "../../environments/environment";
 })
 
 export class Auth {
+  public user = new BehaviorSubject<any>(null);
   private apiHost: string = "";
   private authHeaders: any = {
     "Content-Type": "application/json",
     "X-Api-Key": environment.apiKey
   }
-  public user = new BehaviorSubject<any>(null);
 
   constructor(
     private storage: Storage,
@@ -102,8 +102,8 @@ export class Auth {
         headers: new HttpHeaders(this.authHeaders)
       }).subscribe((res: any) => {
         if (res.result) {
-          this.user.next(res.user);
           this.storage.set("LSUSERMETA", res.user).then(() => {
+            this.user.next(res.user);
             this.crud.getAll().then(() => {
               setTimeout(() => {
                 this.misc.navi.next("/dashboard");
