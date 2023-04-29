@@ -108,14 +108,6 @@ export class AccountPage implements OnInit {
     });
   }
 
-  doSignout() {
-    this.auth.Signout().then(() => {
-      console.log("*** signed out");
-    }).catch((error: any) => {
-      console.error("signout error", error.msg);
-    });
-  }
-
   doCopy(w: string) {
     const s = w === "apikey" ? this.accountf_apikey : w === "view" ? this.viewurl_ : "";
     this.is_apikey_copied = w === "apikey" ? true : false;

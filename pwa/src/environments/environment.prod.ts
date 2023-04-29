@@ -161,7 +161,7 @@ export const environment = {
     { "id": "_token", "title": "API Tokens" },
     { "id": "_backup", "title": "Backups" },
     { "id": "_log", "title": "Logs" },
-    { "id": "_kv", "title": "Key:Value" }
+    { "id": "_kv", "title": "Key : Value" }
   ],
   themes: [
     { "name": "Dark", "color": "#111111" },

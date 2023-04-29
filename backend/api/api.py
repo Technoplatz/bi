@@ -60,12 +60,11 @@ import bleach
 import pyotp
 import jwt
 import numexpr as ne
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, Response, make_response
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 from croniter import croniter
-import openpyxl
 
 
 class APIError(BaseException):
@@ -400,22 +399,18 @@ class Misc:
         docstring is in progress
         """
         try:
-            find_ = (
-                Mongo()
-                .db_["_token"]
-                .find_one({"_id": ObjectId(base64.b64decode(token_).decode())})
-            )
+            find_ = Mongo().db_["_token"].find_one({"_id": ObjectId(base64.b64decode(token_).decode())})
             if not find_:
-                raise Exception(f"token not found {token_}")
+                raise APIError(f"token not found {token_}")
 
             grant_ = f"tkn_grant_{operation_}"
             if not find_[grant_]:
-                raise Exception(f"token is not permitted to {operation_}")
+                raise APIError(f"token is not permitted to {operation_}")
 
             return {"result": True, "data": find_}
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except APIError as exc_:
+            return Misc().exception_f(exc_)
 
     def permitted_user_f(self, user_):
         """
@@ -461,29 +456,23 @@ class Misc:
         key_ = set_["key"]
         value_ = set_["value"]
         if value_[:1] == "$":
-            f_ = value_[1:]
-            value_ = rec_[f_] if f_ in rec_ else None
+            forward_ = value_[1:]
+            value_ = rec_[forward_] if forward_ in rec_ else None
         elif value_[:1] == "=":
             formula_ = str(value_[1:]).replace(" ", "")
             parts_ = re.split("([+-/*()])", formula_)
             for part_ in parts_:
                 if part_[:1] == "$":
-                    f_ = part_[1:]
-                    if f_ in rec_:
-                        if rec_[f_] in [None, ""]:
-                            rec_[f_] = 0
-                        formula_ = formula_.replace(part_, str(rec_[f_]))
+                    forward_ = part_[1:]
+                    if forward_ in rec_:
+                        if rec_[forward_] in [None, ""]:
+                            rec_[forward_] = 0
+                        formula_ = formula_.replace(part_, str(rec_[forward_]))
                     else:
                         formula_ = formula_.replace(part_, "")
 
             value_ = str(ne.evaluate(formula_))
-            value_ = (
-                float(value_)
-                if properties_[key_]["bsonType"] in ["number", "decimal", "double"]
-                else int(value_)
-                if properties_[key_]["bsonType"] == "int"
-                else None
-            )
+            value_ = float(value_) if properties_[key_]["bsonType"] in ["number", "decimal", "double"] else int(value_) if properties_[key_]["bsonType"] == "int" else None
 
         return value_
 
@@ -595,50 +584,31 @@ class Crud:
         """
         docstring is in progress
         """
-        try:
-            return json.loads(open(f"/app/_schema/{schema}.json", "r", encoding="utf-8").read())
+        return json.loads(open(f"/app/_schema/{schema}.json", "r", encoding="utf-8").read())
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
 
     def validate_iso8601_f(self, strv):
         """
         docstring is in progress
         """
-        try:
-            regex = r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
-            match_iso8601 = re.compile(regex).match
-            if match_iso8601(strv) is not None:
-                return True
-        except Exception:
-            pass
-
-        return False
+        regex = r"^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
+        match_iso8601 = re.compile(regex).match
+        return match_iso8601(strv) is not None
 
     def get_properties_f(self, collection):
         """
         docstring is in progress
         """
         try:
-            cursor_ = (
-                Mongo().db_["_collection"].find_one({"col_id": collection})
-                if collection[:1] != "_"
-                else self.root_schemas_f(f"{collection}")
-            )
-
+            cursor_ = Mongo().db_["_collection"].find_one({"col_id": collection}) if collection[:1] != "_" else self.root_schemas_f(f"{collection}")
             if not cursor_:
                 raise APIError("collection not found for properties")
-
             if "col_structure" not in cursor_:
                 raise APIError("structure not found")
 
             structure_ = cursor_["col_structure"] if collection[:1] != "_" else cursor_
             if "properties" not in structure_:
                 raise APIError("properties not found in structure")
-
             properties_ = structure_["properties"]
 
             return {"result": True, "properties": properties_}
@@ -1338,7 +1308,7 @@ class Crud:
             if link_ is None:
                 raise APIError("required parameter (link) is missing")
             if data_ is None:
-                 raise APIError("required parameter (data) is missing")
+                raise APIError("required parameter (data) is missing")
 
             collection_ = link_["collection"] if "collection" in link_ else None
             get_ = link_["get"] if "get" in link_ else None
@@ -4553,17 +4523,16 @@ class Auth:
             if not verify_2fa_f_["result"]:
                 raise AuthError(verify_2fa_f_["msg"])
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": "_auth",
-                    "op": "signin",
-                    "user": email_,
-                    "document": {
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": "_auth",
+                "op": "signin",
+                "user": email_,
+                "document": {
                         "_modified_at": datetime.now(),
                         "_modified_by": email_,
-                    },
-                }
+                },
+            }
             )
 
             if not log_["result"]:
@@ -4575,18 +4544,7 @@ class Auth:
             jdate_ = Misc().get_jdate_f()
             token_ = jwt.encode({"some": "payload"}, password_, algorithm="HS256")
 
-            Mongo().db_["_auth"].update_one(
-                {"aut_id": email_},
-                {
-                    "$set": {
-                        "aut_token": token_,
-                        "aut_tfac": None,
-                        "_modified_at": datetime.now(),
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-                upsert=False,
-            )
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_token": token_, "aut_tfac": None, "_modified_at": datetime.now()}, "$inc": {"_modified_count": 1}})
 
             user_ = {
                 "token": token_,
@@ -4599,12 +4557,11 @@ class Auth:
 
             ip_ = Misc().get_user_ip_f()
 
-            email_sent_ = Email().sendEmail_f(
-                {
-                    "op": "signin",
-                    "personalizations": {"to": [{"email": email_, "name": name_db_}]},
-                    "html": f"<p>Hi {name_db_},<br /><br />You have now signed-in from {ip_}.</p>",
-                }
+            email_sent_ = Email().sendEmail_f({
+                "op": "signin",
+                "personalizations": {"to": [{"email": email_, "name": name_db_}]},
+                "html": f"<p>Hi {name_db_},<br /><br />You have now signed-in from {ip_}.</p>",
+            }
             )
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
@@ -4879,45 +4836,23 @@ MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 
-origins_ = [
-    f"http://{DOMAIN_}",
-    f"https://{DOMAIN_}",
-    f"http://{DOMAIN_}:8100",
-    f"http://{DOMAIN_}:8101",
-]
 
 app = Flask(__name__)
+origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101"]
 app.config["CORS_ORIGINS"] = origins_
-app.config["CORS_HEADERS"] = [
-    "Content-Type",
-    "Origin",
-    "Authorization",
-    "X-Requested-With",
-    "Accept",
-    "x-auth",
-]
+app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_
-app.config["UPLOAD_EXTENSIONS"] = [
-    "pdf",
-    "png",
-    "jpg",
-    "jpeg",
-    "xlsx",
-    "xls",
-    "doc",
-    "docx",
-    "csv",
-    "txt",
-]
+app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 app.config["UPLOAD_FOLDER"] = "/vault/"
+app.json_encoder = JSONEncoder
 CORS(app)
 
 log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
-@ app.route("/import", methods=["POST"], endpoint="import")
+@app.route("/import", methods=["POST"], endpoint="import")
 def storage_f():
     """
     docstring is in progress
@@ -4971,7 +4906,7 @@ def storage_f():
         return {"msg": str(exc), "status": 500}
 
 
-@ app.route("/crud", methods=["POST"], endpoint="crud")
+@app.route("/crud", methods=["POST"], endpoint="crud")
 def crud_f():
     """
     docstring is in progress
@@ -4979,78 +4914,61 @@ def crud_f():
     try:
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "validation error"
-            )
+            raise APIError(validate_)
 
         input_ = request.json
 
         if "op" not in input_:
-            raise APIError("no operation found")
+            raise APIError({"result": False, "msg": "no operation found"})
         op_ = input_["op"]
 
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
-            raise APIError("user info not found")
+            raise APIError({"result": False, "msg": "user info not found"})
+
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
 
         collection_ = input_["collection"] if "collection" in input_ else None
-        match_ = (
-            input_["match"]
-            if "match" in input_
-            and input_["match"] is not None
-            and len(input_["match"]) > 0
-            else []
-        )
+        match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
 
-        validate_ = Auth().user_validate_by_basic_auth_f(
-            {"userid": email_, "token": token_}, "op"
-        )
+        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
         if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "crud validation error"
-            )
+            raise APIError(validate_)
         input_["userindb"] = validate_["user"]
 
         allowmatch_ = []
-        permission_f_ = Auth().permission_f(
-            {
-                "user": validate_["user"],
-                "auth": validate_["auth"],
-                "collection": collection_,
-                "op": op_,
-            }
-        )
+        permission_f_ = Auth().permission_f({
+            "user": validate_["user"],
+            "auth": validate_["auth"],
+            "collection": collection_,
+            "op": op_,
+        })
         if not permission_f_["result"]:
-            raise AuthError(permission_f_["msg"])
+            raise AuthError(permission_f_)
 
-        allowmatch_ = (
-            permission_f_["allowmatch"]
-            if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0
-            else []
-        )
+        allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ += allowmatch_
         input_["match"] = match_
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
-                raise APIError("document must be included in the request")
+                raise APIError({"result": False, "msg": "document must be included in the request"})
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
-                raise APIError(decode_["msg"] if "msg" in decode_ else "decode error")
+                raise APIError(decode_)
             input_["doc"] = decode_["doc"]
         elif op_ in ["remove", "clone", "delete"]:
             col_check_ = Crud().inner_collection_f(input_["collection"])
             if not col_check_["result"]:
-                raise APIError(col_check_["msg"])
+                raise APIError(col_check_)
 
         if op_ in ["announce"]:
             tfac_ = input_["tfac"]
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
             if not verify_2fa_f_["result"]:
-                raise APIError(verify_2fa_f_["msg"])
+                raise APIError(verify_2fa_f_)
 
         if op_ == "read":
             res_ = Crud().read_f(input_)
@@ -5093,19 +5011,33 @@ def crud_f():
         else:
             raise APIError(f"{op_} is not a supported operation")
 
-        return json.dumps(res_, default=json_util.default, sort_keys=False), 200, Security().header_simple_f()
+        if not res_["result"]:
+            raise APIError(res_)
 
-    except APIError as exc:
-        return {"msg": str(exc), "status": 400}
+        status_code_ = 200
 
-    except AuthError as exc:
-        return {"msg": str(exc), "status": 401}
+    except APIError as exc_:
+        res_ = exc_
+        status_code_ = 400
 
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
+    except AuthError as exc_:
+        res_ = exc_
+        status_code_ = 401
+
+    except Exception as exc_:
+        res_ = exc_
+        status_code_ = 500
+
+    finally:
+        status_code_ = 200 if status_code_ is None else status_code_
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.headers["Content-Type"] = "application/json"
+        response_.status_code = status_code_
+        response_.mimetype = "application/json"
+        return response_
 
 
-@ app.route("/otp", methods=["POST"])
+@app.route("/otp", methods=["POST"])
 def otp_f():
     """
     docstring is in progress
@@ -5172,7 +5104,7 @@ def otp_f():
         return {"msg": str(exc), "status": 500}
 
 
-@ app.route("/auth", methods=["POST"], endpoint="auth")
+@app.route("/auth", methods=["POST"], endpoint="auth")
 def auth_f():
     """
     docstring is in progress
@@ -5180,78 +5112,68 @@ def auth_f():
     try:
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "web validation error"
-            )
+            raise APIError(validate_)
 
         input_ = request.json
         if not input_:
-            raise APIError("input missing")
+            raise APIError({"result": False, "msg": "input missing"})
 
         if "op" not in input_:
-            raise APIError("no operation found")
+            raise APIError({"result": False, "msg": "no operation found"})
+
         op_ = input_["op"]
 
-        token_ = None
-
         if op_ == "signup":
-            auth_ = Auth().signup_f()
+            res_ = Auth().signup_f()
         elif op_ == "saas":
-            auth_ = Auth().saas_f()
+            res_ = Auth().saas_f()
         elif op_ == "signin":
-            auth_ = Auth().signin_f()
+            res_ = Auth().signin_f()
         elif op_ == "tfac":
-            auth_ = Auth().tfac_f()
+            res_ = Auth().tfac_f()
         elif op_ == "signout":
-            auth_ = Auth().signout_f()
+            res_ = Auth().signout_f()
         elif op_ == "forgot":
-            auth_ = Auth().forgot_f()
+            res_ = Auth().forgot_f()
         elif op_ == "reset":
-            auth_ = Auth().reset_f()
+            res_ = Auth().reset_f()
         elif op_ in ["apikeygen", "apikeyget"]:
-            auth_ = Auth().account_f(input_)
+            res_ = Auth().account_f(input_)
         elif op_ == "session":
-            auth_ = Auth().session_f(input_)
+            res_ = Auth().session_f(input_)
         else:
-            raise APIError(f"operation not supported {op_}")
+            raise APIError({"result": False, "msg": f"operation not supported {op_}"})
 
-        if not auth_["result"]:
-            raise APIError(auth_["msg"])
+        if not res_["result"]:
+            raise APIError(res_)
 
-        user_ = auth_["user"] if auth_ and "user" in auth_ else None
-        saas_ = auth_["saas"] if auth_ and "saas" in auth_ else None
+        user_ = res_["user"] if res_ and "user" in res_ else None
+        saas_ = res_["saas"] if res_ and "saas" in res_ else None
+        status_code_ = 200
 
-        if op_ == "tfac":
-            token_ = (
-                user_["token"]
-                if "token" in user_ and user_["token"] is not None
-                else None
-            )
+        res_ = {"result": True, "user": user_, "saas": saas_}
 
-        header_ = Security().header_simple_f()
+    except APIError as exc_:
+        res_ = exc_
+        status_code_ = 401
+
+    except Exception as exc_:
+        res_ = exc_
+        status_code_ = 500
+
+    finally:
+        status_code_ = 200 if status_code_ is None else status_code_
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.headers["Content-Type"] = "application/json"
+        token_ = user_["token"] if op_ == "tfac" and "token" in user_ and user_["token"] is not None else None
         if token_ is not None:
-            header_[
-                "Set-Cookie"
-            ] = f"technoplatz-bi-session={token_}; path=/; samesite=strict; httponly"
-
-        return (
-            json.dumps(
-                {"result": True, "user": user_, "saas": saas_},
-                default=json_util.default,
-                sort_keys=False
-            ),
-            200,
-            header_
-        )
-
-    except APIError as exc:
-        return {"msg": str(exc), "status": 401}
-
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
+            response_.headers["Set-Cookie"] = f"technoplatz-bi-session={token_}; path=/; samesite=strict; httponly"
+        response_.status_code = status_code_
+        response_.mimetype = "application/json"
+        return response_
 
 
-@ app.route("/post", methods=["POST"])
+@app.route("/post", methods=["POST"])
 def post_f():
     """
     docstring is in progress
@@ -5266,7 +5188,6 @@ def post_f():
         if not API_OUTPUT_ROWS_LIMIT_:
             raise APIError("no api rows limit defined")
 
-        # checks the authorization from the request header
         rh_apikey_ = (
             request.headers.get("x-api-key", None)
             if "x-api-key" in request.headers and request.headers["x-api-key"] != ""
@@ -5275,35 +5196,23 @@ def post_f():
         if not rh_apikey_:
             raise AuthError("no api key provided")
 
-        # checks the token
-        rh_authorization_ = (
-            request.headers.get("Authorization", None)
-            if "Authorization" in request.headers
-            and request.headers["Authorization"] != ""
-            else None
-        )
+        rh_authorization_ = request.headers.get("Authorization", None) if "Authorization" in request.headers and request.headers["Authorization"] != "" else None
         if not rh_authorization_:
             raise AuthError("no authorization provided")
+
         auth_parts_ = rh_authorization_.split()
         if len(auth_parts_) == 1:
             raise AuthError("no access token provided")
-        elif auth_parts_[0].lower() != "bearer":
+        if auth_parts_[0].lower() != "bearer":
             raise AuthError("invalid authorization format")
         rh_token_ = auth_parts_[1]
 
-        # gets operation
         operation_ = (
             request.headers.get("operation", None)
             if "operation" in request.headers and request.headers["operation"] != ""
             else None
         )
-        if not operation_ or operation_ not in [
-            "read",
-            "insert",
-            "update",
-            "upsert",
-            "delete",
-        ]:
+        if not operation_ or operation_ not in ["read", "insert", "update", "upsert", "delete"]:
             raise APIError("invalid operation")
 
         user_validate_ = Auth().user_validate_by_apikey_f({"apikey": rh_apikey_})
@@ -5477,7 +5386,7 @@ def post_f():
             session_.abort_transaction()
 
 
-@ app.route("/get/dump", methods=["POST"])
+@app.route("/get/dump", methods=["POST"])
 def get_dump_f():
     """
     docstring is in progress
@@ -5529,7 +5438,7 @@ def get_dump_f():
         return {"msg": str(exc), "status": 500}
 
 
-@ app.route("/get/view/<string:id_>", methods=["GET"])
+@app.route("/get/view/<string:id_>", methods=["GET"])
 def get_data_f(id_):
     """
     docstring is in progress

@@ -36,17 +36,6 @@ https://www.gnu.org/licenses.
     <h6>{{ 'ACCOUNT' | translate }}</h6>
     <h1>{{ subheader }}</h1>
 
-    <!-- SIGN OUT -->
-    <div *ngIf="submenu=='signout'" class="ion-margin-top">
-      <p>
-        {{ 'Please click the button below' | translate }},<br />
-        {{ 'To close your current session
-        immediately' | translate }}.
-      </p>
-      <ion-button (click)="doSignout()" class="ion-margin-top" size="default">
-        {{ 'Sign out' | translate }}
-      </ion-button>
-    </div>
     <div *ngIf="submenu=='profile-settings'" class="profile-settings">
       <ion-list class="ion-padding-end">
         <ion-list-header>{{ 'PERSONAL' | translate }}</ion-list-header>

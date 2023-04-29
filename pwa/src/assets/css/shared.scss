@@ -83,6 +83,7 @@ ion-button {
   margin: 0px;
   margin-right: 4px !important;
   letter-spacing: normal;
+  font-weight: 600;
 }
 
 ion-button ion-icon {
@@ -381,7 +382,7 @@ ion-note {
 .data-sq-button {
   vertical-align: top !important;
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
   padding-top: 16px;
   padding-bottom: 16px;
   padding-right: 8px;
@@ -911,7 +912,14 @@ ion-label {
   margin-top: 10px;
 }
 
-.toggler {
+app-menu {
+  margin-top: 0px;
+  width: 260px !important;
+  border-right: 1px solid var(--ion-color-light);
+  z-index: 999;
+}
+
+app-menu .toggler {
   position: fixed !important;
   background-color: var(--ion-color-light);
   width: 14px;
@@ -920,18 +928,11 @@ ion-label {
   top: 18px;
   cursor: pointer;
   padding: 0px !important;
-  z-index: 999999;
+  z-index: 9999;
 }
 
 .toggler ion-icon {
   margin-top: 8px;
-}
-
-app-menu {
-  margin-top: 0px;
-  width: 260px;
-  border-right: 1px solid var(--ion-color-light);
-  z-index: 999;
 }
 
 .input-desc {

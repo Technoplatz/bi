@@ -69,4 +69,12 @@ export class ToolsComponent implements OnInit {
     });
   }
 
+  doSignout() {
+    this.auth.Signout().then(() => {
+      console.log("*** signed out");
+    }).catch((error: any) => {
+      console.error("signout error", error.msg);
+    });
+  }
+
 }
