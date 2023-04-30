@@ -53,9 +53,7 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      if (LSUSERMETA) {
-        this.user = LSUSERMETA;
-      }
+      this.user = LSUSERMETA ? LSUSERMETA : null;
     });
   }
 

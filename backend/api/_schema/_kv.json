@@ -16,7 +16,7 @@
       "title": "As",
       "description": "As",
       "enum": ["string", "number", "int", "float", "date", "boolean", "array"],
-      "width": 160
+      "width": 120
     },
     "kav_value": {
       "bsonType": "string",
@@ -24,7 +24,7 @@
       "maxLength": 64,
       "title": "Value",
       "description": "Value",
-      "width": 120
+      "width": 220
     }
   },
   "required": ["kav_key", "kav_as", "kav_value"],

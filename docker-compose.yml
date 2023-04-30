@@ -334,7 +334,7 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - API_SCHEDULE_INTERVAL_MIN=${API_SCHEDULE_INTERVAL_MIN}
       - API_DUMP_HOURS=${API_DUMP_HOURS}
-      - SECUR_MAX_AGE=${SECUR_MAX_AGE}
+      - API_SESSION_EXP_HOURS=${API_SESSION_EXP_HOURS}
       - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
       - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
       - API_MAX_CONTENT_LENGTH=${API_MAX_CONTENT_LENGTH}
@@ -401,7 +401,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-    command: --interval ${UPDATE_INTERVAL}
+    command: --interval ${WATCHTOWER_UPDATE_INTERVAL}
     environment:
       - TZ=${TZ}
       - WATCHTOWER_NOTIFICATIONS=${NOTIFICATIONS}

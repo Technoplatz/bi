@@ -70,10 +70,22 @@ export class Auth {
         if (res && res.result) {
           resolve(true);
         } else {
-          reject(res.msg);
+          this.storage.remove("LSUSERMETA").then(() => {
+            this.storage.remove("LSTOKEN").then(() => {
+              console.error("*** auth negative", res);
+              reject(res.msg);
+            });
+
+          });
         }
       }, (res: any) => {
-        reject(res.error && res.error.msg ? res.error.msg : res);
+        this.storage.remove("LSUSERMETA").then(() => {
+          this.storage.remove("LSTOKEN").then(() => {
+            console.error("*** auth error", res);
+            reject(res.error && res.error.msg ? res.error.msg : res);
+          });
+
+        });
       });
     });
   }
@@ -101,22 +113,34 @@ export class Auth {
       this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
         headers: new HttpHeaders(this.authHeaders)
       }).subscribe((res: any) => {
-        if (res.result) {
+        if (res && res.result) {
           this.user.next(res.user);
           this.storage.set("LSUSERMETA", res.user).then(() => {
-            this.misc.navi.next("/dashboard");
-            this.crud.getAll().then(() => {
-              resolve(true);
-            }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
+            this.storage.set("LSTOKEN", res.jwt).then(() => {
+              this.misc.navi.next("/dashboard");
+              this.crud.getAll().then(() => {
+                resolve(true);
+              }).catch((error: any) => {
+                console.error(error);
+                this.misc.doMessage(error, "error");
+              });
             });
-          })
+          });
         } else {
-          reject(res.msg);
+          this.storage.remove("LSUSERMETA").then(() => {
+            this.storage.remove("LSTOKEN").then(() => {
+              reject(res.msg);
+            });
+
+          });
         }
       }, (res: any) => {
-        reject(res.error && res.error.msg ? res.error.msg : res);
+        this.storage.remove("LSUSERMETA").then(() => {
+          this.storage.remove("LSTOKEN").then(() => {
+            reject(res.error && res.error.msg ? res.error.msg : res);
+          });
+
+        });
       });
     });
   }
@@ -226,18 +250,20 @@ export class Auth {
   Signup(creds: any) {
     return new Promise((resolve, reject) => {
       this.storage.remove("LSUSERMETA").then(() => {
-        creds.op = "signup";
-        this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-          headers: new HttpHeaders(this.authHeaders)
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            this.user.next(null);
-            resolve(true);
-          } else {
-            reject(res.msg);
-          }
-        }, (error: any) => {
-          reject(error.msg);
+        this.storage.remove("LSTOKEN").then(() => {
+          creds.op = "signup";
+          this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
+            headers: new HttpHeaders(this.authHeaders)
+          }).subscribe((res: any) => {
+            if (res && res.result) {
+              this.user.next(null);
+              resolve(true);
+            } else {
+              reject(res.msg);
+            }
+          }, (error: any) => {
+            reject(error.msg);
+          });
         });
       }, (res: any) => {
         reject(res.error && res.error.msg ? res.error.msg : res);

@@ -281,7 +281,7 @@ export class Crud {
     });
   }
 
-  getAnnouncements(LSUSERMETA: any) {
+  getAnnouncements() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
         op: "read",
@@ -301,31 +301,23 @@ export class Crud {
 
   getAll() {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.getCollections().then(() => {
-          resolve(true);
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-          reject(error);
-        });
-        // this.getViews().then(() => {
-        //   resolve(true);
-        // }).catch((error: any) => {
-        //   this.misc.doMessage(error, "error");
-        //   reject(error);
-        // });
-        this.getCharts().then(() => {
-          resolve(true);
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-          reject(error);
-        });
-        this.getAnnouncements(LSUSERMETA).then(() => {
-          resolve(true);
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-          reject(error);
-        });
+      this.getCollections().then(() => {
+        resolve(true);
+      }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+        reject(error);
+      });
+      this.getCharts().then(() => {
+        resolve(true);
+      }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+        reject(error);
+      });
+      this.getAnnouncements().then(() => {
+        resolve(true);
+      }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+        reject(error);
       });
     });
   }

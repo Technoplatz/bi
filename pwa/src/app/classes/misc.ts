@@ -40,6 +40,7 @@ import { ClipboardPluginWeb } from "@capacitor/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { CrudPage } from "../pages/crud/crud.page";
 import { SignPage } from "../pages/sign/sign.page";
+import { Auth } from "./auth";
 
 @Injectable({
   providedIn: "root"
@@ -60,7 +61,8 @@ export class Miscellaneous {
     private modal: ModalController,
     private toast: ToastController,
     private cb: ClipboardPluginWeb,
-    private http: HttpClient
+    private http: HttpClient,
+    private auth: Auth
   ) {
     this.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
@@ -94,8 +96,17 @@ export class Miscellaneous {
               reject(res && res.msg ? res.msg : res);
             }
           }, (res: any) => {
-            console.error("*** api error", res);
-            reject(res.error && res.error.msg ? res.error.msg : res);
+            if (res.error && res.error.msg) {
+              if (res.error.msg === "session ended") {
+                this.auth.Signout().then(() => { }).catch((error: any) => {
+                  console.error(error);
+                });
+              } else {
+                reject(res.error.msg);
+              }
+            } else {
+              reject(res);
+            }
           });
         });
       });

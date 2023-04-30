@@ -77,37 +77,38 @@ https://www.gnu.org/licenses.
     </form>
     <form [formGroup]="signupForm" *ngIf="formtype=='signup'">
         <ion-item class="section-header" lines="none">
-            <h2>{{ 'Sign up' | translate }}</h2>
+            <h1>{{ 'Sign up' | translate }}</h1>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'E-mail' | translate }} <sup>
+            <ion-label position="stacked">{{ 'User ID' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #emailfocussignup class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required>
+                autocorrect="off" required placeholder="{{ 'Business E-mail' | translate }}">
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Full Name' | translate }} <sup>
+            <ion-label position="stacked">{{ 'Name' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #namefocus class="ion-no-padding" formControlName="name" type="text" spellcheck="false"
-                autocorrect="off" required>
+                autocorrect="off" required placeholder="{{ 'Name and Surname' | translate }}">
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Password [8+ chars. mixed]' | translate }} <sup>
+            <ion-label position="stacked">{{ 'New Password' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
-            <ion-input #passwordfocus formControlName="password" type="password" required>
+            <ion-input #passwordfocus formControlName="password" type="password"
+                placeholder="{{ '8+ characters; a-Z,0-9,sign' | translate }}" required>
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Invitation code' | translate }} <sup>
+            <ion-label position="stacked">{{ 'User Access Code' | translate }} <sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
             <ion-input #namefocus class="ion-no-padding" formControlName="passcode" type="text" spellcheck="false"
-                autocorrect="off" required>
+                autocorrect="off" required placeholder="{{ 'Ask from the Administrator' | translate }}">
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
@@ -120,11 +121,8 @@ https://www.gnu.org/licenses.
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-padding-top">
-            <ion-button fill="clear" (click)="doDismissModal()" size="small"
-                class="no-hover ion-no-padding clear-dark-button">
-                <ion-icon name="newspaper-outline"></ion-icon>
-                <span>{{ 'By completing this form you accept the Terms and conditions' | translate }}.</span>
-            </ion-button>
+            <ion-icon name="newspaper-outline"></ion-icon>&nbsp;
+            <ion-text class="smalli">{{ 'By creating an account, you accept the terms and conditions' | translate }}.</ion-text>
         </ion-item>
     </form>
     <form [formGroup]="signinForm" *ngIf="formtype=='signin'">

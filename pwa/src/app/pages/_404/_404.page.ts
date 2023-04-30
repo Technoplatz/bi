@@ -42,19 +42,14 @@ import { Storage } from "@ionic/storage";
 
 export class _404Page implements OnInit {
   public header: string = "Sorry!";
-  public user: any = null;
 
   constructor(
-    public misc: Miscellaneous, 
+    public misc: Miscellaneous,
     private storage: Storage
   ) { }
 
   ngOnDestroy() { }
 
-  ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA;
-    });
-  }
+  ngOnInit() { }
 
 }

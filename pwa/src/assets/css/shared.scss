@@ -49,6 +49,7 @@ h6 {
 }
 
 h1 {
+  margin-top: 16px !important;
   font-size: 2.4rem !important;
   letter-spacing: -0.02rem !important;
 }
@@ -775,6 +776,10 @@ ion-spinner {
 .token {
   font-size: x-large !important;
   font-weight: 600;
+}
+
+.smalli {
+  font-size: small !important;
 }
 
 .section-header span {
@@ -1894,12 +1899,12 @@ app-chart {
   background-color: #e6e6e6;
   align-content: flex-start;
   width: 320px;
-  height: 122px;
+  height: 120px;
   white-space: nowrap !important;
 }
 
 .flash-sq h2 {
-  margin-top: 12px !important;
+  padding-top: 4px;
   color: var(--ion-color-primary);
 }
 

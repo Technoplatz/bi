@@ -10,7 +10,7 @@ numexpr
 apscheduler
 Jinja2
 pyotp
-PyJWT
+authlib
 xlsxwriter
 partial
 croniter

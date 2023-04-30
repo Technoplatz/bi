@@ -41,6 +41,7 @@ import operator
 import smtplib
 import urllib
 import hashlib
+import ast
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -48,7 +49,9 @@ from email.mime.text import MIMEText
 from functools import partial
 from subprocess import call
 from random import randint
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
+import pytz
 from pymongo import MongoClient
 import pymongo
 import bson
@@ -58,9 +61,10 @@ import pandas as pd
 import numpy as np
 import bleach
 import pyotp
-import jwt
+from authlib.jose import jwt
+from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTokenError, InvalidTokenError
 import numexpr as ne
-from flask import Flask, request, send_from_directory, Response, make_response
+from flask import Flask, request, send_from_directory, make_response
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
@@ -130,7 +134,7 @@ class Schedular:
         docstring is in progress
         """
         try:
-            print("*** scheduled views started", datetime.now())
+            print("*** scheduled views started", Misc().get_now_f())
             collections_ = list(Mongo().db_["_collection"].aggregate([{
                 "$project": {
                     "col_id": 1,
@@ -269,41 +273,47 @@ class Misc:
                 print("*** notification error", resp_)
         return True
 
-    def exception_f(self, exc):
+    def exception_f(self, exc_):
         """
         docstring is in progress
         """
-        self.post_notification(exc)
-        return {"result": False, "msg": str(exc)}
+        res_ = str(exc_)
+        self.post_notification(res_)
+        return {"result": False, "msg": res_}
 
-    def api_error_f(self, exc):
+    def api_error_f(self, exc_):
         """
         docstring is in progress
         """
-        self.post_notification(exc)
-        return {"result": False, "msg": str(exc)}
+        res_ = str(exc_)
+        self.post_notification(res_)
+        return {"result": False, "msg": res_}
 
-    def app_exception_f(self, exc):
+    def app_exception_f(self, exc_):
         """
         docstring is in progress
         """
-        self.post_notification(exc)
-        return {"result": False, "msg": str(exc)}
+        res_ = str(exc_)
+        self.post_notification(res_)
+        return {"result": False, "msg": res_}
 
-    def auth_error_f(self, exc):
+    def auth_error_f(self, exc_):
         """
         docstring is in progress
         """
-        self.post_notification(exc)
-        return {"result": False, "msg": str(exc)}
+        res_ = str(exc_)
+        self.post_notification(res_)
+        return {"result": False, "msg": res_}
 
-    def mongo_error_f(self, exc):
+    def mongo_error_f(self, exc_):
         """
         docstring is in progress
         """
-        self.post_notification(exc)
-        notify_ = False
-        return {"result": False, "msg": str(exc), "notify": notify_, "count": 0}
+        splt_ = str(exc_).split(", full error: ")
+        splt0_ = splt_[0] if splt_ and len(splt_) > 0 else None
+        jerror_ = splt0_ if splt0_ else str(exc_)
+        self.post_notification(jerror_)
+        return {"result": False, "msg": jerror_, "notify": False, "count": 0}
 
     def log_f(self, obj):
         """
@@ -312,14 +322,14 @@ class Misc:
         try:
             doc_ = {
                 "log_type": obj["type"],
-                "log_date": datetime.now(),
+                "log_date": self.get_now_f(),
                 "log_user_id": obj["user"],
                 "log_ip": Misc().get_user_ip_f(),
                 "log_collection_id": obj["collection"] if "collection" in obj else None,
                 "log_operation": obj["op"] if "op" in obj else None,
                 "log_object_id": obj["object_id"] if "object_id" in obj else None,
                 "log_document": obj["document"] if "document" in obj else None,
-                "_created_at": datetime.now(),
+                "_created_at": self.get_now_f(),
                 "_created_by": obj["user"],
             }
 
@@ -336,7 +346,7 @@ class Misc:
         """
         docstring is in progress
         """
-        dt_ = datetime.now()
+        dt_ = self.get_now_f()
         mon_ = ("0" + str(dt_.month))[-2:]
         day_ = ("0" + str(dt_.day))[-2:]
         hou_ = ("0" + str(dt_.hour))[-2:]
@@ -349,6 +359,12 @@ class Misc:
         docstring is in progress
         """
         return int(datetime.today().timestamp())
+
+    def get_now_f(self):
+        """
+        docstring is in progress
+        """
+        return datetime.now(pytz.timezone(TZ_))
 
     def allowed_file(self, filename):
         """
@@ -586,7 +602,6 @@ class Crud:
         """
         return json.loads(open(f"/app/_schema/{schema}.json", "r", encoding="utf-8").read())
 
-
     def validate_iso8601_f(self, strv):
         """
         docstring is in progress
@@ -688,9 +703,9 @@ class Crud:
                             "col_title": col_title_,
                             "col_prefix": prefix_,
                             "col_structure": structure_,
-                            "_created_at": datetime.now(),
+                            "_created_at": Misc().get_now_f(),
                             "_created_by": email_,
-                            "_modified_at": datetime.now(),
+                            "_modified_at": Misc().get_now_f(),
                             "_modified_by": email_,
                             "_modified_count": 0,
                         }
@@ -1073,7 +1088,7 @@ class Crud:
             )
 
             # SETTING THE DEFAULTS
-            df_["_created_at"] = datetime.now()
+            df_["_created_at"] = Misc().get_now_f()
             df_["_created_by"] = email_
             df_["_modified_at"] = None
             df_["_modified_by"] = None
@@ -1195,7 +1210,7 @@ class Crud:
             if vie_attach_pivot_:
                 body_ += f"{pivotify_}"
 
-            footer_ = f"<br />Generated at {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+            footer_ = f"<br />Generated at {Misc().get_now_f().strftime('%d.%m.%Y %H:%M')}"
             html_ = f'<div style="font-size: 13px;"><h1>{vie_title_}</h1><p>{body_}</p><p>{footer_}</p></div>' if scope_ == "live" else f'<div style="font-size: 13px;"><p style="color: #c00; font-weight: bold;">THIS IS A TEST MESSAGE</p><p>{vie_title_}</p><p>{body_}</p><p>{footer_}</p></div>'
 
             email_sent_ = Email().sendEmail_f({
@@ -1216,7 +1231,7 @@ class Crud:
                 "ano_vie_title": vie_title_,
                 "ano_to": to_,
                 "_tags": _tags,
-                "_created_at": datetime.now(),
+                "_created_at": Misc().get_now_f(),
                 "_created_by": email_ if email_ else "cronjob"
             })
 
@@ -1252,9 +1267,9 @@ class Crud:
                 "bak_size": size_,
                 "bak_description": description_,
                 "bak_process": op_,
-                "_created_at": datetime.now(),
+                "_created_at": Misc().get_now_f(),
                 "_created_by": email_,
-                "_modified_at": datetime.now(),
+                "_modified_at": Misc().get_now_f(),
                 "_modified_by": email_,
             }
 
@@ -2363,7 +2378,7 @@ class Crud:
                 properties_[key_]["width"] = 100
 
             doc_["col_structure"]["properties"][key_] = properties_[key_]
-            doc_["_modified_at"] = datetime.now()
+            doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = (
                 user_["email"] if user_ and "email" in user_ else None
             )
@@ -2436,11 +2451,11 @@ class Crud:
             doc_ = {}
             if op_ == "request":
                 doc_["_reconfig_req"] = True
-                doc_["_reconfig_req_at"] = datetime.now()
+                doc_["_reconfig_req_at"] = Misc().get_now_f()
                 doc_["_reconfig_req_by"] = email_
             else:
                 doc_["_reconfig_req"] = False
-                doc_["_reconfig_set_at"] = datetime.now()
+                doc_["_reconfig_set_at"] = Misc().get_now_f()
                 doc_["_reconfig_set_by"] = email_
 
             Mongo().db_["_collection"].update_one(
@@ -2792,7 +2807,7 @@ class Crud:
                         else "descending"
                         if sort_ and prop_ in sort_ and sort_[prop_] < 0
                         else "unsorted",
-                        "_modified_at": datetime.now(),
+                        "_modified_at": Misc().get_now_f(),
                         "_modified_by": user_["email"]
                         if user_ and "email" in user_
                         else None,
@@ -2836,7 +2851,7 @@ class Crud:
                             "act_one_click": act_one_click_,
                             "act_filter": act_filter_,
                             "act_set": act_set_,
-                            "_modified_at": datetime.now(),
+                            "_modified_at": Misc().get_now_f(),
                             "_modified_by": user_["email"]
                             if user_ and "email" in user_
                             else None,
@@ -2919,7 +2934,7 @@ class Crud:
                 if item[:1] != "_" or item in Misc().get_except_underdashes():
                     doc_[item] = doc[item] if doc[item] != "" else None
 
-            doc_["_modified_at"] = datetime.now()
+            doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = (
                 user_["email"] if user_ and "email" in user_ else None
             )
@@ -2991,7 +3006,7 @@ class Crud:
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            doc_["_removed_at"] = datetime.now()
+            doc_["_removed_at"] = Misc().get_now_f()
             doc_["_removed_by"] = user_["email"] if user_ and "email" in user_ else None
 
             Mongo().db_[collection_].delete_one(match_)
@@ -3084,7 +3099,7 @@ class Crud:
             cursor = Mongo().db_[collection_].find({"_id": {"$in": ids_}})
             for index, doc in enumerate(cursor, start=1):
                 if op_ == "clone":
-                    doc["_created_at"] = doc["_modified_at"] = datetime.now()
+                    doc["_created_at"] = doc["_modified_at"] = Misc().get_now_f()
                     doc["_created_by"] = doc["_modified_by"] = (
                         user_["email"] if user_ and "email" in user_ else None
                     )
@@ -3108,7 +3123,7 @@ class Crud:
 
                 elif op_ == "delete":
                     Mongo().db_[collection_].delete_one({"_id": doc["_id"]})
-                    doc["_deleted_at"] = datetime.now()
+                    doc["_deleted_at"] = Misc().get_now_f()
                     doc["_deleted_by"] = (
                         user_["email"] if user_ and "email" in user_ else None
                     )
@@ -3215,7 +3230,7 @@ class Crud:
             if notification_:
                 if "notify" not in notification_:
                     raise AppException("no notify field found in notification")
-                notify_ = True if notification_["notify"] is True else False
+                notify_ = notification_["notify"] is True
                 subject_ = (
                     notification_["subject"]
                     if "subject" in notification_
@@ -3268,7 +3283,7 @@ class Crud:
                 }
             )
 
-            doc_["_modified_at"] = datetime.now()
+            doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = email_
 
             if ids_ and len(ids_) > 0:
@@ -3376,7 +3391,7 @@ class Crud:
 
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            doc_["_created_at"] = doc_["_modified_at"] = datetime.now()
+            doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
 
             doc_["_created_by"] = doc_["_modified_by"] = (
                 user_["email"] if user_ and "email" in user_ else None
@@ -3667,46 +3682,23 @@ class OTP:
         docstring is in progress
         """
         try:
-            # read auth
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
-                raise AuthError("account not found")
+                raise AuthError("account not found to reset otp")
 
             aut_otp_secret_ = pyotp.random_base32()
+            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
 
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
-                name=email_, issuer_name="Technoplatz-BI"
-            )
-
-            Mongo().db_["_auth"].update_one(
-                {"aut_id": email_},
-                {
-                    "$set": {
-                        "aut_otp_secret": aut_otp_secret_,
-                        "aut_otp_validated": False,
-                        "_modified_at": datetime.now(),
-                        "_modified_by": email_,
-                        "_otp_secret_modified_at": datetime.now(),
-                        "_otp_secret_modified_by": email_,
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-            )
-
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": "_auth",
-                    "op": "reset-otp",
-                    "user": email_,
-                    "document": {
-                        "_modified_at": datetime.now(),
-                        "_modified_by": email_,
-                    },
-                }
-            )
-            if not log_["result"]:
-                raise APIError(log_["msg"])
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {
+                "$set": {
+                    "aut_otp_secret": aut_otp_secret_,
+                    "aut_otp_validated": False,
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": email_,
+                    "_otp_secret_modified_at": Misc().get_now_f(),
+                    "_otp_secret_modified_by": email_,
+                }, "$inc": {"_modified_count": 1}
+            })
 
             return {"result": True, "qr": qr_}
 
@@ -3760,7 +3752,7 @@ class OTP:
                     {
                         "$set": {
                             "aut_otp_validated": validated_,
-                            "_otp_validated_at": datetime.now(),
+                            "_otp_validated_at": Misc().get_now_f(),
                             "_otp_validated_by": email_,
                             "_otp_validated_ip": Misc().get_user_ip_f(),
                         },
@@ -3774,7 +3766,7 @@ class OTP:
                         {
                             "$set": {
                                 "aut_otp_validated": validated_,
-                                "_otp_not_validated_at": datetime.now(),
+                                "_otp_not_validated_at": Misc().get_now_f(),
                                 "_otp_not_validated_by": email_,
                                 "_otp_not_validated_ip": Misc().get_user_ip_f(),
                             },
@@ -3792,7 +3784,7 @@ class OTP:
                         "otp": otp_,
                         "success": validated_,
                         "ip": Misc().get_user_ip_f(),
-                        "_modified_at": datetime.now(),
+                        "_modified_at": Misc().get_now_f(),
                         "_modified_by": email_,
                     },
                 }
@@ -3863,27 +3855,13 @@ class OTP:
 
             usr_id_ = user_["usr_id"]
             name_ = user_["usr_name"]
-
             tfac_ = randint(100001, 999999)
-            Mongo().db_["_auth"].update_one(
-                {"aut_id": usr_id_},
-                {
-                    "$set": {
-                        "aut_tfac": tfac_,
-                        "_tfac_modified_at": datetime.now(),
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-            )
-
-            email_sent_ = Email().sendEmail_f(
-                {
-                    "op": "tfa",
-                    "personalizations": {"to": [{"email": usr_id_, "name": name_}]},
-                    "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>",
-                }
-            )
-
+            Mongo().db_["_auth"].update_one({"aut_id": usr_id_}, {"$set": {"aut_tfac": tfac_, "_tfac_modified_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
+            email_sent_ = Email().sendEmail_f({
+                "op": "tfa",
+                "personalizations": {"to": [{"email": usr_id_, "name": name_}]},
+                "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>"
+            })
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
 
@@ -3962,7 +3940,7 @@ class Auth:
                     "$set": {
                         "aut_tfac": None,
                         "aut_tfac_ex": aut_tfac_,
-                        "_modified_at": datetime.now(),
+                        "_modified_at": Misc().get_now_f(),
                     },
                     "$inc": {"_modified_count": 1},
                 },
@@ -3987,7 +3965,7 @@ class Auth:
                         "otp_entered": tfac_,
                         "otp_expected": aut_tfac_,
                         "exception": str(exc),
-                        "_modified_at": datetime.now(),
+                        "_modified_at": Misc().get_now_f(),
                         "_modified_by": email_,
                     },
                 }
@@ -4006,12 +3984,12 @@ class Auth:
             if "email" not in input_ or input_["email"] is None:
                 raise APIError("E-mail is missing")
             if "name" not in input_ or input_["name"] is None:
-                raise APIError("Full name is missing")
+                raise APIError("full name is missing")
             pat = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
             if not re.search(pat, input_["email"]):
-                raise APIError("Invalid e-mail address")
+                raise APIError("invalid e-mail address")
             if "password" not in input_ or input_["password"] is None:
-                raise APIError("Invalid email or password")
+                raise APIError("invalid email or password")
 
             return {"result": True}
 
@@ -4048,23 +4026,9 @@ class Auth:
         docstring is in progress
         """
         try:
-            # gets the required parameters
             input_ = request.json
             email_ = input_["email"]
-
-            # sets None to auth token and TFAC code
-            Mongo().db_["_auth"].update_one(
-                {"aut_id": email_},
-                {
-                    "$set": {
-                        "aut_token": None,
-                        "aut_tfac": None,
-                        "_modified_at": datetime.now(),
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-            )
-
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_jwt_secret": None, "aut_jwt_token": None, "aut_tfac": None, "_signedout_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
@@ -4251,68 +4215,12 @@ class Auth:
                     "document": {
                         "ip": ip_,
                         "exception": str(exc),
-                        "_modified_at": datetime.now(),
+                        "_modified_at": Misc().get_now_f(),
                         "_modified_by": user_["usr_id"],
                     },
                 }
             )
             return Misc().auth_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def session_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            # gets the email and user token
-            user_ = input_["user"] if "user" in input_ else input_
-            email_ = user_["email"] if "email" in user_ else None
-            token_ = user_["token"] if "token" in user_ else None
-            jdate_curr_ = Misc().get_jdate_f()
-
-            if not email_ or not token_:
-                raise APIError("invalid session parameters")
-
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
-            if not auth_:
-                raise APIError(f"user auth not found {email_}")
-
-            token_db_ = auth_["aut_token"] if "aut_token" in auth_ else None
-
-            if not token_db_ or token_ != token_db_:
-                raise APIError(f"session closed for {email_}")
-
-            if "jdate" not in user_:
-                user_["jdate"] = jdate_curr_
-
-            jdate_exp_ = int(user_["jdate"]) + int(SECUR_MAX_AGE_)
-
-            if jdate_curr_ > jdate_exp_:
-                raise APIError("session expired")
-
-            return {"result": True, "user": user_}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            Mongo().db_["_auth"].update_one(
-                {"aut_id": email_},
-                {
-                    "$set": {
-                        "aut_token": None,
-                        "aut_tfac": None,
-                        "_modified_at": datetime.now(),
-                        "_modified_by": "restapi",
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-                upsert=False,
-            )
-
-            return Misc().api_error_f(exc)
 
         except Exception as exc:
             return Misc().exception_f(exc)
@@ -4341,7 +4249,7 @@ class Auth:
                     {
                         "$set": {
                             "aut_apikey": apikey_,
-                            "_apikey_modified_at": datetime.now(),
+                            "_apikey_modified_at": Misc().get_now_f(),
                             "_apikey_modified_by": email_,
                         },
                         "$inc": {"_apikey_modified_count": 1},
@@ -4356,7 +4264,7 @@ class Auth:
                         "user": email_,
                         "document": {
                             "aut_apikey": f"********{apikey_[-4:]}",
-                            "_modified_at": datetime.now(),
+                            "_modified_at": Misc().get_now_f(),
                             "_modified_by": email_,
                         },
                     }
@@ -4365,7 +4273,7 @@ class Auth:
                 if not log_["result"]:
                     raise APIError(log_["msg"])
 
-                response_ = {"apikey": apikey_, "_modified_at": datetime.now()}
+                response_ = {"apikey": apikey_, "_modified_at": Misc().get_now_f()}
 
             elif op_ == "apikeyget":
                 apikey_modified_at_ = (
@@ -4455,36 +4363,30 @@ class Auth:
             salt_ = hash_f_["salt"]
             key_ = hash_f_["key"]
 
-            Mongo().db_["_auth"].update_one(
-                {"aut_id": email_},
-                {
-                    "$set": {
-                        "aut_salt": salt_,
-                        "aut_key": key_,
-                        "aut_token": None,
-                        "aut_tfac": None,
-                        "aut_expires": 0,
-                        "_modified_at": datetime.now(),
-                        "_modified_by": email_,
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-                upsert=False,
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
+                "aut_salt": salt_,
+                "aut_key": key_,
+                "aut_tfac": None,
+                "aut_expires": 0,
+                "_modified_at": Misc().get_now_f(),
+                "_modified_by": email_,
+            },
+                "$inc": {"_modified_count": 1},
+            },
+                upsert=False
             )
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": "_auth",
-                    "op": "reset",
-                    "user": email_,
-                    "document": {
-                        "tfac": tfac_,
-                        "_modified_at": datetime.now(),
-                        "_modified_by": email_,
-                    },
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": "_auth",
+                "op": "reset",
+                "user": email_,
+                "document": {
+                    "tfac": tfac_,
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": email_,
                 }
-            )
+            })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
@@ -4511,10 +4413,7 @@ class Auth:
             email_ = input_["email"]
             password_ = input_["password"]
             tfac_ = input_["tfac"]
-
-            user_validate_ = self.user_validate_by_basic_auth_f(
-                {"userid": email_, "password": password_}, "tfac"
-            )
+            user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
             user_ = user_validate_["user"] if "user" in user_validate_ else None
@@ -4523,50 +4422,47 @@ class Auth:
             if not verify_2fa_f_["result"]:
                 raise AuthError(verify_2fa_f_["msg"])
 
+            usr_name_ = user_["usr_name"]
+            perm_ = Misc().permitted_user_f(user_)
+            payload_ = {
+                "iss": "Technoplatz",
+                "aud": "api",
+                "sub": "bi",
+                "exp": Misc().get_now_f() + timedelta(hours=int(API_SESSION_EXP_HOURS_)),
+                "iat": Misc().get_now_f(),
+                "id": email_,
+                "name": usr_name_,
+                "perm": perm_
+            }
+            header_ = {"alg": "HS256"}
+            secret_ = pyotp.random_base32()
+            jwt_ = jwt.encode(header_, payload_, secret_)
+            token_ = jwt_.decode()
+
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_jwt_secret": secret_, "aut_jwt_token": token_, "aut_tfac": None, "_modified_at": Misc().get_now_f(), "_jwt_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
+
+            user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_}
+            ip_ = Misc().get_user_ip_f()
+
             log_ = Misc().log_f({
                 "type": "Info",
                 "collection": "_auth",
                 "op": "signin",
                 "user": email_,
-                "document": {
-                        "_modified_at": datetime.now(),
-                        "_modified_by": email_,
-                },
-            }
-            )
-
+                "document": {"_signedin_at": Misc().get_now_f(), "ip": ip_, "perm": perm_}
+            })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            name_db_ = user_["usr_name"]
-            perm_ = Misc().permitted_user_f(user_)
-            apikey_ = user_["aut_apikey"]
-            jdate_ = Misc().get_jdate_f()
-            token_ = jwt.encode({"some": "payload"}, password_, algorithm="HS256")
-
-            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_token": token_, "aut_tfac": None, "_modified_at": datetime.now()}, "$inc": {"_modified_count": 1}})
-
-            user_ = {
-                "token": token_,
-                "name": name_db_,
-                "email": email_,
-                "perm": perm_,
-                "apikey": apikey_,
-                "jdate": jdate_,
-            }
-
-            ip_ = Misc().get_user_ip_f()
-
             email_sent_ = Email().sendEmail_f({
                 "op": "signin",
-                "personalizations": {"to": [{"email": email_, "name": name_db_}]},
-                "html": f"<p>Hi {name_db_},<br /><br />You have now signed-in from {ip_}.</p>",
-            }
-            )
+                "personalizations": {"to": [{"email": email_, "name": usr_name_}]},
+                "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",
+            })
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
 
-            return {"result": True, "user": user_}
+            return {"result": True, "user": user_payload_}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -4580,15 +4476,49 @@ class Auth:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def user_validate_by_basic_auth_f(self, input_, op_):
+    def jwt_validate_f(self, auth_, token_):
+        """
+        docstring is in progress
+        """
+        try:
+            jwt_secret_ = auth_["aut_jwt_secret"] if "aut_jwt_secret" in auth_ and auth_["aut_jwt_secret"] is not None else None
+            claims_options_ = {
+                "iss": {"essential": True, "value": "Technoplatz"},
+                "aud": {"essential": True, "value": "api"},
+                "sub": {"essential": True, "value": "bi"}
+            }
+            claims_ = jwt.decode(token_, jwt_secret_, claims_options=claims_options_)
+            claims_.validate()
+            usr_id_ = claims_["id"] if "id" in claims_ and claims_["id"] is not None else None
+            if not usr_id_:
+                raise AuthError("invalid token")
+            if usr_id_ != auth_["aut_id"]:
+                raise AuthError("invalid session")
+
+            return ({"result": True, "claims": claims_})
+
+        except AuthError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except ExpiredTokenError as exc_:
+            return ({"result": False, "msg": "token is expired", "exc": str(exc_)})
+
+        except MissingClaimError as exc_:
+            return ({"result": False, "msg": "claim is missing", "exc": str(exc_)})
+
+        except InvalidClaimError as exc_:
+            return ({"result": False, "msg": "claim is invalid", "exc": str(exc_)})
+
+        except InvalidTokenError as exc_:
+            return ({"result": False, "msg": "invalid token", "exc": str(exc_)})
+
+    def user_validate_by_basic_auth_f(self, input_):
         """
         docstring is in progress
         """
         try:
             user_id_ = bleach.clean(input_["userid"]) if "userid" in input_ else None
-            password_ = (
-                bleach.clean(input_["password"]) if "password" in input_ else None
-            )
+            password_ = bleach.clean(input_["password"]) if "password" in input_ else None
             token_ = bleach.clean(input_["token"]) if "token" in input_ else None
 
             if not user_id_:
@@ -4596,7 +4526,7 @@ class Auth:
 
             pat = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
             if not re.search(pat, user_id_):
-                raise APIError("invalid e-mail address")
+                raise APIError("invalid user id")
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
@@ -4604,31 +4534,23 @@ class Auth:
 
             if "aut_salt" not in auth_ or auth_["aut_salt"] is None:
                 raise AuthError("please set a password")
-
             if "aut_key" not in auth_ or auth_["aut_key"] is None:
-                raise AuthError("please set a new password")
+                raise AuthError("you need to set a new password")
 
             user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
             if not user_:
                 raise AuthError("user not found for validate")
-
-            user_["aut_apikey"] = (
-                auth_["aut_apikey"]
-                if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None
-                else None
-            )
-
-            salt_ = auth_["aut_salt"]
-            key_ = auth_["aut_key"]
-            token_db_ = auth_["aut_token"] if "aut_token" in auth_ else None
+            user_["aut_apikey"] = auth_["aut_apikey"] if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None else None
 
             if not password_:
                 if not token_:
                     raise AuthError("no credentials provided")
-                else:
-                    if token_db_ != token_:
-                        raise AuthError("session closed")
+                jwt_validate_f_ = self.jwt_validate_f(auth_, token_)
+                if not jwt_validate_f_["result"]:
+                    raise AuthError("session ended")
             else:
+                salt_ = auth_["aut_salt"]
+                key_ = auth_["aut_key"]
                 hash_f_ = self.password_hash_f(password_, salt_)
                 if not hash_f_["result"]:
                     raise APIError(hash_f_["msg"])
@@ -4646,13 +4568,6 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except AuthError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": "_auth",
-                "op": op_,
-                "user": user_id_,
-                "document": {"type": "auth", "exception": str(exc)}
-            })
             return Misc().auth_error_f(exc)
 
         except APIError as exc:
@@ -4703,9 +4618,7 @@ class Auth:
             email_ = input_["email"]
             password_ = input_["password"]
 
-            user_validate_ = self.user_validate_by_basic_auth_f(
-                {"userid": email_, "password": password_}, "signin"
-            )
+            user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
 
@@ -4767,19 +4680,18 @@ class Auth:
                     "aut_id": email_,
                     "aut_salt": salt_,
                     "aut_key": key_,
-                    "aut_token": None,
                     "aut_apikey": apikey_,
                     "aut_tfac": None,
                     "aut_expires": 0,
                     "aut_otp_secret": aut_otp_secret_,
                     "aut_otp_validated": False,
-                    "_qr_modified_at": datetime.now(),
+                    "_qr_modified_at": Misc().get_now_f(),
                     "_qr_modified_by": email_,
                     "_qr_modified_count": 0,
-                    "_created_at": datetime.now(),
+                    "_created_at": Misc().get_now_f(),
                     "_created_by": email_,
                     "_created_ip": Misc().get_user_ip_f(),
-                    "_modified_at": datetime.now(),
+                    "_modified_at": Misc().get_now_f(),
                     "_modified_by": email_,
                 }
             )
@@ -4816,7 +4728,7 @@ API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_H
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_KEY_ = os.environ.get("API_KEY")
-SECUR_MAX_AGE_ = os.environ.get("SECUR_MAX_AGE")
+API_SESSION_EXP_HOURS_ = os.environ.get("API_SESSION_EXP_HOURS")
 SAAS_ = os.environ.get("SAAS")
 PERMISSIVE_TAGS_ = str(os.environ.get("PERMISSIVE_TAGS"))
 MONGO_RS_ = os.environ.get("MONGO_RS")
@@ -4881,7 +4793,7 @@ def storage_f():
         email_ = form_["email"] if "email" in form_ else None
         token_ = form_["token"] if "token" in form_ else None
 
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "import")
+        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
         user_ = validate_["user"]
@@ -4925,18 +4837,19 @@ def crud_f():
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError({"result": False, "msg": "user info not found"})
-
         email_ = user_["email"] if "email" in user_ else None
+
         token_ = user_["token"] if "token" in user_ else None
+        if not token_:
+            raise APIError({"result": False, "msg": "invalid token"})
 
-        collection_ = input_["collection"] if "collection" in input_ else None
-        match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
-
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_}, "op")
+        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
         if not validate_["result"]:
             raise APIError(validate_)
-        input_["userindb"] = validate_["user"]
 
+        input_["userindb"] = validate_["user"]
+        collection_ = input_["collection"] if "collection" in input_ else None
+        match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
         allowmatch_ = []
         permission_f_ = Auth().permission_f({
             "user": validate_["user"],
@@ -4945,7 +4858,7 @@ def crud_f():
             "op": op_,
         })
         if not permission_f_["result"]:
-            raise AuthError(permission_f_)
+            raise AuthError(permission_f_["msg"])
 
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
@@ -5014,25 +4927,29 @@ def crud_f():
         if not res_["result"]:
             raise APIError(res_)
 
-        status_code_ = 200
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 200
+        response_.mimetype = "application/json"
+        return response_
 
     except APIError as exc_:
-        res_ = exc_
-        status_code_ = 400
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 400
+        response_.mimetype = "application/json"
+        return response_
 
     except AuthError as exc_:
-        res_ = exc_
-        status_code_ = 401
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 401
+        response_.mimetype = "application/json"
+        return response_
 
     except Exception as exc_:
-        res_ = exc_
-        status_code_ = 500
-
-    finally:
-        status_code_ = 200 if status_code_ is None else status_code_
+        res_ = ast.literal_eval(str(exc_))
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.headers["Content-Type"] = "application/json"
-        response_.status_code = status_code_
+        response_.status_code = 500
         response_.mimetype = "application/json"
         return response_
 
@@ -5043,39 +4960,39 @@ def otp_f():
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
-        if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "web validation error"
-            )
-
         input_ = request.json
         if not input_:
-            raise APIError("input missing")
+            res_ = {"result": False, "msg": "input is missing"}
+            raise APIError(res_)
 
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
-            raise APIError("credentials are missing")
-        email_ = user_["email"] if "email" in user_ else None
-        token_ = user_["token"] if "token" in user_ else None
+            res_ = {"result": False, "msg": "user is missing"}
+            raise APIError(res_)
 
         request_ = input_["request"] if "request" in input_ else None
         if not request_:
-            raise APIError("request is nissing")
-
-        validate_ = Auth().user_validate_by_basic_auth_f(
-            {"userid": email_, "token": token_}, "otp"
-        )
-        if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "otp validation error"
-            )
+            res_ = {"result": False, "msg": "no request provided"}
+            raise APIError(res_)
 
         if "op" not in request_:
-            raise APIError("no operation found")
+            res_ = {"result": False, "msg": "no operation found"}
+            raise APIError(res_)
+
+        validate_ = Security().validate_request_f()
+        if not validate_["result"]:
+            res_ = {"result": False, "msg": validate_["msg"] if "msg" in validate_ else "web validation error"}
+            raise APIError(res_)
+
+        email_ = user_["email"] if "email" in user_ else None
+        token_ = user_["token"] if "token" in user_ else None
+
+        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
+        if not validate_["result"]:
+            res_ = {"result": False, "msg": validate_["msg"] if "msg" in validate_ else "otp validation error"}
+            raise APIError(res_)
 
         op_ = request_["op"]
-
         if op_ == "reset":
             res_ = OTP().reset_otp_f(email_)
         elif op_ == "show":
@@ -5088,20 +5005,26 @@ def otp_f():
             raise APIError(f"operation not supported {op_}")
 
         if not res_["result"]:
-            raise APIError(res_["msg"])
+            raise APIError(res_)
 
-        status_ = res_["status"] if "status" in res_ else 200
-        return (
-            json.dumps(res_, default=json_util.default),
-            status_,
-            Security().header_simple_f(),
-        )
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 200
+        response_.mimetype = "application/json"
+        return response_
 
-    except APIError as exc:
-        return {"msg": str(exc), "status": 401}
+    except APIError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 401
+        response_.mimetype = "application/json"
+        return response_
 
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
+    except Exception as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 500
+        response_.mimetype = "application/json"
+        return response_
 
 
 @app.route("/auth", methods=["POST"], endpoint="auth")
@@ -5122,6 +5045,7 @@ def auth_f():
             raise APIError({"result": False, "msg": "no operation found"})
 
         op_ = input_["op"]
+        user_, token_ = None, None
 
         if op_ == "signup":
             res_ = Auth().signup_f()
@@ -5139,36 +5063,42 @@ def auth_f():
             res_ = Auth().reset_f()
         elif op_ in ["apikeygen", "apikeyget"]:
             res_ = Auth().account_f(input_)
-        elif op_ == "session":
-            res_ = Auth().session_f(input_)
         else:
             raise APIError({"result": False, "msg": f"operation not supported {op_}"})
 
         if not res_["result"]:
-            raise APIError(res_)
+            raise AuthError(res_)
 
         user_ = res_["user"] if res_ and "user" in res_ else None
+        token_ = user_["token"] if op_ == "tfac" and "token" in user_ and user_["token"] is not None else None
         saas_ = res_["saas"] if res_ and "saas" in res_ else None
-        status_code_ = 200
-
         res_ = {"result": True, "user": user_, "saas": saas_}
 
-    except APIError as exc_:
-        res_ = exc_
-        status_code_ = 401
-
-    except Exception as exc_:
-        res_ = exc_
-        status_code_ = 500
-
-    finally:
-        status_code_ = 200 if status_code_ is None else status_code_
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.headers["Content-Type"] = "application/json"
-        token_ = user_["token"] if op_ == "tfac" and "token" in user_ and user_["token"] is not None else None
         if token_ is not None:
             response_.headers["Set-Cookie"] = f"technoplatz-bi-session={token_}; path=/; samesite=strict; httponly"
-        response_.status_code = status_code_
+        response_.status_code = 200
+        response_.mimetype = "application/json"
+        return response_
+
+    except APIError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 400
+        response_.mimetype = "application/json"
+        return response_
+
+    except AuthError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 401
+        response_.mimetype = "application/json"
+        return response_
+
+    except Exception as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 500
         response_.mimetype = "application/json"
         return response_
 
@@ -5308,7 +5238,7 @@ def post_f():
                 if not decode_crud_doc_f_["result"]:
                     raise APIError(decode_crud_doc_f_["msg"])
                 doc__ = decode_crud_doc_f_["doc"]
-                doc__["_modified_at"] = datetime.now()
+                doc__["_modified_at"] = Misc().get_now_f()
                 doc__["_modified_by"] = "API"
                 if operation_ == "upsert":
                     session_db_[collection_data_].update_many(
@@ -5407,13 +5337,9 @@ def get_dump_f():
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
 
-        validate_ = Auth().user_validate_by_basic_auth_f(
-            {"userid": email_, "token": token_}, "backup"
-        )
+        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
         if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "request not validated"
-            )
+            raise APIError(validate_["msg"] if "msg" in validate_ else "request not validated")
 
         id_ = bleach.clean(input_["id"])
         if not id_:

@@ -52,7 +52,7 @@ https://www.gnu.org/licenses.
             {{ item.self.description }}<br />
             {{ item.collection }} | {{ item.self.data_values[0].value }} {{ 'of' | translate }} {{
             item.self.data_values[0].key }}
-            <h1>{{ item.stats[item.self.data_values[0].value] }}</h1>
+            <h2>{{ item.stats[item.self.data_values[0].value] }}</h2>
             <div *ngIf="item.self && item.self.scheduled && item.self.scheduled_cron" class="flash-cron"><ion-icon name="alarm-outline" size="large"></ion-icon><br />{{ item.self.scheduled_cron }} </div>
           </div>
         </div>

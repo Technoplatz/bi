@@ -44,7 +44,6 @@ import { HttpClient } from '@angular/common/http';
 
 export class SupportPage implements OnInit {
   public header: string = "Sorry!";
-  public user: any = null;
   public support_md: any = "";
 
   constructor(
@@ -56,13 +55,10 @@ export class SupportPage implements OnInit {
   ngOnDestroy() { }
 
   ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA;
-      this.http.get(environment.support_url, { responseType: "text" }).subscribe((md: any) => {
-        this.support_md = md;
-      }, (error: any) => {
-        console.error(error);
-      });
+    this.http.get(environment.support_url, { responseType: "text" }).subscribe((md: any) => {
+      this.support_md = md;
+    }, (error: any) => {
+      console.error(error);
     });
   }
 
