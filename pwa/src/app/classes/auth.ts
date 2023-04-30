@@ -36,7 +36,6 @@ import { BehaviorSubject } from "rxjs";
 import { Crud } from "./crud";
 import { Miscellaneous } from "./misc";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { environment } from "../../environments/environment";
 
 @Injectable({
   providedIn: "root"
@@ -45,10 +44,6 @@ import { environment } from "../../environments/environment";
 export class Auth {
   public user = new BehaviorSubject<any>(null);
   private apiHost: string = "";
-  private authHeaders: any = {
-    "Content-Type": "application/json",
-    "X-Api-Key": environment.apiKey
-  }
 
   constructor(
     private storage: Storage,
@@ -64,27 +59,20 @@ export class Auth {
   Signin(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "signin";
-      this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders(this.authHeaders)
-      }).subscribe((res: any) => {
+      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
+        console.log("*** res", res);
         if (res && res.result) {
           resolve(true);
         } else {
           this.storage.remove("LSUSERMETA").then(() => {
-            this.storage.remove("LSTOKEN").then(() => {
-              console.error("*** auth negative", res);
-              reject(res.msg);
-            });
-
+            console.error("*** auth negative", res);
+            reject(res.msg);
           });
         }
-      }, (res: any) => {
+      }).catch((res: any) => {
         this.storage.remove("LSUSERMETA").then(() => {
-          this.storage.remove("LSTOKEN").then(() => {
-            console.error("*** auth error", res);
-            reject(res.error && res.error.msg ? res.error.msg : res);
-          });
-
+          console.error("*** auth error", res);
+          reject(res);
         });
       });
     });
@@ -94,7 +82,9 @@ export class Auth {
     return new Promise((resolve, reject) => {
       creds.op = "forgot";
       this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders(this.authHeaders)
+        headers: new HttpHeaders({
+          "Content-Type": "application/json",
+        })
       }).subscribe((res: any) => {
         if (res && res.result) {
           resolve(true);
@@ -110,36 +100,32 @@ export class Auth {
   TFAC(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "tfac";
-      this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders(this.authHeaders)
-      }).subscribe((res: any) => {
+      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
+        console.log("*** res", res);
         if (res && res.result) {
           this.user.next(res.user);
           this.storage.set("LSUSERMETA", res.user).then(() => {
-            this.storage.set("LSTOKEN", res.jwt).then(() => {
-              this.misc.navi.next("/dashboard");
-              this.crud.getAll().then(() => {
-                resolve(true);
-              }).catch((error: any) => {
-                console.error(error);
-                this.misc.doMessage(error, "error");
-              });
+            this.misc.navi.next("/dashboard");
+            this.crud.getAll().then(() => {
+              resolve(true);
+            }).catch((error: any) => {
+              console.error(error);
+              this.misc.doMessage(error, "error");
+              reject(error);
             });
           });
         } else {
           this.storage.remove("LSUSERMETA").then(() => {
-            this.storage.remove("LSTOKEN").then(() => {
-              reject(res.msg);
-            });
-
+            console.error("*** auth negative", res);
+            reject(res.msg);
           });
         }
-      }, (res: any) => {
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
         this.storage.remove("LSUSERMETA").then(() => {
-          this.storage.remove("LSTOKEN").then(() => {
-            reject(res.error && res.error.msg ? res.error.msg : res);
-          });
-
+          console.error("*** auth error", res);
+          this.misc.navi.next("/");
+          reject(res);
         });
       });
     });
@@ -149,7 +135,9 @@ export class Auth {
     return new Promise((resolve, reject) => {
       creds.op = "reset";
       this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders(this.authHeaders)
+        headers: new HttpHeaders({
+          "Content-Type": "application/json",
+        })
       }).subscribe((res: any) => {
         if (res && res.result) {
           this.misc.navi.next("/");
@@ -170,7 +158,9 @@ export class Auth {
           op: op,
           user: LSUSERMETA
         }), {
-          headers: new HttpHeaders(this.authHeaders)
+          headers: new HttpHeaders({
+            "Content-Type": "application/json",
+          })
         }).subscribe((res: any) => {
           if (res && res.result) {
             resolve(res);
@@ -191,7 +181,9 @@ export class Auth {
           request: obj,
           user: LSUSERMETA
         }), {
-          headers: new HttpHeaders(this.authHeaders)
+          headers: new HttpHeaders({
+            "Content-Type": "application/json",
+          })
         }).subscribe((res: any) => {
           if (res && res.result) {
             resolve(res);
@@ -215,7 +207,9 @@ export class Auth {
               email: email,
               op: "signout"
             }), {
-              headers: new HttpHeaders(this.authHeaders)
+              headers: new HttpHeaders({
+                "Content-Type": "application/json",
+              })
             }).subscribe((res: any) => {
               if (res && res.result) {
                 this.user.next(null);
@@ -253,7 +247,9 @@ export class Auth {
         this.storage.remove("LSTOKEN").then(() => {
           creds.op = "signup";
           this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-            headers: new HttpHeaders(this.authHeaders)
+            headers: new HttpHeaders({
+              "Content-Type": "application/json",
+            })
           }).subscribe((res: any) => {
             if (res && res.result) {
               this.user.next(null);
@@ -274,7 +270,9 @@ export class Auth {
   forgotPassword(creds: any) {
     return new Promise((resolve, reject) => {
       this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders(this.authHeaders)
+        headers: new HttpHeaders({
+          "Content-Type": "application/json",
+        })
       }).subscribe((res: any) => {
         if (res) {
           if (res.successful) {

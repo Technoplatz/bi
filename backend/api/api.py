@@ -50,7 +50,6 @@ from functools import partial
 from subprocess import call
 from random import randint
 from datetime import datetime, timedelta
-import time
 import pytz
 from pymongo import MongoClient
 import pymongo
@@ -646,7 +645,7 @@ class Crud:
             user_ = input_["user"] if "user" in input_ else None
             if not user_:
                 raise APIError("user not provided")
-            email_ = user_["email"]
+            email_ = user_["usr_id"]
 
             userindb_ = input_["userindb"] if "userindb" in input_ else None
             if not userindb_:
@@ -689,28 +688,22 @@ class Crud:
 
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
-                    fopen_ = open(path_, "r", encoding="utf-8")
-                    jtxt_ = fopen_.read()
-                    jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
-                    structure_ = json.loads(jtxt_)
+                    with open(path_, "r", encoding="utf-8") as fopen_:
+                        jtxt_ = fopen_.read()
+                        jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
+                        structure_ = json.loads(jtxt_)
 
-                find_one_ = (
-                    Mongo()
-                    .db_["_collection"]
-                    .insert_one(
-                        {
-                            "col_id": col_id_,
-                            "col_title": col_title_,
-                            "col_prefix": prefix_,
-                            "col_structure": structure_,
-                            "_created_at": Misc().get_now_f(),
-                            "_created_by": email_,
-                            "_modified_at": Misc().get_now_f(),
-                            "_modified_by": email_,
-                            "_modified_count": 0,
-                        }
-                    )
-                )
+                Mongo().db_["_collection"].insert_one({
+                    "col_id": col_id_,
+                    "col_title": col_title_,
+                    "col_prefix": prefix_,
+                    "col_structure": structure_,
+                    "_created_at": Misc().get_now_f(),
+                    "_created_by": email_,
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": email_,
+                    "_modified_count": 0,
+                })
 
                 schemavalidate_ = self.crudschema_validate_f(
                     {"collection": collection__, "structure": structure_}
@@ -3630,32 +3623,16 @@ class Security:
         """
         docstring is in progress
         """
-        self.HEADERS = request.headers
-        self.URL = request.url
-        self.QSTRING = request.query_string.decode()
-        self.XAPIKEY = (
-            self.HEADERS["X-Api-Key"] if "X-Api-Key" in self.HEADERS else None
-        )
-        self.ORIGIN = (
-            self.HEADERS["Origin"]
-            .replace("https://", "")
-            .replace("http://", "")
-            .replace("/", "")
-            .split(":")[0]
-            if "Origin" in self.HEADERS
-            else None
-        )
+        self.headers_ = request.headers
+        self.origin = self.headers_["Origin"].replace("https://", "").replace("http://", "").replace("/", "").split(":")[0] if "Origin" in self.headers_ else None
 
     def validate_request_f(self):
         """
         docstring is in progress
         """
         try:
-            if self.ORIGIN != DOMAIN_:
-                raise APIError(f"invalid request from {self.ORIGIN}")
-
-            if API_KEY_ != self.XAPIKEY:
-                raise APIError("invalid api request")
+            if self.origin != DOMAIN_:
+                raise APIError(f"invalid request from {self.origin}")
 
             return {"result": True}
 
@@ -4232,7 +4209,6 @@ class Auth:
         try:
             user_ = input_["user"]
             op_ = input_["op"]
-
             email_ = user_["email"]
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
@@ -4248,11 +4224,11 @@ class Auth:
                     {"aut_id": email_},
                     {
                         "$set": {
-                            "aut_apikey": apikey_,
-                            "_apikey_modified_at": Misc().get_now_f(),
-                            "_apikey_modified_by": email_,
+                            "aut_api_key": apikey_,
+                            "_api_key_modified_at": Misc().get_now_f(),
+                            "_api_key_modified_by": email_,
                         },
-                        "$inc": {"_apikey_modified_count": 1},
+                        "$inc": {"_api_key_modified_count": 1},
                     },
                     upsert=False,
                 )
@@ -4263,7 +4239,7 @@ class Auth:
                         "op": op_,
                         "user": email_,
                         "document": {
-                            "aut_apikey": f"********{apikey_[-4:]}",
+                            "aut_api_key": f"********{apikey_[-4:]}",
                             "_modified_at": Misc().get_now_f(),
                             "_modified_by": email_,
                         },
@@ -4277,11 +4253,11 @@ class Auth:
 
             elif op_ == "apikeyget":
                 apikey_modified_at_ = (
-                    auth_["_apikey_modified_at"]
-                    if "_apikey_modified_at" in auth_
+                    auth_["_api_key_modified_at"]
+                    if "_api_key_modified_at" in auth_
                     else None
                 )
-                apikey_ = auth_["aut_apikey"] if "aut_apikey" in auth_ else None
+                apikey_ = auth_["aut_api_key"] if "aut_api_key" in auth_ else None
                 response_ = {
                     "apikey": apikey_,
                     "apikey_modified_at": apikey_modified_at_,
@@ -4439,7 +4415,8 @@ class Auth:
             jwt_ = jwt.encode(header_, payload_, secret_)
             token_ = jwt_.decode()
 
-            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_jwt_secret": secret_, "aut_jwt_token": token_, "aut_tfac": None, "_modified_at": Misc().get_now_f(), "_jwt_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_jwt_secret": secret_, "aut_jwt_token": token_,
+                                                                          "aut_tfac": None, "_modified_at": Misc().get_now_f(), "_jwt_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
 
             user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_}
             ip_ = Misc().get_user_ip_f()
@@ -4476,11 +4453,38 @@ class Auth:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def jwt_validate_f(self, auth_, token_):
+    def jwt_validate_f(self):
         """
         docstring is in progress
         """
         try:
+            print("*** 000")
+            authorization_ = request.headers.get("Authorization", None)
+            if not authorization_:
+                raise AuthError("no authorization 403")
+
+            authb_ = "Bearer "
+            ix_ = authorization_.find(authb_)
+            if ix_ != 0:
+                raise AuthError("no token provided 403")
+
+            token_ = authorization_.replace(authb_, "")
+            if not token_:
+                raise AuthError("no token provided 403")
+
+            print("*** 222", token_)
+
+            x_api_key_ = request.headers.get("X-Api-Key", None)
+            if not x_api_key_:
+                raise AuthError("no api key provided 403")
+
+            print("*** 333", x_api_key_)
+
+            auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": x_api_key_})
+            if not auth_:
+                raise AuthError("account not found")
+            aut_id_ = auth_["aut_id"]
+
             jwt_secret_ = auth_["aut_jwt_secret"] if "aut_jwt_secret" in auth_ and auth_["aut_jwt_secret"] is not None else None
             claims_options_ = {
                 "iss": {"essential": True, "value": "Technoplatz"},
@@ -4491,14 +4495,20 @@ class Auth:
             claims_.validate()
             usr_id_ = claims_["id"] if "id" in claims_ and claims_["id"] is not None else None
             if not usr_id_:
-                raise AuthError("invalid token")
-            if usr_id_ != auth_["aut_id"]:
-                raise AuthError("invalid session")
+                raise AuthError("invalid user token")
+            if usr_id_ != aut_id_:
+                raise AuthError("invalid user validation")
 
-            return ({"result": True, "claims": claims_})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": aut_id_})
+            if not user_:
+                raise AuthError("user not found")
+
+            user_["email"] = user_["usr_id"]
+
+            return ({"result": True, "user": user_, "auth": auth_})
 
         except AuthError as exc_:
-            return ({"result": False, "msg": str(exc_)})
+            return Misc().auth_error_f(exc_)
 
         except ExpiredTokenError as exc_:
             return ({"result": False, "msg": "token is expired", "exc": str(exc_)})
@@ -4519,7 +4529,6 @@ class Auth:
         try:
             user_id_ = bleach.clean(input_["userid"]) if "userid" in input_ else None
             password_ = bleach.clean(input_["password"]) if "password" in input_ else None
-            token_ = bleach.clean(input_["token"]) if "token" in input_ else None
 
             if not user_id_:
                 raise APIError("email must be provided")
@@ -4540,14 +4549,10 @@ class Auth:
             user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
             if not user_:
                 raise AuthError("user not found for validate")
-            user_["aut_apikey"] = auth_["aut_apikey"] if "aut_apikey" in auth_ and auth_["aut_apikey"] is not None else None
+            user_["aut_api_key"] = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
 
             if not password_:
-                if not token_:
-                    raise AuthError("no credentials provided")
-                jwt_validate_f_ = self.jwt_validate_f(auth_, token_)
-                if not jwt_validate_f_["result"]:
-                    raise AuthError("session ended")
+                raise AuthError("no credentials provided")
             else:
                 salt_ = auth_["aut_salt"]
                 key_ = auth_["aut_key"]
@@ -4576,7 +4581,7 @@ class Auth:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def user_validate_by_apikey_f(self, input_):
+    def user_validate_by_api_key_f(self, input_):
         """
         docstring is in progress
         """
@@ -4585,7 +4590,7 @@ class Auth:
             if not apikey_ or apikey_ is None:
                 raise APIError("api key must be provided")
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_apikey": apikey_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": apikey_})
             if not auth_:
                 raise APIError("not authenticated")
             user_id_ = auth_["aut_id"]
@@ -4680,7 +4685,7 @@ class Auth:
                     "aut_id": email_,
                     "aut_salt": salt_,
                     "aut_key": key_,
-                    "aut_apikey": apikey_,
+                    "aut_api_key": apikey_,
                     "aut_tfac": None,
                     "aut_expires": 0,
                     "aut_otp_secret": aut_otp_secret_,
@@ -4727,7 +4732,6 @@ API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
-API_KEY_ = os.environ.get("API_KEY")
 API_SESSION_EXP_HOURS_ = os.environ.get("API_SESSION_EXP_HOURS")
 SAAS_ = os.environ.get("SAAS")
 PERMISSIVE_TAGS_ = str(os.environ.get("PERMISSIVE_TAGS"))
@@ -4824,46 +4828,54 @@ def crud_f():
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
-        if not validate_["result"]:
-            raise APIError(validate_)
-
         input_ = request.json
-
         if "op" not in input_:
             raise APIError({"result": False, "msg": "no operation found"})
         op_ = input_["op"]
 
-        user_ = input_["user"] if "user" in input_ else None
+        validate_request_f_ = Security().validate_request_f()
+        if not validate_request_f_["result"]:
+            raise APIError(validate_request_f_)
+
+        jwt_validate_f_ = Auth().jwt_validate_f()
+        if not jwt_validate_f_["result"]:
+            raise AuthError({"result": False, "msg": "session ended"})
+
+        print(">>> jwt_validate_f_", jwt_validate_f_)
+
+        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise APIError({"result": False, "msg": "user info not found"})
-        email_ = user_["email"] if "email" in user_ else None
+            raise APIError({"result": False, "msg": "user data not found"})
 
-        token_ = user_["token"] if "token" in user_ else None
-        if not token_:
-            raise APIError({"result": False, "msg": "invalid token"})
+        print(">>> user_", user_)
+        print(">>> input_", input_)
 
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
-        if not validate_["result"]:
-            raise APIError(validate_)
+        input_["user"] = user_
+        input_["userindb"] = user_
+        email_ = user_["usr_id"] if "usr_id" in user_ else None
 
-        input_["userindb"] = validate_["user"]
+        print(">>> email_", email_)
+
         collection_ = input_["collection"] if "collection" in input_ else None
         match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
         allowmatch_ = []
         permission_f_ = Auth().permission_f({
-            "user": validate_["user"],
-            "auth": validate_["auth"],
+            "user": jwt_validate_f_["user"],
+            "auth": jwt_validate_f_["auth"],
             "collection": collection_,
             "op": op_,
         })
         if not permission_f_["result"]:
-            raise AuthError(permission_f_["msg"])
+            raise AuthError(permission_f_)
+
+        print(">>> permission_f_", permission_f_)
 
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ += allowmatch_
         input_["match"] = match_
+
+        print(">>> allowmatch_", allowmatch_)
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
@@ -4877,11 +4889,15 @@ def crud_f():
             if not col_check_["result"]:
                 raise APIError(col_check_)
 
+        print(">>> op_", op_)
+
         if op_ in ["announce"]:
             tfac_ = input_["tfac"]
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_)
+
+        print(">>> op2_", op_)
 
         if op_ == "read":
             res_ = Crud().read_f(input_)
@@ -5118,12 +5134,8 @@ def post_f():
         if not API_OUTPUT_ROWS_LIMIT_:
             raise APIError("no api rows limit defined")
 
-        rh_apikey_ = (
-            request.headers.get("x-api-key", None)
-            if "x-api-key" in request.headers and request.headers["x-api-key"] != ""
-            else None
-        )
-        if not rh_apikey_:
+        rh_api_key_ = request.headers.get("x-api-key", None) if "x-api-key" in request.headers and request.headers["x-api-key"] != "" else None
+        if not rh_api_key_:
             raise AuthError("no api key provided")
 
         rh_authorization_ = request.headers.get("Authorization", None) if "Authorization" in request.headers and request.headers["Authorization"] != "" else None
@@ -5145,7 +5157,7 @@ def post_f():
         if not operation_ or operation_ not in ["read", "insert", "update", "upsert", "delete"]:
             raise APIError("invalid operation")
 
-        user_validate_ = Auth().user_validate_by_apikey_f({"apikey": rh_apikey_})
+        user_validate_ = Auth().user_validate_by_api_key_f({"apikey": rh_api_key_})
         if not user_validate_["result"]:
             raise AuthError(user_validate_["msg"])
 
@@ -5324,19 +5336,15 @@ def get_dump_f():
     try:
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "validation error"
-            )
+            raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
         input_ = request.json
-
         user_ = input_["user"] if "user" in input_ else None
         if not user_:
             raise APIError("invalid credentials")
 
         email_ = user_["email"] if "email" in user_ else None
         token_ = user_["token"] if "token" in user_ else None
-
         validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "request not validated")
@@ -5348,11 +5356,7 @@ def get_dump_f():
         file_ = f"{id_}.gz"
         directory_ = "/dump"
 
-        return (
-            send_from_directory(directory=directory_, path=file_, as_attachment=True),
-            200,
-            Security().header_simple_f(),
-        )
+        return send_from_directory(directory=directory_, path=file_, as_attachment=True), 200, Security().header_simple_f()
 
     except AuthError as exc:
         return {"msg": str(exc), "status": 401}
@@ -5381,9 +5385,9 @@ def get_data_f(id_):
         apikey_ = (
             request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
         )
-        user_validate_ = Auth().user_validate_by_apikey_f({"apikey": apikey_})
+        user_validate_ = Auth().user_validate_by_api_key_f({"apikey": apikey_})
         if not user_validate_["result"]:
-            user_validate_ = Auth().user_validate_by_apikey_f({"apikey": arg_})
+            user_validate_ = Auth().user_validate_by_api_key_f({"apikey": arg_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
         user_ = user_validate_["user"] if "user" in user_validate_ else None

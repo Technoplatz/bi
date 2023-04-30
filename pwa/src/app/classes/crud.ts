@@ -36,7 +36,6 @@ import { Subject, BehaviorSubject } from "rxjs";
 import { Validators, FormControl } from "@angular/forms";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Miscellaneous } from "./misc";
-import { environment } from "../../environments/environment";
 
 @Injectable({
   providedIn: "root"
@@ -58,8 +57,7 @@ export class Crud {
   public saas = new BehaviorSubject(null);
   public announcements = new BehaviorSubject<any>([]);
   private crudHeaders: any = {
-    "Content-Type": "application/json",
-    "X-Api-Key": environment.apiKey
+    "Content-Type": "application/json"
   }
 
   constructor(

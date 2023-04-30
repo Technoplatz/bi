@@ -40,7 +40,6 @@ import { ClipboardPluginWeb } from "@capacitor/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { CrudPage } from "../pages/crud/crud.page";
 import { SignPage } from "../pages/sign/sign.page";
-import { Auth } from "./auth";
 
 @Injectable({
   providedIn: "root"
@@ -61,8 +60,7 @@ export class Miscellaneous {
     private modal: ModalController,
     private toast: ToastController,
     private cb: ClipboardPluginWeb,
-    private http: HttpClient,
-    private auth: Auth
+    private http: HttpClient
   ) {
     this.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
@@ -80,15 +78,16 @@ export class Miscellaneous {
   apiCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        posted.user = LSUSERMETA;
-        posted.email = LSUSERMETA.email;
         this.getAPIHost().then((apiHost) => {
+          const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
           this.http.post<any>(apiHost + "/" + url, posted, {
             headers: new HttpHeaders({
               "Content-Type": "application/json",
-              "X-Api-Key": environment.apiKey
+              "Authorization": "Bearer " + token_,
+              "X-Api-Key": "89507f49562f2428b72757c9dbe3fefc"
             })
           }).subscribe((res: any) => {
+            console.log("*** res", res);
             if (res && res.result) {
               resolve(res);
             } else {
@@ -96,14 +95,14 @@ export class Miscellaneous {
               reject(res && res.msg ? res.msg : res);
             }
           }, (res: any) => {
+            console.error("*** api negative", res);
             if (res.error && res.error.msg) {
-              if (res.error.msg === "session ended") {
-                this.auth.Signout().then(() => { }).catch((error: any) => {
-                  console.error(error);
+              if(res.error.msg === "session ended") {
+                this.storage.remove("LSUSERMETA").then(() => {
+                  this.navi.next("/");
                 });
-              } else {
-                reject(res.error.msg);
               }
+              reject(res.error.msg);
             } else {
               reject(res);
             }
@@ -163,7 +162,8 @@ export class Miscellaneous {
         this.getAPIHost().then((apiHost) => {
           this.http.post<any>(apiHost + "/" + url, posted, {
             headers: new HttpHeaders({
-              "X-Api-Key": environment.apiKey
+              "Authorization": "Bearer " + LSUSERMETA.token,
+              "X-Api-Key": "89507f49562f2428b72757c9dbe3fefc"
             })
           }).subscribe((res: any) => {
             if (res && res.result) {

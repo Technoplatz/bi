@@ -435,14 +435,14 @@ export class SignPage implements OnInit {
       email: this.email,
       password: this.signinForm.get("password")?.value,
       tfac: this.TFACForm.get("tfac")?.value
-    }).then(() => {
-      this.doDismissModal();
-      this.isInProgress = false;
-    }).catch((error: any) => {
-      this.isInProgress = false;
-      console.error("error tfac", error);
+    }).then(() => { }).catch((error: any) => {
       this.TFACForm.controls["tfac"].setValue(null);
       this.error = error;
+      this.auth.user.next(null);
+      this.misc.navi.next("/");
+    }).finally(() => {
+      this.doDismissModal();
+      this.isInProgress = false;
     });
   }
 

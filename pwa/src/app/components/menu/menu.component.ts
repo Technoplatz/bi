@@ -87,12 +87,6 @@ export class MenuComponent implements OnInit {
     });
   }
 
-  Signout() {
-    this.auth.Signout().then(() => { }).catch((error: any) => {
-      console.error(error);
-    });
-  }
-
   doMenuToggle() {
     this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
       this.menutoggle = !LSMENUTOGGLE;

@@ -106,15 +106,6 @@ const routes: Routes = [
     }
   },
   {
-    path: "account/signout",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
-  {
     path: "account/profile-settings",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
