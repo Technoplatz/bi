@@ -89,7 +89,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: any) => {
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
       this.menutoggle = LSMENUTOGGLE ? false : true;
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.auth.user.next(LSUSERMETA);

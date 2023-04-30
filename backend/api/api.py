@@ -2267,164 +2267,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def setprop_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = obj["user"] if "user" in obj else None
-            cid_ = obj["collection"]
-            properties_ = obj["properties"]
-            key_ = obj["key"]
-
-            collection_f_ = self.inner_collection_f(cid_)
-            if not collection_f_["result"]:
-                raise APIError("collection not found")
-
-            is_crud_ = cid_[:1] != "_"
-            if not is_crud_:
-                raise APIError("collection is not allowed to update")
-
-            doc_ = Mongo().db_["_collection"].find_one({"col_id": cid_})
-            if not doc_:
-                raise APIError("no collection found")
-
-            for item_ in properties_[key_]:
-                if item_ not in self.props_ + self.xtra_props_:
-                    raise APIError(f"invalid property: {key_}")
-
-            if "required" in properties_[key_] and properties_[key_]["required"]:
-                if (
-                    "required" in doc_["col_structure"]
-                    and len(doc_["col_structure"]["required"]) > 0
-                ):
-                    doc_["col_structure"]["required"].append(key_)
-                    doc_["col_structure"]["required"] = Misc().make_array_unique_f(
-                        doc_["col_structure"]["required"]
-                    )
-                else:
-                    doc_["col_structure"]["required"] = [key_]
-            else:
-                if (
-                    "required" in doc_["col_structure"]
-                    and key_ in doc_["col_structure"]["required"]
-                ):
-                    doc_["col_structure"]["required"].remove(key_)
-                    if len(doc_["col_structure"]["required"]) == 0:
-                        doc_["col_structure"].pop("required", None)
-
-            if (
-                doc_["col_structure"]["properties"][key_]["bsonType"] == "string"
-                and properties_[key_]["bsonType"] != "string"
-            ):
-                raise APIError("string is not convertible")
-
-            if doc_["col_structure"]["properties"][key_]["bsonType"] in [
-                "number",
-                "decimal",
-            ] and properties_[key_]["bsonType"] not in ["number", "decimal", "string"]:
-                raise APIError("number is not convertible")
-
-            if properties_[key_]["bsonType"] == "string":
-                properties_[key_].pop("minimum", None)
-                properties_[key_].pop("maximum", None)
-                if "minLength" in properties_[key_] and properties_[key_][
-                    "minLength"
-                ] in [None, 0, ""]:
-                    properties_[key_].pop("minLength", None)
-                if "maxLength" in properties_[key_] and properties_[key_][
-                    "maxLength"
-                ] in [None, 0, ""]:
-                    properties_[key_].pop("maxLength", None)
-
-            if properties_[key_]["bsonType"] in ["number", "decimal"]:
-                properties_[key_].pop("minLength", None)
-                properties_[key_].pop("maxLength", None)
-                if "minimum" in properties_[key_] and properties_[key_]["minimum"] in [
-                    None,
-                    0,
-                    "",
-                ]:
-                    properties_[key_].pop("minimum", None)
-                if "maximum" in properties_[key_] and properties_[key_]["maximum"] in [
-                    None,
-                    0,
-                    "",
-                ]:
-                    properties_[key_].pop("maximum", None)
-                if (
-                    "minimum" in properties_[key_]
-                    and properties_[key_]["minimum"] > 0
-                    and "maximum" in properties_[key_]
-                    and properties_[key_]["maximum"] > 0
-                    and properties_[key_]["minimum"] > properties_[key_]["maximum"]
-                ):
-                    raise APIError("minimum value is greater than maximum value")
-
-            if properties_[key_]["bsonType"] in ["bool", "date"]:
-                properties_[key_].pop("minimum", None)
-                properties_[key_].pop("maximum", None)
-                properties_[key_].pop("minLength", None)
-                properties_[key_].pop("maxLength", None)
-
-            if "width" not in properties_[key_]:
-                properties_[key_]["width"] = 100
-
-            doc_["col_structure"]["properties"][key_] = properties_[key_]
-            doc_["_modified_at"] = Misc().get_now_f()
-            doc_["_modified_by"] = (
-                user_["email"] if user_ and "email" in user_ else None
-            )
-
-            Mongo().db_["_collection"].update_one(
-                {"col_id": cid_}, {"$set": doc_}, upsert=False
-            )
-
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": cid_,
-                    "op": "setprop",
-                    "user": user_["email"] if user_ else None,
-                    "document": doc_,
-                }
-            )
-            if not log_["result"]:
-                raise APIError(log_["msg"])
-
-            datac_ = f"{cid_}_data"
-            datac_not_found_ = False
-            if datac_ not in Mongo().db_.list_collection_names():
-                datac_not_found_ = True
-                Mongo().db_[datac_].insert_one({})
-            schemavalidate_ = self.crudschema_validate_f(
-                {"collection": datac_, "structure": doc_["col_structure"]}
-            )
-            if not schemavalidate_["result"]:
-                raise APIError(schemavalidate_["msg"])
-            if datac_not_found_:
-                Mongo().db_[datac_].delete_one({})
-
-            return {"result": True}
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": cid_,
-                    "op": "setprop",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def config_field_to_structure_f(self, obj):
         """
         docstring is in progress
@@ -4003,9 +3845,19 @@ class Auth:
         docstring is in progress
         """
         try:
-            input_ = request.json
-            email_ = input_["email"]
-            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_jwt_secret": None, "aut_jwt_token": None, "aut_tfac": None, "_signedout_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
+            jwt_validate_f_ = Auth().jwt_validate_f()
+            if not jwt_validate_f_["result"]:
+                raise AuthError("session ended")
+            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
+            if not auth_:
+                raise APIError("account data not found")
+            aut_id_ = auth_["aut_id"]
+            Mongo().db_["_auth"].update_one({"aut_id": aut_id_}, {"$set": {
+                "aut_jwt_secret": None,
+                "aut_jwt_token": None,
+                "aut_tfac": None,
+                "_signed_out_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}
+            })
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
@@ -4061,70 +3913,25 @@ class Auth:
                 raise APIError(f"no collection found {collection_id_}/{op_}")
 
             permission_ = False
-
             for ix_, usr_tag_ in enumerate(usr_tags_):
-                permission_check_ = (
-                    Mongo()
-                    .db_["_permission"]
-                    .find_one(
-                        {"per_tag": usr_tag_, "per_collection_id": collection_id_}
-                    )
-                )
+                permission_check_ = Mongo().db_["_permission"].find_one({"per_tag": usr_tag_, "per_collection_id": collection_id_})
                 if permission_check_:
-                    per_insert_ = (
-                        True
-                        if "per_insert" in permission_check_
-                        and permission_check_["per_insert"] is True
-                        else False
-                    )
-                    per_read_ = (
-                        True
-                        if "per_read" in permission_check_
-                        and permission_check_["per_read"] is True
-                        else False
-                    )
-                    per_update_ = (
-                        True
-                        if "per_update" in permission_check_
-                        and permission_check_["per_update"] is True
-                        else False
-                    )
-                    per_delete_ = (
-                        True
-                        if "per_delete" in permission_check_
-                        and permission_check_["per_delete"] is True
-                        else False
-                    )
-                    per_share_ = (
-                        True
-                        if "per_share" in permission_check_
-                        and permission_check_["per_share"] is True
-                        else False
-                    )
-                    per_schema_ = (
-                        True
-                        if "per_schema" in permission_check_
-                        and permission_check_["per_schema"] is True
-                        else False
-                    )
-
-                    if (
-                        (op_ == "saveschema" and per_schema_)
-                        or (op_ == "announce" and per_share_)
-                        or (op_ == "read" and per_read_)
-                        or (op_ in ["insert", "import"] and per_insert_)
-                        or (op_ == "upsert" and per_insert_ and per_update_)
-                        or (op_ in ["update", "action"] and per_read_ and per_update_)
-                        or (op_ == "clone" and per_read_ and per_insert_)
-                        or (op_ == "delete" and per_read_ and per_delete_)
-                    ):
+                    per_insert_ = "per_insert" in permission_check_ and permission_check_["per_insert"] is True
+                    per_read_ = "per_read" in permission_check_ and permission_check_["per_read"] is True
+                    per_update_ = "per_update" in permission_check_ and permission_check_["per_update"] is True
+                    per_delete_ = "per_delete" in permission_check_ and permission_check_["per_delete"] is True
+                    per_share_ = "per_share" in permission_check_ and permission_check_["per_share"] is True
+                    per_schema_ = "per_schema" in permission_check_ and permission_check_["per_schema"] is True
+                    if ((op_ == "saveschema" and per_schema_) or
+                        (op_ == "announce" and per_share_) or
+                        (op_ == "read" and per_read_) or
+                        (op_ in ["insert", "import"] and per_insert_) or
+                        (op_ == "upsert" and per_insert_ and per_update_) or
+                        (op_ in ["update", "action"] and per_read_ and per_update_) or
+                        (op_ == "clone" and per_read_ and per_insert_) or
+                        (op_ == "delete" and per_read_ and per_delete_)):
                         if ix_ == 0:
-                            allowmatch_ = (
-                                permission_check_["per_match"]
-                                if "per_match" in permission_check_
-                                and len(permission_check_["per_match"]) > 0
-                                else []
-                            )
+                            allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True
                         break
 
@@ -4207,64 +4014,37 @@ class Auth:
         docstring is in progress
         """
         try:
-            user_ = input_["user"]
-            op_ = input_["op"]
-            email_ = user_["email"]
-
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            jwt_validate_f_ = Auth().jwt_validate_f()
+            if not jwt_validate_f_["result"]:
+                raise AuthError("session ended")
+            user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
+            if not user_:
+                raise APIError("user data not found")
             if not auth_:
                 raise AuthError("account not found")
 
+            email_ = user_["email"] if "email" in user_ else None
+            op_ = input_["op"]
+
             response_ = {}
-            apikey_ = None
+            api_key_ = None
 
             if op_ == "apikeygen":
-                apikey_ = secrets.token_hex(16)
+                api_key_ = secrets.token_hex(16)
                 Mongo().db_["_auth"].update_one(
-                    {"aut_id": email_},
-                    {
-                        "$set": {
-                            "aut_api_key": apikey_,
-                            "_api_key_modified_at": Misc().get_now_f(),
-                            "_api_key_modified_by": email_,
-                        },
-                        "$inc": {"_api_key_modified_count": 1},
-                    },
-                    upsert=False,
-                )
-                log_ = Misc().log_f(
-                    {
-                        "type": "Info",
-                        "collection": "_auth",
-                        "op": op_,
-                        "user": email_,
-                        "document": {
-                            "aut_api_key": f"********{apikey_[-4:]}",
-                            "_modified_at": Misc().get_now_f(),
-                            "_modified_by": email_,
-                        },
-                    }
-                )
-
-                if not log_["result"]:
-                    raise APIError(log_["msg"])
-
-                response_ = {"apikey": apikey_, "_modified_at": Misc().get_now_f()}
-
+                    {"aut_id": email_}, {"$set": {
+                        "aut_api_key": api_key_,
+                        "_api_key_modified_at": Misc().get_now_f(),
+                        "_api_key_modified_by": email_
+                    }, "$inc": {"_api_key_modified_count": 1}})
+                response_ = {"api_key": api_key_, "_modified_at": Misc().get_now_f()}
             elif op_ == "apikeyget":
-                apikey_modified_at_ = (
-                    auth_["_api_key_modified_at"]
-                    if "_api_key_modified_at" in auth_
-                    else None
-                )
-                apikey_ = auth_["aut_api_key"] if "aut_api_key" in auth_ else None
-                response_ = {
-                    "apikey": apikey_,
-                    "apikey_modified_at": apikey_modified_at_,
-                }
-
+                api_key_modified_at_ = auth_["_api_key_modified_at"] if "_api_key_modified_at" in auth_ else None
+                api_key_ = auth_["aut_api_key"] if "aut_api_key" in auth_ else None
+                response_ = {"api_key": api_key_, "api_key_modified_at": api_key_modified_at_}
             else:
-                raise APIError("account operation not supported " + op_)
+                raise APIError("operation not supported " + op_)
 
             return {"result": True, "user": response_}
 
@@ -4346,25 +4126,7 @@ class Auth:
                 "aut_expires": 0,
                 "_modified_at": Misc().get_now_f(),
                 "_modified_by": email_,
-            },
-                "$inc": {"_modified_count": 1},
-            },
-                upsert=False
-            )
-
-            log_ = Misc().log_f({
-                "type": "Info",
-                "collection": "_auth",
-                "op": "reset",
-                "user": email_,
-                "document": {
-                    "tfac": tfac_,
-                    "_modified_at": Misc().get_now_f(),
-                    "_modified_by": email_,
-                }
-            })
-            if not log_["result"]:
-                raise APIError(log_["msg"])
+            }, "$inc": {"_modified_count": 1}})
 
             return {"result": True}
 
@@ -4393,6 +4155,7 @@ class Auth:
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
             user_ = user_validate_["user"] if "user" in user_validate_ else None
+            auth_ = user_validate_["auth"] if "auth" in user_validate_ else None
 
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
             if not verify_2fa_f_["result"]:
@@ -4415,10 +4178,17 @@ class Auth:
             jwt_ = jwt.encode(header_, payload_, secret_)
             token_ = jwt_.decode()
 
-            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_jwt_secret": secret_, "aut_jwt_token": token_,
-                                                                          "aut_tfac": None, "_modified_at": Misc().get_now_f(), "_jwt_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
+                "aut_jwt_secret": secret_,
+                "aut_jwt_token": token_,
+                "aut_tfac": None,
+                "_modified_at": Misc().get_now_f(),
+                "_jwt_at": Misc().get_now_f()},
+                "$inc": {"_modified_count": 1}
+            })
 
-            user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_}
+            api_key_ = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
+            user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_, "api_key": api_key_}
             ip_ = Misc().get_user_ip_f()
 
             log_ = Misc().log_f({
@@ -4458,7 +4228,6 @@ class Auth:
         docstring is in progress
         """
         try:
-            print("*** 000")
             authorization_ = request.headers.get("Authorization", None)
             if not authorization_:
                 raise AuthError("no authorization 403")
@@ -4472,13 +4241,9 @@ class Auth:
             if not token_:
                 raise AuthError("no token provided 403")
 
-            print("*** 222", token_)
-
             x_api_key_ = request.headers.get("X-Api-Key", None)
             if not x_api_key_:
                 raise AuthError("no api key provided 403")
-
-            print("*** 333", x_api_key_)
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": x_api_key_})
             if not auth_:
@@ -4504,6 +4269,7 @@ class Auth:
                 raise AuthError("user not found")
 
             user_["email"] = user_["usr_id"]
+            user_["api_key"] = auth_["aut_api_key"]
 
             return ({"result": True, "user": user_, "auth": auth_})
 
@@ -4586,11 +4352,11 @@ class Auth:
         docstring is in progress
         """
         try:
-            apikey_ = bleach.clean(input_["apikey"]) if "apikey" in input_ else None
-            if not apikey_ or apikey_ is None:
+            api_key_ = bleach.clean(input_["api_key"]) if "api_key" in input_ else None
+            if not api_key_ or api_key_ is None:
                 raise APIError("api key must be provided")
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": apikey_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": api_key_})
             if not auth_:
                 raise APIError("not authenticated")
             user_id_ = auth_["aut_id"]
@@ -4678,14 +4444,14 @@ class Auth:
             qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
                 name=email_, issuer_name="Technoplatz-BI"
             )
-            apikey_ = secrets.token_hex(16)
+            api_key_ = secrets.token_hex(16)
 
             Mongo().db_["_auth"].insert_one(
                 {
                     "aut_id": email_,
                     "aut_salt": salt_,
                     "aut_key": key_,
-                    "aut_api_key": apikey_,
+                    "aut_api_key": api_key_,
                     "aut_tfac": None,
                     "aut_expires": 0,
                     "aut_otp_secret": aut_otp_secret_,
@@ -4840,21 +4606,12 @@ def crud_f():
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
             raise AuthError({"result": False, "msg": "session ended"})
-
-        print(">>> jwt_validate_f_", jwt_validate_f_)
-
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
             raise APIError({"result": False, "msg": "user data not found"})
-
-        print(">>> user_", user_)
-        print(">>> input_", input_)
-
         input_["user"] = user_
         input_["userindb"] = user_
         email_ = user_["usr_id"] if "usr_id" in user_ else None
-
-        print(">>> email_", email_)
 
         collection_ = input_["collection"] if "collection" in input_ else None
         match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
@@ -4868,14 +4625,10 @@ def crud_f():
         if not permission_f_["result"]:
             raise AuthError(permission_f_)
 
-        print(">>> permission_f_", permission_f_)
-
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ += allowmatch_
         input_["match"] = match_
-
-        print(">>> allowmatch_", allowmatch_)
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
@@ -4889,15 +4642,11 @@ def crud_f():
             if not col_check_["result"]:
                 raise APIError(col_check_)
 
-        print(">>> op_", op_)
-
         if op_ in ["announce"]:
             tfac_ = input_["tfac"]
             verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
             if not verify_2fa_f_["result"]:
                 raise APIError(verify_2fa_f_)
-
-        print(">>> op2_", op_)
 
         if op_ == "read":
             res_ = Crud().read_f(input_)
@@ -4911,8 +4660,6 @@ def crud_f():
             res_ = Crud().action_f(input_)
         elif op_ == "remove":
             res_ = Crud().remove_f(input_)
-        elif op_ == "setprop":
-            res_ = Crud().setprop_f(input_)
         elif op_ == "copykey":
             res_ = Crud().copykey_f(input_)
         elif op_ == "purge":
@@ -4981,32 +4728,25 @@ def otp_f():
             res_ = {"result": False, "msg": "input is missing"}
             raise APIError(res_)
 
-        user_ = input_["user"] if "user" in input_ else None
-        if not user_:
-            res_ = {"result": False, "msg": "user is missing"}
-            raise APIError(res_)
-
         request_ = input_["request"] if "request" in input_ else None
         if not request_:
             res_ = {"result": False, "msg": "no request provided"}
             raise APIError(res_)
-
         if "op" not in request_:
             res_ = {"result": False, "msg": "no operation found"}
             raise APIError(res_)
 
-        validate_ = Security().validate_request_f()
-        if not validate_["result"]:
-            res_ = {"result": False, "msg": validate_["msg"] if "msg" in validate_ else "web validation error"}
-            raise APIError(res_)
+        validate_request_f_ = Security().validate_request_f()
+        if not validate_request_f_["result"]:
+            raise APIError(validate_request_f_)
 
+        jwt_validate_f_ = Auth().jwt_validate_f()
+        if not jwt_validate_f_["result"]:
+            raise AuthError({"result": False, "msg": "session ended"})
+        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+        if not user_:
+            raise APIError({"result": False, "msg": "user data not found"})
         email_ = user_["email"] if "email" in user_ else None
-        token_ = user_["token"] if "token" in user_ else None
-
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
-        if not validate_["result"]:
-            res_ = {"result": False, "msg": validate_["msg"] if "msg" in validate_ else "otp validation error"}
-            raise APIError(res_)
 
         op_ = request_["op"]
         if op_ == "reset":
@@ -5157,7 +4897,7 @@ def post_f():
         if not operation_ or operation_ not in ["read", "insert", "update", "upsert", "delete"]:
             raise APIError("invalid operation")
 
-        user_validate_ = Auth().user_validate_by_api_key_f({"apikey": rh_api_key_})
+        user_validate_ = Auth().user_validate_by_api_key_f({"api_key": rh_api_key_})
         if not user_validate_["result"]:
             raise AuthError(user_validate_["msg"])
 
@@ -5263,7 +5003,6 @@ def post_f():
                     session_db_[collection_data_].update_many(
                         filter__,
                         {"$set": doc__, "$inc": {"_modified_count": 1}},
-                        upsert=False,
                         session=session_,
                     )
                 elif operation_ == "insert":
@@ -5382,12 +5121,10 @@ def get_data_f(id_):
         if not arg_:
             raise APIError("missing argument")
 
-        apikey_ = (
-            request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
-        )
-        user_validate_ = Auth().user_validate_by_api_key_f({"apikey": apikey_})
+        api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
+        user_validate_ = Auth().user_validate_by_api_key_f({"api_key": api_key_})
         if not user_validate_["result"]:
-            user_validate_ = Auth().user_validate_by_api_key_f({"apikey": arg_})
+            user_validate_ = Auth().user_validate_by_api_key_f({"api_key": arg_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
         user_ = user_validate_["user"] if "user" in user_validate_ else None

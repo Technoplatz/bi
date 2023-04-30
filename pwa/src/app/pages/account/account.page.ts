@@ -55,10 +55,10 @@ export class AccountPage implements OnInit {
   public submenu: string = "";
   public themes: any = environment.themes;
   public perm: boolean = false;
-  public accountf_apikey: string = "";
-  public is_apikey_copied: boolean = false;
-  public is_apikey_enabled: boolean = false;
-  public accountf_apikeydate: any = null;
+  public accountf_api_key: string = "";
+  public is_api_key_copied: boolean = false;
+  public is_api_key_enabled: boolean = false;
+  public accountf_api_key_date: any = null;
   public is_processing_account: boolean = false;
   public is_url_copied: boolean = false;
   public viewurl_: string = "";
@@ -69,7 +69,6 @@ export class AccountPage implements OnInit {
   public qr_show: boolean = false;
   public otp_qr: string = "";
   public saas: any = null;
-
   private user_: any = null;
   private saas_: any = null;
 
@@ -83,7 +82,7 @@ export class AccountPage implements OnInit {
     this.user_ = this.auth.user.subscribe((user: any) => {
       this.user = user;
       this.perm = user && user.perm ? true : false;
-      this.accountf_apikey = user.apikey;
+      this.accountf_api_key = user.api_key;
       this.is_initialized = true;
     });
     this.saas_ = this.misc.saas.subscribe((saas: any) => {
@@ -94,6 +93,8 @@ export class AccountPage implements OnInit {
   ngOnDestroy() {
     this.user_ = null;
     this.saas_ = null;
+    this.auth.user.unsubscribe;
+    this.misc.saas.unsubscribe;
   }
 
   ngOnInit() {
@@ -109,26 +110,26 @@ export class AccountPage implements OnInit {
   }
 
   doCopy(w: string) {
-    const s = w === "apikey" ? this.accountf_apikey : w === "view" ? this.viewurl_ : "";
-    this.is_apikey_copied = w === "apikey" ? true : false;
+    const s = w === "api_key" ? this.accountf_api_key : w === "view" ? this.viewurl_ : "";
+    this.is_api_key_copied = w === "api_key" ? true : false;
     this.is_url_copied = w === "view" || w === "collection" ? true : false;
     this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {
-      this.is_apikey_copied = false;
+      this.is_api_key_copied = false;
       this.is_url_copied = false;
     });
   }
 
-  doAccount(s: string) {
+  doAccount(req_: string) {
     return new Promise((resolve) => {
       this.is_processing_account = true;
-      this.auth.Account(s).then((res: any) => {
-        if (["apikeygen", "apikeyget"].includes(s)) {
-          this.accountf_apikey = res && res.user && res.user.apikey ? res.user.apikey : null;
-          this.accountf_apikeydate = res && res.user && res.user.apikey_modified_at ? res.user.apikey_modified_at.$date : null;
-          s === "apikeygen" ? this.doApiKeyEnabled() : null;
-          this.user.apikey = this.accountf_apikey;
+      this.auth.Account(req_).then((res: any) => {
+        if (["apikeygen", "apikeyget"].includes(req_)) {
+          this.accountf_api_key = res && res.user && res.user.api_key ? res.user.api_key : null;
+          this.accountf_api_key_date = res && res.user && res.user.api_key_modified_at ? res.user.api_key_modified_at.$date : null;
+          req_ === "apikeygen" ? this.doApiKeyEnabled() : null;
+          this.user.api_key = this.accountf_api_key;
           this.storage.set("LSUSERMETA", this.user).then(() => { });
         }
         resolve(true);
@@ -142,10 +143,10 @@ export class AccountPage implements OnInit {
   }
 
   doApiKeyEnabled() {
-    if (!this.is_apikey_enabled) {
-      this.is_apikey_enabled = true;
+    if (!this.is_api_key_enabled) {
+      this.is_api_key_enabled = true;
       setTimeout(() => {
-        this.is_apikey_enabled = false;
+        this.is_api_key_enabled = false;
       }, 5000);
     }
   }

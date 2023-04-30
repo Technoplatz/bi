@@ -327,7 +327,6 @@ services:
       - MONGO_PORT1=${MONGO_PORT1}
       - MONGO_PORT2=${MONGO_PORT2}
       - MONGO_RS=${MONGO_RS}
-      - API_KEY=${API_KEY}
       - SMTP_SERVER=${SMTP_SERVER}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USERID=${SMTP_USERID}

@@ -35,7 +35,6 @@ import { Storage } from "@ionic/storage";
 import { BehaviorSubject } from "rxjs";
 import { Crud } from "./crud";
 import { Miscellaneous } from "./misc";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
 
 @Injectable({
   providedIn: "root"
@@ -43,35 +42,28 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 
 export class Auth {
   public user = new BehaviorSubject<any>(null);
-  private apiHost: string = "";
 
   constructor(
     private storage: Storage,
     private misc: Miscellaneous,
-    private crud: Crud,
-    private http: HttpClient
-  ) {
-    this.misc.getAPIHost().then((apiHost: any) => {
-      this.apiHost = apiHost;
-    });
-  }
+    private crud: Crud
+  ) { }
 
   Signin(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "signin";
       this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
-        console.log("*** res", res);
         if (res && res.result) {
           resolve(true);
         } else {
           this.storage.remove("LSUSERMETA").then(() => {
-            console.error("*** auth negative", res);
+            console.error("*** signin negative", res);
             reject(res.msg);
           });
         }
       }).catch((res: any) => {
         this.storage.remove("LSUSERMETA").then(() => {
-          console.error("*** auth error", res);
+          console.error("*** signin error", res);
           reject(res);
         });
       });
@@ -81,18 +73,15 @@ export class Auth {
   Forgot(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "forgot";
-      this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders({
-          "Content-Type": "application/json",
-        })
-      }).subscribe((res: any) => {
+      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           resolve(true);
         } else {
           reject(res.msg);
         }
-      }, (res: any) => {
-        reject(res.error && res.error.msg ? res.error.msg : res);
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
       });
     });
   }
@@ -101,7 +90,6 @@ export class Auth {
     return new Promise((resolve, reject) => {
       creds.op = "tfac";
       this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
-        console.log("*** res", res);
         if (res && res.result) {
           this.user.next(res.user);
           this.storage.set("LSUSERMETA", res.user).then(() => {
@@ -134,96 +122,69 @@ export class Auth {
   Reset(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "reset";
-      this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders({
-          "Content-Type": "application/json",
-        })
-      }).subscribe((res: any) => {
+      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
-          this.misc.navi.next("/");
           resolve(true);
         } else {
           reject(res.msg);
         }
-      }, (res: any) => {
-        reject(res.error && res.error.msg ? res.error.msg : res);
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
       });
     });
   }
 
   Account(op: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.http.post<any>(this.apiHost + "/auth", JSON.stringify({
-          op: op,
-          user: LSUSERMETA
-        }), {
-          headers: new HttpHeaders({
-            "Content-Type": "application/json",
-          })
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (res: any) => {
-          reject(res.error && res.error.msg ? res.error.msg : res);
-        });
+      this.misc.apiCall("auth", JSON.stringify({
+        op: op
+      })).then((res: any) => {
+        if (res && res.result) {
+          resolve(true);
+        } else {
+          reject(res.msg);
+        }
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
       });
     });
   }
 
   OTP(obj: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.http.post<any>(this.apiHost + "/otp", JSON.stringify({
-          request: obj,
-          user: LSUSERMETA
-        }), {
-          headers: new HttpHeaders({
-            "Content-Type": "application/json",
-          })
-        }).subscribe((res: any) => {
-          if (res && res.result) {
-            resolve(res);
-          } else {
-            reject(res.msg);
-          }
-        }, (res: any) => {
-          reject(res.error && res.error.msg ? res.error.msg : res);
-        });
+      this.misc.apiCall("otp", JSON.stringify({
+        request: obj
+      })).then((res: any) => {
+        if (res && res.result) {
+          resolve(res);
+        } else {
+          reject(res.msg);
+        }
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
       });
     });
   }
 
   Signout() {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        if (LSUSERMETA && LSUSERMETA.email) {
-          const email = LSUSERMETA.email;
+      this.misc.apiCall("auth", JSON.stringify({
+        op: "signout"
+      })).then((res: any) => {
+        if (res && res.result) {
           this.storage.remove("LSUSERMETA").then(() => {
-            this.http.post<any>(this.apiHost + "/auth", JSON.stringify({
-              email: email,
-              op: "signout"
-            }), {
-              headers: new HttpHeaders({
-                "Content-Type": "application/json",
-              })
-            }).subscribe((res: any) => {
-              if (res && res.result) {
-                this.user.next(null);
-              } else {
-                reject(res.msg);
-              }
-            }, (res: any) => {
-              reject(res.error && res.error.msg ? res.error.msg : res);
-            });
+            this.user.next(null)
+            resolve(true);
           });
         } else {
-          this.misc.navi.next("/");
-          resolve(true);
+          reject(res.msg);
         }
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
       });
     });
   }
@@ -243,49 +204,34 @@ export class Auth {
 
   Signup(creds: any) {
     return new Promise((resolve, reject) => {
-      this.storage.remove("LSUSERMETA").then(() => {
-        this.storage.remove("LSTOKEN").then(() => {
-          creds.op = "signup";
-          this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-            headers: new HttpHeaders({
-              "Content-Type": "application/json",
-            })
-          }).subscribe((res: any) => {
-            if (res && res.result) {
-              this.user.next(null);
-              resolve(true);
-            } else {
-              reject(res.msg);
-            }
-          }, (error: any) => {
-            reject(error.msg);
-          });
-        });
-      }, (res: any) => {
-        reject(res.error && res.error.msg ? res.error.msg : res);
+      creds.op = "signup";
+      this.misc.apiCall("otp", JSON.stringify(creds)).then((res: any) => {
+        if (res && res.result) {
+          this.user.next(null);
+          resolve(true);
+        } else {
+          reject(res.msg);
+        }
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
       });
     });
   }
 
   forgotPassword(creds: any) {
     return new Promise((resolve, reject) => {
-      this.http.post<any>(this.apiHost + "/auth", JSON.stringify(creds), {
-        headers: new HttpHeaders({
-          "Content-Type": "application/json",
-        })
-      }).subscribe((res: any) => {
-        if (res) {
-          if (res.successful) {
-            this.user.next(null);
-            resolve({ message: res.msg });
-          } else {
-            reject({ message: res.msg });
-          }
+      creds.op = "forgot";
+      this.misc.apiCall("otp", JSON.stringify(creds)).then((res: any) => {
+        if (res && res.result) {
+          this.user.next(null);
+          resolve(true);
         } else {
-          reject({ message: "no api response" });
+          reject(res.msg);
         }
-      }, (res: any) => {
-        reject(res.error && res.error.msg ? res.error.msg : res);
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        reject(res);
       });
     });
   }

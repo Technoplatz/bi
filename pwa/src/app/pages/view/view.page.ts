@@ -73,9 +73,9 @@ export class ViewPage implements OnInit {
   public view_properties: any = {};
   public view_properties_: any = {};
   public is_url_copied: boolean = false;
-  public accountf_apikey: string = "";
+  public accountf_api_key: string = "";
   public viewurl_: string = "";
-  public is_apikey_copied: boolean = false;
+  public is_api_key_copied: boolean = false;
   private segment = "data";
   private is_selected: boolean = false;
   private views: any = [];
@@ -106,7 +106,7 @@ export class ViewPage implements OnInit {
   ) {
     this.user_ ? null : this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res ? res : null;
-      this.accountf_apikey = res && res.apikey ? res.apikey : null;
+      this.accountf_api_key = res && res.api_key ? res.api_key : null;
     });
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
@@ -144,7 +144,7 @@ export class ViewPage implements OnInit {
           this.is_loaded = true;
           this.is_initialized = true;
           this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
-          this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_apikey;
+          this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_api_key;
           this.crud.charts.unsubscribe;
           this.charts_ = null;
         }
@@ -258,13 +258,13 @@ export class ViewPage implements OnInit {
   }
 
   doCopy(v: string) {
-    const s = v === "apikey" ? this.accountf_apikey : v === "view" ? this.viewurl_ : "";
-    this.is_apikey_copied = v === "apikey" ? true : false;
+    const s = v === "api_key" ? this.accountf_api_key : v === "view" ? this.viewurl_ : "";
+    this.is_api_key_copied = v === "api_key" ? true : false;
     this.is_url_copied = ["view", "collection"].includes(v) ? true : false;
     this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {
-      this.is_apikey_copied = false;
+      this.is_api_key_copied = false;
       this.is_url_copied = false;
     });
   }

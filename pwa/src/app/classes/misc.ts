@@ -80,14 +80,14 @@ export class Miscellaneous {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.getAPIHost().then((apiHost) => {
           const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
+          const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
           this.http.post<any>(apiHost + "/" + url, posted, {
             headers: new HttpHeaders({
               "Content-Type": "application/json",
               "Authorization": "Bearer " + token_,
-              "X-Api-Key": "89507f49562f2428b72757c9dbe3fefc"
+              "X-Api-Key": api_key_
             })
           }).subscribe((res: any) => {
-            console.log("*** res", res);
             if (res && res.result) {
               resolve(res);
             } else {
@@ -159,11 +159,12 @@ export class Miscellaneous {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         posted.append("email", LSUSERMETA.email);
         posted.append("token", LSUSERMETA.token);
+        const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
         this.getAPIHost().then((apiHost) => {
           this.http.post<any>(apiHost + "/" + url, posted, {
             headers: new HttpHeaders({
               "Authorization": "Bearer " + LSUSERMETA.token,
-              "X-Api-Key": "89507f49562f2428b72757c9dbe3fefc"
+              "X-Api-Key": api_key_
             })
           }).subscribe((res: any) => {
             if (res && res.result) {

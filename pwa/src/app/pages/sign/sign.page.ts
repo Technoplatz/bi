@@ -394,8 +394,8 @@ export class SignPage implements OnInit {
       ? this.storage.set("LSREMEMBERME", this.isRememberMe).then(() => {
         this.storage.set("LSUSERMETA", { email: this.signinForm?.get("email")?.value }).then(() => { });
       })
-      : this.storage.set("LSUSERMETA", null).then(() => {
-        this.storage.set("LSREMEMBERME", null).then(() => { });
+      : this.storage.remove("LSUSERMETA").then(() => {
+        this.storage.remove("LSREMEMBERME").then(() => { });
       });
     if (this.signinForm?.get("email")?.valid && this.signinForm?.get("password")?.valid) {
       this.auth.Signin({

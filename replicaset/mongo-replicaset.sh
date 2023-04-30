@@ -124,8 +124,8 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
             _modified_count: 0,
-            _apikey_modified_at: new Date(),
-            _apikey_modified_by: '${ADMIN_EMAIL}'
+            _api_key_modified_at: new Date(),
+            _api_key_modified_by: '${ADMIN_EMAIL}'
         });
         db.getCollection('_auth').createIndex({ 'aut_id': 1 }, { unique: true });
         print('_auth created.');
@@ -204,8 +204,8 @@ else
                 _modified_at: new Date(),
                 _modified_by: 'saas',
                 _modified_count: 0,
-                _apikey_modified_at: new Date(),
-                _apikey_modified_by: 'saas'
+                _api_key_modified_at: new Date(),
+                _api_key_modified_by: 'saas'
             }}, { upsert: false });
             if(upsert_auth_) {
                 print('auth upserted', '${ADMIN_EMAIL}');
