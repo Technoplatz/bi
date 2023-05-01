@@ -83,15 +83,23 @@ echo "MONGO_INDEXOF_DB $MONGO_INDEXOF_DB"
 if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
     echo "Database ${MONGO_DB} does not exist."
     mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
-        print('DB user creating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
-        db.createUser({ user: '${MONGO_USERNAME}', pwd: '${MONGO_PASSWORD}', roles: [{ role: 'root', db: '${MONGO_AUTH_DB}' },{ role: 'dbOwner', db: '${MONGO_DB}' }] });
-        print('DB user created.');
+        print('authdb connected.');
+        print('authdb user creating...');
+        if (db.getUser('${MONGO_USERNAME}') == null) {
+            db.createUser({ user: '${MONGO_USERNAME}', pwd: '${MONGO_PASSWORD}', roles: [{ role: 'dbOwner', db: '${MONGO_DB}' }] });
+            print('authdb user created.');
+        } else {
+            print('authdb user already exists.');
+            print('authdb user credentials updating...');
+            db.changeUserPassword('${MONGO_USERNAME}','${MONGO_PASSWORD}');
+            print('authdb user credentials updated.');
+        }
     "
     mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
+        db = db.getSiblingDB('${MONGO_DB}');
         print('db connected.');
         print('update started.');
-        db = db.getSiblingDB('${MONGO_DB}');
         // SAAS
         db.getCollection('_saas').drop();
         db.createCollection('_saas', { 'capped': false });
@@ -137,7 +145,7 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             usr_name: '${ADMIN_USER_NAME}',
             usr_scope: 'Administrator',
             usr_enabled: true,
-            _tags: ${PERMISSIVE_TAGS},
+            _tags: '${PERMISSIVE_TAGS}',
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
             _modified_count: 0
@@ -180,10 +188,17 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
 else
     echo "Database ${MONGO_DB} already exists."
     mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0,$MONGO_HOST1:$MONGO_PORT1,$MONGO_HOST2:$MONGO_PORT2/?replicaSet=$MONGO_RS&authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
-        print('db user credentials updating...');
         db = db.getSiblingDB('${MONGO_AUTH_DB}');
-        db.changeUserPassword('${MONGO_USERNAME}','${MONGO_PASSWORD}');
-        print('db user credentials updated.');
+        print('authdb user creating if does not exist...');
+        if (db.getUser('${MONGO_USERNAME}') == null) {
+            db.createUser({ user: '${MONGO_USERNAME}', pwd: '${MONGO_PASSWORD}', roles: [{ role: 'dbOwner', db: '${MONGO_DB}' }] });
+            print('authdb user created.');
+        } else {
+            print('authdb user already exists.');
+            print('authdb user credentials updating...');
+            db.changeUserPassword('${MONGO_USERNAME}','${MONGO_PASSWORD}');
+            print('authdb user credentials updated.');
+        }
         db = db.getSiblingDB('${MONGO_DB}');
         var saas_ = db.getCollection('_saas').findOne({ sas_id: 'saas' });
         var sas_user_id_ = saas_.sas_user_id;
@@ -215,7 +230,7 @@ else
                 usr_name: '${ADMIN_USER_NAME}',
                 usr_scope: 'Administrator',
                 usr_enabled: true,
-                _tags: ${PERMISSIVE_TAGS},
+                _tags: '${PERMISSIVE_TAGS}',
                 _modified_at: new Date(),
                 _modified_by: 'saas',
                 _modified_count: 0
