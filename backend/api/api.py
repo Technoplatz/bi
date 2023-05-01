@@ -1927,9 +1927,7 @@ class Crud:
                         if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
                             continue
                         if not get_view_data_f_["result"]:
-                            raise APIError(
-                                f"get view data error {get_view_data_f_['msg']}"
-                            )
+                            raise APIError(f"get view data error {get_view_data_f_['msg']}")
                         returned_views_.append({
                             "id": id__,
                             "collection": collection_["col_id"],
@@ -2794,9 +2792,7 @@ class Crud:
                     doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            Mongo().db_[collection_].update_one(
-                match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, upsert=False
-            )
+            Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
             log_ = Misc().log_f(
                 {
@@ -2813,15 +2809,13 @@ class Crud:
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_id_,
-                    "op": "update",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": "update",
+                "user": user_["email"] if user_ else None,
+                "document": str(exc)
+            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -2852,15 +2846,13 @@ class Crud:
 
             Mongo().db_[collection_].delete_one(match_)
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": collection_id_,
-                    "op": "remove",
-                    "user": user_["email"] if user_ else None,
-                    "document": doc_,
-                }
-            )
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": collection_id_,
+                "op": "remove",
+                "user": user_["email"] if user_ else None,
+                "document": doc_
+            })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
@@ -2873,15 +2865,13 @@ class Crud:
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_id_,
-                    "op": "remove",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": "remove",
+                "user": user_["email"] if user_ else None,
+                "document": str(exc)
+            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -2904,12 +2894,10 @@ class Crud:
                 raise APIError("operation not supported")
 
             if collection_id_ in ["_log", "_backup", "_announcement"]:
-                raise AppException("this collection is protected is protected for bulk processes")
+                raise AppException("this collection is protected for the bulk processes")
 
             if op_ == "delete" and collection_id_ == "_user":
-                raise AppException(
-                    "user is protected to delete. please consider disabling user instead."
-                )
+                raise AppException("user collection is protected to be deleted")
 
             ids_ = []
             for _id in match_:
@@ -2949,10 +2937,7 @@ class Crud:
                     if unique:
                         for uq in unique:
                             if uq[0] in doc:
-                                if (
-                                    "objectId" in properties[uq[0]]
-                                    and properties[uq[0]]["objectId"] is True
-                                ):
+                                if "objectId" in properties[uq[0]] and properties[uq[0]]["objectId"] is True:
                                     doc[uq[0]] = str(bson.objectid.ObjectId())
                                 elif properties[uq[0]]["bsonType"] == "string":
                                     doc[uq[0]] = (
@@ -2965,35 +2950,29 @@ class Crud:
                 elif op_ == "delete":
                     Mongo().db_[collection_].delete_one({"_id": doc["_id"]})
                     doc["_deleted_at"] = Misc().get_now_f()
-                    doc["_deleted_by"] = (
-                        user_["email"] if user_ and "email" in user_ else None
-                    )
+                    doc["_deleted_by"] = user_["email"] if user_ and "email" in user_ else None
                     Mongo().db_[f"{collection_id_}_bin"].insert_one(doc)
 
-                log_ = Misc().log_f(
-                    {
-                        "type": "Info",
-                        "collection": collection_,
-                        "op": f"multiple {op_}",
-                        "user": user_["email"] if user_ else None,
-                        "document": doc,
-                    }
-                )
+                log_ = Misc().log_f({
+                    "type": "Info",
+                    "collection": collection_,
+                    "op": f"multiple {op_}",
+                    "user": user_["email"] if user_ else None,
+                    "document": doc
+                })
                 if not log_["result"]:
                     raise APIError(log_["msg"])
 
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_id_,
-                    "op": f"multiple {op_}",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": f"multiple {op_}",
+                "user": user_["email"] if user_ else None,
+                "document": str(exc)
+            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -3031,17 +3010,11 @@ class Crud:
                     ids_.append(ObjectId(_id))
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            schema_ = (
-                Mongo().db_["_collection"].find_one({"col_id": collection_id_})
-                if is_crud_
-                else self.root_schemas_f(f"{collection_id_}")
-            )
+            schema_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if not schema_:
                 raise AppException("schema not found")
 
-            structure_ = (
-                schema_["col_structure"] if "col_structure" in schema_ else None
-            )
+            structure_ = schema_["col_structure"] if "col_structure" in schema_ else None
             if not structure_:
                 raise AppException(f"structure not found {collection_id_}")
 
@@ -4529,9 +4502,7 @@ def storage_f():
     try:
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
-            raise APIError(
-                validate_["msg"] if "msg" in validate_ else "validation error"
-            )
+            raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
         form_ = request.form.to_dict(flat=True)
         if not form_:
@@ -4990,20 +4961,15 @@ def post_f():
                         for uq__ in uq_:
                             filter_[uq__] = None
                 else:
-                    raise APIError(
-                        f"at leat one unique field must be provided for {operation_}"
-                    )
+                    raise APIError(f"at leat one unique field must be provided for {operation_}")
             for ix_, item_ in enumerate(body_):
                 filter__ = {}
                 if operation_ in ["update", "upsert", "delete"]:
-                    for key_ in filter_.keys():
+                    for key_ in filter_:
                         if key_ in item_ and item_[key_] is not None:
                             filter__[key_] = item_[key_]
                     if not filter__:
-                        raise APIError(
-                            f"at least one unique field must be provided for {operation_} index {ix_}"
-                        )
-                # decode document
+                        raise APIError(f"at least one unique field must be provided for {operation_} index {ix_}")
                 decode_crud_doc_f_ = Crud().decode_crud_doc_f(item_, properties_)
                 if not decode_crud_doc_f_["result"]:
                     raise APIError(decode_crud_doc_f_["msg"])
