@@ -47,7 +47,11 @@ export class Auth {
     private storage: Storage,
     private misc: Miscellaneous,
     private crud: Crud
-  ) { }
+  ) {
+    this.misc.session_.subscribe((session_: any) => {
+      session_ === "ended" ? this.user.next(null) : null;
+    });
+  }
 
   Signin(creds: any) {
     return new Promise((resolve, reject) => {
@@ -56,16 +60,14 @@ export class Auth {
         if (res && res.result) {
           resolve(true);
         } else {
-          this.storage.remove("LSUSERMETA").then(() => {
-            console.error("*** signin negative", res);
-            reject(res.msg);
-          });
+          this.misc.doMessage(res.msg, "error");
+          this.user.next(null);
+          reject(res.msg);
         }
       }).catch((res: any) => {
-        this.storage.remove("LSUSERMETA").then(() => {
-          console.error("*** signin error", res);
-          reject(res);
-        });
+        this.misc.doMessage(res.msg, "error");
+        this.user.next(null);
+        reject(res.msg);
       });
     });
   }
@@ -103,18 +105,14 @@ export class Auth {
             });
           });
         } else {
-          this.storage.remove("LSUSERMETA").then(() => {
-            console.error("*** auth negative", res);
-            reject(res.msg);
-          });
+          this.misc.doMessage(res.msg, "error");
+          this.user.next(null);
+          reject(res.msg);
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
-        this.storage.remove("LSUSERMETA").then(() => {
-          console.error("*** auth error", res);
-          this.misc.navi.next("/");
-          reject(res);
-        });
+        this.user.next(null);
+        reject(res);
       });
     });
   }
@@ -175,10 +173,8 @@ export class Auth {
         op: "signout"
       })).then((res: any) => {
         if (res && res.result) {
-          this.storage.remove("LSUSERMETA").then(() => {
-            this.user.next(null)
-            resolve(true);
-          });
+          this.user.next(null)
+          resolve(true);
         } else {
           reject(res.msg);
         }
@@ -192,7 +188,7 @@ export class Auth {
   Session() {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        if (LSUSERMETA && LSUSERMETA?.email && LSUSERMETA.token) {
+        if (LSUSERMETA && LSUSERMETA?.token) {
           resolve(true);
         } else {
           this.user.next(null);

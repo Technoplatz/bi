@@ -82,6 +82,12 @@ class AuthError(BaseException):
     """
 
 
+class SessionError(BaseException):
+    """
+    docstring is in progress
+    """
+
+
 class AppException(BaseException):
     """
     docstring is in progress
@@ -3840,17 +3846,11 @@ class Auth:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def signout_f(self):
+    def signout_f(self, auth_):
         """
         docstring is in progress
         """
         try:
-            jwt_validate_f_ = Auth().jwt_validate_f()
-            if not jwt_validate_f_["result"]:
-                raise AuthError("session ended")
-            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
-            if not auth_:
-                raise APIError("account data not found")
             aut_id_ = auth_["aut_id"]
             Mongo().db_["_auth"].update_one({"aut_id": aut_id_}, {"$set": {
                 "aut_jwt_secret": None,
@@ -3862,9 +3862,6 @@ class Auth:
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
 
         except Exception as exc:
             return Misc().exception_f(exc)
@@ -3929,7 +3926,7 @@ class Auth:
                         (op_ == "upsert" and per_insert_ and per_update_) or
                         (op_ in ["update", "action"] and per_read_ and per_update_) or
                         (op_ == "clone" and per_read_ and per_insert_) or
-                        (op_ == "delete" and per_read_ and per_delete_)):
+                            (op_ == "delete" and per_read_ and per_delete_)):
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True
@@ -4014,16 +4011,8 @@ class Auth:
         docstring is in progress
         """
         try:
-            jwt_validate_f_ = Auth().jwt_validate_f()
-            if not jwt_validate_f_["result"]:
-                raise AuthError("session ended")
-            user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
-            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
-            if not user_:
-                raise APIError("user data not found")
-            if not auth_:
-                raise AuthError("account not found")
-
+            user_ = input_["user"] if "user" in input_ else None
+            auth_ = input_["auth"] if "auth" in input_ else None
             email_ = user_["email"] if "email" in user_ else None
             op_ = input_["op"]
 
@@ -4053,9 +4042,6 @@ class Auth:
 
         except APIError as exc:
             return Misc().api_error_f(exc)
-
-        except AuthError as exc:
-            return Misc().auth_error_f(exc)
 
         except Exception as exc:
             return Misc().exception_f(exc)
@@ -4167,7 +4153,7 @@ class Auth:
                 "iss": "Technoplatz",
                 "aud": "api",
                 "sub": "bi",
-                "exp": Misc().get_now_f() + timedelta(hours=int(API_SESSION_EXP_HOURS_)),
+                "exp": Misc().get_now_f() + timedelta(minutes=int(API_SESSION_EXP_MINUTES_)),
                 "iat": Misc().get_now_f(),
                 "id": email_,
                 "name": usr_name_,
@@ -4201,13 +4187,14 @@ class Auth:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            email_sent_ = Email().sendEmail_f({
-                "op": "signin",
-                "personalizations": {"to": [{"email": email_, "name": usr_name_}]},
-                "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",
-            })
-            if not email_sent_["result"]:
-                raise APIError(email_sent_["msg"])
+            if "_otp_validated_ip" in auth_ and auth_["_otp_validated_ip"] is not None and auth_["_otp_validated_ip"] != ip_:
+                email_sent_ = Email().sendEmail_f({
+                    "op": "signin",
+                    "personalizations": {"to": [{"email": email_, "name": usr_name_}]},
+                    "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",
+                })
+                if not email_sent_["result"]:
+                    raise APIError(email_sent_["msg"])
 
             return {"result": True, "user": user_payload_}
 
@@ -4277,16 +4264,16 @@ class Auth:
             return Misc().auth_error_f(exc_)
 
         except ExpiredTokenError as exc_:
-            return ({"result": False, "msg": "token is expired", "exc": str(exc_)})
+            return ({"result": False, "msg": "session expired", "exc": str(exc_)})
 
         except MissingClaimError as exc_:
-            return ({"result": False, "msg": "claim is missing", "exc": str(exc_)})
+            return ({"result": False, "msg": "session claim is missing", "exc": str(exc_)})
 
         except InvalidClaimError as exc_:
-            return ({"result": False, "msg": "claim is invalid", "exc": str(exc_)})
+            return ({"result": False, "msg": "session claim is invalid", "exc": str(exc_)})
 
         except InvalidTokenError as exc_:
-            return ({"result": False, "msg": "invalid token", "exc": str(exc_)})
+            return ({"result": False, "msg": "session token is invalid", "exc": str(exc_)})
 
     def user_validate_by_basic_auth_f(self, input_):
         """
@@ -4498,7 +4485,7 @@ API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
-API_SESSION_EXP_HOURS_ = os.environ.get("API_SESSION_EXP_HOURS")
+API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 SAAS_ = os.environ.get("SAAS")
 PERMISSIVE_TAGS_ = str(os.environ.get("PERMISSIVE_TAGS"))
 MONGO_RS_ = os.environ.get("MONGO_RS")
@@ -4601,14 +4588,14 @@ def crud_f():
 
         validate_request_f_ = Security().validate_request_f()
         if not validate_request_f_["result"]:
-            raise APIError(validate_request_f_)
+            raise SessionError(validate_request_f_)
 
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
-            raise AuthError({"result": False, "msg": "session ended"})
+            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise APIError({"result": False, "msg": "user data not found"})
+            raise SessionError({"result": False, "msg": "user session not found"})
         input_["user"] = user_
         input_["userindb"] = user_
         email_ = user_["usr_id"] if "usr_id" in user_ else None
@@ -4709,6 +4696,13 @@ def crud_f():
         response_.mimetype = "application/json"
         return response_
 
+    except SessionError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 403
+        response_.mimetype = "application/json"
+        return response_
+
     except Exception as exc_:
         res_ = ast.literal_eval(str(exc_))
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
@@ -4738,14 +4732,14 @@ def otp_f():
 
         validate_request_f_ = Security().validate_request_f()
         if not validate_request_f_["result"]:
-            raise APIError(validate_request_f_)
+            raise SessionError(validate_request_f_)
 
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
-            raise AuthError({"result": False, "msg": "session ended"})
+            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise APIError({"result": False, "msg": "user data not found"})
+            raise SessionError({"result": False, "msg": "user session not found"})
         email_ = user_["email"] if "email" in user_ else None
 
         op_ = request_["op"]
@@ -4765,6 +4759,13 @@ def otp_f():
 
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.status_code = 200
+        response_.mimetype = "application/json"
+        return response_
+
+    except SessionError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 403
         response_.mimetype = "application/json"
         return response_
 
@@ -4791,17 +4792,25 @@ def auth_f():
     try:
         validate_ = Security().validate_request_f()
         if not validate_["result"]:
-            raise APIError(validate_)
+            raise SessionError(validate_)
 
         input_ = request.json
         if not input_:
             raise APIError({"result": False, "msg": "input missing"})
-
         if "op" not in input_:
             raise APIError({"result": False, "msg": "no operation found"})
-
         op_ = input_["op"]
-        user_, token_ = None, None
+
+        user_, auth_, token_ = None, None, None
+
+        if op_ in ["signout", "apikeygen", "apikeyget"]:
+            jwt_validate_f_ = Auth().jwt_validate_f()
+            if not jwt_validate_f_["result"]:
+                raise SessionError(jwt_validate_f_["msg"])
+            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
+            user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+            if not auth_:
+                raise SessionError("account data not found")
 
         if op_ == "signup":
             res_ = Auth().signup_f()
@@ -4812,12 +4821,14 @@ def auth_f():
         elif op_ == "tfac":
             res_ = Auth().tfac_f()
         elif op_ == "signout":
-            res_ = Auth().signout_f()
+            res_ = Auth().signout_f(auth_)
         elif op_ == "forgot":
             res_ = Auth().forgot_f()
         elif op_ == "reset":
             res_ = Auth().reset_f()
         elif op_ in ["apikeygen", "apikeyget"]:
+            input_["user"] = user_
+            input_["auth"] = auth_
             res_ = Auth().account_f(input_)
         else:
             raise APIError({"result": False, "msg": f"operation not supported {op_}"})
@@ -4832,7 +4843,7 @@ def auth_f():
 
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         if token_ is not None:
-            response_.headers["Set-Cookie"] = f"technoplatz-bi-session={token_}; path=/; samesite=strict; httponly"
+            response_.headers.add("A-Auth-Token", token_)
         response_.status_code = 200
         response_.mimetype = "application/json"
         return response_
@@ -4841,6 +4852,13 @@ def auth_f():
         res_ = ast.literal_eval(str(exc_))
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.status_code = 400
+        response_.mimetype = "application/json"
+        return response_
+
+    except SessionError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 403
         response_.mimetype = "application/json"
         return response_
 

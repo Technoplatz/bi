@@ -210,31 +210,22 @@ export class Crud {
 
   Download(obj: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.http.post<any>(this.apiHost + "/get/dump", {
-          user: LSUSERMETA,
-          type: obj.type,
-          id: obj.id
-        }, {
-          headers: new HttpHeaders(this.crudHeaders),
-          responseType: "blob" as "json"
-        }).subscribe((res: any) => {
-          if (res) {
-            const fn_ = obj.id + ".gz";
-            let binaryData = [];
-            binaryData.push(res);
-            let downloadLink = document.createElement("a");
-            downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
-            downloadLink.setAttribute("download", fn_);
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            resolve(true);
-          } else {
-            reject(res.msg);
-          }
-        }, (res: any) => {
-          reject(res.error && res.error.msg ? res.error.msg : res);
-        });
+      this.misc.apiCall("get/dump", {
+        type: obj.type,
+        id: obj.id,
+        responseType: "blob" as "json"
+      }).then((res: any) => {
+        const fn_ = obj.id + ".gz";
+        let binaryData = [];
+        binaryData.push(res);
+        let downloadLink = document.createElement("a");
+        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
+        downloadLink.setAttribute("download", fn_);
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        resolve(true);
+      }).catch((err: any) => {
+        reject(err);
       });
     });
   }
@@ -322,20 +313,12 @@ export class Crud {
 
   getSaas() {
     return new Promise((resolve, reject) => {
-      const posted: any = {
+      this.misc.apiCall("auth", {
         op: "saas"
-      }
-      this.http.post<any>(this.apiHost + "/auth", posted, {
-        headers: new HttpHeaders(this.crudHeaders)
-      }).subscribe((res: any) => {
-        if (res && res.result) {
-          this.saas.next(res.saas);
-          resolve(res.saas);
-        } else {
-          reject(res.msg);
-        }
-      }, (res: any) => {
-        reject(res.error && res.error.msg ? res.error.msg : res);
+      }).then((res: any) => {
+        resolve(this.saas.next(res.saas));
+      }).catch((err: any) => {
+        reject(err);
       });
     });
   }

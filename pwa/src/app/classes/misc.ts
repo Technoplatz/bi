@@ -47,6 +47,7 @@ import { SignPage } from "../pages/sign/sign.page";
 
 export class Miscellaneous {
   public collections = new BehaviorSubject<any>([]);
+  public session_ = new BehaviorSubject<any>([]);
   public navi = new Subject<any>();
   public menutoggle = new BehaviorSubject<boolean>(false);
   public version = new BehaviorSubject<boolean>(false);
@@ -86,23 +87,25 @@ export class Miscellaneous {
               "Content-Type": "application/json",
               "Authorization": "Bearer " + token_,
               "X-Api-Key": api_key_
-            })
+            }),
+            observe: "response"
+            // responseType: "blob" as "json"
           }).subscribe((res: any) => {
-            if (res && res.result) {
-              resolve(res);
+            const res_ = res.body;
+            if (res_ && res_.result) {
+              resolve(res_);
             } else {
-              console.error("*** api result", res);
-              reject(res && res.msg ? res.msg : res);
+              console.error("*** api negative", res_);
+              reject(res_ && res_.msg ? res_.msg : res_);
             }
           }, (res: any) => {
-            console.error("*** api negative", res);
-            if (res.error && res.error.msg) {
-              if(res.error.msg === "session ended") {
-                this.storage.remove("LSUSERMETA").then(() => {
-                  this.navi.next("/");
-                });
+            console.error("*** api error", res);
+            if (res.error && res.status) {
+              if (res.status === 403) {
+                this.session_.next("ended");
+                this.doMessage(res.error.msg, "error");
               }
-              reject(res.error.msg);
+              reject(res.error.msg ? res.error.msg : res.error);
             } else {
               reject(res);
             }
@@ -165,13 +168,15 @@ export class Miscellaneous {
             headers: new HttpHeaders({
               "Authorization": "Bearer " + LSUSERMETA.token,
               "X-Api-Key": api_key_
-            })
+            }),
+            observe: "response" as "response"
           }).subscribe((res: any) => {
-            if (res && res.result) {
-              resolve(res);
+            const res_ = res.body;
+            if (res_ && res_.result) {
+              resolve(res_);
             } else {
-              console.error("*** api call negative", res);
-              reject(res && res.msg ? res.msg : res);
+              console.error("*** api file call negative", res);
+              reject(res_ && res_.msg ? res_.msg : res_);
             }
           }, (res: any) => {
             console.error("*** api call error", res);

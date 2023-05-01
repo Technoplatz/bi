@@ -63,7 +63,7 @@ The platform is also provided as a service for the organizations demanding prefe
 |  Custom Integration Services | ✘ | ✔ |
 |  Custom Domain | ✘ | ✔ |
 |  Licensing | GNU Affero GPL v3 | +Project Agreement/SLA |
-|  Pricing | Free | [Get a Quote](https://bi.technoplatz.de/start) |
+|  Pricing | Free | [get a quote](https://bi.technoplatz.de/start) |
 
 ## Impressum
 

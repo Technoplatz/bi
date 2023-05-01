@@ -67,7 +67,9 @@ export class AppComponent implements OnInit {
     this.auth.user.subscribe((user: any) => {
       this.user_ = user;
       if (!user) {
-        this.misc.navi.next("/");
+        this.storage.remove("LSUSERMETA").then(() => {
+          this.misc.navi.next("/");
+        });
       }
     });
     this.misc.navi.subscribe((path: any) => {
