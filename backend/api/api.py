@@ -462,7 +462,6 @@ class Misc:
                             properties_property_["items"][
                                 "properties"
                             ] = properties_new__
-                    # to add null option to each bsonType
                     if field_ == "bsonType":
                         dict_[field_] = [properties_property_[field_], "null"]
                     else:
@@ -4101,16 +4100,20 @@ class Auth:
             jwt_ = jwt.encode(header_, payload_, secret_)
             token_ = jwt_.decode()
 
+            api_key_ = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
+            if api_key_ is None:
+                api_key_ = secrets.token_hex(16)
+
             Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
                 "aut_jwt_secret": secret_,
                 "aut_jwt_token": token_,
                 "aut_tfac": None,
+                "aut_api_key": api_key_,
                 "_modified_at": Misc().get_now_f(),
                 "_jwt_at": Misc().get_now_f()},
                 "$inc": {"_modified_count": 1}
             })
 
-            api_key_ = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
             user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_, "api_key": api_key_}
             ip_ = Misc().get_user_ip_f()
 

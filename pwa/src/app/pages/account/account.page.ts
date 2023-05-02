@@ -69,7 +69,6 @@ export class AccountPage implements OnInit {
   public qr_show: boolean = false;
   public otp_qr: string = "";
   public saas: any = null;
-  private user_: any = null;
   private saas_: any = null;
 
   constructor(
@@ -79,21 +78,13 @@ export class AccountPage implements OnInit {
     private alert: AlertController,
     public misc: Miscellaneous
   ) {
-    this.user_ = this.auth.user.subscribe((user: any) => {
-      this.user = user;
-      this.perm = user && user.perm ? true : false;
-      this.accountf_api_key = user.api_key;
-      this.is_initialized = true;
-    });
     this.saas_ = this.misc.saas.subscribe((saas: any) => {
       this.saas = saas;
     });
   }
 
   ngOnDestroy() {
-    this.user_ = null;
     this.saas_ = null;
-    this.auth.user.unsubscribe;
     this.misc.saas.unsubscribe;
   }
 
@@ -101,6 +92,12 @@ export class AccountPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.submenu = this.router.url.split("/")[2];
     this.subheader = this.submenu === "profile-settings" ? "Profile Settings" : this.submenu === "signout" ? "Sign Out" : this.submenu;
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.user = LSUSERMETA;
+      this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
+      this.accountf_api_key = LSUSERMETA.api_key;
+      this.is_initialized = true;
+    });
   }
 
   doTheme(LSTHEME: any) {
