@@ -193,14 +193,14 @@ https://www.gnu.org/licenses.
                                         [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                         [maxlength]="field.maxLength" [minlength]="field.minLength"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
-                                        [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="true"
+                                        [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="false"
                                         [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
                                         [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
                                     </ion-input>
                                     <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
                                         [(ngModel)]="data_[field.name]"
                                         [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                        auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
+                                        auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength" autocorrect="off" 
                                         [formControlName]="field.name" [required]="field.required" spellcheck="false"
                                         debounce="500">
                                     </ion-textarea>

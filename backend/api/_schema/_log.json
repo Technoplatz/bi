@@ -33,7 +33,7 @@
       "maxLength": 16,
       "title": "IP",
       "description": "IP address",
-      "width": 100
+      "width": 160
     },
     "log_collection_id": {
       "bsonType": "string",
@@ -54,24 +54,19 @@
       "required": true,
       "width": 120
     },
-    "log_object_id": {
-      "bsonType": "string",
-      "minLength": 1,
-      "maxLength": 64,
-      "title": "Object Id",
-      "description": "Object Id",
-      "width": 120
-    },
     "log_document": {
-      "bsonType": "object",
+      "bsonType": "string",
       "title": "Document",
       "description": "Document",
-      "width": 120
+      "textarea": true,
+      "minLength": 0,
+      "maxLength": 2048,
+      "width": 180
     }
   },
   "required": ["log_type", "log_date", "log_user_id", "log_operation"],
   "sort": {
     "_created_at": -1
   },
-  "index": [["log_object_id"], ["log_operation"], ["log_collection_id"], ["log_type", "log_date"]]
+  "index": [["log_operation"], ["log_collection_id"], ["log_type", "log_date"]]
 }

@@ -332,8 +332,7 @@ class Misc:
                 "log_ip": Misc().get_user_ip_f(),
                 "log_collection_id": obj["collection"] if "collection" in obj else None,
                 "log_operation": obj["op"] if "op" in obj else None,
-                "log_object_id": obj["object_id"] if "object_id" in obj else None,
-                "log_document": obj["document"] if "document" in obj else None,
+                "log_document": str(obj["document"]) if "document" in obj else None,
                 "_created_at": self.get_now_f(),
                 "_created_by": obj["user"],
             }
@@ -2563,15 +2562,13 @@ class Crud:
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": collection_id_,
-                    "op": "update",
-                    "user": user_["email"] if user_ else None,
-                    "document": doc_,
-                }
-            )
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": collection_id_,
+                "op": "update",
+                "user": user_["email"] if user_ else None,
+                "document": doc_,
+            })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
@@ -3234,6 +3231,7 @@ class OTP:
     """
     docstring is in progress
     """
+
     def reset_otp_f(self, email_):
         """
         docstring is in progress
@@ -3253,7 +3251,7 @@ class OTP:
                 "_modified_by": email_,
                 "_otp_secret_modified_at": Misc().get_now_f(),
                 "_otp_secret_modified_by": email_,
-                }, "$inc": {"_modified_count": 1}
+            }, "$inc": {"_modified_count": 1}
             })
 
             return {"result": True, "qr": qr_}
@@ -3299,7 +3297,7 @@ class OTP:
                     "_otp_validated_at": Misc().get_now_f(),
                     "_otp_validated_by": email_,
                     "_otp_validated_ip": Misc().get_user_ip_f(),
-                    }, "$inc": {"_modified_count": 1}
+                }, "$inc": {"_modified_count": 1}
                 })
             else:
                 Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
@@ -3307,7 +3305,7 @@ class OTP:
                     "_otp_not_validated_at": Misc().get_now_f(),
                     "_otp_not_validated_by": email_,
                     "_otp_not_validated_ip": Misc().get_user_ip_f()
-                    }, "$inc": {"_modified_count": 1}
+                }, "$inc": {"_modified_count": 1}
                 })
                 raise AuthError("invalid otp")
 
@@ -3415,7 +3413,6 @@ class Auth:
     """
     docstring is in progress
     """
-
     def saas_f(self):
         """
         docstring is in progress
@@ -3423,15 +3420,10 @@ class Auth:
         try:
             saas_ = {
                 "company": COMPANY_NAME_,
-                "version": "Technoplatz BI - Enterprise Edition"
-                if SAAS_.lower() == "ee"
-                else "Technoplatz BI - Community Edition",
+                "version": "Technoplatz BI - Enterprise Edition" if SAAS_.lower() == "ee" else "Technoplatz BI - Community Edition",
             }
 
             return {"result": True, "user": None, "saas": saas_}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
 
         except Exception as exc:
             return Misc().exception_f(exc)
@@ -3478,21 +3470,19 @@ class Auth:
             return Misc().api_error_f(exc)
 
         except AuthError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": "_auth",
-                    "op": op_,
-                    "user": email_,
-                    "document": {
-                        "otp_entered": tfac_,
-                        "otp_expected": aut_tfac_,
-                        "exception": str(exc),
-                        "_modified_at": Misc().get_now_f(),
-                        "_modified_by": email_,
-                    },
+            Misc().log_f({
+                "type": "Error",
+                "collection": "_auth",
+                "op": op_,
+                "user": email_,
+                "document": {
+                    "otp_entered": tfac_,
+                    "otp_expected": aut_tfac_,
+                    "exception": str(exc),
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": email_,
                 }
-            )
+            })
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
@@ -3685,20 +3675,18 @@ class Auth:
             return Misc().api_error_f(exc)
 
         except AuthError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": "_firewall",
-                    "op": "block",
-                    "user": user_["usr_id"],
-                    "document": {
-                        "ip": ip_,
-                        "exception": str(exc),
-                        "_modified_at": Misc().get_now_f(),
-                        "_modified_by": user_["usr_id"],
-                    },
+            Misc().log_f({
+                "type": "Error",
+                "collection": "_firewall",
+                "op": "block",
+                "user": user_["usr_id"],
+                "document": {
+                    "ip": ip_,
+                    "exception": str(exc),
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": user_["usr_id"],
                 }
-            )
+            })
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
