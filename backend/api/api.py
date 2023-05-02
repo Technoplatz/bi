@@ -873,9 +873,9 @@ class Crud:
             if not auth_:
                 raise APIError(f"user auth not found {email_}")
 
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "purge")
-            if not verify_2fa_f_["result"]:
-                raise APIError(verify_2fa_f_["msg"])
+            verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "purge")
+            if not verify_otp_f_["result"]:
+                raise APIError(verify_otp_f_["msg"])
 
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
@@ -1110,7 +1110,6 @@ class Crud:
         except pymongo.errors.PyMongoError as exc:
             session_.abort_transaction()
             res_ = Misc().mongo_error_f(exc)
-
             email_sent_ = Email().sendEmail_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
@@ -3474,7 +3473,6 @@ class OTP:
     """
     docstring is in progress
     """
-
     def reset_otp_f(self, email_):
         """
         docstring is in progress
@@ -3487,14 +3485,13 @@ class OTP:
             aut_otp_secret_ = pyotp.random_base32()
             qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
 
-            Mongo().db_["_auth"].update_one({"aut_id": email_}, {
-                "$set": {
-                    "aut_otp_secret": aut_otp_secret_,
-                    "aut_otp_validated": False,
-                    "_modified_at": Misc().get_now_f(),
-                    "_modified_by": email_,
-                    "_otp_secret_modified_at": Misc().get_now_f(),
-                    "_otp_secret_modified_by": email_,
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
+                "aut_otp_secret": aut_otp_secret_,
+                "aut_otp_validated": False,
+                "_modified_at": Misc().get_now_f(),
+                "_modified_by": email_,
+                "_otp_secret_modified_at": Misc().get_now_f(),
+                "_otp_secret_modified_by": email_,
                 }, "$inc": {"_modified_count": 1}
             })
 
@@ -3512,81 +3509,59 @@ class OTP:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def validate_otp_f(self, email_, request_):
+    def validate_qr_f(self, email_, request_):
         """
         docstring is in progress
         """
         try:
-            # read auth
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
                 raise AuthError("account not found")
 
-            aut_otp_secret_ = (
-                auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
-            )
-            aut_otp_validated_ = (
-                auth_["aut_otp_validated"] if "aut_otp_validated" in auth_ else False
-            )
-
+            aut_otp_secret_ = auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
             if not aut_otp_secret_:
-                raise AuthError("OTP secret is missing")
+                raise AuthError("otp secret is missing")
 
             otp_ = request_["otp"] if "otp" in request_ else None
             if not otp_:
-                raise AuthError("OTP is missing")
+                raise AuthError("otp is missing")
 
             totp_ = pyotp.TOTP(aut_otp_secret_)
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
-                name=email_, issuer_name="BI"
-            )
+            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="BI")
 
             validated_ = False
 
             if totp_.verify(otp_):
                 validated_ = True
-                Mongo().db_["_auth"].update_one(
-                    {"aut_id": email_},
-                    {
-                        "$set": {
-                            "aut_otp_validated": validated_,
-                            "_otp_validated_at": Misc().get_now_f(),
-                            "_otp_validated_by": email_,
-                            "_otp_validated_ip": Misc().get_user_ip_f(),
-                        },
-                        "$inc": {"_modified_count": 1},
-                    },
-                )
+                Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
+                    "aut_otp_validated": validated_,
+                    "_otp_validated_at": Misc().get_now_f(),
+                    "_otp_validated_by": email_,
+                    "_otp_validated_ip": Misc().get_user_ip_f(),
+                    }, "$inc": {"_modified_count": 1}
+                })
             else:
-                if not aut_otp_validated_:
-                    Mongo().db_["_auth"].update_one(
-                        {"aut_id": email_},
-                        {
-                            "$set": {
-                                "aut_otp_validated": validated_,
-                                "_otp_not_validated_at": Misc().get_now_f(),
-                                "_otp_not_validated_by": email_,
-                                "_otp_not_validated_ip": Misc().get_user_ip_f(),
-                            },
-                            "$inc": {"_modified_count": 1},
-                        },
-                    )
+                Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
+                    "aut_otp_validated": validated_,
+                    "_otp_not_validated_at": Misc().get_now_f(),
+                    "_otp_not_validated_by": email_,
+                    "_otp_not_validated_ip": Misc().get_user_ip_f()
+                    }, "$inc": {"_modified_count": 1}
+                })
+                raise AuthError("invalid otp")
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": "_auth",
-                    "op": "validate-otp",
-                    "user": email_,
-                    "document": {
-                        "otp": otp_,
-                        "success": validated_,
-                        "ip": Misc().get_user_ip_f(),
-                        "_modified_at": Misc().get_now_f(),
-                        "_modified_by": email_,
-                    },
-                }
-            )
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": "_auth",
+                "op": "validate-otp",
+                "user": email_,
+                "document": {
+                    "otp": otp_,
+                    "success": validated_,
+                    "ip": Misc().get_user_ip_f(),
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": email_,
+                }})
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
@@ -3709,40 +3684,29 @@ class Auth:
             if not auth_:
                 raise AuthError(f"user auth not found {email_}")
 
-            # checks if tfac is valid format
             compile_ = re.compile("^[0-9]{6,6}$")
             if not re.search(compile_, str(tfac_)):
-                raise AuthError("invalid TFAC")
+                raise AuthError("invalid otp format")
 
-            aut_otp_secret_ = (
-                auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
-            )
-            aut_otp_validated_ = (
-                auth_["aut_otp_validated"] if "aut_otp_validated" in auth_ else False
-            )
-            aut_tfac_ = auth_["aut_tfac"] if "aut_tfac" in auth_ else None
+            aut_otp_secret_ = auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ and auth_["aut_otp_secret"] is not None else None
+            aut_tfac_ = auth_["aut_tfac"] if "aut_tfac" in auth_ and auth_["aut_tfac"] is not None else None
+            if not aut_tfac_:
+                raise AuthError("otp not provided")
 
-            if aut_tfac_ and str(aut_tfac_) == str(tfac_):
-                pass
-            else:
-                if aut_otp_secret_ and aut_otp_validated_:
-                    validate_otp_f_ = OTP().validate_otp_f(email_, {"otp": tfac_})
-                    if not validate_otp_f_["result"]:
-                        raise AuthError("Invalid OTP code")
+            if str(aut_tfac_) != str(tfac_):
+                if aut_otp_secret_:
+                    validate_qr_f_ = OTP().validate_qr_f(email_, {"otp": tfac_})
+                    if not validate_qr_f_["result"]:
+                        raise AuthError("invalid otp")
                 else:
-                    raise AuthError("Invalid OTP")
+                    raise AuthError("invalid otp")
 
-            Mongo().db_["_auth"].update_one(
-                {"aut_id": email_},
-                {
-                    "$set": {
-                        "aut_tfac": None,
-                        "aut_tfac_ex": aut_tfac_,
-                        "_modified_at": Misc().get_now_f(),
-                    },
-                    "$inc": {"_modified_count": 1},
-                },
-            )
+            Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {
+                "aut_tfac": None,
+                "aut_tfac_ex": aut_tfac_,
+                "_modified_at": Misc().get_now_f()
+                }, "$inc": {"_modified_count": 1}
+            })
 
             return {"result": True}
 
@@ -4067,9 +4031,9 @@ class Auth:
             if not auth_:
                 raise AuthError("account not found")
 
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "reset")
-            if not verify_2fa_f_["result"]:
-                raise AuthError(verify_2fa_f_["msg"])
+            verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "reset")
+            if not verify_otp_f_["result"]:
+                raise AuthError(verify_otp_f_["msg"])
 
             hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
@@ -4116,9 +4080,9 @@ class Auth:
             user_ = user_validate_["user"] if "user" in user_validate_ else None
             auth_ = user_validate_["auth"] if "auth" in user_validate_ else None
 
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
-            if not verify_2fa_f_["result"]:
-                raise AuthError(verify_2fa_f_["msg"])
+            verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
+            if not verify_otp_f_["result"]:
+                raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
             perm_ = Misc().permitted_user_f(user_)
@@ -4279,15 +4243,15 @@ class Auth:
 
             if not password_:
                 raise AuthError("no credentials provided")
-            else:
-                salt_ = auth_["aut_salt"]
-                key_ = auth_["aut_key"]
-                hash_f_ = self.password_hash_f(password_, salt_)
-                if not hash_f_["result"]:
-                    raise APIError(hash_f_["msg"])
-                new_key_ = hash_f_["key"]
-                if new_key_ != key_:
-                    raise AuthError("invalid email or password")
+
+            salt_ = auth_["aut_salt"]
+            key_ = auth_["aut_key"]
+            hash_f_ = self.password_hash_f(password_, salt_)
+            if not hash_f_["result"]:
+                raise APIError(hash_f_["msg"])
+            new_key_ = hash_f_["key"]
+            if new_key_ != key_:
+                raise AuthError("invalid email or password")
 
             firewall_ = self.firewall_f(user_)
             if not firewall_["result"]:
@@ -4406,26 +4370,24 @@ class Auth:
             )
             api_key_ = secrets.token_hex(16)
 
-            Mongo().db_["_auth"].insert_one(
-                {
-                    "aut_id": email_,
-                    "aut_salt": salt_,
-                    "aut_key": key_,
-                    "aut_api_key": api_key_,
-                    "aut_tfac": None,
-                    "aut_expires": 0,
-                    "aut_otp_secret": aut_otp_secret_,
-                    "aut_otp_validated": False,
-                    "_qr_modified_at": Misc().get_now_f(),
-                    "_qr_modified_by": email_,
-                    "_qr_modified_count": 0,
-                    "_created_at": Misc().get_now_f(),
-                    "_created_by": email_,
-                    "_created_ip": Misc().get_user_ip_f(),
-                    "_modified_at": Misc().get_now_f(),
-                    "_modified_by": email_,
-                }
-            )
+            Mongo().db_["_auth"].insert_one({
+                "aut_id": email_,
+                "aut_salt": salt_,
+                "aut_key": key_,
+                "aut_api_key": api_key_,
+                "aut_tfac": None,
+                "aut_expires": 0,
+                "aut_otp_secret": aut_otp_secret_,
+                "aut_otp_validated": False,
+                "_qr_modified_at": Misc().get_now_f(),
+                "_qr_modified_by": email_,
+                "_qr_modified_count": 0,
+                "_created_at": Misc().get_now_f(),
+                "_created_by": email_,
+                "_created_ip": Misc().get_user_ip_f(),
+                "_modified_at": Misc().get_now_f(),
+                "_modified_by": email_,
+            })
 
             return {"result": True, "qr": qr_}
 
@@ -4500,9 +4462,16 @@ def storage_f():
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
-        if not validate_["result"]:
-            raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
+        validate_request_f_ = Security().validate_request_f()
+        if not validate_request_f_["result"]:
+            raise APIError(validate_request_f_["msg"] if "msg" in validate_request_f_ else "validation error")
+
+        jwt_validate_f_ = Auth().jwt_validate_f()
+        if not jwt_validate_f_["result"]:
+            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+        if not user_:
+            raise SessionError({"result": False, "msg": "user session not found"})
 
         form_ = request.form.to_dict(flat=True)
         if not form_:
@@ -4518,13 +4487,6 @@ def storage_f():
             raise APIError(col_check_["msg"])
 
         prefix_ = col_check_["collection"]["col_prefix"]
-        email_ = form_["email"] if "email" in form_ else None
-        token_ = form_["token"] if "token" in form_ else None
-
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
-        if not validate_["result"]:
-            raise APIError(validate_["msg"] if "msg" in validate_ else "crud validation error")
-        user_ = validate_["user"]
 
         import_f_ = Crud().import_f({
             "form": form_,
@@ -4602,9 +4564,9 @@ def crud_f():
 
         if op_ in ["announce"]:
             tfac_ = input_["tfac"]
-            verify_2fa_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
-            if not verify_2fa_f_["result"]:
-                raise APIError(verify_2fa_f_)
+            verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
+            if not verify_otp_f_["result"]:
+                raise APIError(verify_otp_f_)
 
         if op_ == "read":
             res_ = Crud().read_f(input_)
@@ -4721,7 +4683,7 @@ def otp_f():
         elif op_ == "request":
             res_ = OTP().request_otp_f(email_)
         elif op_ == "validate":
-            res_ = OTP().validate_otp_f(email_, request_)
+            res_ = OTP().validate_qr_f(email_, request_)
         else:
             raise APIError(f"operation not supported {op_}")
 

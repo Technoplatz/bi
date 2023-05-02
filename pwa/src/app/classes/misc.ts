@@ -99,15 +99,15 @@ export class Miscellaneous {
               reject(res_ && res_.msg ? res_.msg : res_);
             }
           }, (res: any) => {
-            console.error("*** api error", res);
-            if (res.error && res.status) {
-              if (res.status === 403) {
+            const res_ = res;
+            if (res_.error && res_.status) {
+              if (res_.status === 403) {
                 this.session_.next("ended");
-                this.doMessage(res.error.msg, "error");
+                this.doMessage(res_.error.msg, "error");
               }
-              reject(res.error.msg ? res.error.msg : res.error);
+              reject(res_.error.msg ? res_.error.msg : res_.error);
             } else {
-              reject(res);
+              reject(res_);
             }
           });
         });
@@ -160,13 +160,13 @@ export class Miscellaneous {
   apiFileCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        posted.append("email", LSUSERMETA.email);
-        posted.append("token", LSUSERMETA.token);
+        const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
         const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
+        posted.append("email", LSUSERMETA.email);
         this.getAPIHost().then((apiHost) => {
           this.http.post<any>(apiHost + "/" + url, posted, {
             headers: new HttpHeaders({
-              "Authorization": "Bearer " + LSUSERMETA.token,
+              "Authorization": "Bearer " + token_,
               "X-Api-Key": api_key_
             }),
             observe: "response" as "response"
@@ -175,12 +175,20 @@ export class Miscellaneous {
             if (res_ && res_.result) {
               resolve(res_);
             } else {
-              console.error("*** api file call negative", res);
+              console.error("*** file api negative", res_);
               reject(res_ && res_.msg ? res_.msg : res_);
             }
           }, (res: any) => {
-            console.error("*** api call error", res);
-            reject(res.error && res.error.msg ? res.error.msg : "please click cancel and try again");
+            const res_ = res;
+            if (res_.error && res_.status) {
+              if (res_.status === 403) {
+                this.session_.next("ended");
+                this.doMessage(res_.error.msg, "error");
+              }
+              reject(res_.error.msg ? res_.error.msg : res_.error);
+            } else {
+              reject(res_);
+            }
           });
         });
       });

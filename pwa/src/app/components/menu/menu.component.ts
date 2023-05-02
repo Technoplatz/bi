@@ -89,9 +89,9 @@ export class MenuComponent implements OnInit {
 
   doMenuToggle() {
     this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = !LSMENUTOGGLE;
-      this.misc.menutoggle.next(this.menutoggle);
+      this.menutoggle = !LSMENUTOGGLE ? true : false;
       this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
+        this.misc.menutoggle.next(this.menutoggle);
       });
     });
   }

@@ -414,7 +414,6 @@ export class SignPage implements OnInit {
         });
       }).catch((err: any) => {
         this.signinForm?.controls["password"].setValue(null);
-        this.error = err;
       }).finally(() => {
         this.isInProgress = false;
       });
@@ -427,25 +426,22 @@ export class SignPage implements OnInit {
 
   TFAC() {
     this.isInProgress = true;
-    this.error = "";
     this.success_str = "";
     this.auth.TFAC({
       email: this.email,
       password: this.signinForm.get("password")?.value,
       tfac: this.TFACForm.get("tfac")?.value
-    }).then(() => { }).catch((error: any) => {
-      this.TFACForm.controls["tfac"].setValue(null);
-      this.error = error;
-      this.auth.user.next(null);
-    }).finally(() => {
+    }).then(() => {
       this.doDismissModal();
+    }).catch((error: any) => {
+      this.TFACForm.controls["tfac"].setValue(null);
+    }).finally(() => {
       this.isInProgress = false;
     });
   }
 
   Reset() {
     this.isInProgress = true;
-    this.error = "";
     this.success_str = "";
     this.auth.Reset({
       email: this.email,
@@ -459,7 +455,6 @@ export class SignPage implements OnInit {
       this.isInProgress = false;
       console.error("error reset", error);
       this.resetForm.controls["tfac"].setValue(null);
-      this.error = error;
     });
   }
 
@@ -468,7 +463,6 @@ export class SignPage implements OnInit {
       console.error("form is not valid");
     } else {
       this.isInProgress = true;
-      this.error = "";
       this.success_str = "";
       this.auth.Forgot({
         email: this.forgotForm.get("email")?.value
@@ -486,7 +480,6 @@ export class SignPage implements OnInit {
       }).catch((error: any) => {
         this.isInProgress = false;
         this.forgotForm.controls["email"].setValue(null);
-        this.error = error;
       });
     }
   }
@@ -494,7 +487,6 @@ export class SignPage implements OnInit {
   Signup() {
     if (this.signupForm.get("email")?.valid && this.signupForm.get("name")?.valid && this.signupForm.get("password")?.valid && this.signupForm.get("passcode")?.valid) {
       this.isInProgress = true;
-      this.error = "";
       this.success_str = "";
       this.auth.Signup({
         name: this.signupForm.get("name")?.value,
@@ -508,7 +500,6 @@ export class SignPage implements OnInit {
       }).catch((error: any) => {
         this.isInProgress = false;
         this.signinForm?.controls["password"].setValue(null);
-        this.error = error;
       });
     }
   }

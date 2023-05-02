@@ -62,15 +62,10 @@ export class AppComponent implements OnInit {
     private storage: Storage
   ) {
     this.misc.menutoggle.subscribe((res: any) => {
-      this.menutoggle = res ? false : true;
+      this.menutoggle = res;
     });
     this.auth.user.subscribe((user: any) => {
       this.user_ = user;
-      if (!user) {
-        this.storage.remove("LSUSERMETA").then(() => {
-          this.misc.navi.next("/");
-        });
-      }
     });
     this.misc.navi.subscribe((path: any) => {
       this.router.navigateByUrl(path).then(() => { }).catch((error: any) => {
@@ -92,7 +87,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = LSMENUTOGGLE ? false : true;
+      this.menutoggle = LSMENUTOGGLE;
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.auth.user.next(LSUSERMETA);
         if (LSUSERMETA) {
@@ -104,9 +99,9 @@ export class AppComponent implements OnInit {
           });
         }
       });
-      this.storage.get("LSTHEME").then((res: any) => {
-        if (res) {
-          document.documentElement.style.setProperty("--ion-color-primary", res.color);
+      this.storage.get("LSTHEME").then((LSTHEME: any) => {
+        if (LSTHEME) {
+          document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
         } else {
           this.storage.set("LSTHEME", environment.themes[0]).then(() => {
             document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);

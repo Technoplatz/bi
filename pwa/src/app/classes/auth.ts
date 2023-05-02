@@ -49,7 +49,14 @@ export class Auth {
     private crud: Crud
   ) {
     this.misc.session_.subscribe((session_: any) => {
-      session_ === "ended" ? this.user.next(null) : null;
+      session_ === "ended" ? this.setUserOut() : null;
+    });
+  }
+
+  setUserOut() {
+    this.storage.remove("LSUSERMETA").then(() => {
+      this.user.next(null);
+      this.misc.navi.next("/");
     });
   }
 
@@ -61,13 +68,13 @@ export class Auth {
           resolve(true);
         } else {
           this.misc.doMessage(res.msg, "error");
-          this.user.next(null);
+          this.setUserOut();
           reject(res.msg);
         }
       }).catch((res: any) => {
-        this.misc.doMessage(res.msg, "error");
-        this.user.next(null);
-        reject(res.msg);
+        this.misc.doMessage(res, "error");
+        this.setUserOut();
+        reject(res);
       });
     });
   }
@@ -106,12 +113,12 @@ export class Auth {
           });
         } else {
           this.misc.doMessage(res.msg, "error");
-          this.user.next(null);
+          this.setUserOut();
           reject(res.msg);
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
-        this.user.next(null);
+        this.setUserOut();
         reject(res);
       });
     });
@@ -173,7 +180,7 @@ export class Auth {
         op: "signout"
       })).then((res: any) => {
         if (res && res.result) {
-          this.user.next(null)
+          this.setUserOut();
           resolve(true);
         } else {
           reject(res.msg);
@@ -191,7 +198,7 @@ export class Auth {
         if (LSUSERMETA && LSUSERMETA?.token) {
           resolve(true);
         } else {
-          this.user.next(null);
+          this.setUserOut();
           reject("session closed");
         }
       });
@@ -203,7 +210,7 @@ export class Auth {
       creds.op = "signup";
       this.misc.apiCall("otp", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
-          this.user.next(null);
+          this.setUserOut();
           resolve(true);
         } else {
           reject(res.msg);
@@ -220,7 +227,7 @@ export class Auth {
       creds.op = "forgot";
       this.misc.apiCall("otp", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
-          this.user.next(null);
+          this.setUserOut();
           resolve(true);
         } else {
           reject(res.msg);
