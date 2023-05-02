@@ -4,8 +4,9 @@
       "bsonType": "string",
       "title": "Product ID",
       "description": "Product ID",
-      "minLength": 1,
-      "maxLength": 64,
+      "minLength": 7,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{7,16}$",
       "replacement": [
         {
           "find": "-",
@@ -16,7 +17,7 @@
           "replace": ""
         }
       ],
-      "width": 120
+      "width": 130
     },
     "prd_description": {
       "bsonType": "string",
@@ -27,7 +28,7 @@
       "width": 350
     }
   },
-  "required": ["prd_no", "prd_description"],
+  "required": ["prd_no"],
   "index": [],
   "unique": [["prd_no"]],
   "parents": [],

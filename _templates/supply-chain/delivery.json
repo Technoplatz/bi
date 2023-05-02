@@ -10,11 +10,12 @@
       "width": 110
     },
     "dnn_line_no": {
-      "bsonType": "number",
-      "title": "Line No",
-      "description": "Line No",
-      "minimum": 10,
-      "maximum": 1000,
+      "bsonType": "string",
+      "title": "Line",
+      "description": "Line Number",
+      "minLength": 1,
+      "maxLength": 4,
+      "pattern": "^[0-9]{1,4}$",
       "width": 110
     },
     "dnn_status": {
@@ -140,8 +141,9 @@
       "bsonType": "string",
       "title": "Product ID",
       "description": "Product ID",
-      "minLength": 1,
-      "maxLength": 64,
+      "minLength": 7,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{7,16}$",
       "replacement": [
         {
           "find": "-",
@@ -152,7 +154,7 @@
           "replace": ""
         }
       ],
-      "width": 110
+      "width": 130
     },
     "dnn_prd_description": {
       "bsonType": "string",
@@ -296,6 +298,23 @@
         }
       ],
       "get": ["acc_no", "acc_name"]
+    },
+    {
+      "collection": "invoice",
+      "match": [
+        {
+          "key": "dnn_no",
+          "value": "inv_dnn_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "inv_dnn_no",
+          "op": "ne",
+          "value": "zzz"
+        }
+      ],
+      "get": ["inv_no", "inv_dnn_no"]
     }
   ],
   "actions": [
@@ -633,7 +652,7 @@
       "data_sort": {
         "_modified_at": -1
       },
-      "data_excluded": [],
+      "data_excluded": ["inv_dnn_no"],
       "data_index": ["acc_nick_name"],
       "data_columns": ["dnn_status"],
       "data_values": [

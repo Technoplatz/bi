@@ -19,19 +19,21 @@
       "width": 110
     },
     "ser_line_no": {
-      "bsonType": "number",
-      "title": "Line No",
-      "description": "Line No",
-      "minimum": 0,
-      "maximum": 1000,
+      "bsonType": "string",
+      "title": "Line",
+      "description": "Line Number",
+      "minLength": 1,
+      "maxLength": 4,
+      "pattern": "^[0-9]{1,4}$",
       "width": 110
     },
     "ser_prd_no": {
       "bsonType": "string",
       "title": "Product ID",
       "description": "Product ID",
-      "minLength": 1,
-      "maxLength": 64,
+      "minLength": 7,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{7,16}$",
       "replacement": [
         {
           "find": "-",
@@ -42,7 +44,7 @@
           "replace": ""
         }
       ],
-      "width": 110
+      "width": 130
     },
     "ser_case_no": {
       "bsonType": "string",
