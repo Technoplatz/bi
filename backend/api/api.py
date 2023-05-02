@@ -268,8 +268,8 @@ class Misc:
         if NOTIFICATION_SLACK_HOOK_URL_:
             ip_ = self.get_user_ip_f()
             file_ = __file__ if __file__ else "file not detected"
-            line_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else "line not detected"
-            name_ = type(exc).__name__ if hasattr(type(exc), "__name__") else "Exception"
+            line_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") else "line not detected"
+            name_ = exc.__name__ if hasattr(exc, "__name__") else "Exception"
             exception_ = str(exc)
             notification_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, NAME: {name_}, FILE: {file_}, LINE: {line_}, EXCEPTION: {exception_}"
             print("*** notification_", notification_)

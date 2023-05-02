@@ -56,6 +56,15 @@
       "bsonType": "string",
       "title": "Account No",
       "description": "Account No",
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[0-9-]{10,11}$",
+      "width": 110
+    },
+    "dnn_acc_name": {
+      "bsonType": "string",
+      "title": "Account Name",
+      "description": "Account Name",
       "minLength": 1,
       "width": 110,
       "maxLength": 64
@@ -281,9 +290,9 @@
       ],
       "filter": [
         {
-          "key": "odi_status",
+          "key": "acc_is_active",
           "op": "eq",
-          "value": "1-Arrived"
+          "value": true
         }
       ],
       "get": ["acc_no", "acc_name"]
@@ -625,7 +634,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_acc_no"],
+      "data_index": ["acc_nick_name"],
       "data_columns": ["dnn_status"],
       "data_values": [
         {

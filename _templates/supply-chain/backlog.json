@@ -68,9 +68,10 @@
       "bsonType": "string",
       "title": "Account No",
       "description": "Account No",
-      "minLength": 1,
-      "width": 110,
-      "maxLength": 64
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[0-9-]{10,11}$",
+      "width": 110
     },
     "bck_acc_name": {
       "bsonType": "string",
@@ -146,9 +147,9 @@
       ],
       "filter": [
         {
-          "key": "odi_status",
+          "key": "acc_is_active",
           "op": "eq",
-          "value": "1-Arrived"
+          "value": true
         }
       ],
       "get": ["acc_no", "acc_name"]
@@ -218,7 +219,7 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["bck_acc_name"],
+      "data_index": ["acc_nick_name"],
       "data_columns": ["bck_status"],
       "data_values": [
         {
