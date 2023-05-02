@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import os
 import io
+import sys
 import logging
 import base64
 import re
@@ -267,11 +268,15 @@ class Misc:
         """
         if NOTIFICATION_SLACK_HOOK_URL_:
             ip_ = self.get_user_ip_f()
-            file_ = __file__ if __file__ else "file not detected"
-            line_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") else "line not detected"
-            name_ = exc.__name__ if hasattr(exc, "__name__") else "Exception"
+            exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
+            file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
+            line_ = exc_tb_.tb_lineno
             exception_ = str(exc)
-            notification_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, NAME: {name_}, FILE: {file_}, LINE: {line_}, EXCEPTION: {exception_}"
+            # print(exc_type, fname, exc_tb.tb_lineno)
+            # file_ = __file__ if __file__ else "file not detected"
+            # line_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") else "line not detected"
+            # name_ = exc.__name__ if hasattr(exc, "__name__") else "Exception"
+            notification_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
             print("*** notification_", notification_)
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_)}), timeout=10)
             if resp_.status_code != 200:
@@ -1024,14 +1029,14 @@ class Crud:
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                 file_.seek(0, os.SEEK_END)
-                df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl")
+                df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")
             elif mimetype_ == "text/csv":
                 content_ = file_.read().decode("utf-8")
                 filesize_ = file_.content_length
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                 if mimetype_ == "text/csv":
-                    df_ = pd.read_csv(io.StringIO(content_), header=0)
+                    df_ = pd.read_csv(io.StringIO(content_), header=0, dtype="object")
             else:
                 raise APIError("file type is not supported")
 
@@ -1048,14 +1053,14 @@ class Crud:
                             df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
-                            if "exclude" in property_ and len(property_["exclude"]) > 0:
-                                df_[column_] = df_[column_].str.replace(
-                                    "|".join(property_["exclude"]), "", regex=False
-                                )
+                            if "replacement" in property_ and len(property_["replacement"]) > 0:
+                                for repl_ in property_["replacement"]:
+                                    find_ = repl_["find"] if "find" in repl_ and repl_["find"] is not None else None
+                                    replace_ = repl_["replace"] if "replace" in repl_ and repl_["replace"] is not None else ""
+                                    if find_ and replace_ is not None:
+                                        df_[column_] = df_[column_].str.replace(find_, replace_, regex=True)
                         elif property_["bsonType"] in ["number", "int", "decimal"]:
-                            df_[column_] = df_[column_].apply(
-                                self.frame_convert_number_f
-                            )
+                            df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                     else:
                         columns_tobe_deleted_.append(column_)
                 else:
@@ -1069,15 +1074,7 @@ class Crud:
 
             # SUM OF ALL NUMERICS BY COMBINING DUPLICATE ITEMS
             # ITS OBVIOUS BUT TRUE :)
-            df_ = df_.groupby(
-                list(
-                    df_.select_dtypes(
-                        exclude=["float", "int", "float64", "int64"]
-                    ).columns
-                ),
-                as_index=False,
-                dropna=False,
-            ).sum()
+            df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
 
             # REMOVING NANS
             df_.replace(
@@ -1106,12 +1103,13 @@ class Crud:
             return {"result": True, "count": count_, "msg": "file was imported successfully"}
 
         except pymongo.errors.PyMongoError as exc:
+            exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             session_.abort_transaction()
             res_ = Misc().mongo_error_f(exc)
             email_sent_ = Email().sendEmail_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
-                "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{res_['msg']}"
+                "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{str(exc_obj_)}"
             })
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
@@ -3413,6 +3411,7 @@ class Auth:
     """
     docstring is in progress
     """
+
     def saas_f(self):
         """
         docstring is in progress
@@ -3458,7 +3457,7 @@ class Auth:
                 "aut_tfac": None,
                 "aut_tfac_ex": aut_tfac_,
                 "_modified_at": Misc().get_now_f()
-                }, "$inc": {"_modified_count": 1}
+            }, "$inc": {"_modified_count": 1}
             })
 
             return {"result": True}

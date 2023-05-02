@@ -111,7 +111,6 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="is_pane_ok && is_crud" class="ion-no-padding">
           <ion-row class="ion-no-margin">
             <ion-col *ngIf="perm && actions?.length > 0; else noaction">
-              <!-- <h6>{{ 'ACTIONS' | translate }}</h6> -->
               <div class="act-buttons-wrapper">
                 <span *ngFor="let item of actions; let ac = index">
                   <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button"
@@ -134,7 +133,6 @@ https://www.gnu.org/licenses.
 
         <!-- CRUD GRID SECTION -->
         <ion-grid *ngIf="is_initialized; else dataloading" class="ion-no-padding ion-margin-top data-grid">
-
           <!-- CRUD HEADERS -->
           <ion-row *ngIf="data.length >= 0" class="ion-nowrap search-row">
             <ion-col class="ion-text-center check-column">
@@ -146,7 +144,7 @@ https://www.gnu.org/licenses.
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
                 <span class="column-title">{{ item.value.title }} <span *ngIf="searched[item.key]?.f && is_loaded"
                     class="danger">[ F ]</span><br /> </span>
-                {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
+                {{ item?.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
               </div>
               <div *ngIf="searched[item.key]?.actived" class="search-box">
                 <div *ngIf="!searched[item.key].setmode">

@@ -33,7 +33,7 @@
       "maxLength": 16,
       "title": "IP",
       "description": "IP address",
-      "width": 160
+      "width": 140
     },
     "log_collection_id": {
       "bsonType": "string",

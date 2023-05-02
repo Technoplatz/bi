@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "ser_no": {
+      "bsonType": "string",
+      "title": "Serial No",
+      "description": "Serial Number",
+      "minLength": 4,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9-]{4,16}$",
+      "width": 110
+    },
+    "ser_dnn_no": {
+      "bsonType": "string",
+      "title": "DN No",
+      "description": "Delivery Number",
+      "minLength": 10,
+      "maxLength": 16,
+      "pattern": "^[0-9-]{10,16}$",
+      "width": 110
+    },
+    "ser_line_no": {
+      "bsonType": "number",
+      "title": "Line No",
+      "description": "Line No",
+      "minimum": 0,
+      "maximum": 1000,
+      "width": 110
+    },
+    "ser_prd_no": {
+      "bsonType": "string",
+      "title": "Product ID",
+      "description": "Product ID",
+      "minLength": 1,
+      "maxLength": 64,
+      "replacement": [
+        {
+          "find": "-",
+          "replace": ""
+        },
+        {
+          "find": "_",
+          "replace": ""
+        }
+      ],
+      "width": 110
+    },
+    "ser_case_no": {
+      "bsonType": "string",
+      "title": "Case No",
+      "description": "Case Number",
+      "minLength": 18,
+      "maxLength": 18,
+      "pattern": "^[0-9-]{18,18}$",
+      "width": 150
+    }
+  },
+  "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_case_no"],
+  "index": [["ser_dnn_no"], ["ser_case_no"]],
+  "unique": [["ser_no"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {}
+}
