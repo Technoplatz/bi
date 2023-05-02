@@ -1,5 +1,16 @@
 [
   {
+    "_id": "template-zero",
+    "title": "Zero Template",
+    "by": "Technoplatz",
+    "description": "A minimal template includes one field for a clean start.",
+    "collection": "zero",
+    "file": "template-zero.json",
+    "prefix": "zzz",
+    "icon": "accessibility-outline",
+    "sort": 10
+  },
+  {
     "_id": "template-foo",
     "title": "Foo Template",
     "by": "Technoplatz",
@@ -7,9 +18,7 @@
     "collection": "foo",
     "file": "template-foo.json",
     "prefix": "foo",
-    "datatypes": ["String", "Enum", "Date", "Decimal", "Number", "Boolean"],
-    "structure": ["Parents", "Index", "Unique", "Required", "Actions", "Sort"],
     "icon": "business-outline",
-    "sort": 10
+    "sort": 20
   }
 ]

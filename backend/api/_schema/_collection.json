@@ -7,7 +7,6 @@
       "pattern": "^[a-z0-9-_]{3,64}$",
       "title": "ID",
       "description": "Collection ID",
-      "permanent": true,
       "width": 150
     },
     "col_title": {
@@ -33,60 +32,13 @@
       "pattern": "^[a-z]{3,3}$",
       "title": "Prefix",
       "description": "Column Prefix - 3 characters lower case",
-      "permanent": true,
       "width": 110
     },
     "col_structure": {
       "bsonType": "object",
       "title": "Structure",
       "description": "Collection Structure",
-      "width": 120,
-      "default": {
-        "properties": {
-          "foo_no": {
-            "bsonType": "string",
-            "title": "Record No",
-            "description": "Record No",
-            "minLength": 1,
-            "maxLength": 64
-          },
-          "foo_status": {
-            "bsonType": "string",
-            "title": "Status",
-            "description": "Status",
-            "enum": ["0-Open", "1-InProgress", "2-Closed", "3-Finalized", "4-Archived"],
-            "default": "0-Open"
-          }
-        },
-        "required": ["foo_no", "foo_status"],
-        "index": [["foo_status"]],
-        "unique": [["foo_no"]],
-        "parents": [],
-        "actions": [
-          {
-            "id": "action-status-0-to-1",
-            "title": "Set Status 1-InProgress",
-            "enabled": true,
-            "filter": [
-              {
-                "key": "foo_status",
-                "op": "eq",
-                "value": "0-Open"
-              }
-            ],
-            "set": [
-              {
-                "key": "foo_status",
-                "value": "1-InProgress"
-              }
-            ],
-            "one_click": true
-          }
-        ],
-        "sort": {
-          "_modified_at": -1
-        }
-      }
+      "width": 120
     }
   },
   "required": ["col_id", "col_title", "col_prefix"],

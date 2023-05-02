@@ -33,14 +33,9 @@ https://www.gnu.org/licenses.
 <ion-content class="ion-no-padding">
   <app-tools></app-tools>
   <div class="console-right">
-    <h6>{{ 'STUDIO' | translate }}</h6>
-    <h1>{{ 'Smart Templates' | translate }}</h1>
-    <p class="text-medium">
-      {{ 'A collection is a grouping of database documents in JSON format.' | translate }}<br />
-      {{ 'Documents within a collection can have many different fields and fields can be defined in various data types.' | translate
-      }}
-    </p>
-    <p class="text-medium">{{ 'A collection exists within a single database.' | translate }}<br /></p>
+    <h6>{{ 'DATA STUDIO' | translate }}</h6>
+    <h1>{{ 'Collection Templates' | translate }}</h1>
+    <p class="text-medium">{{ 'You can create a new database collection with one of the smart templates below.' | translate }}</p>
     <div class="template-card-container">
       <ion-card *ngFor="let item of templates; let t = index">
         <ion-icon [name]="item.icon" color="primary"></ion-icon>
@@ -48,76 +43,20 @@ https://www.gnu.org/licenses.
           <ion-card-title>{{ item.title }}</ion-card-title>
           <ion-card-subtitle>{{ 'by' | translate }} {{ item.by }}</ion-card-subtitle>
         </ion-card-header>
-        <ion-card-content>
-          <span class="text-medium">{{ item.description }}</span>
-          <p><strong>{{ 'Data Types' | translate }}:</strong> {{ item.datatypes?.join(', ') }}. 
-          <strong>{{ 'Structure' | translate }}:</strong> {{ item.structure?.join(', ') }}.
-          <strong>{{ 'Prefix' | translate }}: </strong> {{ item.prefix}}_
-        </p>
-        </ion-card-content>
-        <ion-button color="primary" (click)="doInstallTemplate(item, t)">
-          <ion-icon *ngIf="templates[t].processing" name="timer-outline"></ion-icon>
-          {{ 'INSTALL' | translate }}
+        <ion-button (click)="doInstallTemplate(item, t)" size="small">
+          <ion-spinner *ngIf="templates[t].processing; else noproc" name="dots"></ion-spinner>
+          <ng-template #noproc>
+            {{ 'INSTALL' | translate }}
+          </ng-template>
         </ion-button>
+        <ion-card-content>
+          {{ item.description }}
+          <p>
+            <strong>{{ 'Prefix' | translate }}: </strong> {{ item.prefix}}_
+          </p>
+        </ion-card-content>
       </ion-card>
     </div>
   </div>
 </ion-content>
 <app-inner-footer></app-inner-footer>
-
-<!-- <ion-content class="ion-no-padding">
-  <app-tools></app-tools>
-  <div *ngIf="is_initialized" class="ion-padding ion-margin-bottom">
-    <h6>{{ 'COLLECTIONS' | translate }}</h6>
-        <h1>{{ header }}</h1>
-    <ion-grid class="ion-no-padding ion-margin-bottom">
-      <ion-row class="sub-menu-row sq-menu-row">
-        <ion-col size="12">
-          <div class="data-sq-button">
-            <ion-icon name="albums-outline"></ion-icon><br />
-            <span>{{ 'Show' | translate }}<br />{{ 'Templates' | translate }}</span>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-grid *ngIf="templates.length > 0; else notemplates" class="ion-no-padding data-grid">
-      <ion-row>
-        <ion-col size="3">
-          <span class="column-title">{{ 'Template Name' | translate }}</span>
-        </ion-col>
-        <ion-col size="4">
-          <span class="column-title">{{ 'Description' }}</span>
-        </ion-col>
-        <ion-col size="1">
-          &nbsp;
-        </ion-col>
-      </ion-row>
-      <ion-row *ngFor="let item of templates; let t = index">
-        <ion-col size="3" class="flex-container">
-          <ion-icon [name]="item.icon" size="large" class="ion-margin-end"></ion-icon>
-          <div>
-            <div class="data-title temp">{{ item.title }}</div>
-          </div>
-        </ion-col>
-        <ion-col size="4" class="ion-text-wrap">
-          {{ item.description }}
-        </ion-col>
-        <ion-col size="1">
-          <ion-button size="small" size="small" (click)="doInstallTemplate(item, t)">
-            {{ 'Install' | translate }}
-          </ion-button>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col size="8">
-          {{ templates.length }} {{ 'templates found' | translate }}.
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-    <ng-template #notemplates>
-      <ion-text class="pe">{{ 'No templates found' | translate }}.</ion-text>
-    </ng-template>
-  </div>
-</ion-content> 
-<app-inner-footer></app-inner-footer>
--->

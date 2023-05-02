@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "zzz_no": {
+      "bsonType": "string",
+      "title": "No",
+      "description": "Record No",
+      "pattern": "^[a-zA-Z0-9-]{1,64}$",
+      "minLength": 1,
+      "maxLength": 64
+    }
+  },
+  "required": ["zzz_no"],
+  "index": [["zzz_no"]],
+  "unique": [["zzz_no"]],
+  "sort": { "_modified_at": -1 },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {}
+}

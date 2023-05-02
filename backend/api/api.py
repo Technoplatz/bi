@@ -661,12 +661,12 @@ class Crud:
             if not os.path.isfile(path_):
                 raise APIError("no templates found")
 
-            data_ = json.loads(open(path_, "r", encoding="utf-8").read())
+            with open(path_, "r", encoding="utf-8") as fopen_:
+                data_ = json.loads(fopen_.read())
 
             if proc_ == "list":
                 data_ = [item_ for item_ in data_]
                 data_.sort(key=operator.itemgetter("sort"), reverse=False)
-
             elif proc_ == "install":
                 suffix_ = Misc().get_timestamp_f()
                 template_ = input_["template"] if "template" in input_ else None
@@ -677,11 +677,10 @@ class Crud:
                 col_title_ = f"{template_['title']}-{suffix_}"
                 file_ = template_["file"]
                 collection__ = f"{col_id_}_data"
-
-                prefix_ = template_["prefix"] if "prefix" in template_ else "foo"
+                prefix_ = template_["prefix"] if "prefix" in template_ else "zzz"
+                description_ = template_["description"] if "description" in template_ else None
 
                 find_one_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
-
                 if find_one_:
                     raise APIError("collection name already exists")
                 if col_id_ in Mongo().db_.list_collection_names():
@@ -695,19 +694,20 @@ class Crud:
                 if os.path.isfile(path_):
                     with open(path_, "r", encoding="utf-8") as fopen_:
                         jtxt_ = fopen_.read()
-                        jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
+                        jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
                         structure_ = json.loads(jtxt_)
 
                 Mongo().db_["_collection"].insert_one({
                     "col_id": col_id_,
                     "col_title": col_title_,
+                    "col_description": description_,
                     "col_prefix": prefix_,
                     "col_structure": structure_,
                     "_created_at": Misc().get_now_f(),
                     "_created_by": email_,
                     "_modified_at": Misc().get_now_f(),
                     "_modified_by": email_,
-                    "_modified_count": 0,
+                    "_modified_count": 0
                 })
 
                 schemavalidate_ = self.crudschema_validate_f(
@@ -2503,235 +2503,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def config_structure_to_field_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            collection_ = obj["collection"]
-            doc_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
-            if not doc_:
-                raise APIError("no collection found")
-            user_ = obj["user"] if "user" in obj else None
-            structure_ = obj["structure"] if "structure" in obj else None
-            properties_ = (
-                structure_["properties"] if "properties" in structure_ else None
-            )
-            actions_ = (
-                structure_["actions"]
-                if "actions" in structure_ and len(structure_["actions"]) > 0
-                else None
-            )
-            sort_ = structure_["sort"] if "sort" in structure_ else None
-            index_ = structure_["index"] if "index" in structure_ else None
-            unique_ = structure_["unique"] if "unique" in structure_ else None
-            parents_ = structure_["parents"] if "parents" in structure_ else None
-            if properties_:
-                priority_ = 0
-                for prop_ in properties_:
-                    property_ = properties_[prop_]
-                    priority_ += 100
-                    fie_indexed_ = False
-                    fie_indexed_add_ = None
-                    fie_unique_ = False
-                    fie_unique_add_ = None
-                    fie_has_parent_ = False
-                    fie_parent_collection_id_ = None
-                    fie_parent_field_id_ = None
-                    if unique_ and len(unique_) > 0:
-                        for uq_ in unique_:
-                            if uq_[0] == prop_:
-                                fie_unique_ = True
-                                if len(uq_) > 1:
-                                    fie_unique_add_ = uq_[1:]
-                    if index_ and len(index_) > 0:
-                        for ix_ in index_:
-                            if ix_[0] == prop_:
-                                fie_indexed_ = True
-                                if len(ix_) > 1:
-                                    fie_indexed_add_ = ix_[1:]
-                    if parents_ and len(parents_) > 0:
-                        for parent_ in parents_:
-                            if (
-                                "match" in parent_
-                                and len(parent_["match"]) > 0
-                                and parent_["match"][0]["key"] == prop_
-                            ):
-                                fie_has_parent_ = True
-                                fie_parent_collection_id_ = parent_["collection"]
-                                fie_parent_field_id_ = (
-                                    parent_["match"][0]["value"]
-                                    if "match" in parent_
-                                    and len(parent_["match"]) > 0
-                                    and parent_["match"][0]["value"]
-                                    else None
-                                )
-
-                    doc_ = {
-                        "fie_collection_id": collection_,
-                        "fie_id": prop_,
-                        "fie_type": property_["bsonType"]
-                        if "bsonType" in property_
-                        else None,
-                        "fie_title": property_["title"]
-                        if "title" in property_
-                        else None,
-                        "fie_priority": priority_,
-                        "fie_description": property_["description"]
-                        if "description" in property_
-                        else None,
-                        "fie_default": str(property_["default"])
-                        if "default" in property_
-                        else None,
-                        "fie_enabled": property_["enabled"]
-                        if "enabled" in property_
-                        else False,
-                        "fie_required": property_["required"]
-                        if "required" in property_
-                        else False,
-                        "fie_permanent": property_["permanent"]
-                        if "permanent" in property_
-                        else False,
-                        "fie_indexed": fie_indexed_,
-                        "fie_indexed_add": fie_indexed_add_,
-                        "fie_unique": fie_unique_,
-                        "fie_unique_add": fie_unique_add_,
-                        "fie_min_length": property_["minLength"]
-                        if "minLength" in property_
-                        else None,
-                        "fie_max_length": property_["maxLength"]
-                        if "maxLength" in property_
-                        else None,
-                        "fie_minimum": property_["minimum"]
-                        if "minimum" in property_
-                        else None,
-                        "fie_maximum": property_["maximum"]
-                        if "maximum" in property_
-                        else None,
-                        "fie_array_unique_items": property_["uniqueItems"]
-                        if property_["bsonType"] == "array"
-                        and "uniqueItems" in property_
-                        and property_["uniqueItems"] is True
-                        else False,
-                        "fie_array_manual_add": property_["manualAdd"]
-                        if property_["bsonType"] == "array"
-                        and "manualAdd" in property_
-                        and property_["manualAdd"] is True
-                        else False,
-                        "fie_array_min_items": property_["minItems"]
-                        if property_["bsonType"] == "array" and "minItems" in property_
-                        else None,
-                        "fie_array_max_items": property_["maxItems"]
-                        if property_["bsonType"] == "array" and "maxItems" in property_
-                        else None,
-                        "fie_has_parent": fie_has_parent_,
-                        "fie_parent_collection_id": fie_parent_collection_id_
-                        if fie_has_parent_ and fie_parent_collection_id_
-                        else None,
-                        "fie_parent_field_id": fie_parent_field_id_
-                        if fie_has_parent_
-                        and fie_parent_collection_id_
-                        and fie_parent_field_id_
-                        else None,
-                        "fie_options": property_["enum"]
-                        if "enum" in property_
-                        else None,
-                        "fie_width": property_["width"]
-                        if "width" in property_
-                        else 100,
-                        "fie_sort": "ascending"
-                        if sort_ and prop_ in sort_ and sort_[prop_] > 0
-                        else "descending"
-                        if sort_ and prop_ in sort_ and sort_[prop_] < 0
-                        else "unsorted",
-                        "_modified_at": Misc().get_now_f(),
-                        "_modified_by": user_["email"]
-                        if user_ and "email" in user_
-                        else None,
-                    }
-                    Mongo().db_["_field"].update_one(
-                        {"fie_collection_id": collection_, "fie_id": prop_},
-                        {"$set": doc_, "$inc": {"_modified_count": 1}},
-                        upsert=True,
-                    )
-
-            if actions_:
-                for action_ in actions_:
-                    act_id_ = action_["id"] if "id" in action_ else None
-                    act_collection_id_ = collection_
-                    act_title_ = action_["title"] if "title" in action_ else None
-                    act_enabled_ = (
-                        True
-                        if "enabled" in action_ and action_["enabled"] is True
-                        else False
-                    )
-                    act_one_click_ = (
-                        True
-                        if "one_click" in action_ and action_["one_click"] is True
-                        else False
-                    )
-                    act_filter_ = action_["filter"] if "filter" in action_ else None
-                    act_set_ = action_["set"] if "set" in action_ else None
-                    if (
-                        act_id_
-                        and act_collection_id_
-                        and act_title_
-                        and len(act_filter_) >= 0
-                        and act_set_
-                        and len(act_set_) > 0
-                    ):
-                        doc_ = {
-                            "act_id": act_id_,
-                            "act_collection_id": act_collection_id_,
-                            "act_title": act_title_,
-                            "act_enabled": act_enabled_,
-                            "act_one_click": act_one_click_,
-                            "act_filter": act_filter_,
-                            "act_set": act_set_,
-                            "_modified_at": Misc().get_now_f(),
-                            "_modified_by": user_["email"]
-                            if user_ and "email" in user_
-                            else None,
-                        }
-                        Mongo().db_["_action"].update_one(
-                            {
-                                "act_collection_id": act_collection_id_,
-                                "act_id": act_id_,
-                            },
-                            {"$set": doc_, "$inc": {"_modified_count": 1}},
-                            upsert=True,
-                        )
-                        Misc().log_f(
-                            {
-                                "type": "Info",
-                                "collection": "_action",
-                                "op": "upsert",
-                                "user": user_["email"] if user_ else None,
-                                "document": doc_,
-                            }
-                        )
-
-            return {"result": True}
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_,
-                    "op": "reverseinit",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
-
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def upsert_f(self, obj):
         """
         docstring is in progress
@@ -3204,19 +2975,16 @@ class Crud:
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
-
-            doc_["_created_by"] = doc_["_modified_by"] = (
-                user_["email"] if user_ and "email" in user_ else None
-            )
+            doc_["_created_by"] = doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
             if collection_id_ == "_collection":
-                file_ = "template-foo.json"
-                prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "foo"
+                file_ = "template-zero.json"
+                prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "zzz"
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
                     fopen_ = open(path_, "r", encoding="utf-8")
                     jtxt_ = fopen_.read()
-                    jtxt_ = jtxt_.replace("foo_", f"{prefix_}_")
+                    jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
                     structure_ = json.loads(jtxt_)
                 doc_["col_structure"] = structure_
 
@@ -3228,15 +2996,9 @@ class Crud:
                     doc_["col_structure"] if "col_structure" in doc_ else None
                 )
                 datac_ = f"{col_id_}_data"
-                if (
-                    col_structure_
-                    and col_structure_ != {}
-                    and datac_ not in Mongo().db_.list_collection_names()
-                ):
+                if col_structure_ and col_structure_ != {} and datac_ not in Mongo().db_.list_collection_names():
                     Mongo().db_[datac_].insert_one({})
-                    schemavalidate_ = self.crudschema_validate_f(
-                        {"collection": datac_, "structure": col_structure_}
-                    )
+                    schemavalidate_ = self.crudschema_validate_f({"collection": datac_, "structure": col_structure_})
                     if not schemavalidate_["result"]:
                         raise APIError(schemavalidate_["msg"])
                     Mongo().db_[datac_].delete_one({})

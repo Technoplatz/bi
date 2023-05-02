@@ -1314,40 +1314,41 @@ sup {
 }
 
 .template-card-container {
-  display: flex;
   margin-top: 16px;
+  gap: 8px !important;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .template-card-container ion-card {
-  align-content: flex-start;
-  margin: 0px;
-  gap: 16px;
   border-radius: 0px;
-  min-width: 360px !important;
-  max-width: 360px !important;
+  width: 300px;
+  height: 220px;
   box-shadow: none !important;
   border: 5px solid var(--ion-color-light);
   color: var(--ion-color-dark);
-  overflow: visible !important;
+  overflow: hidden !important;
+  margin: 0px;
 }
 
 .template-card-container ion-card ion-card-content {
-  margin-top: 16px !important;
+  margin-top: 0px !important;
+  line-height: normal;
 }
 
 .template-card-container ion-card p {
-  margin-top: 8px !important;
+  margin-top: 4px !important;
 }
 
 .template-card-container ion-card ion-button {
-  bottom: 16px;
-  margin: 16px;
+  margin-left: 16px;
 }
 
 .template-card-container ion-card ion-icon {
   position: absolute;
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   top: 0px;
   right: 0px;
   margin: 20px;
