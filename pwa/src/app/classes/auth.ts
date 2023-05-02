@@ -208,7 +208,7 @@ export class Auth {
   Signup(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "signup";
-      this.misc.apiCall("otp", JSON.stringify(creds)).then((res: any) => {
+      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           this.setUserOut();
           resolve(true);
