@@ -70,6 +70,7 @@ export const environment = {
         "title": "Collection",
         "description": "ID of the target Collection",
         "collection": true,
+        "permanent": true,
         "required": true
       },
       "sto_file": {
@@ -152,7 +153,6 @@ export const environment = {
     },
   },
   segmentsadm: [
-    { "id": "_collection", "title": "Collections", "description": "Database collections stores records as documents." },
     { "id": "_announcement", "title": "Announcements", "description": "Data announcements of the shared views." },
     { "id": "_user", "title": "Users", "description": "Internal users and data subscribers." },
     { "id": "_permission", "title": "Permissions", "description": "Database collection permissions." },

@@ -38,6 +38,40 @@ https://www.gnu.org/licenses.
         <h6>{{ header | translate }}</h6>
         <h1>{{ subheader }}</h1>
         {{ description }}
+        <div *ngIf="id=='_collection'" class="template-card-container">
+          <ion-card>
+            <ion-icon name="rocket-outline" color="primary"></ion-icon>
+            <ion-card-header>
+              <ion-card-title>{{ 'Basic Template' }}</ion-card-title>
+              <ion-card-subtitle>{{ 'by' | translate }} {{ 'Yourself' }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-button (click)="goCrud(null, 'insert')" size="small">
+              <ion-spinner *ngIf="is_inprogress; else noproc" name="dots"></ion-spinner>
+              <ng-template #noproc>
+                {{ 'SETUP' | translate }}
+              </ng-template>
+            </ion-button>
+            <ion-card-content>
+              {{ 'An elementary template consists of four basic data types; string, number, date and boolean' }}.
+            </ion-card-content>
+          </ion-card>
+          <ion-card *ngFor="let item of templates; let t = index">
+            <ion-icon [name]="item.icon" color="primary"></ion-icon>
+            <ion-card-header>
+              <ion-card-title>{{ item.title }}</ion-card-title>
+              <ion-card-subtitle>{{ 'by' | translate }} {{ item.by }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-button (click)="doInstallTemplate(item, t)" size="small">
+              <ion-spinner *ngIf="templates[t].processing; else noproc" name="dots"></ion-spinner>
+              <ng-template #noproc>
+                {{ 'INSTALL' | translate }}
+              </ng-template>
+            </ion-button>
+            <ion-card-content>
+              {{ item.description }}
+            </ion-card-content>
+          </ion-card>
+        </div>
         <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
@@ -50,7 +84,7 @@ https://www.gnu.org/licenses.
                 {{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
-                <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"
+                <div *ngIf="!['_collection', '_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
                   {{ 'Add' | translate }}

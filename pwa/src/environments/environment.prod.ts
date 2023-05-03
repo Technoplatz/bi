@@ -70,6 +70,7 @@ export const environment = {
         "title": "Collection",
         "description": "ID of the target Collection",
         "collection": true,
+        "permanent": true,
         "required": true
       },
       "sto_file": {
@@ -152,7 +153,6 @@ export const environment = {
     }
   },
   segmentsadm: [
-    { "id": "_collection", "title": "Collections" },
     { "id": "_announcement", "title": "Announcements" },
     { "id": "_user", "title": "Users" },
     { "id": "_permission", "title": "Permissions" },

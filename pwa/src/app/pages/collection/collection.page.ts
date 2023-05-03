@@ -107,6 +107,8 @@ export class CollectionPage implements OnInit {
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   private admin_collections: any = environment.admin_collections;
+  public templates: any = [];
+  public is_inprogress: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -153,7 +155,20 @@ export class CollectionPage implements OnInit {
           this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
           this.actions = [];
-          this.RefreshData(0).then(() => { }).catch((error: any) => {
+          this.RefreshData(0).then(() => {
+            if (this.id === "_collection") {
+              this.misc.apiCall("crud", {
+                op: "template",
+                proc: "list",
+                template: null
+              }).then((res: any) => {
+                this.templates = res && res.data ? res.data : [];
+              }).catch((error: any) => {
+                console.error(error);
+                this.misc.doMessage(error, "error");
+              });
+            }
+          }).catch((error: any) => {
             this.misc.doMessage(error, "error");
           }).finally(() => {
             this.is_initialized = true;
@@ -161,7 +176,6 @@ export class CollectionPage implements OnInit {
         });
       });
     }).catch((res: any) => {
-      this.is_initialized = true;
       this.misc.doMessage(res.error.msg, "error");
     });
   }
@@ -533,6 +547,27 @@ export class CollectionPage implements OnInit {
   doChangeSchema(ev: any) {
     if (ev && ev.properties) {
       this.structure_ = ev;
+    }
+  }
+
+  doInstallTemplate(item_: any, ix: number) {
+    if (!this.templates[ix].processing) {
+      this.templates[ix].processing = true;
+      this.misc.apiCall("crud", {
+        op: "template",
+        proc: "install",
+        template: item_
+      }).then(() => {
+        this.misc.doMessage("template installed successfully", "success");
+        this.crud.getAll().then(() => {
+          this.misc.navi.next("dashboard");
+        });
+      }).catch((error: any) => {
+        console.error(error);
+        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.templates[ix].processing = false;
+      });
     }
   }
 

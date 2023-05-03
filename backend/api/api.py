@@ -2061,47 +2061,24 @@ class Crud:
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]
             skip_ = limit_ * (page - 1)
-            match_ = (
-                input_["match"]
-                if "match" in input_ and len(input_["match"]) > 0
-                else []
-            )
-
+            match_ = input_["match"] if "match" in input_ and len(input_["match"]) > 0 else []
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-
-            collation_ = (
-                {"locale": user_["locale"]}
-                if user_ and "locale" in user_
-                else {"locale": "tr"}
-            )
-
+            collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
             cursor_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
-            reconfig_ = (
-                cursor_["_reconfig_req"]
-                if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True
-                else False
-            )
+            reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True else False
 
-            get_filtered_ = self.get_filtered_f(
-                {
-                    "match": match_,
-                    "properties": structure_["properties"]
-                    if "properties" in structure_ else None
-                }
-            )
+            get_filtered_ = self.get_filtered_f({
+                "match": match_,
+                "properties": structure_["properties"]
+                if "properties" in structure_ else None
+            })
 
-            sort_ = (
-                list(input_["sort"].items())
-                if "sort" in input_ and input_["sort"]
-                else list(structure_["sort"].items())
-                if "sort" in structure_ and structure_["sort"]
-                else [("_modified_at", -1)]
-            )
+            sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
             cursor_ = (
                 Mongo()
@@ -2249,66 +2226,12 @@ class Crud:
         """
         try:
             collection_ = obj["collection"]
-
             structure_ = self.root_schemas_f(f"{collection_}")
-
-            schemavalidate_ = self.crudschema_validate_f(
-                {"collection": collection_, "structure": structure_}
-            )
+            schemavalidate_ = self.crudschema_validate_f({"collection": collection_, "structure": structure_})
             if not schemavalidate_["result"]:
                 raise APIError(schemavalidate_["msg"])
 
             return {"result": True}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def config_field_to_structure_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = obj["user"] if "user" in obj else None
-            collection_id_ = obj["collection"]
-            op_ = obj["op"]
-            email_ = (
-                user_["email"]
-                if user_ and "email" in user_
-                else user_["usr_id"]
-                if user_ and "usr_id" in user_
-                else None
-            )
-
-            doc_ = {}
-            if op_ == "request":
-                doc_["_reconfig_req"] = True
-                doc_["_reconfig_req_at"] = Misc().get_now_f()
-                doc_["_reconfig_req_by"] = email_
-            else:
-                doc_["_reconfig_req"] = False
-                doc_["_reconfig_set_at"] = Misc().get_now_f()
-                doc_["_reconfig_set_by"] = email_
-
-            Mongo().db_["_collection"].update_one(
-                {"col_id": collection_id_},
-                {"$set": doc_, "$inc": {"_modified_count": 1}},
-            )
-            return {"result": True}
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_id_,
-                    "op": "reconfig",
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
-            return Misc().mongo_error_f(exc)
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -2528,9 +2451,7 @@ class Crud:
 
             is_crud_ = collection_id_[:1] != "_"
             if not is_crud_:
-                schemavalidate_ = self.nocrudschema_validate_f(
-                    {"collection": collection_id_}
-                )
+                schemavalidate_ = self.nocrudschema_validate_f({"collection": collection_id_})
                 if not schemavalidate_["result"]:
                     raise APIError(schemavalidate_["msg"])
 
@@ -2540,23 +2461,7 @@ class Crud:
                     doc_[item] = doc[item] if doc[item] != "" else None
 
             doc_["_modified_at"] = Misc().get_now_f()
-            doc_["_modified_by"] = (
-                user_["email"] if user_ and "email" in user_ else None
-            )
-
-            if collection_id_ == "_field":
-                field_col_ = (
-                    Mongo()
-                    .db_["_collection"]
-                    .find_one({"col_id": doc_["fie_collection_id"]})
-                )
-                if not field_col_:
-                    raise APIError(
-                        f"collection not found to upsert: {doc_['fie_collection_id']}"
-                    )
-                if doc_["fie_id"][:3] != field_col_["col_prefix"]:
-                    doc_["fie_id"] = f"{field_col_['col_prefix']}_{doc_['fie_id']}"
-
+            doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
@@ -2624,7 +2529,6 @@ class Crud:
                 col_id_ = doc_["col_id"]
                 Mongo().db_[f"{col_id_}_data"].aggregate([{"$match": {}}, {"$out": f"{col_id_}_data_removed"}])
                 Mongo().db_[f"{col_id_}_data"].drop()
-                Mongo().db_["_field"].delete_many({"fie_collection_id": col_id_})
 
             return {"result": True}
 
@@ -2654,7 +2558,7 @@ class Crud:
             match_ = obj["match"] if "match" in obj else None
 
             op_ = obj["op"]
-            if op_ != "clone" and op_ != "delete":
+            if op_ not in ["clone", "delete"]:
                 raise APIError("operation not supported")
 
             if collection_id_ in ["_log", "_backup", "_announcement"]:
@@ -2973,23 +2877,21 @@ class Crud:
             doc_["_created_by"] = doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
             if collection_id_ == "_collection":
-                file_ = "template-zero.json"
+                file_ = "template-elementary.json"
                 prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "zzz"
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
-                    fopen_ = open(path_, "r", encoding="utf-8")
-                    jtxt_ = fopen_.read()
-                    jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
-                    structure_ = json.loads(jtxt_)
+                    with open(path_, "r", encoding="utf-8") as fopen_:
+                        jtxt_ = fopen_.read()
+                        jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
+                        structure_ = json.loads(jtxt_)
                 doc_["col_structure"] = structure_
 
             Mongo().db_[collection_].insert_one(doc_)
 
             if collection_id_ == "_collection":
                 col_id_ = doc_["col_id"] if "col_id" in doc_ else None
-                col_structure_ = (
-                    doc_["col_structure"] if "col_structure" in doc_ else None
-                )
+                col_structure_ = doc_["col_structure"] if "col_structure" in doc_ else None
                 datac_ = f"{col_id_}_data"
                 if col_structure_ and col_structure_ != {} and datac_ not in Mongo().db_.list_collection_names():
                     Mongo().db_[datac_].insert_one({})
@@ -2997,30 +2899,14 @@ class Crud:
                     if not schemavalidate_["result"]:
                         raise APIError(schemavalidate_["msg"])
                     Mongo().db_[datac_].delete_one({})
-            elif collection_id_ in ["_field", "_action"]:
-                cid_ = (
-                    doc_["fie_collection_id"]
-                    if collection_id_ == "_field" and "fie_collection_id" in doc_
-                    else doc_["act_collection_id"]
-                    if collection_id_ == "_action" and "act_collection_id" in doc_
-                    else None
-                )
-                if cid_:
-                    config_structure_f_ = self.config_field_to_structure_f(
-                        {"op": "request", "collection": cid_, "user": user_}
-                    )
-                    if not config_structure_f_["result"]:
-                        raise APIError(config_structure_f_["msg"])
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": collection_id_,
-                    "op": "insert",
-                    "user": user_["email"] if user_ else None,
-                    "document": doc_,
-                }
-            )
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": collection_id_,
+                "op": "insert",
+                "user": user_["email"] if user_ else None,
+                "document": doc_,
+            })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 

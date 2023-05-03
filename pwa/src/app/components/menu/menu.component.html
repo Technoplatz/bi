@@ -45,8 +45,8 @@ https://www.gnu.org/licenses.
       <ion-label>
         {{ "Console" }}_<br />
         <span>
-          v{{ version }} ({{ release }})&nbsp;<br />
-          {{ saas_ ? saas_.company : null }}&nbsp;
+          v{{ version }} ({{ release }})<br />
+          {{ saas_ ? saas_.company : null }}
         </span>
       </ion-label>
     </ion-item>
@@ -55,9 +55,6 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('dashboard')">
           <ion-icon name="stats-chart-sharp"></ion-icon>{{ "Dashboard" | translate }}
         </ion-button>
-        <p class="clicked-item dark" (click)="misc.navi.next('templates')">
-          {{ 'Templates' | translate }}
-        </p>
       </ion-label>
     </ion-item>
     <ion-item lines="none">
@@ -65,6 +62,9 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="server-outline"></ion-icon>{{ "Data Collections" | translate }}
         </ion-button>
+        <p *ngIf="user_.perm" (click)="misc.navi.next('admin/_collection')" class="clicked-item dark separated-menu">
+          {{ 'Collection Studio' | translate }}
+        </p>
         <div *ngIf="collections?.length > 0; else nocollectionsfound">
           <p *ngFor="let item of collections" (click)="misc.navi.next('collection/'+ item.col_id)"
             class="clicked-item dark">
@@ -95,11 +95,6 @@ https://www.gnu.org/licenses.
         </ng-template>
       </ion-label>
     </ion-item>
-    <ng-template #noviewsfound>
-      <ion-item lines="none">
-        {{ "No views found" | translate }}
-      </ion-item>
-    </ng-template>
     <ion-item *ngIf="segmentsadm?.length > 0" lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">

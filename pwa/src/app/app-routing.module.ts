@@ -97,15 +97,6 @@ const routes: Routes = [
     }
   },
   {
-    path: "templates",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/templates/templates.module").then((m) => m.TemplatesPageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
-  {
     path: "account/profile-settings",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),

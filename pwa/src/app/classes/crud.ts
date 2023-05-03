@@ -31,10 +31,8 @@ https://www.gnu.org/licenses.
 */
 
 import { Injectable } from "@angular/core";
-import { Storage } from "@ionic/storage";
 import { Subject, BehaviorSubject } from "rxjs";
 import { Validators, FormControl } from "@angular/forms";
-import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Miscellaneous } from "./misc";
 
 @Injectable({
@@ -45,7 +43,6 @@ export class Crud {
   public cartitems = [];
   public productList: any = [];
   public fields: any = [];
-  private apiHost: string = "";
   public modalSubmitListener = new Subject<any>();
   public updateListener = new Subject<any>();
   public objectsListener = new BehaviorSubject([]);
@@ -56,19 +53,10 @@ export class Crud {
   public visuals = new BehaviorSubject<any>([]);
   public saas = new BehaviorSubject(null);
   public announcements = new BehaviorSubject<any>([]);
-  private crudHeaders: any = {
-    "Content-Type": "application/json"
-  }
 
   constructor(
-    private storage: Storage,
-    private misc: Miscellaneous,
-    private http: HttpClient
-  ) {
-    this.misc.getAPIHost().then((apiHost: any) => {
-      this.apiHost = apiHost;
-    });
-  }
+    private misc: Miscellaneous
+  ) { }
 
   initForm(op: string, structure: any, form: any, data: any, collections: any, views: any) {
     return new Promise((resolve, reject) => {
@@ -236,7 +224,8 @@ export class Crud {
         op: "collections",
       }).then((res: any) => {
         this.misc.collections.next(res);
-        resolve(this.collections.next(res));
+        this.collections.next(res)
+        resolve(true);
       }).catch((err: any) => {
         reject(err);
       });
