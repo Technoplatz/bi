@@ -36,7 +36,7 @@ export const environment = {
   production: false,
   appVersion: require("../../package.json").version + "-dev",
   release: "Brezel Edition",
-  apiPort: "8080",
+  apiPort: "8443",
   support_url: "#",
   misc: {
     logo: "logo-electron",
