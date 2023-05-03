@@ -127,7 +127,7 @@ export class ViewPage implements OnInit {
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_loaded = false;
     this.is_initialized = false;
-    this.misc.getAPIHost().then((apiHost: any) => {
+    this.misc.getAPIUrl().then((apiHost: any) => {
       this.apiHost = apiHost;
       this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
         if (res && res.views) {

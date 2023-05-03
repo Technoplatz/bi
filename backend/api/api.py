@@ -4094,7 +4094,7 @@ log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
-@app.route("/import", methods=["POST"], endpoint="import")
+@app.route("/api/import", methods=["POST"], endpoint="import")
 def storage_f():
     """
     docstring is in progress
@@ -4146,7 +4146,7 @@ def storage_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/crud", methods=["POST"], endpoint="crud")
+@app.route("/api/crud", methods=["POST"], endpoint="crud")
 def crud_f():
     """
     docstring is in progress
@@ -4282,7 +4282,7 @@ def crud_f():
         return response_
 
 
-@app.route("/otp", methods=["POST"])
+@app.route("/api/otp", methods=["POST"])
 def otp_f():
     """
     docstring is in progress
@@ -4355,7 +4355,7 @@ def otp_f():
         return response_
 
 
-@app.route("/auth", methods=["POST"], endpoint="auth")
+@app.route("/api/auth", methods=["POST"], endpoint="auth")
 def auth_f():
     """
     docstring is in progress
@@ -4448,7 +4448,7 @@ def auth_f():
         return response_
 
 
-@app.route("/post", methods=["POST"])
+@app.route("/api/post", methods=["POST"])
 def post_f():
     """
     docstring is in progress
@@ -4651,7 +4651,7 @@ def post_f():
             session_.abort_transaction()
 
 
-@app.route("/get/dump", methods=["POST"])
+@app.route("/api/get/dump", methods=["POST"])
 def get_dump_f():
     """
     docstring is in progress
@@ -4691,7 +4691,7 @@ def get_dump_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/get/view/<string:id_>", methods=["GET"])
+@app.route("/api/get/view/<string:id_>", methods=["GET"])
 def get_data_f(id_):
     """
     docstring is in progress

@@ -150,11 +150,11 @@ const routes: Routes = [
       user: UserResolver,
     }
   },
-  {
-    path: "**",
-    redirectTo: "404",
-    pathMatch: "full",
-  }
+  // {
+  //   path: "**",
+  //   redirectTo: "404",
+  //   pathMatch: "full",
+  // }
 ];
 
 @NgModule({

@@ -53,9 +53,9 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "443:443"
-      - "8080:8080"
-      - "80:80"
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${HTTPS_PORT}:${HTTPS_PORT}"
+      - "${TRAEFIK_PORT}:${TRAEFIK_PORT}"
     environment:
       - TZ=${TZ}
     networks:
@@ -301,7 +301,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
-      - traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)
+      - traefik.http.routers.api.rule=Host(`${DOMAIN}/api`)
       - traefik.http.services.api.loadbalancer.server.port=80
       - com.centurylinklabs.watchtower.enable=true
     volumes:

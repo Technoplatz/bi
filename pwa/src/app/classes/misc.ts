@@ -68,18 +68,18 @@ export class Miscellaneous {
     });
   }
 
-  getAPIHost() {
+  getAPIUrl() {
     return new Promise((resolve) => {
       const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
       const domain_ = window.location.host.split(":")[0];
-      resolve(window.location.protocol + "//" + (ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : "api." + domain_));
+      resolve(window.location.protocol + "//" + domain_ + ":" + environment.apiPort + "/api");
     });
   }
 
   apiCall(url: string, posted: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.getAPIHost().then((apiHost) => {
+        this.getAPIUrl().then((apiHost) => {
           const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
           const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
           this.http.post<any>(apiHost + "/" + url, posted, {
@@ -163,7 +163,7 @@ export class Miscellaneous {
         const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
         const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
         posted.append("email", LSUSERMETA.email);
-        this.getAPIHost().then((apiHost) => {
+        this.getAPIUrl().then((apiHost) => {
           this.http.post<any>(apiHost + "/" + url, posted, {
             headers: new HttpHeaders({
               "Authorization": "Bearer " + token_,
