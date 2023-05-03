@@ -55,7 +55,7 @@ export class MenuComponent implements OnInit {
   public charts_: any = null;
   public collections_: any = null;
   public views_: any = null;
-  public menutoggle: boolean = true;
+  public menutoggle: boolean = false;
 
   constructor(
     public misc: Miscellaneous,

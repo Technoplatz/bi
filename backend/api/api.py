@@ -239,22 +239,16 @@ class Misc:
             "required",
             "password",
             "textarea",
-            "hashtag",
-            "map",
             "default",
-            "token",
             "file",
             "permanent",
             "disabled",
-            "calc",
             "objectId",
             "filter",
             "readonly",
-            "color",
             "collection",
             "view",
             "property",
-            "html",
             "object",
             "subType",
             "manualAdd",
@@ -272,15 +266,12 @@ class Misc:
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
             line_ = exc_tb_.tb_lineno
             exception_ = str(exc)
-            # print(exc_type, fname, exc_tb.tb_lineno)
-            # file_ = __file__ if __file__ else "file not detected"
-            # line_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") else "line not detected"
-            # name_ = exc.__name__ if hasattr(exc, "__name__") else "Exception"
             notification_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
             print("*** notification_", notification_)
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_)}), timeout=10)
             if resp_.status_code != 200:
                 print("*** notification error", resp_)
+
         return True
 
     def exception_f(self, exc_):
@@ -379,32 +370,19 @@ class Misc:
         """
         docstring is in progress
         """
-        return (
-            "." in filename
-            and filename.rsplit(".", 1)[1].lower() in app.config["UPLOAD_EXTENSIONS"]
-        )
+        return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["UPLOAD_EXTENSIONS"]
 
     def get_user_ip_f(self):
         """
         docstring is in progress
         """
-        ip_ = (
-            request.headers["cf-connecting-ip"]
-            if "cf-connecting-ip" in request.headers
-            else bleach.clean(request.access_route[-1])
-        )
-        return ip_
+        return request.headers["cf-connecting-ip"] if "cf-connecting-ip" in request.headers else bleach.clean(request.access_route[-1])
 
     def get_user_host_f(self):
         """
         docstring is in progress
         """
-        host_ = (
-            request.headers["cf-connecting-ip"]
-            if "cf-connecting-ip" in request.headers
-            else bleach.clean(request.access_route[-1])
-        )
-        return host_
+        return request.headers["cf-connecting-ip"] if "cf-connecting-ip" in request.headers else bleach.clean(request.access_route[-1])
 
     def get_except_underdashes(self):
         """
@@ -596,7 +574,6 @@ class Crud:
     """
     docstring is in progress
     """
-
     def __init__(self):
         """
         docstring is in progress
@@ -4096,7 +4073,7 @@ log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
-@app.route("/api/import", methods=["POST"], endpoint="import")
+@app.route("/import", methods=["POST"], endpoint="import")
 def storage_f():
     """
     docstring is in progress
@@ -4148,7 +4125,7 @@ def storage_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/api/crud", methods=["POST"], endpoint="crud")
+@app.route("/crud", methods=["POST"], endpoint="crud")
 def crud_f():
     """
     docstring is in progress
@@ -4284,7 +4261,7 @@ def crud_f():
         return response_
 
 
-@app.route("/api/otp", methods=["POST"])
+@app.route("/otp", methods=["POST"])
 def otp_f():
     """
     docstring is in progress
@@ -4357,7 +4334,7 @@ def otp_f():
         return response_
 
 
-@app.route("/api/auth", methods=["POST"], endpoint="auth")
+@app.route("/auth", methods=["POST"], endpoint="auth")
 def auth_f():
     """
     docstring is in progress
@@ -4450,7 +4427,7 @@ def auth_f():
         return response_
 
 
-@app.route("/api/post", methods=["POST"])
+@app.route("/post", methods=["POST"])
 def post_f():
     """
     docstring is in progress
@@ -4653,7 +4630,7 @@ def post_f():
             session_.abort_transaction()
 
 
-@app.route("/api/get/dump", methods=["POST"])
+@app.route("/get/dump", methods=["POST"])
 def get_dump_f():
     """
     docstring is in progress
@@ -4693,7 +4670,7 @@ def get_dump_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/api/get/view/<string:id_>", methods=["GET"])
+@app.route("/get/view/<string:id_>", methods=["GET"])
 def get_data_f(id_):
     """
     docstring is in progress

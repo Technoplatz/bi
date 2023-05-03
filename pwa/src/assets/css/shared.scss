@@ -930,18 +930,20 @@ app-menu {
 
 app-menu .toggler {
   position: fixed !important;
-  background-color: var(--ion-color-light);
-  width: 14px;
-  height: 32px;
+  background-color: var(--ion-color-primary);
+  width: 10px;
+  height: 40px;
   margin-left: 260px;
-  top: 18px;
+  top: 14px;
   cursor: pointer;
   padding: 0px !important;
   z-index: 9999;
 }
 
 .toggler ion-icon {
-  margin-top: 8px;
+  margin-top: 12px;
+  color: #fff !important;
+  margin-left: -2px;
 }
 
 .input-desc {

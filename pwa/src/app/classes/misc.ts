@@ -72,7 +72,7 @@ export class Miscellaneous {
     return new Promise((resolve) => {
       const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
       const domain_ = window.location.host.split(":")[0];
-      resolve(window.location.protocol + "//" + domain_ + ":" + environment.apiPort + "/api");
+      resolve(window.location.protocol + "//" + (ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : "api." + domain_));
     });
   }
 
