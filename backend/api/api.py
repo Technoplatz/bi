@@ -3085,15 +3085,17 @@ class Security:
         """
         docstring is in progress
         """
-        self.headers_ = request.headers
-        self.origin = self.headers_["Origin"].replace("https://", "").replace("http://", "").replace("/", "").split(":")[0] if "Origin" in self.headers_ else None
+        self.origin = request.headers["Origin"].replace("https://", "").replace("http://", "").replace("/", "").split(":")[0] if request.headers and "Origin" in request.headers else None
 
-    def validate_request_f(self):
+    def validate_app_request_f(self):
         """
         docstring is in progress
         """
         try:
-            if self.origin != DOMAIN_:
+            if not self.origin:
+                raise APIError("invalid request")
+
+            if self.origin not in [DOMAIN_, "localhost"]:
                 raise APIError(f"invalid request from {self.origin}")
 
             return {"result": True}
@@ -4100,7 +4102,7 @@ def storage_f():
     docstring is in progress
     """
     try:
-        validate_request_f_ = Security().validate_request_f()
+        validate_request_f_ = Security().validate_app_request_f()
         if not validate_request_f_["result"]:
             raise APIError(validate_request_f_["msg"] if "msg" in validate_request_f_ else "validation error")
 
@@ -4157,7 +4159,7 @@ def crud_f():
             raise APIError({"result": False, "msg": "no operation found"})
         op_ = input_["op"]
 
-        validate_request_f_ = Security().validate_request_f()
+        validate_request_f_ = Security().validate_app_request_f()
         if not validate_request_f_["result"]:
             raise SessionError(validate_request_f_)
 
@@ -4301,7 +4303,7 @@ def otp_f():
             res_ = {"result": False, "msg": "no operation found"}
             raise APIError(res_)
 
-        validate_request_f_ = Security().validate_request_f()
+        validate_request_f_ = Security().validate_app_request_f()
         if not validate_request_f_["result"]:
             raise SessionError(validate_request_f_)
 
@@ -4361,7 +4363,7 @@ def auth_f():
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
+        validate_ = Security().validate_app_request_f()
         if not validate_["result"]:
             raise SessionError(validate_)
 
@@ -4657,7 +4659,7 @@ def get_dump_f():
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_request_f()
+        validate_ = Security().validate_app_request_f()
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
