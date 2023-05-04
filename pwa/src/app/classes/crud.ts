@@ -82,6 +82,7 @@ export class Crud {
         const items_ = p.items ? p.items : null;
         const password_ = p.password ? true : false;
         const pattern_ = p.pattern ? p.pattern : null;
+        const placeholder_ = p.placeholder ? p.placeholder : null;
         const subType_ = p.subType ? p.subType : null;
         const tzoffset = new Date().getTimezoneOffset() * 60000;
         const default_ = p.default ? p.default === '$CURRENT_DATE' ? new Date(Date.now() - tzoffset).toISOString().substring(0, 19) : p.default : null;
@@ -132,7 +133,8 @@ export class Crud {
           hashtag: hashtag_,
           chips: chips_,
           subType: subType_,
-          manualAdd: manualAdd_
+          manualAdd: manualAdd_,
+          placeholder: placeholder_
         });
         const kvval_: any = [{
           key: null,

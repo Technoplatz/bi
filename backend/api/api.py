@@ -254,6 +254,7 @@ class Misc:
             "manualAdd",
             "barcoded",
             "replacement",
+            "placeholder",
         ]
 
     def post_notification(self, exc):
@@ -1287,7 +1288,6 @@ class Crud:
         """
         try:
             if key_ not in properties_:
-                print("!!! no key in prop:", key_, properties_)
                 raise APIError(f"{key_} was set but not found in collection properties")
 
             setto__ = None
