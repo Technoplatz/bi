@@ -82,6 +82,44 @@
     "_modified_at": -1
   },
   "parents": [],
+  "links": [
+    {
+      "collection": "delivery",
+      "get": "dnn_no",
+      "set": [
+        {
+          "key": "dnn_odi_no",
+          "value": "odi_no"
+        },
+        {
+          "key": "dnn_odi_sub_no",
+          "value": "odi_sub_no"
+        },
+        {
+          "key": "dnn_status",
+          "value": "$DN_STATUS_20"
+        }
+      ]
+    },
+    {
+      "collection": "delivery",
+      "get": "dnn_bill_no",
+      "set": [
+        {
+          "key": "dnn_odi_no",
+          "value": "odi_no"
+        },
+        {
+          "key": "dnn_odi_sub_no",
+          "value": "odi_sub_no"
+        },
+        {
+          "key": "dnn_status",
+          "value": "$DN_STATUS_20"
+        }
+      ]
+    }
+  ],
   "actions": [
     {
       "id": "act-ordino-arrived",

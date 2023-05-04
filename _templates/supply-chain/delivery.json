@@ -67,8 +67,8 @@
       "title": "Account Name",
       "description": "Account Name",
       "minLength": 1,
-      "width": 110,
-      "maxLength": 64
+      "maxLength": 64,
+      "width": 130
     },
     "dnn_date": {
       "bsonType": "date",

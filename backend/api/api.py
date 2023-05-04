@@ -312,7 +312,8 @@ class Misc:
         """
         splt_ = str(exc_).split(", full error: ")
         splt0_ = splt_[0] if splt_ and len(splt_) > 0 else None
-        jerror_ = splt0_ if splt0_ else str(exc_)
+        splt1_ = splt_[1] if splt_ and len(splt_) > 1 else None
+        jerror_ = splt1_ if splt1_ else splt0_ if splt0_ else str(exc_)
         self.post_notification(jerror_)
         return {"result": False, "msg": jerror_, "notify": False, "count": 0}
 
@@ -438,12 +439,8 @@ class Misc:
                         items_ = properties_property_["items"]
                         if "properties" in items_:
                             items_properties_ = items_["properties"]
-                            properties_new__ = self.properties_cleaner_f(
-                                items_properties_
-                            )
-                            properties_property_["items"][
-                                "properties"
-                            ] = properties_new__
+                            properties_new__ = self.properties_cleaner_f(items_properties_)
+                            properties_property_["items"]["properties"] = properties_new__
                     if field_ == "bsonType":
                         dict_[field_] = [properties_property_[field_], "null"]
                     else:
@@ -574,6 +571,7 @@ class Crud:
     """
     docstring is in progress
     """
+
     def __init__(self):
         """
         docstring is in progress
@@ -1283,40 +1281,106 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def set_akey(self, key_, setto_, properties_, data_):
+        """
+        docstring is in progress
+        """
+        try:
+            if key_ not in properties_:
+                print("!!! no key in prop:", key_, properties_)
+                raise APIError(f"{key_} was set but not found in collection properties")
+
+            setto__ = None
+
+            if setto_[:1] == "$":
+                kvk_ = setto_[1:]
+                kav_ = Mongo().db_["_kv"].find_one({"kav_key": kvk_})
+                if kav_:
+                    kav_key_ = kav_["kav_key"] if "kav_key" in kav_ and kav_["kav_key"] is not None else None
+                    kav_as_ = kav_["kav_as"] if "kav_as" in kav_ and kav_["kav_as"] is not None else None
+                    kav_value_ = kav_["kav_value"] if "kav_value" in kav_ and kav_["kav_value"] is not None else None
+                    if kav_key_ and kav_value_ and kav_as_:
+                        setto__ = datetime.strptime(kav_value_[:10], "%Y-%m-%d") if kav_as_ == "date" else bool(kav_value_) if kav_as_ == "bool" else float(kav_value_) if kav_as_ in ["float", "number"] else int(kav_value_) if kav_as_ == "int" else str(kav_value_) if kav_as_ == "string" else str(kav_value_)
+                else:
+                    raise APIError(f"no key value pair provided for {setto_}")
+            else:
+                setto__ = data_[setto_] if setto_ in data_ and data_[setto_] is not None else setto_
+
+            if not setto__:
+                raise APIError(f"no link value provided for {setto_}; please consider to define a key-value pair for it")
+
+            return {"result": True, "value": setto__}
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
     def link_f(self, obj_):
         """
         docstring is in progress
         """
         try:
             link_ = obj_["link"] if "link" in obj_ else None
-            data_ = obj_["data"] if "data" in obj_ and len(obj_["data"]) > 0 else None
+            data_ = obj_["data"] if "data" in obj_ else None
+            linked_ = obj_["linked"] if "linked" in obj_ and len(obj_["linked"]) > 0 else None
+            user_ = obj_["user"] if "user" in obj_ else None
 
             if link_ is None:
-                raise APIError("required parameter (link) is missing")
+                raise APIError("link info is missing")
+            if linked_ is None:
+                raise APIError("linked data is missing")
             if data_ is None:
-                raise APIError("required parameter (data) is missing")
+                raise APIError("master data is missing")
+            if user_ is None:
+                raise APIError("user data is missing")
 
             collection_ = link_["collection"] if "collection" in link_ else None
             get_ = link_["get"] if "get" in link_ else None
             set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
+            usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
 
             if collection_ is None:
-                raise APIError("required parameter (collection) is missing")
+                raise APIError("link collection is missing")
             if get_ is None:
-                raise APIError("required parameter (get) is missing")
+                raise APIError("link get is missing")
             if set_ is None:
-                raise APIError("required parameter (set) is missing")
+                raise APIError("link set is missing")
+            if usr_id_ is None:
+                raise APIError("user id is missing")
+
+            get_properties_ = self.get_properties_f(collection_)
+            if not get_properties_["result"]:
+                raise APIError("collection properties is missing")
+            target_properties_ = get_properties_["properties"]
 
             data_collection_ = f"{collection_}_data"
             setc_ = {}
+
             for set__ in set_:
                 if "key" in set__ and "value" in set__:
-                    setc_[set__["key"]] = set__["value"]
+                    targetkey__ = set__["key"]
+                    setto__ = set__["value"]
+                    if targetkey__ and setto__:
+                        set_akey_ = self.set_akey(targetkey__, setto__, target_properties_, data_)
+                        if not set_akey_["result"]:
+                            raise APIError(set_akey_["msg"])
+                        val_ = set_akey_["value"]
+                        if val_:
+                            setc_[targetkey__] = val_
+                            setc_["_modified_at"] = Misc().get_now_f()
+                            setc_["_modified_by"] = usr_id_
 
             if not setc_:
-                raise APIError(f"assignments are missing in the set cluster {data_collection_}")
+                raise APIError(f"no assignments to set {data_collection_}")
 
-            return {"result": True, "data": setc_}
+            filter_ = {}
+            filter_[get_] = {"$in": linked_}
+            update_many_ = Mongo().db_[data_collection_].update_many(filter_, {"$set": setc_})
+            count_ = update_many_.matched_count
+
+            return {"result": True, "data": setc_, "count": count_}
+
+        except pymongo.errors.PyMongoError as exc:
+            return Misc().mongo_error_f(exc)
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -1381,11 +1445,7 @@ class Crud:
                             else [ObjectId(s.strip()) for s in separated_]
                         )
                         if mat_["op"] == "in":
-                            fres_ = {
-                                "$in": list_
-                                if typ != "number"
-                                else list(map(float, list_))
-                            }
+                            fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
                         else:
                             fres_ = {
                                 "$nin": list_
@@ -2586,7 +2646,7 @@ class Crud:
                                     doc[uq[0]] = str(bson.objectid.ObjectId())
                                 elif properties[uq[0]]["bsonType"] == "string":
                                     doc[uq[0]] = (
-                                        f"{doc[uq[0]]}_x"
+                                        f"{doc[uq[0]]}-1"
                                         if "_" in doc[uq[0]]
                                         else f"{doc[uq[0]]}-{index}"
                                     )

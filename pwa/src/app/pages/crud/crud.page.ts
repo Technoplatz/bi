@@ -92,7 +92,7 @@ export class CrudPage implements OnInit {
   public counter: number = 0;
   private sweeped: any;
   public link_text: any = null;
-  public link_data: any = [];
+  public linked_: any = [];
   private filter: any = [];
   private file: any = null;
   private relatedx: any = []
@@ -348,18 +348,20 @@ export class CrudPage implements OnInit {
 
   doSubmitLink() {
     if (this.link_text) {
-      this.link_data = this.link_text.split('\n').filter((e: any) => { return e });
-      if (this.link_data.length > 0) {
+      this.linked_ = this.link_text.split('\n').filter((e: any) => { return e });
+      if (this.linked_.length > 0) {
         this.isInProgress = true;
         this.modified = false;
         this.misc.apiCall("crud", {
           "op": "link",
           "link": this.link,
-          "data": this.link_data
+          "linked": this.linked_,
+          "data": this.data_
         }).then((res: any) => {
           if (res && res.result) {
             this.modified = true;
-            this.misc.doMessage("collections were linked successfully", "success");
+            const count_ = res.count && res.count > 0 ? res.count : 0;
+            this.misc.doMessage(count_ + " records were linked successfully", "success");
             this.doDismissModal({ op: "link", modified: this.modified, filter: [] });
           }
         }).catch((error: any) => {
