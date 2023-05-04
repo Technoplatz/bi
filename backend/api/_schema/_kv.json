@@ -9,6 +9,14 @@
       "description": "Key Name",
       "width": 180
     },
+    "kav_value": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "title": "Value",
+      "description": "Value",
+      "width": 220
+    },
     "kav_as": {
       "bsonType": "string",
       "minLength": 3,
@@ -17,14 +25,6 @@
       "description": "As",
       "enum": ["string", "number", "int", "float", "date", "boolean"],
       "width": 120
-    },
-    "kav_value": {
-      "bsonType": "string",
-      "minLength": 1,
-      "maxLength": 64,
-      "title": "Value",
-      "description": "Value",
-      "width": 220
     }
   },
   "required": ["kav_key", "kav_as", "kav_value"],

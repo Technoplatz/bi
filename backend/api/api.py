@@ -1300,7 +1300,8 @@ class Crud:
                     kav_as_ = kav_["kav_as"] if "kav_as" in kav_ and kav_["kav_as"] is not None else None
                     kav_value_ = kav_["kav_value"] if "kav_value" in kav_ and kav_["kav_value"] is not None else None
                     if kav_key_ and kav_value_ and kav_as_:
-                        setto__ = datetime.strptime(kav_value_[:10], "%Y-%m-%d") if kav_as_ == "date" else bool(kav_value_) if kav_as_ == "bool" else float(kav_value_) if kav_as_ in ["float", "number"] else int(kav_value_) if kav_as_ == "int" else str(kav_value_) if kav_as_ == "string" else str(kav_value_)
+                        setto__ = datetime.strptime(kav_value_[:10], "%Y-%m-%d") if kav_as_ == "date" else bool(kav_value_) if kav_as_ == "bool" else float(kav_value_) if kav_as_ in ["float",
+                                                                                                                                                                                       "number"] else int(kav_value_) if kav_as_ == "int" else str(kav_value_) if kav_as_ == "string" else str(kav_value_)
                 else:
                     raise APIError(f"no key value pair provided for {setto_}")
             else:
@@ -2375,12 +2376,15 @@ class Crud:
         try:
             collection_id_ = obj["collection"]
             structure_ = obj["structure"]
+            user_ = obj["user"]
 
-            Mongo().db_["_collection"].update_one({
-                "col_id": collection_id_},
-                {"$set": {"col_structure": structure_},
-                 "$inc": {"_modified_count": 1}
-                 })
+            Mongo().db_["_collection"].update_one({"col_id": collection_id_}, {"$set": {
+                "col_structure": structure_,
+                "_modified_at": Misc().get_now_f(),
+                "_modified_by": user_["usr_id"]
+            },
+                "$inc": {"_modified_count": 1}
+            })
 
             func_ = self.crudschema_validate_f({"collection": f"{collection_id_}_data", "structure": structure_})
             if not func_["result"]:
@@ -2426,6 +2430,9 @@ class Crud:
             schema_ext_validate_f_ = self.schema_ext_validate_f(structure_, view_id_)
             if not schema_ext_validate_f_["result"]:
                 raise APIError(schema_ext_validate_f_["msg"])
+
+            doc_["_modified_at"] = Misc().get_now_f()
+            doc_["_modified_by"] = email_
 
             Mongo().db_["_collection"].update_one({"col_id": col_id_}, {"$set": doc_})
 

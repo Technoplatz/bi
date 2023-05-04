@@ -929,21 +929,21 @@ app-menu {
 }
 
 app-menu .toggler {
-  position: fixed !important;
+  position: absolute !important;
   background-color: var(--ion-color-primary);
-  width: 10px;
+  width: 20px;
   height: 40px;
-  margin-left: 260px;
+  right: 0px;
   top: 14px;
   cursor: pointer;
-  padding: 0px !important;
+  padding: 0px;
+  padding-left: 4px !important;
   z-index: 9999;
 }
 
 .toggler ion-icon {
   margin-top: 12px;
   color: #fff !important;
-  margin-left: -2px;
 }
 
 .input-desc {
@@ -1104,6 +1104,7 @@ sup {
   display: block !important;
   max-width: 180px !important;
   color: var(--ion-color-primary) !important;
+  font-weight: 500;
 }
 
 .overflow-hidden-item {
