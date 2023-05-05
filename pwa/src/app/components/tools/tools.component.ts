@@ -52,11 +52,16 @@ export class ToolsComponent implements OnInit {
     private storage: Storage
   ) {
     this.misc.version.subscribe((versioni_: any) => {
+      console.info("*** versioni_", versioni_);
       if (versioni_.is_new_version) {
         this.is_new_version = true;
         this.new_version_ = versioni_.version;
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.misc.version.unsubscribe;
   }
 
   ngOnInit() {
@@ -67,7 +72,7 @@ export class ToolsComponent implements OnInit {
 
   doSetVersion() {
     this.storage.set("LSVERSION", this.new_version_).then(() => {
-      window.location.replace('/dashboard');
+      window.location.replace("/dashboard");
     });
   }
 

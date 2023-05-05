@@ -62,7 +62,7 @@ import numpy as np
 import bleach
 import pyotp
 from authlib.jose import jwt
-from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTokenError, InvalidTokenError
+from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTokenError, InvalidTokenError, BadSignatureError
 import numexpr as ne
 from flask import Flask, request, send_from_directory, make_response
 from flask_cors import CORS
@@ -3895,6 +3895,12 @@ class Auth:
 
         except InvalidTokenError as exc_:
             return ({"result": False, "msg": "session token is invalid", "exc": str(exc_)})
+
+        except BadSignatureError as exc_:
+            return ({"result": False, "msg": "invalid session signature", "exc": str(exc_)})
+
+        except Exception as exc_:
+            return ({"result": False, "msg": "invalid session", "exc": str(exc_)})
 
     def user_validate_by_basic_auth_f(self, input_):
         """

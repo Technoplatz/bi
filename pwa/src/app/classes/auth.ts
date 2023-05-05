@@ -56,7 +56,7 @@ export class Auth {
   setUserOut() {
     this.storage.remove("LSUSERMETA").then(() => {
       this.user.next(null);
-      this.misc.navi.next("/");
+      window.location.replace("/");
     });
   }
 

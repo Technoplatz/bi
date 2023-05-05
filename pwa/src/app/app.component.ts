@@ -65,15 +65,13 @@ export class AppComponent implements OnInit {
   ) {
     if (this.sw_update.isEnabled) {
       console.info("*** sw_update enabled");
-      this.sw_update.versionUpdates.subscribe((evt: any) => {
+      this.sw_update.versionUpdates.subscribe(evt => {
         console.info("*** version updates subscribed", evt);
         switch (evt.type) {
           case "VERSION_DETECTED":
-            console.log(`*** downloading a new version: ${evt.version.hash}`);
+            console.log(`*** downloading new version: ${evt.version.hash}`);
             break;
           case "VERSION_READY":
-            console.log(`*** current version: ${evt.currentVersion.hash}`);
-            console.log(`*** a new version is ready: ${evt.latestVersion.hash}`);
             console.info(`*** currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
             this.storage.get("LSVERSION").then((LSVERSION: any) => {
               this.misc.version.next({ is_new_version: evt.latestVersion !== LSVERSION, version: evt.latestVersion });
