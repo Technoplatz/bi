@@ -53,11 +53,11 @@ import { ClipboardPluginWeb } from "@capacitor/core";
 import { environment } from "./../environments/environment";
 
 if (environment.production) {
-  enableProdMode();
+    enableProdMode();
 }
 
 export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, "./assets/i18n/", ".json");
+    return new TranslateHttpLoader(http, "./assets/i18n/", ".json");
 }
 
 @NgModule({
@@ -90,7 +90,8 @@ export function createTranslateLoader(http: HttpClient) {
             }
         }),
         ServiceWorkerModule.register("ngsw-worker.js", {
-            enabled: environment.production
+            enabled: environment.production,
+            registrationStrategy: "registerWhenStable:30000",
         })
     ],
     providers: [

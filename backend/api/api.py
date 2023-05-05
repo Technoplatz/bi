@@ -3843,15 +3843,15 @@ class Auth:
             authb_ = "Bearer "
             ix_ = authorization_.find(authb_)
             if ix_ != 0:
-                raise AuthError("no token provided 403")
+                raise ExpiredTokenError("no token provided")
 
             token_ = authorization_.replace(authb_, "")
             if not token_:
-                raise AuthError("no token provided 403")
+                raise ExpiredTokenError("no token provided")
 
             x_api_key_ = request.headers.get("X-Api-Key", None)
             if not x_api_key_:
-                raise AuthError("no api key provided 403")
+                raise ExpiredTokenError("no api key provided")
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": x_api_key_})
             if not auth_:

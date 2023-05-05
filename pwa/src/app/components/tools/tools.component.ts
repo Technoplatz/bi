@@ -42,30 +42,32 @@ import { Auth } from "../../classes/auth";
 })
 
 export class ToolsComponent implements OnInit {
-  public newVersion: boolean = false;
   public name: string = "";
+  public is_new_version: boolean = false;
+  public new_version_: string = "";
 
   constructor(
     private auth: Auth,
     public misc: Miscellaneous,
     private storage: Storage
-  ) { }
+  ) {
+    this.misc.version.subscribe((versioni_: any) => {
+      if (versioni_.is_new_version) {
+        this.is_new_version = true;
+        this.new_version_ = versioni_.version;
+      }
+    });
+  }
 
   ngOnInit() {
-    this.misc.version.subscribe((res: any) => {
-      this.storage.set("LSVERSION", res).then(() => {
-        this.newVersion = res === true ? res : false;
-      });
-    });
     this.auth.user.subscribe((user: any) => {
       this.name = user ? user.name : "";
     });
   }
 
   doSetVersion() {
-    this.storage.set("LSVERSION", [false]).then(() => {
-      this.misc.version.next(false);
-      window.location.reload();
+    this.storage.set("LSVERSION", this.new_version_).then(() => {
+      window.location.replace('/dashboard');
     });
   }
 

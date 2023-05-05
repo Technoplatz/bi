@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
+import { SwUpdate } from '@angular/service-worker';
 import { Router, Event, NavigationError, NavigationEnd, NavigationStart } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./classes/misc";
@@ -59,8 +60,33 @@ export class AppComponent implements OnInit {
     private auth: Auth,
     private crud: Crud,
     private misc: Miscellaneous,
-    private storage: Storage
+    private storage: Storage,
+    private sw_update: SwUpdate
   ) {
+    if (this.sw_update.isEnabled) {
+      console.info("*** sw_update enabled");
+      this.sw_update.versionUpdates.subscribe((evt: any) => {
+        console.info("*** version updates subscribed", evt);
+        switch (evt.type) {
+          case "VERSION_DETECTED":
+            console.log(`*** downloading a new version: ${evt.version.hash}`);
+            break;
+          case "VERSION_READY":
+            console.log(`*** current version: ${evt.currentVersion.hash}`);
+            console.log(`*** a new version is ready: ${evt.latestVersion.hash}`);
+            console.info(`*** currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
+            this.storage.get("LSVERSION").then((LSVERSION: any) => {
+              this.misc.version.next({ is_new_version: evt.latestVersion !== LSVERSION, version: evt.latestVersion });
+            });
+            break;
+          case "VERSION_INSTALLATION_FAILED":
+            console.log(`*** installation failed '${evt.version.hash}': ${evt.error}`);
+            break;
+        }
+      });
+    } else {
+      console.error("*** sw_update is not enabled");
+    }
     this.misc.menutoggle.subscribe((res: any) => {
       this.menutoggle = res;
     });
@@ -98,33 +124,33 @@ export class AppComponent implements OnInit {
             });
           });
         }
-      });
-      this.storage.get("LSTHEME").then((LSTHEME: any) => {
-        if (LSTHEME) {
-          document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
-        } else {
-          this.storage.set("LSTHEME", environment.themes[0]).then(() => {
-            document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
-          });
-        }
-      });
-      Network.addListener("networkStatusChange", (status: any) => {
-        if (!status.connected) {
-          this.net_ = false;
-          console.error("*** internet connection is lost");
-        } else {
-          setTimeout(() => {
-            console.log("*** internet connection is back again");
-            this.net_ = true;
-            location.reload();
-          }, 3000);
-        }
-      });
-      this.misc.getLanguage().then((res: any) => {
-        this.translate.setDefaultLang(res ? res : "en");
-        this.translate.use(res ? res : "en");
-      }).catch((error: any) => {
-        console.error(error);
+        this.storage.get("LSTHEME").then((LSTHEME: any) => {
+          if (LSTHEME) {
+            document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
+          } else {
+            this.storage.set("LSTHEME", environment.themes[0]).then(() => {
+              document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
+            });
+          }
+        });
+        Network.addListener("networkStatusChange", (status: any) => {
+          if (!status.connected) {
+            this.net_ = false;
+            console.error("*** internet connection is lost");
+          } else {
+            setTimeout(() => {
+              console.log("*** internet connection is back again");
+              this.net_ = true;
+              location.reload();
+            }, 3000);
+          }
+        });
+        this.misc.getLanguage().then((res: any) => {
+          this.translate.setDefaultLang(res ? res : "en");
+          this.translate.use(res ? res : "en");
+        }).catch((error: any) => {
+          console.error(error);
+        });
       });
     });
   }

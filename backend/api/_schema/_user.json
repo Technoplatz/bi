@@ -2,19 +2,20 @@
   "properties": {
     "usr_id": {
       "bsonType": "string",
+      "pattern": "^.+@.+$",
+      "title": "User ID",
+      "description": "Email",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^.+@.+$",
-      "title": "Email",
-      "description": "Email",
       "required": true,
+      "placeholder": "Enter a business e-mail",
       "width": 200
     },
     "usr_name": {
       "bsonType": "string",
       "minLength": 3,
       "maxLength": 64,
-      "title": "Full Name",
+      "title": "Name",
       "description": "Full Name",
       "required": true,
       "width": 140
@@ -25,10 +26,9 @@
       "maxLength": 13,
       "title": "Scope",
       "description": "User Scope",
-      "enum": ["Internal", "External", "Manager", "Administrator"],
-      "pattern": "^[a-zA-Z]{7,13}$",
+      "enum": ["Internal", "External", "Administrator"],
       "required": true,
-      "default": "External",
+      "default": "Internal",
       "width": 100
     },
     "usr_enabled": {

@@ -102,10 +102,9 @@ export class Auth {
         if (res && res.result) {
           this.user.next(res.user);
           this.storage.set("LSUSERMETA", res.user).then(() => {
+            resolve(true);
             this.misc.navi.next("/dashboard");
-            this.crud.getAll().then(() => {
-              resolve(true);
-            }).catch((error: any) => {
+            this.crud.getAll().then(() => { }).catch((error: any) => {
               console.error(error);
               this.misc.doMessage(error, "error");
               reject(error);

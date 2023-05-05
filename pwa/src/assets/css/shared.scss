@@ -118,6 +118,12 @@ ion-note {
   font-size: 11px !important;
 }
 
+.new-version {
+  margin-right: 32px !important;
+  --padding-start: 10px !important;
+  --padding-end: 10px !important;
+}
+
 .api-key-item ion-button {
   width: 80px;
 }
@@ -1921,7 +1927,7 @@ app-chart {
 
 .flash-sq h2 {
   padding-top: 4px;
-  color: var(--ion-color-primary);
+  color: var(--ion-color-dark);
 }
 
 .flash-sq h5,
