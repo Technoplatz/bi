@@ -52,8 +52,7 @@ export class ToolsComponent implements OnInit {
     private storage: Storage
   ) {
     this.misc.version.subscribe((versioni_: any) => {
-      console.info("*** versioni_", versioni_);
-      if (versioni_.is_new_version) {
+      if (versioni_ && versioni_.is_new_version) {
         this.is_new_version = true;
         this.new_version_ = versioni_.version;
       }
@@ -62,6 +61,7 @@ export class ToolsComponent implements OnInit {
 
   ngOnDestroy() {
     this.misc.version.unsubscribe;
+    this.auth.user.unsubscribe;
   }
 
   ngOnInit() {
@@ -77,9 +77,7 @@ export class ToolsComponent implements OnInit {
   }
 
   doSignout() {
-    this.auth.Signout().then(() => {
-      console.log("*** signed out");
-    }).catch((error: any) => {
+    this.auth.Signout().then(() => { }).catch((error: any) => {
       console.error("signout error", error.msg);
     });
   }
