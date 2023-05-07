@@ -48,12 +48,12 @@ export class MenuComponent implements OnInit {
   public release = environment.release;
   public views: any = [];
   public charts: any = [];
-  public collections: any = [];
   public segmentsadm: any;
   public saas_: any;
   public user_: any;
   public charts_: any = null;
   public collections_: any = null;
+  public collections: any = [];
   public views_: any = null;
   public menutoggle: boolean = false;
 

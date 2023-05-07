@@ -56,12 +56,18 @@ export class DashboardPage implements OnInit {
   public charts_: any = null;
   public charts: any = [];
   public loadingText: string = environment.misc.loadingText;
+  public collections_: any = null;
+  public collections: any = [];
 
   constructor(
     private storage: Storage,
     private crud: Crud,
     public misc: Miscellaneous
   ) {
+    this.collections_ ? null : this.collections_ = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+      console.log("*** collections", this.collections);
+    });
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
       this.charts = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard") : [];
       this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type === "Flashcard") : [];
@@ -70,6 +76,12 @@ export class DashboardPage implements OnInit {
     this.announcements_ ? null : this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];
     });
+  }
+
+  ngOnDestroy() {
+    this.crud.charts.unsubscribe;
+    this.crud.announcements.unsubscribe;
+    this.crud.collections.unsubscribe;
   }
 
   ngOnInit() {

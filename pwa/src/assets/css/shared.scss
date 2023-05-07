@@ -1770,9 +1770,16 @@ ion-checkbox {
   background: none;
 }
 
-.pe a {
+.pe {
+  font-size: 14px;
+  line-height: 20px !important;
+}
+
+.pe a,
+.pe.link {
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .view-grid ion-row ion-col {

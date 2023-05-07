@@ -40,7 +40,9 @@ https://www.gnu.org/licenses.
         <!-- flashcards -->
         <div class="filler-16"></div>
         <div class="brz-visual-group">
-          <div *ngFor="let item of flashcards; let f = index" class="flash-sq" [style]="'background-color:' + (item.self && item.self.chart_colors && item.self.chart_colors[0] ? item.self.chart_colors[0] : '#eee') + ' !important;'" #chcontainer>
+          <div *ngFor="let item of flashcards; let f = index" class="flash-sq"
+            [style]="'background-color:' + (item.self && item.self.chart_colors && item.self.chart_colors[0] ? item.self.chart_colors[0] : '#eee') + ' !important;'"
+            #chcontainer>
             <div class="visual-buttons">
               <ion-button size="small" fill="clear" (click)="misc.navi.next('view/' + item.id)"
                 class="clear-dark-button" color="dark" mode="ios">
@@ -52,7 +54,8 @@ https://www.gnu.org/licenses.
             {{ item.collection }} | {{ item.self.data_values[0].value }} {{ 'of' | translate }} {{
             item.self.data_values[0].key }}
             <h2>{{ item.stats[item.self.data_values[0].value] }}</h2>
-            <div *ngIf="item.self && item.self.scheduled && item.self.scheduled_cron" class="flash-cron"><ion-icon name="alarm-outline" size="large"></ion-icon><br />{{ item.self.scheduled_cron }} </div>
+            <div *ngIf="item.self && item.self.scheduled && item.self.scheduled_cron" class="flash-cron"><ion-icon
+                name="alarm-outline" size="large"></ion-icon><br />{{ item.self.scheduled_cron }} </div>
           </div>
         </div>
 
@@ -100,12 +103,31 @@ https://www.gnu.org/licenses.
           </div>
         </div>
 
+        <!-- COLLECTIONS -->
+        <h4>{{ 'Data Collections' | translate }}</h4>
+        <div class="filler-4"></div>
+        <div *ngIf="collections.length == 0; else collist">
+          <ion-text class="pe">{{ 'NO COLLECTION FOUND' | translate }}</ion-text>
+        </div>
+        <ng-template #collist>
+          <div class="pe link">
+            <span *ngFor="let col of collections" (click)="misc.navi.next('/collection/' + col.col_id)">|&nbsp;&nbsp;{{
+              col.col_title }}&nbsp;&nbsp;</span>
+          </div>
+          <div class="filler-8"></div>
+        </ng-template>
+        <ion-text class="pe">
+          {{ 'There are useful templates are waiting for you to create a new one' | translate }}.<br />
+        </ion-text>
+        <div class="filler-16"></div>
+        <ion-button (click)="misc.navi.next('admin/_collection')">{{ 'Collection Studio' | translate
+          }}</ion-button>
+        <div class="filler-16"></div>
+        <div class="filler-16"></div>
+
         <!-- RECENT ANNOUNCEMENTS -->
         <h4>{{ 'The most recent Announcements' | translate }}</h4>
         <div class="filler-4"></div>
-        <ion-button size="small" (click)="misc.navi.next('admin/_announcement')">{{ 'Show All' | translate
-          }}</ion-button>
-        <div class="filler-16"></div>
         <ion-grid *ngIf="announcements?.length > 0; else noannouncement" class="ion-no-padding data-grid">
           <ion-row>
             <ion-col size="2">
@@ -132,11 +154,16 @@ https://www.gnu.org/licenses.
             <ion-col size="4"> {{ item._tags?.join(' ') }} </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col size="12">{{ 'The latest' | translate }} {{ announcements.length }} {{ 'announcements' | translate }}.</ion-col>
+            <ion-col size="12">{{ 'The latest' | translate }} {{ announcements.length }} {{ 'announcements' | translate
+              }}.</ion-col>
           </ion-row>
+          <div class="filler-16"></div>
+          <ion-button size="small" (click)="misc.navi.next('admin/_announcement')">{{ 'Show All' | translate
+            }}</ion-button>
         </ion-grid>
         <ng-template #noannouncement>
-          <ion-text class="pe">{{ 'No announcement found' | translate }}.</ion-text>
+          <ion-text class="pe">{{ 'NO DATA ANNOUNCEMETS FOUND' | translate }}<br />
+            {{ 'At least one collections must be created so that you can begin to make data announcements' | translate }}.</ion-text>
         </ng-template>
         <br /><br /><br />
       </ion-col>

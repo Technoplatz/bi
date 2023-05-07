@@ -280,6 +280,7 @@ export class CollectionPage implements OnInit {
                 doc: null,
                 is_crud: true
               }).then(() => {
+                this.id === "_collection" ? this.crud.getAll().then(() => { }) : null;
                 this.RefreshData(0);
               }).catch((res: any) => {
                 this.misc.doMessage(res && res.msg ? res.msg : res, "error");
