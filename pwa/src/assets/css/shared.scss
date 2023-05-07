@@ -1770,6 +1770,13 @@ ion-checkbox {
   background: none;
 }
 
+.dash-colls {
+  padding: 8px;
+  float: left;
+  border-right: 1px solid var(--ion-color-light);
+  text-decoration: underline !important;
+}
+
 .pe {
   font-size: 14px;
   line-height: 20px !important;
@@ -1780,6 +1787,9 @@ ion-checkbox {
   text-decoration: none;
   font-weight: 500;
   cursor: pointer;
+  display: flex;
+  border-left: 1px solid var(--ion-color-light);
+  color: var(--ion-color-primary);
 }
 
 .view-grid ion-row ion-col {

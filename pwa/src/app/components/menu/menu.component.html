@@ -65,6 +65,7 @@ https://www.gnu.org/licenses.
         <p *ngIf="user_.perm" (click)="misc.navi.next('admin/_collection')" class="clicked-item dark separated-menu">
           {{ 'Collection Studio' | translate }}
         </p>
+        <div class="filler-8"></div>
         <div *ngIf="collections?.length > 0; else nocollectionsfound">
           <p *ngFor="let item of collections" (click)="misc.navi.next('collection/'+ item.col_id)"
             class="clicked-item dark">

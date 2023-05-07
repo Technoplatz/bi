@@ -4,9 +4,9 @@
       "bsonType": "string",
       "title": "Account No",
       "description": "Account No",
-      "pattern": "^[0-9-]{10,11}$",
+      "pattern": "^[A-Z0-9-]{10,16}$",
       "minLength": 10,
-      "maxLength": 11
+      "maxLength": 16
     },
     "acc_nick_name": {
       "bsonType": "string",
@@ -14,7 +14,7 @@
       "description": "Account Nick Name",
       "minLength": 3,
       "maxLength": 16,
-      "pattern": "^[A-Za-z0-9-]{3,16}$",
+      "pattern": "^[A-Za-z0-9- ]{3,16}$",
       "width": 130
     },
     "acc_name": {
@@ -60,36 +60,9 @@
       "default": true
     }
   },
-  "required": [
-    "acc_no",
-    "acc_name",
-    "acc_nick_name",
-    "acc_tax_no",
-    "acc_tax_office",
-    "acc_ship_to"
-  ],
-  "index": [
-    [
-      "acc_name"
-    ],
-    [
-      "acc_nick_name"
-    ],
-    [
-      "acc_tax_no"
-    ],
-    [
-      "acc_is_active"
-    ]
-  ],
-  "unique": [
-    [
-      "acc_no"
-    ],
-    [
-      "acc_nick_name"
-    ]
-  ],
+  "required": ["acc_no", "acc_name", "acc_nick_name", "acc_tax_no", "acc_tax_office", "acc_ship_to"],
+  "index": [["acc_name"], ["acc_nick_name"], ["acc_tax_no"], ["acc_is_active"]],
+  "unique": [["acc_no"], ["acc_nick_name"]],
   "parents": [],
   "actions": [],
   "sort": {

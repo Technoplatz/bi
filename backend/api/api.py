@@ -1635,14 +1635,10 @@ class Crud:
 
             vie_filter_ = view_["data_filter"] if "data_filter" in view_ else []
             if len(vie_filter_) > 0:
-                get_filtered_ = self.get_filtered_f(
-                    {
-                        "match": vie_filter_,
-                        "properties": properties_master_
-                        if properties_master_
-                        else None
-                    }
-                )
+                get_filtered_ = self.get_filtered_f({
+                    "match": vie_filter_,
+                    "properties": properties_master_ if properties_master_ else None
+                })
                 pipe_.append({"$match": get_filtered_})
 
             if unset_ and len(unset_) > 0:
@@ -1652,13 +1648,11 @@ class Crud:
             records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
             count_ = len(records_) if records_ else 0
 
-            df_ = pd.DataFrame(records_).fillna(0)
-            df_raw_ = pd.DataFrame(records_).fillna('')
+            # df_ = pd.DataFrame(records_).fillna(0)
+            df_ = pd.DataFrame(records_).fillna("#N/A")
+            df_raw_ = pd.DataFrame(records_).fillna("")
 
-            vie_visual_style_ = (
-                view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
-            )
-
+            vie_visual_style_ = view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
             data_index_0_ = (
                 view_["data_index"][0]
                 if "data_index" in view_ and len(view_["data_index"]) > 0
@@ -1691,12 +1685,14 @@ class Crud:
             data_values_ = view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
 
             dropped_ = []
-            dropped_.append(data_index_0_) if data_index_0_ in df_.columns else None
-            dropped_.append(data_values_0_k_) if data_values_0_k_ in df_.columns else None
-            dropped_.append(data_columns_0_) if data_columns_0_ in df_.columns else None
+            if data_index_0_ in df_.columns:
+                dropped_.append(data_index_0_)
+            if data_values_0_k_ in df_.columns:
+                dropped_.append(data_values_0_k_)
+            if data_columns_0_ in df_.columns:
+                dropped_.append(data_columns_0_)
 
             groupby_ = []
-
             if vie_visual_style_ == "Line":
                 if data_columns_0_ in df_.columns:
                     groupby_.append(data_columns_0_)
@@ -1751,16 +1747,8 @@ class Crud:
             if data_index_0_ and data_values_0_k_ in df_.columns:
                 if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
                     for idx_, item_ in enumerate(dfj_):
-                        xaxis_ = (
-                            item_[data_index_0_]
-                            if data_index_0_ in item_
-                            else None
-                        )
-                        yaxis_ = (
-                            item_[data_values_0_k_]
-                            if data_values_0_k_ in item_
-                            else None
-                        )
+                        xaxis_ = item_[data_index_0_] if data_index_0_ in item_ else None
+                        yaxis_ = item_[data_values_0_k_] if data_values_0_k_ in item_ else None
                         if xaxis_ and yaxis_:
                             series_.append({"name": xaxis_, "value": yaxis_})
                 elif vie_visual_style_ == "Line":
@@ -1768,17 +1756,8 @@ class Crud:
                         if idx_ > 0 and item_[data_columns_0_] != legend_:
                             series_.append({"name": legend_, "series": series_sub_})
                             series_sub_ = []
-                        series_sub_.append(
-                            {
-                                "name": item_[data_index_0_],
-                                "value": item_[data_values_0_k_],
-                            }
-                        )
-                        legend_ = (
-                            item_[data_columns_0_]
-                            if data_columns_0_ in item_
-                            else None
-                        )
+                        series_sub_.append({"name": item_[data_index_0_], "value": item_[data_values_0_k_]})
+                        legend_ = item_[data_columns_0_] if data_columns_0_ in item_ else None
                     if legend_:
                         series_.append({"name": legend_, "series": series_sub_})
                 else:
@@ -1786,21 +1765,9 @@ class Crud:
                         if idx_ > 0 and item_[data_index_0_] != xaxis_:
                             series_.append({"name": xaxis_, "series": series_sub_})
                             series_sub_ = []
-                        if (
-                            data_columns_0_ in item_
-                            and item_[data_columns_0_] is not None
-                        ):
-                            series_sub_.append(
-                                {
-                                    "name": item_[data_columns_0_],
-                                    "value": item_[data_values_0_k_],
-                                }
-                            )
-                        xaxis_ = (
-                            item_[data_index_0_]
-                            if data_index_0_ in item_
-                            else None
-                        )
+                        if data_columns_0_ in item_ and item_[data_columns_0_] is not None:
+                            series_sub_.append({ "name": item_[data_columns_0_], "value": item_[data_values_0_k_] })
+                        xaxis_ = item_[data_index_0_] if data_index_0_ in item_ else None
                     if xaxis_:
                         series_.append({"name": xaxis_, "series": series_sub_})
 
@@ -1896,12 +1863,12 @@ class Crud:
                 "dfraw": df_raw_ if scope_ == "announcement" else None,
                 "self": view_,
                 "stats": {
-                    "count": count_,
-                    "sum": sum_,
-                    "unique": unique_,
-                    "mean": mean_,
-                    "stdev": stdev_,
-                    "var": var_
+                    "count": count_ if count_ else 0,
+                    "sum": sum_ if sum_ and sum_ > 0 else 0,
+                    "unique": unique_ if unique_ and unique_ > 0 else 0,
+                    "mean": mean_ if mean_ and mean_ > 0 else 0,
+                    "stdev": stdev_ if stdev_ and stdev_ > 0 else 0,
+                    "var": var_ if var_ and var_ > 0 else 0
                 }
             }
 
@@ -1952,13 +1919,12 @@ class Crud:
                     for view_ in views_:
                         id__ = view_["k"]
                         view__ = view_["v"]
-                        get_view_data_f_ = self.get_view_data_f(
-                            user_, id__, source_
-                        )
+                        get_view_data_f_ = self.get_view_data_f(user_, id__, source_)
                         if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
                             continue
                         if not get_view_data_f_["result"]:
-                            raise APIError(f"get view data error {get_view_data_f_['msg']}")
+                            continue
+                            # raise APIError(f"get view data error {get_view_data_f_['msg']}")
                         returned_views_.append({
                             "id": id__,
                             "collection": collection_["col_id"],

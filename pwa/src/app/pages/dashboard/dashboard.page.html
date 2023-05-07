@@ -37,6 +37,14 @@ https://www.gnu.org/licenses.
         <h6>{{ 'WELCOME ABOARD' | translate }}</h6>
         <h1>{{ 'Shared Views' | translate }}</h1>
 
+        <!-- bitte warten sie -->
+        <div *ngIf="is_loading">
+          <ion-item lines="none">
+            <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
+            <ion-label>{{ loadingText | translate }}</ion-label>
+          </ion-item>
+        </div>
+
         <!-- flashcards -->
         <div class="filler-16"></div>
         <div class="brz-visual-group">
@@ -111,8 +119,9 @@ https://www.gnu.org/licenses.
         </div>
         <ng-template #collist>
           <div class="pe link">
-            <span *ngFor="let col of collections" (click)="misc.navi.next('/collection/' + col.col_id)">|&nbsp;&nbsp;{{
-              col.col_title }}&nbsp;&nbsp;</span>
+            <div *ngFor="let col of collections" (click)="misc.navi.next('/collection/' + col.col_id)"
+              class="dash-colls">{{
+              col.col_title }}</div>
           </div>
           <div class="filler-8"></div>
         </ng-template>
@@ -163,7 +172,8 @@ https://www.gnu.org/licenses.
         </ion-grid>
         <ng-template #noannouncement>
           <ion-text class="pe">{{ 'NO DATA ANNOUNCEMETS FOUND' | translate }}<br />
-            {{ 'At least one collections must be created so that you can begin to make data announcements' | translate }}.</ion-text>
+            {{ 'At least one collections must be created so that you can begin to make data announcements' | translate
+            }}.</ion-text>
         </ng-template>
         <br /><br /><br />
       </ion-col>

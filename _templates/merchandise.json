@@ -6,7 +6,7 @@
       "description": "Merchandise Number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9-]{10,16}$",
+      "pattern": "^[A-Z0-9-]{10,16}$",
       "width": 110
     },
     "mer_line_no": {
@@ -49,7 +49,7 @@
       "description": "Invoice Number",
       "minLength": 10,
       "maxLength": 10,
-      "pattern": "^[0-9]{10,10}$",
+      "pattern": "^[A-Z0-9]{10,10}$",
       "width": 130
     },
     "mer_acc_no": {

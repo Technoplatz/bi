@@ -49,14 +49,12 @@ export class DashboardPage implements OnInit {
   public chart_size: string = "small";
   public chart_css: string = "chart-sq small";
   public is_refreshing: boolean = false;
+  public is_loading: boolean = false;
   public view: any = null;
   public chart: any = null;
   public announcements: any = [];
-  public announcements_: any = null;
-  public charts_: any = null;
   public charts: any = [];
   public loadingText: string = environment.misc.loadingText;
-  public collections_: any = null;
   public collections: any = [];
 
   constructor(
@@ -64,16 +62,19 @@ export class DashboardPage implements OnInit {
     private crud: Crud,
     public misc: Miscellaneous
   ) {
-    this.collections_ ? null : this.collections_ = this.crud.collections.subscribe((res: any) => {
+    this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
-      console.log("*** collections", this.collections);
     });
-    this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
+    this.crud.charts.subscribe((res: any) => {
+      this.is_loading = true;
       this.charts = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard") : [];
       this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type === "Flashcard") : [];
+      if (this.charts.length > 0) {
+        this.is_loading = false;
+      }
       console.log("*** charts", this.charts);
     });
-    this.announcements_ ? null : this.crud.announcements.subscribe((res: any) => {
+    this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];
     });
   }
