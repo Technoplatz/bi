@@ -87,9 +87,6 @@ class Trigger():
         self.client = pymongo.MongoClient(self.connstr_)
         self.db_ = self.client[mongo_db_]
 
-        """
-        refreshes the backbone
-        """
         refresh_f_ = self.refresh_f()
         if not refresh_f_["result"]:
             raise AppException(refresh_f_["exc"])
@@ -135,16 +132,14 @@ class Trigger():
                             "filter": cluster_["filter"],
                             "set": cluster_["set"]
                         })
+
             if not self.triggers_:
-                raise AppException("!!! no triggers found")
-            print(">>> triggers collected")
+                raise PassException("!!! no trigger found and passed")
 
             print(">>> getting properties...")
             self.properties_ = {}
             cursor_ = self.db_["_collection"].aggregate([{
-                "$match": {
-                    "$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]
-                }
+                "$match": {"$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]}
             }])
             for item_ in cursor_:
                 self.properties_[item_["col_id"]] = item_["col_structure"]["properties"]
@@ -154,17 +149,20 @@ class Trigger():
 
             return {"result": True}
 
-        except pymongo.errors.PyMongoError as exc:
+        except PassException as exc_:
+            return {"result": True, "exc": exc_}
+
+        except pymongo.errors.PyMongoError as exc_:
             print("!!! refresher mongo error")
-            return {"result": False, "exc": exc}
+            return {"result": False, "exc": exc_}
 
-        except AppException as exc:
+        except AppException as exc_:
             print("!!! refresher app exception")
-            return {"result": False, "exc": exc}
+            return {"result": False, "exc": exc_}
 
-        except Exception as exc:
+        except Exception as exc_:
             print("!!! refresher exception")
-            return {"result": False, "exc": exc}
+            return {"result": False, "exc": exc_}
 
     def get_filtered_f(self, obj):
         """
@@ -281,12 +279,12 @@ class Trigger():
 
             return sum_
 
-        except pymongo.errors.PyMongoError as exc:
-            print("!!! sum mongo error", str(exc))
+        except pymongo.errors.PyMongoError as exc_:
+            print("!!! sum mongo error", str(exc_))
             return 0
 
-        except Exception as exc:
-            print("!!! sum exception", str(exc))
+        except Exception as exc_:
+            print("!!! sum exception", str(exc_))
             return 0
 
     def aggregater_count_f(self, coll_, filter_):
@@ -306,12 +304,12 @@ class Trigger():
 
             return count_
 
-        except pymongo.errors.PyMongoError as exc:
-            print("!!! count mongo error", str(exc))
+        except pymongo.errors.PyMongoError as exc_:
+            print("!!! count mongo error", str(exc_))
             return 0
 
-        except Exception as exc:
-            print("!!! count exception", str(exc))
+        except Exception as exc_:
+            print("!!! count exception", str(exc_))
             return 0
 
     async def worker_f(self, event_, resume_token_):
@@ -407,9 +405,9 @@ class Trigger():
                 if not match_:
                     print(f"\n!!! no data found with the target {target_collection_id_}", match_)
                     continue
-                
+
                 on_changes_all_ = target_["on_changes_all"]
-                if on_changes_all_ is True:                    
+                if on_changes_all_ is True:
                     changes_filter0_ = self.get_filtered_f({
                         "match": target_changes_,
                         "properties": source_properties_
@@ -468,7 +466,8 @@ class Trigger():
                     parts_ = re.split("([+-/*()])", value_)
                     chkgroupbys_ = re.findall("[a-zA-Z_]+", value_)
                     chkgroup0_ = chkgroupbys_[0]
-                    type_ = "enum" if target_enum_ else "sourcevalue" if value_ in source_properties_ else "targetvalue" if value_ in target_properties_ else "string" if target_bson_type_ == "string" else "formula" if len(parts_) > 1 or chkgroup0_ in self.groupbys_ else target_bson_type_
+                    type_ = "enum" if target_enum_ else "sourcevalue" if value_ in source_properties_ else "targetvalue" if value_ in target_properties_ else "string" if target_bson_type_ == "string" else "formula" if len(
+                        parts_) > 1 or chkgroup0_ in self.groupbys_ else target_bson_type_
                     if type_ == "formula":
                         if target_bson_type_ in self.numerics_:
                             if chkgroup0_ in self.groupbys_:
@@ -517,21 +516,21 @@ class Trigger():
 
             return True
 
-        except pymongo.errors.PyMongoError as exc:
-            print("!!! worker mongo error", str(exc))
-            self.exception_show_f(exc)
+        except pymongo.errors.PyMongoError as exc_:
+            print("!!! worker mongo error", str(exc_))
+            self.exception_show_f(exc_)
 
-        except PassException as exc:
-            print(">>> ⤵ worker passed", str(exc))
-            self.exception_show_f(exc)
+        except PassException as exc_:
+            print(">>> ⤵ worker passed", str(exc_))
+            self.exception_show_f(exc_)
 
-        except AppException as exc:
-            print("!!! worker app exception", str(exc))
-            self.exception_show_f(exc)
+        except AppException as exc_:
+            print("!!! worker app exception", str(exc_))
+            self.exception_show_f(exc_)
 
-        except Exception as exc:
-            print("!!! worker exception", str(exc))
-            self.exception_show_f(exc)
+        except Exception as exc_:
+            print("!!! worker exception", str(exc_))
+            self.exception_show_f(exc_)
 
     def backlog_stream_f(self):
         """
@@ -568,17 +567,17 @@ class Trigger():
             running_tasks_ = [task for task in asyncio.all_tasks() if task is not current_task_]
             await asyncio.wait(running_tasks_)
 
-        except pymongo.errors.PyMongoError as exc:
+        except pymongo.errors.PyMongoError as exc_:
             print("!!! cs mongo error")
-            self.exception_show_f(exc)
+            self.exception_show_f(exc_)
 
-        except AppException as exc:
+        except AppException as exc_:
             print("!!! cs app exception")
-            self.exception_show_f(exc)
+            self.exception_show_f(exc_)
 
-        except Exception as exc:
+        except Exception as exc_:
             print("!!! cs exception")
-            self.exception_show_f(exc)
+            self.exception_show_f(exc_)
 
 
 if __name__ == "__main__":

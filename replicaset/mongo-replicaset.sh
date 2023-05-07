@@ -34,6 +34,9 @@
 
 echo "REPLICASET STARTED"
 
+PROC_DATE_=$(date '+%Y%m%d%H%M%S')
+PERMISSIVE_TAGS_=['#Managers','#Administrators']
+
 if [ ! -f mongo-init.flag ]; then
     mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEY_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
         rs_ = {
@@ -106,7 +109,7 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
         db.getCollection('_saas').updateOne({ sas_id: 'saas' }, { \$set: {
             sas_id: 'saas',
             sas_user_id: '${ADMIN_EMAIL}',
-            sas_user_name: '${ADMIN_USER_NAME}',
+            sas_user_name: '${ADMIN_NAME}',
             sas_company_name: '${COMPANY_NAME}',
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}'
@@ -125,7 +128,6 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             aut_token: null,
             aut_tfac: null,
             aut_expires: 0,
-            aut_root: true,
             aut_api_key: apikey_,
             aut_otp_validated: false,
             aut_otp_secret: null,
@@ -142,10 +144,10 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
         db.createCollection('_user', { 'capped': false });
         db.getCollection('_user').insertOne({
             usr_id: '${ADMIN_EMAIL}',
-            usr_name: '${ADMIN_USER_NAME}',
+            usr_name: '${ADMIN_NAME}',
             usr_scope: 'Administrator',
             usr_enabled: true,
-            _tags: '${PERMISSIVE_TAGS}',
+            _tags: ${PERMISSIVE_TAGS_},
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
             _modified_count: 0
@@ -212,7 +214,6 @@ else
                 aut_token: null,
                 aut_tfac: null,
                 aut_expires: 0,
-                aut_root: true,
                 aut_api_key: apikey_,
                 aut_otp_validated: false,
                 aut_otp_secret: null,
@@ -221,20 +222,20 @@ else
                 _modified_count: 0,
                 _api_key_modified_at: new Date(),
                 _api_key_modified_by: 'saas'
-            }}, { upsert: false });
+            }}, { upsert: true });
             if(upsert_auth_) {
                 print('auth upserted', '${ADMIN_EMAIL}');
             }
             var update_user_ = db.getCollection('_user').updateOne({ usr_id: '${ADMIN_EMAIL}' }, { \$set: {
                 usr_id: '${ADMIN_EMAIL}',
-                usr_name: '${ADMIN_USER_NAME}',
+                usr_name: '${ADMIN_NAME}',
                 usr_scope: 'Administrator',
                 usr_enabled: true,
-                _tags: '${PERMISSIVE_TAGS}',
+                _tags: ${PERMISSIVE_TAGS_},
                 _modified_at: new Date(),
                 _modified_by: 'saas',
                 _modified_count: 0
-            }}, { upsert: false });
+            }}, { upsert: true });
             if(update_user_) {
                 print('user upserted', '${ADMIN_EMAIL}');
             }
@@ -261,17 +262,19 @@ else
                 print('firewall updated', '#Administrators');
             }
             db.getCollection('_saas').updateOne({ sas_id: 'saas-ex' }, { \$set: {
-                sas_id: 'saas-ex',
+                sas_id: 'saas-ex-${PROC_DATE_}',
                 sas_user_id: saas_.sas_user_id,
                 sas_user_name: saas_.sas_user_name,
                 sas_company_name: saas_.sas_company_name,
+                _created_at: new Date(),
+                _created_by: 'saas',
                 _updated_at: new Date(),
                 _updated_by: 'saas'
             }}, { upsert: true });
             db.getCollection('_saas').updateOne({ sas_id: 'saas' }, { \$set: {
                 sas_id: 'saas',
                 sas_user_id: '${ADMIN_EMAIL}',
-                sas_user_name: '${ADMIN_USER_NAME}',
+                sas_user_name: '${ADMIN_NAME}',
                 sas_company_name: '${COMPANY_NAME}',
                 _updated_at: new Date(),
                 _updated_by: '${ADMIN_EMAIL}'

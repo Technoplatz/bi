@@ -1,69 +1,47 @@
 # Technoplatz BI
 
-Willkommen.
+Willkommen.\
+It's time to get started with you inner-cycle!
 
-Technoplatz BI is an open source, multi-container, JSON schema-driven data application and data sharing platform designed to empower business professionals build their boutique solutions without coding from scratch.
+Table of contents;
 
-- [How to get started](#how-to-get-started)
-- [Installation](#installation)
+- [What is Technoplatz BI](#what-is-technoplatz-bi)
 - [Licensing Options](#licensing-options)
-- [Caveats](#caveats)
+- [Tutorials](#tutorials)
 - [Impressum](#impressum)
 - [Author](#author)
 
-## How to get started
+## What is Technoplatz BI
 
-Technoplatz BI works on [Docker](#) which is the leading virtualization technology for developing, shipping and running business grade applications. Before getting started what you need to do is to create a Docker instance on the cloud or on-premises. There are many options with different configurations are sold on the marketplaces of the leading Cloud providers.
+Technoplatz BI is an open source, multi-container, JSON schema-driven data application and data sharing platform designed to empower business professionals build their boutique solution without coding from scratch. The platform offers a pragmatic approach for the three main requirements of many data-driven business processes by considering each company has its own unique conditions.
 
-Here's the guides you need;
+- Data Application
+- BI-Directional Data Sharing
+- Built-in API
 
-- Creating a Docker instance on the Cloud\
-[Microsoft Azure](https://azure.microsoft.com/en-us/services/kubernetes-service/docker/), [Google Cloud](https://cloud.google.com/marketplace/docs/container-images), [AWS](https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa), [DigitalOcean](https://marketplace.digitalocean.com/apps/docker), [IBM Cloud](https://www.ibm.com/de-de/cloud/learn/docker)
-
-- Installing Docker on-premises\
-[Windows](https://docs.docker.com/desktop/install/windows-install), [Linux](https://docs.docker.com/desktop/install/linux-install), [Mac OS](https://docs.docker.com/desktop/install/mac-install)
-
-- System Requirements\
-The minimum configuration for a Docker instance is for a basic workload should be increased as far as the required workload and the number of connections to be established.
-
-    - 2 vCPU
-    - 4 GB of RAM
-    - 30 GB Hard Disk
-    - Internet Connection
-
-## Installation
-
-## Caveats
-
-### Technoplatz BI in Production
-
-If you plan to use the Community Edition in production, there are certain topics that you need to consider before go live in terms of the total accomplishment of the services. Please read Technoplatz's recommendations below;
-
-- Hosting
-- Replication
-- Performance
-- Maintenance
-- Security
+The more information can be found at the [official web site](#).
 
 ## Licensing Options
 
-The 4-cylinder core engine of Technoplatz BI is provided as a community edition which is free as far as the GNU Affero GPL-v3 Licensing terms. Meaning, it is open to everyone who are open and will remain open as well.
+The 4-cylinder core engine of Technoplatz BI is provided as a community edition which is free as far as the GNU Affero GPL-v3 Licensing terms. Meaning, it is open to everyone who are open and will remain open as well. The platform is also provided as a service for the organizations demanding prefessional support in terms of managed hosting, custom development and integration services.
 
-The platform is also provided as a service for the organizations demanding prefessional support in terms of managed hosting, custom development and integration services.
+|                             | Community Edition |                 Brezel Edition                 |
+| :-------------------------- | :---------------: | :--------------------------------------------: |
+| Hosting                     |    Self-Hosted    |                      SaaS                      |
+| Database                    |      MongoDB      |                 MongoDB:latest                 |
+| Replication & Clustering    |  Internal Nodes   |                +Regional Nodes                 |
+| Two-Factor Authentication   |         ✔         |                       ✔                        |
+| Automation                  |         ✘         |                       ✔                        |
+| WebApp Firewall             |         ✘         |                       ✔                        |
+| Technical Support           |         ✘         |                       ✔                        |
+| Custom Integration Services |         ✘         |                       ✔                        |
+| Custom Domain               |         ✘         |                       ✔                        |
+| Licensing                   | GNU Affero GPL v3 |             +Project Agreement/SLA             |
+| Pricing                     |       Free        | [get a quote](https://bi.technoplatz.de/start) |
 
-| | Community Edition | Brezel Edition |
-| :--- | :---: | :---: |
-|  Hosting | Self-Hosted | SaaS |
-|  Database | MongoDB | MongoDB:latest |
-|  Replication & Clustering | Internal Nodes | +Regional Nodes |
-|  Two-Factor Authentication | ✔ | ✔ |
-|  Automation | ✘ | ✔ |
-|  WebApp Firewall | ✘ | ✔ |
-|  Technical Support | ✘ | ✔ |
-|  Custom Integration Services | ✘ | ✔ |
-|  Custom Domain | ✘ | ✔ |
-|  Licensing | GNU Affero GPL v3 | +Project Agreement/SLA |
-|  Pricing | Free | [get a quote](https://bi.technoplatz.de/start) |
+## Tutorials
+
+Tutorials and the support links are provided separately.
 
 ## Impressum
 

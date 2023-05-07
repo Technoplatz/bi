@@ -28,7 +28,5 @@
   "required": ["dnn_no", "dnn_line_no"],
   "index": [["dnn_bu_name"], ["dnn_line_no"], ["dnn_no", "dnn_line_no"]],
   "unique": [["dnn_no", "dnn_line_no"]],
-  "sort": {
-    "_modified_at": -1
-  }
+  "sort": { "_modified_at": -1 }
 }

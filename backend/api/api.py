@@ -422,9 +422,7 @@ class Misc:
         docstring is in progress
         """
         tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-        ptags__ = PERMISSIVE_TAGS_.split(",")
-        ptags_ = ptags__ if ptags__ and len(ptags__) > 0 else []
-        return any(i in tags_ for i in ptags_)
+        return any(i in tags_ for i in PERMISSIVE_TAGS_)
 
     def properties_cleaner_f(self, properties):
         """
@@ -3574,29 +3572,13 @@ class Auth:
         """
         try:
             ip_ = Misc().get_user_ip_f()
-            tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-            )
-            allowed_ = (
-                Mongo()
-                .db_["_firewall"]
-                .find_one(
-                    {
-                        "$or": [
-                            {
-                                "fwa_tag": {"$in": tags_},
-                                "fwa_source_ip": ip_,
-                                "fwa_enabled": True,
-                            },
-                            {
-                                "fwa_tag": {"$in": tags_},
-                                "fwa_source_ip": "0.0.0.0",
-                                "fwa_enabled": True,
-                            },
-                        ]
-                    }
-                )
-            )
+            tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+            allowed_ = Mongo().db_["_firewall"].find_one({
+                "$or": [
+                    {"fwa_tag": {"$in": tags_}, "fwa_source_ip": ip_, "fwa_enabled": True},
+                    {"fwa_tag": {"$in": tags_}, "fwa_source_ip": "0.0.0.0", "fwa_enabled": True}
+                ]
+            })
             if not allowed_:
                 raise AuthError(f"connection is not allowed from IP address {ip_}")
 
@@ -3897,7 +3879,7 @@ class Auth:
             return ({"result": False, "msg": "session token is invalid", "exc": str(exc_)})
 
         except BadSignatureError as exc_:
-            return ({"result": False, "msg": "invalid session signature", "exc": str(exc_)})
+            return ({"result": False, "msg": "session closed", "exc": str(exc_)})
 
         except Exception as exc_:
             return ({"result": False, "msg": "invalid session", "exc": str(exc_)})
@@ -3922,7 +3904,7 @@ class Auth:
                 raise AuthError("account not found")
 
             if "aut_salt" not in auth_ or auth_["aut_salt"] is None:
-                raise AuthError("please set a password")
+                raise AuthError("please set a new password")
             if "aut_key" not in auth_ or auth_["aut_key"] is None:
                 raise AuthError("you need to set a new password")
 
@@ -4112,7 +4094,6 @@ API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 SAAS_ = os.environ.get("SAAS")
-PERMISSIVE_TAGS_ = str(os.environ.get("PERMISSIVE_TAGS"))
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -4129,7 +4110,7 @@ MONGO_TLS_CERT_KEY_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_TLS
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
-
+PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 
 app = Flask(__name__)
 origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101"]

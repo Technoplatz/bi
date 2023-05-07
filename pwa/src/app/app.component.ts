@@ -74,7 +74,7 @@ export class AppComponent implements OnInit {
           case "VERSION_READY":
             console.info(`*** currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
             this.storage.get("LSVERSION").then((LSVERSION: any) => {
-              this.misc.version.next({ is_new_version: evt.latestVersion !== LSVERSION, version: evt.latestVersion });
+              this.misc.version.next({ is_new_version: evt.latestVersion.hash !== LSVERSION, version: evt.latestVersion.hash });
             });
             break;
           case "VERSION_INSTALLATION_FAILED":

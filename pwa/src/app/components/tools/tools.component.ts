@@ -51,10 +51,10 @@ export class ToolsComponent implements OnInit {
     public misc: Miscellaneous,
     private storage: Storage
   ) {
-    this.misc.version.subscribe((versioni_: any) => {
-      if (versioni_ && versioni_.is_new_version) {
+    this.misc.version.subscribe((version_: any) => {
+      if (version_ && version_.is_new_version) {
         this.is_new_version = true;
-        this.new_version_ = versioni_.version;
+        this.new_version_ = version_.version;
       }
     });
   }

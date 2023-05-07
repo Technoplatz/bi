@@ -68,12 +68,10 @@ export class Auth {
           resolve(true);
         } else {
           this.misc.doMessage(res.msg, "error");
-          this.setUserOut();
           reject(res.msg);
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
-        this.setUserOut();
         reject(res);
       });
     });
@@ -112,12 +110,10 @@ export class Auth {
           });
         } else {
           this.misc.doMessage(res.msg, "error");
-          this.setUserOut();
           reject(res.msg);
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
-        this.setUserOut();
         reject(res);
       });
     });

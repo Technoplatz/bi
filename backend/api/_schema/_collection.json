@@ -12,7 +12,7 @@
     "col_title": {
       "bsonType": "string",
       "minLength": 1,
-      "maxLength": 64,
+      "maxLength": 32,
       "title": "Title",
       "description": "Collection Title",
       "width": 150
