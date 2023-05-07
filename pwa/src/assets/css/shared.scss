@@ -1895,6 +1895,7 @@ ion-checkbox {
   height: auto;
   top: auto;
   display: flex;
+  margin-top: 16px;
 }
 
 app-charts {
@@ -1964,7 +1965,7 @@ app-chart {
   position: relative;
   margin-bottom: 8px;
   margin-right: 8px;
-  overflow: hidden;
+  overflow: visible !important;
   padding: 16px;
   border: 5px solid var(--ion-color-light);
   border-radius: 0px;

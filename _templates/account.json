@@ -62,7 +62,7 @@
   },
   "required": ["acc_no", "acc_name", "acc_nick_name", "acc_tax_no", "acc_tax_office", "acc_ship_to"],
   "index": [["acc_name"], ["acc_nick_name"], ["acc_tax_no"], ["acc_is_active"]],
-  "unique": [["acc_no"], ["acc_nick_name"]],
+  "unique": [["acc_no"], ["acc_nick_name"], ["acc_tax_no"]],
   "parents": [],
   "actions": [],
   "sort": {

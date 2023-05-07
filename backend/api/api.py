@@ -1648,7 +1648,6 @@ class Crud:
             records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
             count_ = len(records_) if records_ else 0
 
-            # df_ = pd.DataFrame(records_).fillna(0)
             df_ = pd.DataFrame(records_).fillna("#N/A")
             df_raw_ = pd.DataFrame(records_).fillna("")
 
@@ -1677,9 +1676,6 @@ class Crud:
                 if "data_columns" in view_ and len(view_["data_columns"]) > 0
                 else None
             )
-
-            # if data_values_0_k_ not in df_.columns:
-            #     raise APIError(f"key for data value is missing: {data_values_0_k_}")
 
             pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ else False
             data_values_ = view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
@@ -2377,13 +2373,14 @@ class Crud:
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             _tags = user_["_tags"]
 
-            permission_ = Mongo().db_["_permission"].find_one({
-                "per_collection_id": col_id_,
-                "per_tag": {"$in": _tags},
-                "per_schema": True
-            })
-            if not permission_:
-                raise APIError("no permission")
+            if not Misc().permitted_user_f(user_):
+                permission_ = Mongo().db_["_permission"].find_one({
+                    "per_collection_id": col_id_,
+                    "per_tag": {"$in": _tags},
+                    "per_schema": True
+                })
+                if not permission_:
+                    raise APIError("no permission")
 
             doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
             if not doc_:
