@@ -232,10 +232,30 @@ export class CrudPage implements OnInit {
         this.isInProgress = true;
         this.crud.Submit(this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix).then((res: any) => {
           this.crud.modalSubmitListener.next({ "result": true });
-          if (this.barcoded_) {
-            console.log("*** barcode is staying alive");
+          if (res && res.token) {
+            this.alert.create({
+              subHeader: "A new API Token has been generated. This is the only chance to copy!",
+              message: res.token,
+              buttons: [{
+                text: "COPY",
+                handler: () => {
+                  this.misc.copyToClipboard("Bearer " + res.token).then(() => { }).catch((error: any) => {
+                    this.misc.doMessage(error, "error");
+                  }).finally(() => {
+                    this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+                  });
+                }
+              }
+              ]
+            }).then((alert: any) => {
+              alert.present();
+            });
           } else {
-            this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+            if (this.barcoded_) {
+              console.log("*** barcode is staying alive");
+            } else {
+              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+            }
           }
         }).catch((res: any) => {
           this.misc.doMessage(res, "error");
@@ -403,7 +423,7 @@ export class CrudPage implements OnInit {
         match: [{
           key: "col_id",
           op: "eq",
-          value: coll_ === "_collection" ? this.data_["col_id"] : coll_ === "_permission" ? this.data_["per_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_
+          value: coll_ === "_collection" ? this.data_["col_id"] : coll_ === "_token" ? this.data_["tkn_collection_id"] : coll_ === "_permission" ? this.data_["per_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_
         }],
         sort: null,
         page: 1,
@@ -503,15 +523,6 @@ export class CrudPage implements OnInit {
   doStartSearch(e: any) {
     this.related = this.relatedx;
     this.related = this.related.filter((obj: any) => (obj[this.field_parents.get[0]] + obj[this.field_parents.get[1]] + obj[this.field_parents.get[2]]).toLowerCase().indexOf(e.toLowerCase()) > -1);
-  }
-
-  doCopyToken() {
-    this.is_token_copied = true;
-    this.misc.copyToClipboard(btoa(this._id)).then(() => { }).catch((error: any) => {
-      this.misc.doMessage("not copied", "error");
-    }).finally(() => {
-      this.is_token_copied = false;
-    });
   }
 
   doDateAssign(event: any, fn: string) {

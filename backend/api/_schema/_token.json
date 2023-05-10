@@ -1,22 +1,13 @@
 {
   "properties": {
-    "tkn_id": {
-      "bsonType": "string",
-      "minLength": 1,
-      "maxLength": 64,
-      "pattern": "^[a-z0-9-]+$",
-      "title": "ID",
-      "description": "Token ID",
-      "permanent": true,
-      "required": true,
-      "width": 180
-    },
     "tkn_description": {
       "bsonType": "string",
-      "minLength": 0,
-      "maxLength": 128,
       "title": "Description",
-      "description": "Description",
+      "description": "Token Description",
+      "placeholder": "Short description for Token",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[a-zA-Z0-9-_ ]{3,128}$",
       "width": 160
     },
     "tkn_collection_id": {
@@ -27,9 +18,25 @@
       "title": "Collection",
       "description": "Collection ID",
       "collection": true,
-      "required": true,
       "permanent": true,
       "width": 140
+    },
+    "tkn_lifetime": {
+      "bsonType": "number",
+      "title": "Lifetime",
+      "description": "Token validity period in minutes",
+      "placeholder": "Token life time in seconds",
+      "minimum": 1,
+      "maximum": 525600,
+      "permanent": true,
+      "width": 130
+    },
+    "tkn_is_active": {
+      "bsonType": "bool",
+      "title": "Is Active",
+      "description": "Token Accesibility",
+      "default": true,
+      "width": 130
     },
     "tkn_grant_read": {
       "bsonType": "bool",
@@ -67,9 +74,9 @@
       "width": 140
     }
   },
-  "required": ["tkn_id"],
-  "index": [["tkn_permission"], ["tkn_collection_id"]],
-  "unique": [["tkn_id"]],
+  "required": ["tkn_description"],
+  "index": [["tkn_collection_id"], ["tkn_finder", "tkn_is_active"]],
+  "unique": [["tkn_description"], ["tkn_finder"], ["tkn_secret"]],
   "sort": {
     "_modified_at": -1
   }

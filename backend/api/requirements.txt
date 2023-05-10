@@ -14,4 +14,4 @@ xlsxwriter
 partial
 croniter
 openpyxl
-Authlib
+python-jose

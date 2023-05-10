@@ -61,8 +61,7 @@ import pandas as pd
 import numpy as np
 import bleach
 import pyotp
-from authlib.jose import jwt
-from authlib.jose.errors import MissingClaimError, InvalidClaimError, ExpiredTokenError, InvalidTokenError, BadSignatureError
+from jose import jwt
 import numexpr as ne
 from flask import Flask, request, send_from_directory, make_response
 from flask_cors import CORS
@@ -157,7 +156,6 @@ class Schedular:
             }]))
 
             if not collections_:
-                print("*** no view found to schedule")
                 return {"result": True}
 
             for collection_ in collections_:
@@ -257,6 +255,35 @@ class Misc:
             "placeholder",
         ]
 
+    def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
+        """
+        docstring is in progress
+        """
+        try:
+            alg_ = "HS256"
+            if endecode_ == "decode":
+                unverified_claims_ = jwt.get_unverified_claims(token_)
+                aud_ = unverified_claims_.get("aud")
+                sub_ = unverified_claims_.get("sub")
+                iss_ = unverified_claims_.get("iss")
+                claims_ = jwt.decode(token_, jwt_secret_, options=payload_, algorithms=[alg_], audience=aud_, issuer=iss_, subject=sub_)
+            elif endecode_ == "encode":
+                claims_ = jwt.encode(payload_, jwt_secret_, algorithm=alg_, headers=header_)
+
+            return ({"result": True, "jwt": claims_})
+
+        except jwt.ExpiredSignatureError as exc_:
+            return ({"result": False, "msg": str(exc_), "exc": str(exc_)})
+
+        except jwt.JWTClaimsError as exc_:
+            return ({"result": False, "msg": str(exc_), "exc": str(exc_)})
+
+        except jwt.JWTError as exc_:
+            return ({"result": False, "msg": str(exc_), "exc": str(exc_)})
+
+        except Exception as exc_:
+            return ({"result": False, "msg": str(exc_), "exc": str(exc_)})
+
     def post_notification(self, exc):
         """
         docstring is in progress
@@ -268,7 +295,6 @@ class Misc:
             line_ = exc_tb_.tb_lineno
             exception_ = str(exc)
             notification_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
-            print("*** notification_", notification_)
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_)}), timeout=10)
             if resp_.status_code != 200:
                 print("*** notification error", resp_)
@@ -399,7 +425,7 @@ class Misc:
         temp_ = set()
         return [x for x in array_ if x not in temp_ and not temp_.add(x)]
 
-    def token_validate_f(self, token_, operation_):
+    def user_token_validate_f(self, token_, operation_):
         """
         docstring is in progress
         """
@@ -416,6 +442,54 @@ class Misc:
 
         except APIError as exc_:
             return Misc().exception_f(exc_)
+
+    def api_token_validate_f(self, bearer_):
+        """
+        docstring is in progress
+        """
+        try:
+            token__ = re.split(" ", bearer_)
+            token_ = token__[1] if token__ and len(token__) > 0 and token__[0].lower() == "bearer" else None
+            if not token_:
+                raise AuthError("token not found at one")
+
+            header_ = jwt.get_unverified_header(token_)
+            finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
+            if not finder_:
+                raise AuthError("finder is not valid please use an api token")
+
+            find_ = Mongo().db_["_token"].find_one({"tkn_finder": finder_, "tkn_is_active": True})
+            if not find_:
+                raise AuthError("token not found")
+            jwt_secret_ = find_["tkn_secret"]
+
+            options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
+            jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
+
+            if not jwt_proc_f_["result"]:
+                raise AuthError(jwt_proc_f_["msg"])
+
+            tkn_grant_read_ = find_["tkn_grant_read"] if "tkn_grant_read" in find_ and find_["tkn_grant_read"] is True else False
+
+            if not tkn_grant_read_:
+                raise APIError("token is not permitted to read")
+
+            return {"result": True}
+
+        except AuthError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except jwt.ExpiredSignatureError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except jwt.JWTClaimsError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except jwt.JWTError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except Exception as exc_:
+            return ({"result": False, "msg": str(exc_)})
 
     def permitted_user_f(self, user_):
         """
@@ -1391,134 +1465,135 @@ class Crud:
         """
         docstring is in progress
         """
-        match_ = obj["match"]
-        properties_ = obj["properties"] if "properties" in obj else None
-        fand_ = []
-        filtered_ = {}
-        if properties_:
-            for mat_ in match_:
-                if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
-                    fres_ = None
-                    typ = (
-                        properties_[mat_["key"]]["bsonType"]
-                        if mat_["key"] in properties_
-                        else "string"
-                    )
-                    if mat_["op"] in ["eq", "contains"]:
-                        if typ in ["number", "int", "decimal"]:
-                            fres_ = float(mat_["value"])
-                        elif typ == "bool":
-                            fres_ = bool(mat_["value"])
-                        elif typ == "date":
-                            fres_ = datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                        else:
-                            fres_ = (
-                                {"$regex": mat_["value"], "$options": "i"}
-                                if mat_["value"]
-                                else {"$regex": "", "$options": "i"}
-                            )
-                    elif mat_["op"] in ["ne", "nc"]:
-                        if typ in ["number", "decimal"]:
-                            fres_ = {"$not": {"$eq": float(mat_["value"])}}
-                        elif typ == "bool":
-                            fres_ = {"$not": {"$eq": bool(mat_["value"])}}
-                        elif typ == "date":
-                            fres_ = {
-                                "$not": {
-                                    "$eq": datetime.strptime(
-                                        mat_["value"][:10], "%Y-%m-%d"
-                                    )
-                                }
-                            }
-                        else:
-                            fres_ = (
-                                {"$not": {"$regex": mat_["value"], "$options": "i"}}
-                                if mat_["value"]
-                                else {"$not": {"$regex": "", "$options": "i"}}
-                            )
-                    elif mat_["op"] in ["in", "nin"]:
-                        separated_ = re.split(",", mat_["value"])
-                        list_ = (
-                            [s.strip() for s in separated_]
-                            if mat_["key"] != "_id"
-                            else [ObjectId(s.strip()) for s in separated_]
+        try:
+            match_ = obj["match"]
+            properties_ = obj["properties"] if "properties" in obj else None
+            fand_ = []
+            filtered_ = {}
+            if properties_:
+                for mat_ in match_:
+                    if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
+                        fres_ = None
+                        typ = (
+                            properties_[mat_["key"]]["bsonType"]
+                            if mat_["key"] in properties_
+                            else "string"
                         )
-                        if mat_["op"] == "in":
-                            fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
-                        else:
-                            fres_ = {
-                                "$nin": list_
-                                if typ != "number"
-                                else list(map(float, list_))
-                            }
-                    elif mat_["op"] == "gt":
-                        if typ in ["number", "decimal"]:
-                            fres_ = {"$gt": float(mat_["value"])}
-                        elif typ == "date":
-                            fres_ = {
-                                "$gt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                            }
-                        else:
-                            fres_ = {"$gt": mat_["value"]}
-                    elif mat_["op"] == "gte":
-                        if typ in ["number", "decimal"]:
-                            fres_ = {"$gte": float(mat_["value"])}
-                        elif typ == "date":
-                            fres_ = {
-                                "$gte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                            }
-                        else:
-                            fres_ = {"$gte": mat_["value"]}
-                    elif mat_["op"] == "lt":
-                        if typ in ["number", "decimal"]:
-                            fres_ = {"$lt": float(mat_["value"])}
-                        elif typ == "date":
-                            fres_ = {
-                                "$lt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                            }
-                        else:
-                            fres_ = {"$lt": mat_["value"]}
-                    elif mat_["op"] == "lte":
-                        if typ in ["number", "decimal"]:
-                            fres_ = {"$lte": float(mat_["value"])}
-                        elif typ == "date":
-                            fres_ = {
-                                "$lte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                            }
-                        else:
-                            fres_ = {"$lte": mat_["value"]}
-                    elif mat_["op"] == "true":
-                        fres_ = {"$eq": True}
-                    elif mat_["op"] == "false":
-                        fres_ = {"$eq": False}
-                    elif mat_["op"] == "nnull":
-                        array_ = []
-                        array1_ = {}
-                        array2_ = {}
-                        array1_[mat_["key"]] = {"$ne": None}
-                        array2_[mat_["key"]] = {"$exists": True}
-                        array_.append(array1_)
-                        array_.append(array2_)
-                    elif mat_["op"] == "null":
-                        array_ = []
-                        array1_ = {}
-                        array2_ = {}
-                        array1_[mat_["key"]] = {"$eq": None}
-                        array2_[mat_["key"]] = {"$exists": False}
-                        array_.append(array1_)
-                        array_.append(array2_)
+                        if mat_["op"] in ["eq", "contains"]:
+                            if typ in ["number", "int", "decimal"]:
+                                fres_ = float(mat_["value"])
+                            elif typ == "bool":
+                                fres_ = bool(mat_["value"])
+                            elif typ == "date":
+                                fres_ = datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
+                            else:
+                                fres_ = {"$regex": mat_["value"], "$options": "i"} if mat_["value"] else {"$regex": "", "$options": "i"}
+                        elif mat_["op"] in ["ne", "nc"]:
+                            if typ in ["number", "decimal"]:
+                                fres_ = {"$not": {"$eq": float(mat_["value"])}}
+                            elif typ == "bool":
+                                fres_ = {"$not": {"$eq": bool(mat_["value"])}}
+                            elif typ == "date":
+                                fres_ = {
+                                    "$not": {
+                                        "$eq": datetime.strptime(
+                                            mat_["value"][:10], "%Y-%m-%d"
+                                        )
+                                    }
+                                }
+                            else:
+                                fres_ = (
+                                    {"$not": {"$regex": mat_["value"], "$options": "i"}}
+                                    if mat_["value"]
+                                    else {"$not": {"$regex": "", "$options": "i"}}
+                                )
+                        elif mat_["op"] in ["in", "nin"]:
+                            separated_ = re.split(",", mat_["value"])
+                            list_ = (
+                                [s.strip() for s in separated_]
+                                if mat_["key"] != "_id"
+                                else [ObjectId(s.strip()) for s in separated_]
+                            )
+                            if mat_["op"] == "in":
+                                fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
+                            else:
+                                fres_ = {
+                                    "$nin": list_
+                                    if typ != "number"
+                                    else list(map(float, list_))
+                                }
+                        elif mat_["op"] == "gt":
+                            if typ in ["number", "decimal"]:
+                                fres_ = {"$gt": float(mat_["value"])}
+                            elif typ == "date":
+                                fres_ = {
+                                    "$gt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
+                                }
+                            else:
+                                fres_ = {"$gt": mat_["value"]}
+                        elif mat_["op"] == "gte":
+                            if typ in ["number", "decimal"]:
+                                fres_ = {"$gte": float(mat_["value"])}
+                            elif typ == "date":
+                                fres_ = {
+                                    "$gte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
+                                }
+                            else:
+                                fres_ = {"$gte": mat_["value"]}
+                        elif mat_["op"] == "lt":
+                            if typ in ["number", "decimal"]:
+                                fres_ = {"$lt": float(mat_["value"])}
+                            elif typ == "date":
+                                fres_ = {
+                                    "$lt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
+                                }
+                            else:
+                                fres_ = {"$lt": mat_["value"]}
+                        elif mat_["op"] == "lte":
+                            if typ in ["number", "decimal"]:
+                                fres_ = {"$lte": float(mat_["value"])}
+                            elif typ == "date":
+                                fres_ = {
+                                    "$lte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
+                                }
+                            else:
+                                fres_ = {"$lte": mat_["value"]}
+                        elif mat_["op"] == "true":
+                            fres_ = {"$eq": True}
+                        elif mat_["op"] == "false":
+                            fres_ = {"$eq": False}
+                        elif mat_["op"] == "nnull":
+                            array_ = []
+                            array1_ = {}
+                            array2_ = {}
+                            array1_[mat_["key"]] = {"$ne": None}
+                            array2_[mat_["key"]] = {"$exists": True}
+                            array_.append(array1_)
+                            array_.append(array2_)
+                        elif mat_["op"] == "null":
+                            array_ = []
+                            array1_ = {}
+                            array2_ = {}
+                            array1_[mat_["key"]] = {"$eq": None}
+                            array2_[mat_["key"]] = {"$exists": False}
+                            array_.append(array1_)
+                            array_.append(array2_)
 
-                    fpart_ = {}
-                    if mat_["op"] in ["null", "nnull"]:
-                        fpart_["$or"] = array_
-                    else:
-                        fpart_[mat_["key"]] = fres_
+                        fpart_ = {}
+                        if mat_["op"] in ["null", "nnull"]:
+                            fpart_["$or"] = array_
+                        else:
+                            fpart_[mat_["key"]] = fres_
 
-                    fand_.append(fpart_)
+                        fand_.append(fpart_)
 
-            filtered_ = {"$and": fand_} if fand_ and len(fand_) > 0 else {}
+                filtered_ = {"$and": fand_} if fand_ and len(fand_) > 0 else {}
 
-        return filtered_
+            return filtered_
+
+        except Exception as exc_:
+            print("!!! exc_", exc_)
+            return None
 
     def get_view_data_f(self, user_, view_id_, scope_):
         """
@@ -1762,7 +1837,7 @@ class Crud:
                             series_.append({"name": xaxis_, "series": series_sub_})
                             series_sub_ = []
                         if data_columns_0_ in item_ and item_[data_columns_0_] is not None:
-                            series_sub_.append({ "name": item_[data_columns_0_], "value": item_[data_values_0_k_] })
+                            series_sub_.append({"name": item_[data_columns_0_], "value": item_[data_values_0_k_]})
                         xaxis_ = item_[data_index_0_] if data_index_0_ in item_ else None
                     if xaxis_:
                         series_.append({"name": xaxis_, "series": series_sub_})
@@ -2052,7 +2127,6 @@ class Crud:
         docstring is in progress
         """
         try:
-            # gets the parameters required
             user_ = input_["user"]
             limit_ = input_["limit"]
             page = input_["page"]
@@ -2072,24 +2146,12 @@ class Crud:
 
             get_filtered_ = self.get_filtered_f({
                 "match": match_,
-                "properties": structure_["properties"]
-                if "properties" in structure_ else None
+                "properties": structure_["properties"] if "properties" in structure_ else None
             })
 
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
-            cursor_ = (
-                Mongo()
-                .db_[collection_]
-                .find(
-                    filter=get_filtered_,
-                    projection=projection_,
-                    sort=sort_,
-                    collation=collation_,
-                )
-                .skip(skip_)
-                .limit(limit_)
-            )
+            cursor_ = Mongo().db_[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
             docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
             count_ = Mongo().db_[collection_].count_documents(get_filtered_)
 
@@ -2444,12 +2506,13 @@ class Crud:
                 if "filter" in obj
                 else None
             )
+
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
             col_check_ = self.inner_collection_f(collection_id_)
 
-            if collection_id_ in ["_log", "_backup", "_event", "_announcement"]:
-                raise APIError("this collection is protected")
+            if collection_id_ in PROTECTED_COLLS_:
+                raise APIError("collection is protected")
 
             if not col_check_["result"]:
                 raise APIError("collection not found")
@@ -2475,7 +2538,7 @@ class Crud:
                 "collection": collection_id_,
                 "op": "update",
                 "user": user_["email"] if user_ else None,
-                "document": doc_,
+                "document": doc_
             })
             if not log_["result"]:
                 raise APIError(log_["msg"])
@@ -2509,8 +2572,9 @@ class Crud:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
 
-            if collection_id_ in ["_log", "_backup", "_announcement"]:
-                raise APIError("this collection is protected to delete")
+            if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
+                if collection_id_ in PROTECTED_COLLS_:
+                    raise APIError("collection is protected to delete")
 
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
@@ -2566,11 +2630,12 @@ class Crud:
             if op_ not in ["clone", "delete"]:
                 raise APIError("operation not supported")
 
-            if collection_id_ in ["_log", "_backup", "_announcement"]:
-                raise AppException("this collection is protected for the bulk processes")
+            if op_ != "delete" or collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
+                if collection_id_ in PROTECTED_COLLS_:
+                    raise APIError("collection is protected for bulk processes")
 
             if op_ == "delete" and collection_id_ == "_user":
-                raise AppException("user collection is protected to be deleted")
+                raise APIError("user collection is protected to be deleted")
 
             ids_ = []
             for _id in match_:
@@ -2870,12 +2935,17 @@ class Crud:
             collection_id_ = obj["collection"]
             doc_ = obj["doc"]
 
+            if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
+                if collection_id_ in PROTECTED_COLLS_:
+                    raise APIError("collection is protected to add")
+
             if "_id" in doc_:
                 doc_.pop("_id", None)
 
             if "_structure" in doc_:
                 doc_.pop("_structure", None)
 
+            inserted_ = None
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
@@ -2891,6 +2961,23 @@ class Crud:
                         jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
                         structure_ = json.loads(jtxt_)
                 doc_["col_structure"] = structure_
+            elif collection_id_ == "_token":
+                tkn_lifetime_ = doc_["tkn_lifetime"] if "tkn_lifetime" in doc_ and doc_["tkn_lifetime"] > 0 else 1440
+                secret_ = pyotp.random_base32()
+                finder_ = pyotp.random_base32()
+                jwt_proc_f_ = Misc().jwt_proc_f("encode", None, secret_, {
+                    "iss": "Technoplatz",
+                    "aud": "api",
+                    "sub": "bi",
+                    "exp": Misc().get_now_f() + timedelta(minutes=tkn_lifetime_),
+                    "iat": Misc().get_now_f()
+                }, {"finder": finder_})
+                if not jwt_proc_f_["result"]:
+                    raise AuthError(jwt_proc_f_["msg"])
+                doc_["tkn_copy_count"] = 0
+                doc_["tkn_token"] = inserted_ = jwt_proc_f_["jwt"]
+                doc_["tkn_secret"] = secret_
+                doc_["tkn_finder"] = finder_
 
             Mongo().db_[collection_].insert_one(doc_)
 
@@ -2915,25 +3002,26 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            return {"result": True}
+            return {"result": True, "token": inserted_}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_id_,
-                    "op": "insert",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": "insert",
+                "user": user_["email"] if user_ else None,
+                "document": str(exc)
+            })
             return Misc().mongo_error_f(exc)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except AuthError as exc_:
+            return Misc().auth_error_f(exc_)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
 
 class _Noop:
@@ -3453,9 +3541,7 @@ class Auth:
         try:
             user_ = input_["user"]
             user_id_ = user_["usr_id"] if "usr_id" in user_ else None
-            usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-            )
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             collection_id_ = input_["collection"] if "collection" in input_ else None
             op_ = input_["op"] if "op" in input_ else None
             administratives_ = ["dump", "backup", "restore"]
@@ -3476,11 +3562,7 @@ class Auth:
                 raise AuthError(f"no {op_} permission for {collection_id_}")
 
             if not collection_id_:
-                return (
-                    {"result": True, "allowmatch": allowmatch_}
-                    if op_ in permissive_
-                    else {"result": False, "allowmatch": allowmatch_}
-                )
+                return {"result": True, "allowmatch": allowmatch_} if op_ in permissive_ else {"result": False, "allowmatch": allowmatch_}
 
             if collection_id_[:1] == "_" and op_ == "read":
                 return {"result": True, "allowmatch": allowmatch_}
@@ -3721,10 +3803,11 @@ class Auth:
                 "name": usr_name_,
                 "perm": perm_
             }
-            header_ = {"alg": "HS256"}
             secret_ = pyotp.random_base32()
-            jwt_ = jwt.encode(header_, payload_, secret_)
-            token_ = jwt_.decode()
+            jwt_proc_f_ = Misc().jwt_proc_f("encode", None, secret_, payload_, None)
+            if not jwt_proc_f_["result"]:
+                raise AuthError(jwt_proc_f_["msg"])
+            token_ = jwt_proc_f_["jwt"]
 
             api_key_ = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
             if api_key_ is None:
@@ -3783,20 +3866,20 @@ class Auth:
         try:
             authorization_ = request.headers.get("Authorization", None)
             if not authorization_:
-                raise AuthError("no authorization 403")
+                raise AuthError("invalid authorization request")
 
             authb_ = "Bearer "
             ix_ = authorization_.find(authb_)
             if ix_ != 0:
-                raise ExpiredTokenError("no token provided")
+                raise AuthError("no token provided")
 
             token_ = authorization_.replace(authb_, "")
             if not token_:
-                raise ExpiredTokenError("no token provided")
+                raise AuthError("no token provided")
 
             x_api_key_ = request.headers.get("X-Api-Key", None)
             if not x_api_key_:
-                raise ExpiredTokenError("no api key provided")
+                raise AuthError("no api key provided")
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": x_api_key_})
             if not auth_:
@@ -3804,13 +3887,13 @@ class Auth:
             aut_id_ = auth_["aut_id"]
 
             jwt_secret_ = auth_["aut_jwt_secret"] if "aut_jwt_secret" in auth_ and auth_["aut_jwt_secret"] is not None else None
-            claims_options_ = {
-                "iss": {"essential": True, "value": "Technoplatz"},
-                "aud": {"essential": True, "value": "api"},
-                "sub": {"essential": True, "value": "bi"}
-            }
-            claims_ = jwt.decode(token_, jwt_secret_, claims_options=claims_options_)
-            claims_.validate()
+
+            options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
+            jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
+            if not jwt_proc_f_["result"]:
+                raise AuthError(jwt_proc_f_["msg"])
+            claims_ = jwt_proc_f_["jwt"]
+
             usr_id_ = claims_["id"] if "id" in claims_ and claims_["id"] is not None else None
             if not usr_id_:
                 raise AuthError("invalid user token")
@@ -3828,21 +3911,6 @@ class Auth:
 
         except AuthError as exc_:
             return Misc().auth_error_f(exc_)
-
-        except ExpiredTokenError as exc_:
-            return ({"result": False, "msg": "session expired", "exc": str(exc_)})
-
-        except MissingClaimError as exc_:
-            return ({"result": False, "msg": "session claim is missing", "exc": str(exc_)})
-
-        except InvalidClaimError as exc_:
-            return ({"result": False, "msg": "session claim is invalid", "exc": str(exc_)})
-
-        except InvalidTokenError as exc_:
-            return ({"result": False, "msg": "session token is invalid", "exc": str(exc_)})
-
-        except BadSignatureError as exc_:
-            return ({"result": False, "msg": "session closed", "exc": str(exc_)})
 
         except Exception as exc_:
             return ({"result": False, "msg": "invalid session", "exc": str(exc_)})
@@ -4074,6 +4142,8 @@ MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
+PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_token", "_announcement"]
+PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 
 app = Flask(__name__)
 origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101"]
@@ -4486,7 +4556,7 @@ def post_f():
         if not user_validate_["result"]:
             raise AuthError(user_validate_["msg"])
 
-        token_validate_f_ = Misc().token_validate_f(rh_token_, operation_)
+        token_validate_f_ = Misc().user_token_validate_f(rh_token_, operation_)
         if not token_validate_f_["result"]:
             raise AuthError(f"token is not permitted to {operation_}")
 
@@ -4694,37 +4764,61 @@ def get_data_f(id_):
     """
     try:
         if not request.headers:
-            raise AuthError("no header provided")
+            raise AuthError({"result": False, "msg": "no header provided"})
 
         id_ = bleach.clean(id_)
         arg_ = request.args.get("k", default=None, type=str)
         if not arg_:
-            raise APIError("missing argument")
+            raise APIError({"result": False, "msg": "missing argument"})
 
         api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
         user_validate_ = Auth().user_validate_by_api_key_f({"api_key": api_key_})
         if not user_validate_["result"]:
             user_validate_ = Auth().user_validate_by_api_key_f({"api_key": arg_})
             if not user_validate_["result"]:
-                raise AuthError(user_validate_["msg"])
+                raise AuthError(user_validate_)
         user_ = user_validate_["user"] if "user" in user_validate_ else None
         if not user_:
-            raise AuthError("user not found for view")
+            raise AuthError({"result": False, "msg": "user not found for view"})
+
+        api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
+        if not api_token_:
+            raise AuthError({"result": False, "msg": "invalid api token"})
+
+        api_token_validate_f_ = Misc().api_token_validate_f(api_token_)
+        if not api_token_validate_f_["result"]:
+            raise AuthError(api_token_validate_f_)
 
         generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")
         if not generate_view_data_f_["result"]:
-            raise APIError(generate_view_data_f_["msg"])
+            raise APIError(generate_view_data_f_)
 
-        return json.dumps(generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else [], default=json_util.default, ensure_ascii=False, sort_keys=False,), 200, Security().header_simple_f()
+        res_ = generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 200
+        response_.mimetype = "application/json"
+        return response_
 
-    except AuthError as exc:
-        return {"msg": str(exc), "status": 401}
+    except AuthError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 401
+        response_.mimetype = "application/json"
+        return response_
 
-    except APIError as exc:
-        return {"msg": str(exc), "status": 400}
+    except APIError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 400
+        response_.mimetype = "application/json"
+        return response_
 
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
+    except Exception as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 500
+        response_.mimetype = "application/json"
+        return response_
 
 
 if __name__ == "__main__":

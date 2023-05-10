@@ -66,11 +66,6 @@ https://www.gnu.org/licenses.
                 <ion-button *ngIf="op=='update'" color="danger" size="small" (click)="doRemove()" class="end-item">
                     {{ 'DELETE' | translate }}&nbsp;
                 </ion-button>
-                <ion-button *ngIf="collection=='_token' && op=='update' && !isInProgress" size="small"
-                    (click)="doCopyToken()">
-                    <span *ngIf="!is_token_copied">{{ 'COPY TOKEN' | translate }}</span>
-                    <span *ngIf="is_token_copied">{{ 'COPIED' | translate }}</span>
-                </ion-button>
             </ion-col>
         </ion-row>
         <ion-row *ngIf="tab=='relation'" class="ion-padding-top ion-padding-bottom" (click)="doSubmitRelated()">

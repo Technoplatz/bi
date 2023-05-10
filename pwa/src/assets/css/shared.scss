@@ -153,6 +153,8 @@ ion-note {
 .top-tools ion-button {
   --padding-start: none;
   --padding-end: none;
+  --color: var(--ion-color-dark) !important;
+  margin-left: 8px;
 }
 
 .filler-10 {

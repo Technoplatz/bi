@@ -13,7 +13,7 @@ Table of contents;
 
 ## What is Technoplatz BI
 
-Technoplatz BI is an open source, multi-container, JSON schema-driven data application and data sharing platform designed to empower business professionals build their boutique solution without coding from scratch. The platform offers a pragmatic approach for the three main requirements of many data-driven business processes by considering each company has its own unique conditions.
+Technoplatz BI is an open source, multi-container, JSON schema-driven data application and data sharing platform designed to empower business professionals build their boutique solution without coding. The platform offers a pragmatic approach for the three main requirements of data-driven processes by considering each company has its own unique conditions.
 
 - Data Application
 - BI-Directional Data Sharing
