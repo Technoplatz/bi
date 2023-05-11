@@ -37,7 +37,7 @@ https://www.gnu.org/licenses.
         <h6>{{ header | translate }}</h6>
         <h1>{{ subheader }}</h1>
         {{ description }}
-        <div *ngIf="id=='_collection'" class="template-card-container">
+        <div *ngIf="id=='_collection'; else schemas" class="template-card-container">
           <ion-card>
             <ion-icon name="rocket-outline" color="primary"></ion-icon>
             <ion-card-header>
@@ -71,6 +71,19 @@ https://www.gnu.org/licenses.
             </ion-card-content>
           </ion-card>
         </div>
+        <ng-template #schemas>
+          <div *ngIf="is_crud" class="schema-card-container">
+            <ion-card *ngFor="let item of schema_ | keyvalue" (click)="doShowSchema(item.key)">
+              <ion-card-header>
+                <ion-card-title>{{ item.value.title }}</ion-card-title>
+                <ion-card-subtitle>{{ item.value.description | translate }}</ion-card-subtitle>
+                <ion-card-content>
+                  {{ item.value.count }}
+                </ion-card-content>
+              </ion-card-header>
+            </ion-card>
+          </div>
+        </ng-template>
         <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
@@ -109,7 +122,7 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}
               </div>
-              <div *ngIf="perm && is_crud" (click)="doShowSchema()" class="data-sq-button">
+              <div *ngIf="perm && is_crud" (click)="doShowSchema('')" class="data-sq-button">
                 <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
                   <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
                   {{ 'Schema' | translate }}

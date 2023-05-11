@@ -109,6 +109,17 @@ export class CollectionPage implements OnInit {
   private admin_collections: any = environment.admin_collections;
   public templates: any = [];
   public is_inprogress: boolean = false;
+  public schema_: any = {
+    "properties": { "title": "Properties", "description": "Data Fields", "count": 0 },
+    "required": { "title": "Required", "description": "Mandatories", "count": 0 },
+    "index": { "title": "Indexes", "description": "Speed", "count": 0 },
+    "actions": { "title": "Actions", "description": "One-clicks", "count": 0 },
+    "parents": { "title": "Parents", "description": "Ancestors", "count": 0 },
+    "triggers": { "title": "Triggers", "description": "Automation", "count": 0 },
+    "views": { "title": "Views", "description": "Shares", "count": 0 },
+    "unique": { "title": "Unique", "description": "Uniques", "count": 0 },
+    "sort": { "title": "Sort", "description": "Order by", "count": 0 }
+  }
 
   constructor(
     private storage: Storage,
@@ -129,7 +140,7 @@ export class CollectionPage implements OnInit {
     });
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "tree";
+    this.jeoptions.mode = "code";
     this.jeoptions.statusBar = true;
     this.jeoptions.enableSort = false;
     this.jeoptions.expandAll = false;
@@ -180,6 +191,14 @@ export class CollectionPage implements OnInit {
     });
   }
 
+  doBuildSchema(prop_: any) {
+    for (let p_ in prop_) {
+      if (this.schema_[p_]) {
+        this.schema_[p_].count = ["properties", "sort", "views"].includes(p_) ? Object.keys(prop_[p_]).length : prop_[p_].length;
+      }
+    }
+  }
+
   RefreshData(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
@@ -198,7 +217,8 @@ export class CollectionPage implements OnInit {
             page: this.page,
             limit: this.limit
           }).then((res: any) => {
-            if (res.structure.properties) {
+            if (res.structure && res.structure.properties) {
+              this.doBuildSchema(res.structure);
               this.data = res.data;
               this.structure = res.structure;
               this.structure_ = res.structure;
@@ -481,7 +501,7 @@ export class CollectionPage implements OnInit {
     this.template_showed = !this.template_showed;
   }
 
-  doShowSchema() {
+  doShowSchema(key: string) {
     if (this.jeopen) {
       this.jeopen = false;
       this.schemevis = "hide"

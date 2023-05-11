@@ -4767,27 +4767,25 @@ def get_data_f(id_):
             raise AuthError({"result": False, "msg": "no header provided"})
 
         id_ = bleach.clean(id_)
-        arg_ = request.args.get("k", default=None, type=str)
-        if not arg_:
-            raise APIError({"result": False, "msg": "missing argument"})
-
-        api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
-        user_validate_ = Auth().user_validate_by_api_key_f({"api_key": api_key_})
-        if not user_validate_["result"]:
-            user_validate_ = Auth().user_validate_by_api_key_f({"api_key": arg_})
-            if not user_validate_["result"]:
-                raise AuthError(user_validate_)
-        user_ = user_validate_["user"] if "user" in user_validate_ else None
-        if not user_:
-            raise AuthError({"result": False, "msg": "user not found for view"})
 
         api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
-        if not api_token_:
-            raise AuthError({"result": False, "msg": "invalid api token"})
-
-        api_token_validate_f_ = Misc().api_token_validate_f(api_token_)
-        if not api_token_validate_f_["result"]:
-            raise AuthError(api_token_validate_f_)
+        if api_token_:
+            api_token_validate_f_ = Misc().api_token_validate_f(api_token_)
+            if not api_token_validate_f_["result"]:
+                raise AuthError(api_token_validate_f_)
+        else:
+            arg_ = request.args.get("k", default=None, type=str)
+            if not arg_:
+                raise AuthError({"result": False, "msg": "apikey is missing"})
+            api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
+            user_validate_ = Auth().user_validate_by_api_key_f({"api_key": api_key_})
+            if not user_validate_["result"]:
+                user_validate_ = Auth().user_validate_by_api_key_f({"api_key": arg_})
+                if not user_validate_["result"]:
+                    raise AuthError(user_validate_)
+            user_ = user_validate_["user"] if "user" in user_validate_ else None
+            if not user_:
+                raise AuthError({"result": False, "msg": "user not found for view"})
 
         generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")
         if not generate_view_data_f_["result"]:

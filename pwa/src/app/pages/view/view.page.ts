@@ -257,11 +257,11 @@ export class ViewPage implements OnInit {
     }
   }
 
-  doCopy(v: string) {
-    const s = v === "api_key" ? this.accountf_api_key : v === "view" ? this.viewurl_ : "";
-    this.is_api_key_copied = v === "api_key" ? true : false;
-    this.is_url_copied = ["view", "collection"].includes(v) ? true : false;
-    this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
+  doCopy(tocopy_: string) {
+    const copied_ = tocopy_ === "api_key" ? this.accountf_api_key : tocopy_ === "view" ? this.viewurl_ : "";
+    this.is_api_key_copied = tocopy_ === "api_key" ? true : false;
+    this.is_url_copied = ["view", "collection"].includes(tocopy_) ? true : false;
+    this.misc.copyToClipboard(copied_).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {
       this.is_api_key_copied = false;
