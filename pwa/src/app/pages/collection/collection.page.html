@@ -73,7 +73,7 @@ https://www.gnu.org/licenses.
         </div>
         <ng-template #schemas>
           <div *ngIf="is_crud" class="schema-card-container">
-            <ion-card *ngFor="let item of schema_ | keyvalue" (click)="doShowSchema(item.key)">
+            <ion-card *ngFor="let item of schema_ | keyvalue" (click)="doShowSchemaKey(item.key)">
               <ion-card-header>
                 <ion-card-title>{{ item.value.title }}</ion-card-title>
                 <ion-card-subtitle>{{ item.value.description | translate }}</ion-card-subtitle>
@@ -122,7 +122,7 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}
               </div>
-              <div *ngIf="perm && is_crud" (click)="doShowSchema('')" class="data-sq-button">
+              <div *ngIf="is_crud" (click)="doShowSchema()" class="data-sq-button">
                 <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
                   <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
                   {{ 'Schema' | translate }}
@@ -132,7 +132,7 @@ https://www.gnu.org/licenses.
                   {{ 'Close' | translate }}
                 </ng-template>
               </div>
-              <div *ngIf="jeopen && perm && is_crud" class="data-sq-button ion-no-padding danger"
+              <div *ngIf="jeopen && is_crud" class="data-sq-button ion-no-padding danger"
                 (click)="doSaveSchema()">
                 <span *ngIf="!is_saving">
                   <ion-icon name="save-outline"></ion-icon><br />
@@ -146,9 +146,11 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
-        <ion-grid [class]="schemevis" *ngIf="perm && is_crud">
+        <ion-grid [class]="schemevis" *ngIf="is_crud">
           <ion-row>
             <ion-col size="12" class="jeditor">
+              <h4 *ngIf="schema_key">{{ schema_key }}</h4>
+              <h4 *ngIf="!schema_key">{{ 'Full schema' | translate }}</h4>
               <json-editor id="struc" [options]="jeoptions" [data]="structure ? structure : {}"
                 (change)="doChangeSchema($event)" #editor></json-editor>
             </ion-col>
@@ -156,7 +158,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
         <ion-grid *ngIf="is_pane_ok && is_crud" class="ion-no-padding">
           <ion-row class="ion-no-margin">
-            <ion-col *ngIf="perm && actions?.length > 0; else noaction">
+            <ion-col *ngIf="actions?.length > 0; else noaction">
               <div class="act-buttons-wrapper">
                 <span *ngFor="let item of actions; let ac = index">
                   <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button"

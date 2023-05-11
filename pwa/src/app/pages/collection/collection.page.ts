@@ -95,6 +95,7 @@ export class CollectionPage implements OnInit {
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
+  public schema_key: any = null;
   public properties_: any = {};
   public jeopen: boolean = false;
   public is_saving: boolean = false;
@@ -110,15 +111,16 @@ export class CollectionPage implements OnInit {
   public templates: any = [];
   public is_inprogress: boolean = false;
   public schema_: any = {
-    "properties": { "title": "Properties", "description": "Data Fields", "count": 0 },
-    "required": { "title": "Required", "description": "Mandatories", "count": 0 },
-    "index": { "title": "Indexes", "description": "Speed", "count": 0 },
-    "actions": { "title": "Actions", "description": "One-clicks", "count": 0 },
-    "parents": { "title": "Parents", "description": "Ancestors", "count": 0 },
-    "triggers": { "title": "Triggers", "description": "Automation", "count": 0 },
-    "views": { "title": "Views", "description": "Shares", "count": 0 },
-    "unique": { "title": "Unique", "description": "Uniques", "count": 0 },
-    "sort": { "title": "Sort", "description": "Order by", "count": 0 }
+    "properties": { "title": "Properties", "description": "field", "count": 0 },
+    "required": { "title": "Required", "description": "compulsory", "count": 0 },
+    "index": { "title": "Indexes", "description": "speed", "count": 0 },
+    "actions": { "title": "Actions", "description": "one-click", "count": 0 },
+    "parents": { "title": "Parents", "description": "ancestor", "count": 0 },
+    "triggers": { "title": "Triggers", "description": "automation", "count": 0 },
+    "views": { "title": "Views", "description": "share", "count": 0 },
+    "unique": { "title": "Unique", "description": "unrepeat", "count": 0 },
+    "sort": { "title": "Sort", "description": "order-by", "count": 0 },
+    "links": { "title": "Links", "description": "connection", "count": 0 }
   }
 
   constructor(
@@ -136,11 +138,10 @@ export class CollectionPage implements OnInit {
     });
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res;
-      this.perm = res && res.perm ? true : false;
     });
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "code";
+    this.jeoptions.mode = "tree";
     this.jeoptions.statusBar = true;
     this.jeoptions.enableSort = false;
     this.jeoptions.expandAll = false;
@@ -218,8 +219,10 @@ export class CollectionPage implements OnInit {
             limit: this.limit
           }).then((res: any) => {
             if (res.structure && res.structure.properties) {
+              this.editor?.setMode("tree");
               this.doBuildSchema(res.structure);
               this.data = res.data;
+              this.schema_key = null;
               this.structure = res.structure;
               this.structure_ = res.structure;
               this.actions = this.structure.actions;
@@ -259,7 +262,7 @@ export class CollectionPage implements OnInit {
   }
 
   doAction(ix: any) {
-    if (this.perm && this.data?.length > 0) {
+    if (this.data?.length > 0) {
       if (this.actions[ix]?.one_click || this.sweeped[this.segment]?.length > 0) {
         this.actionix = ix;
         this.goCrud(null, "action");
@@ -501,7 +504,7 @@ export class CollectionPage implements OnInit {
     this.template_showed = !this.template_showed;
   }
 
-  doShowSchema(key: string) {
+  doShowSchema() {
     if (this.jeopen) {
       this.jeopen = false;
       this.schemevis = "hide"
@@ -512,21 +515,34 @@ export class CollectionPage implements OnInit {
     }
   }
 
+  doShowSchemaKey(key: string) {
+    this.schema_key = key ? key : null;
+    this.structure = this.structure_;
+    this.structure = this.structure[key];
+    this.jeoptions.mode = "code";
+    this.editor.setMode("code");
+    this.jeopen = true;
+    this.schemevis = "show";
+    this.editor.focus();
+  }
+
   doSaveSchema() {
-    if (this.perm) {
-      this.is_saving = true;
-      this.misc.apiCall("/crud", {
-        op: "saveschema",
-        collection: this.id,
-        structure: this.structure_
-      }).then(() => {
-        window.location.reload();
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.is_saving = false;
+    this.is_saving = true;
+    this.misc.apiCall("/crud", {
+      op: "saveschema",
+      collection: this.id,
+      schema_key: this.schema_key,
+      structure: this.structure_
+    }).then(() => {
+      this.RefreshData(0).then(() => {
+        this.jeopen = false;
+        this.schemevis = "hide"
       });
-    }
+    }).catch((error: any) => {
+      this.misc.doMessage(error, "error");
+    }).finally(() => {
+      this.is_saving = false;
+    });
   }
 
   doUploadModal() {
@@ -566,9 +582,7 @@ export class CollectionPage implements OnInit {
   }
 
   doChangeSchema(ev: any) {
-    if (ev && ev.properties) {
-      this.structure_ = ev;
-    }
+    ev && ev.isTrusted ? null : this.structure_ = ev;
   }
 
   doInstallTemplate(item_: any, ix: number) {

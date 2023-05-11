@@ -1359,10 +1359,10 @@ sup {
 
 .schema-card-container ion-card {
   border-radius: 0px;
-  width: 98px;
+  width: 85px;
   height: 80px;
   box-shadow: none !important;
-  background-color: #eee;
+  background-color: #e3e3e3;
   color: var(--ion-color-dark);
   overflow: hidden !important;
   margin: 0px;
@@ -1398,19 +1398,20 @@ sup {
 
 .schema-card-container ion-card ion-card-content {
   padding: 0px;
-  margin-top: 4px;
-  font-size: medium;
-  font-weight: 600;
+  margin-top: -4px;
+  font-size: 30px;
+  font-weight: 400;
+  color: #bbb;
 }
 
 .schema-card-container ion-card-title {
-  font-size: 15px !important;
+  font-size: 13px !important;
 }
 
 .schema-card-container ion-card-subtitle {
   font-size: 12px !important;
   font-weight: 400 !important;
-  margin-top: 4px !important;
+  margin-top: 2px !important;
 }
 
 .template-card-container ion-card ion-icon {
@@ -1420,16 +1421,6 @@ sup {
   top: 0px;
   right: 0px;
   margin: 20px;
-}
-
-.schema-card-value {
-  position: absolute;
-  top: 0px;
-  right: 10px;
-  margin-top: 6px;
-  font-size: x-large;
-  font-weight: 900;
-  color: var(--ion-color-medium);
 }
 
 .data-div {
@@ -1507,7 +1498,7 @@ sup {
 .jeditor {
   display: flex !important;
   flex-flow: column;
-  height: calc(90vh - 150px);
+  height: calc(90vh - 270px);
   margin-top: -20px;
   margin-bottom: 32px;
   padding: 0px;

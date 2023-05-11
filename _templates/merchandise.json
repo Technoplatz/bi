@@ -213,7 +213,7 @@
       "description": "Shipment Waybill Number",
       "minLength": 0,
       "maxLength": 16,
-      "width": 130
+      "width": 150
     },
     "mer_waybill_date": {
       "bsonType": "date",
@@ -316,6 +316,7 @@
       "get": ["inv_no", "inv_mer_no"]
     }
   ],
+  "links": [],
   "actions": [
     {
       "id": "standby",
@@ -682,8 +683,8 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "dn-buid-view": {
-      "title": "Business Units",
-      "description": "GiT by BU Id's",
+      "title": "Market Share",
+      "description": "By Business Units",
       "priority": 1000,
       "enabled": true,
       "dashboard": true,
@@ -706,7 +707,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
-      "chart_type": "Stacked Horizontal Bar",
+      "chart_type": "Pie",
       "chart_label": true,
       "chart_gradient": true,
       "chart_grid": true,
@@ -767,7 +768,7 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "fc-on-the-way": {
+    "fc-status-10": {
       "title": "STby + On the Way",
       "description": "Merchandise stand-by and on the way",
       "priority": 2000,
@@ -813,7 +814,7 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "fc-on-customs": {
+    "fc-status-20": {
       "title": "On Customs",
       "description": "Merchandise have just arrived",
       "priority": 2000,
@@ -859,7 +860,7 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "fc-on-custom-process": {
+    "fc-status-30": {
       "title": "On Customs Process",
       "description": "Merchandise currently on customs process",
       "priority": 2000,
@@ -899,147 +900,9 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "chart_colors": ["#fd7f6f", "#ffb55a", "#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#7eb0d5", "#b2e061"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
-    },
-    "fc-status-40": {
-      "title": "Clearance Completed",
-      "description": "Merchandise clearance have been completed",
-      "priority": 2000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [
-        {
-          "key": "mer_status",
-          "op": "eq",
-          "value": "40-ClearanceCompleted"
-        }
-      ],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["mer_status"],
-      "data_columns": [],
-      "data_values": [
-        {
-          "key": "mer_no",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "chart_type": "Flashcard",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
-      "scheduled": false,
-      "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
-    },
-    "fc-status-50": {
-      "title": "On The Touchpoint",
-      "description": "Merchandise on the Touchpoint",
-      "priority": 2000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [
-        {
-          "key": "mer_status",
-          "op": "eq",
-          "value": "50-OnTheTouchpoint"
-        }
-      ],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["mer_status"],
-      "data_columns": [],
-      "data_values": [
-        {
-          "key": "mer_no",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "chart_type": "Flashcard",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
-      "scheduled": true,
-      "scheduled_cron": "30 9,17 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Technoplatz"]
-    },
-    "fc-status-60": {
-      "title": "Ready To Be Delivered",
-      "description": "Merchandise awaiting shipment",
-      "priority": 2000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [
-        {
-          "key": "mer_status",
-          "op": "eq",
-          "value": "60-ReadyToBeDelivered"
-        }
-      ],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["mer_status"],
-      "data_columns": [],
-      "data_values": [
-        {
-          "key": "mer_no",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "chart_type": "Flashcard",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
-      "scheduled": false,
-      "scheduled_cron": "* 23 * * sun",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     }

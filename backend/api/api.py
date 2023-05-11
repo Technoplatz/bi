@@ -2396,19 +2396,48 @@ class Crud:
         docstring is in progress
         """
         try:
-            collection_id_ = obj["collection"]
-            structure_ = obj["structure"]
-            user_ = obj["user"]
+            col_id_ = obj["collection"] if "collection" in obj and obj["collection"] is not None else None
+            structure_ = obj["structure"] if "structure" in obj and obj["structure"] is not None else None
+            schema_key_ = obj["schema_key"] if "schema_key" in obj and obj["schema_key"] in STRUCTURE_KEYS_ else None
+            user_ = obj["user"] if "user" in obj and obj["user"] != "" and obj["user"] is not None else None
 
-            Mongo().db_["_collection"].update_one({"col_id": collection_id_}, {"$set": {
+            if not user_:
+                raise APIError("user not found")
+
+            if not structure_:
+                raise APIError("structure not found")
+
+            if not col_id_:
+                raise APIError("collection not found")
+
+            print("*** schema_key", schema_key_)
+            print("*** col_id_", col_id_)
+            print("*** structure1_", structure_)
+
+            if schema_key_ is not None:
+                doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
+                if not doc_:
+                    raise APIError("collection not found")
+                col_structure_ = doc_["col_structure"] if "col_structure" in doc_ and doc_["col_structure"] is not None else None
+                if col_structure_:
+                    col_structure_[schema_key_] = structure_
+                    structure_ = col_structure_
+
+            arr_ = [str_ for str_ in structure_ if str_ not in STRUCTURE_KEYS_]
+            if len(arr_) > 0:
+                raise APIError(f"some structure keys are invalid {','.join(arr_)}")
+
+            arr_ = [str_ for str_ in structure_ if str_ in STRUCTURE_KEYS_]
+            if len(arr_) != len(STRUCTURE_KEYS_):
+                raise APIError(f"some structure keys are missing; expected: {','.join(STRUCTURE_KEYS_)}, considered: {','.join(arr_)}")
+
+            Mongo().db_["_collection"].update_one({"col_id": col_id_}, {"$set": {
                 "col_structure": structure_,
                 "_modified_at": Misc().get_now_f(),
                 "_modified_by": user_["usr_id"]
-            },
-                "$inc": {"_modified_count": 1}
-            })
+            }, "$inc": {"_modified_count": 1}})
 
-            func_ = self.crudschema_validate_f({"collection": f"{collection_id_}_data", "structure": structure_})
+            func_ = self.crudschema_validate_f({"collection": f"{col_id_}_data", "structure": structure_})
             if not func_["result"]:
                 raise APIError(func_["msg"])
 
@@ -4144,6 +4173,7 @@ MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "Tr
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_token", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
+STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers"]
 
 app = Flask(__name__)
 origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101"]
