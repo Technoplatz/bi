@@ -241,8 +241,8 @@ export class Miscellaneous {
     type === "error" ? console.error(msg) : null;
     const typed: any = {
       message: msg + ".",
-      duration: type === "success" ? 15000 : 15000,
-      cssClass: type === "success" ? "toast-class-success" : "toast-class-error",
+      duration: 10000,
+      cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
       buttons: [{
         side: "end",
         icon: "close-outline",

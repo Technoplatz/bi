@@ -104,7 +104,8 @@ export class CollectionPage implements OnInit {
   public sort: any = {};
   public structure: any = {};
   public schemevis: any = "hide";
-  private structure_: any = {};
+  private structure_ori_: any = null;
+  private structured_: any = null;
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   private admin_collections: any = environment.admin_collections;
@@ -203,6 +204,7 @@ export class CollectionPage implements OnInit {
   RefreshData(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
+      this.schema_key = null;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -222,9 +224,8 @@ export class CollectionPage implements OnInit {
               this.editor?.setMode("tree");
               this.doBuildSchema(res.structure);
               this.data = res.data;
-              this.schema_key = null;
+              this.structure_ori_ = res.structure;
               this.structure = res.structure;
-              this.structure_ = res.structure;
               this.actions = this.structure.actions;
               this.properties_ = res.structure.properties;
               this.barcoded_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].barcoded).length > 0 : false;
@@ -500,15 +501,12 @@ export class CollectionPage implements OnInit {
     this.searched[k].op = op;
   }
 
-  doTemplateShow() {
-    this.template_showed = !this.template_showed;
-  }
-
   doShowSchema() {
     if (this.jeopen) {
       this.jeopen = false;
       this.schemevis = "hide"
     } else {
+      this.editor.setMode("tree");
       this.jeopen = true;
       this.schemevis = "show";
       this.editor.focus();
@@ -516,9 +514,10 @@ export class CollectionPage implements OnInit {
   }
 
   doShowSchemaKey(key: string) {
+    this.structured_ ? this.misc.doMessage("change was discarded", "warning") : null;
     this.schema_key = key ? key : null;
-    this.structure = this.structure_;
-    this.structure = this.structure[key];
+    this.structured_ = null;
+    this.structure = this.structure_ori_[key];
     this.jeoptions.mode = "code";
     this.editor.setMode("code");
     this.jeopen = true;
@@ -532,7 +531,7 @@ export class CollectionPage implements OnInit {
       op: "saveschema",
       collection: this.id,
       schema_key: this.schema_key,
-      structure: this.structure_
+      structure: this.structured_ ? this.structured_ : this.structure
     }).then(() => {
       this.RefreshData(0).then(() => {
         this.jeopen = false;
@@ -582,7 +581,7 @@ export class CollectionPage implements OnInit {
   }
 
   doChangeSchema(ev: any) {
-    ev && ev.isTrusted ? null : this.structure_ = ev;
+    ev && ev.isTrusted ? null : this.structured_ = ev;
   }
 
   doInstallTemplate(item_: any, ix: number) {

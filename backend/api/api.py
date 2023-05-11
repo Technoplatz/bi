@@ -2410,10 +2410,6 @@ class Crud:
             if not col_id_:
                 raise APIError("collection not found")
 
-            print("*** schema_key", schema_key_)
-            print("*** col_id_", col_id_)
-            print("*** structure1_", structure_)
-
             if schema_key_ is not None:
                 doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
                 if not doc_:
@@ -3617,7 +3613,7 @@ class Auth:
                         (op_ == "upsert" and per_insert_ and per_update_) or
                         (op_ in ["update", "action"] and per_read_ and per_update_) or
                         (op_ == "clone" and per_read_ and per_insert_) or
-                            (op_ == "delete" and per_read_ and per_delete_)):
+                        (op_ == "delete" and per_read_ and per_delete_)):
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True

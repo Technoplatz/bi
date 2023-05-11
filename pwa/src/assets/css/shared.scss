@@ -1175,20 +1175,15 @@ sup {
 }
 
 .toast-class-warning {
-  --min-width: 100%;
   --white-space: 0px;
-  --height: 60px;
-  --background: var(--ion-color-dark);
+  --background: var(--ion-color-warning);
   --border-radius: 0px;
   --border-width: 0px;
-  --start: 0;
   --box-shadow: none;
-  --color: var(--ion-color-white) !important;
-  --button-color: var(--ion-color-white) !important;
+  --button-color: var(--ion-color-dark) !important;
   font-weight: 600;
-  text-align: center;
   padding: 0px !important;
-  margin-top: -8px;
+  top: -31px !important;
 }
 
 .end-item {
@@ -1398,10 +1393,11 @@ sup {
 
 .schema-card-container ion-card ion-card-content {
   padding: 0px;
-  margin-top: -4px;
-  font-size: 30px;
-  font-weight: 400;
-  color: #bbb;
+  margin-top: 4px;
+  margin-left: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
 }
 
 .schema-card-container ion-card-title {
@@ -1498,9 +1494,9 @@ sup {
 .jeditor {
   display: flex !important;
   flex-flow: column;
-  height: calc(90vh - 270px);
+  height: calc(90vh - 470px);
   margin-top: -20px;
-  margin-bottom: 32px;
+  margin-bottom: 8px;
   padding: 0px;
 }
 
