@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "exc_date": {
+      "bsonType": "date",
+      "title": "Date",
+      "description": "Date"
+    },
+    "exc_exchange": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Record Status",
+      "enum": ["EUR", "TRY", "USD"],
+      "default": "EUR"
+    },
+    "exc_rate": {
+      "bsonType": "number",
+      "title": "Rate",
+      "description": "Exchange Rate",
+      "default": 1
+    },
+    "exc_currency": {
+      "bsonType": "string",
+      "title": "Currency",
+      "description": "Exchange Currency",
+      "enum": ["EUR", "TRY", "USD"],
+      "default": "USD"
+    }
+  },
+  "required": ["exc_date", "exc_exchange"],
+  "index": [["exc_currency"]],
+  "unique": [["exc_date", "exc_exchange"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {
+    "vie-exchange-rates": {
+      "title": "Exchanges",
+      "description": "Exchanges 2023",
+      "priority": 4000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["exc_date"],
+      "data_columns": ["exc_exchange"],
+      "data_values": [
+        {
+          "key": "exc_rate",
+          "value": "sum"
+        }
+      ],
+      "data_json": false,
+      "data_excel": true,
+      "data_csv": false,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Line",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": false,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#27aeef", "#ea5545", "#b33dc6", "#87bc45", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32"],
+      "scheduled": false,
+      "scheduled_cron": "15 10,16 * * 1-5",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Technoplatz"]
+    }
+  }
+}

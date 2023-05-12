@@ -1,24 +1,16 @@
 [
   {
-    "_id": "template-zero",
-    "title": "Zero Template",
+    "_id": "template-merchandise",
+    "title": "Merhandise Template",
     "by": "Technoplatz",
-    "description": "A minimal template includes one field for a clean start.",
-    "collection": "zero",
+    "description": "A minimal business template to manage goods to be sold and purchased, accounts and exchanges.",
     "file": "template-zero.json",
-    "prefix": "zzz",
     "icon": "accessibility-outline",
-    "sort": 10
-  },
-  {
-    "_id": "template-foo",
-    "title": "Foo Template",
-    "by": "Technoplatz",
-    "description": "A basic collection template includes essential fields and data types for generic business use.",
-    "collection": "foo",
-    "file": "template-foo.json",
-    "prefix": "foo",
-    "icon": "business-outline",
-    "sort": 20
+    "sort": 10,
+    "collections": [
+      { "col_id": "exchange", "col_title": "Exchanges", "col_description": "Foreign Currencies", "prefix": "exc", "data": true },
+      { "col_id": "account", "col_title": "Accounts", "col_description": "Customers and Suppliers", "prefix": "acc", "data": true },
+      { "col_id": "merchandise", "col_title": "Merchandise", "col_description": "Goods to be sold or purchased", "prefix": "mer", "data": true }
+    ]
   }
 ]

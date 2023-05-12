@@ -1180,6 +1180,7 @@ sup {
   --border-radius: 0px;
   --border-width: 0px;
   --box-shadow: none;
+  --color: var(--ion-color-dark) !important;
   --button-color: var(--ion-color-dark) !important;
   font-weight: 600;
   padding: 0px !important;
@@ -1341,17 +1342,6 @@ sup {
   align-items: center;
 }
 
-.template-card-container ion-card {
-  border-radius: 0px;
-  width: 280px;
-  height: 195px;
-  box-shadow: none !important;
-  border: 5px solid var(--ion-color-light);
-  color: var(--ion-color-dark);
-  overflow: hidden !important;
-  margin: 0px;
-}
-
 .schema-card-container ion-card {
   border-radius: 0px;
   width: 85px;
@@ -1362,19 +1352,6 @@ sup {
   overflow: hidden !important;
   margin: 0px;
   cursor: pointer;
-}
-
-.template-card-container ion-card ion-card-content {
-  margin-top: 0px !important;
-  line-height: normal;
-}
-
-.template-card-container ion-card p {
-  margin-top: 4px !important;
-}
-
-.template-card-container ion-card ion-button {
-  margin-left: 16px;
 }
 
 .schema-card-container ion-card ion-button {
@@ -1397,7 +1374,7 @@ sup {
   margin-left: 10px;
   font-size: 20px;
   font-weight: 600;
-  color: var(--ion-color-medium);
+  color: #333;
 }
 
 .schema-card-container ion-card-title {
@@ -1408,6 +1385,35 @@ sup {
   font-size: 12px !important;
   font-weight: 400 !important;
   margin-top: 2px !important;
+}
+
+.template-card-container ion-card {
+  border-radius: 0px;
+  width: 280px;
+  height: 195px;
+  box-shadow: none !important;
+  border: 5px solid var(--ion-color-medium);
+  color: var(--ion-color-dark);
+  overflow: hidden !important;
+  margin: 0px;
+}
+
+.template-card-container ion-card.single-coll {
+  border: 5px solid var(--ion-color-primary) !important;
+}
+
+.template-card-container ion-card ion-card-content {
+  margin-top: 0px !important;
+  line-height: normal;
+  font-size: small;
+}
+
+.template-card-container ion-card p {
+  margin-top: 4px !important;
+}
+
+.template-card-container ion-card ion-button {
+  margin-left: 16px;
 }
 
 .template-card-container ion-card ion-icon {

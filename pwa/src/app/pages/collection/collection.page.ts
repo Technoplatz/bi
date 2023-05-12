@@ -175,7 +175,7 @@ export class CollectionPage implements OnInit {
                 proc: "list",
                 template: null
               }).then((res: any) => {
-                this.templates = res && res.data ? res.data : [];
+                this.templates = res && res.templates ? res.templates : [];
               }).catch((error: any) => {
                 console.error(error);
                 this.misc.doMessage(error, "error");
@@ -503,8 +503,11 @@ export class CollectionPage implements OnInit {
 
   doShowSchema() {
     if (this.jeopen) {
-      this.jeopen = false;
-      this.schemevis = "hide"
+      this.RefreshData(0).then(() => {
+        this.jeopen = false;
+        this.schemevis = "hide"
+        this.structured_ = null;
+      });
     } else {
       this.editor.setMode("tree");
       this.jeopen = true;
@@ -514,7 +517,7 @@ export class CollectionPage implements OnInit {
   }
 
   doShowSchemaKey(key: string) {
-    this.structured_ ? this.misc.doMessage("change was discarded", "warning") : null;
+    this.structured_ ? this.misc.doMessage("the latest change was discarded", "warning") : null;
     this.schema_key = key ? key : null;
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
@@ -540,6 +543,7 @@ export class CollectionPage implements OnInit {
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     }).finally(() => {
+      this.structured_ = null;
       this.is_saving = false;
     });
   }
@@ -593,14 +597,16 @@ export class CollectionPage implements OnInit {
         template: item_
       }).then(() => {
         this.misc.doMessage("template installed successfully", "success");
-        this.crud.getAll().then(() => {
-          this.misc.navi.next("dashboard");
-        });
+        this.misc.navi.next("dashboard");
       }).catch((error: any) => {
         console.error(error);
         this.misc.doMessage(error, "error");
       }).finally(() => {
-        this.templates[ix].processing = false;
+        this.RefreshData(0).then(() => {
+          this.crud.getAll().then(() => {
+            this.templates[ix].processing = false;
+          });
+        });
       });
     }
   }

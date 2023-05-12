@@ -684,11 +684,11 @@ class Crud:
 
             return {"result": True, "properties": properties_}
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
     def template_f(self, input_):
         """
@@ -704,80 +704,89 @@ class Crud:
                 raise APIError("user not provided")
             email_ = user_["usr_id"]
 
-            userindb_ = input_["userindb"] if "userindb" in input_ else None
-            if not userindb_:
-                raise APIError("user not found")
-
-            data_ = None
+            templates_ = None
             path_ = "/app/_template/templates.json"
             if not os.path.isfile(path_):
                 raise APIError("no templates found")
 
             with open(path_, "r", encoding="utf-8") as fopen_:
-                data_ = json.loads(fopen_.read())
+                templates_ = json.loads(fopen_.read())
 
             if proc_ == "list":
-                data_ = [item_ for item_ in data_]
-                data_.sort(key=operator.itemgetter("sort"), reverse=False)
-            elif proc_ == "install":
-                suffix_ = Misc().get_timestamp_f()
-                template_ = input_["template"] if "template" in input_ else None
-                if not template_:
-                    raise APIError("invalid template requested")
+                templates_ = list(templates_)
+                templates_.sort(key=operator.itemgetter("sort"), reverse=False)
+                return {"result": True, "templates": templates_}
 
-                col_id_ = f"{template_['collection']}-{suffix_}"
-                col_title_ = f"{template_['title']}-{suffix_}"
-                file_ = template_["file"]
-                collection__ = f"{col_id_}_data"
-                prefix_ = template_["prefix"] if "prefix" in template_ else "zzz"
-                description_ = template_["description"] if "description" in template_ else None
+            for template_ in templates_:
+                collections_ = template_["collections"]
+                for collection_ in collections_:
+                    col_id_ = collection_['col_id']
+                    col_title_ = collection_['col_title']
+                    col_description_ = collection_["col_description"]
+                    collection__ = f"{col_id_}_data"
+                    prefix_ = collection_["prefix"] if "prefix" in collection_ else "zzz"
+                    scheme_file_ = f"{col_id_}.json"
+                    data_file_ = f"{collection__}.json"
+                    suffix_ = Misc().get_timestamp_f()
 
-                find_one_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
-                if find_one_:
-                    raise APIError("collection name already exists")
-                if col_id_ in Mongo().db_.list_collection_names():
-                    raise APIError("collection data already exists")
+                    find_one_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
+                    if find_one_:
+                        raise APIError(f"collection already exists: {col_id_}")
 
-                find_one_ = Mongo().db_["_collection"].find_one({"col_prefix": prefix_})
-                if find_one_:
-                    raise APIError(f"collection prefix already exists: {prefix_}")
+                    find_one_ = Mongo().db_["_collection"].find_one({"col_prefix": prefix_})
+                    if find_one_:
+                        raise APIError(f"collection prefix already exists: {prefix_}")
 
-                path_ = f"/app/_template/{file_}"
-                if os.path.isfile(path_):
-                    with open(path_, "r", encoding="utf-8") as fopen_:
-                        jtxt_ = fopen_.read()
-                        jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
-                        structure_ = json.loads(jtxt_)
+                    if collection__ in Mongo().db_.list_collection_names():
+                        Mongo().db_[collection__].aggregate([{"$match": {}}, {"$out": f"{collection__}_bin_{suffix_}"}])
+                        Mongo().db_[collection__].drop()
 
-                Mongo().db_["_collection"].insert_one({
-                    "col_id": col_id_,
-                    "col_title": col_title_,
-                    "col_description": description_,
-                    "col_prefix": prefix_,
-                    "col_structure": structure_,
-                    "_created_at": Misc().get_now_f(),
-                    "_created_by": email_,
-                    "_modified_at": Misc().get_now_f(),
-                    "_modified_by": email_,
-                    "_modified_count": 0
-                })
+                    scheme_path_ = f"/app/_template/{scheme_file_}"
+                    if os.path.isfile(scheme_path_):
+                        with open(scheme_path_, "r", encoding="utf-8") as fopen_:
+                            jtxt_ = fopen_.read()
+                            jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
+                            structure_ = json.loads(jtxt_)
 
-                schemavalidate_ = self.crudschema_validate_f(
-                    {"collection": collection__, "structure": structure_}
-                )
-                if not schemavalidate_["result"]:
-                    raise APIError(schemavalidate_["msg"])
+                        Mongo().db_["_collection"].insert_one({
+                            "col_id": col_id_,
+                            "col_title": col_title_,
+                            "col_description": col_description_,
+                            "col_prefix": prefix_,
+                            "col_structure": structure_,
+                            "_created_at": Misc().get_now_f(),
+                            "_created_by": email_,
+                            "_modified_at": Misc().get_now_f(),
+                            "_modified_by": email_,
+                            "_modified_count": 0
+                        })
 
-            return {"result": True, "data": data_}
+                        schemavalidate_ = self.crudschema_validate_f({"collection": collection__, "structure": structure_})
+                        if not schemavalidate_["result"]:
+                            raise APIError(schemavalidate_["msg"])
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+                        data_path_ = f"/app/_template/{data_file_}"
+                        if os.path.isfile(data_path_):
+                            command_ = f"mongoimport --quiet --file={data_path_} --collection={collection__} --mode=insert --jsonArray --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_}"
+                            call(command_, shell=True)
+                            Mongo().db_[collection__].update_many({}, {"$set": {
+                                "_created_at": Misc().get_now_f(),
+                                "_created_by": email_,
+                                "_modified_at": Misc().get_now_f(),
+                                "_modified_by": email_,
+                                "_modified_count": 0
+                            }})
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+            return {"result": True}
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
+
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
     def inner_collection_f(self, cid_):
         """
@@ -2690,31 +2699,29 @@ class Crud:
 
             cursor = Mongo().db_[collection_].find({"_id": {"$in": ids_}})
             for index, doc in enumerate(cursor, start=1):
+                col_id_ = doc["col_id"] if "col_id" in doc else None
                 if op_ == "clone":
                     doc["_created_at"] = doc["_modified_at"] = Misc().get_now_f()
-                    doc["_created_by"] = doc["_modified_by"] = (
-                        user_["email"] if user_ and "email" in user_ else None
-                    )
+                    doc["_created_by"] = doc["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
                     doc["_modified_count"] = 0
                     doc.pop("_id", None)
                     if unique:
-                        for uq in unique:
-                            if uq[0] in doc:
-                                if "objectId" in properties[uq[0]] and properties[uq[0]]["objectId"] is True:
-                                    doc[uq[0]] = str(bson.objectid.ObjectId())
-                                elif properties[uq[0]]["bsonType"] == "string":
-                                    doc[uq[0]] = (
-                                        f"{doc[uq[0]]}-1"
-                                        if "_" in doc[uq[0]]
-                                        else f"{doc[uq[0]]}-{index}"
-                                    )
+                        for uq_ in unique:
+                            if uq_[0] in doc:
+                                if "objectId" in properties[uq_[0]] and properties[uq_[0]]["objectId"] is True:
+                                    doc[uq_[0]] = str(bson.objectid.ObjectId())
+                                elif properties[uq_[0]]["bsonType"] == "string":
+                                    doc[uq_[0]] = f"{doc[uq_[0]]}-1" if "_" in doc[uq_[0]] else f"{doc[uq_[0]]}-{index}"
                     Mongo().db_[collection_].insert_one(doc)
-
                 elif op_ == "delete":
                     Mongo().db_[collection_].delete_one({"_id": doc["_id"]})
                     doc["_deleted_at"] = Misc().get_now_f()
                     doc["_deleted_by"] = user_["email"] if user_ and "email" in user_ else None
                     Mongo().db_[f"{collection_id_}_bin"].insert_one(doc)
+                    if collection_ == "_collection":
+                        suffix_ = Misc().get_timestamp_f()
+                        Mongo().db_[f"{col_id_}_data"].aggregate([{"$match": {}}, {"$out": f"{col_id_}_data_bin_{suffix_}"}])
+                        Mongo().db_[f"{col_id_}_data"].drop()
 
                 log_ = Misc().log_f({
                     "type": "Info",
@@ -2898,15 +2905,13 @@ class Crud:
                     command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
                     files_ = [{"filename": file_, "filetype": type_}]
-                    email_sent_ = Email().sendEmail_f(
-                        {
-                            "op": "action",
-                            "tags": tags_,
-                            "subject": subject_,
-                            "html": body_,
-                            "files": files_,
-                        }
-                    )
+                    email_sent_ = Email().sendEmail_f({
+                        "op": "action",
+                        "tags": tags_,
+                        "subject": subject_,
+                        "html": body_,
+                        "files": files_
+                    })
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
             else:
@@ -3613,7 +3618,7 @@ class Auth:
                         (op_ == "upsert" and per_insert_ and per_update_) or
                         (op_ in ["update", "action"] and per_read_ and per_update_) or
                         (op_ == "clone" and per_read_ and per_insert_) or
-                        (op_ == "delete" and per_read_ and per_delete_)):
+                            (op_ == "delete" and per_read_ and per_delete_)):
                         if ix_ == 0:
                             allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
                         permission_ = True

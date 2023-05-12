@@ -153,13 +153,13 @@ export const environment = {
     }
   },
   segmentsadm: [
-    { "id": "_announcement", "title": "Announcements" },
-    { "id": "_user", "title": "Users" },
-    { "id": "_permission", "title": "Permissions" },
-    { "id": "_firewall", "title": "Firewall" },
-    { "id": "_token", "title": "API Tokens" },
-    { "id": "_backup", "title": "Backups" },
-    { "id": "_log", "title": "Logs" },
+    { "id": "_announcement", "title": "Announcements", "description": "Data announcements of shared views." },
+    { "id": "_user", "title": "Users", "description": "Internal users and data subscribers." },
+    { "id": "_permission", "title": "Permissions", "description": "Database collection permissions." },
+    { "id": "_firewall", "title": "Firewall", "description": "IP Firewall" },
+    { "id": "_token", "title": "API Tokens", "description": "Access tokens of built-in API functions." },
+    { "id": "_backup", "title": "Backups", "description": "Database backup and restore." },
+    { "id": "_log", "title": "Logs", "description": "Transaction logs in detail" },
     { "id": "_kv", "title": "Key : Value" }
   ],
   themes: [
@@ -170,6 +170,6 @@ export const environment = {
     { "name": "Marine", "color": "#3A62FA" },
     { "name": "Iris", "color": "#5D3FD3" },
     { "name": "Sunshine", "color": "#FF5733" },
-    { "name": "Rot", "color": "#aa0000" }
+    { "name": "Rot", "color": "#AA0000" }
   ]
 }

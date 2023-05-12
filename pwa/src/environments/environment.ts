@@ -153,7 +153,7 @@ export const environment = {
     },
   },
   segmentsadm: [
-    { "id": "_announcement", "title": "Announcements", "description": "Data announcements of the shared views." },
+    { "id": "_announcement", "title": "Announcements", "description": "Data announcements of shared views." },
     { "id": "_user", "title": "Users", "description": "Internal users and data subscribers." },
     { "id": "_permission", "title": "Permissions", "description": "Database collection permissions." },
     { "id": "_firewall", "title": "Firewall", "description": "IP Firewall" },
@@ -170,6 +170,6 @@ export const environment = {
     { "name": "Marine", "color": "#1F51FF" },
     { "name": "Iris", "color": "#5D3FD3" },
     { "name": "Sunshine", "color": "#FF5733" },
-    { "name": "Rot", "color": "#aa0000" }
+    { "name": "Rot", "color": "#AA0000" }
   ]
 }

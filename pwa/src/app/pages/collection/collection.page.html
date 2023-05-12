@@ -38,10 +38,10 @@ https://www.gnu.org/licenses.
         <h1>{{ subheader }}</h1>
         {{ description }}
         <div *ngIf="id=='_collection'; else schemas" class="template-card-container">
-          <ion-card>
+          <ion-card class="single-coll">
             <ion-icon name="rocket-outline" color="primary"></ion-icon>
             <ion-card-header>
-              <ion-card-title>{{ 'Basic Template' }}</ion-card-title>
+              <ion-card-title>{{ 'Single Collection' }}</ion-card-title>
               <ion-card-subtitle>{{ 'by' | translate }} {{ 'Yourself' }}</ion-card-subtitle>
             </ion-card-header>
             <ion-button (click)="goCrud(null, 'insert')" size="small">
@@ -51,11 +51,10 @@ https://www.gnu.org/licenses.
               </ng-template>
             </ion-button>
             <ion-card-content>
-              {{ 'An elementary template consists of four basic data types; string, number, date and boolean' }}.
+              {{ 'An elementary collection consists of 4 basic data types; string, number, date and boolean' }}.
             </ion-card-content>
           </ion-card>
           <ion-card *ngFor="let item of templates; let t = index">
-            <ion-icon [name]="item.icon" color="primary"></ion-icon>
             <ion-card-header>
               <ion-card-title>{{ item.title }}</ion-card-title>
               <ion-card-subtitle>{{ 'by' | translate }} {{ item.by }}</ion-card-subtitle>
