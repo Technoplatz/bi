@@ -204,7 +204,7 @@ export class CollectionPage implements OnInit {
   RefreshData(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
-      this.schema_key = null;
+      this.doSetSchemaKey(null);
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -516,13 +516,17 @@ export class CollectionPage implements OnInit {
     }
   }
 
+  doSetSchemaKey(key: any) {
+    this.schema_key = key ? key : "schema-structure";
+    this.editor?.setName(key ? key : "schema-structure");
+  }
+
   doShowSchemaKey(key: string) {
     this.structured_ ? this.misc.doMessage("the latest change was discarded", "warning") : null;
-    this.schema_key = key ? key : null;
+    this.doSetSchemaKey(key);
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
-    this.jeoptions.mode = "code";
-    this.editor.setMode("code");
+    this.editor.setMode("tree");
     this.jeopen = true;
     this.schemevis = "show";
     this.editor.focus();

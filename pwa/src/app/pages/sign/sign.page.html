@@ -160,12 +160,12 @@ https://www.gnu.org/licenses.
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe" mode="md" class="ion-margin-end">
-            </ion-checkbox>{{ 'Remember me' | translate }}
+            </ion-checkbox><ion-text size="small">{{ 'Remember me' | translate }}</ion-text>
         </ion-item>
     </form>
     <form [formGroup]="TFACForm" *ngIf="formtype=='tfac'">
         <ion-item class="section-header" lines="none">
-            <h2>{{ '2F Authenticaton' | translate }}</h2>
+            <h2>{{ '2F Authentication' | translate }}</h2>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'One Time Password' | translate }}
@@ -187,7 +187,7 @@ https://www.gnu.org/licenses.
             <ion-button fill="clear" (click)="doSetOp('signin')" size="small"
                 class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="mail-outline"></ion-icon>
-                <span>{{ 'Your backup OTP has been sent by Email' | translate }}.</span>
+                <span>{{ 'Your OTP has been sent by e-mail' | translate }}.</span>
             </ion-button>
         </ion-item>
     </form>

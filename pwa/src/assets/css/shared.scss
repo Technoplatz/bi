@@ -304,32 +304,11 @@ ion-note {
 
 .pane-item {
   cursor: default;
-  font-weight: 600;
-}
-
-.pane-item span,
-.pane-item div {
   font-size: small !important;
   color: var(--ion-color-dark);
   font-weight: normal !important;
   line-height: normal !important;
-}
-
-.pane-item-last {
-  padding-top: 8px !important;
-}
-
-.pane-item div a {
-  margin-bottom: 8px !important;
-  font-weight: 600;
-}
-
-.pane-item ion-icon {
-  color: var(--ion-color-primary);
-  vertical-align: top !important;
-  position: absolute;
-  top: 0 !important;
-  right: 0;
+  margin-bottom: 16px;
 }
 
 .pane-stat-num {
@@ -379,6 +358,7 @@ ion-note {
   display: flex;
   gap: 3px;
   margin-bottom: 16px;
+  margin-top: 3px;
 }
 
 .alert-class input {
@@ -634,24 +614,18 @@ form ion-item ion-label {
 .menu-button,
 .dash-button {
   --padding-start: 0px !important;
-  margin-bottom: -4px;
-  font-weight: 700;
-  cursor: none;
-  pointer-events: none;
+  font-weight: bold;
+  cursor: pointer !important;
 }
 
-.dash-button {
-  cursor: pointer !important;
-  pointer-events: initial !important;
+.dash-item {
+  height: 45px !important;
+  margin-top: -10px;
 }
 
 .menu-button ion-icon,
 .dash-button ion-icon {
   width: 24px !important;
-}
-
-.dash-button ion-icon {
-  margin-top: -8px !important;
 }
 
 .pane_segment {
@@ -1326,17 +1300,9 @@ sup {
   pointer-events: none !important;
 }
 
-.template-card-container {
-  margin-top: 16px;
-  gap: 8px !important;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
 .schema-card-container {
   margin-top: 16px;
-  gap: 4px !important;
+  gap: 3px !important;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -1344,7 +1310,7 @@ sup {
 
 .schema-card-container ion-card {
   border-radius: 0px;
-  width: 85px;
+  width: 86px;
   height: 80px;
   box-shadow: none !important;
   background-color: #e3e3e3;
@@ -1385,6 +1351,15 @@ sup {
   font-size: 12px !important;
   font-weight: 400 !important;
   margin-top: 2px !important;
+}
+
+.template-card-container {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  gap: 8px !important;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .template-card-container ion-card {
@@ -1529,7 +1504,7 @@ json-editor jsoneditor-outer {
 }
 
 .jsoneditor-value.jsoneditor-array {
-  color: #FFC300;
+  color: var(--ion-color-success);
 }
 
 .ace_editor,
@@ -1946,7 +1921,7 @@ ion-checkbox {
 
 .app-charts {
   position: absolute;
-  bottom: 8px;
+  bottom: 16px;
   height: auto;
   top: auto;
   display: flex;
@@ -1954,11 +1929,12 @@ ion-checkbox {
 }
 
 app-charts {
-  margin-left: -14px;
+  margin-left: -16px;
 }
 
 app-chart {
   margin-left: -16px;
+  padding-top: 4px;
 }
 
 .flash-rec {

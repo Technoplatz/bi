@@ -50,10 +50,17 @@ https://www.gnu.org/licenses.
         </span>
       </ion-label>
     </ion-item>
-    <ion-item lines="none">
+    <ion-item lines="none" class="dash-item">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('dashboard')">
           <ion-icon name="stats-chart-sharp"></ion-icon>{{ "Dashboard" | translate }}
+        </ion-button>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none" class="dash-item">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('admin/_collection')">
+          <ion-icon name="cube-outline"></ion-icon>{{ "Studio" | translate }}
         </ion-button>
       </ion-label>
     </ion-item>
@@ -62,10 +69,6 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="server-outline"></ion-icon>{{ "Data Collections" | translate }}
         </ion-button>
-        <p *ngIf="user_.perm" (click)="misc.navi.next('admin/_collection')" class="clicked-item dark separated-menu">
-          {{ 'Collection Studio' | translate }}
-        </p>
-        <div class="filler-8"></div>
         <div *ngIf="collections?.length > 0; else nocollectionsfound">
           <p *ngFor="let item of collections" (click)="misc.navi.next('collection/'+ item.col_id)"
             class="clicked-item dark">

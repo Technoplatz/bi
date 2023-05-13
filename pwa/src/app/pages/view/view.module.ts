@@ -38,8 +38,6 @@ import { IonicModule } from "@ionic/angular";
 import { ViewPageRoutingModule } from "./view-routing.module";
 import { ViewPage } from "./view.page";
 import { PageComponentsModule } from "../../components/page-components.module";
-import { QRCodeModule } from 'angularx-qrcode';
-import { NgJsonEditorModule } from "ang-jsoneditor";
 
 @NgModule({
   imports: [
@@ -49,9 +47,7 @@ import { NgJsonEditorModule } from "ang-jsoneditor";
     IonicModule,
     ViewPageRoutingModule,
     TranslateModule.forChild(),
-    PageComponentsModule,
-    QRCodeModule,
-    NgJsonEditorModule
+    PageComponentsModule
   ],
   declarations: [
     ViewPage

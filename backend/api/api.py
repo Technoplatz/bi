@@ -1141,8 +1141,8 @@ class Crud:
             # SETTING THE DEFAULTS
             df_["_created_at"] = Misc().get_now_f()
             df_["_created_by"] = email_
-            df_["_modified_at"] = None
-            df_["_modified_by"] = None
+            df_["_modified_at"] = Misc().get_now_f()
+            df_["_modified_by"] = email_
             df_["_modified_count"] = 0
 
             # BULK INSERT DF INTO DATABASE

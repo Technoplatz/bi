@@ -244,44 +244,6 @@
   },
   "parents": [
     {
-      "collection": "ordino",
-      "match": [
-        {
-          "key": "mer_odi_no",
-          "value": "odi_no"
-        },
-        {
-          "key": "mer_odi_sub_no",
-          "value": "odi_sub_no"
-        }
-      ],
-      "filter": [
-        {
-          "key": "odi_status",
-          "op": "in",
-          "value": "00-Open,10-OnTheWay,20-Arrived"
-        }
-      ],
-      "get": ["odi_no", "odi_sub_no", "odi_customs"]
-    },
-    {
-      "collection": "manifest",
-      "match": [
-        {
-          "key": "mer_man_no",
-          "value": "man_no"
-        }
-      ],
-      "filter": [
-        {
-          "key": "man_status",
-          "op": "in",
-          "value": "00-Open,10-InProgress"
-        }
-      ],
-      "get": ["man_no", "man_opening_date"]
-    },
-    {
       "collection": "account",
       "match": [
         {
@@ -297,23 +259,6 @@
         }
       ],
       "get": ["acc_no", "acc_name"]
-    },
-    {
-      "collection": "invoice",
-      "match": [
-        {
-          "key": "mer_no",
-          "value": "inv_mer_no"
-        }
-      ],
-      "filter": [
-        {
-          "key": "inv_mer_no",
-          "op": "ne",
-          "value": "zzz"
-        }
-      ],
-      "get": ["inv_no", "inv_mer_no"]
     }
   ],
   "links": [],
@@ -352,42 +297,8 @@
       }
     },
     {
-      "id": "standby-cancel",
-      "title": "StandBy",
-      "enabled": true,
-      "rollback": true,
-      "match": [
-        {
-          "key": "mer_status",
-          "op": "eq",
-          "value": "01-StandBy"
-        }
-      ],
-      "set": [
-        {
-          "key": "mer_status",
-          "value": "00-Open"
-        }
-      ],
-      "one_click": true,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "Merchandise stand by canceled",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached Merchandise has been rolled back from 01-StandBy to 00-Open.",
-        "fields": "mer_no,mer_status",
-        "filter": [
-          {
-            "key": "mer_status",
-            "op": "eq",
-            "value": "00-Open"
-          }
-        ]
-      }
-    },
-    {
       "id": "ordino",
-      "title": "Attach to Ordino",
+      "title": "Attach Ordino",
       "enabled": true,
       "match": [
         {
@@ -415,7 +326,7 @@
       "notification": {
         "notify": true,
         "subject": "Merchandise on the way",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached Merchandise was changed from 01-StandBy to 10-OnTheWay.",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached merchandise was changed from 01-StandBy to 10-OnTheWay.",
         "fields": "mer_no,mer_odi_no,mer_odi_sub_no",
         "filter": [
           {
@@ -427,50 +338,8 @@
       }
     },
     {
-      "id": "ordino-cancel",
-      "title": "Ordino",
-      "enabled": true,
-      "rollback": true,
-      "match": [
-        {
-          "key": "mer_status",
-          "op": "in",
-          "value": "01-StandBy,10-OnTheWay"
-        }
-      ],
-      "set": [
-        {
-          "key": "mer_status",
-          "value": "01-StandBy"
-        },
-        {
-          "key": "mer_odi_no",
-          "value": null
-        },
-        {
-          "key": "mer_odi_sub_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "Merchandise rolled back to stand by",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached Merchandise has been rolled back from 10-OnTheWay to 01-StandBy.",
-        "fields": "mer_no,mer_odi_no,mer_odi_sub_no",
-        "filter": [
-          {
-            "key": "mer_status",
-            "op": "eq",
-            "value": "01-StandBy"
-          }
-        ]
-      }
-    },
-    {
       "id": "manifest",
-      "title": "Attach to Manifest",
+      "title": "Attach Manifest",
       "enabled": true,
       "match": [
         {
@@ -494,51 +363,13 @@
       "notification": {
         "notify": true,
         "subject": "Merchandise on customs process",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached Merchandise was changed from 20-OnCustoms to 30-OnCustomsProcess.",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached merchandise was changed from 20-OnCustoms to 30-OnCustomsProcess.",
         "fields": "mer_no,mer_odi_no,mer_odi_sub_no,mer_man_no",
         "filter": [
           {
             "key": "mer_status",
             "op": "eq",
             "value": "30-OnCustomsProcess"
-          }
-        ]
-      }
-    },
-    {
-      "id": "manifest",
-      "title": "Manifest",
-      "enabled": true,
-      "rollback": true,
-      "match": [
-        {
-          "key": "mer_status",
-          "op": "in",
-          "value": "30-OnCustomsProcess"
-        }
-      ],
-      "set": [
-        {
-          "key": "mer_status",
-          "value": "20-OnCustoms"
-        },
-        {
-          "key": "mer_man_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "Merchandise customs process canceled",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached Merchandise was rolled back from 30-OnCustomsProcess to 20-OnCustoms.",
-        "fields": "mer_no,mer_odi_no,mer_odi_sub_no,mer_man_no",
-        "filter": [
-          {
-            "key": "mer_status",
-            "op": "eq",
-            "value": "20-OnCustoms"
           }
         ]
       }
@@ -642,9 +473,9 @@
     }
   ],
   "views": {
-    "dn-git-view": {
-      "title": "GiT 2023",
-      "description": "GiT by account and statuses",
+    "mer-general-view": {
+      "title": "General View",
+      "description": "Merchandise by account and statuses",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
@@ -676,55 +507,15 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
+      "chart_colors": ["#ea5545", "#87bc45", "#27aeef", "#ede15b", "#b33dc6", "#f46a9b", "#ef9b20", "#edbf33", "#bdcf32"],
       "scheduled": true,
       "scheduled_cron": "15 14,15,16 * * mon,tue",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "dn-buid-view": {
-      "title": "Market Share",
-      "description": "By Business Units",
-      "priority": 1000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["mer_bu_name"],
-      "data_columns": ["mer_status"],
-      "data_values": [
-        {
-          "key": "mer_no",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "chart_type": "Pie",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
-      "scheduled": false,
-      "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
-    },
-    "dn-statuses-view": {
-      "title": "Statuses",
-      "description": "DN Statuses",
+    "mer-status-view": {
+      "title": "Status View",
+      "description": "Merchandise Statuses",
       "priority": 2000,
       "enabled": false,
       "dashboard": false,
@@ -765,6 +556,46 @@
       "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "mer-market-view": {
+      "title": "Market Share",
+      "description": "By Business Units",
+      "priority": 1000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["mer_bu_name"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "mer_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Pie",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#e60049", "#0bb4ff", "#9b19f5", "#50e991", "#e6d800", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
+      "scheduled": false,
+      "scheduled_cron": "* 4 * * *",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
@@ -861,16 +692,16 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-30": {
-      "title": "On Customs Process",
-      "description": "Merchandise currently on customs process",
+      "title": "In Stock",
+      "description": "Merchandise arrived at the warehouse",
       "priority": 2000,
       "enabled": true,
       "dashboard": true,
       "data_filter": [
         {
           "key": "mer_status",
-          "op": "in",
-          "value": "30-OnCustomsProcess,40-ClearanceCompleted"
+          "op": "eq",
+          "value": "50-InStock"
         }
       ],
       "data_sort": {

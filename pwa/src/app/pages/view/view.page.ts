@@ -30,14 +30,13 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
-import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 
 @Component({
   selector: "app-view",
@@ -46,8 +45,6 @@ import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 })
 
 export class ViewPage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false }) editor: JsonEditorComponent = new JsonEditorComponent;
-  public jeoptions: JsonEditorOptions;
   public loadingText: string = environment.misc.loadingText;
   public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
   public header: string = "Views";
@@ -108,14 +105,6 @@ export class ViewPage implements OnInit {
       this.user = res ? res : null;
       this.accountf_api_key = res && res.api_key ? res.api_key : null;
     });
-    this.jeoptions = new JsonEditorOptions();
-    this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "tree";
-    this.jeoptions.statusBar = true;
-    this.jeoptions.enableSort = false;
-    this.jeoptions.expandAll = false;
-    this.jeoptions.navigationBar = true;
-    this.jeoptions.name = "schema-structure";
   }
 
   ngOnDestroy() {
@@ -283,23 +272,6 @@ export class ViewPage implements OnInit {
     }).finally(() => {
       this.is_saving = false;
     });
-  }
-
-  doShowSchema() {
-    if (this.jeopen) {
-      this.jeopen = false;
-      this.schemevis = "hide"
-    } else {
-      this.jeopen = true;
-      this.schemevis = "show";
-      this.editor.focus();
-    }
-  }
-
-  doChangeSchema(ev: any) {
-    if (ev) {
-      this.view_ = ev;
-    }
   }
 
 }

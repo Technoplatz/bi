@@ -52,6 +52,10 @@ https://www.gnu.org/licenses.
             [style]="'background-color:' + (item.self && item.self.chart_colors && item.self.chart_colors[0] ? item.self.chart_colors[0] : '#eee') + ' !important;'"
             #chcontainer>
             <div class="visual-buttons">
+              <ion-button size="small" fill="clear" (click)="doRefresh()" class="clear-dark-button" color="dark"
+              mode="ios">
+              <ion-icon name="sync-outline"></ion-icon>
+            </ion-button>
               <ion-button size="small" fill="clear" (click)="misc.navi.next('view/' + item.id)"
                 class="clear-dark-button" color="dark" mode="ios">
                 <ion-icon name="list-outline"></ion-icon>
