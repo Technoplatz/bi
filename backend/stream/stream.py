@@ -416,10 +416,15 @@ class Trigger():
                     raise AppException(f"no target changes found {target_collection_id_}")
 
                 match_ = {"_id": _id}
+                conditions_filter_ = self.get_filtered_f({
+                    "match": target_changes_,
+                    "properties": source_properties_
+                })
+                match_ = {**match_, **conditions_filter_}
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
-                    raise AppException(f"!!! no matching source document found: {match_}")
+                    continue
 
                 match_ = {}
                 match_for_aggregate_ = {}
