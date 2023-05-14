@@ -482,11 +482,12 @@ class Trigger():
                         "match": target_filters_,
                         "properties": target_properties_
                     })
+                match_ = {**match_, **filter_}
 
-                if "_id" in match_ and ObjectId.is_valid(match_["_id"]):
-                    pass
-                else:
-                    match_ = {**match_, **filter_}
+                # if "_id" in match_ and ObjectId.is_valid(match_["_id"]):
+                #     pass
+                # else:
+                #     match_ = {**match_, **filter_}
 
                 set_ = {}
                 sets_ = target_["set"]

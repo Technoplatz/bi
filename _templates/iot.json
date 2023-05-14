@@ -32,64 +32,136 @@
     {
       "name": "Depot Entries",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": ["insert"],
       "changes": [
-        { "key": "iot_input", "op": "nnull", "value": null },
-        { "key": "iot_proc", "op": "eq", "value": "in" }
+        {
+          "key": "iot_input",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "iot_proc",
+          "op": "eq",
+          "value": "in"
+        }
       ],
       "targets": [
         {
           "collection": "serial",
-          "match": [{ "key": "ser_case_no", "value": "iot_input" }],
+          "match": [
+            {
+              "key": "ser_case_no",
+              "value": "iot_input"
+            }
+          ],
           "filter": [],
           "prefixes": ["1P"],
           "set": [
-            { "key": "ser_proc_in", "value": true },
-            { "key": "ser_proc_in_date", "value": "$current_date" }
+            {
+              "key": "ser_proc_in",
+              "value": true
+            },
+            {
+              "key": "ser_proc_in_date",
+              "value": "$current_date"
+            }
           ],
           "upsert": false
         },
         {
           "collection": "serial",
-          "match": [{ "key": "ser_no", "value": "iot_input" }],
+          "match": [
+            {
+              "key": "ser_no",
+              "value": "iot_input"
+            }
+          ],
           "filter": [],
           "prefixes": ["2N"],
           "set": [
-            { "key": "ser_proc_in", "value": true },
-            { "key": "ser_proc_in_date", "value": "$current_date" }
+            {
+              "key": "ser_proc_in",
+              "value": true
+            },
+            {
+              "key": "ser_proc_in_date",
+              "value": "$current_date"
+            }
           ],
           "upsert": false
         }
       ]
     },
     {
-      "name": "Depot Entries",
+      "name": "Depot Outgoing",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": ["insert"],
       "changes": [
-        { "key": "iot_input", "op": "nnull", "value": null },
-        { "key": "iot_proc", "op": "eq", "value": "out" }
+        {
+          "key": "iot_input",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "iot_proc",
+          "op": "eq",
+          "value": "out"
+        }
       ],
       "targets": [
         {
           "collection": "serial",
-          "match": [{ "key": "ser_case_no", "value": "iot_input" }],
-          "filter": [],
+          "match": [
+            {
+              "key": "ser_case_no",
+              "value": "iot_input"
+            }
+          ],
+          "filter": [
+            {
+              "key": "ser_proc_in",
+              "op": "eq",
+              "value": true
+            }
+          ],
           "prefixes": ["1P"],
           "set": [
-            { "key": "ser_proc_out", "value": true },
-            { "key": "ser_proc_out_date", "value": "$current_date" }
+            {
+              "key": "ser_proc_out",
+              "value": true
+            },
+            {
+              "key": "ser_proc_out_date",
+              "value": "$current_date"
+            }
           ],
           "upsert": false
         },
         {
           "collection": "serial",
-          "match": [{ "key": "ser_no", "value": "iot_input" }],
-          "filter": [],
+          "match": [
+            {
+              "key": "ser_no",
+              "value": "iot_input"
+            }
+          ],
+          "filter": [
+            {
+              "key": "ser_proc_in",
+              "op": "eq",
+              "value": true
+            }
+          ],
           "prefixes": ["2N"],
           "set": [
-            { "key": "ser_proc_out", "value": true },
-            { "key": "ser_proc_out_date", "value": "$current_date" }
+            {
+              "key": "ser_proc_out",
+              "value": true
+            },
+            {
+              "key": "ser_proc_out_date",
+              "value": "$current_date"
+            }
           ],
           "upsert": false
         }
