@@ -42,7 +42,7 @@
         "AR-Archived"
       ],
       "default": "00-Open",
-      "width": 160
+      "width": 170
     },
     "dnn_bill_no": {
       "bsonType": "string",
@@ -544,6 +544,7 @@
       }
     }
   ],
+  "links": [],
   "triggers": [
     {
       "name": "Amounts updater",
@@ -559,13 +560,6 @@
           "key": "dnn_unit_price",
           "op": "gte",
           "value": 0
-        }
-      ],
-      "conditions": [
-        {
-          "key": "dnn_status",
-          "op": "ne",
-          "value": "70-Delivered"
         }
       ],
       "targets": [

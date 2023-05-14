@@ -122,13 +122,6 @@
       "changes": [
         {
           "key": "man_status",
-          "op": "eq",
-          "value": "00-Open"
-        }
-      ],
-      "conditions": [
-        {
-          "key": "man_status",
           "op": "in",
           "value": "00-Open,10-OnCustomsProcess"
         }
@@ -164,13 +157,6 @@
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
-        {
-          "key": "man_status",
-          "op": "eq",
-          "value": "10-OnCustomsProcess"
-        }
-      ],
-      "conditions": [
         {
           "key": "man_status",
           "op": "in",
@@ -217,13 +203,6 @@
           "key": "man_clearance_completed",
           "op": "eq",
           "value": true
-        }
-      ],
-      "conditions": [
-        {
-          "key": "man_status",
-          "op": "in",
-          "value": "00-Open,10-OnCustomsProcess,20-Closed"
         }
       ],
       "targets": [
@@ -280,5 +259,6 @@
         }
       ]
     }
-  ]
+  ],
+  "views": {}
 }

@@ -154,7 +154,7 @@ ion-note {
   --padding-start: none;
   --padding-end: none;
   --color: var(--ion-color-dark) !important;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 .filler-10 {
@@ -358,7 +358,7 @@ ion-note {
   display: flex;
   gap: 3px;
   margin-bottom: 16px;
-  margin-top: 3px;
+  margin-top: 8px;
 }
 
 .alert-class input {
@@ -519,7 +519,7 @@ form ion-item ion-label {
   display: flex;
   margin-top: 16px;
   width: calc(100% - 20px);
-  gap: 12px;
+  gap: 8px;
 }
 
 .pivot {
@@ -1897,6 +1897,8 @@ ion-checkbox {
   display: flex;
   flex-flow: row wrap;
   padding-left: 0px !important;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .visual-error {
@@ -1961,8 +1963,6 @@ app-chart {
 
 .flash-sq {
   position: relative;
-  margin-bottom: 8px;
-  margin-right: 8px;
   overflow: hidden;
   padding: 12px;
   padding-left: 16px;
@@ -1994,8 +1994,6 @@ app-chart {
 
 .chart-sq {
   position: relative;
-  margin-bottom: 8px;
-  margin-right: 8px;
   overflow: visible !important;
   padding: 16px;
   border: 5px solid var(--ion-color-light);
