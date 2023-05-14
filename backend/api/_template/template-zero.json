@@ -7,15 +7,39 @@
       "pattern": "^[a-zA-Z0-9-]{1,64}$",
       "minLength": 1,
       "maxLength": 64
+    },
+    "zzz_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Record Status",
+      "enum": ["00-Open", "10-InProgress", "20-Closed", "30-Finalized"],
+      "default": "00-Open"
+    },
+    "zzz_date": {
+      "bsonType": "date",
+      "title": "Date",
+      "description": "Record Date"
+    },
+    "zzz_qty": {
+      "bsonType": "number",
+      "title": "Quantity",
+      "description": "Quantity",
+      "default": 1
+    },
+    "zzz_is_disabled": {
+      "bsonType": "bool",
+      "title": "Is Disabled?",
+      "description": "Is Disabled?",
+      "default": false
     }
   },
-  "required": ["zzz_no"],
-  "index": [["zzz_no"]],
+  "required": ["zzz_no", "zzz_status"],
+  "index": [["zzz_no"], ["zzz_status"]],
   "unique": [["zzz_no"]],
-  "sort": { "_modified_at": -1 },
   "parents": [],
   "links": [],
   "actions": [],
   "triggers": [],
-  "views": {}
+  "views": {},
+  "sort": { "_modified_at": -1 }
 }

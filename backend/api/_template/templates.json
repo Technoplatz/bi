@@ -1,16 +1,31 @@
 [
   {
     "_id": "template-merchandise",
-    "title": "Merhandise Template",
+    "title": "Merhandise Bundle",
     "by": "Technoplatz",
     "description": "A minimal business template to manage goods to be sold and purchased, accounts and exchanges.",
-    "file": "template-zero.json",
-    "icon": "accessibility-outline",
     "sort": 10,
     "collections": [
       { "col_id": "exchange", "col_title": "Exchanges", "col_description": "Foreign Currencies", "prefix": "exc", "data": true },
-      { "col_id": "account", "col_title": "Accounts", "col_description": "Customers and Suppliers", "prefix": "acc", "data": true },
-      { "col_id": "merchandise", "col_title": "Merchandise", "col_description": "Goods to be sold or purchased", "prefix": "mer", "data": true }
+      { "col_id": "account", "col_title": "Accounts", "col_description": "Customers and suppliers", "prefix": "acc", "data": true },
+      {
+        "col_id": "merchandise",
+        "col_title": "Merchandise",
+        "col_description": "Goods to be sold or purchased",
+        "prefix": "mer",
+        "data": true
+      }
+    ]
+  },
+  {
+    "_id": "template-invoice",
+    "title": "Invoice Template",
+    "by": "Technoplatz",
+    "description": "A minimal business template to manage sales invoices",
+    "sort": 20,
+    "collections": [
+      { "col_id": "account", "col_title": "Accounts", "col_description": "Customers and suppliers", "prefix": "acc", "data": true },
+      { "col_id": "invoice", "col_title": "Invoices", "col_description": "Sales Invoices", "prefix": "inv", "data": true }
     ]
   }
 ]

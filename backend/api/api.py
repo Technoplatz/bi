@@ -699,6 +699,10 @@ class Crud:
             if proc_ not in ["list", "install"]:
                 raise APIError("invalid template request")
 
+            _id = input_["id"] if "id" in input_ else None
+            if proc_ == "install" and not _id:
+                raise APIError("no template selected")
+
             user_ = input_["user"] if "user" in input_ else None
             if not user_:
                 raise APIError("user not provided")
@@ -710,14 +714,16 @@ class Crud:
                 raise APIError("no templates found")
 
             with open(path_, "r", encoding="utf-8") as fopen_:
-                templates_ = json.loads(fopen_.read())
+                templates_ = list(json.loads(fopen_.read()))
+                templates_.sort(key=operator.itemgetter("sort"), reverse=False)
 
             if proc_ == "list":
-                templates_ = list(templates_)
-                templates_.sort(key=operator.itemgetter("sort"), reverse=False)
                 return {"result": True, "templates": templates_}
 
+            notification_ = []
             for template_ in templates_:
+                if _id != template_["_id"]:
+                    continue
                 collections_ = template_["collections"]
                 for collection_ in collections_:
                     col_id_ = collection_['col_id']
@@ -731,11 +737,13 @@ class Crud:
 
                     find_one_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
                     if find_one_:
-                        raise APIError(f"collection already exists: {col_id_}")
+                        notification_.append(f"collection already exists: {col_id_}")
+                        continue
 
                     find_one_ = Mongo().db_["_collection"].find_one({"col_prefix": prefix_})
                     if find_one_:
-                        raise APIError(f"collection prefix already exists: {prefix_}")
+                        notification_.append(f"collection prefix already exists: {prefix_}")
+                        continue
 
                     if collection__ in Mongo().db_.list_collection_names():
                         Mongo().db_[collection__].aggregate([{"$match": {}}, {"$out": f"{collection__}_bin_{suffix_}"}])
@@ -763,7 +771,8 @@ class Crud:
 
                         schemavalidate_ = self.crudschema_validate_f({"collection": collection__, "structure": structure_})
                         if not schemavalidate_["result"]:
-                            raise APIError(schemavalidate_["msg"])
+                            notification_.append(schemavalidate_["msg"])
+                            continue
 
                         data_path_ = f"/app/_template/{data_file_}"
                         if os.path.isfile(data_path_):
@@ -777,7 +786,8 @@ class Crud:
                                 "_modified_count": 0
                             }})
 
-            return {"result": True}
+            msg_ = "<br />".join(notification_) if len(notification_) > 0 else "template installed successfully"
+            return {"result": True, "msg": msg_}
 
         except pymongo.errors.PyMongoError as exc_:
             return Misc().mongo_error_f(exc_)
@@ -2982,7 +2992,7 @@ class Crud:
             doc_["_created_by"] = doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
             if collection_id_ == "_collection":
-                file_ = "template-elementary.json"
+                file_ = "template-zero.json"
                 prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "zzz"
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):

@@ -598,9 +598,9 @@ export class CollectionPage implements OnInit {
       this.misc.apiCall("crud", {
         op: "template",
         proc: "install",
-        template: item_
-      }).then(() => {
-        this.misc.doMessage("template installed successfully", "success");
+        id: item_._id
+      }).then((res: any) => {
+        this.misc.doMessage(res.msg, "success");
         this.misc.navi.next("dashboard");
       }).catch((error: any) => {
         console.error(error);

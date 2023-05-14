@@ -28,7 +28,7 @@
 # if any, to sign a "copyright disclaimer" for the program, if necessary.
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
-# 
+#
 
 FROM python:3.9-slim
 RUN DEBIAN_FRONTEND=noninteractive
