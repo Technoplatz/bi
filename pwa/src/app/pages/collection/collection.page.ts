@@ -275,18 +275,18 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  MultiCrud(op: string) {
+  MultiCrud(op_: string) {
     if (this.data.length > 0 && this.is_selected) {
-      if (op === "action") {
+      if (op_ === "action") {
         if (this.structure && this.structure.actions && this.structure.actions.length > 0) {
-          this.goCrud(null, op);
+          this.goCrud(null, op_);
         } else {
           this.misc.doMessage("no action defined for the collection", "error");
         }
       } else {
         this.alert.create({
           header: "Confirm",
-          message: "Please confirm this " + op,
+          message: "Please confirm this " + op_,
           buttons: [{
             text: "Cancel",
             role: "cancel",
@@ -298,7 +298,7 @@ export class CollectionPage implements OnInit {
               this.is_deleting = true;
               this.is_loaded = this.is_selected = false;
               this.misc.apiCall("crud", {
-                op: op,
+                op: op_,
                 collection: this.id,
                 match: this.sweeped[this.segment],
                 doc: null,
@@ -320,7 +320,7 @@ export class CollectionPage implements OnInit {
         });
       }
     } else {
-      this.misc.doMessage("you must select record(s) prior to " + op, "error");
+      this.misc.doMessage("you must select record(s) prior to " + op_, "error");
     }
   }
 

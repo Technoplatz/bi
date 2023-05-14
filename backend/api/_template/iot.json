@@ -1,0 +1,100 @@
+{
+  "properties": {
+    "iot_proc": {
+      "bsonType": "string",
+      "title": "Process",
+      "description": "Process Identifier",
+      "enum": ["in", "out"],
+      "default": "in",
+      "pattern": "^[a-z]{2,3}$",
+      "minLength": 2,
+      "maxLength": 3
+    },
+    "iot_input": {
+      "bsonType": "string",
+      "title": "Input",
+      "description": "Input Data",
+      "pattern": "^[A-Za-z0-9-]{1,32}$",
+      "minLength": 1,
+      "maxLength": 32
+    }
+  },
+  "required": ["iot_proc", "iot_input"],
+  "index": [["iot_proc"], ["iot_input"]],
+  "unique": [["iot_proc", "iot_input"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [
+    {
+      "name": "Depot Entries",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        { "key": "iot_input", "op": "nnull", "value": null },
+        { "key": "iot_proc", "op": "eq", "value": "in" }
+      ],
+      "targets": [
+        {
+          "collection": "serial",
+          "match": [{ "key": "ser_case_no", "value": "iot_input" }],
+          "filter": [],
+          "prefixes": ["1P"],
+          "set": [
+            { "key": "ser_proc_in", "value": true },
+            { "key": "ser_proc_in_date", "value": "$current_date" }
+          ],
+          "upsert": false
+        },
+        {
+          "collection": "serial",
+          "match": [{ "key": "ser_no", "value": "iot_input" }],
+          "filter": [],
+          "prefixes": ["2N"],
+          "set": [
+            { "key": "ser_proc_in", "value": true },
+            { "key": "ser_proc_in_date", "value": "$current_date" }
+          ],
+          "upsert": false
+        }
+      ]
+    },
+    {
+      "name": "Depot Entries",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        { "key": "iot_input", "op": "nnull", "value": null },
+        { "key": "iot_proc", "op": "eq", "value": "out" }
+      ],
+      "targets": [
+        {
+          "collection": "serial",
+          "match": [{ "key": "ser_case_no", "value": "iot_input" }],
+          "filter": [],
+          "prefixes": ["1P"],
+          "set": [
+            { "key": "ser_proc_out", "value": true },
+            { "key": "ser_proc_out_date", "value": "$current_date" }
+          ],
+          "upsert": false
+        },
+        {
+          "collection": "serial",
+          "match": [{ "key": "ser_no", "value": "iot_input" }],
+          "filter": [],
+          "prefixes": ["2N"],
+          "set": [
+            { "key": "ser_proc_out", "value": true },
+            { "key": "ser_proc_out_date", "value": "$current_date" }
+          ],
+          "upsert": false
+        }
+      ]
+    }
+  ],
+  "views": {}
+}

@@ -54,6 +54,32 @@
       "maxLength": 18,
       "pattern": "^[0-9-]{18,18}$",
       "width": 150
+    },
+    "ser_proc_in": {
+      "bsonType": "bool",
+      "title": "Income",
+      "description": "Depot Income",
+      "default": false,
+      "width": 110
+    },
+    "ser_proc_out": {
+      "bsonType": "bool",
+      "title": "Outgoing",
+      "description": "Depot Out",
+      "default": false,
+      "width": 120
+    },
+    "ser_proc_in_date": {
+      "bsonType": "date",
+      "title": "In Date",
+      "description": "Depot Income Date",
+      "width": 140
+    },
+    "ser_proc_out_date": {
+      "bsonType": "date",
+      "title": "In Date",
+      "description": "Depot Outgoing Date",
+      "width": 150
     }
   },
   "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_case_no"],

@@ -907,6 +907,13 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def frame_convert_bool_f(self, data_):
+        """
+        docstring is in progress
+        """
+        str_ = str(data_).strip()
+        return str_ in ["true", "TRUE"]
+
     def frame_convert_datetime_f(self, data_):
         """
         docstring is in progress
@@ -1118,6 +1125,8 @@ class Crud:
                     if "bsonType" in property_:
                         if property_["bsonType"] == "date":
                             df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
+                        elif property_["bsonType"] == "bool":
+                            df_[column_] = df_[column_].apply(self.frame_convert_bool_f)
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(self.frame_convert_string_f)
                             if "replacement" in property_ and len(property_["replacement"]) > 0:
