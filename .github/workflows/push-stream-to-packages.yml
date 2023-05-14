@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 #
 
-name: Deploy API Image
+name: Deploy Stream Image
 on:
   push:
     branches:

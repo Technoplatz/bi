@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 #
 
-name: Deploy init Image
+name: Deploy Init Image
 on:
   push:
     branches:

@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 #
 
-name: Deploy replicaset Image
+name: Deploy Replicaset Image
 on:
   push:
     branches:
