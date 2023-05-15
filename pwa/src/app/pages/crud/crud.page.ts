@@ -245,8 +245,7 @@ export class CrudPage implements OnInit {
                     this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
                   });
                 }
-              }
-              ]
+              }]
             }).then((alert: any) => {
               alert.present();
             });
@@ -508,6 +507,19 @@ export class CrudPage implements OnInit {
     }
   }
 
+  doStartSearch(e: any) {
+    this.related = this.relatedx;
+    this.related = this.related.filter((obj: any) => (obj[this.field_parents.get[0]] + obj[this.field_parents.get[1]] + obj[this.field_parents.get[2]]).toLowerCase().indexOf(e.toLowerCase()) > -1);
+    if (this.related.length === 0 && this.barcoded_) {
+      this.parent.filter = e !== "" ? [{
+        "key": this.parent.match[0].value,
+        "op": "eq",
+        "value": e
+      }] : [];
+      this.doParent(this.parent);
+    }
+  }
+
   doSetRelated(item_: any) {
     for (let k = 0; k < this.field_parents.match.length; k++) {
       if (this.field_parents.match[k].key) {
@@ -518,11 +530,6 @@ export class CrudPage implements OnInit {
         this.tab = "data";
       }
     }
-  }
-
-  doStartSearch(e: any) {
-    this.related = this.relatedx;
-    this.related = this.related.filter((obj: any) => (obj[this.field_parents.get[0]] + obj[this.field_parents.get[1]] + obj[this.field_parents.get[2]]).toLowerCase().indexOf(e.toLowerCase()) > -1);
   }
 
   doDateAssign(event: any, fn: string) {

@@ -97,19 +97,19 @@ https://www.gnu.org/licenses.
         </ion-row>
     </ion-grid>
     <div *ngIf="tab=='relation'; else norelation" class="ion-padding-bottom ion-margin-top">
+        <ion-item class="clicked-item" lines="none">
+            <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' | translate }}" animated="true"
+                class="ion-no-padding ion-no-margin brz-searchbar"
+                (ionChange)="doStartSearch($event.detail.value)">
+            </ion-searchbar>
+        </ion-item>
         <ion-item *ngIf="reloading; else notreloading" class="clicked-item" lines="none">
             <ion-spinner name="lines" class="ion-margin-end"></ion-spinner>
             <ion-label> {{ parent.collection }} {{ 'is loading' | translate }}... </ion-label>
         </ion-item>
         <ng-template #notreloading>
             <ion-grid *ngIf="parent.get?.length > 0; else nogetfields" class="ion-no-padding data-grid">
-                <ion-item class="clicked-item" lines="none">
-                    <ion-searchbar showCancelButton="never" debounce="500" placeholder="Search" animated="true"
-                        class="ion-no-padding ion-no-margin brz-searchbar"
-                        (ionChange)="doStartSearch($event.detail.value)">
-                    </ion-searchbar>
-                </ion-item>
-                <ion-row class="list-header-row ion-nowrap">
+                <ion-row class="ion-nowrap">
                     <ion-col *ngFor="let item of parent.get; let i = index" class="data-col-header"
                         [size]="12/parent.get.length">{{ item }}</ion-col>
                 </ion-row>

@@ -15,6 +15,7 @@
       "title": "Input",
       "description": "Input Data",
       "pattern": "^[A-Za-z0-9-]{1,32}$",
+      "barcoded": true,
       "minLength": 1,
       "maxLength": 32
     }
@@ -32,6 +33,7 @@
     {
       "name": "Depot Entries",
       "enabled": true,
+      "prefixes": ["1P"],
       "operations": ["insert"],
       "changes": [
         {
@@ -55,7 +57,6 @@
             }
           ],
           "filter": [],
-          "prefixes": ["1P"],
           "set": [
             {
               "key": "ser_proc_in",
@@ -77,7 +78,6 @@
             }
           ],
           "filter": [],
-          "prefixes": ["2N"],
           "set": [
             {
               "key": "ser_proc_in",
@@ -96,6 +96,7 @@
       "name": "Depot Outgoing",
       "enabled": true,
       "operations": ["insert"],
+      "prefixes": ["1P"],
       "changes": [
         {
           "key": "iot_input",
@@ -124,7 +125,6 @@
               "value": true
             }
           ],
-          "prefixes": ["1P"],
           "set": [
             {
               "key": "ser_proc_out",
@@ -152,7 +152,6 @@
               "value": true
             }
           ],
-          "prefixes": ["2N"],
           "set": [
             {
               "key": "ser_proc_out",

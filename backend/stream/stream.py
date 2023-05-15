@@ -129,8 +129,7 @@ class Trigger():
                             "on_changes_all": "on_changes_all" in trigger_ and trigger_["on_changes_all"] is True,
                             "match": cluster_["match"] if "match" in cluster_ and len(cluster_["match"]) > 0 else [],
                             "filter": cluster_["filter"] if "filter" in cluster_ and len(cluster_["filter"]) > 0 else [],
-                            "set": cluster_["set"] if "set" in cluster_ and len(cluster_["set"]) > 0 else [],
-                            "prefixes": cluster_["prefixes"] if "prefixes" in cluster_ and len(cluster_["prefixes"]) > 0 else []
+                            "set": cluster_["set"] if "set" in cluster_ and len(cluster_["set"]) > 0 else []
                         })
 
             if not self.triggers_:
@@ -348,6 +347,13 @@ class Trigger():
             print("!!! count exception", str(exc_))
             return 0
 
+    def prefix_remove_f(self, input_, prfxs_):
+        """
+        gets the collection and the fields that affected by the change stream.
+        """
+        prfx_ = prfxs_[0] if prfxs_ and len(prfxs_) > 0 else prfxs_
+        return input_.removeprefix(prfx_)
+
     async def worker_f(self, event_, resume_token_):
         """
         gets the collection and the fields that affected by the change stream.
@@ -389,6 +395,13 @@ class Trigger():
             changed_keys_ = list(changed_.keys())
 
             print(f"\nİİİ change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
+
+            # for chg_ in changed_:
+            #     print("*** source_properties_[chg_]0", chg_)
+            #     if chg_ in source_properties_ and source_properties_[chg_]["bsonType"] == "string" and "prefix" in source_properties_[chg_]:
+            #         print("*** source_properties_[chg_]1", source_properties_[chg_])
+            #         changed_[chg_] = changed_[chg_].removeprefix(source_properties_[chg_]["prefix"])
+            #         print("*** source_properties_[chg_]2", changed_)
 
             trigger_targets_ = [tg_ for tg_ in self.triggers_ if tg_["source"] == source_collection_id_ and op_ in tg_["operations"] and [ma_ for ma_ in tg_["changes"] if ma_["key"] in changed_keys_ and (
                 (ma_["op"].lower() == "eq" and changed_[ma_["key"]] == ma_["value"]) or

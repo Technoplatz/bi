@@ -239,6 +239,7 @@ class Misc:
             "textarea",
             "default",
             "file",
+            "prefix",
             "permanent",
             "disabled",
             "objectId",
@@ -1659,9 +1660,7 @@ class Crud:
                         if "properties" in items_:
                             item_properties_ = items_["properties"]
                             for item_property_ in item_properties_:
-                                properties_master_[item_property_] = item_properties_[
-                                    item_property_
-                                ]
+                                properties_master_[item_property_] = item_properties_[item_property_]
 
             parents_ = []
             if "parents" in col_structure_:

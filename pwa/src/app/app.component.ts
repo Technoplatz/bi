@@ -61,18 +61,23 @@ export class AppComponent implements OnInit {
     private crud: Crud,
     private misc: Miscellaneous,
     private storage: Storage,
-    private sw_update: SwUpdate
+    private readonly sw_update: SwUpdate
   ) {
     if (this.sw_update.isEnabled) {
-      console.info("*** sw_update enabled");
+      setInterval(() => {
+        this.sw_update.checkForUpdate().then(() => {
+          console.log("checking for updates...");
+        });
+      }, 60 * 5);
+      console.log("*** sw_update enabled");
       this.sw_update.versionUpdates.subscribe(evt => {
-        console.info("*** version updates subscribed", evt);
+        console.log("*** version updates subscribed", evt);
         switch (evt.type) {
           case "VERSION_DETECTED":
             console.log(`*** downloading new version: ${evt.version.hash}`);
             break;
           case "VERSION_READY":
-            console.info(`*** currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
+            console.log(`*** currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
             this.storage.get("LSVERSION").then((LSVERSION: any) => {
               this.misc.version.next({ is_new_version: evt.latestVersion.hash !== LSVERSION, version: evt.latestVersion.hash });
             });
