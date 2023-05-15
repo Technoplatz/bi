@@ -182,33 +182,40 @@ ion-note {
 }
 
 .flex-child {
-  align-content: flex-start;
-}
-
-.flex-child-start {
-  align-content: flex-start;
   margin-top: auto;
   margin-bottom: auto;
   margin-left: 16px !important;
 }
 
-.flex-header {
-  display: flex !important;
+.flex-child-start {
+  align-content: flex-start;
 }
 
-.flex-header-start {
-  align-content: flex-start;
+.flex-child-end {
+  align-content: flex-end;
+}
+
+.flex-footer {
+  display: flex !important;
   margin: auto;
+}
+
+.flex-footer-start {
+  align-content: flex-start;
+  margin-top: auto;
+  margin-bottom: auto;
   margin-left: 16px;
 }
 
-.flex-header-start.nomargin {
+.flex-footer-start.nomargin {
   margin-left: 0px !important;
 }
 
-.flex-header-end {
+.flex-footer-end {
   align-content: flex-end;
-  margin: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: 16px;
 }
 
 .theme-button {
@@ -980,6 +987,7 @@ app-menu .toggler {
   bottom: 0px;
   border-top: 1px solid var(--ion-color-light);
   background-color: #fff !important;
+  width: 100%;
   height: 40px;
   color: var(--ion-color-medium);
 }

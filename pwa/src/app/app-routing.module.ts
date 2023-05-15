@@ -141,15 +141,6 @@ const routes: Routes = [
       user: UserResolver,
     }
   },
-  {
-    path: "support",
-    canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/support/support.module").then((m) => m.SupportPageModule),
-    data: { preload: true },
-    resolve: {
-      user: UserResolver,
-    }
-  },
   // {
   //   path: "**",
   //   redirectTo: "404",

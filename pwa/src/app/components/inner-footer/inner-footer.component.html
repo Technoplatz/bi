@@ -30,12 +30,15 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-footer class="inner-footer ion-no-border ion-no-margin flex-header">
-  <div class="flex-child-start">&copy; {{ "2019-2023 Technoplatz GmbH." }}</div>
-  <div class="flex-child-start">
-    <a (click)="misc.navi.next('dashboard')" class="clicked-item">{{ "Dashboard" | translate }}</a>
+<ion-footer class="inner-footer ion-no-border ion-no-margin flex-footer">
+  <div class="flex-footer-start">&copy; {{ "2019-2023 Technoplatz GmbH." }}</div>
+  <div class="flex-footer-start">
+    <a target="_blank" class="clicked-item" href="https://bi.technoplatz.com/support">{{ "Support" | translate }}</a>
   </div>
-  <div class="flex-child-start">
-    <a target="_blank" (click)="misc.navi.next('support')" class="clicked-item">{{ "Support" | translate }}</a>
+  <div class="flex-footer-start">
+    <a target="_blank" class="clicked-item" href="https://bi.technoplatz.com/legal/terms">{{ "Terms & Conditions" | translate }}</a>
+  </div>
+  <div class="flex-footer-start">
+    <a target="_blank" class="clicked-item" href="https://bi.technoplatz.com/legal/privacy-policy">{{ "Privacy Policy" | translate }}</a>
   </div>
 </ion-footer>
