@@ -50,11 +50,6 @@
       "operations": ["insert"],
       "changes": [
         {
-          "key": "iot_input",
-          "op": "nnull",
-          "value": null
-        },
-        {
           "key": "iot_proc",
           "op": "eq",
           "value": "in"
@@ -110,11 +105,6 @@
       "enabled": true,
       "operations": ["insert"],
       "changes": [
-        {
-          "key": "iot_input",
-          "op": "nnull",
-          "value": null
-        },
         {
           "key": "iot_proc",
           "op": "eq",
