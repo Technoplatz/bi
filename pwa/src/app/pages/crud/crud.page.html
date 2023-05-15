@@ -46,11 +46,11 @@ https://www.gnu.org/licenses.
                     (click)="doDump('restore')">
                     {{ 'RESTORE' | translate }}
                 </ion-button>
-                <ion-button *ngIf="barcoded_ && op=='insert'; else nobarcoded" size="small" (click)="doSubmit()">
-                    <ion-icon name="barcode-outline"></ion-icon>
-                    {{ 'READ' | translate }}
+                <ion-button *ngIf="scan_ && op=='insert'; else noscan" size="small" (click)="doSubmit()">
+                    <ion-icon name="barcode-outline"></ion-icon>&nbsp;
+                    {{ 'SCAN' | translate }}
                 </ion-button>
-                <ng-template #nobarcoded>
+                <ng-template #noscan>
                     <ion-button *ngIf="collection!='_backup' && collection!='_storage' && op!='filter' && !isInProgress"
                         size="small" (click)="doSubmit()">
                         <span *ngIf="op=='action'; else noaction"> {{ 'RUN ACTION' | translate }} </span>
@@ -185,7 +185,7 @@ https://www.gnu.org/licenses.
                                 <div *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword"
                                     style="min-width: 100% !important">
                                     <ion-input #barcodefocus *ngIf="!field.textarea"
-                                        [class]="barcoded_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
+                                        [class]="scan_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                         [maxlength]="field.maxLength" [minlength]="field.minLength"
                                         [placeholder]="field.placeholder ? field.placeholder : ''"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"

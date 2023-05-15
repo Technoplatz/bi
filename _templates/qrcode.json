@@ -8,15 +8,18 @@
       "default": "in",
       "pattern": "^[a-z]{2,3}$",
       "minLength": 2,
-      "maxLength": 3
+      "maxLength": 3,
+      "width": 110
     },
     "iot_input": {
       "bsonType": "string",
       "title": "Input",
       "description": "Input Data",
       "pattern": "^[A-Za-z0-9-]{1,32}$",
+      "scan": true,
       "minLength": 1,
-      "maxLength": 32
+      "maxLength": 32,
+      "width": 200
     }
   },
   "required": ["iot_proc", "iot_input"],
@@ -25,7 +28,19 @@
   "sort": {
     "_modified_at": -1
   },
-  "parents": [],
+  "parents": [
+    {
+      "collection": "serial",
+      "match": [
+        {
+          "key": "iot_input",
+          "value": "ser_case_no"
+        }
+      ],
+      "filter": [],
+      "get": ["ser_case_no", "ser_dnn_no"]
+    }
+  ],
   "links": [],
   "actions": [],
   "triggers": [
@@ -55,7 +70,6 @@
             }
           ],
           "filter": [],
-          "prefixes": ["1P"],
           "set": [
             {
               "key": "ser_proc_in",
@@ -77,7 +91,6 @@
             }
           ],
           "filter": [],
-          "prefixes": ["2N"],
           "set": [
             {
               "key": "ser_proc_in",
@@ -124,7 +137,6 @@
               "value": true
             }
           ],
-          "prefixes": ["1P"],
           "set": [
             {
               "key": "ser_proc_out",
@@ -152,7 +164,6 @@
               "value": true
             }
           ],
-          "prefixes": ["2N"],
           "set": [
             {
               "key": "ser_proc_out",

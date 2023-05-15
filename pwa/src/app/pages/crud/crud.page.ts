@@ -81,7 +81,7 @@ export class CrudPage implements OnInit {
   public related: any = [];
   public actionix: number = -1;
   public is_token_copied: boolean = false;
-  public barcoded_: boolean = false;
+  public scan_: boolean = false;
   public istrue_: boolean = true;
   public visible: string = "hide";
   public parent: any = {};
@@ -144,7 +144,7 @@ export class CrudPage implements OnInit {
     this.views = this.shuttle.views;
     this.actionix = this.shuttle.actionix;
     this.view = this.shuttle.view;
-    this.barcoded_ = this.shuttle.barcoded;
+    this.scan_ = this.shuttle.scan;
     this.links = this.shuttle.structure.links;
     this.parents = this.structure__?.parents ? this.structure__.parents : [];
     this.doGetAllAktions(this.op).then((res: any) => {
@@ -166,7 +166,7 @@ export class CrudPage implements OnInit {
           this.misc.doMessage(error, "error");
         }).finally(() => {
           this.visible = "show";
-          this.barcoded_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
+          this.scan_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
         });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
@@ -250,7 +250,7 @@ export class CrudPage implements OnInit {
               alert.present();
             });
           } else {
-            if (this.barcoded_) {
+            if (this.scan_) {
               console.log("*** barcode is staying alive");
             } else {
               this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
@@ -484,7 +484,7 @@ export class CrudPage implements OnInit {
             match: filter_,
             sort: null,
             page: 1,
-            limit: 1000
+            limit: 100
           }).then((res: any) => {
             if (res && res.data) {
               this.related = res.data;
@@ -510,7 +510,7 @@ export class CrudPage implements OnInit {
   doStartSearch(e: any) {
     this.related = this.relatedx;
     this.related = this.related.filter((obj: any) => (obj[this.field_parents.get[0]] + obj[this.field_parents.get[1]] + obj[this.field_parents.get[2]]).toLowerCase().indexOf(e.toLowerCase()) > -1);
-    if (this.related.length === 0 && this.barcoded_) {
+    if (this.related.length === 0 && this.scan_) {
       this.parent.filter = e !== "" ? [{
         "key": this.parent.match[0].value,
         "op": "eq",

@@ -90,9 +90,9 @@ https://www.gnu.org/licenses.
                 <ion-icon name="cloud-upload-outline"></ion-icon><br />
                 {{ 'Upload' | translate }}
               </div>
-              <div *ngIf="barcoded_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
-                <ion-icon name="barcode"></ion-icon><br />
-                {{ 'Barcode' | translate }}
+              <div *ngIf="scan_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
+                <ion-icon name="qr-code-outline"></ion-icon><br />
+                {{ 'Scan' | translate }}
               </div>
               <ng-template #newrecord>
                 <div *ngIf="!['_collection', '_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"

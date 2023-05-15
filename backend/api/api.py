@@ -251,7 +251,7 @@ class Misc:
             "object",
             "subType",
             "manualAdd",
-            "barcoded",
+            "scan",
             "replacement",
             "placeholder",
         ]

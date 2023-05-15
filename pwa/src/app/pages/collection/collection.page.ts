@@ -80,7 +80,7 @@ export class CollectionPage implements OnInit {
   public collections: any = [];
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
-  public barcoded_: boolean = false;
+  public scan_: boolean = false;
   private view: any = null;
   public actions: any = [];
   public columns_: any;
@@ -228,7 +228,7 @@ export class CollectionPage implements OnInit {
               this.structure = res.structure;
               this.actions = this.structure.actions;
               this.properties_ = res.structure.properties;
-              this.barcoded_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].barcoded).length > 0 : false;
+              this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
               this.count = res.count;
               this.multicheckbox = false;
               this.multicheckbox ? this.multicheckbox = false : null;
@@ -343,12 +343,12 @@ export class CollectionPage implements OnInit {
           actions: this.actions && this.actions.length > 0 ? this.actions : [],
           actionix: op === "action" && this.actionix >= 0 ? this.actionix : -1,
           view: this.view,
-          barcoded: this.barcoded_
+          scan: this.scan_
         }
       }
     });
     modal.onDidDismiss().then((res: any) => {
-      if (res.data.modified) {
+      if (res.data.modified || this.scan_) {
         if (op === "action" && res.data.res?.count > 0) {
           this.misc.doMessage("action completed successfully. " + res.data.res.count + " records affected", "success");
         }

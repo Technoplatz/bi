@@ -94,9 +94,9 @@
       "get": ["odi_no", "odi_sub_no"],
       "filter": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess"
+          "key": "odi_completed",
+          "op": "eq",
+          "value": false
         }
       ]
     }
