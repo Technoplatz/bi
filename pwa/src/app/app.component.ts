@@ -68,7 +68,7 @@ export class AppComponent implements OnInit {
         this.sw_update.checkForUpdate().then(() => {
           console.log("checking for updates...");
         });
-      }, 60 * 60 * 5);
+      }, 60 * 1000 * 15);
       console.log("*** sw_update enabled");
       this.sw_update.versionUpdates.subscribe(evt => {
         console.log("*** version updates subscribed", evt);

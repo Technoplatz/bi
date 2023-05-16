@@ -221,7 +221,7 @@ export class CollectionPage implements OnInit {
             limit: this.limit
           }).then((res: any) => {
             if (res.structure && res.structure.properties) {
-              this.editor?.setMode("tree");
+              this.editor?.setMode("code");
               this.doBuildSchema(res.structure);
               this.data = res.data;
               this.structure_ori_ = res.structure;
@@ -526,7 +526,7 @@ export class CollectionPage implements OnInit {
     this.doSetSchemaKey(key);
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
-    this.editor.setMode("tree");
+    this.editor.setMode("code");
     this.jeopen = true;
     this.schemevis = "show";
     this.editor.focus();

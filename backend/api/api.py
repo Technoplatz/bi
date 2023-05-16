@@ -2159,6 +2159,7 @@ class Crud:
             page = input_["page"]
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]
+            group_ = "group" in input_ and input_["group"] is True
             skip_ = limit_ * (page - 1)
             match_ = input_["match"] if "match" in input_ and len(input_["match"]) > 0 else []
             is_crud_ = collection_id_[:1] != "_"
@@ -2178,7 +2179,20 @@ class Crud:
 
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
-            cursor_ = Mongo().db_[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
+            if group_:
+                group__ = {"_id": {}}
+                project__ = {"_id": 0}
+                sort__ = {}
+                for item_ in projection_:
+                    group__["_id"][item_] = f"${item_}"
+                    project__[item_] = f"$_id.{item_}"
+                    sort__[item_] = 1
+                group__["count"] = { "$sum": 1 }
+                project__["count"] = "$count"
+                cursor_ = Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": group__}, {"$project": project__}, {"$sort": sort__}, {"$limit": limit_}])
+            else:
+                cursor_ = Mongo().db_[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
+
             docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
             count_ = Mongo().db_[collection_].count_documents(get_filtered_)
 
@@ -2191,15 +2205,13 @@ class Crud:
             }
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_,
-                    "op": "read",
-                    "user": user_["email"] if user_ else None,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_,
+                "op": "read",
+                "user": user_["email"] if user_ else None,
+                "document": str(exc)
+            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:

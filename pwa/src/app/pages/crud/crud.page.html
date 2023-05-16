@@ -98,8 +98,8 @@ https://www.gnu.org/licenses.
     </ion-grid>
     <div *ngIf="tab=='relation'; else norelation" class="ion-padding-bottom ion-margin-top">
         <ion-item class="clicked-item" lines="none">
-            <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' | translate }}" animated="true"
-                class="ion-no-padding ion-no-margin brz-searchbar"
+            <ion-searchbar showCancelButton="never" debounce="500" placeholder="{{ 'Search' | translate }}"
+                animated="true" class="ion-no-padding ion-no-margin brz-searchbar"
                 (ionChange)="doStartSearch($event.detail.value)">
             </ion-searchbar>
         </ion-item>
@@ -111,12 +111,14 @@ https://www.gnu.org/licenses.
             <ion-grid *ngIf="parent.get?.length > 0; else nogetfields" class="ion-no-padding data-grid">
                 <ion-row class="ion-nowrap">
                     <ion-col *ngFor="let item of parent.get; let i = index" class="data-col-header"
-                        [size]="12/parent.get.length">{{ item }}</ion-col>
+                        [size]="10/parent.get.length">{{ item }}</ion-col>
+                    <ion-col class="data-col-header" size="2">{{ 'count' | translate }}</ion-col>
                 </ion-row>
                 <ion-row *ngFor="let item of related; let k=index" class="ion-no-padding ion-nowrap">
-                    <ion-col *ngFor="let rel of parent.get; let i = index" [size]="12/parent.get.length"
-                        (click)="doSetRelated(item)" class="clicked-item">{{
+                    <ion-col *ngFor="let rel of parent.get; let i = index" [size]="10/parent.get.length"
+                        (click)="doSetRelated(item)" class="clicked-item related-line-item">{{
                         item[rel] }}</ion-col>
+                    <ion-col class="clicked-item related-line-item" size="2">{{ item.count }}</ion-col>
                 </ion-row>
                 <ion-row>
                     <ion-col size="12">{{ related.length }} {{ 'records found' | translate }}</ion-col>
@@ -156,9 +158,9 @@ https://www.gnu.org/licenses.
                         </ion-label>
                         <div class="ion-margin-top full-flex ion-margin-bottom">
                             <ion-button *ngFor="let item of parents; let p = index" (click)="doParent(item)"
-                                color="medium" size="small">{{ item.collection }}
+                                color="medium" size="default">{{ item.name ? item.name : item.collection }}
                             </ion-button>
-                            <ion-button *ngFor="let item of links" (click)="doLink(item)" color="dark" size="small">{{
+                            <ion-button *ngFor="let item of links" (click)="doLink(item)" color="dark" size="default">{{
                                 item.get }}
                             </ion-button>
                         </div>
@@ -280,6 +282,15 @@ https://www.gnu.org/licenses.
                             <ion-input [formControlName]="field.name" [(ngModel)]="data_[field.name]"
                                 class="hide"></ion-input>
                             <app-kov [data]="data_" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
+                        </div>
+                    </ion-item>
+                    <ion-item *ngIf="scan_" lines="none">
+                        <ion-label position="stacked">{{ 'Scan History' }}</ion-label>
+                        <div class="input-desc">{{ 'The latest scans' | translate }}</div>
+                        <div class="flexbox-container">
+                            <p class="scan-ok" *ngFor="let item of scanned_; let s = index">
+                                {{ item.input }}<br /><span>{{ item.date | date:'dd.MM.yyyy HH:mm:ss' }}</span>
+                            </p>
                         </div>
                     </ion-item>
                 </ion-list>

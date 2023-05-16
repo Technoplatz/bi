@@ -181,6 +181,13 @@ ion-note {
   display: flex !important;
 }
 
+.flexbox-container {
+  display: flex !important;
+  width: 100%;
+  overflow-x: scroll;
+  flex-wrap: nowrap !important;
+}
+
 .flex-child {
   margin-top: auto;
   margin-bottom: auto;
@@ -1047,6 +1054,25 @@ app-menu .toggler {
   line-height: 18px !important;
 }
 
+.scan-ok {
+  line-height: 20px !important;
+  color: var(--ion-color-success);
+  font-weight: 600;
+  margin-right: 16px;
+  white-space: nowrap;
+  display: flexbox !important;
+}
+
+.scan-ok span {
+  font-size: small !important;
+  font-weight: 500 !important;
+}
+
+.related-line-item {
+  font-size: 16px !important;
+  line-height: normal;
+}
+
 .logo-column {
   display: flex !important;
   padding-bottom: 8px;
@@ -1333,7 +1359,8 @@ sup {
 
 .schema-card-container ion-card {
   border-radius: 0px;
-  width: 86px;
+  max-width: 86px;
+  min-width: 86px;
   height: 80px;
   box-shadow: none !important;
   background-color: #e3e3e3;

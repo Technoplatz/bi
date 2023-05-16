@@ -82,6 +82,7 @@ export class CrudPage implements OnInit {
   public actionix: number = -1;
   public is_token_copied: boolean = false;
   public scan_: boolean = false;
+  public scanned_: any = [];
   public istrue_: boolean = true;
   public visible: string = "hide";
   public parent: any = {};
@@ -90,6 +91,7 @@ export class CrudPage implements OnInit {
   public properties_: any = {};
   public links: any = [];
   public counter: number = 0;
+  public scan_result: string = "";
   private sweeped: any;
   public link_text: any = null;
   public linked_: any = [];
@@ -147,29 +149,32 @@ export class CrudPage implements OnInit {
     this.scan_ = this.shuttle.scan;
     this.links = this.shuttle.structure.links;
     this.parents = this.structure__?.parents ? this.structure__.parents : [];
-    this.doGetAllAktions(this.op).then((res: any) => {
-      this.aktions = res;
-      this.crud.initForm(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
-        this.tab = "data";
-        this.crudForm = res.form;
-        this.fields = res.fields;
-        this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? res.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
-        this.data_ = this.shuttle.data ? this.shuttle.data : res.init;
-        this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
-        this.doGetSubProperties(this.collection).then(() => {
-          if (this.actionix >= 0) {
-            this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            });
-          }
+    this.storage.get("LSSCANNED").then((LSSCANNED: any) => {
+      this.scanned_ = LSSCANNED ? LSSCANNED : [];
+      this.doGetAllAktions(this.op).then((res: any) => {
+        this.aktions = res;
+        this.crud.initForm(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views).then((res: any) => {
+          this.tab = "data";
+          this.crudForm = res.form;
+          this.fields = res.fields;
+          this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? res.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
+          this.data_ = this.shuttle.data ? this.shuttle.data : res.init;
+          this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
+          this.doGetSubProperties(this.collection).then(() => {
+            if (this.actionix >= 0) {
+              this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
+                this.misc.doMessage(error, "error");
+              });
+            }
+          }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          }).finally(() => {
+            this.visible = "show";
+            this.scan_ ? setInterval(() => { this.barcodefocus.setFocus(); }, 1000) : null;
+          });
         }).catch((error: any) => {
           this.misc.doMessage(error, "error");
-        }).finally(() => {
-          this.visible = "show";
-          this.scan_ ? setTimeout(() => { this.barcodefocus.setFocus(); }, this.timeout) : null;
         });
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
       });
     });
   }
@@ -250,8 +255,14 @@ export class CrudPage implements OnInit {
               alert.present();
             });
           } else {
+            this.scan_result = "";
             if (this.scan_) {
-              console.log("*** barcode is staying alive");
+              this.scan_result = "<div class='scan-ok'>&#10003; OK " + this.crudForm.get("iot_input")?.value + "<br /><span>Read at " + new Date(Date.now()).toISOString() + "</span></div>";
+              this.scanned_.unshift({ "input": this.crudForm.get("iot_input")?.value, "date": new Date(Date.now()).toISOString() });
+              this.storage.set("LSSCANNED", this.scanned_).then(() => {
+                this.data_["iot_input"] = "";
+                this.crudForm.get("iot_input")?.setValue(this.data_["iot_input"]);
+              });
             } else {
               this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
             }
@@ -483,6 +494,7 @@ export class CrudPage implements OnInit {
             projection: projection_,
             match: filter_,
             sort: null,
+            group: true,
             page: 1,
             limit: 100
           }).then((res: any) => {
