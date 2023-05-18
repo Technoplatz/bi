@@ -1,47 +1,22 @@
 # Technoplatz BI
 
-Willkommen.\
-It's time to get started with you inner-cycle!
-
+It's time to get data-driven with your inner-cycle!\
 Table of contents;
 
-- [What is Technoplatz BI](#what-is-technoplatz-bi)
-- [Licensing Options](#licensing-options)
-- [Tutorials](#tutorials)
+- [Platform](#platform)
 - [Impressum](#impressum)
 - [Author](#author)
 
-## What is Technoplatz BI
+## Platform
 
-Technoplatz BI is an open source, multi-container, JSON schema-driven data application and data sharing platform designed to empower business professionals build their boutique solution without coding. The platform offers a pragmatic approach for the three main requirements of data-driven processes by considering each company has its own unique conditions.
+Technoplatz BI is an open source, multi-container, JSON-driven advanced no-code data application and data sharing platform designed to empower business professionals build their own unique solution. Technoplatz platform offers a pragmatic and optimised way to meet the four key requirements of critical business processes by considering that each company has its own unique conditions;
 
-- Data Application
+- Dedicated Infastructure
+- No-code Data Application
 - BI-Directional Data Sharing
 - Built-in API
 
-The more information can be found at the [official web site](#).
-
-## Licensing Options
-
-The 4-cylinder core engine of Technoplatz BI is provided as a community edition which is free as far as the GNU Affero GPL-v3 Licensing terms. Meaning, it is open to everyone who are open and will remain open as well. The platform is also provided as a service for the organizations demanding prefessional support in terms of managed hosting, custom development and integration services.
-
-|                             | Community Edition |                 Brezel Edition                 |
-| :-------------------------- | :---------------: | :--------------------------------------------: |
-| Hosting                     |    Self-Hosted    |                      SaaS                      |
-| Database                    |      MongoDB      |                 MongoDB:latest                 |
-| Replication & Clustering    |  Internal Nodes   |                +Regional Nodes                 |
-| Two-Factor Authentication   |         ✔         |                       ✔                        |
-| Automation                  |         ✘         |                       ✔                        |
-| WebApp Firewall             |         ✘         |                       ✔                        |
-| Technical Support           |         ✘         |                       ✔                        |
-| Custom Integration Services |         ✘         |                       ✔                        |
-| Custom Domain               |         ✘         |                       ✔                        |
-| Licensing                   | GNU Affero GPL v3 |             +Project Agreement/SLA             |
-| Pricing                     |       Free        | [get a quote](https://bi.technoplatz.de/start) |
-
-## Tutorials
-
-Tutorials and the support links are provided separately.
+The further information can be found at the [official web site](https://bi.technoplatz.com).
 
 ## Impressum
 
@@ -66,7 +41,7 @@ DE318821373
 ### Kontakt
 
 E-Mail: support@technoplatz.de\
-Web: [https://www.technoplatz.de/contact](https://bi.technoplatz.com)
+Web: [https://www.technoplatz.de/contact](https://www.technoplatz.de/contact)
 
 Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV\
 Technoplatz IT Solutions GmbH
@@ -100,8 +75,8 @@ Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden 
 
 Mustafa Mat\
 <sup>Geschäftsführer, MD</sup>\
-Senior System Analist, Developer\
-Data Sciences, Statistics B.Sc.\
+Senior Developer\
+Data Sciences & Statistics B.Sc.\
 [@mustafamat](https://www.github.com/mustafamat)
 
 --

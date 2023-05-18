@@ -6,9 +6,7 @@
         { "key": "dnn_odi_no", "value": "odi_no" },
         { "key": "dnn_odi_sub_no", "value": "odi_sub_no" }
       ],
-      "filter": [
-        { "key": "odi_status", "eq": "in", "value": "00-Open,10-OnTheWay" }
-      ],
+      "filter": [{ "key": "odi_status", "eq": "in", "value": "00-Open,10-OnTheWay" }],
       "get": ["odi_no", "odi_sub_no", "odi_customs"]
     }
   ]
