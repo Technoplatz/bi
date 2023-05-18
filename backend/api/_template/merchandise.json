@@ -401,7 +401,7 @@
       ],
       "targets": [
         {
-          "collection": "Merchandise",
+          "collection": "merchandise",
           "match": [
             {
               "key": "_id",
@@ -424,7 +424,7 @@
           "upsert": false
         },
         {
-          "collection": "Merchandise",
+          "collection": "merchandise",
           "match": [
             {
               "key": "_id",

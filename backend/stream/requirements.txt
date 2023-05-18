@@ -2,3 +2,4 @@ asyncio
 pymongo[tls]
 dnspython
 partial
+pytz

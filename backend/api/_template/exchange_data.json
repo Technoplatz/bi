@@ -11734,7 +11734,7 @@
     "exc_date": { "$date": "2023-05-03T00:00:00.000+0200" },
     "exc_exchange": "EUR",
     "_modified_at": { "$date": "2023-05-09T21:39:34.742+0200" },
-    "_modified_by": "mmat@technoplatz.de",
+    "_modified_by": "bi@technoplatz.com",
     "_modified_count": 33,
     "exc_currency": "TRY",
     "exc_rate": 21.3306
@@ -11774,7 +11774,7 @@
     "exc_date": { "$date": "2023-05-05T00:00:00.000+0200" },
     "exc_exchange": "EUR",
     "_modified_at": { "$date": "2023-05-09T19:46:10.225+0200" },
-    "_modified_by": "mmat@technoplatz.de",
+    "_modified_by": "bi@technoplatz.com",
     "_modified_count": 13,
     "exc_currency": "TRY",
     "exc_rate": 21.5293
@@ -11794,7 +11794,7 @@
     "exc_date": { "$date": "2023-05-08T00:00:00.000+0200" },
     "exc_exchange": "EUR",
     "_modified_at": { "$date": "2023-05-08T00:59:38.415+0200" },
-    "_modified_by": "mmat@technoplatz.de",
+    "_modified_by": "bi@technoplatz.com",
     "_modified_count": 3,
     "exc_currency": "TRY",
     "exc_rate": 21.4749

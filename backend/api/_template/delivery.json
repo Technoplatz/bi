@@ -209,8 +209,8 @@
       "width": 180
     },
     "dnn_waybill_no": {
-      "bsonType": "string",
       "title": "Waybill No",
+      "bsonType": "string",
       "description": "Shipment Waybill Number",
       "minLength": 0,
       "maxLength": 16,

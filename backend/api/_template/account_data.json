@@ -14,7 +14,7 @@
     "acc_tax_no": "ID00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -34,7 +34,7 @@
     "acc_tax_no": "PT00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -54,7 +54,7 @@
     "acc_tax_no": "PE00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -74,7 +74,7 @@
     "acc_tax_no": "PA00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -94,7 +94,7 @@
     "acc_tax_no": "ID00000002",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -114,7 +114,7 @@
     "acc_tax_no": "SB00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -134,7 +134,7 @@
     "acc_tax_no": "ID00000003",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -154,7 +154,7 @@
     "acc_tax_no": "CN00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -174,7 +174,7 @@
     "acc_tax_no": "PT00000002",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -194,7 +194,7 @@
     "acc_tax_no": "CN00000002",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -214,7 +214,7 @@
     "acc_tax_no": "RU00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -234,7 +234,7 @@
     "acc_tax_no": "PH00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -254,7 +254,7 @@
     "acc_tax_no": "CN00000003",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -274,7 +274,7 @@
     "acc_tax_no": "GH00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -294,7 +294,7 @@
     "acc_tax_no": "CN00000004",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -314,7 +314,7 @@
     "acc_tax_no": "RU00000002",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -334,7 +334,7 @@
     "acc_tax_no": "CN00000005",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -354,7 +354,7 @@
     "acc_tax_no": "VE00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -374,7 +374,7 @@
     "acc_tax_no": "CN00000006",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0
@@ -394,7 +394,7 @@
     "acc_tax_no": "GP00000001",
     "acc_is_active": true,
     "_created_at": { "$date": "2023-05-12T18:02:21.114+0200" },
-    "_created_by": "mmat@technoplatz.de",
+    "_created_by": "bi@technoplatz.com",
     "_modified_at": null,
     "_modified_by": null,
     "_modified_count": 0

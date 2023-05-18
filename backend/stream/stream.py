@@ -37,6 +37,7 @@ import urllib
 from datetime import datetime
 from functools import partial
 from bson.objectid import ObjectId
+import pytz
 import pymongo
 
 
@@ -55,8 +56,7 @@ class PassException(BaseException):
 class Trigger():
     """
     docstring is in progress
-    """
-
+    """       
     def __init__(self):
         """
         docstring is in progress
@@ -101,6 +101,13 @@ class Trigger():
         name_ = type(exc).__name__ if hasattr(type(exc), "__name__") else "Exception"
         print(f"!!! worker exception type {name_} at line {line_no_}:", str(exc))
         return True
+
+    def get_now_f(self):
+        """
+        docstring is in progress
+        """
+        tz_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
+        return datetime.now(pytz.timezone(tz_))
 
     def refresh_f(self):
         """
@@ -396,13 +403,6 @@ class Trigger():
 
             print(f"\nİİİ change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
 
-            # for chg_ in changed_:
-            #     print("*** source_properties_[chg_]0", chg_)
-            #     if chg_ in source_properties_ and source_properties_[chg_]["bsonType"] == "string" and "prefix" in source_properties_[chg_]:
-            #         print("*** source_properties_[chg_]1", source_properties_[chg_])
-            #         changed_[chg_] = changed_[chg_].removeprefix(source_properties_[chg_]["prefix"])
-            #         print("*** source_properties_[chg_]2", changed_)
-
             trigger_targets_ = [tg_ for tg_ in self.triggers_ if tg_["source"] == source_collection_id_ and op_ in tg_["operations"] and [ma_ for ma_ in tg_["changes"] if ma_["key"] in changed_keys_ and (
                 (ma_["op"].lower() == "eq" and changed_[ma_["key"]] == ma_["value"]) or
                 (ma_["op"].lower() == "ne" and changed_[ma_["key"]] != ma_["value"]) or
@@ -417,7 +417,7 @@ class Trigger():
                 raise PassException("!!! no trigger condition found")
 
             for target_ in trigger_targets_:
-                target_collection_id_ = target_["target"]
+                target_collection_id_ = target_["target"].lower()
                 target_collection_ = f"{target_collection_id_}_data"
                 target_properties_ = self.properties_[target_collection_id_] if target_collection_id_ in self.properties_ else None
                 print(">>> target found", target_collection_id_)
@@ -497,11 +497,6 @@ class Trigger():
                     })
                 match_ = {**match_, **filter_}
 
-                # if "_id" in match_ and ObjectId.is_valid(match_["_id"]):
-                #     pass
-                # else:
-                #     match_ = {**match_, **filter_}
-
                 set_ = {}
                 sets_ = target_["set"]
                 upsert_ = "upsert" in target_ and target_["upsert"] is True
@@ -546,7 +541,7 @@ class Trigger():
                         set_[target_field_] = str(value_).lower() == "true"
                     elif type_ == "date":
                         if str(value_).lower() == "$current_date":
-                            set_[target_field_] = datetime.now()
+                            set_[target_field_] = self.get_now_f()
                         else:
                             ln_ = 10 if len(value_) == 10 else 19
                             rgx_ = "%Y-%m-%d" if ln_ == 10 else "%Y-%m-%dT%H:%M:%S"
@@ -558,7 +553,7 @@ class Trigger():
                     else:
                         set_[target_field_] = value_
 
-                set_["_modified_at"] = datetime.now()
+                set_["_modified_at"] = self.get_now_f()
                 set_["_modified_by"] = "_automation"
                 set_["_resume_token"] = token_
 
