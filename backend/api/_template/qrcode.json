@@ -4,10 +4,7 @@
       "bsonType": "string",
       "title": "Process",
       "description": "Process Identifier",
-      "enum": [
-        "in",
-        "out"
-      ],
+      "enum": ["in", "out"],
       "default": "in",
       "pattern": "^[a-z]{2,3}$",
       "minLength": 2,
@@ -25,24 +22,9 @@
       "width": 200
     }
   },
-  "required": [
-    "iot_proc",
-    "iot_input"
-  ],
-  "index": [
-    [
-      "iot_proc"
-    ],
-    [
-      "iot_input"
-    ]
-  ],
-  "unique": [
-    [
-      "iot_proc",
-      "iot_input"
-    ]
-  ],
+  "required": ["iot_proc", "iot_input"],
+  "index": [["iot_proc"], ["iot_input"]],
+  "unique": [["iot_proc", "iot_input"]],
   "sort": {
     "_modified_at": -1
   },
@@ -57,10 +39,7 @@
         }
       ],
       "filter": [],
-      "get": [
-        "ser_case_no",
-        "ser_dnn_no"
-      ]
+      "get": ["ser_case_no", "ser_dnn_no"]
     },
     {
       "name": "DNs",
@@ -72,10 +51,7 @@
         }
       ],
       "filter": [],
-      "get": [
-        "ser_dnn_no",
-        "ser_case_no"
-      ]
+      "get": ["ser_dnn_no", "ser_case_no"]
     }
   ],
   "links": [],
@@ -84,9 +60,7 @@
     {
       "name": "Depot Entries",
       "enabled": true,
-      "operations": [
-        "insert"
-      ],
+      "operations": ["insert"],
       "changes": [
         {
           "key": "iot_proc",
@@ -142,9 +116,7 @@
     {
       "name": "Depot Outgoing",
       "enabled": true,
-      "operations": [
-        "insert"
-      ],
+      "operations": ["insert"],
       "changes": [
         {
           "key": "iot_proc",

@@ -645,7 +645,6 @@ class Crud:
     """
     docstring is in progress
     """
-
     def __init__(self):
         """
         docstring is in progress
@@ -657,7 +656,7 @@ class Crud:
         """
         docstring is in progress
         """
-        return json.loads(open(f"/app/_schema/{schema}.json", "r", encoding="utf-8").read())
+        return json.loads(open(f"/app/_template/{schema}.json", "r", encoding="utf-8").read())
 
     def validate_iso8601_f(self, strv):
         """
@@ -2187,7 +2186,7 @@ class Crud:
                     group__["_id"][item_] = f"${item_}"
                     project__[item_] = f"$_id.{item_}"
                     sort__[item_] = 1
-                group__["count"] = { "$sum": 1 }
+                group__["count"] = {"$sum": 1}
                 project__["count"] = "$count"
                 cursor_ = Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": group__}, {"$project": project__}, {"$sort": sort__}, {"$limit": limit_}])
             else:
