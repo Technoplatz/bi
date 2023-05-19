@@ -49,7 +49,6 @@ export class MenuComponent implements OnInit {
   public views: any = [];
   public charts: any = [];
   public segmentsadm: any;
-  public saas_: any;
   public user_: any;
   public charts_: any = null;
   public collections_: any = null;
@@ -77,9 +76,6 @@ export class MenuComponent implements OnInit {
     });
     this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
       this.views = res && res.views ? res.views : [];
-    });
-    this.crud.saas.subscribe((res: any) => {
-      this.saas_ = res;
     });
     this.auth.user.subscribe((res: any) => {
       this.user_ = res;

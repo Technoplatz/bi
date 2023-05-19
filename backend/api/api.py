@@ -40,7 +40,6 @@ import secrets
 import json
 import operator
 import smtplib
-import urllib
 import hashlib
 import ast
 from email import encoders
@@ -68,6 +67,7 @@ from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 from croniter import croniter
+from get_docker_secret import get_docker_secret
 
 
 class APIError(BaseException):
@@ -289,14 +289,14 @@ class Misc:
         """
         docstring is in progress
         """
-        if NOTIFICATION_SLACK_HOOK_URL_:
+        if NOTIFICATIONS_ == "slack" and NOTIFICATION_SLACK_HOOK_URL_:
             ip_ = self.get_user_ip_f()
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
             line_ = exc_tb_.tb_lineno
             exception_ = str(exc)
-            notification_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
-            resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_)}), timeout=10)
+            notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
+            resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
             if resp_.status_code != 200:
                 print("*** notification error", resp_)
 
@@ -589,7 +589,7 @@ class Mongo:
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true" if MONGO_TLS_ else "&tls=false"
         tls_certificate_key_file_ = f"&tlsCertificateKeyFile={MONGO_TLS_CERT_KEYFILE_}" if MONGO_TLS_CERT_KEYFILE_ else ""
-        tls_certificate_key_file_password_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEY_PASSWORD_}" if MONGO_TLS_CERT_KEY_PASSWORD_ else ""
+        tls_certificate_key_file_password_ = f"&tlsCertificateKeyFilePassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_}" if MONGO_TLS_CERT_KEYFILE_PASSWORD_ else ""
         tls_ca_file_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
         retry_writes_ = "&retryWrites=true" if MONGO_RETRY_WRITES_ else "&retryWrites=false"
@@ -607,7 +607,7 @@ class Mongo:
             file_ = f"{id_}.gz"
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
-            command_ = f'mongodump --host "{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password "{MONGO_PASSWORD_}" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}'
+            command_ = f'mongodump --host "{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password "{MONGO_PASSWORD_}" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}'
             os.system(command_)
             size_ = os.path.getsize(loc_)
             return {"result": True, "id": id_, "type": type_, "size": size_}
@@ -628,7 +628,7 @@ class Mongo:
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
 
-            command_ = f'mongorestore --host "{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password "{MONGO_PASSWORD_}" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude="{MONGO_DB_}._backup" --nsExclude="{MONGO_DB_}._auth" --nsExclude="{MONGO_DB_}._user" --nsExclude="{MONGO_DB_}._log" --drop --quiet'
+            command_ = f'mongorestore --host "{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password "{MONGO_PASSWORD_}" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude="{MONGO_DB_}._backup" --nsExclude="{MONGO_DB_}._auth" --nsExclude="{MONGO_DB_}._user" --nsExclude="{MONGO_DB_}._log" --drop --quiet'
             os.system(command_)
 
             size_ = os.path.getsize(loc_)
@@ -645,6 +645,7 @@ class Crud:
     """
     docstring is in progress
     """
+
     def __init__(self):
         """
         docstring is in progress
@@ -776,7 +777,7 @@ class Crud:
 
                         data_path_ = f"/app/_template/{data_file_}"
                         if os.path.isfile(data_path_):
-                            command_ = f"mongoimport --quiet --file={data_path_} --collection={collection__} --mode=insert --jsonArray --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_}"
+                            command_ = f"mongoimport --quiet --file={data_path_} --collection={collection__} --mode=insert --jsonArray --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_}"
                             call(command_, shell=True)
                             Mongo().db_[collection__].update_many({}, {"$set": {
                                 "_created_at": Misc().get_now_f(),
@@ -2931,7 +2932,7 @@ class Crud:
                         )
                         + "'"
                     )
-                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEY_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
                     files_ = [{"filename": file_, "filetype": type_}]
                     email_sent_ = Email().sendEmail_f({
@@ -3451,21 +3452,6 @@ class Auth:
     """
     docstring is in progress
     """
-
-    def saas_f(self):
-        """
-        docstring is in progress
-        """
-        try:
-            saas_ = {
-                "company": COMPANY_NAME_,
-                "version": "Technoplatz BI - Enterprise Edition" if SAAS_.lower() == "ee" else "Technoplatz BI - Community Edition",
-            }
-
-            return {"result": True, "user": None, "saas": saas_}
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
 
     def verify_otp_f(self, email_, tfac_, op_):
         """
@@ -4166,6 +4152,7 @@ class Auth:
 TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
+NOTIFICATIONS_ = os.environ.get("NOTIFICATIONS")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
 SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
@@ -4183,7 +4170,6 @@ API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_H
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
-SAAS_ = os.environ.get("SAAS")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -4193,10 +4179,10 @@ MONGO_PORT1_ = int(os.environ.get("MONGO_PORT1"))
 MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
 MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-MONGO_USERNAME_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
-MONGO_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
+MONGO_USERNAME_ = get_docker_secret("mongo_username", default="")
+MONGO_PASSWORD_ = get_docker_secret("mongo_password", default="")
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = get_docker_secret("mongo_tls_keyfile_password", default="")
 MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
-MONGO_TLS_CERT_KEY_PASSWORD_ = urllib.parse.quote_plus(os.environ.get("MONGO_TLS_CERT_KEY_PASSWORD"))
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
@@ -4511,8 +4497,6 @@ def auth_f():
 
         if op_ == "signup":
             res_ = Auth().signup_f()
-        elif op_ == "saas":
-            res_ = Auth().saas_f()
         elif op_ == "signin":
             res_ = Auth().signin_f()
         elif op_ == "tfac":
@@ -4535,8 +4519,7 @@ def auth_f():
 
         user_ = res_["user"] if res_ and "user" in res_ else None
         token_ = user_["token"] if op_ == "tfac" and "token" in user_ and user_["token"] is not None else None
-        saas_ = res_["saas"] if res_ and "saas" in res_ else None
-        res_ = {"result": True, "user": user_, "saas": saas_}
+        res_ = {"result": True, "user": user_}
 
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         if token_ is not None:

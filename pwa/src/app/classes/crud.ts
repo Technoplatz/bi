@@ -298,16 +298,4 @@ export class Crud {
     });
   }
 
-  getSaas() {
-    return new Promise((resolve, reject) => {
-      this.misc.apiCall("auth", {
-        op: "saas"
-      }).then((res: any) => {
-        resolve(this.saas.next(res.saas));
-      }).catch((err: any) => {
-        reject(err);
-      });
-    });
-  }
-
 }

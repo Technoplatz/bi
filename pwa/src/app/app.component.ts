@@ -120,11 +120,8 @@ export class AppComponent implements OnInit {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.auth.user.next(LSUSERMETA);
         if (LSUSERMETA) {
-          this.crud.getSaas().then((saas: any) => {
-            this.misc.saas.next(saas);
-            this.crud.getAll().then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            });
+          this.crud.getAll().then(() => { }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
           });
         }
         this.storage.get("LSTHEME").then((LSTHEME: any) => {

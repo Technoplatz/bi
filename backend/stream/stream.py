@@ -37,6 +37,7 @@ import urllib
 from datetime import datetime
 from functools import partial
 from bson.objectid import ObjectId
+from get_docker_secret import get_docker_secret
 import pytz
 import pymongo
 
@@ -56,7 +57,8 @@ class PassException(BaseException):
 class Trigger():
     """
     docstring is in progress
-    """       
+    """
+
     def __init__(self):
         """
         docstring is in progress
@@ -71,10 +73,10 @@ class Trigger():
         mongo_port2_ = int(os.environ.get("MONGO_PORT2"))
         mongo_db_ = os.environ.get("MONGO_DB")
         mngo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
-        mongo_username_ = urllib.parse.quote_plus(os.environ.get("MONGO_USERNAME"))
-        mongo_password_ = urllib.parse.quote_plus(os.environ.get("MONGO_PASSWORD"))
+        mongo_username_ = get_docker_secret("mongo_username", default="")
+        mongo_password_ = get_docker_secret("mongo_password", default="")
+        mongo_tls_cert_keyfile_password_ = get_docker_secret("mongo_tls_keyfile_password", default="")
         mongo_tls_ = os.environ.get("MONGO_TLS")
-        mongo_tls_cert_key_password_ = urllib.parse.quote_plus(os.environ.get("MONGO_TLS_CERT_KEY_PASSWORD"))
         mongo_tls_cert_keyfile_ = os.environ.get('MONGO_TLS_CERT_KEYFILE')
         mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")
         mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
@@ -83,7 +85,7 @@ class Trigger():
         self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
         self.groupbys_ = ["sum", "count", "mean", "std", "var"]
-        self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_key_password_}&retryWrites={mongo_retry_writes_}"
+        self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_keyfile_password_}&retryWrites={mongo_retry_writes_}"
         self.client = pymongo.MongoClient(self.connstr_)
         self.db_ = self.client[mongo_db_]
 

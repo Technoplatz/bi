@@ -69,7 +69,6 @@ export class AccountPage implements OnInit {
   public qr_show: boolean = false;
   public otp_qr: string = "";
   public saas: any = null;
-  private saas_: any = null;
 
   constructor(
     private storage: Storage,
@@ -77,16 +76,7 @@ export class AccountPage implements OnInit {
     private router: Router,
     private alert: AlertController,
     public misc: Miscellaneous
-  ) {
-    this.saas_ = this.misc.saas.subscribe((saas: any) => {
-      this.saas = saas;
-    });
-  }
-
-  ngOnDestroy() {
-    this.saas_ = null;
-    this.misc.saas.unsubscribe;
-  }
+  ) {}
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
