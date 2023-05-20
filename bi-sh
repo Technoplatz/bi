@@ -55,9 +55,8 @@ function helpBI() {
 
 function initBI() {
     echo "Initializing..."
-    BKDOTENV=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
-    cp ./$DOTENV ./$BKDOTENV
-    curl -Ls -o ./$DCYML --create-dirs https://raw.githubusercontent.com/Technoplatz/bi/main/_bi/{$DCYML}
+    cp ./$DOTENV ./$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
+    curl -Ls -o ./$DCYML --create-dirs $RAWREPO/{$DCYML}
     if [ $? -eq 0 ]; then
         echo "✔ Initialized successfully."
     else
