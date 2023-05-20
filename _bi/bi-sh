@@ -56,7 +56,7 @@ function updateBI() {
     echo "Updating..."
     BKDOTENV=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
     cp ./$DOTENV ./$BKDOTENV
-    curl -Ls -o ./bi-sh -o ./docker-compose.yml --create-dirs https://raw.githubusercontent.com/Technoplatz/bi/main/_bi/{bi-sh,docker-compose.yml} && sudo chmod +x ./bi-sh
+    curl -Ls -o ./docker-compose.yml --create-dirs https://raw.githubusercontent.com/Technoplatz/bi/main/_bi/{docker-compose.yml}
     if [ $? -eq 0 ]; then
         echo "✔ Update completed successfully."
     else
@@ -148,7 +148,7 @@ function buildBI() {
         return 0
     fi
     echo -e "\nBuilt OK :)"
-    echo "You should restart containers"
+    echo -e "\n!!!You should restart containers"
     return 1
 }
 
@@ -157,7 +157,7 @@ DIR="."
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 DCYML="docker-compose.yml"
-DOTENV=".env"
+DOTENV=".env-dev"
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
 
