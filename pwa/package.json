@@ -16,7 +16,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^14.3.0",
-    "@angular/cdk": "^12.2.13",
+    "@angular/cdk": "^14.2.7",
     "@angular/common": "^14.3.0",
     "@angular/core": "^14.3.0",
     "@angular/forms": "^14.3.0",
@@ -34,7 +34,7 @@
     "@ngx-translate/http-loader": "^6.0.0",
     "@swimlane/ngx-charts": "^20.1.0",
     "ang-jsoneditor": "^1.10.5",
-    "angularx-qrcode": "^13.0.15",
+    "angularx-qrcode": "^14.0.0",
     "cordova-sqlite-storage": "^5.1.0",
     "ngx-clipboard": "^15.1.0",
     "node-forge": ">=1.3.0",
