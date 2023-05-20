@@ -3126,23 +3126,14 @@ class Email:
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
-                part_.add_header(
-                    "Content-Disposition",
-                    f"attachment; filename= {filename_}",
-                )
+                part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
                 message_.attach(part_)
 
             recipients_ = []
             recipients_str_ = ""
             for recipient_ in msg["personalizations"]["to"]:
-                email_to_ = (
-                    f"{recipient_['name']} <{recipient_['email']}>"
-                    if recipient_["name"] and "name" in recipient_
-                    else recipient_["email"]
-                )
-                recipients_str_ += (
-                    email_to_ if recipients_str_ == "" else f", {email_to_}"
-                )
+                email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
+                recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
                 recipients_.append(recipient_["email"])
 
             message_["To"] = recipients_str_
@@ -3151,11 +3142,14 @@ class Email:
 
             return {"result": True}
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except smtplib.SMTPResponseException as exc_:
+            return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except smtplib.SMTPServerDisconnected as exc_:
+            return Misc().api_error_f(f"smtp connection: {exc_}")
+
+        except Exception as exc_:
+            return Misc().exception_f(f"smtp exception: {exc_}")
 
     def sendEmail_f(self, msg):
         """
