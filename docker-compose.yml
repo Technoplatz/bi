@@ -64,7 +64,7 @@ services:
 
   init:
     build:
-      context: ./../init
+      context: ./init
       dockerfile: Dockerfile
     image: ${HUB}/technoplatz/bi-init:${VERSION}
     container_name: init
@@ -216,7 +216,7 @@ services:
 
   replicaset:
     build:
-      context: ./../replicaset
+      context: ./replicaset
       dockerfile: Dockerfile
     image: ${HUB}/technoplatz/bi-replicaset:${VERSION}
     container_name: replicaset
@@ -269,7 +269,7 @@ services:
 
   stream:
     build:
-      context: ./../backend/stream
+      context: ./backend/stream
       dockerfile: Dockerfile
     image: ${HUB}/technoplatz/bi-stream:${VERSION}
     container_name: stream
@@ -318,7 +318,7 @@ services:
 
   api:
     build:
-      context: ./../backend/api
+      context: ./backend/api
       dockerfile: Dockerfile
     image: ${HUB}/technoplatz/bi-api:${VERSION}
     container_name: api
@@ -389,7 +389,7 @@ services:
 
   pwa:
     build:
-      context: ./../pwa
+      context: ./pwa
       dockerfile: Dockerfile
     image: ${HUB}/technoplatz/bi-pwa:${VERSION}
     container_name: pwa
@@ -479,12 +479,12 @@ networks:
 
 secrets:
   mongo_initdb_root_password:
-    file: ./mongo/.mongo_initdb_root_password
+    file: ./.mongo/mongo_initdb_root_password
   mongo_initdb_root_username:
-    file: ./mongo/.mongo_initdb_root_username
+    file: ./.mongo/mongo_initdb_root_username
   mongo_password:
-    file: ./mongo/.mongo_password
+    file: ./.mongo/mongo_password
   mongo_username:
-    file: ./mongo/.mongo_username
+    file: ./.mongo/mongo_username
   mongo_tls_keyfile_password:
-    file: ./mongo/.mongo_tls_keyfile_password
+    file: ./.mongo/mongo_tls_keyfile_password

@@ -42,6 +42,7 @@ EOF
 
 function helpBI() {
     echo "Available commands:"
+    echo "./bi-sh init"
     echo "./bi-sh start"
     echo "./bi-sh restart"
     echo "./bi-sh stop"
@@ -52,13 +53,26 @@ function helpBI() {
     echo "./bi-sh help"
 }
 
-function updateBI() {
-    echo "Updating..."
+function initBI() {
+    echo "Initializing..."
     BKDOTENV=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
     cp ./$DOTENV ./$BKDOTENV
-    curl -Ls -o ./docker-compose.yml --create-dirs https://raw.githubusercontent.com/Technoplatz/bi/main/_bi/{docker-compose.yml}
+    curl -Ls -o ./$DCYML --create-dirs https://raw.githubusercontent.com/Technoplatz/bi/main/_bi/{$DCYML}
     if [ $? -eq 0 ]; then
-        echo "✔ Update completed successfully."
+        echo "✔ Initialized successfully."
+    else
+        echo -e "✘ Sorry! Process was terminated ($?)."
+        return 0
+    fi
+    return 1
+}
+
+function updateBI() {
+    echo "Updating..."
+    docker compose -f ./$DCYML pull
+    if [ $? -eq 0 ]; then
+        echo -e "✔ The latest version received successfully."
+        startBI
     else
         echo -e "✘ Sorry! Process was terminated ($?)."
         return 0
@@ -79,28 +93,28 @@ function pruneBI() {
 }
 
 function startBI() {
-    echo "Starting containers..."
-    mkdir -p $DIR/mongo
-    if [[ ! -f $DIR/mongo/.mongo_tls_keyfile_password ]]; then
-        echo "p@ssw0rd" >$DIR/mongo/.mongo_tls_keyfile_password
+    echo -e "\nStarting containers..."
+    mkdir -p ./.mongo
+    if [[ ! -f ./.mongo/mongo_tls_keyfile_password ]]; then
+        openssl rand -hex 10 >./.mongo/mongo_tls_keyfile_password
     fi
-    if [[ ! -f $DIR/mongo/.mongo_username ]]; then
-        echo "root" >$DIR/mongo/.mongo_username
+    if [[ ! -f ./.mongo/mongo_username ]]; then
+        echo "root" >./.mongo/mongo_username
     fi
-    if [[ ! -f $DIR/mongo/.mongo_password ]]; then
-        openssl rand -hex 10 >$DIR/mongo/.mongo_password
+    if [[ ! -f ./.mongo/mongo_password ]]; then
+        openssl rand -hex 10 >./.mongo/mongo_password
     fi
-    if [[ ! -f $DIR/mongo/.mongo_initdb_root_username ]]; then
-        echo "root" >$DIR/mongo/.mongo_initdb_root_username
+    if [[ ! -f ./.mongo/mongo_initdb_root_username ]]; then
+        echo "root" >./.mongo/mongo_initdb_root_username
     fi
-    if [[ ! -f $DIR/mongo/.mongo_initdb_root_password ]]; then
-        openssl rand -hex 10 >$DIR/mongo/.mongo_initdb_root_password
+    if [[ ! -f ./.mongo/mongo_initdb_root_password ]]; then
+        openssl rand -hex 10 >./.mongo/mongo_initdb_root_password
     fi
-    env docker compose --env-file $DOTENV -f $DIR/$DCYML up --detach --remove-orphans --no-build
+    env docker compose --env-file $DOTENV -f ./$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
-        docker cp init:/cert/mongo0.pem $DIR/mongo/mongo0.pem
-        docker cp init:/cert/mongo-ca.pem $DIR/mongo/mongo-ca.pem
+        docker cp init:/cert/mongo0.pem ./.mongo/mongo0.pem
+        docker cp init:/cert/mongo-ca.pem ./.mongo/mongo-ca.pem
         echo -e "\n✔ Platform is up and running."
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
@@ -142,18 +156,17 @@ function logsBI() {
 }
 
 function buildBI() {
-    docker compose --env-file $DOTENV -f $DIR/$DCYML build $1
+    docker compose --env-file $DOTENV -f ./$DCYML build $1
     if [ $? -ne 0 ]; then
         echo -e "\n✘ Sorry! An error occured."
         return 0
     fi
     echo -e "\nBuilt OK :)"
-    echo -e "\n!!!You should restart containers"
+    echo "You should restart containers"
     return 1
 }
 
 # ENV VARIABLES
-DIR="."
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 DCYML="docker-compose.yml"
@@ -162,6 +175,9 @@ LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
 
 case $1 in
+"init")
+    initBI
+    ;;
 "start")
     startBI
     ;;
