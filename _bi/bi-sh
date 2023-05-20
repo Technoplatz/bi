@@ -134,7 +134,7 @@ function updateBI() {
         chmod +x $DIR/bi.sh
         echo "✔ Service script received successfully."
     fi
-    docker compose -f $DIR/$DCYML pull
+    docker compose --env-file $DOTENV -f $DIR/$DCYML pull
     if [ $? -eq 0 ]; then
         echo -e "✔ The latest version received successfully."
         echo "You should restart containers"
@@ -160,11 +160,7 @@ function pruneBI() {
 function startBI() {
     echo "Starting containers..."
     mkdir -p $DIR/mongo
-    ENVF=$DOTENV
-    if [[ ! -z $1 ]]; then
-        ENVF=$1
-    fi
-    env docker compose --env-file $ENVF -f $DIR/$DCYML up --detach --remove-orphans --no-build
+    env docker compose --env-file $DOTENV -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
         docker cp init:/cert/mongo0.pem $DIR/mongo/mongo0.pem
@@ -210,7 +206,7 @@ function logsBI() {
 }
 
 function buildBI() {
-    docker compose -f $DIR/$DCYML build $1
+    docker compose --env-file $DOTENV -f $DIR/$DCYML build $1
     if [ $? -ne 0 ]; then
         echo -e "\n✘ Sorry! An error occured."
         return 0
@@ -221,10 +217,11 @@ function buildBI() {
 }
 
 # ENV VARIABLES
+DIR="."
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 DCYML="docker-compose.yml"
-DOTENV=".env"
+DOTENV=".env-dev"
 TOKEN=""
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
@@ -243,18 +240,16 @@ if [[ ! -z $2 ]]; then
     fi
 fi
 
-DIR="."
-
 case $1 in
 "install")
     installBI
     ;;
 "start")
-    startBI "$2"
+    startBI
     ;;
 "restart")
     stopBI
-    startBI "$2"
+    startBI
     ;;
 "stop")
     stopBI

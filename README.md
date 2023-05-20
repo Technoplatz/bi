@@ -76,7 +76,7 @@ Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden 
 Mustafa Mat\
 <sup>Geschäftsführer, MD</sup>\
 Senior Developer\
-Data Sciences & Statistics B.Sc.\
+Data Sciences - Statistics B.Sc.\
 [@mustafamat](https://www.github.com/mustafamat)
 
 --
