@@ -42,102 +42,23 @@ EOF
 
 function helpBI() {
     echo "Available commands:"
-    echo "./bi-sh install"
     echo "./bi-sh start"
     echo "./bi-sh restart"
     echo "./bi-sh stop"
     echo "./bi-sh update"
     echo "./bi-sh prune [--all]"
-    echo "./bi-sh logs api|pwa|init|replicaset [last n rows]"
-    echo "./bi-sh build [api|pwa|init|replicaset]"
+    echo "./bi-sh logs api|pwa|init|replicaset|stream [last n rows]"
+    echo "./bi-sh build [api|pwa|init|replicaset|stream]"
     echo "./bi-sh help"
 }
 
-function installBI() {
-    if [ -d $DIR ]; then
-        while true; do
-            read -p "$(echo -e "Oops! An existing ${COLOR}$DIR${NOCOLOR} folder found. Do you want to remove it? (Y/n) ")" yn
-            case $yn in
-            [Y]*)
-                if [[ -f $DIR/$DOTENV ]]; then
-                    BKFILE=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
-                    cp $DIR/$DOTENV $DIR/$BKFILE
-                    echo -e "✔ Existing parameter file ${COLOR}$DIR/$DOTENV${NOCOLOR} has been backed up as ${COLOR}$DIR/$BKFILE${NOCOLOR}."
-                fi
-                rm -rf $DIR
-                break
-                ;;
-            [Nn]*)
-                echo -e "✘ Installation canceled."
-                return 0
-                ;;
-            *)
-                echo -e "✘ Please enter ${COLOR}Y${NOCOLOR} or ${COLOR}n${NOCOLOR}."
-                ;;
-            esac
-        done
-    fi
-    echo -e "✔ Installation started."
-    declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
-    if [ $TOKEN ]; then
-        curlHeaders+=("-H" "Authorization: token $TOKEN")
-    fi
-    curl "${curlHeaders[@]}" -Ls -o $DIR/$DCYML -o $DIR/$DOTENV $RAWREPO/{$DCYML,$DOTENV}
-    CONTD=$(cat $DIR/$DCYML | head -c 3)
-    if [[ "$CONTD" == *"40"* || ! -z $DIR/$DCYML || -z $DIR/$DOTENV ]]; then
-        echo -e "✘ Sorry! Required files not received successfully $CONTD."
-        echo -e "You can retry by adding a token ${COLOR}./bi-sh install [token]${NOCOLOR} as the way to get connected privately."
-        return 0
-    else
-        echo "✔ Required files received successfully."
-    fi
-    echo "✔ The first step completed successfully."
-    echo ">>> NEXT STEPS:"
-    echo -e "${COLOR}>>> Please note that your project folder is $DIR${NOCOLOR}"
-    echo -e ">>> 1. Open ${COLOR}$DIR$/.env${NOCOLOR} file with any text editor."
-    echo ">>> 2. Apply the necessary changes and save it."
-    echo -e ">>> 3. Run ${COLOR}./bi-sh start${NOCOLOR} to make containers up and keep them running."
-    echo "Here you go :)"
-    return 1
-}
-
 function updateBI() {
-    echo "Updating platform..."
-    if [ ! -d $DIR ]; then
-        echo -e "✘ Sorry! ${COLOR}$DIR${NOCOLOR} folder not found in the directory you are."
-        return 0
-    fi
-    declare -a curlHeaders=("-H" "Accept: application/vnd.github.v3.raw")
-    if [ $TOKEN ]; then
-        curlHeaders+=("-H" "Authorization: token $TOKEN")
-    fi
-    curl "${curlHeaders[@]}" -Lso $DIR/$DCYML.bak $RAWREPO/{$DCYML}
-    CONTD=$(cat $DIR/$DCYML.bak | head -c 3)
-    if [[ -z $DIR/$DCYML.bak || "$CONTD" == *"40"* ]]; then
-        echo -e "✘ Sorry! Configuration file not received from repository ($CONTD)."
-        echo -e "You may try to add your token ${COLOR}./bi-sh update [token]${NOCOLOR} as the way to get connected privately."
-        rm $DIR/$DCYML.bak
-        return 0
-    else
-        mv -f $DIR/$DCYML.bak $DIR/$DCYML
-        echo "✔ Configuration file received successfully."
-    fi
-    curl "${curlHeaders[@]}" -Lso $DIR/bi-sh.bak $RAWREPO/bi-sh
-    CONTD=$(cat $DIR/bi-sh.bak | head -c 3)
-    if [[ -z $DIR/bi-sh.bak || "$CONTD" == *"40"* ]]; then
-        echo -e "✘ Sorry! Service script not received from repository ($CONTD)."
-        echo -e "You may try to add your token ${COLOR}./bi-sh update [token]${NOCOLOR} as the way to get connected privately."
-        rm $DIR/bi-sh.bak
-        return 0
-    else
-        mv -f $DIR/bi-sh.bak $DIR/bi-sh
-        chmod +x $DIR/bi-sh
-        echo "✔ Service script received successfully."
-    fi
-    docker compose --env-file $DOTENV -f $DIR/$DCYML pull
+    echo "Updating..."
+    BKDOTENV=$DOTENV.bak.$(date '+%Y%m%d%H%M%S')
+    cp ./$DOTENV ./$BKDOTENV
+    curl -Ls -o ./bi-sh -o ./docker-compose.yml --create-dirs https://raw.githubusercontent.com/Technoplatz/bi/main/_bi/{bi-sh,docker-compose.yml} && sudo chmod +x ./bi-sh
     if [ $? -eq 0 ]; then
-        echo -e "✔ The latest version received successfully."
-        echo "You should restart containers"
+        echo "✔ Update completed successfully."
     else
         echo -e "✘ Sorry! Process was terminated ($?)."
         return 0
@@ -160,6 +81,21 @@ function pruneBI() {
 function startBI() {
     echo "Starting containers..."
     mkdir -p $DIR/mongo
+    if [[ ! -f $DIR/mongo/.mongo_tls_keyfile_password ]]; then
+        echo "p@ssw0rd" >$DIR/mongo/.mongo_tls_keyfile_password
+    fi
+    if [[ ! -f $DIR/mongo/.mongo_username ]]; then
+        echo "root" >$DIR/mongo/.mongo_username
+    fi
+    if [[ ! -f $DIR/mongo/.mongo_password ]]; then
+        openssl rand -hex 10 >$DIR/mongo/.mongo_password
+    fi
+    if [[ ! -f $DIR/mongo/.mongo_initdb_root_username ]]; then
+        echo "root" >$DIR/mongo/.mongo_initdb_root_username
+    fi
+    if [[ ! -f $DIR/mongo/.mongo_initdb_root_password ]]; then
+        openssl rand -hex 10 >$DIR/mongo/.mongo_initdb_root_password
+    fi
     env docker compose --env-file $DOTENV -f $DIR/$DCYML up --detach --remove-orphans --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
@@ -222,28 +158,10 @@ COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 DCYML="docker-compose.yml"
 DOTENV=".env"
-TOKEN=""
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
 
-if [[ ! -z $2 ]]; then
-    if [[ "$2" == *"-dev"* ]]; then
-        if [[ ! -z $3 ]]; then
-            if [[ $1 == "update" || $1 == "install" ]]; then
-                TOKEN="$3"
-            fi
-        fi
-    else
-        if [[ $1 == "update" || $1 == "install" ]]; then
-            TOKEN="$2"
-        fi
-    fi
-fi
-
 case $1 in
-"install")
-    installBI
-    ;;
 "start")
     startBI
     ;;
