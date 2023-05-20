@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit, HostListener, Input, ViewChild } from "@angular/core";
-import { FormBuilder, FormGroup } from "@angular/forms";
+import { UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { AlertController } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "../../classes/misc";
@@ -47,7 +47,7 @@ export class CrudPage implements OnInit {
   @Input() shuttle: any = {};
   @Input() modified: boolean = false;
   @ViewChild("barcodefocus", { static: false }) barcodefocus: any;
-  public crudForm: FormGroup;
+  public crudForm: UntypedFormGroup;
   public novalue: any = null;
   public required: any = [];
   public property_list: any = [];
@@ -115,7 +115,7 @@ export class CrudPage implements OnInit {
   }
 
   constructor(
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     public misc: Miscellaneous,
     private storage: Storage,
     private crud: Crud,

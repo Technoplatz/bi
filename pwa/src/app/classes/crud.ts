@@ -32,7 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { Subject, BehaviorSubject } from "rxjs";
-import { Validators, FormControl } from "@angular/forms";
+import { Validators, UntypedFormControl } from "@angular/forms";
 import { Miscellaneous } from "./misc";
 
 @Injectable({
@@ -141,7 +141,7 @@ export class Crud {
           value: null
         }];
         init[item] = default_ ? default_ : arrayInc_ ? kv_ ? kvval_ : [] : objectInc_ ? {} : null;
-        form.addControl(item, new FormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": disabled_ || (item === "id" && op === "update" && (data[item] || init[item])) ? true : false }, Validators.compose(v)));
+        form.addControl(item, new UntypedFormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": disabled_ || (item === "id" && op === "update" && (data[item] || init[item])) ? true : false }, Validators.compose(v)));
         if (i === Object.keys(structure.properties).length - 1) {
           resolve({
             form: form,
