@@ -42,15 +42,15 @@ EOF
 
 function helpBI() {
     echo "Available commands:"
-    echo "./bi.sh install"
-    echo "./bi.sh start"
-    echo "./bi.sh restart"
-    echo "./bi.sh stop"
-    echo "./bi.sh update"
-    echo "./bi.sh prune [--all]"
-    echo "./bi.sh logs api|pwa|init|replicaset [last n rows]"
-    echo "./bi.sh build [api|pwa|init|replicaset]"
-    echo "./bi.sh help"
+    echo "./bi-sh install"
+    echo "./bi-sh start"
+    echo "./bi-sh restart"
+    echo "./bi-sh stop"
+    echo "./bi-sh update"
+    echo "./bi-sh prune [--all]"
+    echo "./bi-sh logs api|pwa|init|replicaset [last n rows]"
+    echo "./bi-sh build [api|pwa|init|replicaset]"
+    echo "./bi-sh help"
 }
 
 function installBI() {
@@ -86,7 +86,7 @@ function installBI() {
     CONTD=$(cat $DIR/$DCYML | head -c 3)
     if [[ "$CONTD" == *"40"* || ! -z $DIR/$DCYML || -z $DIR/$DOTENV ]]; then
         echo -e "✘ Sorry! Required files not received successfully $CONTD."
-        echo -e "You can retry by adding a token ${COLOR}./bi.sh install [token]${NOCOLOR} as the way to get connected privately."
+        echo -e "You can retry by adding a token ${COLOR}./bi-sh install [token]${NOCOLOR} as the way to get connected privately."
         return 0
     else
         echo "✔ Required files received successfully."
@@ -96,7 +96,7 @@ function installBI() {
     echo -e "${COLOR}>>> Please note that your project folder is $DIR${NOCOLOR}"
     echo -e ">>> 1. Open ${COLOR}$DIR$/.env${NOCOLOR} file with any text editor."
     echo ">>> 2. Apply the necessary changes and save it."
-    echo -e ">>> 3. Run ${COLOR}./bi.sh start${NOCOLOR} to make containers up and keep them running."
+    echo -e ">>> 3. Run ${COLOR}./bi-sh start${NOCOLOR} to make containers up and keep them running."
     echo "Here you go :)"
     return 1
 }
@@ -115,7 +115,7 @@ function updateBI() {
     CONTD=$(cat $DIR/$DCYML.bak | head -c 3)
     if [[ -z $DIR/$DCYML.bak || "$CONTD" == *"40"* ]]; then
         echo -e "✘ Sorry! Configuration file not received from repository ($CONTD)."
-        echo -e "You may try to add your token ${COLOR}./bi.sh update [token]${NOCOLOR} as the way to get connected privately."
+        echo -e "You may try to add your token ${COLOR}./bi-sh update [token]${NOCOLOR} as the way to get connected privately."
         rm $DIR/$DCYML.bak
         return 0
     else
@@ -126,12 +126,12 @@ function updateBI() {
     CONTD=$(cat $DIR/bi-sh.bak | head -c 3)
     if [[ -z $DIR/bi-sh.bak || "$CONTD" == *"40"* ]]; then
         echo -e "✘ Sorry! Service script not received from repository ($CONTD)."
-        echo -e "You may try to add your token ${COLOR}./bi.sh update [token]${NOCOLOR} as the way to get connected privately."
+        echo -e "You may try to add your token ${COLOR}./bi-sh update [token]${NOCOLOR} as the way to get connected privately."
         rm $DIR/bi-sh.bak
         return 0
     else
-        mv -f $DIR/bi-sh.bak $DIR/bi.sh
-        chmod +x $DIR/bi.sh
+        mv -f $DIR/bi-sh.bak $DIR/bi-sh
+        chmod +x $DIR/bi-sh
         echo "✔ Service script received successfully."
     fi
     docker compose --env-file $DOTENV -f $DIR/$DCYML pull
@@ -193,7 +193,7 @@ function stopBI() {
 function logsBI() {
     if [ ! $1 ]; then
         echo "✘ Sorry! You need to provide a docker service ID."
-        echo "Command should be given like ./bi.sh logs api|pwa|init|replicaset"
+        echo "Command should be given like ./bi-sh logs api|pwa|init|replicaset"
         return 0
     fi
     TAIL=$LOGTAIL
@@ -221,7 +221,7 @@ DIR="."
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 DCYML="docker-compose.yml"
-DOTENV=".env-dev"
+DOTENV=".env"
 TOKEN=""
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
