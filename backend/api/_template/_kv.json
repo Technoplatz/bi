@@ -31,6 +31,6 @@
   "index": [["kav_key"]],
   "unique": [["kav_key", "kav_as", "kav_value"]],
   "sort": {
-    "kav_key": 1
+    "_created_at": -1
   }
 }

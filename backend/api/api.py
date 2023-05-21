@@ -2236,18 +2236,11 @@ class Crud:
             structure_ = obj["structure"]
             collection_ = obj["collection"]
 
-            if (
-                collection_ in Mongo().db_.list_collection_names()
-                and "properties" in structure_
-            ):
+            if collection_ in Mongo().db_.list_collection_names() and "properties" in structure_:
                 properties_ = structure_["properties"]
                 properties_ = Misc().properties_cleaner_f(properties_)
 
-                if (
-                    "required" in structure_
-                    and structure_["required"]
-                    and len(structure_["required"]) > 0
-                ):
+                if "required" in structure_ and structure_["required"] and len(structure_["required"]) > 0:
                     break_ = False
                     err_ = None
                     for req_ in structure_["required"]:
@@ -2270,6 +2263,7 @@ class Crud:
                 Mongo().db_.command({"collMod": collection_, "validator": validator_})
 
                 Mongo().db_[collection_].drop_indexes()
+
                 if "index" in structure_ and len(structure_["index"]) > 0:
                     break_ = False
                     err_ = None
@@ -2482,7 +2476,7 @@ class Crud:
                         counter_name_ = f"{property_.upper()}_COUNTER"
                         find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
                         if not find_one_:
-                            doc_ = {"kav_key": counter_name_, "kav_value": 0, "kav_as": "int"}
+                            doc_ = {"kav_key": counter_name_, "kav_value": "0", "kav_as": "int"}
                             doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
                             doc_["_created_by"] = doc_["_modified_by"] = user_["usr_id"]
                             Mongo().db_["_kv"].insert_one(doc_)
@@ -3100,7 +3094,7 @@ class Crud:
                     Mongo().db_[datac_].delete_one({})
 
             if is_crud_:
-                get_properties_ = self.get_properties_f(col_id_)
+                get_properties_ = self.get_properties_f(collection_id_)
                 if not get_properties_["result"]:
                     raise APIError(get_properties_["msg"])
                 properties_ = get_properties_["properties"]
@@ -3116,7 +3110,7 @@ class Crud:
                 "collection": collection_id_,
                 "op": "insert",
                 "user": user_["email"] if user_ else None,
-                "document": doc_,
+                "document": doc_
             })
             if not log_["result"]:
                 raise APIError(log_["msg"])

@@ -4,33 +4,42 @@
       "bsonType": "string",
       "title": "No",
       "description": "Record No",
+      "placeholder": "Record No",
       "pattern": "^[a-zA-Z0-9-]{1,64}$",
       "minLength": 1,
-      "maxLength": 64
+      "maxLength": 64,
+      "width": 140
     },
     "zzz_status": {
       "bsonType": "string",
       "title": "Status",
       "description": "Record Status",
+      "placeholder": "Status",
       "enum": ["00-Open", "10-InProgress", "20-Closed", "30-Finalized"],
-      "default": "00-Open"
+      "default": "00-Open",
+      "width": 140
     },
     "zzz_date": {
       "bsonType": "date",
       "title": "Date",
-      "description": "Record Date"
+      "description": "Record Date",
+      "placeholder": "Date",
+      "width": 140
     },
     "zzz_qty": {
       "bsonType": "number",
       "title": "Quantity",
       "description": "Quantity",
-      "default": 1
+      "placeholder": "Quantity",
+      "default": 1,
+      "width": 140
     },
     "zzz_is_disabled": {
       "bsonType": "bool",
       "title": "Is Disabled?",
       "description": "Is Disabled?",
-      "default": false
+      "default": false,
+      "width": 140
     }
   },
   "required": ["zzz_no", "zzz_status"],
