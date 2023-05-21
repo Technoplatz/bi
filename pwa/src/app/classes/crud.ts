@@ -58,7 +58,7 @@ export class Crud {
     private misc: Miscellaneous
   ) { }
 
-  initForm(op: string, structure: any, form: any, data: any, collections: any, views: any) {
+  initForm(op: string, structure: any, form: any, data: any, collections: any, views: any, counters: any) {
     return new Promise((resolve, reject) => {
       let i = 0;
       let init: any = {};
@@ -98,6 +98,7 @@ export class Crud {
         const chips_ = p.chips ? true : false;
         const view_ = p.view ? true : false;
         const manualAdd_ = p.manualAdd ? true : false;
+        const counter_ = p.counter && p.counter === true ? true : false;
         view_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < views.length; v++) { arr_.push(views[v].record.vie_id) } return arr_; })() : null;
         collection_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < collections.length; v++) { arr_.push(collections[v].col_id) } return arr_; })() : null;
         const parents_ = structure.parents ? structure.parents.find((obj: any) => obj.match[0]?.key === item) : null;
@@ -134,13 +135,14 @@ export class Crud {
           chips: chips_,
           subType: subType_,
           manualAdd: manualAdd_,
-          placeholder: placeholder_
+          placeholder: placeholder_,
+          counter: counter_
         });
         const kvval_: any = [{
           key: null,
           value: null
         }];
-        init[item] = default_ ? default_ : arrayInc_ ? kv_ ? kvval_ : [] : objectInc_ ? {} : null;
+        init[item] = counters && counters[item] ? counters[item] : default_ ? default_ : arrayInc_ ? kv_ ? kvval_ : [] : objectInc_ ? {} : null;
         form.addControl(item, new UntypedFormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": disabled_ || (item === "id" && op === "update" && (data[item] || init[item])) ? true : false }, Validators.compose(v)));
         if (i === Object.keys(structure.properties).length - 1) {
           resolve({

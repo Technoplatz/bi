@@ -29,16 +29,9 @@
         "20-OnCustoms",
         "30-OnCustomsProcess",
         "40-ClearanceCompleted",
-        "50-OnTheTouchpoint",
+        "50-InStock",
         "60-ReadyToBeDelivered",
-        "70-Delivered",
-        "BL-Backlog",
-        "NE-Missing",
-        "WF-WriteOff",
-        "RE-Remittance",
-        "SP-ServicePack",
-        "EX-Exported",
-        "AR-Archived"
+        "70-Delivered"
       ],
       "default": "00-Open",
       "width": 160

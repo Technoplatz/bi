@@ -161,7 +161,7 @@ function buildBI() {
         return 0
     fi
     echo -e "\nBuilt OK :)"
-    echo "You should restart containers"
+    startBI
     return 1
 }
 

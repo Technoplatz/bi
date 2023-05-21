@@ -1,0 +1,10 @@
+{
+  "foo_something_date": {
+    "bsonType": "date",
+    "title": "Date",
+    "description": "Date of something",
+    "placeholder": "Please provide a date",
+    "default": "$CURRENT_DATE",
+    "width": 130
+  }
+}

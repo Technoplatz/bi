@@ -11,8 +11,8 @@ Each new application version may contain patches released for security vulnerabi
 
 | Version | Supported |
 | :--- | :---: |
-| >= 3.0.28, latest | Yes |
-| < 3.0.27 | No |
+| >= 4.1.2, latest | Yes |
+| < 4.1.1 | No |
 
 ## Reporting a Vulnerability
 

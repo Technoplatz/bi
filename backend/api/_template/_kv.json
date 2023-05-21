@@ -7,7 +7,7 @@
       "pattern": "^[A-Z0-9_-]{1,64}$",
       "title": "Key",
       "description": "Key Name",
-      "width": 180
+      "width": 220
     },
     "kav_value": {
       "bsonType": "string",

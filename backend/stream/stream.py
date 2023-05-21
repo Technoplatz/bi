@@ -378,6 +378,9 @@ class Trigger():
                     raise AppException(refresh_f_["exc"])
                 raise PassException(">>> _collection updated")
 
+            if source_collection_[:1] == "_":
+                raise PassException(f">>> system collection passed {source_collection_}")
+
             source_collection_id_ = source_collection_.replace("_data", "")
 
             _id = event_["documentKey"]["_id"]

@@ -1,0 +1,16 @@
+{
+  "foo_something_string_tag": {
+    "bsonType": "string",
+    "title": "Field Title",
+    "description": "String Field Description",
+    "placeholder": "Enter a tag eg #Customers",
+    "minWidth": 3,
+    "maxWidth": 16,
+    "pattern": "^[#@][a-zA-Z0-9]{3,16}$",
+    "permanent": false,
+    "default": "#User",
+    "width": 140
+  }
+}
+
+

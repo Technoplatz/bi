@@ -1,0 +1,14 @@
+{
+  "foo_something_string": {
+    "bsonType": "string",
+    "title": "Field Title",
+    "description": "String field description",
+    "placeholder": "Please enter a string value",
+    "minWidth": 8,
+    "maxWidth": 32,
+    "pattern": "^[a-zA-Z0-9-_ ]{8,32}$",
+    "default": null,
+    "permanent": false,
+    "width": 140
+  }
+}

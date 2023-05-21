@@ -77,6 +77,7 @@ export class CollectionPage implements OnInit {
   private is_selected: boolean = false;
   public multicheckbox: boolean = false;
   private master: any = {};
+  private counters_: any = {};
   public collections: any = [];
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
@@ -161,6 +162,7 @@ export class CollectionPage implements OnInit {
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
     this.crud.getCollection(this.id).then((res: any) => {
       this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
+      this.counters_ = res && res.counters ? res.counters : {};
       this.subheader = res && res.data ? res.data.col_title : this.id;
       this.description = res && res.data ? res.data.col_description : this.admin_collections[this.id].description;
       this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -337,6 +339,7 @@ export class CollectionPage implements OnInit {
           views: this.views ? this.views : [],
           user: this.user,
           data: rec,
+          counters: this.counters_,
           structure: this.editor ? this.editor.get() : this.structure,
           sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
           filter: op === "action" ? this.filter : null,

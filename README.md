@@ -9,7 +9,7 @@ Table of contents;
 
 ## Platform
 
-Technoplatz BI is an open source, multi-container, JSON-driven advanced no-code data application and data sharing platform designed to empower business professionals build their own unique solution. Technoplatz platform offers a pragmatic and optimised way to meet the four key requirements of critical business processes by considering that each company has its own unique conditions;
+Technoplatz BI community edition is an open source, multi-container, JSON-driven advanced no-code data application and data sharing platform designed to empower business professionals build their own unique solution. Technoplatz platform offers a pragmatic and optimised way to meet the four key requirements of critical business processes by considering that each company has its own unique conditions;
 
 - Dedicated Infastructure
 - No-code Data Application

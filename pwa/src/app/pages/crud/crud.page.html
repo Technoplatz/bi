@@ -294,7 +294,7 @@ https://www.gnu.org/licenses.
                         </div>
                     </ion-item>
                 </ion-list>
-                <ion-list *ngIf="op=='update'" class="ion-no-padding ion-margin-bottom crud-form-list">
+                <ion-list *ngIf="op=='update'" class="ion-no-padding crud-form-list">
                     <ion-item *ngIf="data_['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'ID' }}</ion-label>
                         <ion-input class="ion-no-padding" type="text" [value]="data_['_id']" disabled> </ion-input>
@@ -334,4 +334,5 @@ https://www.gnu.org/licenses.
         <ion-label> {{ loadingText | translate }} </ion-label>
     </ion-item>
 </ion-content>
+<br />
 <modal-footer><modal-footer></modal-footer></modal-footer>

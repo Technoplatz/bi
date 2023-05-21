@@ -254,6 +254,7 @@ class Misc:
             "scan",
             "replacement",
             "placeholder",
+            "counter"
         ]
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
@@ -2104,31 +2105,24 @@ class Crud:
             user_ = obj["userindb"]
             col_id_ = obj["collection"]
             data_ = {}
-            usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-            )
+            counters_ = {}
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
             if Misc().permitted_user_f(user_):
                 permitted_ = True
             else:
                 permitted_ = False
                 for usr_tag_ in usr_tags_:
-                    permissions_ = (
-                        Mongo()
-                        .db_["_permission"]
-                        .find_one(
-                            {
-                                "per_collection_id": col_id_,
-                                "per_tag": usr_tag_,
-                                "$or": [
-                                    {"per_insert": True},
-                                    {"per_read": True},
-                                    {"per_update": True},
-                                    {"per_delete": True},
-                                ],
-                            }
-                        )
-                    )
+                    permissions_ = Mongo().db_["_permission"].find_one({
+                        "per_collection_id": col_id_,
+                        "per_tag": usr_tag_,
+                        "$or": [
+                            {"per_insert": True},
+                            {"per_read": True},
+                            {"per_update": True},
+                            {"per_delete": True},
+                        ],
+                    })
                     if permissions_:
                         permitted_ = True
                         break
@@ -2138,7 +2132,11 @@ class Crud:
             else:
                 raise APIError(f"no permission for {col_id_}")
 
-            return {"result": True, "data": data_}
+            if col_id_[:1] != "_":
+                counters_f_ = self.counters_f({"col_id": col_id_})
+                counters_ = counters_f_["counters"] if counters_f_["result"] is True and "counters" in counters_f_ else {}
+
+            return {"result": True, "data": data_, "counters": counters_}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -2476,6 +2474,19 @@ class Crud:
             if not func_["result"]:
                 raise APIError(func_["msg"])
 
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if properties_:
+                for property_ in properties_:
+                    prop_ = properties_[property_]
+                    if prop_["bsonType"] in ["int", "number", "float", "decimal"] and "counter" in prop_ and prop_["counter"] is True:
+                        counter_name_ = f"{property_.upper()}_COUNTER"
+                        find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
+                        if not find_one_:
+                            doc_ = {"kav_key": counter_name_, "kav_value": 0, "kav_as": "int"}
+                            doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
+                            doc_["_created_by"] = doc_["_modified_by"] = user_["usr_id"]
+                            Mongo().db_["_kv"].insert_one(doc_)
+
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
@@ -2546,6 +2557,42 @@ class Crud:
                 "document": str(exc)
             })
 
+            return Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
+    def counters_f(self, input_):
+        """
+        docstring is in progress
+        """
+        try:
+            col_id_ = input_["col_id"] if "col_id" in input_ else None
+            if not col_id_:
+                raise APIError("collection is missing")
+
+            counters_ = {}
+            get_properties_ = self.get_properties_f(col_id_)
+            if not get_properties_["result"]:
+                raise APIError(get_properties_["msg"])
+            properties_ = get_properties_["properties"]
+            for property_ in properties_:
+                prop_ = properties_[property_]
+                if prop_["bsonType"] in ["int", "number", "float", "decimal"] and "counter" in prop_ and prop_["counter"] is True:
+                    counter_name_ = f"{property_.upper()}_COUNTER"
+                    find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
+                    if not find_one_:
+                        raise APIError(f"missing _kv for {property_}")
+                    value_ = find_one_["kav_value"] if "kav_value" in find_one_ and int(find_one_["kav_value"]) >= 0 else 0
+                    value_ = int(value_) + 1
+                    counters_[property_] = value_
+
+            return {"result": True, "counters": counters_}
+
+        except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -3052,6 +3099,18 @@ class Crud:
                         raise APIError(schemavalidate_["msg"])
                     Mongo().db_[datac_].delete_one({})
 
+            if is_crud_:
+                get_properties_ = self.get_properties_f(col_id_)
+                if not get_properties_["result"]:
+                    raise APIError(get_properties_["msg"])
+                properties_ = get_properties_["properties"]
+                for property_ in properties_:
+                    prop_ = properties_[property_]
+                    if prop_["bsonType"] in ["int", "number", "float", "decimal"] and "counter" in prop_ and prop_["counter"] is True:
+                        counter_name_ = f"{property_.upper()}_COUNTER"
+                        counter_ = doc_[property_]
+                        Mongo().db_["_kv"].update_one({"kav_key": counter_name_}, {"$set": {"kav_value": str(counter_) }})
+
             log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_id_,
@@ -3146,7 +3205,8 @@ class Email:
             return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
 
         except smtplib.SMTPServerDisconnected as exc_:
-            return Misc().api_error_f(f"smtp connection: {exc_}")
+            # return Misc().api_error_f(f"smtp connection: {exc_}")
+            return {"result": True, "exc": str(exc_)}
 
         except Exception as exc_:
             return Misc().exception_f(f"smtp exception: {exc_}")
@@ -4320,6 +4380,8 @@ def crud_f():
             res_ = Crud().insert_f(input_)
         elif op_ in ["clone", "delete"]:
             res_ = Crud().multiple_f(input_)
+        elif op_ in ["counterset", "counterget"]:
+            res_ = Crud().counters_f(input_)
         elif op_ == "action":
             res_ = Crud().action_f(input_)
         elif op_ == "remove":
