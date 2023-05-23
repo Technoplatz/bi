@@ -2457,6 +2457,10 @@ class Crud:
             arr_ = [str_ for str_ in structure_ if str_ in STRUCTURE_KEYS_]
             if len(arr_) != len(STRUCTURE_KEYS_):
                 raise APIError(f"some structure keys are missing; expected: {','.join(STRUCTURE_KEYS_)}, considered: {','.join(arr_)}")
+            
+            arr_ = [str_ for str_ in structure_ if str_ not in STRUCTURE_KEYS_]
+            if len(arr_) > 0:
+                raise APIError(f"some structure keys are invalid; expected: {','.join(STRUCTURE_KEYS_)}, considered: {','.join(arr_)}")
 
             Mongo().db_["_collection"].update_one({"col_id": col_id_}, {"$set": {
                 "col_structure": structure_,
@@ -2472,11 +2476,13 @@ class Crud:
             if properties_:
                 for property_ in properties_:
                     prop_ = properties_[property_]
-                    if prop_["bsonType"] in ["int", "number", "float", "decimal"] and "counter" in prop_ and prop_["counter"] is True:
+                    if prop_["bsonType"] in ["int", "number", "float", "decimal", "string"] and "counter" in prop_ and prop_["counter"] is True:
                         counter_name_ = f"{property_.upper()}_COUNTER"
                         find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
                         if not find_one_:
-                            doc_ = {"kav_key": counter_name_, "kav_value": "0", "kav_as": "int"}
+                            initialno__ = "0" if prop_["bsonType"] in ["int", "number", "float", "decimal"] else ""
+                            initialas__ = "string" if prop_["bsonType"] == "string" else "int"
+                            doc_ = {"kav_key": counter_name_, "kav_value": initialno__, "kav_as": initialas__}
                             doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
                             doc_["_created_by"] = doc_["_modified_by"] = user_["usr_id"]
                             Mongo().db_["_kv"].insert_one(doc_)
@@ -2575,13 +2581,19 @@ class Crud:
             properties_ = get_properties_["properties"]
             for property_ in properties_:
                 prop_ = properties_[property_]
-                if prop_["bsonType"] in ["int", "number", "float", "decimal"] and "counter" in prop_ and prop_["counter"] is True:
+                if prop_["bsonType"] in ["int", "number", "float", "decimal", "string"] and "counter" in prop_ and prop_["counter"] is True:
                     counter_name_ = f"{property_.upper()}_COUNTER"
                     find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
                     if not find_one_:
                         raise APIError(f"missing _kv for {property_}")
-                    value_ = find_one_["kav_value"] if "kav_value" in find_one_ and int(find_one_["kav_value"]) >= 0 else 0
-                    value_ = int(value_) + 1
+                    if prop_["bsonType"] in ["int", "number", "float", "decimal"]:
+                        value_ = find_one_["kav_value"] if "kav_value" in find_one_ and int(find_one_["kav_value"]) >= 0 else 0
+                        value_ = int(value_) + 1
+                    else:
+                        # match__ = re.findall(r'\d+', find_one_["kav_value"])[-1]
+                        # value_ = match__ if match__ and "kav_value" in find_one_ and find_one_["kav_value"] is not None else find_one_["kav_value"]
+                        value_ = find_one_["kav_value"]
+
                     counters_[property_] = value_
 
             return {"result": True, "counters": counters_}
@@ -3100,9 +3112,13 @@ class Crud:
                 properties_ = get_properties_["properties"]
                 for property_ in properties_:
                     prop_ = properties_[property_]
-                    if prop_["bsonType"] in ["int", "number", "float", "decimal"] and "counter" in prop_ and prop_["counter"] is True:
-                        counter_name_ = f"{property_.upper()}_COUNTER"
-                        counter_ = doc_[property_]
+                    if "counter" in prop_ and prop_["counter"] is True and prop_["bsonType"] in ["int", "number", "float", "decimal", "string"]:
+                        if prop_["bsonType"] in ["int", "number", "float", "decimal"]:
+                            counter_name_ = f"{property_.upper()}_COUNTER"
+                            counter_ = doc_[property_]
+                        else:
+                            counter_ = doc_[property_]
+
                         Mongo().db_["_kv"].update_one({"kav_key": counter_name_}, {"$set": {"kav_value": str(counter_) }})
 
             log_ = Misc().log_f({

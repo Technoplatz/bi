@@ -1,0 +1,14 @@
+{
+  "collection": "target_collection",
+  "get": "target_field_to_be_linked",
+  "set": [
+    {
+      "key": "target_field_receiver",
+      "value": "source_field_sender"
+    },
+    {
+      "key": "target_field_receiver",
+      "value": "source_field_sender"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "properties": {
+    "shp_date": {
+      "bsonType": "date",
+      "title": "Date",
+      "description": "Record Date",
+      "width": 140
+    },
+    "shp_no": {
+      "bsonType": "number",
+      "title": "Record No",
+      "description": "Record No",
+      "placeholder": "No",
+      "minimum": 1,
+      "maximum": 9999,
+      "counter": true,
+      "width": 140
+    },
+    "shp_serial_no": {
+      "bsonType": "string",
+      "title": "Serial No",
+      "description": "Actual legal serial no printed on the waybill",
+      "placeholder": "Waybill Serial No",
+      "pattern": "^[a-zA-Z0-9-]{2,16}$",
+      "minLength": 2,
+      "maxLength": 16,
+      "counter": true,
+      "width": 140
+    },
+    "shp_driver_name": {
+      "bsonType": "string",
+      "title": "Driver Name",
+      "description": "Name and surname of vehicle driver",
+      "placeholder": "Driver Name",
+      "minLength": 2,
+      "maxLength": 32,
+      "width": 180
+    },
+    "shp_driver_idno": {
+      "bsonType": "string",
+      "title": "Driver ID",
+      "description": "ID of vehicle driver",
+      "placeholder": "Driver ID",
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[A-Z0-9]{10,11}$",
+      "width": 140
+    },
+    "shp_vehicle_plate": {
+      "bsonType": "string",
+      "title": "Plate No",
+      "description": "Vehicle plate number",
+      "placeholder": "Vehicle Plate",
+      "minLength": 6,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9 ]{8,16}$",
+      "width": 140
+    }
+  },
+  "required": ["shp_no", "shp_serial_no", "shp_driver_name", "shp_driver_idno", "shp_date", "shp_vehicle_plate"],
+  "index": [["shp_no"], ["shp_serial_no"]],
+  "unique": [["shp_no"], ["shp_serial_no"]],
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {},
+  "sort": {
+    "_modified_at": -1
+  }
+}
