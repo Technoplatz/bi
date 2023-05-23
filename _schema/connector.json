@@ -1,0 +1,24 @@
+{
+  "id": "shipment-connector",
+  "enabled": true,
+  "method": "post",
+  "url": "https://api.bi.technoplatz.com",
+  "headers": [{ "Authorization": "$POST01_BEARER" }, { "X-Api-Key": "$POST01_APIKEY" }],
+  "body": {
+    "op": "upsert",
+    "collection": "delivery",
+    "data": {
+      "DeliveryNo": "$dnn_no",
+      "ManifestId": "$dnn_manifest_no"
+    }
+  },
+  "actions": {
+    "200": {
+      "mapping": [
+        {
+          "merchandise": [{ "source_field": "DeliveryNo", "target_field": "dnn_no" }]
+        }
+      ]
+    }
+  }
+}

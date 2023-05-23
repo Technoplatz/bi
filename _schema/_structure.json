@@ -1,0 +1,12 @@
+{
+  "properties": {},
+  "sort": {},
+  "required": [],
+  "unique": [[]],
+  "index": [[]],
+  "parents": [{}],
+  "links": [{}],
+  "actions": [{}],
+  "triggers": [{}],
+  "connectors": [{}]
+}

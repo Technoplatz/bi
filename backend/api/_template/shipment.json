@@ -3,65 +3,101 @@
     "shp_date": {
       "bsonType": "date",
       "title": "Date",
-      "description": "Record Date",
+      "description": "Shipment Date",
       "width": 140
     },
-    "shp_no": {
+    "shp_id": {
       "bsonType": "number",
-      "title": "Record No",
-      "description": "Record No",
-      "placeholder": "No",
+      "title": "ID",
+      "description": "Shipment ID",
+      "placeholder": "Shipment ID",
       "minimum": 1,
-      "maximum": 9999,
+      "maximum": 99999,
       "counter": true,
-      "width": 140
+      "disabled": true,
+      "width": 100
     },
-    "shp_serial_no": {
+    "shp_waybill_no": {
       "bsonType": "string",
-      "title": "Serial No",
-      "description": "Actual legal serial no printed on the waybill",
-      "placeholder": "Waybill Serial No",
-      "pattern": "^[a-zA-Z0-9-]{2,16}$",
-      "minLength": 2,
+      "title": "Waybill No",
+      "description": "Waybill serial number",
+      "placeholder": "Waybill No",
+      "pattern": "^[A-Z0-9]{16,16}$",
+      "minLength": 16,
       "maxLength": 16,
-      "counter": true,
       "width": 140
     },
-    "shp_driver_name": {
+    "shp_carrier_name": {
       "bsonType": "string",
-      "title": "Driver Name",
-      "description": "Name and surname of vehicle driver",
-      "placeholder": "Driver Name",
+      "title": "Carrier",
+      "description": "Carrier name or driver name surname",
+      "placeholder": "Carrier or Driver Name",
       "minLength": 2,
       "maxLength": 32,
       "width": 180
     },
-    "shp_driver_idno": {
+    "shp_carrier_id": {
       "bsonType": "string",
-      "title": "Driver ID",
-      "description": "ID of vehicle driver",
-      "placeholder": "Driver ID",
+      "title": "Carrier Tax",
+      "description": "Carrier tax no or driver id",
+      "placeholder": "Carrier Tax/Id No",
       "minLength": 10,
-      "maxLength": 11,
-      "pattern": "^[A-Z0-9]{10,11}$",
+      "maxLength": 12,
+      "pattern": "^[0-9]{10,12}$",
       "width": 140
     },
-    "shp_vehicle_plate": {
+    "shp_vehicle_id": {
       "bsonType": "string",
-      "title": "Plate No",
+      "title": "vehicle Id",
       "description": "Vehicle plate number",
       "placeholder": "Vehicle Plate",
       "minLength": 6,
       "maxLength": 16,
-      "pattern": "^[A-Za-z0-9 ]{8,16}$",
+      "pattern": "^[A-Za-z0-9 ]{6,16}$",
       "width": 140
+    },
+    "shp_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status",
+      "minLength": 2,
+      "maxLength": 16,
+      "pattern": "^[a-zA-Z]{2,16}$",
+      "permanent": false,
+      "enum": ["OK", "Processing", "Error"],
+      "default": "Processing",
+      "width": 100
+    },
+    "shp_notes": {
+      "bsonType": "string",
+      "title": "Notes",
+      "description": "Shipment notes to carrier or customer",
+      "placeholder": "Shipment Notes",
+      "minLength": 0,
+      "maxLength": 512,
+      "width": 200
     }
   },
-  "required": ["shp_no", "shp_serial_no", "shp_driver_name", "shp_driver_idno", "shp_date", "shp_vehicle_plate"],
-  "index": [["shp_no"], ["shp_serial_no"]],
-  "unique": [["shp_no"], ["shp_serial_no"]],
+  "required": ["shp_id", "shp_carrier_name", "shp_carrier_id", "shp_date", "shp_waybill_no", "shp_vehicle_id"],
+  "index": [["shp_id"], ["shp_waybill_no"]],
+  "unique": [["shp_id"], ["shp_waybill_no"]],
   "parents": [],
-  "links": [],
+  "links": [
+    {
+      "collection": "delivery",
+      "get": "dnn_no",
+      "set": [
+        {
+          "key": "dnn_waybill_no",
+          "value": "shp_waybill_no"
+        },
+        {
+          "key": "dnn_waybill_date",
+          "value": "shp_date"
+        }
+      ]
+    }
+  ],
   "actions": [],
   "triggers": [],
   "views": {},

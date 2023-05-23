@@ -89,9 +89,17 @@ class Trigger():
         self.client = pymongo.MongoClient(self.connstr_)
         self.db_ = self.client[mongo_db_]
 
-        refresh_f_ = self.refresh_f()
-        if not refresh_f_["result"]:
-            raise AppException(refresh_f_["exc"])
+        refresh_properties_f_ = self.refresh_properties_f()
+        if not refresh_properties_f_["result"]:
+            raise AppException(refresh_properties_f_["exc"])
+
+        refresh_triggers_f_ = self.refresh_triggers_f()
+        if not refresh_triggers_f_["result"]:
+            raise AppException(refresh_triggers_f_["exc"])
+
+        refresh_connectors_f_ = self.refresh_connectors_f()
+        if not refresh_connectors_f_["result"]:
+            raise AppException(refresh_connectors_f_["exc"])
 
         print(">>> init ended")
 
@@ -111,7 +119,40 @@ class Trigger():
         tz_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
         return datetime.now(pytz.timezone(tz_))
 
-    def refresh_f(self):
+    def refresh_properties_f(self):
+        """
+        docstring is in progress
+        """
+        try:
+            print(">>> getting properties...")
+            self.properties_ = {}
+            cursor_ = self.db_["_collection"].aggregate([{
+                "$match": {"$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]}
+            }])
+            for item_ in cursor_:
+                self.properties_[item_["col_id"]] = item_["col_structure"]["properties"]
+                
+            if not self.properties_:
+                print("!!! properties passed")
+                raise AppException("!!! no properties found")
+
+            print(">>> properties refreshed")
+
+            return {"result": True}
+
+        except pymongo.errors.PyMongoError as exc_:
+            print("!!! refresher mongo error")
+            return {"result": False, "exc": exc_}
+
+        except AppException as exc_:
+            print("!!! refresher app exception")
+            return {"result": False, "exc": exc_}
+
+        except Exception as exc_:
+            print("!!! refresher exception")
+            return {"result": False, "exc": exc_}
+
+    def refresh_triggers_f(self):
         """
         docstring is in progress
         """
@@ -142,18 +183,10 @@ class Trigger():
                         })
 
             if not self.triggers_:
-                raise PassException("!!! no trigger found and passed")
+                print("!!! triggers passed")
+                raise PassException("!!! no trigger found so passed")
 
-            print(">>> getting properties...")
-            self.properties_ = {}
-            cursor_ = self.db_["_collection"].aggregate([{
-                "$match": {"$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]}
-            }])
-            for item_ in cursor_:
-                self.properties_[item_["col_id"]] = item_["col_structure"]["properties"]
-            if not self.properties_:
-                raise AppException("!!! no properties found")
-            print(">>> properties collected")
+            print(">>> triggers refreshed")
 
             return {"result": True}
 
@@ -164,8 +197,44 @@ class Trigger():
             print("!!! refresher mongo error")
             return {"result": False, "exc": exc_}
 
-        except AppException as exc_:
-            print("!!! refresher app exception")
+        except Exception as exc_:
+            print("!!! refresher exception")
+            return {"result": False, "exc": exc_}
+
+    def refresh_connectors_f(self):
+        """
+        docstring is in progress
+        """
+        try:
+            print(">>> getting connectors...")
+            self.connectors_ = []
+            cursor_ = self.db_["_collection"].aggregate([{
+                "$match": {
+                    "col_structure.connectors": {
+                        "$elemMatch": {
+                            "enabled": True
+                        }
+                    }
+                }
+            }])
+            for item_ in cursor_:
+                for connector_ in item_["col_structure"]["connectors"]:
+                    for cluster_ in connector_["targets"]:
+                        self.triggers_.append(cluster_)
+
+            if not self.connectors_:
+                print("!!! connectors passed")
+                raise PassException("!!! no connector found so passed")
+
+            print(">>> connectors refreshed")
+
+            return {"result": True}
+
+        except PassException as exc_:
+            return {"result": True, "exc": exc_}
+
+        except pymongo.errors.PyMongoError as exc_:
+            print("!!! refresher mongo error")
             return {"result": False, "exc": exc_}
 
         except Exception as exc_:
@@ -373,10 +442,21 @@ class Trigger():
                 raise AppException("no collection provided")
 
             if source_collection_ == "_collection":
-                refresh_f_ = self.refresh_f()
-                if not refresh_f_["result"]:
-                    raise AppException(refresh_f_["exc"])
-                raise PassException(">>> _collection updated")
+                properties_refreshed_ = False
+                triggers_refreshed_ = False
+                connections_refreshed_ = False
+                refresh_properties_f_ = self.refresh_properties_f()
+                if "result" in refresh_properties_f_ and refresh_properties_f_["result"] is True:
+                    properties_refreshed_ = True
+                refresh_triggers_f_ = self.refresh_triggers_f()
+                if "result" in refresh_triggers_f_ and refresh_triggers_f_["result"] is True:
+                    triggers_refreshed_ = True
+                refresh_connectors_f_ = self.refresh_connectors_f()
+                if "result" in refresh_connectors_f_ and refresh_connectors_f_["result"] is True:
+                    connections_refreshed_ = True
+                if properties_refreshed_ and triggers_refreshed_ and connections_refreshed_:
+                    raise PassException(">>> _collection updated")
+                raise AppException(f"{refresh_properties_f_['exc']} {refresh_triggers_f_['exc']} {refresh_connectors_f_['exc']}")
 
             if source_collection_[:1] == "_":
                 raise PassException(f">>> system collection passed {source_collection_}")
@@ -586,6 +666,7 @@ class Trigger():
         backlog stream is in progress
         """
         print(">>> backlog stream started")
+        print(">>> backlog stream is in progress...")
         print(">>> backlog stream ended")
         return True
 

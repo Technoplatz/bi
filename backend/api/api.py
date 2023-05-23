@@ -2457,10 +2457,6 @@ class Crud:
             arr_ = [str_ for str_ in structure_ if str_ in STRUCTURE_KEYS_]
             if len(arr_) != len(STRUCTURE_KEYS_):
                 raise APIError(f"some structure keys are missing; expected: {','.join(STRUCTURE_KEYS_)}, considered: {','.join(arr_)}")
-            
-            arr_ = [str_ for str_ in structure_ if str_ not in STRUCTURE_KEYS_]
-            if len(arr_) > 0:
-                raise APIError(f"some structure keys are invalid; expected: {','.join(STRUCTURE_KEYS_)}, considered: {','.join(arr_)}")
 
             Mongo().db_["_collection"].update_one({"col_id": col_id_}, {"$set": {
                 "col_structure": structure_,
@@ -3119,7 +3115,7 @@ class Crud:
                         else:
                             counter_ = doc_[property_]
 
-                        Mongo().db_["_kv"].update_one({"kav_key": counter_name_}, {"$set": {"kav_value": str(counter_) }})
+                        Mongo().db_["_kv"].update_one({"kav_key": counter_name_}, {"$set": {"kav_value": str(counter_)}})
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -4253,7 +4249,7 @@ MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "Tr
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_token", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
-STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers"]
+STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "connectors"]
 
 app = Flask(__name__)
 origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101"]
