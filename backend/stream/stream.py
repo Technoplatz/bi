@@ -33,7 +33,6 @@ https://www.gnu.org/licenses.
 import os
 import re
 import asyncio
-import urllib
 from datetime import datetime
 from functools import partial
 from bson.objectid import ObjectId
@@ -80,7 +79,6 @@ class Trigger():
         mongo_tls_cert_keyfile_ = os.environ.get('MONGO_TLS_CERT_KEYFILE')
         mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")
         mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
-
         self.operations_ = ["insert", "update", "replace", "delete"]
         self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
@@ -103,6 +101,13 @@ class Trigger():
 
         print(">>> init ended")
 
+    def exception_passed_f(self, exc):
+        """
+        docstring is in progress
+        """
+        print(">>> passed:", str(exc))
+        return True
+
     def exception_show_f(self, exc):
         """
         docstring is in progress
@@ -124,19 +129,19 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print(">>> getting properties...")
+            print(">>> getting structure...")
             self.properties_ = {}
+            self.connectors_ = {}
             cursor_ = self.db_["_collection"].aggregate([{
                 "$match": {"$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]}
             }])
             for item_ in cursor_:
-                self.properties_[item_["col_id"]] = item_["col_structure"]["properties"]
-                
+                self.properties_[item_["col_id"]] = item_["col_structure"]["properties"] if "properties" in item_["col_structure"] else None
+
             if not self.properties_:
-                print("!!! properties passed")
                 raise AppException("!!! no properties found")
 
-            print(">>> properties refreshed")
+            print(">>> structure refreshed")
 
             return {"result": True}
 
@@ -207,31 +212,15 @@ class Trigger():
         """
         try:
             print(">>> getting connectors...")
-            self.connectors_ = []
-            cursor_ = self.db_["_collection"].aggregate([{
-                "$match": {
-                    "col_structure.connectors": {
-                        "$elemMatch": {
-                            "enabled": True
-                        }
-                    }
-                }
-            }])
+            self.connectors_ = {}
+            cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.connectors": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
-                for connector_ in item_["col_structure"]["connectors"]:
-                    for cluster_ in connector_["targets"]:
-                        self.triggers_.append(cluster_)
+                connectors__ = item_["col_structure"]["connectors"] if "connectors" in item_["col_structure"] and len(item_["col_structure"]["connectors"]) > 0 else None
+                if connectors__:
+                    self.connectors_[item_["col_id"]] = item_["col_structure"]["connectors"]
 
-            if not self.connectors_:
-                print("!!! connectors passed")
-                raise PassException("!!! no connector found so passed")
-
-            print(">>> connectors refreshed")
-
+            print(">>> connectors refreshed", self.connectors_)
             return {"result": True}
-
-        except PassException as exc_:
-            return {"result": True, "exc": exc_}
 
         except pymongo.errors.PyMongoError as exc_:
             print("!!! refresher mongo error")
@@ -274,68 +263,42 @@ class Trigger():
                             elif typ == "bool":
                                 fres_ = {"$not": {"$eq": bool(mat_["value"])}}
                             elif typ == "date":
-                                fres_ = {
-                                    "$not": {
-                                        "$eq": datetime.strptime(
-                                            mat_["value"][:10], "%Y-%m-%d"
-                                        )
-                                    }
-                                }
+                                fres_ = {"$not": {"$eq": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}}
                             else:
-                                fres_ = (
-                                    {"$not": {"$regex": mat_["value"], "$options": "i"}}
-                                    if mat_["value"]
-                                    else {"$not": {"$regex": "", "$options": "i"}}
-                                )
+                                fres_ = {"$not": {"$regex": mat_["value"], "$options": "i"}} if mat_["value"] else {"$not": {"$regex": "", "$options": "i"}}
                         elif mat_["op"] in ["in", "nin"]:
                             separated_ = re.split(",", mat_["value"])
-                            list_ = (
-                                [s.strip() for s in separated_]
-                                if mat_["key"] != "_id"
-                                else [ObjectId(s.strip()) for s in separated_]
-                            )
+                            list_ = [s.strip() for s in separated_] if mat_["key"] != "_id" else [ObjectId(s.strip()) for s in separated_]
                             if mat_["op"] == "in":
                                 fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
                             else:
-                                fres_ = {
-                                    "$nin": list_
-                                    if typ != "number"
-                                    else list(map(float, list_))
-                                }
+                                fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
                         elif mat_["op"] == "gt":
                             if typ in ["number", "decimal"]:
                                 fres_ = {"$gt": float(mat_["value"])}
                             elif typ == "date":
-                                fres_ = {
-                                    "$gt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$gt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
                             else:
                                 fres_ = {"$gt": mat_["value"]}
                         elif mat_["op"] == "gte":
                             if typ in ["number", "decimal"]:
                                 fres_ = {"$gte": float(mat_["value"])}
                             elif typ == "date":
-                                fres_ = {
-                                    "$gte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$gte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
                             else:
                                 fres_ = {"$gte": mat_["value"]}
                         elif mat_["op"] == "lt":
                             if typ in ["number", "decimal"]:
                                 fres_ = {"$lt": float(mat_["value"])}
                             elif typ == "date":
-                                fres_ = {
-                                    "$lt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$lt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
                             else:
                                 fres_ = {"$lt": mat_["value"]}
                         elif mat_["op"] == "lte":
                             if typ in ["number", "decimal"]:
                                 fres_ = {"$lte": float(mat_["value"])}
                             elif typ == "date":
-                                fres_ = {
-                                    "$lte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$lte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
                             else:
                                 fres_ = {"$lte": mat_["value"]}
                         elif mat_["op"] == "true":
@@ -382,14 +345,9 @@ class Trigger():
         try:
             sum_ = None
             match_ = filter_ if filter_ else {}
-            aggregate_ = self.db_[coll_].aggregate([
-                {"$match": match_},
-                {"$group": {"_id": None, "sum": {"$sum": f"${field_}"}}},
-                {"$project": {"_id": 0}}])
-
+            aggregate_ = self.db_[coll_].aggregate([{"$match": match_}, {"$group": {"_id": None, "sum": {"$sum": f"${field_}"}}}, {"$project": {"_id": 0}}])
             for doc_ in aggregate_:
                 sum_ = doc_["sum"] if "sum" in doc_ else None
-
             return sum_
 
         except pymongo.errors.PyMongoError as exc_:
@@ -407,14 +365,9 @@ class Trigger():
         try:
             count_ = None
             match_ = filter_ if filter_ else {}
-            aggregate_ = self.db_[coll_].aggregate([
-                {"$match": match_},
-                {"$group": {"_id": None, "count": {"$sum": 1}}},
-                {"$project": {"_id": 0}}])
-
+            aggregate_ = self.db_[coll_].aggregate([{"$match": match_}, {"$group": {"_id": None, "count": {"$sum": 1}}}, {"$project": {"_id": 0}}])
             for doc_ in aggregate_:
                 count_ = doc_["count"] if "count" in doc_ else None
-
             return count_
 
         except pymongo.errors.PyMongoError as exc_:
@@ -432,72 +385,70 @@ class Trigger():
         prfx_ = prfxs_[0] if prfxs_ and len(prfxs_) > 0 else prfxs_
         return input_.removeprefix(prfx_)
 
-    async def worker_f(self, event_, resume_token_):
+    async def worker_connectors_f(self, params_):
         """
         gets the collection and the fields that affected by the change stream.
         """
         try:
-            source_collection_ = event_["ns"]["coll"] if "ns" in event_ and "coll" in event_["ns"] else None
-            if source_collection_ is None:
-                raise AppException("no collection provided")
+            source_collection_ = params_["collection"]
+            _id = params_["id"]
+            col_id_ = source_collection_.replace("_data", "")
 
-            if source_collection_ == "_collection":
-                properties_refreshed_ = False
-                triggers_refreshed_ = False
-                connections_refreshed_ = False
-                refresh_properties_f_ = self.refresh_properties_f()
-                if "result" in refresh_properties_f_ and refresh_properties_f_["result"] is True:
-                    properties_refreshed_ = True
-                refresh_triggers_f_ = self.refresh_triggers_f()
-                if "result" in refresh_triggers_f_ and refresh_triggers_f_["result"] is True:
-                    triggers_refreshed_ = True
-                refresh_connectors_f_ = self.refresh_connectors_f()
-                if "result" in refresh_connectors_f_ and refresh_connectors_f_["result"] is True:
-                    connections_refreshed_ = True
-                if properties_refreshed_ and triggers_refreshed_ and connections_refreshed_:
-                    raise PassException(">>> _collection updated")
-                raise AppException(f"{refresh_properties_f_['exc']} {refresh_triggers_f_['exc']} {refresh_connectors_f_['exc']}")
+            connectors_ = self.connectors_[col_id_] if col_id_ in self.connectors_ and len(self.connectors_[col_id_]) > 0 else None
+            if not connectors_:
+                raise PassException("!!! no connector found for", col_id_)
 
-            if source_collection_[:1] == "_":
-                raise PassException(f">>> system collection passed {source_collection_}")
+            for connector_ in connectors_:
+                enabled_ = connector_["enabled"] if "enabled" in connector_ and connector_["enabled"] is True else False
+                if not enabled_:
+                    continue
+                url_ = connector_["url"] if "enabled" in connector_ and connector_["enabled"] is True else False
+                if not url_:
+                    continue
+                print(">>> connector_", col_id_, url_)
+
+            return True
+
+        except pymongo.errors.PyMongoError as exc_:
+            self.exception_show_f(exc_)
+
+        except PassException as exc_:
+            self.exception_passed_f(exc_)
+
+        except AppException as exc_:
+            self.exception_show_f(exc_)
+
+        except Exception as exc_:
+            self.exception_show_f(exc_)
+
+    async def worker_change_f(self, params_):
+        """
+        gets the collection and the fields that affected by the change stream.
+        """
+        try:
+            source_collection_ = params_["collection"]
+            token_ = params_["token"]
+            op_ = params_["op"]
+            changed_ = params_["changed"]
+            source_properties_ = params_["properties"]
+            _id = params_["id"]
 
             source_collection_id_ = source_collection_.replace("_data", "")
-
-            _id = event_["documentKey"]["_id"]
-            if _id is None:
-                raise AppException(f"!!! missing document _id {event_}")
-
-            token_ = resume_token_["_data"] if "_data" in resume_token_ else None
-            if token_ is None:
-                raise AppException(f"no resume token provided: {resume_token_}")
-
-            source_properties_ = self.properties_[source_collection_id_] if source_collection_id_ in self.properties_ else None
-            if source_properties_ is None:
-                raise PassException(f"no source properties defined for '{source_collection_id_}'")
-
-            op_ = event_["operationType"] if "operationType" in event_ and event_["operationType"] in self.operations_ else None
-            if op_ is None:
-                raise AppException(f"invalid operation type '{op_}'")
-
-            changed_ = event_["updateDescription"]["updatedFields"] if "updateDescription" in event_ and "updatedFields" in event_["updateDescription"] and op_ in ["update", "replace"] else None
-            if changed_ is None:
-                changed_ = event_["fullDocument"] if "fullDocument" in event_ and op_ == "insert" else None
-                if changed_ is None:
-                    raise AppException(f"updated fields is missing '{op_}'")
             changed_keys_ = list(changed_.keys())
+            print(f">>> change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
 
-            print(f"\nİİİ change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
-
-            trigger_targets_ = [tg_ for tg_ in self.triggers_ if tg_["source"] == source_collection_id_ and op_ in tg_["operations"] and [ma_ for ma_ in tg_["changes"] if ma_["key"] in changed_keys_ and (
-                (ma_["op"].lower() == "eq" and changed_[ma_["key"]] == ma_["value"]) or
-                (ma_["op"].lower() == "ne" and changed_[ma_["key"]] != ma_["value"]) or
-                (ma_["op"].lower() == "gt" and changed_[ma_["key"]] > ma_["value"]) or
-                (ma_["op"].lower() == "gte" and changed_[ma_["key"]] >= ma_["value"]) or
-                (ma_["op"].lower() == "lt" and changed_[ma_["key"]] < ma_["value"]) or
-                (ma_["op"].lower() == "lte" and changed_[ma_["key"]] <= ma_["value"]) or
-                (ma_["op"].lower() == "null" and changed_[ma_["key"]] in [None, ""]) or
-                (ma_["op"].lower() == "nnull" and changed_[ma_["key"]] not in [None, ""])
-            )]]
+            trigger_targets_ = \
+                [tg_ for tg_ in self.triggers_ if tg_["source"] == source_collection_id_ and op_ in tg_["operations"] and
+                 [ma_ for ma_ in tg_["changes"] if ma_["key"] in changed_keys_ and (
+                     (ma_["op"].lower() == "eq" and changed_[ma_["key"]] == ma_["value"]) or
+                     (ma_["op"].lower() == "ne" and changed_[ma_["key"]] != ma_["value"]) or
+                     (ma_["op"].lower() == "gt" and changed_[ma_["key"]] > ma_["value"]) or
+                     (ma_["op"].lower() == "gte" and changed_[ma_["key"]] >= ma_["value"]) or
+                     (ma_["op"].lower() == "lt" and changed_[ma_["key"]] < ma_["value"]) or
+                     (ma_["op"].lower() == "lte" and changed_[ma_["key"]] <= ma_["value"]) or
+                     (ma_["op"].lower() == "null" and changed_[ma_["key"]] in [None, ""]) or
+                     (ma_["op"].lower() == "nnull" and changed_[ma_["key"]] not in [None, ""])
+                 )]]
             if trigger_targets_ == []:
                 raise PassException("!!! no trigger condition found")
 
@@ -534,7 +485,7 @@ class Trigger():
                     else:
                         continue
                 if not match_:
-                    print(f"\n!!! no data found with the target {target_collection_id_}", match_)
+                    print(f"!!! no data found with the target {target_collection_id_}", match_)
                     continue
 
                 on_changes_all_ = target_["on_changes_all"]
@@ -653,13 +604,27 @@ class Trigger():
             self.exception_show_f(exc_)
 
         except PassException as exc_:
-            self.exception_show_f(exc_)
+            self.exception_passed_f(exc_)
 
         except AppException as exc_:
             self.exception_show_f(exc_)
 
         except Exception as exc_:
             self.exception_show_f(exc_)
+
+    async def starter_connectors_f(self, params_):
+        """
+        docstring is in progress
+        """
+        print("\n>>> connectors hub started")
+        return await self.worker_connectors_f(params_)
+
+    async def starter_changes_f(self, params_):
+        """
+        docstring is in progress
+        """
+        print("\n>>> changes hub started")
+        return await self.worker_change_f(params_)
 
     def backlog_stream_f(self):
         """
@@ -670,13 +635,7 @@ class Trigger():
         print(">>> backlog stream ended")
         return True
 
-    async def starter_f(self, event_, resume_token_):
-        """
-        docstring is in progress
-        """
-        return await self.worker_f(event_, resume_token_)
-
-    async def changes_stream(self):
+    async def changes_stream_f(self):
         """
         creates a pipeline to run async works in a loop
         """
@@ -689,24 +648,79 @@ class Trigger():
 
             with self.db_.watch(self.pipeline_) as changes_stream_:
                 for event_ in changes_stream_:
+
+                    source_collection_ = event_["ns"]["coll"] if "ns" in event_ and "coll" in event_["ns"] else None
+                    if source_collection_ is None:
+                        print("!!! no collection provided")
+                        continue
+                    source_collection_id_ = source_collection_.replace("_data", "")
+
+                    print("\n>>> it is a change", source_collection_id_)
+
+                    source_properties_ = self.properties_[source_collection_id_] if source_collection_id_ in self.properties_ else None
+                    if source_properties_ is None:
+                        print("!!! no source properties found", source_collection_id_)
+                        continue
+
+                    op_ = event_["operationType"] if "operationType" in event_ and event_["operationType"] in self.operations_ else None
+                    if op_ is None:
+                        print("!!! no operation provided")
+                        continue
+
+                    changed_ = event_["updateDescription"]["updatedFields"] if "updateDescription" in event_ and "updatedFields" in event_["updateDescription"] and op_ in ["update", "replace"] else None
+                    if changed_ is None:
+                        changed_ = event_["fullDocument"] if "fullDocument" in event_ and op_ == "insert" else None
+                        if changed_ is None:
+                            print("!!! no changed fields provided")
+                            continue
+
+                    if source_collection_ == "_collection":
+                        refresh_properties_f_ = self.refresh_properties_f()
+                        if not refresh_properties_f_["result"]:
+                            print(">>> properties refresh error", refresh_properties_f_["exc"])
+                            continue
+                        refresh_triggers_f_ = self.refresh_triggers_f()
+                        if not refresh_triggers_f_["result"]:
+                            print(">>> triggers refresh error", refresh_triggers_f_["exc"])
+                            continue
+                        refresh_connectors_f_ = self.refresh_connectors_f()
+                        if not refresh_connectors_f_["result"]:
+                            print(">>> connectors refresh error", refresh_connectors_f_["exc"])
+                            continue
+                        print(">>> _collection updated and refreshed")
+
+                    if source_collection_[:1] == "_":
+                        print(f">>> system collection passed {source_collection_}")
+                        continue
+
                     resume_token_ = changes_stream_.resume_token
-                    starter_f_ = asyncio.create_task(self.starter_f(event_, resume_token_))
-                    await starter_f_
+                    token_ = resume_token_["_data"] if "_data" in resume_token_ and resume_token_["_data"] is not None else None
+                    _id = event_["documentKey"]["_id"] if "documentKey" in event_ and "_id" in event_["documentKey"] else None
+
+                    if _id is None:
+                        continue
+
+                    params_ = {"collection": source_collection_, "properties": source_properties_, "id": _id, "token": token_, "op": op_, "changed": changed_}
+                    await asyncio.create_task(self.starter_changes_f(params_))
+                    await asyncio.create_task(self.starter_connectors_f(params_))
 
             current_task_ = asyncio.current_task()
             running_tasks_ = [task for task in asyncio.all_tasks() if task is not current_task_]
             await asyncio.wait(running_tasks_)
 
         except pymongo.errors.PyMongoError as exc_:
+            print("!!! exited mongo error", exc_)
             self.exception_show_f(exc_)
 
         except AppException as exc_:
+            print("!!! exited app error", exc_)
             self.exception_show_f(exc_)
 
         except Exception as exc_:
+            print("!!! exited exception", exc_)
             self.exception_show_f(exc_)
 
 
 if __name__ == "__main__":
     print = partial(print, flush=True)
-    asyncio.run(Trigger().changes_stream())
+    asyncio.run(Trigger().changes_stream_f())

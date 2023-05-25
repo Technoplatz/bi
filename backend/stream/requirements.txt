@@ -4,3 +4,4 @@ dnspython
 partial
 pytz
 get-docker-secret
+requests

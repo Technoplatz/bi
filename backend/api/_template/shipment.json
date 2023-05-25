@@ -103,5 +103,32 @@
   "views": {},
   "sort": {
     "_modified_at": -1
-  }
+  },
+  "connectors": [
+    {
+      "id": "shipment-connector",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "method": "post",
+      "url": "https://api.bi.technoplatz.com",
+      "headers": [{ "Authorization": "$POST01_BEARER" }, { "X-Api-Key": "$POST01_APIKEY" }],
+      "filter": [{}],
+      "body": {
+        "op": "upsert",
+        "collection": "delivery",
+        "data": {
+          "DeliveryNo": "$dnn_no"
+        }
+      },
+      "actions": {
+        "200": {
+          "mapping": [
+            {
+              "merchandise": [{ "source_field": "DeliveryNo", "target_field": "dnn_no" }]
+            }
+          ]
+        }
+      }
+    }
+  ]
 }

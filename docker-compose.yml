@@ -420,16 +420,13 @@ services:
     container_name: watchtower
     hostname: watchtower
     restart: always
-    depends_on:
-      traefik:
-        condition: service_started
     labels:
       - com.centurylinklabs.watchtower.enable=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-    command: --interval ${WATCHTOWER_UPDATE_INTERVAL}
+    command: --interval ${WATCHTOWER_UPDATE_INTERVAL_MIN}
     environment:
       - TZ=${TZ}
       - WATCHTOWER_NOTIFICATIONS=${NOTIFICATIONS}

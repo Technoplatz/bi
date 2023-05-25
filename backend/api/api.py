@@ -427,25 +427,7 @@ class Misc:
         temp_ = set()
         return [x for x in array_ if x not in temp_ and not temp_.add(x)]
 
-    def user_token_validate_f(self, token_, operation_):
-        """
-        docstring is in progress
-        """
-        try:
-            find_ = Mongo().db_["_token"].find_one({"_id": ObjectId(base64.b64decode(token_).decode())})
-            if not find_:
-                raise APIError(f"token not found {token_}")
-
-            grant_ = f"tkn_grant_{operation_}"
-            if not find_[grant_]:
-                raise APIError(f"token is not permitted to {operation_}")
-
-            return {"result": True, "data": find_}
-
-        except APIError as exc_:
-            return Misc().exception_f(exc_)
-
-    def api_token_validate_f(self, bearer_):
+    def user_validate_by_token_f(self, bearer_, operation_):
         """
         docstring is in progress
         """
@@ -456,11 +438,11 @@ class Misc:
                 raise AuthError("token not found at one")
 
             header_ = jwt.get_unverified_header(token_)
-            finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
-            if not finder_:
+            token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
+            if not token_finder_:
                 raise AuthError("finder is not valid please use an api token")
 
-            find_ = Mongo().db_["_token"].find_one({"tkn_finder": finder_, "tkn_is_active": True})
+            find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
             if not find_:
                 raise AuthError("token not found")
             jwt_secret_ = find_["tkn_secret"]
@@ -471,10 +453,9 @@ class Misc:
             if not jwt_proc_f_["result"]:
                 raise AuthError(jwt_proc_f_["msg"])
 
-            tkn_grant_read_ = find_["tkn_grant_read"] if "tkn_grant_read" in find_ and find_["tkn_grant_read"] is True else False
-
-            if not tkn_grant_read_:
-                raise APIError("token is not permitted to read")
+            grant_ = f"tkn_grant_{operation_}"
+            if not find_[grant_]:
+                raise AuthError(f"token is not allowed to do {operation_}")
 
             return {"result": True}
 
@@ -1633,15 +1614,10 @@ class Crud:
             filter_ = {}
             filter_[f"col_structure.views.{view_id_}.enabled"] = True
             if user_:
-                filter_[f"col_structure.views.{view_id_}._tags"] = {
-                    "$elemMatch": {"$in": user_["_tags"]}
-                }
+                filter_[f"col_structure.views.{view_id_}._tags"] = {"$elemMatch": {"$in": user_["_tags"]}}
             collection_ = Mongo().db_["_collection"].find_one(filter_)
             if not collection_:
-                return {
-                    "result": True,
-                    "skip": True
-                }
+                return {"result": True, "skip": True}
             collection_id_ = f"{collection_['col_id']}_data"
             view_ = collection_["col_structure"]["views"][view_id_]
             col_structure_ = collection_["col_structure"]
@@ -1750,36 +1726,14 @@ class Crud:
 
             records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
             count_ = len(records_) if records_ else 0
-
             df_ = pd.DataFrame(records_).fillna("#N/A")
             df_raw_ = pd.DataFrame(records_).fillna("")
 
             vie_visual_style_ = view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
-            data_index_0_ = (
-                view_["data_index"][0]
-                if "data_index" in view_ and len(view_["data_index"]) > 0
-                else None
-            )
-            data_values_0_k_ = (
-                view_["data_values"][0]["key"]
-                if "data_values" in view_
-                and len(view_["data_values"]) > 0
-                and "key" in view_["data_values"][0]
-                else None
-            )
-            data_values_0_v_ = (
-                view_["data_values"][0]["value"]
-                if "data_values" in view_
-                and len(view_["data_values"]) > 0
-                and "value" in view_["data_values"][0]
-                else "sum"
-            )
-            data_columns_0_ = (
-                view_["data_columns"][0]
-                if "data_columns" in view_ and len(view_["data_columns"]) > 0
-                else None
-            )
-
+            data_index_0_ = view_["data_index"][0] if "data_index" in view_ and len(view_["data_index"]) > 0 else None
+            data_values_0_k_ = view_["data_values"][0]["key"] if "data_values" in view_ and len(view_["data_values"]) > 0 and "key" in view_["data_values"][0] else None
+            data_values_0_v_ = view_["data_values"][0]["value"] if "data_values" in view_ and len(view_["data_values"]) > 0 and "value" in view_["data_values"][0] else "sum"
+            data_columns_0_ = view_["data_columns"][0] if "data_columns" in view_ and len(view_["data_columns"]) > 0 else None
             pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ else False
             data_values_ = view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
 
@@ -2452,7 +2406,7 @@ class Crud:
 
             arr_ = [str_ for str_ in structure_ if str_ not in STRUCTURE_KEYS_]
             if len(arr_) > 0:
-                raise APIError(f"some structure keys are invalid {','.join(arr_)}")
+                raise APIError(f"some structure keys are invalid: {','.join(arr_)}")
 
             arr_ = [str_ for str_ in structure_ if str_ in STRUCTURE_KEYS_]
             if len(arr_) != len(STRUCTURE_KEYS_):
@@ -3073,20 +3027,20 @@ class Crud:
             elif collection_id_ == "_token":
                 tkn_lifetime_ = doc_["tkn_lifetime"] if "tkn_lifetime" in doc_ and doc_["tkn_lifetime"] > 0 else 1440
                 secret_ = pyotp.random_base32()
-                finder_ = pyotp.random_base32()
+                token_finder_ = pyotp.random_base32()
                 jwt_proc_f_ = Misc().jwt_proc_f("encode", None, secret_, {
                     "iss": "Technoplatz",
                     "aud": "api",
                     "sub": "bi",
                     "exp": Misc().get_now_f() + timedelta(minutes=tkn_lifetime_),
                     "iat": Misc().get_now_f()
-                }, {"finder": finder_})
+                }, {"finder": token_finder_})
                 if not jwt_proc_f_["result"]:
                     raise AuthError(jwt_proc_f_["msg"])
                 doc_["tkn_copy_count"] = 0
                 doc_["tkn_token"] = inserted_ = jwt_proc_f_["jwt"]
                 doc_["tkn_secret"] = secret_
-                doc_["tkn_finder"] = finder_
+                doc_["tkn_finder"] = token_finder_
 
             Mongo().db_[collection_].insert_one(doc_)
 
@@ -4628,74 +4582,58 @@ def post_f():
         if not request.headers:
             raise AuthError("no headers provided")
 
+        content_type_ = request.headers.get("Content-Type", None) if "Content-Type" in request.headers and request.headers["Content-Type"] != "" else None
+        if not content_type_:
+            raise APIError("no content type provided")
+        
+        operation_ = request.headers.get("operation", None).lower() if "operation" in request.headers and request.headers["operation"] != "" else None
+        if not operation_:
+            raise APIError("no operation provided in header")
+
+        rh_collection_ = request.headers.get("collection", None).lower() if "collection" in request.headers and request.headers["collection"] != "" else None
+        if not rh_collection_:
+            raise APIError("no collection provided in header")
+
+        if operation_ not in ["read", "insert", "update", "upsert", "delete"]:
+            raise APIError("invalid operation")
+
+        x_api_token_ = request.headers["Authorization"] if "Authorization" in request.headers and request.headers["Authorization"] != "" else None
+        if not x_api_token_:
+            raise AuthError("no authorization provided")
+
+        split_ = re.split(" ", x_api_token_)
+        if not split_ or len(split_) != 2 or split_[0].lower() != "bearer":
+            raise AuthError("invalid authorization bearer")
+
+        user_validate_by_token_f_ = Misc().user_validate_by_token_f(x_api_token_, operation_)
+        if not user_validate_by_token_f_["result"]:
+            raise AuthError(user_validate_by_token_f_["msg"])
+
         if not request.json:
-            raise APIError("no data provided")
+            raise APIError("no json data provided")
 
         if not API_OUTPUT_ROWS_LIMIT_:
             raise APIError("no api rows limit defined")
 
-        rh_api_key_ = request.headers.get("x-api-key", None) if "x-api-key" in request.headers and request.headers["x-api-key"] != "" else None
-        if not rh_api_key_:
-            raise AuthError("no api key provided")
-
-        rh_authorization_ = request.headers.get("Authorization", None) if "Authorization" in request.headers and request.headers["Authorization"] != "" else None
-        if not rh_authorization_:
-            raise AuthError("no authorization provided")
-
-        auth_parts_ = rh_authorization_.split()
-        if len(auth_parts_) == 1:
-            raise AuthError("no access token provided")
-        if auth_parts_[0].lower() != "bearer":
-            raise AuthError("invalid authorization format")
-        rh_token_ = auth_parts_[1]
-
-        operation_ = (
-            request.headers.get("operation", None)
-            if "operation" in request.headers and request.headers["operation"] != ""
-            else None
-        )
-        if not operation_ or operation_ not in ["read", "insert", "update", "upsert", "delete"]:
-            raise APIError("invalid operation")
-
-        user_validate_ = Auth().user_validate_by_api_key_f({"api_key": rh_api_key_})
-        if not user_validate_["result"]:
-            raise AuthError(user_validate_["msg"])
-
-        token_validate_f_ = Misc().user_token_validate_f(rh_token_, operation_)
-        if not token_validate_f_["result"]:
-            raise AuthError(f"token is not permitted to {operation_}")
-
-        rh_collection_ = (
-            request.headers.get("collection", None)
-            if "collection" in request.headers and request.headers["collection"] != ""
-            else None
-        )
-        if not rh_collection_:
-            raise APIError("no collection found")
         collection_f_ = Crud().inner_collection_f(rh_collection_)
         if not collection_f_["result"]:
-            raise AuthError(collection_f_["msg"])
+            raise APIError(collection_f_["msg"])
 
-        collection_ = (
-            collection_f_["collection"] if "collection" in collection_f_ else None
-        )
+        collection_ = collection_f_["collection"] if "collection" in collection_f_ else None
         if not collection_:
             raise APIError("collection not found")
-        structure_ = (
-            collection_["col_structure"] if "col_structure" in collection_ else None
-        )
-        if not collection_:
-            raise APIError("structure not found")
+
+        structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+        if not structure_:
+            raise APIError(f"no structure found: {collection_}")
 
         properties_ = structure_["properties"] if "properties" in structure_ else None
         if not properties_:
-            raise APIError("properties not found")
+            raise APIError(f"no properties found: {collection_}")
 
         unique_ = structure_["unique"] if "unique" in structure_ else []
-
         is_crud_ = rh_collection_[:1] != "_"
         collection_data_ = f"{rh_collection_}_data" if is_crud_ else rh_collection_
-
         body_ = request.json
         type_ = str(type(body_))
 
@@ -4703,7 +4641,7 @@ def post_f():
             if operation_ == "read":
                 body_ = [body_]
             else:
-                raise APIError("data must be in an array")
+                raise APIError("post data must be provided in an array")
 
         output_ = []
         count_ = 0
@@ -4716,9 +4654,7 @@ def post_f():
         if operation_ == "read":
             for item_ in body_:
                 cursor_ = session_db_[collection_data_].find(item_)
-                docs_ = (
-                    json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
-                )
+                docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
                 for doc_ in docs_:
                     output_.append(doc_)
                     count_ += 1
@@ -4732,7 +4668,7 @@ def post_f():
                         for uq__ in uq_:
                             filter_[uq__] = None
                 else:
-                    raise APIError(f"at leat one unique field must be provided for {operation_}")
+                    raise APIError(f"at least one unique field must be provided for {operation_}")
             for ix_, item_ in enumerate(body_):
                 filter__ = {}
                 if operation_ in ["update", "upsert", "delete"]:
@@ -4747,82 +4683,69 @@ def post_f():
                 doc__ = decode_crud_doc_f_["doc"]
                 doc__["_modified_at"] = Misc().get_now_f()
                 doc__["_modified_by"] = "API"
+                if operation_ in ["insert", "upsert"]:
+                    doc__["_created_at"] = Misc().get_now_f()
+                    doc__["_created_by"] = "API"
                 if operation_ == "upsert":
-                    session_db_[collection_data_].update_many(
-                        filter__,
-                        {"$set": doc__, "$inc": {"_modified_count": 1}},
-                        upsert=True,
-                        session=session_,
-                    )
+                    session_db_[collection_data_].update_many(filter__, {"$set": doc__, "$inc": {"_modified_count": 1}}, upsert=True, session=session_)
                 if operation_ == "update":
-                    session_db_[collection_data_].update_many(
-                        filter__,
-                        {"$set": doc__, "$inc": {"_modified_count": 1}},
-                        session=session_,
-                    )
+                    session_db_[collection_data_].update_many(filter__, {"$set": doc__, "$inc": {"_modified_count": 1}}, session=session_)
                 elif operation_ == "insert":
                     session_db_[collection_data_].insert_one(doc__, session=session_)
                 elif operation_ == "delete":
-                    session_db_[collection_data_].delete_many(
-                        filter__, session=session_
-                    )
+                    session_db_[collection_data_].delete_many(filter__, session=session_)
                 count_ += 1
                 if count_ >= int(API_OUTPUT_ROWS_LIMIT_):
                     break
                 output_.append(item_)
 
-        log_ = Misc().log_f(
-            {
-                "type": "Info",
-                "collection": rh_collection_,
-                "op": f"API {operation_}",
-                "user": "API",
-                "document": body_,
-            }
-        )
+        log_ = Misc().log_f({
+            "type": "Info",
+            "collection": rh_collection_,
+            "op": f"API {operation_}",
+            "user": "API",
+            "document": body_
+        })
         if not log_["result"]:
             raise APIError(log_["msg"])
-
-        response_ = json.loads(
-            JSONEncoder().encode(
-                {
-                    "collection": rh_collection_,
-                    "operation": operation_,
-                    "count": count_,
-                    "output": output_,
-                }
-            )
-        )
 
         session_.commit_transaction()
         session_client_.close()
 
-        return (
-            json.dumps(
-                {"result": True, "response": response_},
-                default=json_util.default,
-                ensure_ascii=False,
-                sort_keys=False,
-            ),
-            200,
-            Security().header_simple_f(),
-        )
+        res_ = {
+            "result": True,
+            "operation": operation_,
+            "count": count_,
+            "output": output_
+        }
+        response_ = make_response(json.dumps(res_, default=json_util.default, ensure_ascii=False, sort_keys=False))
+        response_.status_code = 200
+        response_.mimetype = "application/json"
+        return response_
 
-    except AuthError as exc:
-        return {"result": False, "response": str(exc), "status": 401}
+    except AuthError as exc_:
+        res_ = {"result": False, "msg": str(exc_)}
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 401
+        response_.mimetype = "application/json"
+        return response_
 
-    except APIError as exc:
-        return {"result": False, "response": str(exc), "status": 400}
+    except APIError as exc_:
+        res_ = {"result": False, "msg": str(exc_)}
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 400
+        response_.mimetype = "application/json"
+        return response_
 
-    except Exception as exc:
-        return {"result": False, "response": str(exc), "status": 500}
+    except Exception as exc_:
+        res_ = {"result": False, "msg": str(exc_)}
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = 500
+        response_.mimetype = "application/json"
+        return response_
 
-    finally:
-        if session_:
-            session_.abort_transaction()
 
-
-@app.route("/get/dump", methods=["POST"])
+@ app.route("/get/dump", methods=["POST"])
 def get_dump_f():
     """
     docstring is in progress
@@ -4862,7 +4785,7 @@ def get_dump_f():
         return {"msg": str(exc), "status": 500}
 
 
-@app.route("/get/view/<string:id_>", methods=["GET"])
+@ app.route("/get/view/<string:id_>", methods=["GET"])
 def get_data_f(id_):
     """
     docstring is in progress
@@ -4870,24 +4793,20 @@ def get_data_f(id_):
     try:
         if not request.headers:
             raise AuthError({"result": False, "msg": "no header provided"})
-
         id_ = bleach.clean(id_)
-
+        user_ = None
         api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
         if api_token_:
-            api_token_validate_f_ = Misc().api_token_validate_f(api_token_)
-            if not api_token_validate_f_["result"]:
-                raise AuthError(api_token_validate_f_)
+            user_validate_by_token_f_ = Misc().user_validate_by_token_f(api_token_, "read")
+            if not user_validate_by_token_f_["result"]:
+                raise AuthError(user_validate_by_token_f_)
         else:
-            arg_ = request.args.get("k", default=None, type=str)
-            if not arg_:
-                raise AuthError({"result": False, "msg": "apikey is missing"})
-            api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else arg_
-            user_validate_ = Auth().user_validate_by_api_key_f({"api_key": api_key_})
+            x_api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else None
+            if not x_api_key_:
+                raise AuthError({"result": False, "msg": "X-Api-Key is missing in header"})
+            user_validate_ = Auth().user_validate_by_api_key_f({"api_key": x_api_key_})
             if not user_validate_["result"]:
-                user_validate_ = Auth().user_validate_by_api_key_f({"api_key": arg_})
-                if not user_validate_["result"]:
-                    raise AuthError(user_validate_)
+                raise AuthError(user_validate_)
             user_ = user_validate_["user"] if "user" in user_validate_ else None
             if not user_:
                 raise AuthError({"result": False, "msg": "user not found for view"})
