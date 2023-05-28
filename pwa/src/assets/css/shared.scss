@@ -1063,13 +1063,17 @@ app-menu .toggler {
   display: flexbox !important;
 }
 
+ion-select {
+  --placeholder-opacity: 0.5 !important;
+}
+
 .scan-ok span {
   font-size: small !important;
   font-weight: 500 !important;
 }
 
 .related-line-item {
-  font-size: 16px !important;
+  font-size: 15px !important;
   line-height: normal;
 }
 
@@ -1347,6 +1351,10 @@ sup {
 .no-cursor {
   cursor: none !important;
   pointer-events: none !important;
+}
+
+.parent-link-button {
+  margin: auto !important;
 }
 
 .schema-card-container {

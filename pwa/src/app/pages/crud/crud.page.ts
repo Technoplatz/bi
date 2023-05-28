@@ -477,6 +477,7 @@ export class CrudPage implements OnInit {
   }
 
   doParent(parent_: any) {
+    console.log("*** parent_", parent_);
     this.parent = parent_;
     let projection_: any = {};
     this.relact = true;

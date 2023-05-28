@@ -34,7 +34,6 @@ import os
 import io
 import sys
 import logging
-import base64
 import re
 import secrets
 import json
@@ -139,7 +138,7 @@ class Schedular:
         docstring is in progress
         """
         try:
-            print("*** scheduled views started", Misc().get_now_f())
+            print_("*** scheduled views started", Misc().get_now_f())
             collections_ = list(Mongo().db_["_collection"].aggregate([{
                 "$project": {
                     "col_id": 1,
@@ -161,7 +160,7 @@ class Schedular:
             for collection_ in collections_:
                 views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
                 if not views_:
-                    print(f"!!! no view found to schedule for {collection_['col_id']}")
+                    print_(f"!!! no view found to schedule for {collection_['col_id']}")
                     continue
                 for view_ in views_:
                     id__ = view_["k"]
@@ -176,7 +175,7 @@ class Schedular:
                     }]
                     sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_[
                                    "month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, timezone=cron_looker_f_["tz"], replace_existing=True, args=args_)
-                    print("scheduled", id__)
+                    print_("scheduled", id__)
 
             return {"result": True}
 
@@ -254,7 +253,8 @@ class Misc:
             "scan",
             "replacement",
             "placeholder",
-            "counter"
+            "counter",
+            "uuid"
         ]
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
@@ -299,7 +299,7 @@ class Misc:
             notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
             if resp_.status_code != 200:
-                print("*** notification error", resp_)
+                print_("*** notification error", resp_)
 
         return True
 
@@ -1603,7 +1603,7 @@ class Crud:
             return filtered_
 
         except Exception as exc_:
-            print("!!! exc_", exc_)
+            print_("!!! exc_", exc_)
             return None
 
     def get_view_data_f(self, user_, view_id_, scope_):
@@ -2392,6 +2392,10 @@ class Crud:
             if not structure_:
                 raise APIError("structure not found")
 
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise APIError("no properties found")
+
             if not col_id_:
                 raise APIError("collection not found")
 
@@ -2412,6 +2416,12 @@ class Crud:
             if len(arr_) != len(STRUCTURE_KEYS_):
                 raise APIError(f"some structure keys are missing; expected: {','.join(STRUCTURE_KEYS_)}, considered: {','.join(arr_)}")
 
+            for property_ in properties_:
+                prop_ = properties_[property_]
+                arr_ = [key_ for key_ in prop_ if key_ in PROP_KEYS_]
+                if len(arr_) != len(PROP_KEYS_):
+                    raise APIError(f"some keys are missing in property {property_}; expected: {','.join(PROP_KEYS_)}, considered: {','.join(arr_)}")
+
             Mongo().db_["_collection"].update_one({"col_id": col_id_}, {"$set": {
                 "col_structure": structure_,
                 "_modified_at": Misc().get_now_f(),
@@ -2422,20 +2432,18 @@ class Crud:
             if not func_["result"]:
                 raise APIError(func_["msg"])
 
-            properties_ = structure_["properties"] if "properties" in structure_ else None
-            if properties_:
-                for property_ in properties_:
-                    prop_ = properties_[property_]
-                    if prop_["bsonType"] in ["int", "number", "float", "decimal", "string"] and "counter" in prop_ and prop_["counter"] is True:
-                        counter_name_ = f"{property_.upper()}_COUNTER"
-                        find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
-                        if not find_one_:
-                            initialno__ = "0" if prop_["bsonType"] in ["int", "number", "float", "decimal"] else ""
-                            initialas__ = "string" if prop_["bsonType"] == "string" else "int"
-                            doc_ = {"kav_key": counter_name_, "kav_value": initialno__, "kav_as": initialas__}
-                            doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
-                            doc_["_created_by"] = doc_["_modified_by"] = user_["usr_id"]
-                            Mongo().db_["_kv"].insert_one(doc_)
+            for property_ in properties_:
+                prop_ = properties_[property_]
+                if prop_["bsonType"] in ["int", "number", "float", "decimal", "string"] and "counter" in prop_ and prop_["counter"] is True:
+                    counter_name_ = f"{property_.upper()}_COUNTER"
+                    find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
+                    if not find_one_:
+                        initialno__ = "0" if prop_["bsonType"] in ["int", "number", "float", "decimal"] else ""
+                        initialas__ = "string" if prop_["bsonType"] == "string" else "int"
+                        doc_ = {"kav_key": counter_name_, "kav_value": initialno__, "kav_as": initialas__}
+                        doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
+                        doc_["_created_by"] = doc_["_modified_by"] = user_["usr_id"]
+                        Mongo().db_["_kv"].insert_one(doc_)
 
             return {"result": True}
 
@@ -2540,8 +2548,6 @@ class Crud:
                         value_ = find_one_["kav_value"] if "kav_value" in find_one_ and int(find_one_["kav_value"]) >= 0 else 0
                         value_ = int(value_) + 1
                     else:
-                        # match__ = re.findall(r'\d+', find_one_["kav_value"])[-1]
-                        # value_ = match__ if match__ and "kav_value" in find_one_ and find_one_["kav_value"] is not None else find_one_["kav_value"]
                         value_ = find_one_["kav_value"]
 
                     counters_[property_] = value_
@@ -4204,6 +4210,7 @@ PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_token", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "connectors"]
+PROP_KEYS_ = ["bsonType", "title", "description"]
 
 app = Flask(__name__)
 origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101"]
@@ -4585,7 +4592,7 @@ def post_f():
         content_type_ = request.headers.get("Content-Type", None) if "Content-Type" in request.headers and request.headers["Content-Type"] != "" else None
         if not content_type_:
             raise APIError("no content type provided")
-        
+
         operation_ = request.headers.get("operation", None).lower() if "operation" in request.headers and request.headers["operation"] != "" else None
         if not operation_:
             raise APIError("no operation provided in header")
@@ -4844,6 +4851,6 @@ def get_data_f(id_):
 
 
 if __name__ == "__main__":
-    print = partial(print, flush=True)
+    print_ = partial(print, flush=True)
     Schedular().main_f()
     app.run(host="0.0.0.0", port=80, debug=False)
