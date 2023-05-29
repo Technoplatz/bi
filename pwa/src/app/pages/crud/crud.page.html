@@ -57,17 +57,22 @@ https://www.gnu.org/licenses.
                 <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" (click)="doSubmit()">
                     {{ 'UPLOAD' | translate }}
                 </ion-button>
-                <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium"> {{ 'Cancel' |
+                <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                    {{ 'Cancel' |
                     translate }} </ion-button>
                 <ion-button *ngIf="op=='update'" color="danger" (click)="doRemove()" class="end-item">
-                    {{ 'DELETE' | translate }}&nbsp;
+                    <ion-icon name="trash-bin-outline"></ion-icon>
+                    {{ 'Delete' | translate }}&nbsp;
                 </ion-button>
             </ion-col>
         </ion-row>
         <ion-row *ngIf="tab=='relation'" class="ion-padding-top ion-padding-bottom" (click)="doSubmitRelated()">
             <ion-col size="12">
                 <ion-button> {{ 'OK' | translate }} </ion-button>
-                <ion-button (click)="goTab('data')" color="medium">{{ 'Cancel' | translate }}</ion-button>
+                <ion-button (click)="goTab('data')" color="medium">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                    {{ 'Cancel' | translate }}</ion-button>
             </ion-col>
         </ion-row>
         <ion-row *ngIf="tab=='link'" class="ion-padding-top ion-padding-bottom" (click)="doSubmitLink()">
@@ -78,7 +83,9 @@ https://www.gnu.org/licenses.
                         {{ 'ATTACH' | translate }}
                     </ng-template>
                 </ion-button>
-                <ion-button (click)="goTab('data')" color="medium">{{ 'Cancel' | translate }} </ion-button>
+                <ion-button (click)="goTab('data')" color="medium">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                    {{ 'Cancel' | translate }} </ion-button>
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -186,14 +193,12 @@ https://www.gnu.org/licenses.
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="false"
-                                        [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                        [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0">
+                                        [disabled]="field.disabled" [readonly]="field.readonly">
                                     </ion-input>
                                     <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
-                                        [(ngModel)]="data_[field.name]"
-                                        [readonly]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                        auto-grow="true" [maxlength]="field.maxLength" [minlength]="field.minLength"
-                                        autocorrect="off"
+                                        [(ngModel)]="data_[field.name]" [readonly]="field.readonly"
+                                        [disabled]="field.disabled" auto-grow="true" [maxlength]="field.maxLength"
+                                        [minlength]="field.minLength" autocorrect="off"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [formControlName]="field.name" [required]="field.required" spellcheck="false"
                                         debounce="500">
@@ -210,7 +215,7 @@ https://www.gnu.org/licenses.
                                     <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
-                                        [disabled]="field.permanent && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
+                                        [disabled]="(field.disabled || field.readonly) && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
                                         [(ngModel)]="data_[field.name]"
                                         (ionChange)="doChangeEnum(field, $event.target.value)">
                                         <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
@@ -238,16 +243,18 @@ https://www.gnu.org/licenses.
                         <div *ngIf="field.bsonType=='date'">
                             <div *ngIf="data_[field.name]; else nodatevalue" class="datetime-class">
                                 <ion-datetime-button [datetime]="field.name"> </ion-datetime-button>
-                                <ion-button (click)="doCancelDate(field.name)" fill="clear"
+                                <ion-button *ngIf="!field.readonly" (click)="doCancelDate(field.name)" fill="clear"
                                     class="ion-no-padding datetime-button">
                                     <ion-icon name="close-circle-outline"></ion-icon>
                                 </ion-button>
                                 <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
                                     <ng-template>
-                                        <ion-datetime [id]="field.name" presentation="date-time" [multiple]="false"
-                                            [value]="data_[field.name]?.replace(' ', 'T')" [showClearButton]="true"
-                                            (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
-                                            [showDefaultButtons]="true">
+                                        <ion-datetime [id]="field.name" [multiple]="false"
+                                            [value]="data_[field.name]?.replace(' ', 'T').substr(0,19)"
+                                            [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
+                                            [firstDayOfWeek]="1" [showDefaultButtons]="true"
+                                            displayFormat="DD.MM.YYYY HH:mm"
+                                            [readonly]="field.readonly" [disabled]="field.disabled">
                                             <span slot="title">{{ field.title }}</span>
                                         </ion-datetime>
                                     </ng-template>
@@ -264,7 +271,7 @@ https://www.gnu.org/licenses.
                             class="ion-no-padding" [formControlName]="field.name" type="number"
                             [required]="field.required" [(ngModel)]="data_[field.name]"
                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                            [readonly]="field.permanent && op != 'insert'">
+                            [readonly]="field.readonly && op != 'insert'">
                         </ion-input>
                         <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
                             [(ngModel)]="data_[field.name]">

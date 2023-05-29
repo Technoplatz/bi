@@ -4,7 +4,8 @@
       "bsonType": "date",
       "title": "Date",
       "description": "Shipment Date",
-      "width": 140
+      "dateonly": true,
+      "width": 120
     },
     "shp_id": {
       "bsonType": "number",
@@ -14,18 +15,17 @@
       "minimum": 1,
       "maximum": 99999,
       "counter": true,
-      "disabled": true,
-      "width": 100
+      "permanent": true,
+      "width": 90
     },
-    "shp_waybill_no": {
+    "shp_acc_no": {
       "bsonType": "string",
-      "title": "Waybill No",
-      "description": "Waybill serial number",
-      "placeholder": "Waybill No",
-      "pattern": "^[A-Z0-9]{16,16}$",
-      "minLength": 16,
-      "maxLength": 16,
-      "width": 140
+      "title": "Account No",
+      "description": "Account No",
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[A-Z0-9-]{10,11}$",
+      "width": 110
     },
     "shp_carrier_name": {
       "bsonType": "string",
@@ -56,18 +56,6 @@
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
       "width": 140
     },
-    "shp_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Status",
-      "minLength": 2,
-      "maxLength": 16,
-      "pattern": "^[a-zA-Z]{2,16}$",
-      "permanent": false,
-      "enum": ["OK", "Processing", "Error"],
-      "default": "Processing",
-      "width": 100
-    },
     "shp_notes": {
       "bsonType": "string",
       "title": "Notes",
@@ -76,12 +64,74 @@
       "minLength": 0,
       "maxLength": 512,
       "width": 200
+    },
+    "shp_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status",
+      "minLength": 2,
+      "maxLength": 16,
+      "pattern": "^[a-zA-Z]{2,16}$",
+      "enum": ["OK", "Processing", "Error"],
+      "default": "Processing",
+      "readonly": true,
+      "width": 100
+    },
+    "shp_ewaybill_no": {
+      "bsonType": "string",
+      "title": "EWaybill No",
+      "description": "Waybill serial number",
+      "placeholder": "Waybill No",
+      "pattern": "^[A-Z0-9]{16,16}$",
+      "minLength": 16,
+      "maxLength": 16,
+      "readonly": true,
+      "width": 140
+    },
+    "shp_ewaybill_date": {
+      "bsonType": "date",
+      "title": "EWaybill Date",
+      "description": "Ewaybill generated date",
+      "readonly": true,
+      "width": 150
+    },
+    "shp_ettn": {
+      "bsonType": "string",
+      "title": "EWaybill ETTN",
+      "description": "EWaybill ETTN",
+      "placeholder": "ETTN",
+      "pattern": "^[a-z0-9-]{32,40}$",
+      "minLength": 32,
+      "maxLength": 40,
+      "readonly": true,
+      "width": 270
     }
   },
-  "required": ["shp_id", "shp_carrier_name", "shp_carrier_id", "shp_date", "shp_waybill_no", "shp_vehicle_id"],
-  "index": [["shp_id"], ["shp_waybill_no"]],
-  "unique": [["shp_id"], ["shp_waybill_no"]],
-  "parents": [],
+  "sort": {
+    "_modified_at": -1
+  },
+  "required": ["shp_id", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_date", "shp_vehicle_id"],
+  "index": [["shp_id"], ["shp_acc_no"]],
+  "unique": [["shp_id"], ["shp_ewaybill_no"]],
+  "parents": [
+    {
+      "collection": "account",
+      "match": [
+        {
+          "key": "shp_acc_no",
+          "value": "acc_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "acc_is_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "get": ["acc_no", "acc_name"]
+    }
+  ],
   "links": [
     {
       "collection": "delivery",
@@ -101,34 +151,5 @@
   "actions": [],
   "triggers": [],
   "views": {},
-  "sort": {
-    "_modified_at": -1
-  },
-  "connectors": [
-    {
-      "id": "shipment-connector",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "method": "post",
-      "url": "https://api.bi.technoplatz.com",
-      "headers": [{ "Authorization": "$POST01_BEARER" }, { "X-Api-Key": "$POST01_APIKEY" }],
-      "filter": [{}],
-      "body": {
-        "op": "upsert",
-        "collection": "delivery",
-        "data": {
-          "DeliveryNo": "$dnn_no"
-        }
-      },
-      "actions": {
-        "200": {
-          "mapping": [
-            {
-              "merchandise": [{ "source_field": "DeliveryNo", "target_field": "dnn_no" }]
-            }
-          ]
-        }
-      }
-    }
-  ]
+  "connectors": []
 }

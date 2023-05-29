@@ -91,6 +91,7 @@ export class Crud {
         const property_ = p.property ? true : false;
         const kv_ = p.subType === "keyvalue" ? true : false;
         const permanent_ = p.permanent ? true : false;
+        const readonly_ = p.readonly ? true : false;
         const collection_ = p.collection ? true : false;
         const textarea_ = p.textarea ? true : false;
         const disabled_ = p.disabled && p.disabled === true ? true : false;
@@ -127,6 +128,7 @@ export class Crud {
           filter: filter_,
           kv: kv_,
           permanent: permanent_,
+          readonly: readonly_,
           collection: collection_,
           view: view_,
           property: property_,

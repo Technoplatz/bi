@@ -254,7 +254,8 @@ class Misc:
             "replacement",
             "placeholder",
             "counter",
-            "uuid"
+            "uuid",
+            "dateonly"
         ]
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):

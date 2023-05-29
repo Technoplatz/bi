@@ -626,15 +626,6 @@ class Trigger():
         print("\n>>> changes hub started")
         return await self.worker_change_f(params_)
 
-    def backlog_stream_f(self):
-        """
-        backlog stream is in progress
-        """
-        print(">>> backlog stream started")
-        print(">>> backlog stream is in progress...")
-        print(">>> backlog stream ended")
-        return True
-
     async def changes_stream_f(self):
         """
         creates a pipeline to run async works in a loop
@@ -642,9 +633,6 @@ class Trigger():
         try:
             print(">>> change stream started")
             resume_token_ = None
-            backlog_stream_ = self.backlog_stream_f()
-            if not backlog_stream_:
-                raise AppException("backlog trace error")
 
             with self.db_.watch(self.pipeline_) as changes_stream_:
                 for event_ in changes_stream_:

@@ -370,9 +370,9 @@ ion-note {
 
 .data-sq-container {
   display: flex;
-  gap: 3px;
+  gap: 4px;
   margin-bottom: 16px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .alert-class input {
@@ -877,12 +877,12 @@ ion-select {
 .datetime-class {
   display: flex;
   margin-left: 0px !important;
+  margin-bottom: 8px !important;
 }
 
 .datetime-button {
   margin-left: 0px;
   margin-top: 4px !important;
-  margin-bottom: 8px !important;
 }
 
 ion-datetime {
@@ -1359,7 +1359,7 @@ sup {
 
 .schema-card-container {
   margin-top: 16px;
-  gap: 3px !important;
+  gap: 4px !important;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -1371,7 +1371,7 @@ sup {
   min-width: 86px;
   height: 80px;
   box-shadow: none !important;
-  background-color: #e3e3e3;
+  background-color: #ddd;
   color: var(--ion-color-dark);
   overflow: hidden !important;
   margin: 0px;
@@ -1394,9 +1394,9 @@ sup {
 
 .schema-card-container ion-card ion-card-content {
   padding: 0px;
-  margin-top: 4px;
+  margin-top: 2px;
   margin-left: 10px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
   color: #333;
 }

@@ -95,6 +95,7 @@ export class CrudPage implements OnInit {
   private sweeped: any;
   public link_text: any = null;
   public linked_: any = [];
+  public date_format: string = "DD.MM.YYYY HH:mm";
   private counters: any = {};
   private filter: any = [];
   private file: any = null;
