@@ -1,0 +1,8 @@
+Flask
+flask-cors
+pymongo[tls]
+uuid
+pytz
+datetime
+requests
+get-docker-secret

@@ -240,7 +240,8 @@ https://www.gnu.org/licenses.
                         </div>
                         <div *ngIf="field.bsonType=='date'" class="datetime-class">
                             <div *ngIf="data_[field.name]; else nodatevalue">
-                                <ion-datetime-button [datetime]="field.name">
+                                <ion-datetime-button [datetime]="field.name"
+                                    [disabled]="field.readonly || field.disabled">
                                 </ion-datetime-button>
                                 <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
                                     <ng-template>
