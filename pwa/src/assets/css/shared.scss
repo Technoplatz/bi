@@ -822,6 +822,10 @@ ion-select {
   width: auto !important;
 }
 
+ion-select.select-disabled {
+  opacity: 1 !important;
+}
+
 .tabs-row {
   border-bottom: 1px solid var(--ion-color-light) !important;
 }
@@ -875,14 +879,21 @@ ion-select {
 }
 
 .datetime-class {
-  display: flex;
   margin-left: 0px !important;
   margin-bottom: 8px !important;
+  height: 32px !important;
 }
 
-.datetime-button {
+.datetime-button,
+ion-datetime-button {
   margin-left: 0px;
   margin-top: 4px !important;
+}
+
+.datetime-clear-button {
+  position: absolute;
+  right: 8px !important;
+  top: 24px !important;
 }
 
 ion-datetime {

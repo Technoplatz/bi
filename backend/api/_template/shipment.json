@@ -4,7 +4,7 @@
       "bsonType": "date",
       "title": "Date",
       "description": "Shipment Date",
-      "dateonly": true,
+      "dateonly": false,
       "width": 120
     },
     "shp_id": {
@@ -56,24 +56,15 @@
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
       "width": 140
     },
-    "shp_notes": {
-      "bsonType": "string",
-      "title": "Notes",
-      "description": "Shipment notes to carrier or customer",
-      "placeholder": "Shipment Notes",
-      "minLength": 0,
-      "maxLength": 512,
-      "width": 200
-    },
     "shp_status": {
       "bsonType": "string",
       "title": "Status",
       "description": "Status",
-      "minLength": 2,
+      "minLength": 5,
       "maxLength": 16,
-      "pattern": "^[a-zA-Z]{2,16}$",
-      "enum": ["OK", "Processing", "Error"],
-      "default": "Processing",
+      "pattern": "^[A-Za-z0-9-]{5,16}$",
+      "enum": ["00-Open", "10-InProgress", "20-OK", "99-Error"],
+      "default": "00-Open",
       "readonly": true,
       "width": 100
     },
@@ -105,6 +96,15 @@
       "maxLength": 40,
       "readonly": true,
       "width": 270
+    },
+    "shp_notes": {
+      "bsonType": "string",
+      "title": "Notes",
+      "description": "Shipment notes to carrier or customer",
+      "placeholder": "Shipment Notes",
+      "minLength": 0,
+      "maxLength": 512,
+      "width": 200
     }
   },
   "sort": {

@@ -92,6 +92,7 @@ export class Crud {
         const kv_ = p.subType === "keyvalue" ? true : false;
         const permanent_ = p.permanent ? true : false;
         const readonly_ = p.readonly ? true : false;
+        const dateonly_ = p.dateonly ? true : false;
         const collection_ = p.collection ? true : false;
         const textarea_ = p.textarea ? true : false;
         const disabled_ = p.disabled && p.disabled === true ? true : false;
@@ -138,7 +139,8 @@ export class Crud {
           subType: subType_,
           manualAdd: manualAdd_,
           placeholder: placeholder_,
-          counter: counter_
+          counter: counter_,
+          dateonly: dateonly_
         });
         const kvval_: any = [{
           key: null,

@@ -182,7 +182,6 @@ https://www.gnu.org/licenses.
                                 <ion-icon *ngIf="field.readonly" name="star"></ion-icon>
                             </sup>
                         </ion-label>
-                        <!-- <div *ngIf="field?.description" class="input-desc">{{ field.description | translate }}</div> -->
                         <div *ngIf="field.bsonType=='string'" class="full-width">
                             <div *ngIf="!field.file; else isfile">
                                 <div *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword"
@@ -215,8 +214,7 @@ https://www.gnu.org/licenses.
                                     <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
-                                        [disabled]="(field.disabled || field.readonly) && op != 'insert' && dataprev && dataprev[field.name]?.length > 0"
-                                        [(ngModel)]="data_[field.name]"
+                                        [disabled]="field.disabled || field.readonly" [(ngModel)]="data_[field.name]"
                                         (ionChange)="doChangeEnum(field, $event.target.value)">
                                         <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
                                         </ion-select-option>
@@ -240,25 +238,28 @@ https://www.gnu.org/licenses.
                                 </div>
                             </ng-template>
                         </div>
-                        <div *ngIf="field.bsonType=='date'">
-                            <div *ngIf="data_[field.name]; else nodatevalue" class="datetime-class">
-                                <ion-datetime-button [datetime]="field.name"> </ion-datetime-button>
-                                <ion-button *ngIf="!field.readonly" (click)="doCancelDate(field.name)" fill="clear"
-                                    class="ion-no-padding datetime-button">
-                                    <ion-icon name="close-circle-outline"></ion-icon>
-                                </ion-button>
+                        <div *ngIf="field.bsonType=='date'" class="datetime-class">
+                            <div *ngIf="data_[field.name]; else nodatevalue">
+                                <ion-datetime-button [datetime]="field.name">
+                                </ion-datetime-button>
                                 <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
                                     <ng-template>
-                                        <ion-datetime [id]="field.name" [multiple]="false"
+                                        <ion-datetime [id]="field.name"
+                                            [presentation]="field.dateonly ? 'date' : 'date-time'" [multiple]="false"
                                             [value]="data_[field.name]?.replace(' ', 'T').substr(0,19)"
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
                                             [firstDayOfWeek]="1" [showDefaultButtons]="true"
-                                            displayFormat="DD.MM.YYYY HH:mm"
+                                            displayFormat="field.dateonly ? 'DD.MM.YYYY' : 'DD.MM.YYYY HH:mm'"
                                             [readonly]="field.readonly" [disabled]="field.disabled">
                                             <span slot="title">{{ field.title }}</span>
                                         </ion-datetime>
                                     </ng-template>
                                 </ion-modal>
+                                <ion-button *ngIf="!field.readonly && !field.disabled"
+                                    (click)="doCancelDate(field.name)" fill="clear"
+                                    class="ion-no-padding datetime-clear-button" size="default">
+                                    <ion-icon name="close-outline"></ion-icon>
+                                </ion-button>
                             </div>
                             <ng-template #nodatevalue>
                                 <ion-button (click)="doInitDate(field.name)" fill="clear"
@@ -271,7 +272,7 @@ https://www.gnu.org/licenses.
                             class="ion-no-padding" [formControlName]="field.name" type="number"
                             [required]="field.required" [(ngModel)]="data_[field.name]"
                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                            [readonly]="field.readonly && op != 'insert'">
+                            [disabled]="field.disabled" [readonly]="field.readonly">
                         </ion-input>
                         <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
                             [(ngModel)]="data_[field.name]">
