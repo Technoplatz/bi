@@ -643,6 +643,21 @@ class Trigger():
                         continue
                     source_collection_id_ = source_collection_.replace("_data", "")
 
+                    if source_collection_ == "_collection":
+                        refresh_properties_f_ = self.refresh_properties_f()
+                        if not refresh_properties_f_["result"]:
+                            print(">>> properties refresh error", refresh_properties_f_["exc"])
+                            continue
+                        refresh_triggers_f_ = self.refresh_triggers_f()
+                        if not refresh_triggers_f_["result"]:
+                            print(">>> triggers refresh error", refresh_triggers_f_["exc"])
+                            continue
+                        refresh_connectors_f_ = self.refresh_connectors_f()
+                        if not refresh_connectors_f_["result"]:
+                            print(">>> connectors refresh error", refresh_connectors_f_["exc"])
+                            continue
+                        print(">>> _collection updated and refreshed")
+
                     print("\n>>> it is a change", source_collection_id_)
 
                     source_properties_ = self.properties_[source_collection_id_] if source_collection_id_ in self.properties_ else None
@@ -661,21 +676,6 @@ class Trigger():
                         if changed_ is None:
                             print("!!! no changed fields provided")
                             continue
-
-                    if source_collection_ == "_collection":
-                        refresh_properties_f_ = self.refresh_properties_f()
-                        if not refresh_properties_f_["result"]:
-                            print(">>> properties refresh error", refresh_properties_f_["exc"])
-                            continue
-                        refresh_triggers_f_ = self.refresh_triggers_f()
-                        if not refresh_triggers_f_["result"]:
-                            print(">>> triggers refresh error", refresh_triggers_f_["exc"])
-                            continue
-                        refresh_connectors_f_ = self.refresh_connectors_f()
-                        if not refresh_connectors_f_["result"]:
-                            print(">>> connectors refresh error", refresh_connectors_f_["exc"])
-                            continue
-                        print(">>> _collection updated and refreshed")
 
                     if source_collection_[:1] == "_":
                         print(f">>> system collection passed {source_collection_}")

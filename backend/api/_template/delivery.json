@@ -47,7 +47,7 @@
     "dnn_bill_no": {
       "bsonType": "string",
       "title": "Invoice No",
-      "description": "Fatura No",
+      "description": "Invoice Number",
       "minLength": 10,
       "maxLength": 10,
       "pattern": "^[0-9]{10,10}$",
@@ -79,7 +79,7 @@
     "dnn_po_id": {
       "bsonType": "string",
       "title": "Po ID",
-      "description": "Sipariş No",
+      "description": "Customer order no",
       "minLength": 1,
       "maxLength": 64,
       "width": 260
@@ -87,7 +87,7 @@
     "dnn_po_date": {
       "bsonType": "date",
       "title": "PO Date",
-      "description": "Purchase Order Date",
+      "description": "Purchase order date",
       "width": 120
     },
     "dnn_sales_doc": {
@@ -671,7 +671,7 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
-      "scheduled": true,
+      "scheduled": false,
       "scheduled_cron": "15 14,15,16 * * mon,tue",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
@@ -803,7 +803,7 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
-      "scheduled": true,
+      "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
@@ -849,7 +849,7 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
-      "scheduled": true,
+      "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
@@ -987,7 +987,7 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
-      "scheduled": true,
+      "scheduled": false,
       "scheduled_cron": "30 9,17 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
@@ -1038,5 +1038,6 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     }
-  }
+  },
+  "connectors": []
 }

@@ -5,6 +5,7 @@
     "description": "Date of something",
     "placeholder": "Please provide a date",
     "default": "$CURRENT_DATE",
+    "dateonly": false,
     "width": 130
   }
 }
