@@ -394,7 +394,7 @@ export class CrudPage implements OnInit {
           if (res && res.result) {
             this.modified = true;
             const count_ = res.count && res.count > 0 ? res.count : 0;
-            this.misc.doMessage(count_ + " records were linked successfully", "success");
+            count_ > 0 ? this.misc.doMessage(count_ + " records were linked successfully", "success") : this.misc.doMessage("no records were matched to get linked", "error");
             this.doDismissModal({ op: "link", modified: this.modified, filter: [] });
           }
         }).catch((error: any) => {

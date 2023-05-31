@@ -93,6 +93,12 @@ class AppException(BaseException):
     """
 
 
+class PassException(BaseException):
+    """
+    docstring is in progress
+    """
+
+
 class JSONEncoder(json.JSONEncoder):
     """
     docstring is in progress
@@ -326,6 +332,13 @@ class Misc:
         """
         res_ = str(exc_)
         self.post_notification(res_)
+        return {"result": False, "msg": res_}
+
+    def pass_exception_f(self, exc_):
+        """
+        docstring is in progress
+        """
+        res_ = str(exc_)
         return {"result": False, "msg": res_}
 
     def auth_error_f(self, exc_):
@@ -1411,33 +1424,43 @@ class Crud:
 
             if link_ is None:
                 raise APIError("link info is missing")
+
             if linked_ is None:
                 raise APIError("linked data is missing")
+
             if data_ is None:
                 raise APIError("master data is missing")
-            if user_ is None:
-                raise APIError("user data is missing")
 
-            collection_ = link_["collection"] if "collection" in link_ else None
+            if user_ is None:
+                raise APIError("user is missing")
+
+            col_id_ = link_["collection"] if "collection" in link_ else None
             get_ = link_["get"] if "get" in link_ else None
             set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
+            match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
             usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
 
-            if collection_ is None:
+            if col_id_ is None:
                 raise APIError("link collection is missing")
+
             if get_ is None:
                 raise APIError("link get is missing")
+
             if set_ is None:
                 raise APIError("link set is missing")
+
+            if not match_:
+                raise APIError("link match is missing")
+
             if usr_id_ is None:
                 raise APIError("user id is missing")
 
-            get_properties_ = self.get_properties_f(collection_)
+            get_properties_ = self.get_properties_f(col_id_)
             if not get_properties_["result"]:
                 raise APIError("collection properties is missing")
             target_properties_ = get_properties_["properties"]
 
-            data_collection_ = f"{collection_}_data"
+            data_collection_ = f"{col_id_}_data"
             setc_ = {}
 
             for set__ in set_:
@@ -1457,8 +1480,14 @@ class Crud:
             if not setc_:
                 raise APIError(f"no assignments to set {data_collection_}")
 
-            filter_ = {}
-            filter_[get_] = {"$in": linked_}
+            filter0_ = {}
+            filter0_[get_] = {"$in": linked_}
+            filter1_ = self.get_filtered_f({
+                "match": match_,
+                "properties": target_properties_
+            })
+            filter_ = {"$and": [filter0_, filter1_]}
+
             update_many_ = Mongo().db_[data_collection_].update_many(filter_, {"$set": setc_})
             count_ = update_many_.matched_count
 
@@ -2957,37 +2986,36 @@ class Crud:
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
             else:
-                raise AppException("no rows affected due to the match criteria")
+                raise PassException("no rows affected due to the match criteria")
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": collection_,
-                    "op": "action",
-                    "user": email_,
-                    "document": {"doc": doc_, "match": match_},
-                }
-            )
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": collection_,
+                "op": "action",
+                "user": email_,
+                "document": {"doc": doc_, "match": match_}
+            })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
             return {"result": True, "count": update_many_.matched_count}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_id_,
-                    "op": "action",
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_id_,
+                "op": "action",
+                "user": email_,
+                "document": str(exc)
+            })
 
             return Misc().mongo_error_f(exc)
 
         except AppException as exc:
             return Misc().app_exception_f(exc)
+
+        except PassException as exc:
+            return Misc().pass_exception_f(exc)
 
         except APIError as exc:
             return Misc().api_error_f(exc)

@@ -82,7 +82,7 @@ ion-button {
   --opacity: 1;
   --border-radius: 0px;
   margin: 0px;
-  margin-right: 3px !important;
+  margin-right: 4px !important;
   letter-spacing: normal;
   font-weight: 600;
 }
@@ -1194,7 +1194,7 @@ sup {
   --box-shadow: none;
   --color: var(--ion-color-white) !important;
   --button-color: var(--ion-color-white) !important;
-  font-weight: 600;
+  font-weight: 600 !important;
   padding: 0px !important;
   top: -31px !important;
 }
@@ -1207,7 +1207,7 @@ sup {
   --box-shadow: none;
   --color: var(--ion-color-white) !important;
   --button-color: var(--ion-color-white) !important;
-  font-weight: 600;
+  font-weight: 600 !important;
   padding: 0px !important;
   top: -31px !important;
 }
@@ -1220,7 +1220,7 @@ sup {
   --box-shadow: none;
   --color: var(--ion-color-dark) !important;
   --button-color: var(--ion-color-dark) !important;
-  font-weight: 600;
+  font-weight: 600 !important;
   padding: 0px !important;
   top: -31px !important;
 }

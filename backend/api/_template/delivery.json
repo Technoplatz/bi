@@ -60,7 +60,7 @@
       "minLength": 10,
       "maxLength": 11,
       "pattern": "^[A-Z0-9-]{10,11}$",
-      "width": 110
+      "width": 120
     },
     "dnn_acc_name": {
       "bsonType": "string",
@@ -68,7 +68,7 @@
       "description": "Account Name",
       "minLength": 1,
       "maxLength": 64,
-      "width": 130
+      "width": 140
     },
     "dnn_date": {
       "bsonType": "date",
@@ -339,7 +339,7 @@
           "value": "00-Open,10-InProgress,20-OK"
         }
       ],
-      "get": ["shp_id", "shp_ewaybill_no"]
+      "get": ["shp_id", "shp_waybill_no"]
     }
   ],
   "actions": [
@@ -494,7 +494,7 @@
       }
     },
     {
-      "id": "manifest",
+      "id": "attach-manifest",
       "title": "Attach to Manifest",
       "enabled": true,
       "match": [
@@ -531,7 +531,7 @@
       }
     },
     {
-      "id": "manifest",
+      "id": "detach-manifest",
       "title": "Manifest",
       "enabled": true,
       "rollback": true,
@@ -564,6 +564,39 @@
             "key": "dnn_status",
             "op": "eq",
             "value": "20-OnCustoms"
+          }
+        ]
+      }
+    },
+    {
+      "id": "get-ready",
+      "title": "RTD",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "01-StandBy,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
+      "one_click": false,
+      "_tags": ["#Managers", "#Administrators"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs are ready to be delivered",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 50-OnTheTouchpoint to 60-ReadyToBeDelivered.",
+        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no,dnn_man_no",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "60-ReadyToBeDelivered"
           }
         ]
       }

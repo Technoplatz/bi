@@ -203,13 +203,13 @@ def issue_f():
         if not shipment_ettn_field_:
             raise APIError("missing shipment ettn field")
 
-        shipment_ewaybill_no_field_ = body_["shipment_ewaybill_no_field"] if "shipment_ewaybill_no_field" in body_ and body_["shipment_ewaybill_no_field"] is not None else None
-        if not shipment_ewaybill_no_field_:
-            raise APIError("missing shipment ewaybill no field")
+        shipment_waybill_no_field_ = body_["shipment_waybill_no_field"] if "shipment_waybill_no_field" in body_ and body_["shipment_waybill_no_field"] is not None else None
+        if not shipment_waybill_no_field_:
+            raise APIError("missing shipment waybill no field")
 
-        shipment_ewaybill_date_field_ = body_["shipment_ewaybill_date_field"] if "shipment_ewaybill_date_field" in body_ and body_["shipment_ewaybill_date_field"] is not None else None
-        if not shipment_ewaybill_date_field_:
-            raise APIError("missing shipment ewaybill date field")
+        shipment_waybill_date_field_ = body_["shipment_waybill_date_field"] if "shipment_waybill_date_field" in body_ and body_["shipment_waybill_date_field"] is not None else None
+        if not shipment_waybill_date_field_:
+            raise APIError("missing shipment waybill date field")
 
         shipment_account_no_field_ = body_["shipment_account_no_field"] if "shipment_account_no_field" in body_ and body_["shipment_account_no_field"] is not None else None
         if not shipment_account_no_field_:
@@ -219,8 +219,8 @@ def issue_f():
         if not shipment_status_field_:
             raise APIError("missing shipment status field")
 
-        shipment_status_ok_value_ = body_["shipment_status_ok_value"] if "shipment_status_ok_value" in body_ and body_["shipment_status_ok_value"] is not None else None
-        if not shipment_status_ok_value_:
+        shipment_status_set_value_ = body_["shipment_status_set_value"] if "shipment_status_set_value" in body_ and body_["shipment_status_set_value"] is not None else None
+        if not shipment_status_set_value_:
             raise APIError("missing shipment ok value")
 
         shipment_ids_ = body_["shipment_ids"] if "shipment_ids" in body_ and len(body_["shipment_ids"]) > 0 else None
@@ -271,7 +271,15 @@ def issue_f():
         if not delivery_product_desc_field_:
             raise APIError("missing delivery product description field")
 
-        ewaybills_ = []
+        delivery_set_status_ = body_["delivery_set_status"] if "delivery_set_status" in body_ and body_["delivery_set_status"] is not None else None
+        if not delivery_set_status_:
+            raise APIError("missing delivery set status")
+
+        delivery_status_field_ = body_["delivery_status_field"] if "delivery_status_field" in body_ and body_["delivery_status_field"] is not None else None
+        if not delivery_status_field_:
+            raise APIError("missing delivery status field")
+
+        waybills_ = []
 
         session_client_ = MongoClient(Mongo().connstr_)
         session_db_ = session_client_[MONGO_DB_]
@@ -288,7 +296,7 @@ def issue_f():
                 if not shipment_:
                     raise IssueError("shipment not found")
 
-                if shipment_[shipment_ettn_field_] is not None or shipment_[shipment_ewaybill_no_field_] is not None:
+                if shipment_[shipment_ettn_field_] is not None or shipment_[shipment_waybill_no_field_] is not None:
                     raise IssueError(f"shipment was already issued in {shipment_collection_}")
 
                 delivery_filter_ = {}
@@ -296,7 +304,7 @@ def issue_f():
                 deliveries_ = session_db_[delivery_collection_].find(delivery_filter_)
                 line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
                 if not deliveries_ or line_count_ == 0:
-                    raise IssueError(f"no deliveries found with {delivery_shipment_id_field_}: {shipment_id_}")
+                    raise IssueError(f"no deliveries found with {delivery_shipment_id_field_}={shipment_id_}")
 
                 prior_filter_ = {}
                 prior_filter_[delivery_shipment_id_field_] = shipment_id_
@@ -491,11 +499,11 @@ def issue_f():
                         for tag in root_.iter("{http://tempuri.org/}IRsaliyeNo"):
                             if not tag.text:
                                 raise APIError("!!! missing irsaliyeno tag")
-                            ewaybill_no_ = str(tag.text)
+                            waybill_no_ = str(tag.text)
                             for tag in root_.iter("{http://tempuri.org/}IrsaliyeETTN"):
                                 if not tag.text:
                                     raise APIError("!!! missing irsaliyeettn tag")
-                                ewaybill_ettn_ = str(tag.text)
+                                waybill_ettn_ = str(tag.text)
                     else:
                         for tag in root_.iter("{http://tempuri.org/}Mesaj"):
                             if not tag.text:
@@ -505,35 +513,36 @@ def issue_f():
                 process_date_ = Misc().get_now_f()
 
                 set_ = {}
-                set_[shipment_ewaybill_no_field_] = ewaybill_no_
-                set_[shipment_ewaybill_date_field_] = process_date_
-                set_[shipment_ettn_field_] = ewaybill_ettn_
-                set_[shipment_status_field_] = shipment_status_ok_value_
+                set_[shipment_waybill_no_field_] = waybill_no_
+                set_[shipment_waybill_date_field_] = process_date_
+                set_[shipment_ettn_field_] = waybill_ettn_
+                set_[shipment_status_field_] = shipment_status_set_value_
                 set_["_modified_at"] = process_date_
                 set_["_modified_by"] = "shipment"
 
                 session_db_[shipment_collection_].update_one(shipment_filter_, {"$set": set_})
 
                 set_ = {}
-                set_[delivery_waybill_no_field_] = ewaybill_no_
+                set_[delivery_waybill_no_field_] = waybill_no_
                 set_[delivery_waybill_date_field_] = process_date_
+                set_[delivery_status_field_] = delivery_set_status_
                 set_["_modified_at"] = process_date_
                 set_["_modified_by"] = "shipment"
                 deliveries_ = session_db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
 
-                ewaybills_.append({"status": "Success", "shipment_id": shipment_id_, "msg": "OK", "ewaybill_no": ewaybill_no_, "ewaybill_ettn": ewaybill_ettn_})
+                waybills_.append({"status": "Success", "shipment_id": shipment_id_, "msg": "OK", "waybill_no": waybill_no_, "waybill_ettn": waybill_ettn_})
 
                 session_.commit_transaction()
 
             except IssueError as exc_:
                 session_.abort_transaction()
-                ewaybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "ewaybill_no": None, "ewaybill_ettn": None})
+                waybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "waybill_no": None, "waybill_ettn": None})
 
             except pymongo.errors.PyMongoError as exc_:
                 session_.abort_transaction()
-                ewaybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "ewaybill_no": None, "ewaybill_ettn": None})
+                waybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "waybill_no": None, "waybill_ettn": None})
 
-        res_ = {"result": True, "ewaybills": ewaybills_}
+        res_ = {"result": True, "waybills": waybills_}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.mimetype = "application/json"
         response_.status_code = 200

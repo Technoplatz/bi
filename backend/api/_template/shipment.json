@@ -68,28 +68,28 @@
       "readonly": true,
       "width": 100
     },
-    "shp_ewaybill_no": {
+    "shp_waybill_no": {
       "bsonType": "string",
-      "title": "EWaybill No",
+      "title": "Waybill No",
       "description": "Waybill serial number",
       "placeholder": "Waybill No",
       "pattern": "^[A-Z0-9-]{16,18}$",
-      "minLength": 16,
+      "minLength": 0,
       "maxLength": 18,
       "readonly": false,
       "width": 150
     },
-    "shp_ewaybill_date": {
+    "shp_waybill_date": {
       "bsonType": "date",
-      "title": "EWaybill Date",
-      "description": "Ewaybill generated date",
+      "title": "Waybill Date",
+      "description": "Waybill generated date",
       "readonly": false,
       "width": 150
     },
     "shp_ettn": {
       "bsonType": "string",
-      "title": "EWaybill ETTN",
-      "description": "EWaybill ETTN",
+      "title": "Waybill ETTN",
+      "description": "Waybill ETTN",
       "placeholder": "ETTN",
       "pattern": "^[a-z0-9-]{32,40}$",
       "minLength": 32,
@@ -111,8 +111,8 @@
     "_modified_at": -1
   },
   "required": ["shp_id", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_date", "shp_vehicle_id"],
-  "index": [["shp_id"], ["shp_acc_no"]],
-  "unique": [["shp_id"], ["shp_ewaybill_no"]],
+  "index": [["shp_id"], ["shp_acc_no"], ["shp_waybill_no"]],
+  "unique": [["shp_id"]],
   "parents": [
     {
       "collection": "account",
@@ -136,14 +136,17 @@
     {
       "collection": "delivery",
       "get": "dnn_no",
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
       "set": [
         {
-          "key": "dnn_waybill_no",
-          "value": "shp_waybill_no"
-        },
-        {
-          "key": "dnn_waybill_date",
-          "value": "shp_date"
+          "key": "dnn_shp_id",
+          "value": "shp_id"
         }
       ]
     }
