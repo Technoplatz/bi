@@ -12,8 +12,8 @@
       "title": "ID",
       "description": "Shipment ID",
       "placeholder": "Shipment ID",
-      "minimum": 1,
-      "maximum": 99999,
+      "minimum": 0,
+      "maximum": 999999,
       "counter": true,
       "permanent": true,
       "width": 90
@@ -76,14 +76,14 @@
       "pattern": "^[A-Z0-9]{16,16}$",
       "minLength": 16,
       "maxLength": 16,
-      "readonly": true,
+      "readonly": false,
       "width": 140
     },
     "shp_ewaybill_date": {
       "bsonType": "date",
       "title": "EWaybill Date",
       "description": "Ewaybill generated date",
-      "readonly": true,
+      "readonly": false,
       "width": 150
     },
     "shp_ettn": {
@@ -94,7 +94,7 @@
       "pattern": "^[a-z0-9-]{32,40}$",
       "minLength": 32,
       "maxLength": 40,
-      "readonly": true,
+      "readonly": false,
       "width": 270
     },
     "shp_notes": {

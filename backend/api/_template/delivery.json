@@ -59,7 +59,7 @@
       "description": "Account No",
       "minLength": 10,
       "maxLength": 11,
-      "pattern": "^[0-9-]{10,11}$",
+      "pattern": "^[A-Z0-9-]{10,11}$",
       "width": 110
     },
     "dnn_acc_name": {
@@ -208,6 +208,14 @@
       "disabled": false,
       "width": 180
     },
+    "dnn_shp_id": {
+      "bsonType": "number",
+      "title": "Shipment ID",
+      "description": "Shipment ID",
+      "minimum": 0,
+      "maximum": 999999,
+      "width": 90
+    },
     "dnn_waybill_no": {
       "title": "Waybill No",
       "bsonType": "string",
@@ -238,7 +246,7 @@
     }
   },
   "required": ["dnn_no", "dnn_acc_no", "dnn_status", "dnn_prd_no"],
-  "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_prd_no"], ["dnn_acc_no", "dnn_status"]],
+  "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_prd_no"], ["dnn_acc_no", "dnn_status"], ["dnn_shp_id"]],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
     "_modified_at": -1
@@ -315,6 +323,23 @@
         }
       ],
       "get": ["inv_no", "inv_dnn_no"]
+    },
+    {
+      "collection": "shipment",
+      "match": [
+        {
+          "key": "dnn_shp_id",
+          "value": "shp_id"
+        }
+      ],
+      "filter": [
+        {
+          "key": "shp_status",
+          "op": "in",
+          "value": "00-Open,10-InProgress,20-OK"
+        }
+      ],
+      "get": ["shp_id", "shp_ewaybill_no"]
     }
   ],
   "actions": [

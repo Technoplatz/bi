@@ -101,6 +101,7 @@ ADVICE_TYPE_CODE_ = os.environ.get("ADVICE_TYPE_CODE")
 IDENTIFICATION_SCHEME_ = os.environ.get("IDENTIFICATION_SCHEME")
 PROFILE_ID_ = os.environ.get("PROFILE_ID")
 EDOKSIS_URL_ = os.environ.get("EDOKSIS_URL")
+EDOKSIS_TIMEOUT_SECONDS_ = os.environ.get("EDOKSIS_TIMEOUT_SECONDS")
 SUPPLIER_NAME_ = os.environ.get("SUPPLIER_NAME")
 SUPPLIER_STREET_NAME_ = os.environ.get("SUPPLIER_STREET_NAME")
 SUPPLIER_BUILDING_NUMBER_ = os.environ.get("SUPPLIER_BUILDING_NUMBER")
@@ -139,8 +140,8 @@ class Mongo:
         tls_ca_file_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
         retry_writes_ = "&retryWrites=true" if MONGO_RETRY_WRITES_ else "&retryWrites=false"
-        connstr_ = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}"
-        client_ = MongoClient(connstr_)
+        self.connstr_ = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}"
+        client_ = MongoClient(self.connstr_)
         self.db_ = client_[MONGO_DB_]
 
 
@@ -161,7 +162,7 @@ class Misc:
         """
         line_no_ = exc_.__traceback__.tb_lineno if hasattr(exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
         name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
-        print(f"!!! {name_} at line {line_no_}:", str(exc_))
+        print_(f"!!! {name_} at line {line_no_}:", str(exc_))
         return True
 
 
@@ -172,6 +173,11 @@ def issue_f():
     """
     try:
         print_("*** ok0")
+
+        session_client_ = MongoClient(Mongo().connstr_)
+        session_db_ = session_client_[MONGO_DB_]
+        session_ = session_client_.start_session()
+        session_.start_transaction()
 
         if not request.headers:
             raise AuthError("no headers provided")
@@ -187,6 +193,8 @@ def issue_f():
             raise APIError("no data requested")
 
         body_ = request.json
+        if not body_:
+            raise APIError("no request json provided")
 
         shipment_collection_ = body_["shipment_collection"] if "shipment_collection" in body_ and body_["shipment_collection"] is not None else None
         if not shipment_collection_:
@@ -222,7 +230,7 @@ def issue_f():
 
         shipment_ids_ = body_["shipment_ids"] if "shipment_ids" in body_ and len(body_["shipment_ids"]) > 0 else None
         if not shipment_ids_:
-            raise APIError("missing shipment ids")
+            raise APIError("no shipment id provided")
 
         account_collection_ = body_["account_collection"] if "account_collection" in body_ and body_["account_collection"] is not None else None
         if not account_collection_:
@@ -232,21 +240,69 @@ def issue_f():
         if not account_no_field_:
             raise APIError("missing account no field")
 
+        delivery_collection_ = body_["delivery_collection"] if "delivery_collection" in body_ and body_["delivery_collection"] is not None else None
+        if not delivery_collection_:
+            raise APIError("missing delivery collection")
+
+        delivery_shipment_id_field_ = body_["delivery_shipment_id_field"] if "delivery_shipment_id_field" in body_ and body_["delivery_shipment_id_field"] is not None else None
+        if not delivery_shipment_id_field_:
+            raise APIError("missing delivery shipment id field")
+
+        delivery_qty_field_ = body_["delivery_qty_field"] if "delivery_qty_field" in body_ and body_["delivery_qty_field"] is not None else None
+        if not delivery_qty_field_:
+            raise APIError("missing delivery qty field")
+
+        delivery_no_field_ = body_["delivery_no_field"] if "delivery_no_field" in body_ and body_["delivery_no_field"] is not None else None
+        if not delivery_no_field_:
+            raise APIError("missing delivery no field")
+
+        delivery_waybill_no_field_ = body_["delivery_waybill_no_field"] if "delivery_waybill_no_field" in body_ and body_["delivery_waybill_no_field"] is not None else None
+        if not delivery_waybill_no_field_:
+            raise APIError("missing delivery waybill no field")
+
+        delivery_waybill_date_field_ = body_["delivery_waybill_date_field"] if "delivery_waybill_date_field" in body_ and body_["delivery_waybill_date_field"] is not None else None
+        if not delivery_waybill_date_field_:
+            raise APIError("missing delivery waybill date field")
+
+        delivery_product_no_field_ = body_["delivery_product_no_field"] if "delivery_product_no_field" in body_ and body_["delivery_product_no_field"] is not None else None
+        if not delivery_product_no_field_:
+            raise APIError("missing delivery product no field")
+
+        delivery_product_desc_field_ = body_["delivery_product_desc_field"] if "delivery_product_desc_field" in body_ and body_["delivery_product_desc_field"] is not None else None
+        if not delivery_product_desc_field_:
+            raise APIError("missing delivery product description field")
+
         ewaybills_ = []
+
         for shipment_id_ in shipment_ids_:
             try:
                 shipment_filter_ = {}
                 shipment_filter_[shipment_id_field_] = shipment_id_
-                shipment_ = Mongo().db_[shipment_collection_].find_one(shipment_filter_)
+                shipment_ = session_db_[shipment_collection_].find_one(shipment_filter_)
                 if not shipment_:
                     raise IssueError("shipment not found")
 
                 if shipment_[shipment_ettn_field_] is not None or shipment_[shipment_ewaybill_no_field_] is not None:
-                    raise IssueError("shipment already issued")
+                    raise IssueError(f"shipment was already issued in {shipment_collection_}")
+
+                prior_filter_ = {}
+                prior_filter_[delivery_shipment_id_field_] = shipment_id_
+                prior_deliveries_ = session_db_[delivery_collection_].find(prior_filter_)
+                if prior_deliveries_.explain().get("executionStats", {}).get("nReturned") > 0 and \
+                        delivery_waybill_no_field_ in prior_deliveries_ and \
+                        prior_deliveries_[delivery_waybill_no_field_] is not None:
+                    raise IssueError(f"shipment id was already issued in {delivery_collection_}")
+
+                delivery_filter_ = {}
+                delivery_filter_[delivery_shipment_id_field_] = shipment_id_
+                deliveries_ = session_db_[delivery_collection_].find(delivery_filter_)
+                line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
+                if not deliveries_ or line_count_ == 0:
+                    raise IssueError(f"no deliveries found with {delivery_shipment_id_field_}: {shipment_id_}")
 
                 account_filter_ = {}
                 account_filter_[account_no_field_] = shipment_[shipment_account_no_field_]
-                account_ = Mongo().db_[account_collection_].find_one(account_filter_)
+                account_ = session_db_[account_collection_].find_one(account_filter_)
                 if not account_:
                     raise IssueError("account not found")
 
@@ -286,19 +342,20 @@ def issue_f():
                 issue_time_ = shp_date_.strftime("%H:%M:%S")
                 notes_ = ""
 
-                deliveries_ = [
-                    {"id": 1, "qty": 1, "name": "product", "unit_code": "NIU", "note": ""}
-                ]
-
-                line_count_ = len(deliveries_)
                 despatch_lines_ = ""
-                for line_ in deliveries_:
-                    id_ = line_["id"]
-                    qty_ = line_["qty"]
-                    note_ = line_["note"]
-                    name_ = line_["name"]
-                    unit_code_ = line_["unit_code"]
-                    despatch_lines_ += f'<tem:DespatchLine><tem:ID>{id_}</tem:ID><tem:DeliveredQuantity>{qty_}</tem:DeliveredQuantity><tem:DeliveredQuantityUnitCode>{unit_code_}</tem:DeliveredQuantityUnitCode><tem:LineID>{shipment_id_}</tem:LineID><tem:ItemName>{name_}</tem:ItemName><tem:Note><tem:string>{note_}</tem:string></tem:Note></tem:DespatchLine>'
+                line_id_ = 0
+                for delivery_ in deliveries_:
+                    delivery_qty_ = delivery_[delivery_qty_field_]
+                    delivery_no_ = delivery_[delivery_no_field_]
+                    delivery_product_no_ = delivery_[delivery_product_no_field_]
+                    delivery_product_desc_ = delivery_[delivery_product_desc_field_]
+                    item_name_ = f"{delivery_no_} {delivery_product_no_} {delivery_product_desc_}"
+                    item_name_ = item_name_[:256]
+                    note_ = ""
+                    unit_code_ = "NIU"
+                    line_id_ += 1
+                    notes_ += f"{delivery_no_} "
+                    despatch_lines_ += f'<tem:DespatchLine><tem:ID>{line_id_}</tem:ID><tem:DeliveredQuantity>{delivery_qty_}</tem:DeliveredQuantity><tem:DeliveredQuantityUnitCode>{unit_code_}</tem:DeliveredQuantityUnitCode><tem:LineID>{shipment_id_}</tem:LineID><tem:ItemName>{item_name_}</tem:ItemName><tem:Note><tem:string>{note_}</tem:string></tem:Note></tem:DespatchLine>'
 
                 request_xml_ = f'''\
                 <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
@@ -408,7 +465,7 @@ def issue_f():
                     "Content-Type": "application/soap+xml; charset=utf-8",
                     "SOAPAction": "IrsaliyeZarfGonderYapisal"
                 }
-                response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=16)
+                response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
                 print_("status", response_.status_code)
                 root_ = ElementTree.fromstring(response_.content)
 
@@ -430,29 +487,39 @@ def issue_f():
                                 raise APIError("!!! missing mesaj tag")
                             raise APIError(tag.text)
 
-                print_("*** ewaybill_no_", ewaybill_no_)
-                print_("*** ewaybill_ettn_", ewaybill_ettn_)
+                process_date_ = Misc().get_now_f()
 
                 set_ = {}
                 set_[shipment_ewaybill_no_field_] = ewaybill_no_
-                set_[shipment_ewaybill_date_field_] = Misc().get_now_f()
+                set_[shipment_ewaybill_date_field_] = process_date_
                 set_[shipment_ettn_field_] = ewaybill_ettn_
                 set_[shipment_status_field_] = shipment_status_ok_value_
 
-                Mongo().db_[shipment_collection_].update_one(shipment_filter_, {"$set": set_})
+                session_db_[shipment_collection_].update_one(shipment_filter_, {"$set": set_})
 
-                ewaybills_.append({"shipment_id": shipment_id_, "msg": "OK", "ewaybill_no": ewaybill_no_, "ewaybill_ettn": ewaybill_ettn_})
+                set_ = {}
+                set_[delivery_waybill_no_field_] = ewaybill_no_
+                set_[delivery_waybill_date_field_] = process_date_
+                deliveries_ = session_db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
+
+                ewaybills_.append({"status": "OK", "shipment_id": shipment_id_, "msg": "OK", "ewaybill_no": ewaybill_no_, "ewaybill_ettn": ewaybill_ettn_})
 
             except IssueError as exc_:
-                ewaybills_.append({"shipment_id": shipment_id_, "msg": str(exc_), "ewaybill_no": None, "ewaybill_ettn": None})
+                ewaybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "ewaybill_no": None, "ewaybill_ettn": None})
+
+            except pymongo.errors.PyMongoError as exc_:
+                ewaybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "ewaybill_no": None, "ewaybill_ettn": None})
 
         res_ = {"result": True, "ewaybills": ewaybills_}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.mimetype = "application/json"
         response_.status_code = 200
+        session_.commit_transaction()
+        session_client_.close()
         return response_
 
     except pymongo.errors.PyMongoError as exc_:
+        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
@@ -461,6 +528,7 @@ def issue_f():
         return response_
 
     except AuthError as exc_:
+        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
@@ -469,6 +537,7 @@ def issue_f():
         return response_
 
     except APIError as exc_:
+        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
@@ -477,6 +546,7 @@ def issue_f():
         return response_
 
     except Exception as exc_:
+        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
