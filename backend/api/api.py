@@ -2752,6 +2752,8 @@ class Crud:
                                     doc[uq_[0]] = str(bson.objectid.ObjectId())
                                 elif properties[uq_[0]]["bsonType"] == "string":
                                     doc[uq_[0]] = f"{doc[uq_[0]]}-1" if "_" in doc[uq_[0]] else f"{doc[uq_[0]]}-{index}"
+                                elif properties[uq_[0]]["bsonType"] in ["number", "int", "float", "decimal"]:
+                                    doc[uq_[0]] = doc[uq_[0]] + 10000
                     Mongo().db_[collection_].insert_one(doc)
                 elif op_ == "delete":
                     Mongo().db_[collection_].delete_one({"_id": doc["_id"]})

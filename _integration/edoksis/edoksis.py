@@ -101,7 +101,7 @@ ADVICE_TYPE_CODE_ = os.environ.get("ADVICE_TYPE_CODE")
 IDENTIFICATION_SCHEME_ = os.environ.get("IDENTIFICATION_SCHEME")
 PROFILE_ID_ = os.environ.get("PROFILE_ID")
 EDOKSIS_URL_ = os.environ.get("EDOKSIS_URL")
-EDOKSIS_TIMEOUT_SECONDS_ = os.environ.get("EDOKSIS_TIMEOUT_SECONDS")
+EDOKSIS_TIMEOUT_SECONDS_ = int(os.environ.get("EDOKSIS_TIMEOUT_SECONDS"))
 SUPPLIER_NAME_ = os.environ.get("SUPPLIER_NAME")
 SUPPLIER_STREET_NAME_ = os.environ.get("SUPPLIER_STREET_NAME")
 SUPPLIER_BUILDING_NUMBER_ = os.environ.get("SUPPLIER_BUILDING_NUMBER")
@@ -173,11 +173,6 @@ def issue_f():
     """
     try:
         print_("*** ok0")
-
-        session_client_ = MongoClient(Mongo().connstr_)
-        session_db_ = session_client_[MONGO_DB_]
-        session_ = session_client_.start_session()
-        session_.start_transaction()
 
         if not request.headers:
             raise AuthError("no headers provided")
@@ -264,6 +259,10 @@ def issue_f():
         if not delivery_waybill_date_field_:
             raise APIError("missing delivery waybill date field")
 
+        delivery_account_no_field_ = body_["delivery_account_no_field"] if "delivery_account_no_field" in body_ and body_["delivery_account_no_field"] is not None else None
+        if not delivery_account_no_field_:
+            raise APIError("missing delivery account no field")
+
         delivery_product_no_field_ = body_["delivery_product_no_field"] if "delivery_product_no_field" in body_ and body_["delivery_product_no_field"] is not None else None
         if not delivery_product_no_field_:
             raise APIError("missing delivery product no field")
@@ -274,8 +273,15 @@ def issue_f():
 
         ewaybills_ = []
 
+        session_client_ = MongoClient(Mongo().connstr_)
+        session_db_ = session_client_[MONGO_DB_]
+        session_ = session_client_.start_session()
+
         for shipment_id_ in shipment_ids_:
             try:
+
+                session_.start_transaction()
+
                 shipment_filter_ = {}
                 shipment_filter_[shipment_id_field_] = shipment_id_
                 shipment_ = session_db_[shipment_collection_].find_one(shipment_filter_)
@@ -285,6 +291,13 @@ def issue_f():
                 if shipment_[shipment_ettn_field_] is not None or shipment_[shipment_ewaybill_no_field_] is not None:
                     raise IssueError(f"shipment was already issued in {shipment_collection_}")
 
+                delivery_filter_ = {}
+                delivery_filter_[delivery_shipment_id_field_] = shipment_id_
+                deliveries_ = session_db_[delivery_collection_].find(delivery_filter_)
+                line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
+                if not deliveries_ or line_count_ == 0:
+                    raise IssueError(f"no deliveries found with {delivery_shipment_id_field_}: {shipment_id_}")
+
                 prior_filter_ = {}
                 prior_filter_[delivery_shipment_id_field_] = shipment_id_
                 prior_deliveries_ = session_db_[delivery_collection_].find(prior_filter_)
@@ -293,12 +306,14 @@ def issue_f():
                         prior_deliveries_[delivery_waybill_no_field_] is not None:
                     raise IssueError(f"shipment id was already issued in {delivery_collection_}")
 
-                delivery_filter_ = {}
-                delivery_filter_[delivery_shipment_id_field_] = shipment_id_
-                deliveries_ = session_db_[delivery_collection_].find(delivery_filter_)
-                line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
-                if not deliveries_ or line_count_ == 0:
-                    raise IssueError(f"no deliveries found with {delivery_shipment_id_field_}: {shipment_id_}")
+                shipment_account_no_ = shipment_[shipment_account_no_field_]
+                delivery_account_filter1_ = delivery_account_filter2_ = {}
+                delivery_account_filter1_[delivery_shipment_id_field_] = shipment_id_
+                delivery_account_filter2_[delivery_account_no_field_] = {"$ne": shipment_account_no_}
+                delivery_account_filter_ = {"$and": [delivery_account_filter1_, delivery_account_filter2_]}
+                delivery_accounts_ = session_db_[delivery_collection_].find(delivery_account_filter_).explain().get("executionStats", {}).get("nReturned")
+                if delivery_accounts_ > 0:
+                    raise IssueError(f"account numbers in {delivery_collection_} don't match with {shipment_collection_}")
 
                 account_filter_ = {}
                 account_filter_[account_no_field_] = shipment_[shipment_account_no_field_]
@@ -485,7 +500,7 @@ def issue_f():
                         for tag in root_.iter("{http://tempuri.org/}Mesaj"):
                             if not tag.text:
                                 raise APIError("!!! missing mesaj tag")
-                            raise APIError(tag.text)
+                            raise APIError(str(tag.text))
 
                 process_date_ = Misc().get_now_f()
 
@@ -494,32 +509,37 @@ def issue_f():
                 set_[shipment_ewaybill_date_field_] = process_date_
                 set_[shipment_ettn_field_] = ewaybill_ettn_
                 set_[shipment_status_field_] = shipment_status_ok_value_
+                set_["_modified_at"] = process_date_
+                set_["_modified_by"] = "shipment"
 
                 session_db_[shipment_collection_].update_one(shipment_filter_, {"$set": set_})
 
                 set_ = {}
                 set_[delivery_waybill_no_field_] = ewaybill_no_
                 set_[delivery_waybill_date_field_] = process_date_
+                set_["_modified_at"] = process_date_
+                set_["_modified_by"] = "shipment"
                 deliveries_ = session_db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
 
-                ewaybills_.append({"status": "OK", "shipment_id": shipment_id_, "msg": "OK", "ewaybill_no": ewaybill_no_, "ewaybill_ettn": ewaybill_ettn_})
+                ewaybills_.append({"status": "Success", "shipment_id": shipment_id_, "msg": "OK", "ewaybill_no": ewaybill_no_, "ewaybill_ettn": ewaybill_ettn_})
+
+                session_.commit_transaction()
 
             except IssueError as exc_:
+                session_.abort_transaction()
                 ewaybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "ewaybill_no": None, "ewaybill_ettn": None})
 
             except pymongo.errors.PyMongoError as exc_:
+                session_.abort_transaction()
                 ewaybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "ewaybill_no": None, "ewaybill_ettn": None})
 
         res_ = {"result": True, "ewaybills": ewaybills_}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.mimetype = "application/json"
         response_.status_code = 200
-        session_.commit_transaction()
-        session_client_.close()
         return response_
 
     except pymongo.errors.PyMongoError as exc_:
-        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
@@ -528,7 +548,6 @@ def issue_f():
         return response_
 
     except AuthError as exc_:
-        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
@@ -537,7 +556,6 @@ def issue_f():
         return response_
 
     except APIError as exc_:
-        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
@@ -546,13 +564,15 @@ def issue_f():
         return response_
 
     except Exception as exc_:
-        session_.abort_transaction()
         Misc().exception_show_f(exc_)
         res_ = {"result": False, "msg": str(exc_)}
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.mimetype = "application/json"
         response_.status_code = 500
         return response_
+
+    finally:
+        scc_ = session_client_.close() if session_client_ else None
 
 
 if __name__ == "__main__":

@@ -214,7 +214,7 @@
       "description": "Shipment ID",
       "minimum": 0,
       "maximum": 999999,
-      "width": 90
+      "width": 100
     },
     "dnn_waybill_no": {
       "title": "Waybill No",
@@ -222,7 +222,7 @@
       "description": "Shipment Waybill Number",
       "minLength": 0,
       "maxLength": 16,
-      "width": 130
+      "width": 140
     },
     "dnn_waybill_date": {
       "bsonType": "date",

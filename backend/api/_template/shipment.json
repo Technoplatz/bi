@@ -16,7 +16,7 @@
       "maximum": 999999,
       "counter": true,
       "permanent": true,
-      "width": 90
+      "width": 80
     },
     "shp_acc_no": {
       "bsonType": "string",
@@ -73,11 +73,11 @@
       "title": "EWaybill No",
       "description": "Waybill serial number",
       "placeholder": "Waybill No",
-      "pattern": "^[A-Z0-9]{16,16}$",
+      "pattern": "^[A-Z0-9-]{16,18}$",
       "minLength": 16,
-      "maxLength": 16,
+      "maxLength": 18,
       "readonly": false,
-      "width": 140
+      "width": 150
     },
     "shp_ewaybill_date": {
       "bsonType": "date",
