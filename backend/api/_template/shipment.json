@@ -18,6 +18,18 @@
       "permanent": true,
       "width": 80
     },
+    "shp_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status",
+      "minLength": 5,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9-]{5,16}$",
+      "enum": ["00-Open", "10-InProgress", "20-OK", "99-Error"],
+      "default": "00-Open",
+      "readonly": false,
+      "width": 100
+    },
     "shp_acc_no": {
       "bsonType": "string",
       "title": "Account No",
@@ -29,16 +41,16 @@
     },
     "shp_carrier_name": {
       "bsonType": "string",
-      "title": "Carrier",
+      "title": "Carrier Name",
       "description": "Carrier name or driver name surname",
-      "placeholder": "Carrier or Driver Name",
+      "placeholder": "Carrier or driver Name",
       "minLength": 2,
       "maxLength": 32,
       "width": 180
     },
     "shp_carrier_id": {
       "bsonType": "string",
-      "title": "Carrier Tax",
+      "title": "Carrier Tax/ID No",
       "description": "Carrier tax no or driver id",
       "placeholder": "Carrier Tax/Id No",
       "minLength": 10,
@@ -48,25 +60,13 @@
     },
     "shp_vehicle_id": {
       "bsonType": "string",
-      "title": "vehicle Id",
+      "title": "Vehicle Plate",
       "description": "Vehicle plate number",
-      "placeholder": "Vehicle Plate",
+      "placeholder": "Vehicle plate number",
       "minLength": 6,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
       "width": 140
-    },
-    "shp_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Status",
-      "minLength": 5,
-      "maxLength": 16,
-      "pattern": "^[A-Za-z0-9-]{5,16}$",
-      "enum": ["00-Open", "10-InProgress", "20-OK", "99-Error"],
-      "default": "00-Open",
-      "readonly": true,
-      "width": 100
     },
     "shp_waybill_no": {
       "bsonType": "string",
@@ -110,7 +110,7 @@
   "sort": {
     "_modified_at": -1
   },
-  "required": ["shp_id", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_date", "shp_vehicle_id"],
+  "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_vehicle_id"],
   "index": [["shp_id"], ["shp_acc_no"], ["shp_waybill_no"]],
   "unique": [["shp_id"]],
   "parents": [
@@ -151,7 +151,114 @@
       ]
     }
   ],
-  "actions": [],
+  "actions": [
+    {
+      "id": "waybill-issue",
+      "title": "Waybill Issue",
+      "enabled": true,
+      "match": [
+        {
+          "key": "shp_status",
+          "op": "in",
+          "value": "00-Open,10-InProgress"
+        }
+      ],
+      "set": [
+        {
+          "key": "shp_date",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "_tags": ["#Managers", "#Administrators"],
+      "apis": [
+        {
+          "id": "edoksis-issue",
+          "name": "Waybill Issue",
+          "enabled": true,
+          "url": "http://172.18.0.8/issue",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "map": {
+            "shipment_collection": "shipment_data",
+            "shipment_id_field": "shp_id",
+            "shipment_ettn_field": "shp_ettn",
+            "shipment_waybill_no_field": "shp_waybill_no",
+            "shipment_waybill_date_field": "shp_waybill_date",
+            "shipment_account_no_field": "shp_acc_no",
+            "shipment_status_field": "shp_status",
+            "shipment_status_set_value": "20-OK",
+            "account_collection": "account_data",
+            "account_no_field": "acc_no",
+            "delivery_collection": "delivery_data",
+            "delivery_shipment_id_field": "dnn_shp_id",
+            "delivery_qty_field": "dnn_qty",
+            "delivery_no_field": "dnn_no",
+            "delivery_account_no_field": "dnn_acc_no",
+            "delivery_product_no_field": "dnn_prd_no",
+            "delivery_product_desc_field": "dnn_prd_description",
+            "delivery_waybill_no_field": "dnn_waybill_no",
+            "delivery_waybill_date_field": "dnn_waybill_date",
+            "delivery_status_field": "dnn_status",
+            "delivery_set_status": "70-Delivered"
+          }
+        }
+      ],
+      "notification": {
+        "notify": true,
+        "subject": "DNs Shipped",
+        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
+        "fields": "dnn_no,dnn_status",
+        "filter": []
+      }
+    },
+    {
+      "id": "waybill-download",
+      "title": "Waybill Download",
+      "enabled": true,
+      "match": [
+        {
+          "key": "shp_status",
+          "op": "eq",
+          "value": "20-OK"
+        }
+      ],
+      "set": [
+        {
+          "key": "shp_date",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "_tags": ["#Managers", "#Administrators"],
+      "apis": [
+        {
+          "id": "edoksis-download",
+          "name": "Waybill Download",
+          "enabled": true,
+          "url": "http://172.18.0.8/download",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "map": {
+            "shipment_collection": "shipment_data",
+            "shipment_id_field": "shp_id",
+            "shipment_ettn_field": "shp_ettn"
+          }
+        }
+      ],
+      "notification": {
+        "notify": false,
+        "subject": "DNs Shipped",
+        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
+        "fields": "dnn_no,dnn_status",
+        "filter": []
+      }
+    }
+  ],
   "triggers": [],
   "views": {},
   "connectors": []

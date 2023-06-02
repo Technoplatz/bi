@@ -576,7 +576,7 @@
         {
           "key": "dnn_status",
           "op": "in",
-          "value": "01-StandBy,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+          "value": "01-StandBy,50-OnTheTouchpoint,60-ReadyToBeDelivered,70-Delivered"
         }
       ],
       "set": [
@@ -1059,8 +1059,8 @@
       "data_filter": [
         {
           "key": "dnn_status",
-          "op": "eq",
-          "value": "60-ReadyToBeDelivered"
+          "op": "in",
+          "value": "60-ReadyToBeDelivered,70-Delivered"
         }
       ],
       "data_sort": {

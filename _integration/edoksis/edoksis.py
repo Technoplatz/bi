@@ -38,6 +38,7 @@ import uuid
 from datetime import datetime
 from xml.etree import ElementTree
 from bson import json_util
+from bson.objectid import ObjectId
 import requests
 from pymongo import MongoClient
 import pytz
@@ -53,7 +54,7 @@ class APIError(BaseException):
     """
 
 
-class IssueError(BaseException):
+class EdoksisError(BaseException):
     """
     docstring is in progress
     """
@@ -63,6 +64,20 @@ class AuthError(BaseException):
     """
     docstring is in progress
     """
+
+
+class JSONEncoder(json.JSONEncoder):
+    """
+    docstring is in progress
+    """
+
+    def default(self, o):
+        """
+        docstring is in progress
+        """
+        if isinstance(o, ObjectId) or isinstance(o, datetime):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
 
 
 app = Flask(__name__)
@@ -166,13 +181,13 @@ class Misc:
         return True
 
 
-@app.route("/issue", methods=["POST"], endpoint="issue")
-def issue_f():
+@app.route("/download", methods=["POST"], endpoint="download")
+def download_f():
     """
     docstring is in progress
     """
     try:
-        print_("*** ok0")
+        content_ = ""
 
         if not request.headers:
             raise AuthError("no headers provided")
@@ -187,106 +202,274 @@ def issue_f():
         if not request.data:
             raise APIError("no data requested")
 
-        body_ = request.json
-        if not body_:
+        json_ = request.json
+        if not json_:
             raise APIError("no request json provided")
 
-        shipment_collection_ = body_["shipment_collection"] if "shipment_collection" in body_ and body_["shipment_collection"] is not None else None
+        map_ = json_["map"] if "map" in json_ else None
+        if not map_:
+            raise APIError("no mapping provided")
+
+        ids_ = json_["ids"] if "ids" in json_ else None
+        if not ids_:
+            raise APIError("no input ids provided")
+
+        shipment_collection_ = map_["shipment_collection"] if "shipment_collection" in map_ and map_["shipment_collection"] is not None else None
         if not shipment_collection_:
             raise APIError("missing shipment collection")
 
-        shipment_id_field_ = body_["shipment_id_field"] if "shipment_id_field" in body_ and body_["shipment_id_field"] is not None else None
-        if not shipment_id_field_:
-            raise APIError("missing shipment id field")
-
-        shipment_ettn_field_ = body_["shipment_ettn_field"] if "shipment_ettn_field" in body_ and body_["shipment_ettn_field"] is not None else None
+        shipment_ettn_field_ = map_["shipment_ettn_field"] if "shipment_ettn_field" in map_ and map_["shipment_ettn_field"] is not None else None
         if not shipment_ettn_field_:
             raise APIError("missing shipment ettn field")
 
-        shipment_waybill_no_field_ = body_["shipment_waybill_no_field"] if "shipment_waybill_no_field" in body_ and body_["shipment_waybill_no_field"] is not None else None
+        shipment_id_field_ = map_["shipment_id_field"] if "shipment_id_field" in map_ and map_["shipment_id_field"] is not None else None
+        if not shipment_id_field_:
+            raise APIError("missing shipment id field")
+
+        ids_ = list(set(json.loads(ids_)))
+        object_ids_ = [ObjectId(i) for i in ids_]
+
+        projection_ = {}
+        projection_[shipment_ettn_field_] = 1
+        cursor_ = Mongo().db_[shipment_collection_].find(filter={"_id": {"$in": object_ids_}}, projection=projection_)
+        shipments_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+        if not shipments_:
+            raise APIError("no shipment id provided")
+
+        type_ = 2
+        format_ = 3
+        content_type_ = "text/xml" if format_ == 1 else "application/pdf" if format_ == 2 else "text/html" if format_ == 3 else None
+        file_type_ = ".xml" if format_ == 1 else ".pdf" if format_ == 2 else ".html" if format_ == 3 else None
+
+        for shipment_ in shipments_:
+
+            shipment_ettn_ = shipment_[shipment_ettn_field_] if shipment_ettn_field_ in shipment_ else None
+
+            try:
+                request_xml_ = f'''
+                <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
+                    <soap:Header/>
+                    <soap:Body>
+                        <tem:IrsaliyeIndir xmlns="http://tempuri.org/">
+                            <tem:Girdi>
+                                <tem:Kimlik>
+                                    <tem:Kullanici>{EDOKSIS_USER_}</tem:Kullanici>
+                                    <tem:Sifre>{EDOKSIS_PASSWORD_}</tem:Sifre>
+                                </tem:Kimlik>
+                                <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
+                                <tem:IrsaliyeETTN>{shipment_ettn_}</tem:IrsaliyeETTN>
+                                <tem:Tipi>{type_}</tem:Tipi>\
+                                <tem:Format>{format_}</tem:Format>\
+                            </tem:Girdi>
+                        </tem:IrsaliyeIndir>
+                    </soap:Body>
+                </soap:Envelope>
+                '''
+
+                request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
+                headers_ = {
+                    "Content-Type": "application/soap+xml; charset=utf-8",
+                    "Content-Length": str(len(request_xml_)),
+                    "SOAPAction": "IrsaliyeIndir"
+                }
+
+                response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
+                root_ = ElementTree.fromstring(response_.content)
+
+                for tag in root_.iter("{http://tempuri.org/}Sonuc"):
+                    if not tag.text:
+                        raise EdoksisError("!!! missing sonuc tag")
+                    if tag.text == "1":
+                        for tag in root_.iter("{http://tempuri.org/}Icerik"):
+                            if not tag.text:
+                                raise EdoksisError("!!! missing icerik tag")
+                            document_ = tag.text
+                            filename_ = f"/docs/{shipment_ettn_}{file_type_}"
+                            try:
+                                os.makedirs(os.path.dirname(filename_), exist_ok=True)
+                                with open(filename_, "w", encoding="utf8") as file_:
+                                    file_.write(document_)
+                                    file_.close()
+                                content_ += f"<br />{shipment_ettn_}: OK"
+                            except Exception as exc_:
+                                content_ += f"<br />{shipment_ettn_}: {str(exc_)}"
+                    else:
+                        for tag in root_.iter("{http://tempuri.org/}Mesaj"):
+                            if not tag.text:
+                                raise EdoksisError("!!! missing mesaj tag")
+                            content_ += f"<br />{shipment_ettn_}: {str(tag.text)}"
+                            raise EdoksisError(str(tag.text))
+
+            except EdoksisError as exc_:
+                content_ += f"<br />{shipment_ettn_}: {str(exc_)}"
+
+            except Exception as exc_:
+                content_ += f"<br />{shipment_ettn_}: {str(exc_)}"
+
+        res_ = {"result": True, "content": content_}
+        response_ = make_response(res_, 200)
+
+    except AuthError as exc_:
+        Misc().exception_show_f(exc_)
+        content_ += f"<br />Auth Error: {str(exc_)}"
+        res_ = {"result": False, "content": content_}
+        response_ = make_response(res_, 401)
+
+    except APIError as exc_:
+        Misc().exception_show_f(exc_)
+        content_ += f"<br />API Error: {str(exc_)}"
+        res_ = {"result": False, "content": content_}
+        response_ = make_response(res_, 400)
+
+    except Exception as exc_:
+        Misc().exception_show_f(exc_)
+        content_ += f"<br />Exception: {str(exc_)}"
+        res_ = {"result": False, "content": content_}
+        response_ = make_response(res_, 500)
+
+    finally:
+        response_.mimetype = "application/json"
+        return response_
+
+
+@app.route("/issue", methods=["POST"], endpoint="issue")
+def issue_f():
+    """
+    docstring is in progress
+    """
+    try:
+        content_ = ""
+
+        if not request.headers:
+            raise AuthError("no headers provided")
+
+        content_type_ = request.headers.get("Content-Type", None) if "Content-Type" in request.headers and request.headers["Content-Type"] != "" else None
+        if not content_type_:
+            raise APIError("no content type provided")
+
+        if content_type_ != "application/json":
+            raise APIError(f"invalid content type: {request['Content-Type']}")
+
+        if not request.data:
+            raise APIError("no data requested")
+
+        json_ = request.json
+        if not json_:
+            raise APIError("no request json provided")
+
+        map_ = json_["map"] if "map" in json_ else None
+        if not map_:
+            raise APIError("no mapping provided")
+
+        ids_ = json_["ids"] if "ids" in json_ else None
+        if not ids_:
+            raise APIError("no input ids provided")
+
+        shipment_collection_ = map_["shipment_collection"] if "shipment_collection" in map_ and map_["shipment_collection"] is not None else None
+        if not shipment_collection_:
+            raise APIError("missing shipment collection")
+
+        shipment_id_field_ = map_["shipment_id_field"] if "shipment_id_field" in map_ and map_["shipment_id_field"] is not None else None
+        if not shipment_id_field_:
+            raise APIError("missing shipment id field")
+
+        shipment_ettn_field_ = map_["shipment_ettn_field"] if "shipment_ettn_field" in map_ and map_["shipment_ettn_field"] is not None else None
+        if not shipment_ettn_field_:
+            raise APIError("missing shipment ettn field")
+
+        shipment_waybill_no_field_ = map_["shipment_waybill_no_field"] if "shipment_waybill_no_field" in map_ and map_["shipment_waybill_no_field"] is not None else None
         if not shipment_waybill_no_field_:
             raise APIError("missing shipment waybill no field")
 
-        shipment_waybill_date_field_ = body_["shipment_waybill_date_field"] if "shipment_waybill_date_field" in body_ and body_["shipment_waybill_date_field"] is not None else None
+        shipment_waybill_date_field_ = map_["shipment_waybill_date_field"] if "shipment_waybill_date_field" in map_ and map_["shipment_waybill_date_field"] is not None else None
         if not shipment_waybill_date_field_:
             raise APIError("missing shipment waybill date field")
 
-        shipment_account_no_field_ = body_["shipment_account_no_field"] if "shipment_account_no_field" in body_ and body_["shipment_account_no_field"] is not None else None
+        shipment_account_no_field_ = map_["shipment_account_no_field"] if "shipment_account_no_field" in map_ and map_["shipment_account_no_field"] is not None else None
         if not shipment_account_no_field_:
             raise APIError("missing shipment account no field")
 
-        shipment_status_field_ = body_["shipment_status_field"] if "shipment_status_field" in body_ and body_["shipment_status_field"] is not None else None
+        shipment_status_field_ = map_["shipment_status_field"] if "shipment_status_field" in map_ and map_["shipment_status_field"] is not None else None
         if not shipment_status_field_:
             raise APIError("missing shipment status field")
 
-        shipment_status_set_value_ = body_["shipment_status_set_value"] if "shipment_status_set_value" in body_ and body_["shipment_status_set_value"] is not None else None
+        shipment_status_set_value_ = map_["shipment_status_set_value"] if "shipment_status_set_value" in map_ and map_["shipment_status_set_value"] is not None else None
         if not shipment_status_set_value_:
             raise APIError("missing shipment ok value")
 
-        shipment_ids_ = body_["shipment_ids"] if "shipment_ids" in body_ and len(body_["shipment_ids"]) > 0 else None
-        if not shipment_ids_:
-            raise APIError("no shipment id provided")
-
-        account_collection_ = body_["account_collection"] if "account_collection" in body_ and body_["account_collection"] is not None else None
+        account_collection_ = map_["account_collection"] if "account_collection" in map_ and map_["account_collection"] is not None else None
         if not account_collection_:
             raise APIError("missing account collection")
 
-        account_no_field_ = body_["account_no_field"] if "account_no_field" in body_ and body_["account_no_field"] is not None else None
+        account_no_field_ = map_["account_no_field"] if "account_no_field" in map_ and map_["account_no_field"] is not None else None
         if not account_no_field_:
             raise APIError("missing account no field")
 
-        delivery_collection_ = body_["delivery_collection"] if "delivery_collection" in body_ and body_["delivery_collection"] is not None else None
+        delivery_collection_ = map_["delivery_collection"] if "delivery_collection" in map_ and map_["delivery_collection"] is not None else None
         if not delivery_collection_:
             raise APIError("missing delivery collection")
 
-        delivery_shipment_id_field_ = body_["delivery_shipment_id_field"] if "delivery_shipment_id_field" in body_ and body_["delivery_shipment_id_field"] is not None else None
+        delivery_shipment_id_field_ = map_["delivery_shipment_id_field"] if "delivery_shipment_id_field" in map_ and map_["delivery_shipment_id_field"] is not None else None
         if not delivery_shipment_id_field_:
             raise APIError("missing delivery shipment id field")
 
-        delivery_qty_field_ = body_["delivery_qty_field"] if "delivery_qty_field" in body_ and body_["delivery_qty_field"] is not None else None
+        delivery_qty_field_ = map_["delivery_qty_field"] if "delivery_qty_field" in map_ and map_["delivery_qty_field"] is not None else None
         if not delivery_qty_field_:
             raise APIError("missing delivery qty field")
 
-        delivery_no_field_ = body_["delivery_no_field"] if "delivery_no_field" in body_ and body_["delivery_no_field"] is not None else None
+        delivery_no_field_ = map_["delivery_no_field"] if "delivery_no_field" in map_ and map_["delivery_no_field"] is not None else None
         if not delivery_no_field_:
             raise APIError("missing delivery no field")
 
-        delivery_waybill_no_field_ = body_["delivery_waybill_no_field"] if "delivery_waybill_no_field" in body_ and body_["delivery_waybill_no_field"] is not None else None
+        delivery_waybill_no_field_ = map_["delivery_waybill_no_field"] if "delivery_waybill_no_field" in map_ and map_["delivery_waybill_no_field"] is not None else None
         if not delivery_waybill_no_field_:
             raise APIError("missing delivery waybill no field")
 
-        delivery_waybill_date_field_ = body_["delivery_waybill_date_field"] if "delivery_waybill_date_field" in body_ and body_["delivery_waybill_date_field"] is not None else None
+        delivery_waybill_date_field_ = map_["delivery_waybill_date_field"] if "delivery_waybill_date_field" in map_ and map_["delivery_waybill_date_field"] is not None else None
         if not delivery_waybill_date_field_:
             raise APIError("missing delivery waybill date field")
 
-        delivery_account_no_field_ = body_["delivery_account_no_field"] if "delivery_account_no_field" in body_ and body_["delivery_account_no_field"] is not None else None
+        delivery_account_no_field_ = map_["delivery_account_no_field"] if "delivery_account_no_field" in map_ and map_["delivery_account_no_field"] is not None else None
         if not delivery_account_no_field_:
             raise APIError("missing delivery account no field")
 
-        delivery_product_no_field_ = body_["delivery_product_no_field"] if "delivery_product_no_field" in body_ and body_["delivery_product_no_field"] is not None else None
+        delivery_product_no_field_ = map_["delivery_product_no_field"] if "delivery_product_no_field" in map_ and map_["delivery_product_no_field"] is not None else None
         if not delivery_product_no_field_:
             raise APIError("missing delivery product no field")
 
-        delivery_product_desc_field_ = body_["delivery_product_desc_field"] if "delivery_product_desc_field" in body_ and body_["delivery_product_desc_field"] is not None else None
+        delivery_product_desc_field_ = map_["delivery_product_desc_field"] if "delivery_product_desc_field" in map_ and map_["delivery_product_desc_field"] is not None else None
         if not delivery_product_desc_field_:
             raise APIError("missing delivery product description field")
 
-        delivery_set_status_ = body_["delivery_set_status"] if "delivery_set_status" in body_ and body_["delivery_set_status"] is not None else None
+        delivery_set_status_ = map_["delivery_set_status"] if "delivery_set_status" in map_ and map_["delivery_set_status"] is not None else None
         if not delivery_set_status_:
             raise APIError("missing delivery set status")
 
-        delivery_status_field_ = body_["delivery_status_field"] if "delivery_status_field" in body_ and body_["delivery_status_field"] is not None else None
+        delivery_status_field_ = map_["delivery_status_field"] if "delivery_status_field" in map_ and map_["delivery_status_field"] is not None else None
         if not delivery_status_field_:
             raise APIError("missing delivery status field")
-
-        waybills_ = []
 
         session_client_ = MongoClient(Mongo().connstr_)
         session_db_ = session_client_[MONGO_DB_]
         session_ = session_client_.start_session()
 
-        for shipment_id_ in shipment_ids_:
+        shipments_ = []
+        projection_ = {}
+        projection_[shipment_id_field_] = 1
+
+        ids_ = list(set(json.loads(ids_)))
+        object_ids_ = [ObjectId(i) for i in ids_]
+        cursor_ = session_db_[shipment_collection_].find(filter={"_id": {"$in": object_ids_}}, projection=projection_)
+        shipments_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+        if not shipments_:
+            raise APIError("no shipment id provided")
+
+        for shipment_ in shipments_:
             try:
+
+                shipment_id_ = shipment_[shipment_id_field_] if shipment_id_field_ in shipment_ else None
+                if not shipment_id_:
+                    continue
 
                 session_.start_transaction()
 
@@ -294,25 +477,25 @@ def issue_f():
                 shipment_filter_[shipment_id_field_] = shipment_id_
                 shipment_ = session_db_[shipment_collection_].find_one(shipment_filter_)
                 if not shipment_:
-                    raise IssueError("shipment not found")
+                    raise EdoksisError("shipment not found")
 
                 if shipment_[shipment_ettn_field_] is not None or shipment_[shipment_waybill_no_field_] is not None:
-                    raise IssueError(f"shipment was already issued in {shipment_collection_}")
+                    raise EdoksisError("shipment was already issued")
 
                 delivery_filter_ = {}
                 delivery_filter_[delivery_shipment_id_field_] = shipment_id_
                 deliveries_ = session_db_[delivery_collection_].find(delivery_filter_)
                 line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
                 if not deliveries_ or line_count_ == 0:
-                    raise IssueError(f"no deliveries found with {delivery_shipment_id_field_}={shipment_id_}")
+                    raise EdoksisError(f"no deliveries found with {delivery_shipment_id_field_}={shipment_id_}")
 
-                prior_filter_ = {}
-                prior_filter_[delivery_shipment_id_field_] = shipment_id_
-                prior_deliveries_ = session_db_[delivery_collection_].find(prior_filter_)
-                if prior_deliveries_.explain().get("executionStats", {}).get("nReturned") > 0 and \
-                        delivery_waybill_no_field_ in prior_deliveries_ and \
-                        prior_deliveries_[delivery_waybill_no_field_] is not None:
-                    raise IssueError(f"shipment id was already issued in {delivery_collection_}")
+                # prior_filter_ = {}
+                # prior_filter_[delivery_shipment_id_field_] = shipment_id_
+                # prior_deliveries_ = session_db_[delivery_collection_].find(prior_filter_)
+                # if prior_deliveries_.explain().get("executionStats", {}).get("nReturned") > 0 and \
+                #         delivery_waybill_no_field_ in prior_deliveries_ and \
+                #         prior_deliveries_[delivery_waybill_no_field_] is not None:
+                #     raise EdoksisError(f"shipment id was already issued in {delivery_collection_}")
 
                 shipment_account_no_ = shipment_[shipment_account_no_field_]
                 delivery_account_filter1_ = delivery_account_filter2_ = {}
@@ -321,13 +504,13 @@ def issue_f():
                 delivery_account_filter_ = {"$and": [delivery_account_filter1_, delivery_account_filter2_]}
                 delivery_accounts_ = session_db_[delivery_collection_].find(delivery_account_filter_).explain().get("executionStats", {}).get("nReturned")
                 if delivery_accounts_ > 0:
-                    raise IssueError(f"account numbers in {delivery_collection_} don't match with {shipment_collection_}")
+                    raise EdoksisError(f"account numbers in {delivery_collection_} don't match with {shipment_collection_}")
 
                 account_filter_ = {}
                 account_filter_[account_no_field_] = shipment_[shipment_account_no_field_]
                 account_ = session_db_[account_collection_].find_one(account_filter_)
                 if not account_:
-                    raise IssueError("account not found")
+                    raise EdoksisError("account not found")
 
                 deliverycustomerparty_websiteuri_ = account_["acc_web_address"] if "acc_web_address" in account_ else None
                 deliverycustomerparty_id_ = account_["acc_tax_no"] if "acc_tax_no" in account_ else None
@@ -380,7 +563,7 @@ def issue_f():
                     notes_ += f"{delivery_no_} "
                     despatch_lines_ += f'<tem:DespatchLine><tem:ID>{line_id_}</tem:ID><tem:DeliveredQuantity>{delivery_qty_}</tem:DeliveredQuantity><tem:DeliveredQuantityUnitCode>{unit_code_}</tem:DeliveredQuantityUnitCode><tem:LineID>{shipment_id_}</tem:LineID><tem:ItemName>{item_name_}</tem:ItemName><tem:Note><tem:string>{note_}</tem:string></tem:Note></tem:DespatchLine>'
 
-                request_xml_ = f'''\
+                request_xml_ = f'''
                 <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
                 <soap:Header/>
                     <soap:Body>
@@ -483,13 +666,13 @@ def issue_f():
                 </soap:Envelope>'''
 
                 request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
-                print_("*** request_xml_", request_xml_)
                 headers_ = {
                     "Content-Type": "application/soap+xml; charset=utf-8",
+                    "Content-Length": str(len(request_xml_)),
                     "SOAPAction": "IrsaliyeZarfGonderYapisal"
                 }
+
                 response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
-                print_("status", response_.status_code)
                 root_ = ElementTree.fromstring(response_.content)
 
                 for tag in root_.iter("{http://tempuri.org/}Sonuc"):
@@ -519,7 +702,6 @@ def issue_f():
                 set_[shipment_status_field_] = shipment_status_set_value_
                 set_["_modified_at"] = process_date_
                 set_["_modified_by"] = "shipment"
-
                 session_db_[shipment_collection_].update_one(shipment_filter_, {"$set": set_})
 
                 set_ = {}
@@ -530,58 +712,53 @@ def issue_f():
                 set_["_modified_by"] = "shipment"
                 deliveries_ = session_db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
 
-                waybills_.append({"status": "Success", "shipment_id": shipment_id_, "msg": "OK", "waybill_no": waybill_no_, "waybill_ettn": waybill_ettn_})
+                content_ += f"{shipment_id_}: OK<br />"
 
                 session_.commit_transaction()
 
-            except IssueError as exc_:
+            except EdoksisError as exc_:
+                content_ += f"{shipment_id_}: {str(exc_)}<br />"
                 session_.abort_transaction()
-                waybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "waybill_no": None, "waybill_ettn": None})
 
             except pymongo.errors.PyMongoError as exc_:
+                content_ += f"{shipment_id_}: {str(exc_)}<br />"
                 session_.abort_transaction()
-                waybills_.append({"status": "Error", "shipment_id": shipment_id_, "msg": str(exc_), "waybill_no": None, "waybill_ettn": None})
 
-        res_ = {"result": True, "waybills": waybills_}
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.mimetype = "application/json"
-        response_.status_code = 200
-        return response_
+            except Exception as exc_:
+                content_ += f"{shipment_id_}: {str(exc_)}<br />"
+                session_.abort_transaction()
+
+        res_ = {"result": True, "content": content_}
+        response_ = make_response(res_, 200)
 
     except pymongo.errors.PyMongoError as exc_:
+        content_ += f"Db Error: {str(exc_)}<br />"
+        res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
-        res_ = {"result": False, "msg": str(exc_)}
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.mimetype = "application/json"
-        response_.status_code = 500
-        return response_
+        response_ = make_response(res_, 500)
 
     except AuthError as exc_:
+        content_ += f"Auth Error: {str(exc_)}<br />"
+        res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
-        res_ = {"result": False, "msg": str(exc_)}
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.mimetype = "application/json"
-        response_.status_code = 401
-        return response_
+        response_ = make_response(content_, 401)
 
     except APIError as exc_:
+        content_ += f"API Error: {str(exc_)}<br />"
+        res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
-        res_ = {"result": False, "msg": str(exc_)}
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.mimetype = "application/json"
-        response_.status_code = 400
-        return response_
+        response_ = make_response(content_, 400)
 
     except Exception as exc_:
+        content_ += f"Exception: {str(exc_)}<br />"
+        res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
-        res_ = {"result": False, "msg": str(exc_)}
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_ = make_response(content_, 500)
+        
+    finally:
         response_.mimetype = "application/json"
-        response_.status_code = 500
         return response_
 
-    finally:
-        scc_ = session_client_.close() if session_client_ else None
 
 
 if __name__ == "__main__":

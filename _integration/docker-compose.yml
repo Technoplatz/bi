@@ -36,12 +36,15 @@ services:
     build:
       context: ./edoksis
       dockerfile: Dockerfile
+      args:
+        - TZ=${TZ}
     image: ${HUB}/technoplatz/bi-edoksis:${VERSION}
     container_name: edoksis
     hostname: edoksis
     restart: always
     volumes:
       - bi-cert-volume:/cert
+      - bi-storage-volume:/docs
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -105,6 +108,9 @@ volumes:
   bi-cert-volume:
     driver: local
     name: bi-cert-volume
+  bi-storage-volume:
+    driver: local
+    name: bi-storage-volume
 
 networks:
   network0:

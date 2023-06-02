@@ -2831,11 +2831,14 @@ class Crud:
             user_ = obj["userindb"] if "userindb" in obj else None
             match_ = obj["match"] if "match" in obj else None
             actionix_ = obj["actionix"] if "actionix" in obj else None
-            doc_ = obj["doc"] if "doc" in obj else None
 
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             if not email_:
                 raise AppException("user is not allowed")
+
+            doc_ = obj["doc"] if "doc" in obj else None
+            doc_["_modified_at"] = Misc().get_now_f()
+            doc_["_modified_by"] = email_
 
             is_crud_ = collection_id_[:1] != "_"
             if not is_crud_:
@@ -2859,146 +2862,132 @@ class Crud:
             if not structure_:
                 raise AppException(f"structure not found {collection_id_}")
 
-            action_ = (
-                structure_["actions"][actionix_]
-                if "actions" in structure_
-                and len(structure_["actions"]) > 0
-                and structure_["actions"][actionix_]
-                else None
-            )
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise AppException(f"properties not found {collection_id_}")
+
+            action_ = structure_["actions"][actionix_] if "actions" in structure_ and len(structure_["actions"]) > 0 and structure_["actions"][actionix_] else None
             if not action_:
                 raise AppException("action not found")
 
-            tags_ = (
-                action_["_tags"]
-                if "_tags" in action_ and len(action_["_tags"]) > 0
-                else None
-            )
+            tags_ = action_["_tags"] if "_tags" in action_ and len(action_["_tags"]) > 0 else None
             if not tags_:
                 raise AppException("no tags found in action")
 
-            notify_ = False
-            notification_ = (
-                action_["notification"] if "notification" in action_ else None
-            )
+            apis_ = action_["apis"] if "apis" in action_ and len(action_["apis"]) > 0 else None
+            set_ = action_["set"] if "set" in action_ else None
 
+            if not set_ and not apis_:
+                raise AppException("no set or apis provided in action")
+
+            notify_ = False
+            notification_ = action_["notification"] if "notification" in action_ else None
+            get_notification_filtered_ = None
             if notification_:
                 if "notify" not in notification_:
                     raise AppException("no notify field found in notification")
                 notify_ = notification_["notify"] is True
-                subject_ = (
-                    notification_["subject"]
-                    if "subject" in notification_
-                    else "Action Completed"
-                )
+                subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
                 if not subject_:
                     raise AppException("no subject field found in notification")
-                body_ = (
-                    notification_["body"]
-                    if "body" in notification_
-                    else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
-                )
+
+                body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
                 if not body_:
                     raise AppException("no body field found in notification")
-                fields_ = (
-                    notification_["fields"].replace(" ", "")
-                    if "fields" in notification_
-                    else None
-                )
+
+                fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
                 if not fields_:
                     raise AppException("no fields field found in notification")
-                filter_ = (
-                    notification_["filter"]
-                    if "filter" in notification_ and len(notification_["filter"]) > 0
-                    else None
-                )
-                if not filter_:
-                    raise AppException("no filter array found in notification")
-                get_notification_filtered_ = self.get_filtered_f(
-                    {
+
+                filter_ = notification_["filter"] if "filter" in notification_ and len(notification_["filter"]) > 0 else None
+                if filter_:
+                    get_notification_filtered_ = self.get_filtered_f({
                         "match": filter_,
-                        "properties": structure_["properties"]
-                        if "properties" in structure_
-                        else None,
-                    }
-                )
+                        "properties": properties_
+                    })
 
-            match_ = (
-                action_["match"]
-                if "match" in action_ and len(action_["match"]) > 0
-                else {}
-            )
-
-            get_filtered_ = self.get_filtered_f(
-                {
-                    "match": match_,
-                    "properties": structure_["properties"]
-                    if "properties" in structure_
-                    else None,
-                }
-            )
-
-            doc_["_modified_at"] = Misc().get_now_f()
-            doc_["_modified_by"] = email_
+            match_ = action_["match"] if "match" in action_ and len(action_["match"]) > 0 else {}
+            get_filtered_ = self.get_filtered_f({
+                "match": match_,
+                "properties": properties_
+            })
 
             if ids_ and len(ids_) > 0:
                 get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
-                if notify_:
-                    get_notification_filtered_ = {
-                        "$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]
-                    }
+                if notify_ and get_notification_filtered_:
+                    get_notification_filtered_ = {"$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]}
+            else:
+                if apis_:
+                    raise AppException("no selection was made")
 
-            # DO ACTION ON DATABASE
-            session_client_ = MongoClient(Mongo().connstr)
-            session_db_ = session_client_[MONGO_DB_]
-            session_ = session_client_.start_session()
-            session_.start_transaction()
-            set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
-            update_many_ = session_db_[collection_].update_many(
-                get_filtered_, set_, session=session_
-            )
+            response_content_ = ""
+            count_ = 0
 
-            if update_many_.matched_count:
-                session_.commit_transaction()
-                if notify_:
+            if set_:
+                set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
+                update_many_ = Mongo().db_[collection_].update_many(get_filtered_, set_)
+                count_ = update_many_.matched_count if update_many_.matched_count > 0 else 0
+                if count_ == 0:
+                    raise PassException("no rows affected due to the match criteria")
+                response_content_ += f"{count_} record(s) were updated.<br />"
+
+            if apis_:
+                response_content_ += "<br />ACTIONS "
+                for api_ in apis_:
+                    api_id_ = api_["id"] if "id" in api_ else None
+                    api_name_ = api_["name"] if "name" in api_ else api_id_
+                    if not api_id_:
+                        raise AppException("invalid id in action api")
+                    response_content_ += f"<br />{api_name_}: "
+                    enabled_ = "enabled" in api_ and api_["enabled"] is True
+                    if not enabled_:
+                        continue
+                    url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
+                    if not url_:
+                        raise AppException("invalid url in action api")
+                    headers_ = api_["headers"] if "headers" in api_ else None
+                    if not headers_:
+                        raise AppException("invalid http headers in action api")
+                    method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
+                    if not method_:
+                        raise AppException("invalid http method in action api")
+                    map_ = api_["map"] if "map" in api_ else None
+                    if not map_:
+                        raise AppException("invalid mapping in action api")
+                    json_ = {"ids": JSONEncoder().encode(ids_), "map": map_}
+                    response_ = requests.post(url_, json=json_, headers=headers_, timeout=30)
+                    if response_.status_code != 200:
+                        raise AppException(f"api error: {response_content_}")
+                    res_ = json.loads(response_.content)
+                    res_content_ = res_["content"] if "content" in res_ else ""
+                    response_content_ += f"{res_content_}"
+
+            if notify_ and count_ > 0:
+                files_ = []
+                if get_notification_filtered_:
                     type_ = "csv"
                     file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
                     loc_ = f"/cron/{file_}"
-                    query_ = (
-                        "'"
-                        + json.dumps(
-                            get_notification_filtered_,
-                            default=json_util.default,
-                            sort_keys=False,
-                        )
-                        + "'"
-                    )
+                    query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
                     command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
                     files_ = [{"filename": file_, "filetype": type_}]
-                    email_sent_ = Email().sendEmail_f({
-                        "op": "action",
-                        "tags": tags_,
-                        "subject": subject_,
-                        "html": body_,
-                        "files": files_
-                    })
-                    if not email_sent_["result"]:
-                        raise APIError(email_sent_["msg"])
-            else:
-                raise PassException("no rows affected due to the match criteria")
+
+                email_sent_ = Email().sendEmail_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                if not email_sent_["result"]:
+                    raise APIError(email_sent_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",
                 "collection": collection_,
                 "op": "action",
                 "user": email_,
-                "document": {"doc": doc_, "match": match_}
+                "document": {"doc": doc_, "match": match_, "content": response_content_}
             })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            return {"result": True, "count": update_many_.matched_count}
+            return {"result": True, "count": count_, "content": response_content_}
 
         except pymongo.errors.PyMongoError as exc:
             Misc().log_f({
@@ -3008,7 +2997,6 @@ class Crud:
                 "user": email_,
                 "document": str(exc)
             })
-
             return Misc().mongo_error_f(exc)
 
         except AppException as exc:
@@ -3022,9 +3010,6 @@ class Crud:
 
         except Exception as exc:
             return Misc().exception_f(exc)
-
-        finally:
-            session_: session_.abort_transaction()
 
     def insert_f(self, obj):
         """

@@ -135,6 +135,7 @@ export class CrudPage implements OnInit {
   }
 
   ngOnInit() {
+    console.log("*** shuttle", this.shuttle);
     this.modified = false;
     this.collection = this.shuttle.collection;
     this.user = this.shuttle.user;
@@ -233,7 +234,8 @@ export class CrudPage implements OnInit {
 
   doSubmit() {
     if (!this.isInProgress) {
-      if (!["remove", "action"].includes(this.op) && !this.crudForm.valid) {
+      this.crudForm.updateValueAndValidity();
+      if (!["remove"].includes(this.op) && !this.crudForm.valid) {
         this.misc.doMessage("form is not valid", "error");
       } else {
         this.modified = true;
@@ -267,7 +269,11 @@ export class CrudPage implements OnInit {
                 this.crudForm.get("iot_input")?.setValue(this.data_["iot_input"]);
               });
             } else {
-              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+              if (this.op === "insert" && this.links?.length > 0) {
+                this.op = "update";
+              } else {
+                this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+              }
             }
           }
         }).catch((res: any) => {

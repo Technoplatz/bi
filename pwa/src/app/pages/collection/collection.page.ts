@@ -352,8 +352,9 @@ export class CollectionPage implements OnInit {
     });
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified || this.scan_) {
-        if (op === "action" && res.data.res?.count > 0) {
-          this.misc.doMessage("action completed successfully. " + res.data.res.count + " records affected", "success");
+        if (op === "action" && res.data.res) {
+          console.log("*** res", res);
+          this.misc.doMessage(res.data.res.content, "success");
         }
         this.id === "_collection" ? this.crud.getAll().then(() => { }) : null;
         this.RefreshData(0);
