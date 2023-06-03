@@ -108,7 +108,7 @@
     }
   },
   "sort": {
-    "_modified_at": -1
+    "shp_id": -1
   },
   "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_vehicle_id"],
   "index": [["shp_id"], ["shp_acc_no"], ["shp_waybill_no"]],
@@ -173,7 +173,7 @@
       "_tags": ["#Managers", "#Administrators"],
       "apis": [
         {
-          "id": "edoksis-issue",
+          "id": "waybill-issue",
           "name": "Waybill Issue",
           "enabled": true,
           "url": "http://172.18.0.8/issue",
@@ -182,6 +182,7 @@
           },
           "method": "post",
           "map": {
+            "tag_prefix": "{http://tempuri.org/}",
             "shipment_collection": "shipment_data",
             "shipment_id_field": "shp_id",
             "shipment_ettn_field": "shp_ettn",
@@ -225,17 +226,13 @@
           "value": "20-OK"
         }
       ],
-      "set": [
-        {
-          "key": "shp_date",
-          "value": null
-        }
-      ],
+      "set": [],
+      "noninteractive": true,
       "one_click": false,
       "_tags": ["#Managers", "#Administrators"],
       "apis": [
         {
-          "id": "edoksis-download",
+          "id": "waybill-download",
           "name": "Waybill Download",
           "enabled": true,
           "url": "http://172.18.0.8/download",
@@ -244,6 +241,7 @@
           },
           "method": "post",
           "map": {
+            "tag_prefix": "{http://tempuri.org/}",
             "shipment_collection": "shipment_data",
             "shipment_id_field": "shp_id",
             "shipment_ettn_field": "shp_ettn"
@@ -251,7 +249,7 @@
         }
       ],
       "notification": {
-        "notify": false,
+        "notify": true,
         "subject": "DNs Shipped",
         "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
         "fields": "dnn_no,dnn_status",

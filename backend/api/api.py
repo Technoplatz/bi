@@ -1179,7 +1179,7 @@ class Crud:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             session_.abort_transaction()
             res_ = Misc().mongo_error_f(exc)
-            email_sent_ = Email().sendEmail_f({
+            email_sent_ = Email().send_email_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
                 "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{str(exc_obj_)}"
@@ -1252,24 +1252,24 @@ class Crud:
 
             files_ = []
             if data_json_:
-                file_json_ = f"{id_}.json"
-                file_json_raw_ = f"{id_}-detail.json"
-                df_.to_json(f"/cron/{file_json_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
-                df_raw_.to_json(f"/cron/{file_json_raw_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
+                file_json_ = f"/cron/{id_}.json"
+                file_json_raw_ = f"/cron/{id_}-detail.json"
+                df_.to_json(f"{file_json_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
+                df_raw_.to_json(f"{file_json_raw_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
                 files_.append({"filename": file_json_, "filetype": "json"})
                 files_.append({"filename": file_json_raw_, "filetype": "json"})
             if data_csv_:
-                file_csv_ = f"{id_}.csv"
-                file_csv_raw_ = f"{id_}-detail.csv"
-                df_.to_csv(f"/cron/{file_csv_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
-                df_raw_.to_csv(f"/cron/{file_csv_raw_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
+                file_csv_ = f"/cron/{id_}.csv"
+                file_csv_raw_ = f"/cron/{id_}-detail.csv"
+                df_.to_csv(f"{file_csv_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
+                df_raw_.to_csv(f"{file_csv_raw_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
                 files_.append({"filename": file_csv_, "filetype": "csv"})
                 files_.append({"filename": file_csv_raw_, "filetype": "csv"})
             if data_excel_:
-                file_excel_ = f"{id_}.xlsx"
-                file_excel_raw_ = f"{id_}-detail.xlsx"
-                df_.to_excel(f"/cron/{file_excel_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
-                df_raw_.to_excel(f"/cron/{file_excel_raw_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
+                file_excel_ = f"/cron/{id_}.xlsx"
+                file_excel_raw_ = f"/cron/{id_}-detail.xlsx"
+                df_.to_excel(f"{file_excel_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
+                df_raw_.to_excel(f"{file_excel_raw_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
                 files_.append({"filename": file_excel_, "filetype": "xlsx"})
                 files_.append({"filename": file_excel_raw_, "filetype": "xlsx"})
 
@@ -1280,7 +1280,7 @@ class Crud:
             footer_ = f"<br />Generated at {Misc().get_now_f().strftime('%d.%m.%Y %H:%M')}"
             html_ = f'<div style="font-size: 13px;"><h1>{vie_title_}</h1><p>{body_}</p><p>{footer_}</p></div>' if scope_ == "live" else f'<div style="font-size: 13px;"><p style="color: #c00; font-weight: bold;">THIS IS A TEST MESSAGE</p><p>{vie_title_}</p><p>{body_}</p><p>{footer_}</p></div>'
 
-            email_sent_ = Email().sendEmail_f({
+            email_sent_ = Email().send_email_f({
                 "personalizations": personalizations_,
                 "op": "view",
                 "html": html_,
@@ -2920,7 +2920,7 @@ class Crud:
                 if apis_:
                     raise AppException("no selection was made")
 
-            response_content_ = ""
+            response_content_ = "Action Result:"
             count_ = 0
 
             if set_:
@@ -2929,16 +2929,15 @@ class Crud:
                 count_ = update_many_.matched_count if update_many_.matched_count > 0 else 0
                 if count_ == 0:
                     raise PassException("no rows affected due to the match criteria")
-                response_content_ += f"{count_} record(s) were updated.<br />"
+                response_content_ += f"<br />{count_} record(s) were updated."
+
+            files_ = []
 
             if apis_:
-                response_content_ += "<br />ACTIONS "
                 for api_ in apis_:
                     api_id_ = api_["id"] if "id" in api_ else None
-                    api_name_ = api_["name"] if "name" in api_ else api_id_
                     if not api_id_:
                         raise AppException("invalid id in action api")
-                    response_content_ += f"<br />{api_name_}: "
                     enabled_ = "enabled" in api_ and api_["enabled"] is True
                     if not enabled_:
                         continue
@@ -2954,26 +2953,31 @@ class Crud:
                     map_ = api_["map"] if "map" in api_ else None
                     if not map_:
                         raise AppException("invalid mapping in action api")
-                    json_ = {"ids": JSONEncoder().encode(ids_), "map": map_}
+
+                    json_ = {"ids": JSONEncoder().encode(ids_), "map": map_, "email": email_}
                     response_ = requests.post(url_, json=json_, headers=headers_, timeout=30)
-                    if response_.status_code != 200:
-                        raise AppException(f"api error: {response_content_}")
                     res_ = json.loads(response_.content)
                     res_content_ = res_["content"] if "content" in res_ else ""
+                    res_files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
+                    if response_.status_code != 200:
+                        response_content_ += f"{res_content_}"
+                        raise AppException(f"{response_content_}")
+
+                    if res_files_:
+                        files_ += res_files_
+
                     response_content_ += f"{res_content_}"
 
-            if notify_ and count_ > 0:
-                files_ = []
+            if notify_:
                 if get_notification_filtered_:
                     type_ = "csv"
-                    file_ = f"action-{Misc().get_timestamp_f()}.{type_}"
-                    loc_ = f"/cron/{file_}"
+                    file_ = f"/cron/action-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
-                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={loc_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
-                    files_ = [{"filename": file_, "filetype": type_}]
+                    files_ += [{"filename": file_, "filetype": type_}]
 
-                email_sent_ = Email().sendEmail_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
 
@@ -3163,10 +3167,11 @@ class Email:
 
             for file_ in msg["files"]:
                 filename_ = file_["filename"]
-                with open(f"/cron/{filename_}", "rb") as attachment_:
+                with open(f"{filename_}", "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
+                filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
                 part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
                 message_.attach(part_)
 
@@ -3187,13 +3192,12 @@ class Email:
             return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
 
         except smtplib.SMTPServerDisconnected as exc_:
-            # return Misc().api_error_f(f"smtp connection: {exc_}")
             return {"result": True, "exc": str(exc_)}
 
         except Exception as exc_:
             return Misc().exception_f(f"smtp exception: {exc_}")
 
-    def sendEmail_f(self, msg):
+    def send_email_f(self, msg):
         """
         docstring is in progress
         """
@@ -3232,10 +3236,10 @@ class Email:
                 raise APIError("email message is missing")
 
             if tags_:
-                f_ = Misc().get_users_from_tags_f(tags_)
-                if not f_["result"]:
-                    raise APIError(f"personalizations error {f_['msg']}")
-                personalizations_ = f_ if "to" in f_ else None
+                get_users_from_tags_f_ = Misc().get_users_from_tags_f(tags_)
+                if not get_users_from_tags_f_["result"]:
+                    raise APIError(f"personalizations error {get_users_from_tags_f_['msg']}")
+                personalizations_ = get_users_from_tags_f_ if "to" in get_users_from_tags_f_ else None
 
             if personalizations_ is None:
                 raise APIError("email personalizations is missing")
@@ -3464,7 +3468,7 @@ class OTP:
             name_ = user_["usr_name"]
             tfac_ = randint(100001, 999999)
             Mongo().db_["_auth"].update_one({"aut_id": usr_id_}, {"$set": {"aut_tfac": tfac_, "_tfac_modified_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
-            email_sent_ = Email().sendEmail_f({
+            email_sent_ = Email().send_email_f({
                 "op": "tfa",
                 "personalizations": {"to": [{"email": usr_id_, "name": name_}]},
                 "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>"
@@ -3918,7 +3922,7 @@ class Auth:
                 raise APIError(log_["msg"])
 
             if "_otp_validated_ip" in auth_ and auth_["_otp_validated_ip"] is not None and auth_["_otp_validated_ip"] != ip_:
-                email_sent_ = Email().sendEmail_f({
+                email_sent_ = Email().send_email_f({
                     "op": "signin",
                     "personalizations": {"to": [{"email": email_, "name": usr_name_}]},
                     "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",

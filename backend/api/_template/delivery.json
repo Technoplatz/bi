@@ -214,7 +214,7 @@
       "description": "Shipment ID",
       "minimum": 0,
       "maximum": 999999,
-      "width": 100
+      "width": 110
     },
     "dnn_waybill_no": {
       "title": "Waybill No",

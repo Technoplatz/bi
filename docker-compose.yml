@@ -335,6 +335,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
     volumes:
       - bi-storage-volume:/cron
+      - bi-storage-volume:/docs
       - bi-storage-volume:/dump
       - bi-storage-volume:/vault
       - bi-cert-volume:/cert

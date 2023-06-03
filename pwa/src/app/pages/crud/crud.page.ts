@@ -84,6 +84,7 @@ export class CrudPage implements OnInit {
   public scan_: boolean = false;
   public scanned_: any = [];
   public istrue_: boolean = true;
+  public isnoninteractive_: boolean = false;
   public visible: string = "hide";
   public parent: any = {};
   public link: any = {};
@@ -98,6 +99,7 @@ export class CrudPage implements OnInit {
   public date_format: string = "DD.MM.YYYY HH:mm";
   private counters: any = {};
   private filter: any = [];
+  private actions: any = [];
   private file: any = null;
   private relatedx: any = []
   private collections: any = [];
@@ -135,7 +137,7 @@ export class CrudPage implements OnInit {
   }
 
   ngOnInit() {
-    console.log("*** shuttle", this.shuttle);
+    // console.log("*** shuttle", this.shuttle);
     this.modified = false;
     this.collection = this.shuttle.collection;
     this.user = this.shuttle.user;
@@ -153,6 +155,8 @@ export class CrudPage implements OnInit {
     this.scan_ = this.shuttle.scan;
     this.links = this.shuttle.structure.links;
     this.parents = this.structure__?.parents ? this.structure__.parents : [];
+    this.actions = this.shuttle.actions && this.shuttle.actions.length > 0 ? this.shuttle.actions : [];
+    this.isnoninteractive_ = this.actions[this.actionix]?.noninteractive === true ? true : false;
     this.storage.get("LSSCANNED").then((LSSCANNED: any) => {
       this.scanned_ = LSSCANNED ? LSSCANNED : [];
       this.doGetAllAktions(this.op).then((res: any) => {
@@ -235,7 +239,7 @@ export class CrudPage implements OnInit {
   doSubmit() {
     if (!this.isInProgress) {
       this.crudForm.updateValueAndValidity();
-      if (!["remove"].includes(this.op) && !this.crudForm.valid) {
+      if (!["remove"].includes(this.op) && !this.crudForm.valid && !this.isnoninteractive_) {
         this.misc.doMessage("form is not valid", "error");
       } else {
         this.modified = true;
