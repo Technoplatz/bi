@@ -231,6 +231,10 @@ def download_f():
         if not tag_prefix_:
             raise APIError("missing tag prefix in mapping")
 
+        document_format_ = map_["document_format"] if "document_format" in map_ and map_["document_format"] is not None else None
+        if not document_format_:
+            raise APIError("missing document format in mapping")
+
         object_ids_ = [ObjectId(i) for i in list(set(json.loads(ids_)))]
         projection_ = {}
         projection_[shipment_ettn_field_] = 1
@@ -240,10 +244,8 @@ def download_f():
         if not shipments_:
             raise APIError("no shipment id provided")
 
-        type_ = 2
-        format_ = 3
-        content_type_ = "text/xml" if format_ == 1 else "application/pdf" if format_ == 2 else "text/html" if format_ == 3 else None
-        file_type_ = "xml" if format_ == 1 else "pdf" if format_ == 2 else "html" if format_ == 3 else None
+        content_type_ = "text/xml" if document_format_ == 1 else "application/pdf" if document_format_ == 2 else "text/html" if document_format_ == 3 else None
+        file_type_ = "xml" if document_format_ == 1 else "pdf" if document_format_ == 2 else "html" if document_format_ == 3 else None
         files_ = []
 
         for shipment_ in shipments_:
@@ -264,8 +266,8 @@ def download_f():
                                 </tem:Kimlik>
                                 <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
                                 <tem:IrsaliyeETTN>{shipment_ettn_}</tem:IrsaliyeETTN>
-                                <tem:Tipi>{type_}</tem:Tipi>\
-                                <tem:Format>{format_}</tem:Format>\
+                                <tem:Tipi>2</tem:Tipi>\
+                                <tem:Format>{document_format_}</tem:Format>\
                             </tem:Girdi>
                         </tem:IrsaliyeIndir>
                     </soap:Body>
@@ -677,7 +679,8 @@ def issue_f():
                             </tem:IrsaliyeYapisal>
                         </tem:IrsaliyeZarfGonderYapisal>
                     </soap:Body>
-                </soap:Envelope>'''
+                </soap:Envelope>
+                '''
 
                 request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
                 headers_ = {
@@ -688,7 +691,6 @@ def issue_f():
 
                 response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
                 root_ = ElementTree.fromstring(response_.content)
-
                 for tag in root_.iter(f"{tag_prefix_}Sonuc"):
                     if not tag.text:
                         raise APIError("!!! missing sonuc tag")
@@ -727,7 +729,6 @@ def issue_f():
                 deliveries_ = session_db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
 
                 content_ += f"{shipment_id_}: OK<br />"
-
                 session_.commit_transaction()
 
             except EdoksisError as exc_:

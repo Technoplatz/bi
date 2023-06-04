@@ -1019,6 +1019,7 @@ class Crud:
             properties_ = obj["properties"]
             key_ = obj["key"]
             match_ = obj["match"] if "match" in obj and obj["match"] != [] else []
+            sweeped_ = obj["sweeped"] if "sweeped" in obj and obj["sweeped"] != [] else []
 
             get_filtered_ = {}
             if len(match_) > 0:
@@ -1027,10 +1028,16 @@ class Crud:
                     "properties": properties_ if properties_ else None
                 })
 
+            ids_ = []
+            for _id in sweeped_:
+                ids_.append(ObjectId(_id))
+            if len(ids_) > 0:
+                get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
+
             distinct_ = ""
             cursora_ = Mongo().db_[f"{collection_}_data"].distinct(key_, get_filtered_)
             if cursora_ and len(cursora_) > 0:
-                distinct_ = "\n".join(map(str, cursora_))
+                distinct_ = "\n".join(map(str, cursora_[:100]))
 
             return {"result": True, "copied": distinct_}
 
@@ -2747,11 +2754,7 @@ class Crud:
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
-            structure__ = (
-                Mongo().db_["_collection"].find_one({"col_id": collection_id_})
-                if is_crud_
-                else self.root_schemas_f(f"{collection_id_}")
-            )
+            structure__ = Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if structure__:
                 structure_ = structure__["col_structure"] if is_crud_ else structure__
             else:

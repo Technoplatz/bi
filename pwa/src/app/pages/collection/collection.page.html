@@ -36,7 +36,8 @@ https://www.gnu.org/licenses.
       <ion-col *ngIf="is_initialized; else dataloading" class="console-right">
         <h6>{{ header | translate }}</h6>
         <h1>{{ subheader }}</h1>
-        {{ description }}
+        <h6>{{ description }}</h6>
+        <div class="filler-10"></div>
         <div *ngIf="id=='_collection'; else schemas" class="template-card-container">
           <ion-card class="single-coll">
             <ion-icon name="rocket-outline" color="primary"></ion-icon>
@@ -131,8 +132,7 @@ https://www.gnu.org/licenses.
                   {{ 'Close' | translate }}
                 </ng-template>
               </div>
-              <div *ngIf="jeopen && is_crud" class="data-sq-button ion-no-padding danger"
-                (click)="doSaveSchema()">
+              <div *ngIf="jeopen && is_crud" class="data-sq-button ion-no-padding danger" (click)="doSaveSchema()">
                 <span *ngIf="!is_saving">
                   <ion-icon name="save-outline"></ion-icon><br />
                   {{ 'Save' | translate }}
@@ -157,7 +157,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
         <ion-grid *ngIf="is_pane_ok && is_crud" class="ion-no-padding">
           <ion-row class="ion-no-margin">
-            <ion-col *ngIf="actions?.length > 0; else noaction">
+            <ion-col *ngIf="actions?.length > 0">
               <div class="act-buttons-wrapper">
                 <span *ngFor="let item of actions; let ac = index">
                   <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button"
@@ -169,12 +169,6 @@ https://www.gnu.org/licenses.
                 </span>
               </div>
             </ion-col>
-            <ng-template #noaction>
-              <ion-col>
-                <h6>{{ 'No actions found' | translate }}</h6>
-                {{ 'To create an action please add an item into "actions" field of JSON Schema' | translate }}.
-              </ion-col>
-            </ng-template>
           </ion-row>
         </ion-grid>
 
@@ -331,10 +325,10 @@ https://www.gnu.org/licenses.
           </ion-row>
 
           <!-- CRUD LIST PAGINATION -->
-          <ion-row *ngIf="count>=0">
+          <ion-row *ngIf="count>=0" class="pagination">
             <ion-col size="12" class="ion-no-padding pages-col">
               <!-- NO RECORD FOUND PAGING -->
-              <div *ngIf="is_loaded && (!count || count==0); else showpaging" class="ion-padding-top">
+              <div *ngIf="is_loaded && (!count || count==0); else showpaging" class="ion-no-padding">
                 <h6>{{ 'No records found' | translate }}</h6>
                 {{ 'Click the button above to add a new record' | translate }}.
               </div>

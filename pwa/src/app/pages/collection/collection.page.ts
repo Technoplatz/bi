@@ -109,7 +109,7 @@ export class CollectionPage implements OnInit {
   private structured_: any = null;
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
-  private admin_collections: any = environment.admin_collections;
+  private segmentsadm_: any = environment.segmentsadm;
   public templates: any = [];
   public is_inprogress: boolean = false;
   public schema_: any = {
@@ -203,7 +203,7 @@ export class CollectionPage implements OnInit {
         this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
         this.counters_ = res && res.counters ? res.counters : {};
         this.subheader = res && res.data ? res.data.col_title : this.id;
-        this.description = res && res.data ? res.data.col_description : this.admin_collections[this.id].description;
+        this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
         this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
           this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -570,6 +570,7 @@ export class CollectionPage implements OnInit {
       collection: this.id,
       properties: this.structure.properties,
       match: this.filter,
+      sweeped: this.sweeped[this.segment],
       key: key
     }).then((res: any) => {
       this.misc.copyToClipboard(res.copied).then(() => {

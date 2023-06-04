@@ -244,7 +244,8 @@
             "tag_prefix": "{http://tempuri.org/}",
             "shipment_collection": "shipment_data",
             "shipment_id_field": "shp_id",
-            "shipment_ettn_field": "shp_ettn"
+            "shipment_ettn_field": "shp_ettn",
+            "document_format": 2
           }
         }
       ],

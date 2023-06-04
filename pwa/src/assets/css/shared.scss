@@ -248,6 +248,10 @@ ion-note {
   margin-top: 0px;
 }
 
+.pagination {
+  margin-top: 10px;
+}
+
 .page-null {
   padding-left: 32px;
   padding-top: 16px;
@@ -1369,7 +1373,7 @@ sup {
 }
 
 .schema-card-container {
-  margin-top: 16px;
+  margin-top: 4px;
   gap: 4px !important;
   display: flex;
   justify-content: flex-start;
