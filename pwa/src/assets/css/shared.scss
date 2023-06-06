@@ -240,10 +240,6 @@ ion-note {
   display: none !important;
 }
 
-.act-buttons-wrapper {
-  position: relative;
-}
-
 .ion-chip-group {
   margin-top: 0px;
 }
@@ -375,8 +371,7 @@ ion-note {
 .data-sq-container {
   display: flex;
   gap: 4px;
-  margin-bottom: 16px;
-  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .alert-class input {
@@ -977,8 +972,7 @@ app-menu .toggler {
 }
 
 .action-button {
-  min-width: 86px;
-  max-width: 180px;
+  width: 100px;
   overflow: hidden !important;
   font-size: 13px;
   font-weight: 600;
@@ -1373,7 +1367,7 @@ sup {
 }
 
 .schema-card-container {
-  margin-top: 4px;
+  margin-bottom: 4px;
   gap: 4px !important;
   display: flex;
   justify-content: flex-start;

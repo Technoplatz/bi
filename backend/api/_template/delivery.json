@@ -336,7 +336,7 @@
         {
           "key": "shp_status",
           "op": "in",
-          "value": "00-Open,10-InProgress,20-OK"
+          "value": "10-Ready,20-Completed"
         }
       ],
       "get": ["shp_id", "shp_waybill_no"]
@@ -377,42 +377,8 @@
       }
     },
     {
-      "id": "standby-cancel",
-      "title": "StandBy",
-      "enabled": true,
-      "rollback": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "01-StandBy"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "00-Open"
-        }
-      ],
-      "one_click": true,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs stand by canceled",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs has been rolled back from 01-StandBy to 00-Open.",
-        "fields": "dnn_no,dnn_status",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "00-Open"
-          }
-        ]
-      }
-    },
-    {
-      "id": "ordino",
-      "title": "Attach to Ordino",
+      "id": "link-ordino",
+      "title": "Ordino",
       "enabled": true,
       "match": [
         {
@@ -452,50 +418,8 @@
       }
     },
     {
-      "id": "ordino-cancel",
-      "title": "Ordino",
-      "enabled": true,
-      "rollback": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "in",
-          "value": "01-StandBy,10-OnTheWay"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "01-StandBy"
-        },
-        {
-          "key": "dnn_odi_no",
-          "value": null
-        },
-        {
-          "key": "dnn_odi_sub_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs rolled back to stand by",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs has been rolled back from 10-OnTheWay to 01-StandBy.",
-        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "01-StandBy"
-          }
-        ]
-      }
-    },
-    {
-      "id": "attach-manifest",
-      "title": "Attach to Manifest",
+      "id": "link-manifest",
+      "title": "Manifest",
       "enabled": true,
       "match": [
         {
@@ -531,46 +455,8 @@
       }
     },
     {
-      "id": "detach-manifest",
-      "title": "Manifest",
-      "enabled": true,
-      "rollback": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "in",
-          "value": "30-OnCustomsProcess"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "20-OnCustoms"
-        },
-        {
-          "key": "dnn_man_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs customs process canceled",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was rolled back from 30-OnCustomsProcess to 20-OnCustoms.",
-        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no,dnn_man_no",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "20-OnCustoms"
-          }
-        ]
-      }
-    },
-    {
       "id": "get-ready",
-      "title": "RTD",
+      "title": "Ready",
       "enabled": true,
       "match": [
         {

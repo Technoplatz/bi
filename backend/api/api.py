@@ -518,33 +518,6 @@ class Misc:
             properties_new_[property_] = dict_
         return properties_new_
 
-    def string_to_formula_f(self, set_, rec_, properties_):
-        """
-        docstring is in progress
-        """
-        key_ = set_["key"]
-        value_ = set_["value"]
-        if value_[:1] == "$":
-            forward_ = value_[1:]
-            value_ = rec_[forward_] if forward_ in rec_ else None
-        elif value_[:1] == "=":
-            formula_ = str(value_[1:]).replace(" ", "")
-            parts_ = re.split("([+-/*()])", formula_)
-            for part_ in parts_:
-                if part_[:1] == "$":
-                    forward_ = part_[1:]
-                    if forward_ in rec_:
-                        if rec_[forward_] in [None, ""]:
-                            rec_[forward_] = 0
-                        formula_ = formula_.replace(part_, str(rec_[forward_]))
-                    else:
-                        formula_ = formula_.replace(part_, "")
-
-            value_ = str(ne.evaluate(formula_))
-            value_ = float(value_) if properties_[key_]["bsonType"] in ["number", "decimal", "double"] else int(value_) if properties_[key_]["bsonType"] == "int" else None
-
-        return value_
-
     def get_users_from_tags_f(self, tags_):
         """
         docstring is in progress
@@ -565,6 +538,61 @@ class Misc:
 
         except Exception as exc:
             return Misc().exception_f(exc)
+
+    def set_value_f(self, key_, setto_, properties_, data_):
+        """
+        docstring is in progress
+        """
+        setto__ = None
+        try:
+            if setto_[:2] == "$$" and key_ and key_ in properties_:
+                forward_ = setto_[2:]
+                if not forward_:
+                    raise APIError("missing $$ key name")
+                setto__ = data_[forward_] if forward_ in data_ else None
+            elif setto_[:1] == "$":
+                forward_ = str(setto_[1:]).upper()
+                if not forward_:
+                    raise APIError("missing $ key name")
+                kav_ = Mongo().db_["_kv"].find_one({"kav_key": forward_})
+                if not kav_:
+                    raise APIError("kv value not found")
+                kav_key_ = kav_["kav_key"] if "kav_key" in kav_ and kav_["kav_key"] is not None else None
+                kav_as_ = kav_["kav_as"] if "kav_as" in kav_ and kav_["kav_as"] is not None else None
+                kav_value_ = kav_["kav_value"] if "kav_value" in kav_ and kav_["kav_value"] is not None else None
+                if not kav_key_ or not kav_value_ or not kav_as_:
+                    raise APIError("missing kv keys")
+                setto__ = \
+                    datetime.strptime(kav_value_[:10], "%Y-%m-%d") if kav_as_ == "date" \
+                    else bool(kav_value_) if kav_as_ == "bool" \
+                    else float(kav_value_) if kav_as_ in ["float", "number", "decimal"] \
+                    else int(kav_value_) if kav_as_ == "int" \
+                    else str(kav_value_) if kav_as_ == "string" \
+                    else str(kav_value_)
+            elif setto_[:1] == "=":
+                forward_ = setto_[1:]
+                if not forward_:
+                    raise APIError("missing = value")
+                formula_ = str(forward_).replace(" ", "")
+                formula_parts_ = re.split("([+-/*()])", formula_)
+                for part_ in formula_parts_:
+                    val_ = self.set_value_f(key_, part_, properties_, data_)
+                    formula_ = formula_.replace(part_, val_)
+                setto__ = ne.evaluate(formula_)
+            else:
+                setto__ = setto_
+
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
+
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
+
+        finally:
+            return setto__
 
 
 class Mongo:
@@ -1386,39 +1414,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def set_akey(self, key_, setto_, properties_, data_):
-        """
-        docstring is in progress
-        """
-        try:
-            if key_ not in properties_:
-                raise APIError(f"{key_} was set but not found in collection properties")
-
-            setto__ = None
-
-            if setto_[:1] == "$":
-                kvk_ = setto_[1:]
-                kav_ = Mongo().db_["_kv"].find_one({"kav_key": kvk_})
-                if kav_:
-                    kav_key_ = kav_["kav_key"] if "kav_key" in kav_ and kav_["kav_key"] is not None else None
-                    kav_as_ = kav_["kav_as"] if "kav_as" in kav_ and kav_["kav_as"] is not None else None
-                    kav_value_ = kav_["kav_value"] if "kav_value" in kav_ and kav_["kav_value"] is not None else None
-                    if kav_key_ and kav_value_ and kav_as_:
-                        setto__ = datetime.strptime(kav_value_[:10], "%Y-%m-%d") if kav_as_ == "date" else bool(kav_value_) if kav_as_ == "bool" else float(kav_value_) if kav_as_ in ["float",
-                                                                                                                                                                                       "number"] else int(kav_value_) if kav_as_ == "int" else str(kav_value_) if kav_as_ == "string" else str(kav_value_)
-                else:
-                    raise APIError(f"no key value pair provided for {setto_}")
-            else:
-                setto__ = data_[setto_] if setto_ in data_ and data_[setto_] is not None else setto_
-
-            if not setto__:
-                raise APIError(f"no link value provided for {setto_}; please consider to define a key-value pair for it")
-
-            return {"result": True, "value": setto__}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
     def link_f(self, obj_):
         """
         docstring is in progress
@@ -1475,10 +1470,7 @@ class Crud:
                     targetkey__ = set__["key"]
                     setto__ = set__["value"]
                     if targetkey__ and setto__:
-                        set_akey_ = self.set_akey(targetkey__, setto__, target_properties_, data_)
-                        if not set_akey_["result"]:
-                            raise APIError(set_akey_["msg"])
-                        val_ = set_akey_["value"]
+                        val_ = Misc().set_value_f(targetkey__, setto__, target_properties_, data_)
                         if val_:
                             setc_[targetkey__] = val_
                             setc_["_modified_at"] = Misc().get_now_f()
@@ -2347,8 +2339,9 @@ class Crud:
                 pivot_ = view_["pivot"] if "pivot" in view_ and view_["pivot"] in [True, False] else None
                 pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ and view_["pivot_totals"] in [True, False] else None
                 chart_ = view_["chart"] if "chart" in view_ and view_["chart"] in [True, False] else None
-                chart_type_ = view_["chart_type"] if "chart_type" in view_ and view_["chart_type"] in ["Flashcard", "Vertical Bar", "Normalized Vertical Bar", "Stacked Vertical Bar",
-                                                                                                       "Grouped Vertical Bar", "Horizontal Bar", "Normalized Horizontal Bar", "Stacked Horizontal Bar", "Grouped Horizontal Bar", "Line", "Pie", "Doughnut"] else None
+                chart_type_ = view_["chart_type"] if "chart_type" in view_ and \
+                    view_["chart_type"] in ["Flashcard", "Vertical Bar", "Normalized Vertical Bar", "Stacked Vertical Bar",
+                                            "Grouped Vertical Bar", "Horizontal Bar", "Normalized Horizontal Bar", "Stacked Horizontal Bar", "Grouped Horizontal Bar", "Line", "Pie", "Doughnut"] else None
                 chart_label_ = view_["chart_label"] if "chart_label" in view_ and view_["chart_label"] in [True, False] else None
                 chart_gradient_ = view_["chart_gradient"] if "chart_gradient" in view_ and view_["chart_gradient"] in [True, False] else None
                 chart_grid_ = view_["chart_grid"] if "chart_grid" in view_ and view_["chart_grid"] in [True, False] else None
@@ -2607,16 +2600,9 @@ class Crud:
         try:
             doc = obj["doc"]
             _id = ObjectId(doc["_id"]) if "_id" in doc else None
-            match_ = (
-                {"_id": _id}
-                if _id
-                else obj["match"]
-                if "match" in obj and obj["match"] is not None and len(obj["match"]) > 0
-                else obj["filter"]
-                if "filter" in obj
-                else None
-            )
-
+            match_ = {"_id": _id} if _id else obj["match"] if "match" in obj and obj["match"] is not None and len(obj["match"]) > 0 else obj["filter"] if "filter" in obj else None
+            link_ = obj["link"] if "link" in obj and obj["link"] is not None else None
+            linked_ = obj["linked"] if "linked" in obj and obj["linked"] is not None else None
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
             col_check_ = self.inner_collection_f(collection_id_)
@@ -2642,6 +2628,16 @@ class Crud:
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
+
+            if is_crud_ and link_ and linked_:
+                link_f_ = self.link_f({
+                    "link": link_,
+                    "linked": linked_,
+                    "data": doc_,
+                    "user": user_
+                })
+                if not link_f_["result"]:
+                    raise APIError(link_f_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -2877,7 +2873,7 @@ class Crud:
             if not tags_:
                 raise AppException("no tags found in action")
 
-            apis_ = action_["apis"] if "apis" in action_ and len(action_["apis"]) > 0 else None
+            apis_ = action_["apis"] if "apis" in action_ and len(action_["apis"]) > 0 else []
             set_ = action_["set"] if "set" in action_ else None
 
             if not set_ and not apis_:
@@ -2936,40 +2932,39 @@ class Crud:
 
             files_ = []
 
-            if apis_:
-                for api_ in apis_:
-                    api_id_ = api_["id"] if "id" in api_ else None
-                    if not api_id_:
-                        raise AppException("invalid id in action api")
-                    enabled_ = "enabled" in api_ and api_["enabled"] is True
-                    if not enabled_:
-                        continue
-                    url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
-                    if not url_:
-                        raise AppException("invalid url in action api")
-                    headers_ = api_["headers"] if "headers" in api_ else None
-                    if not headers_:
-                        raise AppException("invalid http headers in action api")
-                    method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
-                    if not method_:
-                        raise AppException("invalid http method in action api")
-                    map_ = api_["map"] if "map" in api_ else None
-                    if not map_:
-                        raise AppException("invalid mapping in action api")
+            for api_ in apis_:
+                api_id_ = api_["id"] if "id" in api_ else None
+                if not api_id_:
+                    raise AppException("invalid id in action api")
+                enabled_ = "enabled" in api_ and api_["enabled"] is True
+                if not enabled_:
+                    continue
+                url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
+                if not url_:
+                    raise AppException("invalid url in action api")
+                headers_ = api_["headers"] if "headers" in api_ else None
+                if not headers_:
+                    raise AppException("invalid http headers in action api")
+                method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
+                if not method_:
+                    raise AppException("invalid http method in action api")
+                map_ = api_["map"] if "map" in api_ else None
+                if not map_:
+                    raise AppException("invalid mapping in action api")
 
-                    json_ = {"ids": JSONEncoder().encode(ids_), "map": map_, "email": email_}
-                    response_ = requests.post(url_, json=json_, headers=headers_, timeout=30)
-                    res_ = json.loads(response_.content)
-                    res_content_ = res_["content"] if "content" in res_ else ""
-                    res_files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
-                    if response_.status_code != 200:
-                        response_content_ += f"{res_content_}"
-                        raise AppException(f"{response_content_}")
-
-                    if res_files_:
-                        files_ += res_files_
-
+                json_ = {"ids": JSONEncoder().encode(ids_), "map": map_, "email": email_}
+                response_ = requests.post(url_, json=json_, headers=headers_, timeout=60)
+                res_ = json.loads(response_.content)
+                res_content_ = res_["content"] if "content" in res_ else ""
+                res_files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
+                if response_.status_code != 200:
                     response_content_ += f"{res_content_}"
+                    raise AppException(f"{response_content_}")
+
+                if res_files_:
+                    files_ += res_files_
+
+                response_content_ += f"{res_content_}"
 
             if notify_:
                 if get_notification_filtered_:
@@ -3026,6 +3021,8 @@ class Crud:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
             doc_ = obj["doc"]
+            link_ = obj["link"] if "link" in obj and obj["link"] is not None else None
+            linked_ = obj["linked"] if "linked" in obj and obj["linked"] is not None else None
 
             if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
                 if collection_id_ in PROTECTED_COLLS_:
@@ -3097,8 +3094,17 @@ class Crud:
                             counter_ = doc_[property_]
                         else:
                             counter_ = doc_[property_]
-
                         Mongo().db_["_kv"].update_one({"kav_key": counter_name_}, {"$set": {"kav_value": str(counter_)}})
+
+                if link_ and linked_:
+                    link_f_ = self.link_f({
+                        "link": link_,
+                        "linked": linked_,
+                        "data": doc_,
+                        "user": user_
+                    })
+                    if not link_f_["result"]:
+                        raise APIError(link_f_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",

@@ -77,15 +77,15 @@ https://www.gnu.org/licenses.
         </ion-row>
         <ion-row *ngIf="tab=='link'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
-                <ion-button (click)="doSubmitLink()">
+                <ion-button (click)="doSubmit()">
                     <ion-spinner *ngIf="isInProgress; else noattachinprocess" name="dots"></ion-spinner>
                     <ng-template #noattachinprocess>
-                        {{ 'ATTACH' | translate }}
+                        {{ 'SAVE' | translate }}
                     </ng-template>
                 </ion-button>
                 <ion-button (click)="goTab('data')" color="medium">
-                    <ion-icon name="close-circle-outline"></ion-icon>
-                    {{ 'Cancel' | translate }} </ion-button>
+                    <ion-icon name="arrow-back-circle-outline"></ion-icon>
+                    {{ 'Back' | translate }} </ion-button>
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -137,10 +137,10 @@ https://www.gnu.org/licenses.
     <ng-template #norelation>
         <div *ngIf="tab=='link'; else nolink" class="ion-padding-bottom ion-margin-top">
             <ion-item lines="full" class="ion-no-margin ion-margin-bottom full-width">
-                <h6>{{ 'ATTACHED ITEMS' | translate }}</h6>
+                <h6>{{ 'Attached' | translate }} {{ link_?.collection }} {{ 'items' | translate }}:</h6>
                 <ion-label position="stacked">
-                    {{ 'Below' | translate }} <span class="danger">{{ link?.get }}</span> {{ 'items' | translate }} in
-                    <span class="danger">{{ link?.collection }}</span> {{ 'collection will be attached' | translate }}.
+                    {{ 'Below' | translate }} <span class="danger">{{ link_?.get }}</span> {{ 'items' | translate }} in
+                    <span class="danger">{{ link_?.collection }}</span> {{ 'collection will be attached' | translate }}.
                 </ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
                     spellcheck="false" class="link-data" counter="true" maxlength="512" clearOnEdit="true"
@@ -155,7 +155,7 @@ https://www.gnu.org/licenses.
             <form [formGroup]="crudForm" enctype="multipart/form-data">
                 <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
                     class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
-                    <ion-item *ngIf="op=='update' && links?.length > 0">
+                    <ion-item *ngIf="['insert','update','link'].includes(op) && links?.length > 0">
                         <div class="ion-margin-top full-flex ion-margin-bottom">
                             <ion-button *ngFor="let item of links" (click)="doLink(item)" color="dark" size="default"
                                 slot="end">

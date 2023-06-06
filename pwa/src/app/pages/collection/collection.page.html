@@ -148,32 +148,30 @@ https://www.gnu.org/licenses.
         <ion-grid [class]="schemevis" *ngIf="is_crud">
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <h4 *ngIf="schema_key">{{ schema_key }}</h4>
-              <h4 *ngIf="!schema_key">{{ 'Full schema' | translate }}</h4>
+              <h4 *ngIf="schema_key">{{ schema_key ? schema_key : 'Full schema' | translate }}</h4>
               <json-editor id="struc" [options]="jeoptions" [data]="structure ? structure : {}"
                 (change)="doChangeSchema($event)" #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
-        <ion-grid *ngIf="is_pane_ok && is_crud" class="ion-no-padding">
+
+        <!-- ACTION BUTTONS -->
+        <ion-grid *ngIf="is_pane_ok && is_crud && actions?.length > 0"
+          class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="ion-no-margin">
-            <ion-col *ngIf="actions?.length > 0">
-              <div class="act-buttons-wrapper">
-                <span *ngFor="let item of actions; let ac = index">
-                  <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button"
-                    color="dark">
-                    <ion-icon *ngIf="item?.rollback" name="flash-off"></ion-icon>
-                    {{ item.title }}
-                  </ion-button>
-                  <ng-template #actionhide></ng-template>
-                </span>
-              </div>
+            <ion-col>
+              <span *ngFor="let item of actions; let ac = index">
+                <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button">
+                  {{ item.title }}
+                </ion-button>
+                <ng-template #actionhide></ng-template>
+              </span>
             </ion-col>
           </ion-row>
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
-        <ion-grid *ngIf="is_initialized; else dataloading" class="ion-no-padding ion-margin-top data-grid">
+        <ion-grid *ngIf="is_initialized; else dataloading" class="ion-no-padding data-grid">
           <!-- CRUD HEADERS -->
           <ion-row *ngIf="data.length >= 0" class="ion-nowrap search-row">
             <ion-col class="ion-text-center check-column">

@@ -1,12 +1,5 @@
 {
   "properties": {
-    "shp_date": {
-      "bsonType": "date",
-      "title": "Date",
-      "description": "Shipment Date",
-      "dateonly": false,
-      "width": 120
-    },
     "shp_id": {
       "bsonType": "number",
       "title": "ID",
@@ -18,6 +11,13 @@
       "permanent": true,
       "width": 80
     },
+    "shp_date": {
+      "bsonType": "date",
+      "title": "Ship Date",
+      "description": "Shipment Date",
+      "dateonly": false,
+      "width": 120
+    },
     "shp_status": {
       "bsonType": "string",
       "title": "Status",
@@ -25,8 +25,8 @@
       "minLength": 5,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9-]{5,16}$",
-      "enum": ["00-Open", "10-InProgress", "20-OK", "99-Error"],
-      "default": "00-Open",
+      "enum": ["10-Ready", "20-Completed", "99-Error"],
+      "default": "10-Ready",
       "readonly": false,
       "width": 100
     },
@@ -99,7 +99,7 @@
     },
     "shp_notes": {
       "bsonType": "string",
-      "title": "Notes",
+      "title": "Shipment Notes",
       "description": "Shipment notes to carrier or customer",
       "placeholder": "Shipment Notes",
       "minLength": 0,
@@ -108,7 +108,7 @@
     }
   },
   "sort": {
-    "shp_id": -1
+    "_modified_at": -1
   },
   "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_vehicle_id"],
   "index": [["shp_id"], ["shp_acc_no"], ["shp_waybill_no"]],
@@ -139,14 +139,18 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "eq",
-          "value": "60-ReadyToBeDelivered"
+          "op": "in",
+          "value": "50-OnTheTouchpoint,60-ReadyToBeDelivered"
         }
       ],
       "set": [
         {
           "key": "dnn_shp_id",
-          "value": "shp_id"
+          "value": "$$shp_id"
+        },
+        {
+          "key": "dnn_status",
+          "value": "60-ReadyToBeDelivered"
         }
       ]
     }
@@ -154,18 +158,22 @@
   "actions": [
     {
       "id": "waybill-issue",
-      "title": "Waybill Issue",
+      "title": "Issue",
       "enabled": true,
       "match": [
         {
           "key": "shp_status",
-          "op": "in",
-          "value": "00-Open,10-InProgress"
+          "op": "eq",
+          "value": "10-Ready"
         }
       ],
       "set": [
         {
           "key": "shp_date",
+          "value": null
+        },
+        {
+          "key": "shp_notes",
           "value": null
         }
       ],
@@ -190,7 +198,7 @@
             "shipment_waybill_date_field": "shp_waybill_date",
             "shipment_account_no_field": "shp_acc_no",
             "shipment_status_field": "shp_status",
-            "shipment_status_set_value": "20-OK",
+            "shipment_status_set_value": "20-Completed",
             "account_collection": "account_data",
             "account_no_field": "acc_no",
             "delivery_collection": "delivery_data",
@@ -203,7 +211,8 @@
             "delivery_waybill_no_field": "dnn_waybill_no",
             "delivery_waybill_date_field": "dnn_waybill_date",
             "delivery_status_field": "dnn_status",
-            "delivery_set_status": "70-Delivered"
+            "delivery_set_status": "70-Delivered",
+            "document_format": 2
           }
         }
       ],
@@ -217,17 +226,17 @@
     },
     {
       "id": "waybill-download",
-      "title": "Waybill Download",
+      "title": "Download",
       "enabled": true,
       "match": [
         {
           "key": "shp_status",
           "op": "eq",
-          "value": "20-OK"
+          "value": "20-Completed"
         }
       ],
       "set": [],
-      "noninteractive": true,
+      "noninteractive": false,
       "one_click": false,
       "_tags": ["#Managers", "#Administrators"],
       "apis": [

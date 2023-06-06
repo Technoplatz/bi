@@ -220,7 +220,7 @@ export class CollectionPage implements OnInit {
               limit: this.limit
             }).then((res: any) => {
               if (res.structure && res.structure.properties) {
-                this.editor?.setMode("code");
+                this.editor?.setMode("tree");
                 this.doBuildSchema(res.structure);
                 this.data = res.data;
                 this.structure_ori_ = res.structure;
@@ -264,16 +264,12 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  doAction(ix: any) {
-    if (this.data?.length > 0) {
-      if (this.actions[ix]?.one_click || this.sweeped[this.segment]?.length > 0) {
-        this.actionix = ix;
-        this.goCrud(null, "action");
-      } else {
-        this.misc.doMessage("please make a selection to run this action", "error");
-      }
+  doAction(ix_: any) {
+    if (this.actions[ix_]?.one_click || this.sweeped[this.segment]?.length > 0) {
+      this.actionix = ix_;
+      this.goCrud(null, "action");
     } else {
-      this.misc.doMessage("no permission to run this action", "error");
+      this.misc.doMessage("please make a selection to run this action", "error");
     }
   }
 
@@ -353,7 +349,6 @@ export class CollectionPage implements OnInit {
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified || this.scan_) {
         if (op === "action" && res.data.res) {
-          console.log("*** res", res);
           this.misc.doMessage(res.data.res.content, "success");
         }
         this.id === "_collection" ? this.crud.getAll().then(() => { }) : null;
@@ -530,7 +525,7 @@ export class CollectionPage implements OnInit {
     this.doSetSchemaKey(key);
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
-    this.editor.setMode("code");
+    this.editor.setMode("tree");
     this.jeopen = true;
     this.schemevis = "show";
     this.editor.focus();

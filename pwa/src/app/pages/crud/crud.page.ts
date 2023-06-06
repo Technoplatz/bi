@@ -87,7 +87,6 @@ export class CrudPage implements OnInit {
   public isnoninteractive_: boolean = false;
   public visible: string = "hide";
   public parent: any = {};
-  public link: any = {};
   public aktions: any = [];
   public properties_: any = {};
   public links: any = [];
@@ -95,6 +94,7 @@ export class CrudPage implements OnInit {
   public scan_result: string = "";
   private sweeped: any;
   public link_text: any = null;
+  public link_: any = {};
   public linked_: any = [];
   public date_format: string = "DD.MM.YYYY HH:mm";
   private counters: any = {};
@@ -242,10 +242,12 @@ export class CrudPage implements OnInit {
       if (!["remove"].includes(this.op) && !this.crudForm.valid && !this.isnoninteractive_) {
         this.misc.doMessage("form is not valid", "error");
       } else {
+        this.linked_ = this.link_text ? this.link_text.split('\n').filter((e: any) => { return e }) : [];
         this.modified = true;
         this.isInProgress = true;
-        this.crud.Submit(this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix).then((res: any) => {
-          this.crud.modalSubmitListener.next({ "result": true });
+        this.crud.Submit(this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix, this.link_, this.linked_).then((res: any) => {
+          res && res?.result === true ? this.misc.doMessage(`${this.op} completed successfully`, "success") : null;
+          this.crud.modalSubmitListener.next({ result: true });
           if (res && res.token) {
             this.alert.create({
               subHeader: "A new API Token has been generated. This is the only chance to copy!",
@@ -253,7 +255,7 @@ export class CrudPage implements OnInit {
               buttons: [{
                 text: "COPY",
                 handler: () => {
-                  this.misc.copyToClipboard("Bearer " + res.token).then(() => { }).catch((error: any) => {
+                  this.misc.copyToClipboard(`Bearer ${res.token}`).then(() => { }).catch((error: any) => {
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
                     this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
@@ -266,18 +268,14 @@ export class CrudPage implements OnInit {
           } else {
             this.scan_result = "";
             if (this.scan_) {
-              this.scan_result = "<div class='scan-ok'>&#10003; OK " + this.crudForm.get("iot_input")?.value + "<br /><span>Read at " + new Date(Date.now()).toISOString() + "</span></div>";
-              this.scanned_.unshift({ "input": this.crudForm.get("iot_input")?.value, "date": new Date(Date.now()).toISOString() });
+              this.scan_result = `<div class="scan-ok">&#10003; OK ${this.crudForm.get("iot_input")?.value}<br /><span>Read at ${new Date(Date.now()).toISOString()}</span></div>`;
+              this.scanned_.unshift({ input: this.crudForm.get("iot_input")?.value, date: new Date(Date.now()).toISOString() });
               this.storage.set("LSSCANNED", this.scanned_).then(() => {
                 this.data_["iot_input"] = "";
                 this.crudForm.get("iot_input")?.setValue(this.data_["iot_input"]);
               });
             } else {
-              if (this.op === "insert" && this.links?.length > 0) {
-                this.op = "update";
-              } else {
-                this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
-              }
+              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
             }
           }
         }).catch((res: any) => {
@@ -293,11 +291,11 @@ export class CrudPage implements OnInit {
     this.modified = true;
     this.isInProgress = true;
     this.misc.apiCall("crud", {
-      "op": op_,
-      "id": this.data_.bak_id,
-      "type": this.data_.bak_type
+      op: op_,
+      id: this.data_.bak_id,
+      type: this.data_.bak_type
     }).then(() => {
-      this.misc.doMessage(op_ + " completed successfully", "success");
+      this.misc.doMessage(`${op_} completed successfully`, "success");
       this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
@@ -310,8 +308,8 @@ export class CrudPage implements OnInit {
     this.modified = true;
     this.isInProgress = true;
     this.crud.Download({
-      "id": this.data_.bak_id,
-      "type": this.data_.bak_type
+      id: this.data_.bak_id,
+      type: this.data_.bak_type
     }).then(() => {
       this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
     }).catch((error: any) => {
@@ -396,15 +394,15 @@ export class CrudPage implements OnInit {
         this.isInProgress = true;
         this.modified = false;
         this.misc.apiCall("crud", {
-          "op": "link",
-          "link": this.link,
-          "linked": this.linked_,
-          "data": this.data_
+          op: "link",
+          link: this.link_,
+          linked: this.linked_,
+          data: this.data_
         }).then((res: any) => {
           if (res && res.result) {
             this.modified = true;
             const count_ = res.count && res.count > 0 ? res.count : 0;
-            count_ > 0 ? this.misc.doMessage(count_ + " records were linked successfully", "success") : this.misc.doMessage("no records were matched to get linked", "error");
+            count_ > 0 ? this.misc.doMessage(`${count_} records were linked successfully`, "success") : this.misc.doMessage("no records were matched to get linked", "error");
             this.doDismissModal({ op: "link", modified: this.modified, filter: [] });
           }
         }).catch((error: any) => {
@@ -484,7 +482,7 @@ export class CrudPage implements OnInit {
 
   doLink(link_: any) {
     this.tab = "link";
-    this.link = link_;
+    this.link_ = link_;
   }
 
   doParent(parent_: any) {
@@ -537,9 +535,9 @@ export class CrudPage implements OnInit {
     this.related = this.related.filter((obj: any) => (obj[this.field_parents.get[0]] + obj[this.field_parents.get[1]] + obj[this.field_parents.get[2]]).toLowerCase().indexOf(e.toLowerCase()) > -1);
     if (this.related.length === 0 && this.scan_) {
       this.parent.filter = e !== "" ? [{
-        "key": this.parent.match[0].value,
-        "op": "eq",
-        "value": e
+        key: this.parent.match[0].value,
+        op: "eq",
+        value: e
       }] : [];
       this.doParent(this.parent);
     }

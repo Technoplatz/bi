@@ -67,12 +67,11 @@ export class DashboardPage implements OnInit {
     });
     this.crud.charts.subscribe((res: any) => {
       this.is_loading = true;
-      this.charts = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard") : [];
-      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type === "Flashcard") : [];
+      this.charts = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard" && obj.self.dashboard === true && obj.self.enabled === true) : [];
+      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type === "Flashcard" && obj.self.dashboard === true && obj.self.enabled === true) : [];
       if (this.charts.length > 0) {
         this.is_loading = false;
       }
-      console.log("*** charts", this.charts);
     });
     this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];

@@ -38,7 +38,6 @@ import uuid
 import base64
 from datetime import datetime
 from xml.etree import ElementTree
-from bson import json_util
 from bson.objectid import ObjectId
 import requests
 from pymongo import MongoClient
@@ -182,14 +181,130 @@ class Misc:
         return True
 
 
+class Edoksis:
+    """
+    docstring is in progress
+    """
+
+    def get_waybill_f(self, input_):
+        """
+        docstring is in progress
+        """
+        res_ = None
+        files_ = []
+        content_ = ""
+        try:
+            shipment_ettn_field_ = input_["shipment_ettn_field"]
+            shipment_id_field_ = input_["shipment_id_field"]
+            shipment_collection_ = input_["shipment_collection"]
+            document_format_ = input_["document_format"]
+            tag_prefix_ = input_["tag_prefix"]
+            object_ids_ = input_["ids"]
+
+            file_type_ = "xml" if document_format_ == 1 else "pdf" if document_format_ == 2 else "html" if document_format_ == 3 else None
+            if not file_type_:
+                raise APIError("missing file type")
+
+            projection_ = {}
+            projection_[shipment_ettn_field_] = 1
+            projection_[shipment_id_field_] = 1
+            cursor_ = Mongo().db_[shipment_collection_].find(filter={"_id": {"$in": object_ids_}}, projection=projection_)
+            shipments_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            if not shipments_:
+                raise APIError("no shipment id provided")
+
+            for shipment_ in shipments_:
+
+                shipment_ettn_ = shipment_[shipment_ettn_field_] if shipment_ettn_field_ in shipment_ else None
+                shipment_id_ = shipment_[shipment_id_field_] if shipment_id_field_ in shipment_ else None
+
+                try:
+                    request_xml_ = f'''
+                    <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
+                        <soap:Header/>
+                        <soap:Body>
+                            <tem:IrsaliyeIndir xmlns="http://tempuri.org/">
+                                <tem:Girdi>
+                                    <tem:Kimlik>
+                                        <tem:Kullanici>{EDOKSIS_USER_}</tem:Kullanici>
+                                        <tem:Sifre>{EDOKSIS_PASSWORD_}</tem:Sifre>
+                                    </tem:Kimlik>
+                                    <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
+                                    <tem:IrsaliyeETTN>{shipment_ettn_}</tem:IrsaliyeETTN>
+                                    <tem:Tipi>2</tem:Tipi>\
+                                    <tem:Format>{document_format_}</tem:Format>\
+                                </tem:Girdi>
+                            </tem:IrsaliyeIndir>
+                        </soap:Body>
+                    </soap:Envelope>
+                    '''
+
+                    request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
+                    headers_ = {
+                        "Content-Type": "application/soap+xml; charset=utf-8",
+                        "Content-Length": str(len(request_xml_)),
+                        "SOAPAction": "IrsaliyeIndir"
+                    }
+
+                    response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
+                    root_ = ElementTree.fromstring(response_.content)
+
+                    for tag in root_.iter(f"{tag_prefix_}Sonuc"):
+                        if not tag.text:
+                            raise EdoksisError("!!! missing sonuc tag")
+                        if tag.text == "1":
+                            for tag in root_.iter(f"{tag_prefix_}Icerik"):
+                                if not tag.text:
+                                    raise EdoksisError("!!! missing icerik tag")
+                                document_ = base64.b64decode(tag.text)
+                                fn_ = f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}"
+                                filenamewpath_ = f"/docs/{fn_}"
+                                try:
+                                    os.makedirs(os.path.dirname(filenamewpath_), exist_ok=True)
+                                    with open(filenamewpath_, "wb") as file_:
+                                        file_.write(document_)
+                                        file_.close()
+                                    content_ += f"<br />{fn_}: OK"
+                                    files_.append({"filename": filenamewpath_, "filetype": file_type_})
+                                except Exception as exc_:
+                                    content_ += f"<br />{shipment_id_}: {str(exc_)}"
+                        else:
+                            for tag in root_.iter(f"{tag_prefix_}Mesaj"):
+                                if not tag.text:
+                                    raise EdoksisError("!!! missing mesaj tag")
+                                content_ += f"<br />{shipment_id_}: {str(tag.text)}"
+                                raise EdoksisError(str(tag.text))
+
+                except EdoksisError as exc_:
+                    content_ += f"<br />{shipment_id_}: {str(exc_)}"
+
+                except Exception as exc_:
+                    content_ += f"<br />{shipment_id_}: {str(exc_)}"
+
+            res_ = {"result": True, "content": content_, "files": files_}
+
+        except APIError as exc_:
+            Misc().exception_show_f(exc_)
+            content_ += f"<br />API Error: {str(exc_)}"
+            res_ = {"result": False, "content": content_, "msg": str(exc_)}
+
+        except Exception as exc_:
+            Misc().exception_show_f(exc_)
+            content_ += f"<br />Exception: {str(exc_)}"
+            res_ = {"result": False, "content": content_, "msg": str(exc_)}
+
+        finally:
+            return res_
+
+
 @app.route("/download", methods=["POST"], endpoint="download")
 def download_f():
     """
     docstring is in progress
     """
+    response_ = None
+    content_ = ""
     try:
-        content_ = ""
-
         if not request.headers:
             raise AuthError("no headers provided")
 
@@ -235,86 +350,27 @@ def download_f():
         if not document_format_:
             raise APIError("missing document format in mapping")
 
-        object_ids_ = [ObjectId(i) for i in list(set(json.loads(ids_)))]
-        projection_ = {}
-        projection_[shipment_ettn_field_] = 1
-        projection_[shipment_id_field_] = 1
-        cursor_ = Mongo().db_[shipment_collection_].find(filter={"_id": {"$in": object_ids_}}, projection=projection_)
-        shipments_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
-        if not shipments_:
-            raise APIError("no shipment id provided")
-
-        content_type_ = "text/xml" if document_format_ == 1 else "application/pdf" if document_format_ == 2 else "text/html" if document_format_ == 3 else None
         file_type_ = "xml" if document_format_ == 1 else "pdf" if document_format_ == 2 else "html" if document_format_ == 3 else None
-        files_ = []
+        if not file_type_:
+            raise APIError("missing file type")
 
-        for shipment_ in shipments_:
+        ids_ = list(set(json.loads(ids_)))
+        object_ids_ = [ObjectId(i) for i in ids_]
 
-            shipment_ettn_ = shipment_[shipment_ettn_field_] if shipment_ettn_field_ in shipment_ else None
-            shipment_id_ = shipment_[shipment_id_field_] if shipment_id_field_ in shipment_ else None
+        get_waybill_f_ = Edoksis().get_waybill_f({
+            "shipment_ettn_field": shipment_ettn_field_,
+            "shipment_id_field": shipment_id_field_,
+            "shipment_collection": shipment_collection_,
+            "document_format": document_format_,
+            "tag_prefix": tag_prefix_,
+            "ids": object_ids_
+        })
 
-            try:
-                request_xml_ = f'''
-                <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
-                    <soap:Header/>
-                    <soap:Body>
-                        <tem:IrsaliyeIndir xmlns="http://tempuri.org/">
-                            <tem:Girdi>
-                                <tem:Kimlik>
-                                    <tem:Kullanici>{EDOKSIS_USER_}</tem:Kullanici>
-                                    <tem:Sifre>{EDOKSIS_PASSWORD_}</tem:Sifre>
-                                </tem:Kimlik>
-                                <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
-                                <tem:IrsaliyeETTN>{shipment_ettn_}</tem:IrsaliyeETTN>
-                                <tem:Tipi>2</tem:Tipi>\
-                                <tem:Format>{document_format_}</tem:Format>\
-                            </tem:Girdi>
-                        </tem:IrsaliyeIndir>
-                    </soap:Body>
-                </soap:Envelope>
-                '''
+        if not get_waybill_f_["result"]:
+            raise APIError(get_waybill_f_["msg"])
 
-                request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
-                headers_ = {
-                    "Content-Type": "application/soap+xml; charset=utf-8",
-                    "Content-Length": str(len(request_xml_)),
-                    "SOAPAction": "IrsaliyeIndir"
-                }
-
-                response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
-                root_ = ElementTree.fromstring(response_.content)
-
-                for tag in root_.iter(f"{tag_prefix_}Sonuc"):
-                    if not tag.text:
-                        raise EdoksisError("!!! missing sonuc tag")
-                    if tag.text == "1":
-                        for tag in root_.iter(f"{tag_prefix_}Icerik"):
-                            if not tag.text:
-                                raise EdoksisError("!!! missing icerik tag")
-                            document_ = base64.b64decode(tag.text)
-                            fn_ = f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}"
-                            filenamewpath_ = f"/docs/{fn_}"
-                            try:
-                                os.makedirs(os.path.dirname(filenamewpath_), exist_ok=True)
-                                with open(filenamewpath_, "wb") as file_:
-                                    file_.write(document_)
-                                    file_.close()
-                                content_ += f"<br />{fn_}: OK"
-                                files_.append({"filename": filenamewpath_, "filetype": file_type_})
-                            except Exception as exc_:
-                                content_ += f"<br />{shipment_id_}: {str(exc_)}"
-                    else:
-                        for tag in root_.iter(f"{tag_prefix_}Mesaj"):
-                            if not tag.text:
-                                raise EdoksisError("!!! missing mesaj tag")
-                            content_ += f"<br />{shipment_id_}: {str(tag.text)}"
-                            raise EdoksisError(str(tag.text))
-
-            except EdoksisError as exc_:
-                content_ += f"<br />{shipment_id_}: {str(exc_)}"
-
-            except Exception as exc_:
-                content_ += f"<br />{shipment_id_}: {str(exc_)}"
+        files_ = get_waybill_f_["files"]
+        content_ = get_waybill_f_["content"]
 
         res_ = {"result": True, "content": content_, "files": files_}
         response_ = make_response(res_, 200)
@@ -464,6 +520,10 @@ def issue_f():
         tag_prefix_ = map_["tag_prefix"] if "tag_prefix" in map_ and map_["tag_prefix"] is not None else None
         if not tag_prefix_:
             raise APIError("missing tag prefix in mapping")
+
+        document_format_ = map_["document_format"] if "document_format" in map_ and map_["document_format"] is not None else None
+        if not document_format_:
+            raise APIError("missing document format in mapping")
 
         session_client_ = MongoClient(Mongo().connstr_)
         session_db_ = session_client_[MONGO_DB_]
@@ -743,7 +803,20 @@ def issue_f():
                 content_ += f"{shipment_id_}: {str(exc_)}<br />"
                 session_.abort_transaction()
 
-        res_ = {"result": True, "content": content_}
+        get_waybill_f_ = Edoksis().get_waybill_f({
+            "shipment_ettn_field": shipment_ettn_field_,
+            "shipment_id_field": shipment_id_field_,
+            "shipment_collection": shipment_collection_,
+            "document_format": document_format_,
+            "tag_prefix": tag_prefix_,
+            "ids": object_ids_
+        })
+        if not get_waybill_f_["result"]:
+            raise APIError(get_waybill_f_["msg"])
+
+        files_ = get_waybill_f_["files"] if "files" in get_waybill_f_ and len(get_waybill_f_["files"]) > 0 else []
+
+        res_ = {"result": True, "content": content_, "files": files_}
         response_ = make_response(res_, 200)
 
     except pymongo.errors.PyMongoError as exc_:
