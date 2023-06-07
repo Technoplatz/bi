@@ -9,7 +9,7 @@
       "description": "Backup ID",
       "permanent": true,
       "default": "database-dump",
-      "width": 220
+      "width": 250
     },
     "bak_description": {
       "bsonType": "string",

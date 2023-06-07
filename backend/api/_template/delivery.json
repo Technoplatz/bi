@@ -191,6 +191,7 @@
       "description": "Line Amount",
       "default": 0,
       "width": 110,
+      "decimals": 2,
       "disabled": false
     },
     "dnn_customer_price": {
@@ -206,6 +207,7 @@
       "description": "Customer Amount",
       "default": 0,
       "disabled": false,
+      "decimals": 2,
       "width": 180
     },
     "dnn_shp_id": {

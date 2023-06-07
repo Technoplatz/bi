@@ -3,27 +3,31 @@
     "exc_date": {
       "bsonType": "date",
       "title": "Date",
-      "description": "Date"
+      "description": "Date",
+      "width": 120
     },
     "exc_exchange": {
       "bsonType": "string",
       "title": "Status",
       "description": "Record Status",
       "enum": ["EUR", "TRY", "USD"],
-      "default": "EUR"
-    },
-    "exc_rate": {
-      "bsonType": "number",
-      "title": "Rate",
-      "description": "Exchange Rate",
-      "default": 1
+      "default": "EUR",
+      "width": 130
     },
     "exc_currency": {
       "bsonType": "string",
       "title": "Currency",
       "description": "Exchange Currency",
       "enum": ["EUR", "TRY", "USD"],
-      "default": "USD"
+      "default": "USD",
+      "width": 120
+    },
+    "exc_rate": {
+      "bsonType": "number",
+      "title": "Rate",
+      "description": "Exchange Rate",
+      "default": 1,
+      "width": 90
     }
   },
   "required": ["exc_date", "exc_exchange"],
@@ -77,5 +81,6 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Technoplatz"]
     }
-  }
+  },
+  "connectors": []
 }

@@ -35,6 +35,7 @@ import re
 import asyncio
 from datetime import datetime
 from functools import partial
+from decimal import Decimal
 from bson.objectid import ObjectId
 from get_docker_secret import get_docker_secret
 import pytz
@@ -542,11 +543,17 @@ class Trigger():
                     source_bson_type_ = source_properties_[value_]["bsonType"] if value_ in source_properties_ and "bsonType" in source_properties_[value_] else None
                     target_enum_ = target_field_ in target_properties_ and "enum" in target_properties_[target_field_] and len(target_properties_[target_field_]["enum"]) > 0
                     target_bson_type_ = target_properties_[target_field_]["bsonType"] if "bsonType" in target_properties_[target_field_] else None
+                    decimals_ = int(target_properties_[target_field_]["decimals"]) if "decimals" in target_properties_[target_field_] and int(target_properties_[target_field_]["decimals"]) >= 0 else None
                     parts_ = re.split("([+-/*()])", value_)
                     chkgroupbys_ = re.findall("[a-zA-Z_]+", value_)
                     chkgroup0_ = chkgroupbys_[0]
-                    type_ = "enum" if target_enum_ else "sourcevalue" if value_ in source_properties_ else "targetvalue" if value_ in target_properties_ else "string" if target_bson_type_ == "string" else "formula" if len(
-                        parts_) > 1 or chkgroup0_ in self.groupbys_ else target_bson_type_
+                    type_ = \
+                        "enum" if target_enum_ else \
+                        "sourcevalue" if value_ in source_properties_ else \
+                        "targetvalue" if value_ in target_properties_ else \
+                        "string" if target_bson_type_ == "string" else \
+                        "formula" if len(parts_) > 1 or chkgroup0_ in self.groupbys_ else \
+                        target_bson_type_
                     if type_ == "formula":
                         if target_bson_type_ in self.numerics_:
                             if chkgroup0_ in self.groupbys_:
@@ -563,12 +570,14 @@ class Trigger():
                                     part_ = part_.strip()
                                     if part_ in full_document_:
                                         value_ = value_.replace(part_, str(full_document_[part_]))
-                                set_[target_field_] = eval(value_)
+                                set_[target_field_] = round(eval(value_), decimals_) if decimals_ else eval(value_)
                         else:
-                            set_[target_field_] = eval(value_)
+                            set_[target_field_] = round(eval(value_), decimals_) if decimals_ else eval(value_)
                     elif type_ == "sourcevalue":
-                        set_[target_field_] = str(full_document_[value_]) if source_bson_type_ and source_bson_type_ == "string" else full_document_[
-                            value_] * 1 if source_bson_type_ and source_bson_type_ in self.numerics_ else full_document_[value_]
+                        set_[target_field_] = \
+                            str(full_document_[value_]) if source_bson_type_ and source_bson_type_ == "string" else \
+                            full_document_[value_] * 1 if source_bson_type_ and source_bson_type_ in self.numerics_ else \
+                            full_document_[value_]
                     elif type_ == "targetvalue":
                         set_[target_field_] = f"${value_}"
                     elif type_ == "string":

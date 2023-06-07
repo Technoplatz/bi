@@ -180,22 +180,25 @@ https://www.gnu.org/licenses.
                             <div *ngIf="!field.file; else isfile">
                                 <div *ngIf="!field.enum && field.subType!='property' && !field.password; else checkpassword"
                                     style="min-width: 100% !important">
-                                    <ion-input #barcodefocus *ngIf="!field.textarea"
+                                    <ion-input #barcodefocus *ngIf="!field.textarea; else istextarea"
                                         [class]="scan_ && op=='insert' ? 'ion-no-padding barcode' : 'ion-no-padding'"
                                         [maxlength]="field.maxLength" [minlength]="field.minLength"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="false"
-                                        [disabled]="field.disabled" [readonly]="field.readonly">
+                                        [disabled]="field.disabled" [readonly]="field.readonly" [name]="field.name">
                                     </ion-input>
-                                    <ion-textarea *ngIf="field.textarea" class="ion-no-padding" cols="64"
-                                        [(ngModel)]="data_[field.name]" [readonly]="field.readonly"
-                                        [disabled]="field.disabled" auto-grow="true" [maxlength]="field.maxLength"
-                                        [minlength]="field.minLength" autocorrect="off"
-                                        [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                                        [formControlName]="field.name" [required]="field.required" spellcheck="false"
-                                        debounce="500">
-                                    </ion-textarea>
+                                    <ng-template #istextarea>
+                                        <ion-textarea class="ion-no-padding" cols="64" [(ngModel)]="data_[field.name]"
+                                            [readonly]="field.readonly" [disabled]="field.disabled" auto-grow="true"
+                                            [maxlength]="field.maxLength" [minlength]="field.minLength"
+                                            autocorrect="off"
+                                            [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
+                                            [formControlName]="field.name" [required]="field.required"
+                                            spellcheck="false" debounce="500">
+                                        </ion-textarea>
+                                    </ng-template>
+
                                 </div>
                                 <ng-template #checkpassword>
                                     <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"

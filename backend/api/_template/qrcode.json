@@ -13,8 +13,8 @@
     },
     "iot_input": {
       "bsonType": "string",
-      "title": "Input",
-      "description": "Input Data",
+      "title": "Barcode",
+      "description": "Read barcode",
       "pattern": "^[A-Za-z0-9-]{1,32}$",
       "scan": true,
       "minLength": 1,
@@ -23,63 +23,56 @@
     }
   },
   "required": ["iot_proc", "iot_input"],
-  "index": [["iot_proc"], ["iot_input"]],
-  "unique": [["iot_proc", "iot_input"]],
+  "index": [
+    ["iot_proc"],
+    ["iot_input"]
+  ],
+  "unique": [
+    ["iot_proc", "iot_input"]
+  ],
   "sort": {
     "_modified_at": -1
   },
-  "parents": [
-    {
+  "parents": [{
       "name": "CASE",
       "collection": "serial",
-      "match": [
-        {
-          "key": "iot_input",
-          "value": "ser_case_no"
-        }
-      ],
+      "match": [{
+        "key": "iot_input",
+        "value": "ser_case_no"
+      }],
       "filter": [],
       "get": ["ser_case_no", "ser_dnn_no"]
     },
     {
       "name": "DNs",
       "collection": "serial",
-      "match": [
-        {
-          "key": "iot_input",
-          "value": "ser_dnn_no"
-        }
-      ],
+      "match": [{
+        "key": "iot_input",
+        "value": "ser_dnn_no"
+      }],
       "filter": [],
       "get": ["ser_dnn_no", "ser_case_no"]
     }
   ],
   "links": [],
   "actions": [],
-  "triggers": [
-    {
+  "triggers": [{
       "name": "Depot Entries",
       "enabled": true,
       "operations": ["insert"],
-      "changes": [
-        {
-          "key": "iot_proc",
-          "op": "eq",
-          "value": "in"
-        }
-      ],
-      "targets": [
-        {
+      "changes": [{
+        "key": "iot_proc",
+        "op": "eq",
+        "value": "in"
+      }],
+      "targets": [{
           "collection": "serial",
-          "match": [
-            {
-              "key": "ser_case_no",
-              "value": "iot_input"
-            }
-          ],
+          "match": [{
+            "key": "ser_case_no",
+            "value": "iot_input"
+          }],
           "filter": [],
-          "set": [
-            {
+          "set": [{
               "key": "ser_proc_in",
               "value": true
             },
@@ -92,15 +85,12 @@
         },
         {
           "collection": "serial",
-          "match": [
-            {
-              "key": "ser_no",
-              "value": "iot_input"
-            }
-          ],
+          "match": [{
+            "key": "ser_no",
+            "value": "iot_input"
+          }],
           "filter": [],
-          "set": [
-            {
+          "set": [{
               "key": "ser_proc_in",
               "value": true
             },
@@ -117,31 +107,23 @@
       "name": "Depot Outgoing",
       "enabled": true,
       "operations": ["insert"],
-      "changes": [
-        {
-          "key": "iot_proc",
-          "op": "eq",
-          "value": "out"
-        }
-      ],
-      "targets": [
-        {
+      "changes": [{
+        "key": "iot_proc",
+        "op": "eq",
+        "value": "out"
+      }],
+      "targets": [{
           "collection": "serial",
-          "match": [
-            {
-              "key": "ser_case_no",
-              "value": "iot_input"
-            }
-          ],
-          "filter": [
-            {
-              "key": "ser_proc_in",
-              "op": "eq",
-              "value": true
-            }
-          ],
-          "set": [
-            {
+          "match": [{
+            "key": "ser_case_no",
+            "value": "iot_input"
+          }],
+          "filter": [{
+            "key": "ser_proc_in",
+            "op": "eq",
+            "value": true
+          }],
+          "set": [{
               "key": "ser_proc_out",
               "value": true
             },
@@ -154,21 +136,16 @@
         },
         {
           "collection": "serial",
-          "match": [
-            {
-              "key": "ser_no",
-              "value": "iot_input"
-            }
-          ],
-          "filter": [
-            {
-              "key": "ser_proc_in",
-              "op": "eq",
-              "value": true
-            }
-          ],
-          "set": [
-            {
+          "match": [{
+            "key": "ser_no",
+            "value": "iot_input"
+          }],
+          "filter": [{
+            "key": "ser_proc_in",
+            "op": "eq",
+            "value": true
+          }],
+          "set": [{
               "key": "ser_proc_out",
               "value": true
             },
@@ -182,5 +159,6 @@
       ]
     }
   ],
-  "views": {}
+  "views": {},
+  "connectors": []
 }

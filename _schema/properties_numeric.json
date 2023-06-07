@@ -8,6 +8,7 @@
     "maximum": 999999,
     "default": 0,
     "counter": false,
+    "decimals": 2,
     "width": 140
   }
 }

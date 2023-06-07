@@ -203,7 +203,7 @@ class Schedular:
             if not schedule_views_f_["result"]:
                 raise APIError(schedule_views_f_["msg"])
 
-            args_ = {"user": {"email": "cron"}, "op": "backup"}
+            args_ = {"user": {"email": "cron"}, "op": "dump"}
             sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ_, replace_existing=True, args=[args_])
             sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", timezone=TZ_, replace_existing=True, args=[sched_])
             sched_.start()
@@ -261,7 +261,8 @@ class Misc:
             "placeholder",
             "counter",
             "uuid",
-            "dateonly"
+            "dateonly",
+            "decimals"
         ]
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
@@ -545,7 +546,7 @@ class Misc:
         """
         setto__ = None
         try:
-            if setto_[:2] == "$$" and key_ and key_ in properties_:
+            if setto_[:2] == "$$" and key_ or key_ in properties_:
                 forward_ = setto_[2:]
                 if not forward_:
                     raise APIError("missing $$ key name")
@@ -1352,7 +1353,7 @@ class Crud:
         try:
             op_ = obj["op"] if "op" in obj else None
 
-            dump_f_ = Mongo().backup_f() if op_ == "backup" else Mongo().restore_f(obj)
+            dump_f_ = Mongo().backup_f() if op_ in ["backup", "dump"] else Mongo().restore_f(obj)
             if not dump_f_["result"]:
                 raise APIError(dump_f_["msg"])
 
@@ -1360,8 +1361,8 @@ class Crud:
             type_ = dump_f_["type"]
             size_ = dump_f_["size"]
             op_ = obj["op"] if "op" in obj else None
-            email_ = obj["user"]["email"] if obj and obj["user"] else "cron"
-            description_ = "On Demand" if op_ == "backup" else "Automatic"
+            email_ = obj["user"]["email"] if obj and obj["user"] else "cronjob"
+            description_ = "On-Demand" if op_ == "backup" else "Automatic"
 
             doc_ = {
                 "bak_id": id_,

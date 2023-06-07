@@ -68,6 +68,15 @@
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
       "width": 140
     },
+    "shp_notes": {
+      "bsonType": "string",
+      "title": "Shipment Notes",
+      "description": "Shipment notes to carrier or customer",
+      "placeholder": "Shipment Notes",
+      "minLength": 0,
+      "maxLength": 512,
+      "width": 200
+    },
     "shp_waybill_no": {
       "bsonType": "string",
       "title": "Waybill No",
@@ -96,15 +105,6 @@
       "maxLength": 40,
       "readonly": false,
       "width": 270
-    },
-    "shp_notes": {
-      "bsonType": "string",
-      "title": "Shipment Notes",
-      "description": "Shipment notes to carrier or customer",
-      "placeholder": "Shipment Notes",
-      "minLength": 0,
-      "maxLength": 512,
-      "width": 200
     }
   },
   "sort": {

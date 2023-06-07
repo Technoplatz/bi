@@ -101,20 +101,28 @@ export class CrudPage implements OnInit {
   private filter: any = [];
   private actions: any = [];
   private file: any = null;
-  private relatedx: any = []
+  private relatedx: any = [];
   private collections: any = [];
   private views: any = [];
   private view: any = null;
   private structure__: any = {};
+  private input_: string = "";
 
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
     if (event.key === "Enter") {
+      this.input_ = this.crudForm.get(event.target.name)?.value;
       if (event.target.getAttribute("name") === "arrayitem") {
         this.doAddItemToArray(event).then(() => {
         }).catch((error: any) => {
           this.misc.doMessage(error, "error");
         });
+      } else {
+        this.crudForm.get(event.target.name)?.setValue(this.input_.replace(/NAVIGATEPREVIOUS|NAVIGATENEXT|UNIDENTIFIED|NULL|CUT|COPY|SHIFT|TAB|CAPSLOCK|METAV|ARROWDOWN|ARROWUP|ARROWLEFT|ARROWRIGHT|BACKSPACE/gi, "").toUpperCase());
+        console.log("*** input_", event.target.name, this.crudForm.get(event.target.name)?.value);
+        this.doSubmit();
       }
+    } else {
+      this.input_ += event.key;
     }
   }
 
@@ -238,6 +246,7 @@ export class CrudPage implements OnInit {
 
   doSubmit() {
     if (!this.isInProgress) {
+      this.input_ = "";
       this.crudForm.updateValueAndValidity();
       if (!["remove"].includes(this.op) && !this.crudForm.valid && !this.isnoninteractive_) {
         this.misc.doMessage("form is not valid", "error");
