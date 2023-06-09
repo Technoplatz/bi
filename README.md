@@ -1,22 +1,137 @@
 # Technoplatz BI
 
-It's time to get data-driven with your inner-cycle!\
 Table of contents;
 
 - [Platform](#platform)
+- [How to get started](#how-to-get-started)
+- [Installation](#installation)
 - [Impressum](#impressum)
 - [Author](#author)
 
 ## Platform
 
-Technoplatz BI community edition is an open source, multi-container, JSON-driven advanced no-code data application and data sharing platform designed to empower business professionals build their own unique solution. Technoplatz platform offers a pragmatic and optimised way to meet the four key requirements of critical business processes by considering that each company has its own unique conditions;
+Technoplatz BI community edition is an open source, multi-container, JSON-driven no-code data application and data sharing platform designed to empower business professionals build their own unique solution. It offers a pragmatic and optimised way to meet the key requirements of critical business processes by considering that each company has its own unique conditions;
 
-- Dedicated Infastructure
-- No-code Data Application
+- Data Application
 - BI-Directional Data Sharing
-- Built-in API
+- API
 
 The further information can be found at the [official web site](https://bi.technoplatz.com).
+
+## How to get started
+
+### The importance of the containerization
+
+Technoplatz BI community edition works on [Docker](#https://www.docker.com/) platform which is the leading virtualisation technology for developing, shipping and running business grade applications. Before getting started with the installation steps, the first phase you need to complete is creating a standalone Docker instance on the Cloud. We recommend Debian or Debian-based Ubuntu as the main Operating Systems for the Cloud instances required.
+
+#### Why you should choose Debian Platform
+
+Debian is a complete, solid-rock and free Operating System. The word "free" means here doesn't refer to money, instead, it refers to software freedom. In the IT world there are a lot of reasons to choose Debian or Ubuntu as a user, as a developer and even in enterprise environments. Most Debian users appreciate the stability and the smooth upgrade processes of both packages and the entire distribution. Debian is also widely used by software and hardware developers because it runs on numerous architectures and devices. If you plan to use them in a professional environment there are additional benefits like LTS versions and cloud images.
+
+## Creating an Instance on the Cloud
+
+Pick your preferred cloud provider and follow the instructions in the links below:\
+[Microsoft Azure](#https://azure.microsoft.com/en-us/services/kubernetes-service/docker) | ‍[Google Cloud](#https://cloud.google.com/marketplace/docs/container-images) | ‍[Amazon WS](#https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa) | ‍[DigitalOcean](#https://marketplace.digitalocean.com/apps/docker)
+‍
+
+## Installation
+
+### The first touches on the Instance
+
+Many cloud instances provided in the marketplaces may not be up-to-date in terms of the latest version of the operating system or some initial resources. That's why, as soon as the instance is created it is strongly recommended the following steps should be taken before getting started with Docker.
+
+#### Initial Update
+
+Start an SSH session on the instance, perform an initial update then reboot the instance immediately.
+
+```bash
+ssh username@ip-address-of-the-instance
+```
+
+```bash
+sudo apt-get update && sudo apt-get upgrade -y && sudo reboot
+```
+
+#### Setting the Timezone
+
+Check the current date and time zone, list available zones to select the right one. Please consider the country which most BI users get connected from and where the preferred data center is located at.
+
+```bash
+timedatectl
+```
+
+```bash
+timedatectl list-timezones
+```
+
+```bash
+timedatectl set-timezone Europe/Berlin
+```
+
+### Install Docker Engine
+
+Install required packages to allow apt to use a repository securely.
+
+```bash
+sudo apt-get install ca-certificates curl gnupg
+```
+
+Install the official Docker gpg key.
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | \
+sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+```
+
+Set up the Docker repository.
+
+```bash
+echo "deb [arch="$(dpkg --print-architecture)" \
+signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+"$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Update the apt package index again.
+
+```bash
+sudo apt-get update
+```
+
+Start the installation of the latest version of Docker.
+
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io \
+docker-buildx-plugin docker-compose-plugin
+```
+
+Verify that the installation is successful by running the following hello-world image. The command below downloads a test image, runs it in a container, prints a confirmation message and exits.
+
+```bash
+sudo docker run hello-world
+```
+
+### Unistall Docker Engine
+
+Uninstall the Docker Engine, command line interfaces, container service and Docker Compose packages.
+
+```bash
+sudo apt-get purge docker-ce docker-ce-cli containerd.io \
+docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+```
+
+Images, containers, volumes or custom configuration files on your host aren’t automatically removed. To delete them all;
+
+```bash
+sudo rm -rf /var/lib/docker
+sudo rm -rf /var/lib/containerd
+```
+
+You have to delete any edited configuration files manually.
+
+<sup>To get help about error handling you can follow the instructions on the [official web page](#https://docs.docker.com/engine/install/debian/).</sup>
 
 ## Impressum
 
@@ -75,8 +190,8 @@ Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden 
 
 Mustafa Mat\
 <sup>Geschäftsführer, MD</sup>\
-Senior Developer\
-Data Sciences - Statistics B.Sc.\
+Senior Analist Developer\
+Data Sciences, Statistics B.Sc.\
 [@mustafamat](https://www.github.com/mustafamat)
 
 --

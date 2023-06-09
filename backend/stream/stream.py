@@ -63,7 +63,7 @@ class Trigger():
         """
         docstring is in progress
         """
-        print(">>> init started")
+        print_(">>> init started")
         mongo_rs_ = os.environ.get("MONGO_RS")
         mongo_host0_ = os.environ.get("MONGO_HOST0")
         mongo_host1_ = os.environ.get("MONGO_HOST1")
@@ -77,7 +77,7 @@ class Trigger():
         mongo_password_ = get_docker_secret("mongo_password", default="")
         mongo_tls_cert_keyfile_password_ = get_docker_secret("mongo_tls_keyfile_password", default="")
         mongo_tls_ = os.environ.get("MONGO_TLS")
-        mongo_tls_cert_keyfile_ = os.environ.get('MONGO_TLS_CERT_KEYFILE')
+        mongo_tls_cert_keyfile_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
         mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")
         mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
         self.operations_ = ["insert", "update", "replace", "delete"]
@@ -100,13 +100,13 @@ class Trigger():
         if not refresh_connectors_f_["result"]:
             raise AppException(refresh_connectors_f_["exc"])
 
-        print(">>> init ended")
+        print_(">>> init ended")
 
     def exception_passed_f(self, exc):
         """
         docstring is in progress
         """
-        print(">>> passed:", str(exc))
+        print_(">>> passed:", str(exc))
         return True
 
     def exception_show_f(self, exc):
@@ -115,7 +115,7 @@ class Trigger():
         """
         line_no_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else None
         name_ = type(exc).__name__ if hasattr(type(exc), "__name__") else "Exception"
-        print(f"!!! worker exception type {name_} at line {line_no_}:", str(exc))
+        print_(f"!!! worker exception type {name_} at line {line_no_}:", str(exc))
         return True
 
     def get_now_f(self):
@@ -130,7 +130,7 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print(">>> getting structure...")
+            print_(">>> getting structure...")
             self.properties_ = {}
             self.connectors_ = {}
             cursor_ = self.db_["_collection"].aggregate([{
@@ -142,20 +142,20 @@ class Trigger():
             if not self.properties_:
                 raise AppException("!!! no properties found")
 
-            print(">>> structure refreshed")
+            print_(">>> structure refreshed")
 
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc_:
-            print("!!! refresher mongo error")
+            print_("!!! refresher mongo error")
             return {"result": False, "exc": exc_}
 
         except AppException as exc_:
-            print("!!! refresher app exception")
+            print_("!!! refresher app exception")
             return {"result": False, "exc": exc_}
 
         except Exception as exc_:
-            print("!!! refresher exception")
+            print_("!!! refresher exception")
             return {"result": False, "exc": exc_}
 
     def refresh_triggers_f(self):
@@ -163,7 +163,7 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print(">>> getting triggers...")
+            print_(">>> getting triggers...")
             self.triggers_ = []
             cursor_ = self.db_["_collection"].aggregate([{
                 "$match": {
@@ -189,10 +189,10 @@ class Trigger():
                         })
 
             if not self.triggers_:
-                print("!!! triggers passed")
+                print_("!!! triggers passed")
                 raise PassException("!!! no trigger found so passed")
 
-            print(">>> triggers refreshed")
+            print_(">>> triggers refreshed")
 
             return {"result": True}
 
@@ -200,11 +200,11 @@ class Trigger():
             return {"result": True, "exc": exc_}
 
         except pymongo.errors.PyMongoError as exc_:
-            print("!!! refresher mongo error")
+            print_("!!! refresher mongo error")
             return {"result": False, "exc": exc_}
 
         except Exception as exc_:
-            print("!!! refresher exception")
+            print_("!!! refresher exception")
             return {"result": False, "exc": exc_}
 
     def refresh_connectors_f(self):
@@ -212,7 +212,7 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print(">>> getting connectors...")
+            print_(">>> getting connectors...")
             self.connectors_ = {}
             cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.connectors": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
@@ -220,15 +220,15 @@ class Trigger():
                 if connectors__:
                     self.connectors_[item_["col_id"]] = item_["col_structure"]["connectors"]
 
-            print(">>> connectors refreshed", self.connectors_)
+            print_(">>> connectors refreshed", self.connectors_)
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc_:
-            print("!!! refresher mongo error")
+            print_("!!! refresher mongo error")
             return {"result": False, "exc": exc_}
 
         except Exception as exc_:
-            print("!!! refresher exception")
+            print_("!!! refresher exception")
             return {"result": False, "exc": exc_}
 
     def get_filtered_f(self, obj):
@@ -244,11 +244,7 @@ class Trigger():
                 for mat_ in match_:
                     if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
                         fres_ = None
-                        typ = (
-                            properties_[mat_["key"]]["bsonType"]
-                            if mat_["key"] in properties_
-                            else "string"
-                        )
+                        typ = properties_[mat_["key"]]["bsonType"] if mat_["key"] in properties_ else "string"
                         if mat_["op"] in ["eq", "contains"]:
                             if typ in ["number", "int", "decimal"]:
                                 fres_ = float(mat_["value"])
@@ -336,7 +332,7 @@ class Trigger():
             return filtered_
 
         except Exception as exc_:
-            print("!!! exc_", exc_)
+            print_("!!! exc_", exc_)
             return None
 
     def aggregater_sum_f(self, coll_, filter_, field_):
@@ -352,11 +348,11 @@ class Trigger():
             return sum_
 
         except pymongo.errors.PyMongoError as exc_:
-            print("!!! sum mongo error", str(exc_))
+            print_("!!! sum mongo error", str(exc_))
             return 0
 
         except Exception as exc_:
-            print("!!! sum exception", str(exc_))
+            print_("!!! sum exception", str(exc_))
             return 0
 
     def aggregater_count_f(self, coll_, filter_):
@@ -372,11 +368,11 @@ class Trigger():
             return count_
 
         except pymongo.errors.PyMongoError as exc_:
-            print("!!! count mongo error", str(exc_))
+            print_("!!! count mongo error", str(exc_))
             return 0
 
         except Exception as exc_:
-            print("!!! count exception", str(exc_))
+            print_("!!! count exception", str(exc_))
             return 0
 
     def prefix_remove_f(self, input_, prfxs_):
@@ -406,7 +402,7 @@ class Trigger():
                 url_ = connector_["url"] if "enabled" in connector_ and connector_["enabled"] is True else False
                 if not url_:
                     continue
-                print(">>> connector_", col_id_, url_)
+                print_(">>> connector_", col_id_, url_)
 
             return True
 
@@ -436,7 +432,7 @@ class Trigger():
 
             source_collection_id_ = source_collection_.replace("_data", "")
             changed_keys_ = list(changed_.keys())
-            print(f">>> change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
+            print_(f">>> change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
 
             trigger_targets_ = \
                 [tg_ for tg_ in self.triggers_ if tg_["source"] == source_collection_id_ and op_ in tg_["operations"] and
@@ -457,7 +453,7 @@ class Trigger():
                 target_collection_id_ = target_["target"].lower()
                 target_collection_ = f"{target_collection_id_}_data"
                 target_properties_ = self.properties_[target_collection_id_] if target_collection_id_ in self.properties_ else None
-                print(">>> target found", target_collection_id_)
+                print_(">>> target found", target_collection_id_)
                 if target_properties_ is None:
                     raise AppException(f"no target properties found {target_collection_id_}")
 
@@ -480,13 +476,22 @@ class Trigger():
                 match_for_aggregate_ = {}
                 target_matches_ = target_["match"]
                 for item_ in target_matches_:
-                    if "value" in item_ and item_["value"] in full_document_ and full_document_[item_["value"]] is not None:
-                        match_[item_["key"]] = full_document_[item_["value"]]
-                        match_for_aggregate_[item_["value"]] = full_document_[item_["value"]]
+                    key__ = item_["key"] if "key" in item_ else None
+                    value__ = item_["value"] if \
+                        "value" in item_ and \
+                        item_["value"] is not None and \
+                        item_["value"] in full_document_ and\
+                        (item_["value"] in target_properties_ or item_["value"] == "_id") \
+                        else None
+
+                    if key__ and value__:
+                        match_[key__] = full_document_[value__]
+                        match_for_aggregate_[value__] = full_document_[value__]
                     else:
                         continue
+
                 if not match_:
-                    print(f"!!! no data found with the target {target_collection_id_}", match_)
+                    print_(f"!!! no data found with the target {target_collection_id_}", match_)
                     continue
 
                 on_changes_all_ = target_["on_changes_all"]
@@ -502,14 +507,22 @@ class Trigger():
                         {"$project": {"_id": 0}}])
                     for doc_ in aggregate0_:
                         count0_ = doc_["count"] if "count" in doc_ else 0
+
                     match1_ = {}
                     for item_ in target_matches_:
-                        if "value" in item_ and item_["value"] in full_document_ and full_document_[item_["value"]] is not None:
-                            match1_[item_["value"]] = full_document_[item_["value"]]
+
+                        key__ = item_["key"] if "key" in item_ else None
+                        value__ = item_["value"] if \
+                            "value" in item_ and \
+                            item_["value"] is not None and \
+                            item_["value"] in full_document_ and\
+                            (item_["value"] in target_properties_ or item_["value"] == "_id") \
+                            else None
+                        if key__ and value__:
+                            match1_[key__] = full_document_[value__]
                         else:
                             continue
-                        if not match1_:
-                            continue
+
                         changes_filter1_ = self.get_filtered_f({
                             "match": match1_,
                             "properties": source_properties_
@@ -521,8 +534,9 @@ class Trigger():
                             {"$project": {"_id": 0}}])
                         for doc_ in aggregate1_:
                             count1_ = doc_["count"] if "count" in doc_ else 0
+
                     if count0_ != count1_:
-                        print("!!! on changes all not completed", changes_filter0_)
+                        print_("!!! on changes all not completed", changes_filter0_)
                         continue
 
                 filter_ = {}
@@ -602,10 +616,10 @@ class Trigger():
                 set_["_modified_by"] = "_automation"
                 set_["_resume_token"] = token_
 
-                print(f">>> updating... {set_}")
+                print_(f">>> updating... {set_}")
                 update_many_ = self.db_[target_collection_].update_many(match_, {"$set": set_}, upsert=upsert_)
                 count_ = update_many_.matched_count
-                print(">>> updated :)", {"coll": target_collection_, "match": match_, "set": set_, "count": count_})
+                print_(">>> updated :)", {"coll": target_collection_, "match": match_, "set": set_, "count": count_})
 
             return True
 
@@ -625,14 +639,14 @@ class Trigger():
         """
         docstring is in progress
         """
-        print("\n>>> connectors hub started")
+        print_("\n>>> connectors hub started")
         return await self.worker_connectors_f(params_)
 
     async def starter_changes_f(self, params_):
         """
         docstring is in progress
         """
-        print("\n>>> changes hub started")
+        print_("\n>>> changes hub started")
         return await self.worker_change_f(params_)
 
     async def changes_stream_f(self):
@@ -640,7 +654,7 @@ class Trigger():
         creates a pipeline to run async works in a loop
         """
         try:
-            print(">>> change stream started")
+            print_(">>> change stream started")
             resume_token_ = None
 
             with self.db_.watch(self.pipeline_) as changes_stream_:
@@ -648,46 +662,46 @@ class Trigger():
 
                     source_collection_ = event_["ns"]["coll"] if "ns" in event_ and "coll" in event_["ns"] else None
                     if source_collection_ is None:
-                        print("!!! no collection provided")
+                        print_("!!! no collection provided")
                         continue
                     source_collection_id_ = source_collection_.replace("_data", "")
 
                     if source_collection_ == "_collection":
                         refresh_properties_f_ = self.refresh_properties_f()
                         if not refresh_properties_f_["result"]:
-                            print(">>> properties refresh error", refresh_properties_f_["exc"])
+                            print_(">>> properties refresh error", refresh_properties_f_["exc"])
                             continue
                         refresh_triggers_f_ = self.refresh_triggers_f()
                         if not refresh_triggers_f_["result"]:
-                            print(">>> triggers refresh error", refresh_triggers_f_["exc"])
+                            print_(">>> triggers refresh error", refresh_triggers_f_["exc"])
                             continue
                         refresh_connectors_f_ = self.refresh_connectors_f()
                         if not refresh_connectors_f_["result"]:
-                            print(">>> connectors refresh error", refresh_connectors_f_["exc"])
+                            print_(">>> connectors refresh error", refresh_connectors_f_["exc"])
                             continue
-                        print(">>> _collection updated and refreshed")
+                        print_(">>> _collection updated and refreshed")
 
-                    print("\n>>> it is a change", source_collection_id_)
+                    print_("\n>>> it is a change", source_collection_id_)
 
                     source_properties_ = self.properties_[source_collection_id_] if source_collection_id_ in self.properties_ else None
                     if source_properties_ is None:
-                        print("!!! no source properties found", source_collection_id_)
+                        print_("!!! no source properties found", source_collection_id_)
                         continue
 
                     op_ = event_["operationType"] if "operationType" in event_ and event_["operationType"] in self.operations_ else None
                     if op_ is None:
-                        print("!!! no operation provided")
+                        print_("!!! no operation provided")
                         continue
 
                     changed_ = event_["updateDescription"]["updatedFields"] if "updateDescription" in event_ and "updatedFields" in event_["updateDescription"] and op_ in ["update", "replace"] else None
                     if changed_ is None:
                         changed_ = event_["fullDocument"] if "fullDocument" in event_ and op_ == "insert" else None
                         if changed_ is None:
-                            print("!!! no changed fields provided")
+                            print_("!!! no changed fields provided")
                             continue
 
                     if source_collection_[:1] == "_":
-                        print(f">>> system collection passed {source_collection_}")
+                        print_(f">>> system collection passed {source_collection_}")
                         continue
 
                     resume_token_ = changes_stream_.resume_token
@@ -706,18 +720,18 @@ class Trigger():
             await asyncio.wait(running_tasks_)
 
         except pymongo.errors.PyMongoError as exc_:
-            print("!!! exited mongo error", exc_)
+            print_("!!! exited mongo error", exc_)
             self.exception_show_f(exc_)
 
         except AppException as exc_:
-            print("!!! exited app error", exc_)
+            print_("!!! exited app error", exc_)
             self.exception_show_f(exc_)
 
         except Exception as exc_:
-            print("!!! exited exception", exc_)
+            print_("!!! exited exception", exc_)
             self.exception_show_f(exc_)
 
 
 if __name__ == "__main__":
-    print = partial(print, flush=True)
+    print_ = partial(print, flush=True)
     asyncio.run(Trigger().changes_stream_f())

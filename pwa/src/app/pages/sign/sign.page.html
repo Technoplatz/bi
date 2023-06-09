@@ -147,7 +147,7 @@ https://www.gnu.org/licenses.
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button (click)="Signin()" size="default" class="ion-margin-end">
+            <ion-button (click)="Signin()" size="default" class="ion-margin-end" class="sign-button">
                 <span *ngIf="!isInProgress">{{ 'Continue' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
@@ -175,7 +175,7 @@ https://www.gnu.org/licenses.
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button (click)="TFAC()" size="default" class="ion-margin-end">
+            <ion-button (click)="TFAC()" size="default" class="ion-margin-end" class="sign-button">
                 <span *ngIf="!isInProgress">{{ 'Verify' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
@@ -203,7 +203,7 @@ https://www.gnu.org/licenses.
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button (click)="doForgot()" size="default" class="ion-margin-end">
+            <ion-button (click)="doForgot()" size="default" class="ion-margin-end" class="sign-button">
                 <span *ngIf="!isInProgress">{{ 'Continue' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>

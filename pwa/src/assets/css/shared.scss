@@ -128,6 +128,10 @@ ion-note {
   width: 80px;
 }
 
+.sign-button {
+  width: 120px !important;
+}
+
 .sign-content {
   --padding-start: 32px;
   --padding-end: 32px;
@@ -1542,7 +1546,7 @@ sup {
 .jeditor {
   display: flex !important;
   flex-flow: column;
-  height: calc(90vh - 470px);
+  height: calc(90vh - 400px);
   margin-top: -20px;
   margin-bottom: 8px;
   padding: 0px;

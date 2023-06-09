@@ -28,7 +28,7 @@
       "enum": ["10-Ready", "20-Completed", "99-Error"],
       "default": "10-Ready",
       "readonly": false,
-      "width": 100
+      "width": 110
     },
     "shp_acc_no": {
       "bsonType": "string",
@@ -37,7 +37,7 @@
       "minLength": 10,
       "maxLength": 11,
       "pattern": "^[A-Z0-9-]{10,11}$",
-      "width": 110
+      "width": 130
     },
     "shp_carrier_name": {
       "bsonType": "string",
@@ -158,7 +158,7 @@
   "actions": [
     {
       "id": "waybill-issue",
-      "title": "Issue",
+      "title": "Kesme",
       "enabled": true,
       "match": [
         {
@@ -179,6 +179,13 @@
       ],
       "one_click": false,
       "_tags": ["#Managers", "#Administrators"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs Shipped",
+        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
+        "fields": "dnn_no,dnn_status",
+        "filter": []
+      },
       "apis": [
         {
           "id": "waybill-issue",
@@ -215,14 +222,7 @@
             "document_format": 2
           }
         }
-      ],
-      "notification": {
-        "notify": true,
-        "subject": "DNs Shipped",
-        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
-        "fields": "dnn_no,dnn_status",
-        "filter": []
-      }
+      ]
     },
     {
       "id": "waybill-download",
@@ -236,7 +236,7 @@
         }
       ],
       "set": [],
-      "noninteractive": false,
+      "noninteractive": true,
       "one_click": false,
       "_tags": ["#Managers", "#Administrators"],
       "apis": [

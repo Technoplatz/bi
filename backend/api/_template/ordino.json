@@ -1,92 +1,266 @@
 {
   "properties": {
-    "odi_no": {
+    "dnn_no": {
+      "bsonType": "string",
+      "title": "DN No",
+      "description": "Delivery Number",
+      "minLength": 10,
+      "maxLength": 16,
+      "pattern": "^[0-9-]{10,16}$",
+      "width": 110
+    },
+    "dnn_line_no": {
+      "bsonType": "string",
+      "title": "Line",
+      "description": "Line Number",
+      "minLength": 1,
+      "maxLength": 4,
+      "pattern": "^[0-9]{1,4}$",
+      "width": 110
+    },
+    "dnn_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Delivery Status",
+      "enum": [
+        "00-Open",
+        "01-StandBy",
+        "10-OnTheWay",
+        "20-OnCustoms",
+        "30-OnCustomsProcess",
+        "40-ClearanceCompleted",
+        "50-OnTheTouchpoint",
+        "60-ReadyToBeDelivered",
+        "70-Delivered",
+        "BL-Backlog",
+        "NE-Missing",
+        "TX-Tarex",
+        "WF-WriteOff",
+        "RE-Remittance",
+        "SP-ServicePack",
+        "EX-Exported",
+        "AR-Archived"
+      ],
+      "default": "00-Open",
+      "width": 170
+    },
+    "dnn_bill_no": {
+      "bsonType": "string",
+      "title": "Invoice No",
+      "description": "Invoice Number",
+      "minLength": 10,
+      "maxLength": 10,
+      "pattern": "^[0-9]{10,10}$",
+      "width": 130
+    },
+    "dnn_acc_no": {
+      "bsonType": "string",
+      "title": "Account No",
+      "description": "Account No",
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[A-Z0-9-]{10,11}$",
+      "width": 120
+    },
+    "dnn_acc_name": {
+      "bsonType": "string",
+      "title": "Account Name",
+      "description": "Account Name",
+      "minLength": 1,
+      "maxLength": 64,
+      "width": 140
+    },
+    "dnn_date": {
+      "bsonType": "date",
+      "title": "DN Date",
+      "description": "DN Date",
+      "width": 120
+    },
+    "dnn_po_id": {
+      "bsonType": "string",
+      "title": "Po ID",
+      "description": "Customer order no",
+      "minLength": 1,
+      "maxLength": 64,
+      "width": 260
+    },
+    "dnn_po_date": {
+      "bsonType": "date",
+      "title": "PO Date",
+      "description": "Purchase order date",
+      "width": 120
+    },
+    "dnn_sales_doc": {
+      "bsonType": "string",
+      "title": "Sales Doc",
+      "description": "Sales Document Number",
+      "minLength": 10,
+      "maxLength": 10,
+      "pattern": "^[0-9]{10,10}$",
+      "width": 130
+    },
+    "dnn_bu_id": {
+      "bsonType": "number",
+      "title": "BU ID",
+      "description": "Business Unit Id",
+      "width": 100
+    },
+    "dnn_bu_name": {
+      "bsonType": "string",
+      "title": "BU Name",
+      "description": "Business Unit Name",
+      "enum": ["Consumer", "Retail", "SMB", "Enterprise", "Cons", "Rel"],
+      "width": 120
+    },
+    "dnn_odi_no": {
       "bsonType": "string",
       "title": "Ordino No",
       "description": "Main Ordino Number",
-      "pattern": "^[0-9A-Z-]{10,20}$",
       "minLength": 10,
-      "maxLength": 20,
+      "maxLength": 24,
+      "pattern": "^[0-9A-Z-]{10,20}$",
       "width": 170
     },
-    "odi_sub_no": {
+    "dnn_odi_sub_no": {
       "bsonType": "string",
       "title": "Ordino Sub No",
-      "description": "Ordino Sub Number",
-      "pattern": "^[0-9A-Z-]{6,20}$",
+      "description": "Sub Ordino Number",
       "minLength": 6,
-      "maxLength": 20
+      "maxLength": 20,
+      "pattern": "^[0-9A-Z-]{6,20}$"
     },
-    "odi_date": {
-      "bsonType": "date",
-      "title": "Ordino Date",
-      "description": "Ordino Opening Date"
-    },
-    "odi_from": {
+    "dnn_man_no": {
       "bsonType": "string",
-      "title": "Shipped From",
-      "description": "Country where the goods are loaded",
-      "enum": ["China", "Hungary", "Germany", "USA", "Netherlands", "UK"],
-      "width": 110
-    },
-    "odi_customs": {
-      "bsonType": "string",
-      "title": "Customs",
-      "description": "Customs Location",
-      "enum": ["AHL", "Halkalı", "Ambarlı"],
-      "width": 120
-    },
-    "odi_ship_type": {
-      "bsonType": "string",
-      "title": "Ship Type",
-      "description": "Shipping Type",
-      "enum": ["Sea", "Air", "Truck", "Railway"],
-      "width": 120
-    },
-    "odi_arrived": {
-      "bsonType": "bool",
-      "title": "Arrived",
-      "description": "Ordino Arrival Date",
-      "width": 130,
-      "default": false
-    },
-    "odi_arrived_date": {
-      "bsonType": "date",
-      "title": "Arrived Date",
-      "description": "Date of Arrival"
-    },
-    "odi_eta_date": {
-      "bsonType": "date",
-      "title": "ETA Date",
-      "description": "Estimated Date of Arrival",
-      "width": 120
-    },
-    "odi_transfer_date": {
-      "bsonType": "date",
-      "title": "Trasfer Date",
-      "description": "Transfer Date",
+      "title": "Manifest No",
+      "description": "Customs Manifest Number",
+      "minLength": 18,
+      "maxLength": 20,
       "width": 150
     },
-    "odi_completed": {
-      "bsonType": "bool",
-      "title": "Completed",
-      "description": "Customs Clearance Completed",
-      "width": 130,
-      "default": false
+    "dnn_prd_no": {
+      "bsonType": "string",
+      "title": "Product ID",
+      "description": "Product ID",
+      "minLength": 7,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{7,16}$",
+      "replacement": [
+        {
+          "find": "-",
+          "replace": ""
+        },
+        {
+          "find": "_",
+          "replace": ""
+        }
+      ],
+      "width": 130
+    },
+    "dnn_prd_description": {
+      "bsonType": "string",
+      "title": "Description",
+      "description": "Product Description",
+      "minLength": 1,
+      "maxLength": 256,
+      "width": 280
+    },
+    "dnn_weight": {
+      "bsonType": "number",
+      "title": "Weight",
+      "description": "Total Weight",
+      "default": 0,
+      "width": 110
+    },
+    "dnn_qty": {
+      "bsonType": "number",
+      "title": "Quantity",
+      "description": "Quantity",
+      "default": 1,
+      "width": 80
+    },
+    "dnn_unit_price": {
+      "bsonType": "number",
+      "title": "Price",
+      "description": "Unit Price",
+      "default": 0,
+      "width": 130
+    },
+    "dnn_amount": {
+      "bsonType": "number",
+      "title": "Amount",
+      "description": "Line Amount",
+      "default": 0,
+      "width": 110,
+      "decimals": 2,
+      "disabled": false
+    },
+    "dnn_customer_price": {
+      "bsonType": "number",
+      "title": "Customer Price",
+      "description": "Customer Order Price",
+      "default": 0,
+      "width": 160
+    },
+    "dnn_customer_amount": {
+      "bsonType": "number",
+      "title": "Customer Amount",
+      "description": "Customer Amount",
+      "default": 0,
+      "disabled": false,
+      "decimals": 2,
+      "width": 180
+    },
+    "dnn_shp_id": {
+      "bsonType": "number",
+      "title": "Shipment ID",
+      "description": "Shipment ID",
+      "minimum": 0,
+      "maximum": 999999,
+      "width": 110
+    },
+    "dnn_waybill_no": {
+      "title": "Waybill No",
+      "bsonType": "string",
+      "description": "Shipment Waybill Number",
+      "minLength": 0,
+      "maxLength": 16,
+      "width": 140
+    },
+    "dnn_waybill_date": {
+      "bsonType": "date",
+      "title": "Waybill Date",
+      "description": "Waybill Document Date",
+      "width": 140
+    },
+    "dnn_invoice_no": {
+      "bsonType": "string",
+      "title": "Invoice No",
+      "description": "Cusomer Invoice Number",
+      "minLength": 0,
+      "maxLength": 16,
+      "width": 130
+    },
+    "dnn_invoice_date": {
+      "bsonType": "date",
+      "title": "Invoice Date",
+      "description": "Cusomer Invoice Date",
+      "width": 140
     }
   },
-  "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_ship_type", "odi_customs"],
-  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_ship_type"], ["odi_customs"]],
-  "unique": [["odi_no", "odi_sub_no"]],
+  "required": ["dnn_no", "dnn_acc_no", "dnn_status", "dnn_prd_no"],
+  "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_prd_no"], ["dnn_acc_no", "dnn_status"], ["dnn_shp_id"]],
+  "unique": [
+    ["dnn_no", "dnn_line_no"],
+    ["dnn_no", "dnn_line_no", "dnn_man_no"],
+    ["dnn_no", "dnn_line_no", "dnn_odi_no"]
+  ],
   "sort": {
     "_modified_at": -1
   },
-  "parents": [],
-  "links": [
+  "parents": [
     {
-      "collection": "delivery",
-      "get": "dnn_no",
-      "set": [
+      "collection": "ordino",
+      "match": [
         {
           "key": "dnn_odi_no",
           "value": "odi_no"
@@ -94,126 +268,248 @@
         {
           "key": "dnn_odi_sub_no",
           "value": "odi_sub_no"
-        },
-        {
-          "key": "dnn_status",
-          "value": "$DN_STATUS_20"
         }
-      ]
+      ],
+      "filter": [
+        {
+          "key": "odi_status",
+          "op": "in",
+          "value": "00-Open,10-OnTheWay,20-Arrived"
+        }
+      ],
+      "get": ["odi_no", "odi_sub_no", "odi_customs"]
     },
     {
-      "collection": "delivery",
-      "get": "dnn_bill_no",
-      "set": [
+      "collection": "manifest",
+      "match": [
         {
-          "key": "dnn_odi_no",
-          "value": "odi_no"
-        },
-        {
-          "key": "dnn_odi_sub_no",
-          "value": "odi_sub_no"
-        },
-        {
-          "key": "dnn_status",
-          "value": "$DN_STATUS_20"
+          "key": "dnn_man_no",
+          "value": "man_no"
         }
-      ]
+      ],
+      "filter": [
+        {
+          "key": "man_status",
+          "op": "in",
+          "value": "00-Open,10-InProgress"
+        }
+      ],
+      "get": ["man_no", "man_opening_date"]
+    },
+    {
+      "collection": "account",
+      "match": [
+        {
+          "key": "dnn_acc_no",
+          "value": "acc_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "acc_is_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "get": ["acc_no", "acc_name"]
+    },
+    {
+      "collection": "invoice",
+      "match": [
+        {
+          "key": "dnn_no",
+          "value": "inv_dnn_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "inv_dnn_no",
+          "op": "ne",
+          "value": "zzz"
+        }
+      ],
+      "get": ["inv_no", "inv_dnn_no"]
+    },
+    {
+      "collection": "shipment",
+      "match": [
+        {
+          "key": "dnn_shp_id",
+          "value": "shp_id"
+        }
+      ],
+      "filter": [
+        {
+          "key": "shp_status",
+          "op": "in",
+          "value": "10-Ready,20-Completed"
+        }
+      ],
+      "get": ["shp_id", "shp_waybill_no"]
     }
   ],
   "actions": [
     {
-      "id": "act-ordino-arrived",
-      "title": "Arrived (On Customs)",
+      "id": "standby",
+      "title": "StandBy",
       "enabled": true,
       "match": [
         {
-          "key": "odi_arrived",
+          "key": "dnn_status",
           "op": "eq",
-          "value": false
+          "value": "00-Open"
         }
       ],
       "set": [
         {
-          "key": "odi_arrived",
-          "value": true
-        },
-        {
-          "key": "odi_arrived_date",
-          "value": null
+          "key": "dnn_status",
+          "value": "01-StandBy"
         }
       ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
+      "one_click": true,
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
-        "notify": false,
-        "subject": "Ordino is on customs",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been arrived.",
-        "fields": "odi_no,odi_sub_no,odi_ship_type",
+        "notify": true,
+        "subject": "DNs are stand by",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Open to 01-StandBy at once.",
+        "fields": "dnn_no,dnn_status",
         "filter": [
           {
-            "key": "odi_arrived",
+            "key": "dnn_status",
             "op": "eq",
-            "value": true
+            "value": "01-StandBy"
           }
         ]
       }
     },
     {
-      "id": "act-ordino-arrived-cancel",
-      "title": "Arrived Cancel",
+      "id": "link-ordino",
+      "title": "Ordino",
       "enabled": true,
-      "rollback": true,
       "match": [
         {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": true
+          "key": "dnn_status",
+          "op": "in",
+          "value": "01-StandBy,10-OnTheWay"
         }
       ],
       "set": [
         {
-          "key": "odi_arrived",
-          "value": false
+          "key": "dnn_status",
+          "value": "10-OnTheWay"
         },
         {
-          "key": "odi_arrived_date",
+          "key": "dnn_odi_no",
+          "value": null
+        },
+        {
+          "key": "dnn_odi_sub_no",
           "value": null
         }
       ],
       "one_click": false,
-      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
-        "notify": false,
-        "subject": "Ordino Arrival Canceled",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been rolled back.",
-        "fields": "odi_no,odi_sub_no,odi_ship_type",
+        "notify": true,
+        "subject": "DNs on the way",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 01-StandBy to 10-OnTheWay.",
+        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no",
         "filter": [
           {
-            "key": "odi_arrived",
+            "key": "dnn_status",
             "op": "eq",
-            "value": false
+            "value": "10-OnTheWay"
+          }
+        ]
+      }
+    },
+    {
+      "id": "link-manifest",
+      "title": "Manifest",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "20-OnCustoms,30-OnCustomsProcess"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "30-OnCustomsProcess"
+        },
+        {
+          "key": "dnn_man_no",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "_tags": ["#Managers", "#Administrators"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs on customs process",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 20-OnCustoms to 30-OnCustomsProcess.",
+        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no,dnn_man_no",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "30-OnCustomsProcess"
+          }
+        ]
+      }
+    },
+    {
+      "id": "get-ready",
+      "title": "Ready",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "01-StandBy,50-OnTheTouchpoint,60-ReadyToBeDelivered,70-Delivered"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
+      "one_click": false,
+      "_tags": ["#Managers", "#Administrators"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs are ready to be delivered",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 50-OnTheTouchpoint to 60-ReadyToBeDelivered.",
+        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no,dnn_man_no",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "60-ReadyToBeDelivered"
           }
         ]
       }
     }
   ],
+  "links": [],
   "triggers": [
     {
-      "name": "Ordino Arrived",
+      "name": "Amounts updater",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": true
-        }
-      ],
-      "conditions": [
+          "key": "dnn_qty",
+          "op": "gte",
+          "value": 0
+        },
         {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": false
+          "key": "dnn_unit_price",
+          "op": "gte",
+          "value": 0
         }
       ],
       "targets": [
@@ -221,73 +517,67 @@
           "collection": "delivery",
           "match": [
             {
-              "key": "dnn_odi_no",
-              "value": "odi_no"
-            },
-            {
-              "key": "dnn_odi_sub_no",
-              "value": "odi_sub_no"
+              "key": "_id",
+              "value": "_id"
             }
           ],
           "filter": [
             {
               "key": "dnn_status",
-              "op": "in",
-              "value": "01-StandBy,10-OnTheWay,20-OnCustoms"
+              "op": "ne",
+              "value": "70-Delivered"
             }
           ],
           "set": [
             {
-              "key": "dnn_status",
-              "value": "20-OnCustoms"
+              "key": "dnn_amount",
+              "value": "dnn_qty * dnn_unit_price"
             }
           ],
           "upsert": false
-        }
-      ]
-    },
-    {
-      "name": "Ordino Arrived Cancel",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": false
-        }
-      ],
-      "conditions": [
-        {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": true
-        }
-      ],
-      "targets": [
+        },
         {
           "collection": "delivery",
           "match": [
             {
-              "key": "dnn_odi_no",
-              "value": "odi_no"
-            },
-            {
-              "key": "dnn_odi_sub_no",
-              "value": "odi_sub_no"
+              "key": "_id",
+              "value": "_id"
             }
           ],
           "filter": [
             {
               "key": "dnn_status",
-              "op": "in",
-              "value": "01-StandBy,10-OnTheWay,20-OnCustoms"
+              "op": "ne",
+              "value": "70-Delivered"
             }
           ],
           "set": [
             {
-              "key": "dnn_status",
-              "value": "10-OnTheWay"
+              "key": "dnn_customer_amount",
+              "value": "dnn_qty * dnn_customer_price"
+            }
+          ],
+          "upsert": false
+        },
+        {
+          "collection": "manifest",
+          "match": [
+            {
+              "key": "man_no",
+              "value": "dnn_man_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "man_status",
+              "op": "in",
+              "value": "00-Open,10-OnCustomsProcess"
+            }
+          ],
+          "set": [
+            {
+              "key": "man_amount",
+              "value": "sum(dnn_amount)"
             }
           ],
           "upsert": false
@@ -295,5 +585,409 @@
       ]
     }
   ],
-  "views": {}
+  "views": {
+    "dn-git-view": {
+      "title": "GiT 2023",
+      "description": "GiT by account and statuses",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": ["inv_dnn_no"],
+      "data_index": ["acc_nick_name"],
+      "data_columns": ["dnn_status"],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Stacked Vertical Bar",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
+      "scheduled": false,
+      "scheduled_cron": "15 14,15,16 * * mon,tue",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "dn-buid-view": {
+      "title": "Business Units",
+      "description": "GiT by BU Id's",
+      "priority": 1000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_bu_name"],
+      "data_columns": ["dnn_status"],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Stacked Horizontal Bar",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
+      "scheduled": false,
+      "scheduled_cron": "* 4 * * *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "dn-statuses-view": {
+      "title": "Statuses",
+      "description": "DN Statuses",
+      "priority": 2000,
+      "enabled": false,
+      "dashboard": false,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "00-Open,01-StandBy,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted, 50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Pie",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
+      "scheduled": false,
+      "scheduled_cron": "* 2 * * *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "fc-on-the-way": {
+      "title": "STby + On the Way",
+      "description": "DNs stand-by and on the way",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "01-StandBy,10-OnTheWay"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
+      "scheduled": false,
+      "scheduled_cron": "0 10 * 1-5 *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "fc-on-customs": {
+      "title": "On Customs",
+      "description": "DNs have just arrived",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "20-OnCustoms"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
+      "scheduled": false,
+      "scheduled_cron": "0 10 * 1-5 *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "fc-on-custom-process": {
+      "title": "On Customs Process",
+      "description": "DNs currently on customs process",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "30-OnCustomsProcess,40-ClearanceCompleted"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "scheduled": false,
+      "scheduled_cron": "* 2 * * *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "fc-status-40": {
+      "title": "Clearance Completed",
+      "description": "DNs clearance have been completed",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "40-ClearanceCompleted"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "scheduled": false,
+      "scheduled_cron": "* 2 * * *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "fc-status-50": {
+      "title": "On The Touchpoint",
+      "description": "DNs on the Touchpoint",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "50-OnTheTouchpoint"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "scheduled": false,
+      "scheduled_cron": "30 9,17 * 1-5 *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
+    "fc-status-60": {
+      "title": "Ready To Be Delivered",
+      "description": "DNs awaiting shipment",
+      "priority": 2000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "60-ReadyToBeDelivered,70-Delivered"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "scheduled": false,
+      "scheduled_cron": "* 23 * * sun",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    }
+  },
+  "connectors": []
 }

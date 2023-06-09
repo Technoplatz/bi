@@ -546,11 +546,10 @@ class Misc:
         """
         setto__ = None
         try:
-            if setto_[:2] == "$$" and key_ or key_ in properties_:
-                forward_ = setto_[2:]
-                if not forward_:
-                    raise APIError("missing $$ key name")
-                setto__ = data_[forward_] if forward_ in data_ else None
+            if key_ in properties_:
+                if not setto_:
+                    raise APIError("missing key name")
+                setto__ = data_[setto_] if setto_ in data_ else None
             elif setto_[:1] == "$":
                 forward_ = str(setto_[1:]).upper()
                 if not forward_:
@@ -993,44 +992,36 @@ class Crud:
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
 
-            get_filtered_ = self.get_filtered_f(
-                {
-                    "match": match_,
-                    "properties": structure_["properties"]
-                    if "properties" in structure_
-                    else None,
-                }
-            )
+            get_filtered_ = self.get_filtered_f({
+                "match": match_,
+                "properties": structure_["properties"] if "properties" in structure_ else None
+            })
 
             ts_ = Misc().get_timestamp_f()
             bin_ = f"{collection_id_}_bin_{ts_}"
             Mongo().db_[bin_].insert_many(Mongo().db_[collection_].find(get_filtered_))
             Mongo().db_[collection_].delete_many(get_filtered_)
 
-            log_ = Misc().log_f(
-                {
-                    "type": "Info",
-                    "collection": collection_,
-                    "op": "purge",
-                    "user": email_,
-                    "document": get_filtered_,
-                }
-            )
+            log_ = Misc().log_f({
+                "type": "Info",
+                "collection": collection_,
+                "op": "purge",
+                "user": email_,
+                "document": get_filtered_
+            })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f(
-                {
-                    "type": "Error",
-                    "collection": collection_,
-                    "op": "purge",
-                    "user": email_,
-                    "document": str(exc),
-                }
-            )
+            Misc().log_f({
+                "type": "Error",
+                "collection": collection_,
+                "op": "purge",
+                "user": email_,
+                "document": str(exc)
+            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -2423,10 +2414,6 @@ class Crud:
             if not structure_:
                 raise APIError("structure not found")
 
-            properties_ = structure_["properties"] if "properties" in structure_ else None
-            if not properties_:
-                raise APIError("no properties found")
-
             if not col_id_:
                 raise APIError("collection not found")
 
@@ -2438,6 +2425,10 @@ class Crud:
                 if col_structure_:
                     col_structure_[schema_key_] = structure_
                     structure_ = col_structure_
+
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise APIError("no properties found")
 
             arr_ = [str_ for str_ in structure_ if str_ not in STRUCTURE_KEYS_]
             if len(arr_) > 0:
@@ -2742,7 +2733,7 @@ class Crud:
                     raise APIError("collection is protected for bulk processes")
 
             if op_ == "delete" and collection_id_ == "_user":
-                raise APIError("user collection is protected to be deleted")
+                raise APIError("user collection is protected to delete")
 
             ids_ = []
             for _id in match_:
@@ -3966,11 +3957,11 @@ class Auth:
             authb_ = "Bearer "
             ix_ = authorization_.find(authb_)
             if ix_ != 0:
-                raise AuthError("no token provided")
+                raise PassException("no token provided")
 
             token_ = authorization_.replace(authb_, "")
             if not token_:
-                raise AuthError("no token provided")
+                raise PassException("no token provided")
 
             x_api_key_ = request.headers.get("X-Api-Key", None)
             if not x_api_key_:
@@ -3986,14 +3977,15 @@ class Auth:
             options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
             jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
             if not jwt_proc_f_["result"]:
-                raise AuthError(jwt_proc_f_["msg"])
+                raise PassException(jwt_proc_f_["msg"])
             claims_ = jwt_proc_f_["jwt"]
 
             usr_id_ = claims_["id"] if "id" in claims_ and claims_["id"] is not None else None
             if not usr_id_:
-                raise AuthError("invalid user token")
+                raise PassException("invalid user token")
+
             if usr_id_ != aut_id_:
-                raise AuthError("invalid user validation")
+                raise PassException("invalid user validation")
 
             user_ = Mongo().db_["_user"].find_one({"usr_id": aut_id_})
             if not user_:
@@ -4003,6 +3995,9 @@ class Auth:
             user_["api_key"] = auth_["aut_api_key"]
 
             return ({"result": True, "user": user_, "auth": auth_})
+
+        except PassException as exc_:
+            return Misc().pass_exception_f(exc_)
 
         except AuthError as exc_:
             return Misc().auth_error_f(exc_)

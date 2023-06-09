@@ -93,48 +93,7 @@
   "parents": [],
   "links": [],
   "actions": [],
-  "triggers": [
-    {
-      "name": "Makes DN onthetouchpoint",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "ser_proc_in",
-          "op": "eq",
-          "value": true
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_no",
-              "value": "ser_dnn_no"
-            },
-            {
-              "key": "dnn_line_no",
-              "value": "ser_line_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "in",
-              "value": "40-ClearanceCompleted,50-OnTheTouchpoint"
-            }
-          ],
-          "set": [
-            {
-              "key": "dnn_status",
-              "value": "50-OnTheTouchpoint"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    }
-  ],
-  "views": {}
+  "triggers": [],
+  "views": {},
+  "connectors": []
 }

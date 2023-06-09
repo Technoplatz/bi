@@ -152,6 +152,15 @@ https://www.gnu.org/licenses.
             ATTACH button' | translate }}.
         </div>
         <ng-template #nolink>
+            <div *ngIf="isnoninteractive_; else interactive" class="ion-margin-top">
+                <h5>{{ 'This action is non-interactive' | translate }}.</h5>
+                {{ 'Please click RUN ACTION button directly' | translate }}.
+            </div>
+            <ng-template #interactive>
+                <div class="ion-margin-top">
+                    <h5>{{ collection | titlecase }} {{ 'Data Form' | translate }}</h5>
+                </div>
+            </ng-template>
             <form [formGroup]="crudForm" enctype="multipart/form-data">
                 <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
                     class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">

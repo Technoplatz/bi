@@ -249,7 +249,8 @@ export class CrudPage implements OnInit {
       this.input_ = "";
       this.crudForm.updateValueAndValidity();
       if (!["remove"].includes(this.op) && !this.crudForm.valid && !this.isnoninteractive_) {
-        this.misc.doMessage("form is not valid", "error");
+        const msg_ = this.op === "action" ? "form is not valid or action is not non-interactive" : "form is not valid";
+        this.misc.doMessage(msg_, "error");
       } else {
         this.linked_ = this.link_text ? this.link_text.split('\n').filter((e: any) => { return e }) : [];
         this.modified = true;
