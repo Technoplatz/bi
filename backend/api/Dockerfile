@@ -33,13 +33,13 @@
 FROM python:3.9-slim
 RUN DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y cron dirmngr gnupg apt-transport-https ca-certificates software-properties-common wget libmagic-dev curl iputils-ping
+RUN apt-get install -y cron dirmngr gnupg2 apt-transport-https ca-certificates software-properties-common wget libmagic-dev curl iputils-ping
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | apt-key add -
 RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 RUN apt-get update
-RUN apt-get install -y mongodb-org-tools mongodb-mongosh-shared-openssl11
+RUN apt-get install -y mongodb-org-tools
 WORKDIR /app
 COPY . /app
-RUN echo "python3 -m pip install --upgrade pip" >/run_module.sh
+RUN echo "python3 -m pip install --upgrade pip" > /run_module.sh
 RUN pip install -r requirements.txt
 CMD ["python3", "api.py"]

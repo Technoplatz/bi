@@ -298,7 +298,7 @@ class Misc:
         """
         docstring is in progress
         """
-        if NOTIFICATIONS_ == "slack" and NOTIFICATION_SLACK_HOOK_URL_:
+        if NOTIFICATION_SLACK_HOOK_URL_:
             ip_ = self.get_user_ip_f()
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
@@ -4197,7 +4197,6 @@ class Auth:
 TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
-NOTIFICATIONS_ = os.environ.get("NOTIFICATIONS")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
 SMTP_SERVER_ = os.environ.get("SMTP_SERVER")

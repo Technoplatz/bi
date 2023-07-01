@@ -24,17 +24,13 @@ The further information can be found at the [official web site](https://bi.techn
 
 Technoplatz BI community edition works on [Docker](#https://www.docker.com/) platform which is the leading virtualisation technology for developing, shipping and running business grade applications. Before getting started with the installation steps, the first phase you need to complete is creating a standalone Docker instance on the Cloud. We recommend Debian or Debian-based Ubuntu as the main Operating Systems for the Cloud instances required.
 
-#### Why you should choose Debian Platform
-
+**Why you should choose Debian Platform?**\
 Debian is a complete, solid-rock and free Operating System. The word "free" means here doesn't refer to money, instead, it refers to software freedom. In the IT world there are a lot of reasons to choose Debian or Ubuntu as a user, as a developer and even in enterprise environments. Most Debian users appreciate the stability and the smooth upgrade processes of both packages and the entire distribution. Debian is also widely used by software and hardware developers because it runs on numerous architectures and devices. If you plan to use them in a professional environment there are additional benefits like LTS versions and cloud images.
 
-## Creating an Instance on the Cloud
+### Creating an Instance on the Cloud
 
 Pick your preferred cloud provider and follow the instructions in the links below:\
 [Microsoft Azure](#https://azure.microsoft.com/en-us/services/kubernetes-service/docker) | ‍[Google Cloud](#https://cloud.google.com/marketplace/docs/container-images) | ‍[Amazon WS](#https://aws.amazon.com/marketplace/pp/prodview-2jrv4ti3v2r3e?sr=0-1&ref_=beagle&applicationId=AWSMPContessa) | ‍[DigitalOcean](#https://marketplace.digitalocean.com/apps/docker)
-‍
-
-## Installation
 
 ### The first touches on the Instance
 
@@ -49,10 +45,22 @@ ssh username@ip-address-of-the-instance
 ```
 
 ```bash
-sudo apt-get update && sudo apt-get upgrade -y && sudo reboot
+sudo apt-get update && sudo apt-get upgrade -y
 ```
 
-#### Setting the Timezone
+```bash
+sudo reboot
+```
+
+#### Checking the Operating System
+
+Run the following lsb_release command to make sure the current operating system is the same as the one you want to install.
+
+```bash
+lsb_release -a
+```
+
+#### Setting Timezone
 
 Check the current date and time zone, list available zones to select the right one. Please consider the country which most BI users get connected from and where the preferred data center is located at.
 
@@ -68,7 +76,7 @@ timedatectl list-timezones
 timedatectl set-timezone Europe/Berlin
 ```
 
-### Install Docker Engine
+#### Installing the Docker Engine
 
 Install required packages to allow apt to use a repository securely.
 
@@ -103,7 +111,7 @@ sudo apt-get update
 Start the installation of the latest version of Docker.
 
 ```bash
-sudo apt-get install docker-ce docker-ce-cli containerd.io \
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
 docker-buildx-plugin docker-compose-plugin
 ```
 
@@ -113,7 +121,7 @@ Verify that the installation is successful by running the following hello-world 
 sudo docker run hello-world
 ```
 
-### Unistall Docker Engine
+#### Unistalling Docker Engine
 
 Uninstall the Docker Engine, command line interfaces, container service and Docker Compose packages.
 
@@ -132,6 +140,36 @@ sudo rm -rf /var/lib/containerd
 You have to delete any edited configuration files manually.
 
 <sup>To get help about error handling you can follow the instructions on the [official web page](#https://docs.docker.com/engine/install/debian/).</sup>
+
+## Installation
+
+Install required packages to allow apt to use a repository securely.
+
+#### Getting the platform script
+
+Run the following command to get the latest script from the official repository.
+
+```bash
+curl -Lso ~/technoplatz-bi/bi-sh --create-dirs \
+"https://raw.githubusercontent.com/Technoplatz/bi/main/bi-sh" \
+&& sudo chmod +x ~/technoplatz-bi/bi-sh
+```
+
+#### Changing the directory
+
+```bash
+cd ~/technoplatz
+```
+
+#### Starting containers
+
+Enter the command below to start containers by keeping them up and running in the background. Technoplatz BI continues to run at the background and restarts automatically each time the platform is rebooted.
+
+```bash
+./bi-sh start
+```
+
+
 
 ## Impressum
 

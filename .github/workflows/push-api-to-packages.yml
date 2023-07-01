@@ -43,8 +43,6 @@ env:
   FOLDER: backend/api
   DOCKERFILE: Dockerfile
   VERSION: latest
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
 jobs:
   push-to-packages:
@@ -72,15 +70,3 @@ jobs:
           echo "$GHCR_TOKEN" | docker login ghcr.io -u $ --password-stdin
           docker push $IMAGE_ID
           docker logout ghcr.io
-      - name: push-image-dockerhub
-        id: push-image-dockerhub
-        run: |
-          if [ ${{ steps.build-image.outputs.OBRANCH }} == 'main' ]; then
-            IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
-            docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
-            echo "$DOCKERHUB_TOKEN" | docker login -u $DOCKERHUB_USERNAME --password-stdin
-            docker push $IMAGE_ID
-            docker logout
-          else
-            echo "Branch ${{ steps.build-image.outputs.OBRANCH }} skipped"
-          fi

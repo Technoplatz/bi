@@ -130,7 +130,7 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print_(">>> getting structure...")
+            print_(">>> getting collections structure...")
             self.properties_ = {}
             self.connectors_ = {}
             cursor_ = self.db_["_collection"].aggregate([{
@@ -138,9 +138,6 @@ class Trigger():
             }])
             for item_ in cursor_:
                 self.properties_[item_["col_id"]] = item_["col_structure"]["properties"] if "properties" in item_["col_structure"] else None
-
-            if not self.properties_:
-                raise AppException("!!! no properties found")
 
             print_(">>> structure refreshed")
 
