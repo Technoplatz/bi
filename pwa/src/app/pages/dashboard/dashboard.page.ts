@@ -49,7 +49,6 @@ export class DashboardPage implements OnInit {
   public chart_size: string = "small";
   public chart_css: string = "chart-sq small";
   public is_refreshing: boolean = false;
-  public is_loading: boolean = false;
   public view: any = null;
   public chart: any = null;
   public announcements: any = [];
@@ -66,12 +65,8 @@ export class DashboardPage implements OnInit {
       this.collections = res && res.data ? res.data : [];
     });
     this.crud.charts.subscribe((res: any) => {
-      this.is_loading = true;
       this.charts = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard" && obj.self.dashboard === true && obj.self.enabled === true) : [];
       this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type === "Flashcard" && obj.self.dashboard === true && obj.self.enabled === true) : [];
-      if (this.charts.length > 0) {
-        this.is_loading = false;
-      }
     });
     this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];

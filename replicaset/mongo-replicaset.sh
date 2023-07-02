@@ -149,7 +149,7 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             usr_name: '${ADMIN_NAME}',
             usr_scope: 'Administrator',
             usr_enabled: true,
-            _tags: [`#Managers`,`#Administrators`],
+            _tags: ['#Managers', '#Administrators'],
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
             _modified_count: 0
@@ -233,7 +233,7 @@ else
                 usr_name: '${ADMIN_NAME}',
                 usr_scope: 'Administrator',
                 usr_enabled: true,
-                _tags: [`#Managers`,`#Administrators`],
+                _tags: ['#Managers', '#Administrators'],
                 _modified_at: new Date(),
                 _modified_by: 'saas',
                 _modified_count: 0
