@@ -30,10 +30,10 @@ Debian is a complete, solid-rock and free Linux Operating System. The word "free
 
 Pick your preferred cloud provider and follow the instructions in the links below to learn how to create a new Debian instance:
 
-[Microsoft Azure](#https://azuremarketplace.microsoft.com/en-us/marketplace/apps/cloud-infrastructure-services.debian-11?tab=overview)\
-[Google Cloud Platform](#https://console.cloud.google.com/marketplace/product/debian-cloud/debian-bullseye)\
-[Amazon Web Services](#https://aws.amazon.com/marketplace/pp/prodview-l5gv52ndg5q6i)\
-[DigitalOcean](#https://www.digitalocean.com/community/tutorials/initial-server-setup-with-debian-11)
+- [Microsoft Azure](#https://azuremarketplace.microsoft.com/en-us/marketplace/apps/cloud-infrastructure-services.debian-11?tab=overview)
+- [Google Cloud Platform](#https://console.cloud.google.com/marketplace/product/debian-cloud/debian-bullseye)
+- [Amazon Web Services](#https://aws.amazon.com/marketplace/pp/prodview-l5gv52ndg5q6i)
+- [DigitalOcean](#https://www.digitalocean.com/community/tutorials/initial-server-setup-with-debian-11)
 
 ### The first touches to the Instance
 
