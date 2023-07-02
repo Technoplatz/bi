@@ -161,7 +161,7 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
         db.getCollection('_firewall').drop();
         db.createCollection('_firewall', { 'capped': false });
         db.getCollection('_firewall').insertOne({
-            fwa_name: 'manager-allow',
+            fwa_name: 'managers-allow',
             fwa_tag: '#Managers',
             fwa_source_ip: '0.0.0.0',
             fwa_enabled: true,
@@ -172,8 +172,8 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             _modified_count: 0
         });
         db.getCollection('_firewall').insertOne({
-            fwa_name: 'admin-allow',
-            fwa_tag: '#Administrator',
+            fwa_name: 'admins-allow',
+            fwa_tag: '#Administrators',
             fwa_source_ip: '0.0.0.0',
             fwa_enabled: true,
             _created_at: new Date(),
@@ -242,8 +242,8 @@ else
             if(update_user_) {
                 print('user upserted', '${ADMIN_EMAIL}');
             }
-            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_name: 'manager-allow' }, { \$set: {
-                fwa_name: 'manager-allow',
+            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_name: 'managers-allow' }, { \$set: {
+                fwa_name: 'managers-allow',
                 fwa_tag: '#Managers',
                 fwa_source_ip: '0.0.0.0',
                 fwa_enabled: true,
@@ -253,8 +253,8 @@ else
             if(upsert_firewall_) {
                 print('firewall updated', '#Managers');
             }
-            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_name: 'admin-allow' }, { \$set: {
-                fwa_name: 'admin-allow',
+            var upsert_firewall_ = db.getCollection('_firewall').updateOne({ fwa_name: 'admins-allow' }, { \$set: {
+                fwa_name: 'admins-allow',
                 fwa_tag: '#Administrators',
                 fwa_source_ip: '0.0.0.0',
                 fwa_enabled: true,

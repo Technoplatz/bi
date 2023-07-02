@@ -347,7 +347,6 @@ class Misc:
         docstring is in progress
         """
         res_ = str(exc_)
-        self.post_notification(res_)
         return {"result": False, "msg": res_}
 
     def mongo_error_f(self, exc_):
