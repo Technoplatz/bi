@@ -37,15 +37,11 @@ Pick your preferred cloud provider and follow the instructions in the links belo
 
 ### The first touches to the Instance
 
-Many Debian instances provided in the marketplaces may not be up-to-date in terms of the latest version of the operating system or some initial resources. As soon as the instance is created it is strongly recommended that the following steps should be taken immediately.
-
-- Performing an initial update
-- Setting the Time zone
-- Installing Docker Engine
+Many Debian instances provided in the marketplaces may not be up-to-date in terms of the latest version of the operating system or some initial resources. As soon as the instance is created it is highly recommended that the following steps should be taken immediately;
 
 #### Performing an initial update
 
-Upgrade the packages that already installed and reboot the instance.
+Upgrade the packages that already installed and reboot the instance. Reconnect to the instance after rebooting is completed.
 
 ```bash
 sudo apt-get update && sudo apt-get upgrade -y
@@ -54,8 +50,6 @@ sudo apt-get update && sudo apt-get upgrade -y
 ```bash
 sudo reboot
 ```
-
-Reconnect to the instance after rebooting is completed.
 
 #### Setting the Time zone
 
@@ -71,13 +65,11 @@ List available time zones to find your location;
 timedatectl list-timezones
 ```
 
-Set the time zone;
+Set the time zone. Please note that the selected location should be the country where internal users get connected or the preferred data center is located at;
 
 ```bash
 timedatectl set-timezone Europe/Berlin
 ```
-
-Please note that the selected location should be the country where internal users get connected or the preferred data center is located at.
 
 #### Installing Docker Engine
 
@@ -105,20 +97,15 @@ signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian
 sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 ```
 
-Update the apt package index again.
+Update the apt package index again and start the installation of the latest version of Docker platform.
 
 ```bash
-sudo apt-get update
-```
-
-Start the installation of the latest version of Docker.
-
-```bash
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
+sudo apt-get update \
+&& sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
 docker-buildx-plugin docker-compose-plugin
 ```
 
-Verify that the installation is successful by running the following hello-world image. The command below downloads a test image, runs it in a container, prints a confirmation message and exits.
+Verify that the installation completed successfully by running the following hello-world image. The command below downloads a test image, runs it in a container, prints a confirmation message and exits.
 
 ```bash
 sudo docker run hello-world
