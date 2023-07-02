@@ -35,7 +35,6 @@
 echo "REPLICASET STARTED"
 
 PROC_DATE_=$(date '+%Y%m%d%H%M%S')
-PERMISSIVE_TAGS_=[`#Managers`,`#Administrators`]
 mongotlscertkeyfilepassword=$(</run/secrets/mongo_tls_keyfile_password)
 mongo_username=$(</run/secrets/mongo_username)
 mongo_password=$(</run/secrets/mongo_password)
@@ -150,7 +149,7 @@ if [[ $MONGO_INDEXOF_DB -eq "-1" ]]; then
             usr_name: '${ADMIN_NAME}',
             usr_scope: 'Administrator',
             usr_enabled: true,
-            _tags: ${PERMISSIVE_TAGS_},
+            _tags: [`#Managers`,`#Administrators`],
             _created_at: new Date(),
             _created_by: '${ADMIN_EMAIL}',
             _modified_count: 0
@@ -234,7 +233,7 @@ else
                 usr_name: '${ADMIN_NAME}',
                 usr_scope: 'Administrator',
                 usr_enabled: true,
-                _tags: ${PERMISSIVE_TAGS_},
+                _tags: [`#Managers`,`#Administrators`],
                 _modified_at: new Date(),
                 _modified_by: 'saas',
                 _modified_count: 0
