@@ -123,37 +123,7 @@ export class SignPage implements OnInit {
     },
       {}
     );
-    this.forgotForm = this.formBuilder.group({
-      email: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.email,
-          Validators.maxLength(64)]
-        )]
-    },
-      {}
-    );
     this.successForm = this.formBuilder.group({}, {});
-    this.resetForm = this.formBuilder.group({
-      password: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.minLength(8),
-          Validators.maxLength(32),
-          Validators.pattern(this.passwordpttrn_)
-        ]),
-      ],
-      tfac: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.pattern(/^\d{6}$/)
-        ])]
-    },
-      {}
-    );
     this.signinForm = this.formBuilder.group({
       email: [
         null,
@@ -200,16 +170,6 @@ export class SignPage implements OnInit {
           Validators.pattern(this.passwordpttrn_)
         ]),
       ]
-    },
-      {}
-    );
-    this.TFACForm = this.formBuilder.group({
-      tfac: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.pattern(/^\d{6}$/)
-        ])],
     },
       {}
     );

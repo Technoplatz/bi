@@ -47,7 +47,7 @@ https://www.gnu.org/licenses.
     </ion-grid>
     <form [formGroup]="resetForm" *ngIf="formtype=='reset'">
         <ion-item class="section-header" lines="none">
-            <h2>{{ 'Set Password' | translate }}</h2>
+            <h2>{{ 'Reset Password' | translate }}</h2>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Password' | translate }} <sup>
@@ -147,7 +147,7 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
             <ion-button slot="end" (click)="doSetOp('forgot')" fill="outline" size="default">
-                <span>{{ 'Set Password' | translate }}</span>
+                <span>{{ 'Reset Password' | translate }}</span>
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
@@ -185,7 +185,7 @@ https://www.gnu.org/licenses.
     </form>
     <form [formGroup]="forgotForm" *ngIf="formtype=='forgot'">
         <ion-item class="section-header" lines="none">
-            <h2>{{ 'Set Password' | translate }}</h2>
+            <h2>{{ 'Reset Password' | translate }}</h2>
         </ion-item>
         <ion-item lines="full" class="ion-margin-top">
             <ion-label position="stacked">{{ 'E-mail' | translate }}
