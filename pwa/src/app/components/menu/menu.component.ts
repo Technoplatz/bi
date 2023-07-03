@@ -47,13 +47,12 @@ export class MenuComponent implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
   public views: any = [];
-  public charts: any = [];
   public segmentsadm: any;
   public user_: any;
+  public charts: any = [];
   public charts_: any = null;
   public collections_: any = null;
   public collections: any = [];
-  public views_: any = null;
   public menutoggle: boolean = false;
 
   constructor(
@@ -65,7 +64,6 @@ export class MenuComponent implements OnInit {
 
   ngOnDestroy() {
     this.crud.charts.unsubscribe;
-    this.crud.saas.unsubscribe;
     this.crud.collections.unsubscribe;
     this.auth.user.unsubscribe;
   }

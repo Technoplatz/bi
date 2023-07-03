@@ -51,7 +51,6 @@ export class Crud {
   public views = new BehaviorSubject<any>([]);
   public charts = new BehaviorSubject<any>([]);
   public visuals = new BehaviorSubject<any>([]);
-  public saas = new BehaviorSubject(null);
   public announcements = new BehaviorSubject<any>([]);
 
   constructor(

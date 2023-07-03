@@ -34,10 +34,12 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
-        <h6>{{ 'WELCOME ABOARD' | translate }}</h6>
+        <h4>{{ 'Welcome Aboard' | translate }}</h4>
         <div *ngIf="charts.length > 0 || flashcards.length > 0">
           <!-- flashcards -->
           <div class="filler-16"></div>
+          <h4>{{ 'SHARED VIEWS' | translate }}</h4>
+          <div class="filler-10"></div>
           <div class="brz-visual-group">
             <div *ngFor="let item of flashcards; let f = index" class="flash-sq"
               [style]="'background-color:' + (item.self && item.self.chart_colors && item.self.chart_colors[0] ? item.self.chart_colors[0] : '#eee') + ' !important;'"
@@ -107,28 +109,9 @@ https://www.gnu.org/licenses.
           </div>
         </div>
 
-        <!-- COLLECTIONS -->
-        <div class="filler-8"></div>
-        <h4>{{ 'Data Collections' | translate }}</h4>
-        <div class="filler-4"></div>
-        <div *ngIf="collections.length == 0; else collist">
-          <ion-text class="pe">{{ 'NO COLLECTION FOUND' | translate }}</ion-text>
-        </div>
-        <ng-template #collist>
-          <div class="pe link">
-            <div *ngFor="let col of collections" (click)="misc.navi.next('/collection/' + col.col_id)"
-              class="dash-colls">{{
-              col.col_title }}</div>
-          </div>
-          <div class="filler-8"></div>
-        </ng-template>
-        <ion-button (click)="misc.navi.next('admin/_collection')">{{ 'Collection Studio' | translate
-          }}</ion-button>
-        <div class="filler-16"></div>
-
         <!-- RECENT ANNOUNCEMENTS -->
-        <h4>{{ 'The most recent Announcements' | translate }}</h4>
-        <div class="filler-4"></div>
+        <div class="filler-16"></div>
+        <h4>{{ 'ANNOUNCEMENTS' | translate }}</h4>
         <ion-grid *ngIf="announcements?.length > 0; else noannouncement" class="ion-no-padding data-grid">
           <ion-row>
             <ion-col size="2">
@@ -155,7 +138,7 @@ https://www.gnu.org/licenses.
             <ion-col size="4"> {{ item._tags?.join(' ') }} </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col size="12">{{ 'The latest' | translate }} {{ announcements.length }} {{ 'announcements' | translate
+            <ion-col size="12">{{ 'Last' | translate }} {{ announcements.length }} {{ 'announcements' | translate
               }}.</ion-col>
           </ion-row>
           <div class="filler-16"></div>

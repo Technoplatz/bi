@@ -64,31 +64,26 @@ export class AppComponent implements OnInit {
     private readonly sw_update: SwUpdate
   ) {
     if (this.sw_update.isEnabled) {
-      setInterval(() => {
-        this.sw_update.checkForUpdate().then(() => {
-          console.log("checking for updates...");
-        });
-      }, 60 * 1000 * 15);
       console.log("*** sw_update enabled");
+      setInterval(() => {
+        this.sw_update.checkForUpdate().then(() => { });
+      }, 60 * 1000 * 15);
       this.sw_update.versionUpdates.subscribe(evt => {
-        console.log("*** version updates subscribed", evt);
+        console.log(evt);
         switch (evt.type) {
           case "VERSION_DETECTED":
-            console.log(`*** downloading new version: ${evt.version.hash}`);
             break;
           case "VERSION_READY":
-            console.log(`*** currentVersion=[${evt.currentVersion} | latestVersion=[${evt.latestVersion}]`);
             this.storage.get("LSVERSION").then((LSVERSION: any) => {
               this.misc.version.next({ is_new_version: evt.latestVersion.hash !== LSVERSION, version: evt.latestVersion.hash });
             });
             break;
           case "VERSION_INSTALLATION_FAILED":
-            console.log(`*** installation failed '${evt.version.hash}': ${evt.error}`);
+            break;
+          case 'NO_NEW_VERSION_DETECTED':
             break;
         }
       });
-    } else {
-      console.error("*** sw_update is not enabled");
     }
     this.misc.menutoggle.subscribe((res: any) => {
       this.menutoggle = res;

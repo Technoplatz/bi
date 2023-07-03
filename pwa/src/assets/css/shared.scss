@@ -976,10 +976,15 @@ app-menu .toggler {
 }
 
 .action-button {
-  width: 100px;
+  max-width: 240px;
   overflow: hidden !important;
   font-size: 13px;
   font-weight: 600;
+  --background: var(--ion-color-dark);
+}
+
+.action-button ion-icon {
+  font-size: 24px;
 }
 
 .app-footer {
@@ -1833,7 +1838,7 @@ ion-checkbox {
 }
 
 .data-grid {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .data-grid ion-row ion-col {
