@@ -103,14 +103,6 @@ https://www.gnu.org/licenses.
                 placeholder="{{ '8+ characters; a-Z,0-9,sign' | translate }}" required>
             </ion-input>
         </ion-item>
-        <ion-item lines="full">
-            <ion-label position="stacked">{{ 'User Access Code' | translate }} <sup>
-                    <ion-icon name="star"></ion-icon>
-                </sup></ion-label>
-            <ion-input #namefocus class="ion-no-padding" formControlName="passcode" type="text" spellcheck="false"
-                autocorrect="off" required placeholder="{{ 'Ask from the Administrator' | translate }}">
-            </ion-input>
-        </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-button (click)="Signup()" size="default" class="no-hover ion-margin-end">
                 <span *ngIf="!isInProgress">{{ 'Continue' | translate }}</span>

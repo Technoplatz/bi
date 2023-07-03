@@ -1899,25 +1899,19 @@ class Crud:
                 padding_r_ = 2 * padding_
                 font_size_table_ = 13
                 styles_ = [
-                    dict(
-                        selector="th",
-                        props=[
-                            ("background", f"{background_}"),
-                            ("padding", f"{padding_}px {padding_r_}px"),
-                            ("font-size", f"{font_size_table_}px"),
-                        ],
-                    ),
-                    dict(
-                        selector="td",
-                        props=[
-                            ("background", f"{background_}"),
-                            ("padding", f"{padding_}px {padding_r_}px"),
-                            ("text-align", "right"),
-                            ("font-size", f"{font_size_table_}px"),
-                        ],
-                    ),
-                    dict(selector="table", props=[("font-size", f"{font_size_table_}px")]),
-                    dict(selector="caption", props=[("caption-side", "top")]),
+                    {"selector": "th", "props": [
+                        ("background", f"{background_}"),
+                        ("padding", f"{padding_}px {padding_r_}px"),
+                        ("font-size", f"{font_size_table_}px"),
+                    ]},
+                    {"selector": "td", "props": [
+                        ("background", f"{background_}"),
+                        ("padding", f"{padding_}px {padding_r_}px"),
+                        ("text-align", "right"),
+                        ("font-size", f"{font_size_table_}px"),
+                    ]},
+                    {"selector": "table", "props": [("font-size", f"{font_size_table_}px")]},
+                    {"selector": "caption", "props": [("caption-side", "top")]}
                 ]
 
                 pivot_html_ = pivot_table_.to_html().replace('border="1"', "")
@@ -4135,18 +4129,14 @@ class Auth:
             input_ = request.json
             email_ = bleach.clean(input_["email"])
             password_ = bleach.clean(input_["password"])
-            passcode_ = bleach.clean(input_["passcode"])
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if auth_:
-                raise APIError("account already exist")
+                raise AuthError("account already exist")
 
             user_ = Mongo().db_["_user"].find_one({"usr_id": email_, "usr_enabled": True})
             if not user_ or user_ is None:
-                raise APIError("user invitation not found")
-
-            if passcode_ != str(user_["_id"]):
-                raise APIError("invitation codes do not match")
+                raise AuthError("user not found")
 
             hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
@@ -4184,6 +4174,9 @@ class Auth:
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
+
+        except AuthError as exc:
+            return Misc().auth_error_f(exc)
 
         except APIError as exc:
             return Misc().api_error_f(exc)

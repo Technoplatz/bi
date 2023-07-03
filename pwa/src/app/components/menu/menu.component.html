@@ -71,7 +71,7 @@ https://www.gnu.org/licenses.
         <div *ngIf="collections?.length > 0; else nocollectionsfound">
           <p *ngFor="let item of collections" (click)="misc.navi.next('collection/'+ item.col_id)"
             class="clicked-item dark">
-            {{ item.col_title }}
+            {{ item?.col_title }}
           </p>
         </div>
         <ng-template #nocollectionsfound>

@@ -205,7 +205,6 @@ export class Auth {
       creds.op = "signup";
       this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
-          this.setUserOut();
           resolve(true);
         } else {
           reject(res.msg);

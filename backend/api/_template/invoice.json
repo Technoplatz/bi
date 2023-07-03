@@ -19,9 +19,21 @@
       "width": 130
     }
   },
-  "required": ["inv_dnn_no", "inv_no"],
-  "index": [["inv_dnn_no"]],
-  "unique": [["inv_dnn_no", "inv_no"]],
+  "required": [
+    "inv_dnn_no",
+    "inv_no"
+  ],
+  "index": [
+    [
+      "inv_dnn_no"
+    ]
+  ],
+  "unique": [
+    [
+      "inv_dnn_no",
+      "inv_no"
+    ]
+  ],
   "sort": {
     "_modified_at": -1
   },
@@ -29,5 +41,6 @@
   "links": [],
   "actions": [],
   "triggers": [],
-  "views": {}
+  "views": {},
+  "connectors": []
 }

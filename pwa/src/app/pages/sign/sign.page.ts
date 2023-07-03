@@ -51,7 +51,6 @@ export class SignPage implements OnInit {
   @ViewChild("emailfocussignup", { static: false }) emailfocussignup?: IonInput;
   @ViewChild("namefocus", { static: false }) namefocus?: IonInput;
   @ViewChild("passwordfocus", { static: false }) passwordfocus?: IonInput;
-  @ViewChild("passcodefocus", { static: false }) passcodefocus?: IonInput;
   @ViewChild("tfacfocus", { static: false }) tfacfocus?: IonInput;
 
   public error: string = "";
@@ -111,43 +110,6 @@ export class SignPage implements OnInit {
           Validators.required,
           Validators.pattern(/^\d{6}$/)
         ])]
-    },
-      {}
-    );
-    this.signupForm = this.formBuilder.group({
-      name: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.minLength(5),
-          Validators.maxLength(32)
-        ])
-      ],
-      email: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.email,
-          Validators.maxLength(32)
-        ])
-      ],
-      password: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.minLength(8),
-          Validators.maxLength(32),
-          Validators.pattern(this.passwordpttrn_)
-        ]),
-      ],
-      passcode: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.minLength(16),
-          Validators.maxLength(32)
-        ])
-      ]
     },
       {}
     );
@@ -237,14 +199,6 @@ export class SignPage implements OnInit {
           Validators.maxLength(32),
           Validators.pattern(this.passwordpttrn_)
         ]),
-      ],
-      passcode: [
-        null,
-        Validators.compose([
-          Validators.required,
-          Validators.minLength(16),
-          Validators.maxLength(32)
-        ])
       ]
     },
       {}
@@ -485,14 +439,13 @@ export class SignPage implements OnInit {
   }
 
   Signup() {
-    if (this.signupForm.get("email")?.valid && this.signupForm.get("name")?.valid && this.signupForm.get("password")?.valid && this.signupForm.get("passcode")?.valid) {
+    if (this.signupForm.get("email")?.valid && this.signupForm.get("name")?.valid && this.signupForm.get("password")?.valid) {
       this.isInProgress = true;
       this.success_str = "";
       this.auth.Signup({
         name: this.signupForm.get("name")?.value,
         email: this.signupForm.get("email")?.value,
-        password: this.signupForm.get("password")?.value,
-        passcode: this.signupForm.get("passcode")?.value
+        password: this.signupForm.get("password")?.value
       }).then((res: any) => {
         this.isInProgress = false;
         this.successMessage = res.msg;
