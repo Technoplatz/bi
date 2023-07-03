@@ -2023,17 +2023,9 @@ class Crud:
             structure_ = self.root_schemas_f("_collection")
 
             if Misc().permitted_user_f(user_):
-                data_ = list(
-                    Mongo()
-                    .db_["_collection"]
-                    .find(filter={}, sort=[("_updated_at", -1)])
-                )
+                data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1)]))
             else:
-                usr_tags_ = (
-                    user_["_tags"]
-                    if "_tags" in user_ and len(user_["_tags"]) > 0
-                    else []
-                )
+                usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
                 for usr_tag_ in usr_tags_:
                     filter_ = {
                         "per_tag": usr_tag_,
