@@ -289,18 +289,19 @@ export class Crud {
   getAll() {
     return new Promise((resolve, reject) => {
       this.getCharts().then(() => { }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-        reject(error);
+        console.error("*** charts", error);
       }).finally(() => {
         resolve(true);
       });
       this.getCollections().then(() => { }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-        reject(error);
+        console.error("*** collections", error);
+      }).finally(() => {
+        resolve(true);
       });
       this.getAnnouncements().then(() => { }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-        reject(error);
+        console.error("*** announcements", error);
+      }).finally(() => {
+        resolve(true);
       });
     });
   }

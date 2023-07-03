@@ -1997,7 +1997,6 @@ class Crud:
                             continue
                         if not get_view_data_f_["result"]:
                             continue
-                            # raise APIError(f"get view data error {get_view_data_f_['msg']}")
                         returned_views_.append({
                             "id": id__,
                             "collection": collection_["col_id"],

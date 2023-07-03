@@ -183,11 +183,12 @@ https://www.gnu.org/licenses.
             <ion-col *ngFor="let item of properties_ | keyvalue : orderByIndex"
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px;' : 'min-width: ' + default_width + 'px;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
-                <span class="column-title">{{ item.value.title }} <span *ngIf="searched[item.key]?.f && is_loaded"
-                    class="danger">[ F ]</span><br /> </span>
-                {{ item?.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
+                <span class="column-title">{{ item.value.title }} <span *ngIf="searched && searched[item.key] && searched[item.key].f && is_loaded"
+                    class="danger">[ F ]</span><br />
+                </span>
+                {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
               </div>
-              <div *ngIf="searched[item.key]?.actived" class="search-box">
+              <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
                 <div *ngIf="!searched[item.key].setmode">
                   <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
                   <ion-button color="light" size="small" (click)="setSort(item.key, 1)">

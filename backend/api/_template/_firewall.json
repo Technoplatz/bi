@@ -4,7 +4,7 @@
       "bsonType": "string",
       "minLength": 3,
       "maxLength": 64,
-      "pattern": "^[a-z0-9-]+$",
+      "pattern": "^[a-zA-Z0-9- ]+$",
       "title": "Rule Name",
       "description": "Rule Name",
       "width": 180
