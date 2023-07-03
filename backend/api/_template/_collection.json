@@ -34,6 +34,16 @@
       "description": "Column Prefix - 3 characters lower case",
       "width": 110
     },
+    "col_priority": {
+      "bsonType": "number",
+      "title": "Priority",
+      "description": "Sort Number",
+      "placeholder": "Priority",
+      "minimum": 0,
+      "maximum": 1000000,
+      "default": 100,
+      "width": 130
+    },
     "col_structure": {
       "bsonType": "object",
       "title": "Structure",
@@ -42,9 +52,9 @@
     }
   },
   "required": ["col_id", "col_title", "col_prefix"],
-  "index": [["col_prefix"]],
+  "index": [["col_prefix"], ["col_priority"]],
   "unique": [["col_id"]],
   "sort": {
-    "_updated_at": -1
+    "col_priority": 1
   }
 }
