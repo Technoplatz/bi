@@ -95,7 +95,8 @@
           "match": [
             {
               "key": "ser_no",
-              "value": "bar_input"
+              "value": "bar_input",
+              "prefix": "1P"
             }
           ],
           "filter": [],

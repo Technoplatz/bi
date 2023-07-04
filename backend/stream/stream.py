@@ -481,10 +481,14 @@ class Trigger():
                         item_["value"] in full_document_ and \
                         (item_["key"] in target_properties_ or item_["value"] == "_id") \
                         else None
+                    prefix__ = item_["prefix"] if "prefix" in item_ and item_["prefix"] is not None else None
 
                     if key__ and value__:
-                        match_[key__] = full_document_[value__]
-                        match_for_aggregate_[value__] = full_document_[value__]
+                        fdval_ = full_document_[value__]
+                        if prefix__:
+                            fdval_ = fdval_.removeprefix(prefix__)
+                        match_[key__] = fdval_
+                        match_for_aggregate_[value__] = fdval_
                     else:
                         continue
 
@@ -508,16 +512,20 @@ class Trigger():
 
                     match1_ = {}
                     for item_ in target_matches_:
-
                         key__ = item_["key"] if "key" in item_ else None
                         value__ = item_["value"] if \
                             "value" in item_ and \
                             item_["value"] is not None and \
-                            item_["value"] in full_document_ and\
-                            (item_["value"] in target_properties_ or item_["value"] == "_id") \
+                            item_["value"] in full_document_ and \
+                            (item_["key"] in target_properties_ or item_["value"] == "_id") \
                             else None
+                        prefix__ = item_["prefix"] if "prefix" in item_ and item_["prefix"] is not None else None
+
                         if key__ and value__:
-                            match1_[key__] = full_document_[value__]
+                            fdval_ = full_document_[value__]
+                            if prefix__:
+                                fdval_ = fdval_.removeprefix(prefix__)
+                            match1_[key__] = fdval_
                         else:
                             continue
 
