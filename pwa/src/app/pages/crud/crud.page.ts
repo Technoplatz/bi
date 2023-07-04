@@ -277,12 +277,13 @@ export class CrudPage implements OnInit {
             });
           } else {
             this.scan_result = "";
+            const iot_input_ = "bar_input";
             if (this.scan_) {
-              this.scan_result = `<div class="scan-ok">&#10003; OK ${this.crudForm.get("iot_input")?.value}<br /><span>Read at ${new Date(Date.now()).toISOString()}</span></div>`;
-              this.scanned_.unshift({ input: this.crudForm.get("iot_input")?.value, date: new Date(Date.now()).toISOString() });
+              this.scan_result = `<div class="scan-ok">&#10003; OK ${this.crudForm.get(iot_input_)?.value}<br /><span>Read at ${new Date(Date.now()).toISOString()}</span></div>`;
+              this.scanned_.unshift({ input: this.crudForm.get(iot_input_)?.value, date: new Date(Date.now()).toISOString() });
               this.storage.set("LSSCANNED", this.scanned_).then(() => {
-                this.data_["iot_input"] = "";
-                this.crudForm.get("iot_input")?.setValue(this.data_["iot_input"]);
+                this.data_[iot_input_] = "";
+                this.crudForm.get(iot_input_)?.setValue(this.data_[iot_input_]);
               });
             } else {
               this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
