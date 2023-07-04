@@ -1383,12 +1383,7 @@ class Crud:
             for field_ in fields_:
                 projection_[field_] = 1
 
-            cursor_ = (
-                Mongo()
-                .db_[data_collection_]
-                .find(filter={}, projection=projection_)
-                .limit(1000)
-            )
+            cursor_ = Mongo().db_[data_collection_].find(filter={}, projection=projection_).limit(1000)
             docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
 
             return {"result": True, "data": docs_}

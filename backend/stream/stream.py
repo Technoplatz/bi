@@ -472,13 +472,14 @@ class Trigger():
                 match_ = {}
                 match_for_aggregate_ = {}
                 target_matches_ = target_["match"]
+
                 for item_ in target_matches_:
                     key__ = item_["key"] if "key" in item_ else None
                     value__ = item_["value"] if \
                         "value" in item_ and \
                         item_["value"] is not None and \
-                        item_["value"] in full_document_ and\
-                        (item_["value"] in target_properties_ or item_["value"] == "_id") \
+                        item_["value"] in full_document_ and \
+                        (item_["key"] in target_properties_ or item_["value"] == "_id") \
                         else None
 
                     if key__ and value__:
