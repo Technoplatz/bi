@@ -1,9 +1,0 @@
-{
-  "foo_something_bool": {
-    "bsonType": "bool",
-    "title": "Is True?",
-    "description": "Is field true or not",
-    "default": false,
-    "width": 130
-  }
-}

@@ -67,9 +67,8 @@ export class AppComponent implements OnInit {
       console.log("*** sw_update enabled");
       setInterval(() => {
         this.sw_update.checkForUpdate().then(() => { });
-      }, 60 * 1000 * 15);
+      }, 60 * 1000 * 10);
       this.sw_update.versionUpdates.subscribe(evt => {
-        console.log(evt);
         switch (evt.type) {
           case "VERSION_DETECTED":
             break;

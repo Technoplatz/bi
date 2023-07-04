@@ -404,6 +404,16 @@ class Misc:
         """
         return int(datetime.today().timestamp())
 
+    def set_strip_doc_f(self, doc_):
+        """
+        docstring is in progress
+        """
+        print_("doc_", doc_)
+        for field_ in doc_:
+            if isinstance(doc_[field_], str):
+                doc_[field_] = doc_[field_].strip()
+        return doc_
+
     def get_now_f(self):
         """
         docstring is in progress
@@ -855,23 +865,11 @@ class Crud:
                     if k in doc_.keys():
                         if property_["bsonType"] == "date":
                             ln_ = 10 if doc_[k] and len(doc_[k]) == 10 else 19
-                            rgx_ = (
-                                "%Y-%m-%d"
-                                if doc_[k] and ln_ == 10
-                                else "%Y-%m-%dT%H:%M:%S"
-                            )
-                            if (
-                                doc_[k]
-                                and isinstance(doc_[k], str)
-                                and self.validate_iso8601_f(doc_[k])
-                            ):
+                            rgx_ = "%Y-%m-%d" if doc_[k] and ln_ == 10 else "%Y-%m-%dT%H:%M:%S"
+                            if (doc_[k] and isinstance(doc_[k], str) and self.validate_iso8601_f(doc_[k])):
                                 document_[k] = datetime.strptime(doc_[k][:ln_], rgx_)
                             else:
-                                document_[k] = (
-                                    datetime.strptime(doc_[k][:ln_], rgx_)
-                                    if doc_[k] is not None
-                                    else None
-                                )
+                                document_[k] = datetime.strptime(doc_[k][:ln_], rgx_) if doc_[k] is not None else None
                         elif property_["bsonType"] == "string":
                             document_[k] = str(doc_[k]) if doc_[k] is not None else doc_[k]
                         elif property_["bsonType"] in [
@@ -884,11 +882,7 @@ class Crud:
                         elif property_["bsonType"] == "decimal":
                             document_[k] = doc_[k] * 1.00 if document_[k] is not None else document_[k]
                         elif property_["bsonType"] == "bool":
-                            document_[k] = (
-                                True
-                                if document_[k] and document_[k] in [True, "true", "True", "TRUE"]
-                                else False
-                            )
+                            document_[k] = True if document_[k] and document_[k] in [True, "true", "True", "TRUE"] else False
                     else:
                         if property_["bsonType"] == "bool":
                             document_[k] = False
@@ -2023,7 +2017,7 @@ class Crud:
             structure_ = self.root_schemas_f("_collection")
 
             if Misc().permitted_user_f(user_):
-                data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1)]))
+                data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
             else:
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
                 for usr_tag_ in usr_tags_:
@@ -2595,6 +2589,8 @@ class Crud:
                 if not schemavalidate_["result"]:
                     raise APIError(schemavalidate_["msg"])
 
+            doc = Misc().set_strip_doc_f(doc)
+
             doc_ = {}
             for item in doc:
                 if item[:1] != "_" or item in Misc().get_except_underdashes():
@@ -3043,6 +3039,8 @@ class Crud:
                 doc_["tkn_token"] = inserted_ = jwt_proc_f_["jwt"]
                 doc_["tkn_secret"] = secret_
                 doc_["tkn_finder"] = token_finder_
+
+            doc_ = Misc().set_strip_doc_f(doc_)
 
             Mongo().db_[collection_].insert_one(doc_)
 
