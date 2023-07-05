@@ -96,7 +96,29 @@
             {
               "key": "ser_no",
               "value": "bar_input",
-              "prefix": "1P"
+              "prefixes": ["S", "1S"]
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "ser_proc_in",
+              "value": true
+            },
+            {
+              "key": "ser_proc_in_date",
+              "value": "$current_date"
+            }
+          ],
+          "upsert": false
+        },
+        {
+          "collection": "serial",
+          "match": [
+            {
+              "key": "ser_dnn_no",
+              "value": "bar_input",
+              "prefixes": ["16K"]
             }
           ],
           "filter": [],
@@ -158,7 +180,8 @@
           "match": [
             {
               "key": "ser_no",
-              "value": "bar_input"
+              "value": "bar_input",
+              "prefixes": ["S", "1S"]
             }
           ],
           "filter": [
@@ -168,6 +191,28 @@
               "value": true
             }
           ],
+          "set": [
+            {
+              "key": "ser_proc_out",
+              "value": true
+            },
+            {
+              "key": "ser_proc_out_date",
+              "value": "$current_date"
+            }
+          ],
+          "upsert": false
+        },
+        {
+          "collection": "serial",
+          "match": [
+            {
+              "key": "ser_dnn_no",
+              "value": "bar_input",
+              "prefixes": ["16K"]
+            }
+          ],
+          "filter": [],
           "set": [
             {
               "key": "ser_proc_out",

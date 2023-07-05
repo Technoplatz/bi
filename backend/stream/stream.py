@@ -481,12 +481,15 @@ class Trigger():
                         item_["value"] in full_document_ and \
                         (item_["key"] in target_properties_ or item_["value"] == "_id") \
                         else None
-                    prefix__ = item_["prefix"] if "prefix" in item_ and item_["prefix"] is not None else None
+                    prefixes__ = item_["prefixes"] if "prefixes" in item_ and item_["prefixes"] is not None and len(item_["prefixes"]) > 0 else None
 
                     if key__ and value__:
                         fdval_ = full_document_[value__]
-                        if prefix__:
-                            fdval_ = fdval_.removeprefix(prefix__)
+                        if prefixes__:
+                            for prefix__ in prefixes__:
+                                if fdval_[:len(prefix__)] == prefix__:
+                                    fdval_ = fdval_.removeprefix(prefix__)
+                                    break
                         match_[key__] = fdval_
                         match_for_aggregate_[value__] = fdval_
                     else:
@@ -519,12 +522,15 @@ class Trigger():
                             item_["value"] in full_document_ and \
                             (item_["key"] in target_properties_ or item_["value"] == "_id") \
                             else None
-                        prefix__ = item_["prefix"] if "prefix" in item_ and item_["prefix"] is not None else None
+                        prefixes__ = item_["prefixes"] if "prefixes" in item_ and item_["prefixes"] is not None and len(item_["prefixes"]) > 0 else None
 
                         if key__ and value__:
                             fdval_ = full_document_[value__]
-                            if prefix__:
-                                fdval_ = fdval_.removeprefix(prefix__)
+                            if prefixes__:
+                                for prefix__ in prefixes__:
+                                    if fdval_[:len(prefix__)] == prefix__:
+                                        fdval_ = fdval_.removeprefix(prefix__)
+                                        break
                             match1_[key__] = fdval_
                         else:
                             continue
