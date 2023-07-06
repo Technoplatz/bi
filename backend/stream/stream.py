@@ -554,7 +554,8 @@ class Trigger():
                         continue
 
                 filter_ = {}
-                target_filters_ = target_["filter"] if "filter" in target_ and len(target_["filter"]) > 0 else None
+                target_filters_ = target_["filter"] if "filter" in target_ and len(target_["filter"]) > 0 and not upsert_ else None
+
                 if target_filters_:
                     filter_ = self.get_filtered_f({
                         "match": target_filters_,
@@ -628,6 +629,10 @@ class Trigger():
 
                 set_["_modified_at"] = self.get_now_f()
                 set_["_modified_by"] = "_automation"
+                if op_ == "insert":
+                    set_["_created_at"] = self.get_now_f()
+                    set_["_created_by"] = "_automation"
+
                 set_["_resume_token"] = token_
 
                 print_(f">>> updating... {set_}, upsert={upsert_}")
