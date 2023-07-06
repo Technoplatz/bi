@@ -451,12 +451,14 @@ class Trigger():
                 target_collection_id_ = target_["target"].lower()
                 target_collection_ = f"{target_collection_id_}_data"
                 target_properties_ = self.properties_[target_collection_id_] if target_collection_id_ in self.properties_ else None
+                
                 print_(">>> target found", target_collection_id_)
                 if target_properties_ is None:
                     raise AppException(f"no target properties found {target_collection_id_}")
 
                 target_changes_ = target_["changes"] if "changes" in target_ and len(target_["changes"]) > 0 else None
                 if not target_changes_:
+                    print_(f"no target changes defined {target_collection_id_}")
                     raise AppException(f"no target changes defined {target_collection_id_}")
 
                 match_ = {"_id": _id}
@@ -468,6 +470,7 @@ class Trigger():
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
+                    print_(f"not full document found: {match_}")
                     continue
 
                 match_ = {}

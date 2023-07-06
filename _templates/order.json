@@ -15,6 +15,15 @@
       "description": "Order Date",
       "width": 130
     },
+    "ord_acc_no": {
+      "bsonType": "string",
+      "title": "Account No",
+      "description": "Account No",
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[0-9-]{10,11}$",
+      "width": 110
+    },
     "ord_prd_no": {
       "bsonType": "string",
       "title": "Product ID",
@@ -42,8 +51,8 @@
       "width": 160
     }
   },
-  "required": ["ord_no", "ord_order_date", "ord_prd_no"],
-  "index": [["ord_prd_no"]],
+  "required": ["ord_no", "ord_order_date", "ord_acc_no", "ord_prd_no", "ord_unit_price"],
+  "index": [["ord_prd_no"], ["ord_acc_no"], ["ord_no", "ord_prd_no"]],
   "unique": [["ord_no", "ord_prd_no"]],
   "sort": {
     "_modified_at": -1

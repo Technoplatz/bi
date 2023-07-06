@@ -203,6 +203,10 @@
               "value": "blo_order_date"
             },
             {
+              "key": "ord_acc_no",
+              "value": "blo_acc_no"
+            },
+            {
               "key": "ord_prd_no",
               "value": "blo_prd_no"
             },

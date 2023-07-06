@@ -17,30 +17,60 @@
       "maxLength": 10,
       "pattern": "^[0-9]{10,10}$",
       "width": 130
+    },
+    "inv_date": {
+      "bsonType": "date",
+      "title": "Invoice Date",
+      "description": "Invoice Date",
+      "width": 120
     }
   },
-  "required": [
-    "inv_dnn_no",
-    "inv_no"
-  ],
-  "index": [
-    [
-      "inv_dnn_no"
-    ]
-  ],
-  "unique": [
-    [
-      "inv_dnn_no",
-      "inv_no"
-    ]
-  ],
+  "required": ["inv_dnn_no", "inv_no", "inv_date"],
+  "index": [["inv_dnn_no"], ["inv_no"]],
+  "unique": [["inv_dnn_no", "inv_no"]],
   "sort": {
     "_modified_at": -1
   },
   "parents": [],
   "links": [],
   "actions": [],
-  "triggers": [],
+  "triggers": [
+    {
+      "name": "Delivery updater",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        {
+          "key": "inv_no",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_no",
+              "value": "inv_dnn_no"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "dnn_invoice_no",
+              "value": "inv_no"
+            },
+            {
+              "key": "dnn_invoice_date",
+              "value": "inv_date"
+            }
+          ],
+          "upsert": false
+        }
+      ]
+    }
+  ],
   "views": {},
   "connectors": []
 }
