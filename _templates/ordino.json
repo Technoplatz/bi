@@ -233,7 +233,7 @@
             {
               "key": "dnn_status",
               "op": "in",
-              "value": "01-StandBy,10-OnTheWay,20-OnCustoms"
+              "value": "00-Open,10-OnTheWay,20-OnCustoms"
             }
           ],
           "set": [
@@ -281,7 +281,7 @@
             {
               "key": "dnn_status",
               "op": "in",
-              "value": "01-StandBy,10-OnTheWay,20-OnCustoms"
+              "value": "00-Open,10-OnTheWay,20-OnCustoms"
             }
           ],
           "set": [

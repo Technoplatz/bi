@@ -1,6 +1,61 @@
 {
   "properties": {
-    "bck_prd_no": {
+    "blo_order_no": {
+      "bsonType": "string",
+      "title": "Order No",
+      "description": "Order Number",
+      "minLength": 10,
+      "maxLength": 10,
+      "pattern": "^[0-9]{10,10}$",
+      "width": 130
+    },
+    "blo_line_no": {
+      "bsonType": "string",
+      "title": "Line",
+      "description": "Line Number",
+      "minLength": 1,
+      "maxLength": 4,
+      "pattern": "^[0-9]{1,4}$",
+      "width": 110
+    },
+    "blo_order_date": {
+      "bsonType": "date",
+      "title": "Order Date",
+      "description": "Order Date",
+      "width": 130
+    },
+    "blo_acc_no": {
+      "bsonType": "string",
+      "title": "Account No",
+      "description": "Account No",
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[0-9-]{10,11}$",
+      "width": 110
+    },
+    "blo_acc_name": {
+      "bsonType": "string",
+      "title": "Account Name",
+      "description": "Account Name",
+      "minLength": 1,
+      "maxLength": 64,
+      "width": 140
+    },
+    "blo_po_id": {
+      "bsonType": "string",
+      "title": "Po ID",
+      "description": "Purchase Order No",
+      "minLength": 1,
+      "maxLength": 64,
+      "width": 260
+    },
+    "blo_bu_id": {
+      "bsonType": "number",
+      "title": "BU ID",
+      "description": "Business Unit Id",
+      "width": 100
+    },
+    "blo_prd_no": {
       "bsonType": "string",
       "title": "Product ID",
       "description": "Product ID",
@@ -19,7 +74,7 @@
       ],
       "width": 130
     },
-    "bck_prd_description": {
+    "blo_prd_description": {
       "bsonType": "string",
       "title": "Description",
       "description": "Product Description",
@@ -27,114 +82,68 @@
       "maxLength": 256,
       "width": 280
     },
-    "bck_ship_type": {
+    "blo_prd_group": {
+      "bsonType": "string",
+      "title": "Group",
+      "description": "Product Group",
+      "minLength": 0,
+      "maxLength": 64,
+      "width": 130
+    },
+    "blo_prd_family": {
+      "bsonType": "string",
+      "title": "Family",
+      "description": "Product Family",
+      "minLength": 0,
+      "maxLength": 64,
+      "width": 160
+    },
+    "blo_ship_type": {
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping Type",
       "enum": ["Sea", "Air", "Truck", "Railway"],
       "width": 120
     },
-    "bck_sales_doc": {
-      "bsonType": "string",
-      "title": "Sales Doc",
-      "description": "Sales Document Number",
-      "minLength": 10,
-      "maxLength": 10,
-      "pattern": "^[0-9]{10,10}$",
-      "width": 130
-    },
-    "bck_po_id": {
-      "bsonType": "string",
-      "title": "Po ID",
-      "description": "Purchase Order No",
-      "minLength": 1,
-      "maxLength": 64,
-      "width": 260
-    },
-    "bck_order_date": {
-      "bsonType": "date",
-      "title": "Order Date",
-      "description": "Order Date",
-      "width": 130
-    },
-    "bck_line_no": {
-      "bsonType": "string",
-      "title": "Line",
-      "description": "Line Number",
-      "minLength": 1,
-      "maxLength": 4,
-      "pattern": "^[0-9]{1,4}$",
-      "width": 110
-    },
-    "bck_acc_no": {
-      "bsonType": "string",
-      "title": "Account No",
-      "description": "Account No",
-      "minLength": 10,
-      "maxLength": 11,
-      "pattern": "^[0-9-]{10,11}$",
-      "width": 110
-    },
-    "bck_acc_name": {
-      "bsonType": "string",
-      "title": "Account Name",
-      "description": "Account Name",
-      "minLength": 1,
-      "maxLength": 64,
-      "width": 140
-    },
-    "bck_bu_id": {
-      "bsonType": "number",
-      "title": "BU ID",
-      "description": "Business Unit Id",
-      "width": 100
-    },
-    "bck_order_qty": {
+    "blo_order_qty": {
       "bsonType": "number",
       "title": "Order Qty",
       "description": "Order Quantity",
       "default": 1,
       "width": 130
     },
-    "bck_volume_qty": {
+    "blo_volume_qty": {
       "bsonType": "number",
       "title": "Volume Qty",
       "description": "Volume Quantity",
       "default": 1,
       "width": 130
     },
-    "bck_customer_price": {
+    "blo_unit_price": {
       "bsonType": "number",
-      "title": "Customer Price",
-      "description": "Customer Order Price",
+      "title": "Unit Price",
+      "description": "Unit Price",
       "default": 0,
       "width": 160
     },
-    "bck_customer_amount": {
+    "blo_amount": {
       "bsonType": "number",
-      "title": "Customer Amount",
-      "description": "Customer Amount",
+      "title": "Amount",
+      "description": "Amount",
       "default": 0,
       "disabled": false,
       "width": 180
     },
-    "bck_eta_date": {
+    "blo_eta_date": {
       "bsonType": "date",
       "title": "ETA Date",
       "description": "Backlog ETA Date",
       "width": 120
-    },
-    "bck_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Backlog Status",
-      "enum": ["ONS", "ONR", "Credit Block", "Future Order", "Shippable"],
-      "width": 160
     }
   },
-  "required": ["bck_acc_no", "bck_status", "bck_prd_no"],
-  "index": [["bck_acc_no"], ["bck_status"], ["bck_prd_no"], ["bck_acc_no", "bck_status"]],
-  "unique": [["bck_sales_doc", "bck_line_no"]],
+  "required": ["blo_acc_no", "blo_prd_no"],
+  "index": [["blo_acc_no"], ["blo_prd_no"], ["blo_acc_no"]],
+  "unique": [["blo_order_no", "blo_line_no"]],
   "sort": {
     "_modified_at": -1
   },
@@ -143,7 +152,7 @@
       "collection": "account",
       "match": [
         {
-          "key": "bck_acc_no",
+          "key": "blo_acc_no",
           "value": "acc_no"
         }
       ],
@@ -160,97 +169,54 @@
   "actions": [],
   "triggers": [
     {
-      "name": "Amounts updater",
+      "name": "Order creator",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "bck_volume_qty",
+          "key": "blo_unit_price",
           "op": "gte",
           "value": 0
-        },
-        {
-          "key": "bck_customer_price",
-          "op": "gte",
-          "value": 0
-        }
-      ],
-      "conditions": [
-        {
-          "key": "bck_status",
-          "op": "ne",
-          "value": "70-Delivered"
         }
       ],
       "targets": [
         {
-          "collection": "backlog",
+          "collection": "order",
           "match": [
             {
-              "key": "_id",
-              "value": "_id"
-            }
-          ],
-          "filter": [
+              "key": "ord_no",
+              "value": "blo_order_no"
+            },
             {
-              "key": "bck_status",
-              "op": "ne",
-              "value": "70-Delivered"
+              "key": "ord_prd_no",
+              "value": "blo_prd_no"
             }
           ],
+          "filter": [],
           "set": [
             {
-              "key": "bck_customer_amount",
-              "value": "bck_volume_qty * bck_customer_price"
+              "key": "ord_no",
+              "value": "blo_order_no"
+            },
+            {
+              "key": "ord_order_date",
+              "value": "blo_order_date"
+            },
+            {
+              "key": "ord_prd_no",
+              "value": "blo_prd_no"
+            },
+            {
+              "key": "ord_unit_price",
+              "value": "blo_unit_price"
             }
           ],
-          "upsert": false
+          "upsert": true
         }
       ]
     }
   ],
-  "views": {
-    "backlog-general-view": {
-      "title": "Backlog",
-      "description": "Backlog general view by Account",
-      "priority": 9000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["acc_nick_name"],
-      "data_columns": ["bck_status"],
-      "data_values": [
-        {
-          "key": "bck_sales_doc",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "chart_type": "Pie",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": false,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#b33dc6", "#87bc45", "#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#27aeef"],
-      "scheduled": false,
-      "scheduled_cron": "15 14,15,16 * * mon,tue",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
-    }
-  },
+  "views": {},
   "links": [],
   "connectors": []
 }

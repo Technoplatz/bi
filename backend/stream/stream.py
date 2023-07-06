@@ -182,7 +182,8 @@ class Trigger():
                             "on_changes_all": "on_changes_all" in trigger_ and trigger_["on_changes_all"] is True,
                             "match": cluster_["match"] if "match" in cluster_ and len(cluster_["match"]) > 0 else [],
                             "filter": cluster_["filter"] if "filter" in cluster_ and len(cluster_["filter"]) > 0 else [],
-                            "set": cluster_["set"] if "set" in cluster_ and len(cluster_["set"]) > 0 else []
+                            "set": cluster_["set"] if "set" in cluster_ and len(cluster_["set"]) > 0 else [],
+                            "upsert": "upsert" in cluster_ and cluster_["upsert"] is True
                         })
 
             if not self.triggers_:
@@ -444,7 +445,7 @@ class Trigger():
                      (ma_["op"].lower() == "nnull" and changed_[ma_["key"]] not in [None, ""])
                  )]]
             if trigger_targets_ == []:
-                raise PassException("!!! no trigger condition found")
+                raise PassException("!!! no trigger target found")
 
             for target_ in trigger_targets_:
                 target_collection_id_ = target_["target"].lower()
@@ -456,7 +457,7 @@ class Trigger():
 
                 target_changes_ = target_["changes"] if "changes" in target_ and len(target_["changes"]) > 0 else None
                 if not target_changes_:
-                    raise AppException(f"no target changes found {target_collection_id_}")
+                    raise AppException(f"no target changes defined {target_collection_id_}")
 
                 match_ = {"_id": _id}
                 conditions_filter_ = self.get_filtered_f({
@@ -472,6 +473,7 @@ class Trigger():
                 match_ = {}
                 match_for_aggregate_ = {}
                 target_matches_ = target_["match"]
+                upsert_ = target_["upsert"]
 
                 for item_ in target_matches_:
                     key__ = item_["key"] if "key" in item_ else None
@@ -562,7 +564,7 @@ class Trigger():
 
                 set_ = {}
                 sets_ = target_["set"]
-                upsert_ = "upsert" in target_ and target_["upsert"] is True
+
                 for item_ in sets_:
                     target_field_ = item_["key"]
                     value_ = str(item_["value"])
@@ -628,7 +630,7 @@ class Trigger():
                 set_["_modified_by"] = "_automation"
                 set_["_resume_token"] = token_
 
-                print_(f">>> updating... {set_}")
+                print_(f">>> updating... {set_}, upsert={upsert_}")
                 update_many_ = self.db_[target_collection_].update_many(match_, {"$set": set_}, upsert=upsert_)
                 count_ = update_many_.matched_count
                 print_(">>> updated :)", {"coll": target_collection_, "match": match_, "set": set_, "count": count_})
