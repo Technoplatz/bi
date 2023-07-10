@@ -4,23 +4,25 @@
       "bsonType": "string",
       "title": "Ordino No",
       "description": "Main Ordino Number",
-      "pattern": "^[0-9A-Z-]{10,20}$",
-      "minLength": 10,
+      "minLength": 1,
       "maxLength": 20,
+      "pattern": "^[0-9A-Z-]{1,20}$",
       "width": 170
     },
     "odi_sub_no": {
       "bsonType": "string",
       "title": "Ordino Sub No",
       "description": "Ordino Sub Number",
-      "pattern": "^[0-9A-Z-]{6,20}$",
       "minLength": 6,
-      "maxLength": 20
+      "maxLength": 20,
+      "pattern": "^[0-9A-Z-]{6,20}$",
+      "width": 170
     },
     "odi_date": {
       "bsonType": "date",
       "title": "Ordino Date",
-      "description": "Ordino Opening Date"
+      "description": "Ordino Opening Date",
+      "width": 120
     },
     "odi_from": {
       "bsonType": "string",
@@ -34,7 +36,7 @@
       "title": "Customs",
       "description": "Customs Location",
       "enum": ["AHL", "Halkalı", "Ambarlı"],
-      "width": 120
+      "width": 110
     },
     "odi_ship_type": {
       "bsonType": "string",
@@ -47,8 +49,8 @@
       "bsonType": "bool",
       "title": "Arrived",
       "description": "Ordino Arrival Date",
-      "width": 130,
-      "default": false
+      "default": false,
+      "width": 100
     },
     "odi_arrived_date": {
       "bsonType": "date",
@@ -86,6 +88,13 @@
     {
       "collection": "delivery",
       "get": "dnn_no",
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
       "set": [
         {
           "key": "dnn_odi_no",
@@ -97,13 +106,27 @@
         },
         {
           "key": "dnn_status",
-          "value": "$DN_STATUS_20"
+          "value": "10-OnTheWay"
         }
-      ]
+      ],
+      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
+      "notification": {
+        "notify": true,
+        "subject": "Ordino Attached",
+        "body": "Hi,<br /><br />We would like to let you know that attached DNs has been linked to an ordino.",
+        "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name"
+      }
     },
     {
       "collection": "delivery",
       "get": "dnn_bill_no",
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
       "set": [
         {
           "key": "dnn_odi_no",
@@ -115,7 +138,7 @@
         },
         {
           "key": "dnn_status",
-          "value": "$DN_STATUS_20"
+          "value": "10-OnTheWay"
         }
       ]
     }

@@ -451,7 +451,7 @@ class Trigger():
                 target_collection_id_ = target_["target"].lower()
                 target_collection_ = f"{target_collection_id_}_data"
                 target_properties_ = self.properties_[target_collection_id_] if target_collection_id_ in self.properties_ else None
-                
+
                 print_(">>> target found", target_collection_id_)
                 if target_properties_ is None:
                     raise AppException(f"no target properties found {target_collection_id_}")
@@ -632,7 +632,7 @@ class Trigger():
 
                 set_["_modified_at"] = self.get_now_f()
                 set_["_modified_by"] = "_automation"
-                if op_ == "insert":
+                if op_ in ["insert", "upsert"]:
                     set_["_created_at"] = self.get_now_f()
                     set_["_created_by"] = "_automation"
 

@@ -103,9 +103,9 @@
       "bsonType": "string",
       "title": "Ordino No",
       "description": "Main Ordino Number",
-      "minLength": 10,
-      "maxLength": 24,
-      "pattern": "^[0-9A-Z-]{10,20}$",
+      "minLength": 1,
+      "maxLength": 20,
+      "pattern": "^[0-9A-Z-]{1,20}$",
       "width": 170
     },
     "dnn_odi_sub_no": {
@@ -215,17 +215,17 @@
       "decimals": 2,
       "disabled": false
     },
-    "dnn_customer_price": {
+    "dnn_order_price": {
       "bsonType": "number",
-      "title": "Customer Price",
-      "description": "Customer Order Price",
+      "title": "Order Price",
+      "description": "Order Price",
       "default": 0,
       "width": 160
     },
-    "dnn_customer_amount": {
+    "dnn_order_amount": {
       "bsonType": "number",
-      "title": "Customer Amount",
-      "description": "Customer Amount",
+      "title": "Order Amount",
+      "description": "Order Amount",
       "default": 0,
       "disabled": false,
       "decimals": 2,
@@ -313,8 +313,8 @@
       "filter": [
         {
           "key": "man_status",
-          "op": "in",
-          "value": "00-Open,10-InProgress"
+          "op": "eq",
+          "value": "10-OnCustomsProcess"
         }
       ],
       "get": ["man_no", "man_opening_date"]
@@ -412,8 +412,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "in",
-          "value": "00-Open,10-OnTheWay"
+          "op": "eq",
+          "value": "00-Open"
         }
       ],
       "set": [
@@ -576,8 +576,8 @@
           ],
           "set": [
             {
-              "key": "dnn_customer_amount",
-              "value": "dnn_qty * dnn_customer_price"
+              "key": "dnn_order_amount",
+              "value": "dnn_qty * dnn_order_price"
             }
           ],
           "upsert": false
@@ -593,8 +593,8 @@
           "filter": [
             {
               "key": "man_status",
-              "op": "in",
-              "value": "00-Open,10-OnCustomsProcess"
+              "op": "eq",
+              "value": "10-OnCustomsProcess"
             }
           ],
           "set": [

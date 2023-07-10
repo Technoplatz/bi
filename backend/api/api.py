@@ -555,10 +555,14 @@ class Misc:
         """
         setto__ = None
         try:
-            if key_ in properties_:
-                if not setto_:
-                    raise APIError("missing key name")
-                setto__ = data_[setto_] if setto_ in data_ else None
+            if key_ not in properties_:
+                raise APIError("missing set key")
+
+            if not setto_:
+                raise APIError("missing set to")
+
+            if setto_ in data_:
+                setto__ = data_[setto_]
             elif setto_[:1] == "$":
                 forward_ = str(setto_[1:]).upper()
                 if not forward_:
@@ -1403,6 +1407,12 @@ class Crud:
             data_ = obj_["data"] if "data" in obj_ else None
             linked_ = obj_["linked"] if "linked" in obj_ and len(obj_["linked"]) > 0 else None
             user_ = obj_["user"] if "user" in obj_ else None
+            col_id_ = link_["collection"] if "collection" in link_ else None
+            get_ = link_["get"] if "get" in link_ else None
+            set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
+            match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
+            usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
+            tags_ = link_["_tags"] if "_tags" in link_ and len(link_["_tags"]) > 0 else None
 
             if link_ is None:
                 raise APIError("link info is missing")
@@ -1416,11 +1426,8 @@ class Crud:
             if user_ is None:
                 raise APIError("user is missing")
 
-            col_id_ = link_["collection"] if "collection" in link_ else None
-            get_ = link_["get"] if "get" in link_ else None
-            set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
-            match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
-            usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
+            if not tags_:
+                raise AppException("no link tags found")
 
             if col_id_ is None:
                 raise APIError("link collection is missing")
@@ -1435,7 +1442,7 @@ class Crud:
                 raise APIError("link match is missing")
 
             if usr_id_ is None:
-                raise APIError("user id is missing")
+                raise APIError("link user id is missing")
 
             get_properties_ = self.get_properties_f(col_id_)
             if not get_properties_["result"]:
@@ -1463,17 +1470,42 @@ class Crud:
             filter0_[get_] = {"$in": linked_}
             filter1_ = self.get_filtered_f({
                 "match": match_,
-                "properties": target_properties_
+                "properties": target_properties_,
+                "data": data_
             })
             filter_ = {"$and": [filter0_, filter1_]}
 
             update_many_ = Mongo().db_[data_collection_].update_many(filter_, {"$set": setc_})
             count_ = update_many_.matched_count
+            if count_ == 0:
+                raise AppException("no record found to get linked")
+
+            notification_ = link_["notification"] if "notification" in link_ else None
+            notify_ = notification_ and "notify" in notification_ and notification_["notify"] is True
+
+            if notify_:
+                subject_ = notification_["subject"] if "subject" in notification_ else "Link Completed"
+                fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
+                if not fields_:
+                    raise AppException("no fields field found in link")
+                body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
+                type_ = "csv"
+                file_ = f"/cron/link-{Misc().get_timestamp_f()}.{type_}"
+                query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
+                command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={data_collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                call(command_, shell=True)
+                files_ = [{"filename": file_, "filetype": type_}]
+                email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                if not email_sent_["result"]:
+                    raise APIError(email_sent_["msg"])
 
             return {"result": True, "data": setc_, "count": count_}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
+
+        except AppException as exc:
+            return Misc().app_exception_f(exc)
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -1488,96 +1520,70 @@ class Crud:
         try:
             match_ = obj["match"]
             properties_ = obj["properties"] if "properties" in obj else None
+            data_ = obj["data"] if "data" in obj else None
             fand_ = []
             filtered_ = {}
             if properties_:
                 for mat_ in match_:
                     if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
                         fres_ = None
-                        typ = (
-                            properties_[mat_["key"]]["bsonType"]
-                            if mat_["key"] in properties_
-                            else "string"
-                        )
+                        typ = properties_[mat_["key"]]["bsonType"] if mat_["key"] in properties_ else "string"
+                        value_ = mat_["value"]
+                        if data_ and value_ in data_ and data_[value_] is not None:
+                            value_ = data_[value_]
                         if mat_["op"] in ["eq", "contains"]:
                             if typ in ["number", "int", "decimal"]:
-                                fres_ = float(mat_["value"])
+                                fres_ = float(value_)
                             elif typ == "bool":
-                                fres_ = bool(mat_["value"])
+                                fres_ = bool(value_)
                             elif typ == "date":
-                                fres_ = datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
+                                fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
                             else:
-                                fres_ = {"$regex": mat_["value"], "$options": "i"} if mat_["value"] else {"$regex": "", "$options": "i"}
+                                fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
                         elif mat_["op"] in ["ne", "nc"]:
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$not": {"$eq": float(mat_["value"])}}
+                                fres_ = {"$not": {"$eq": float(value_)}}
                             elif typ == "bool":
-                                fres_ = {"$not": {"$eq": bool(mat_["value"])}}
+                                fres_ = {"$not": {"$eq": bool(value_)}}
                             elif typ == "date":
-                                fres_ = {
-                                    "$not": {
-                                        "$eq": datetime.strptime(
-                                            mat_["value"][:10], "%Y-%m-%d"
-                                        )
-                                    }
-                                }
+                                fres_ = {"$not": {"$eq": datetime.strptime(value_[:10], "%Y-%m-%d")}}
                             else:
-                                fres_ = (
-                                    {"$not": {"$regex": mat_["value"], "$options": "i"}}
-                                    if mat_["value"]
-                                    else {"$not": {"$regex": "", "$options": "i"}}
-                                )
+                                fres_ = {"$not": {"$regex": value_, "$options": "i"}} if value_ else {"$not": {"$regex": "", "$options": "i"}}
                         elif mat_["op"] in ["in", "nin"]:
-                            separated_ = re.split(",", mat_["value"])
-                            list_ = (
-                                [s.strip() for s in separated_]
-                                if mat_["key"] != "_id"
-                                else [ObjectId(s.strip()) for s in separated_]
-                            )
+                            separated_ = re.split(",", value_)
+                            list_ = [s.strip() for s in separated_] if mat_["key"] != "_id" else [ObjectId(s.strip()) for s in separated_]
                             if mat_["op"] == "in":
                                 fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
                             else:
-                                fres_ = {
-                                    "$nin": list_
-                                    if typ != "number"
-                                    else list(map(float, list_))
-                                }
+                                fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
                         elif mat_["op"] == "gt":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$gt": float(mat_["value"])}
+                                fres_ = {"$gt": float(value_)}
                             elif typ == "date":
-                                fres_ = {
-                                    "$gt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$gt": mat_["value"]}
+                                fres_ = {"$gt": value_}
                         elif mat_["op"] == "gte":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$gte": float(mat_["value"])}
+                                fres_ = {"$gte": float(value_)}
                             elif typ == "date":
-                                fres_ = {
-                                    "$gte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$gte": mat_["value"]}
+                                fres_ = {"$gte": value_}
                         elif mat_["op"] == "lt":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$lt": float(mat_["value"])}
+                                fres_ = {"$lt": float(value_)}
                             elif typ == "date":
-                                fres_ = {
-                                    "$lt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$lt": mat_["value"]}
+                                fres_ = {"$lt": value_}
                         elif mat_["op"] == "lte":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$lte": float(mat_["value"])}
+                                fres_ = {"$lte": float(value_)}
                             elif typ == "date":
-                                fres_ = {
-                                    "$lte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
-                                }
+                                fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$lte": mat_["value"]}
+                                fres_ = {"$lte": value_}
                         elif mat_["op"] == "true":
                             fres_ = {"$eq": True}
                         elif mat_["op"] == "false":
@@ -2854,17 +2860,10 @@ class Crud:
                     raise AppException("no notify field found in notification")
                 notify_ = notification_["notify"] is True
                 subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
-                if not subject_:
-                    raise AppException("no subject field found in notification")
-
                 body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
-                if not body_:
-                    raise AppException("no body field found in notification")
-
                 fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
                 if not fields_:
                     raise AppException("no fields field found in notification")
-
                 filter_ = notification_["filter"] if "filter" in notification_ and len(notification_["filter"]) > 0 else None
                 if filter_:
                     get_notification_filtered_ = self.get_filtered_f({
