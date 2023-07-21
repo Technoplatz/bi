@@ -143,7 +143,7 @@ export class CollectionPage implements OnInit {
     });
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "tree";
+    this.jeoptions.mode = "code";
     this.jeoptions.statusBar = true;
     this.jeoptions.enableSort = false;
     this.jeoptions.expandAll = false;
@@ -220,7 +220,7 @@ export class CollectionPage implements OnInit {
               limit: this.limit
             }).then((res: any) => {
               if (res.structure && res.structure.properties) {
-                this.editor?.setMode("tree");
+                this.editor?.setMode("code");
                 this.doBuildSchema(res.structure);
                 this.data = res.data;
                 this.structure_ori_ = res.structure;
@@ -508,7 +508,7 @@ export class CollectionPage implements OnInit {
         this.structured_ = null;
       });
     } else {
-      this.editor.setMode("tree");
+      this.editor.setMode("code");
       this.jeopen = true;
       this.schemevis = "show";
       this.editor.focus();
@@ -525,10 +525,56 @@ export class CollectionPage implements OnInit {
     this.doSetSchemaKey(key);
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
-    this.editor.setMode("tree");
+    this.editor.setMode("code");
     this.jeopen = true;
     this.schemevis = "show";
     this.editor.focus();
+  }
+
+  doSaveView() {
+    this.alert.create({
+      cssClass: "my-custom-class",
+      subHeader: "Save Filter as View",
+      message: "Please enter a view name to save the current filter.",
+      inputs: [
+        {
+          name: "viewid",
+          id: "viewid",
+          value: null,
+          type: "text",
+          placeholder: "Enter a view name"
+        }
+      ],
+      buttons: [
+        {
+          text: "Cancel",
+          role: "cancel",
+          cssClass: "primary",
+          handler: () => {
+            console.warn("Confirm cancel");
+          }
+        }, {
+          text: "SAVE VIEW",
+          handler: (data: any) => {
+            console.log("filter", this.filter);
+            this.misc.apiCall("/crud", {
+              op: "saveview",
+              collection: this.id,
+              filter: this.filter,
+              viewid: data.viewid
+            }).then(() => {
+              this.RefreshData(0).then(() => { });
+            }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+            });
+          }
+        }
+      ]
+    }).then((alert: any) => {
+      alert.present();
+      const viewid: HTMLElement = document.getElementById("viewid")!;
+      setTimeout(() => viewid.focus(), 600);
+    });
   }
 
   doSaveSchema() {
@@ -539,6 +585,7 @@ export class CollectionPage implements OnInit {
       schema_key: this.schema_key,
       structure: this.structured_ ? this.structured_ : this.structure
     }).then(() => {
+      this.crud.getAll().then(() => { });
       this.RefreshData(0).then(() => {
         this.jeopen = false;
         this.schemevis = "hide"

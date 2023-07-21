@@ -468,7 +468,7 @@ class Misc:
 
             find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
             if not find_:
-                raise AuthError("token not found")
+                raise AuthError("api token is not defined")
             jwt_secret_ = find_["tkn_secret"]
 
             options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
@@ -1174,9 +1174,7 @@ class Crud:
             df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
 
             # REMOVING NANS
-            df_.replace(
-                [np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True
-            )
+            df_.replace([np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True)
 
             # SETTING THE DEFAULTS
             df_["_created_at"] = Misc().get_now_f()
@@ -1532,8 +1530,10 @@ class Crud:
                         if data_ and value_ in data_ and data_[value_] is not None:
                             value_ = data_[value_]
                         if mat_["op"] in ["eq", "contains"]:
-                            if typ in ["number", "int", "decimal"]:
+                            if typ in ["number", "decimal", "float"]:
                                 fres_ = float(value_)
+                            elif typ == "int":
+                                fres_ = int(value_)
                             elif typ == "bool":
                                 fres_ = bool(value_)
                             elif typ == "date":
@@ -1541,8 +1541,10 @@ class Crud:
                             else:
                                 fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
                         elif mat_["op"] in ["ne", "nc"]:
-                            if typ in ["number", "decimal"]:
+                            if typ in ["number", "decimal", "float"]:
                                 fres_ = {"$not": {"$eq": float(value_)}}
+                            elif typ == "int":
+                                fres_ = {"$not": {"$eq": int(value_)}}
                             elif typ == "bool":
                                 fres_ = {"$not": {"$eq": bool(value_)}}
                             elif typ == "date":
@@ -1557,29 +1559,37 @@ class Crud:
                             else:
                                 fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
                         elif mat_["op"] == "gt":
-                            if typ in ["number", "decimal"]:
+                            if typ in ["number", "decimal", "float"]:
                                 fres_ = {"$gt": float(value_)}
+                            elif typ == "int":
+                                fres_ = {"$gt": int(value_)}
                             elif typ == "date":
                                 fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
                                 fres_ = {"$gt": value_}
                         elif mat_["op"] == "gte":
-                            if typ in ["number", "decimal"]:
+                            if typ in ["number", "decimal", "float"]:
                                 fres_ = {"$gte": float(value_)}
+                            elif typ == "int":
+                                fres_ = {"$gte": int(value_)}
                             elif typ == "date":
                                 fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
                                 fres_ = {"$gte": value_}
                         elif mat_["op"] == "lt":
-                            if typ in ["number", "decimal"]:
+                            if typ in ["number", "decimal", "float"]:
                                 fres_ = {"$lt": float(value_)}
+                            elif typ == "int":
+                                fres_ = {"$lt": int(value_)}
                             elif typ == "date":
                                 fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
                                 fres_ = {"$lt": value_}
                         elif mat_["op"] == "lte":
-                            if typ in ["number", "decimal"]:
+                            if typ in ["number", "decimal", "float"]:
                                 fres_ = {"$lte": float(value_)}
+                            elif typ == "int":
+                                fres_ = {"$lte": int(value_)}
                             elif typ == "date":
                                 fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
@@ -1762,18 +1772,27 @@ class Crud:
 
             groupby_ = []
             if vie_visual_style_ == "Line":
-                if data_columns_0_ in df_.columns:
-                    groupby_.append(data_columns_0_)
-                if data_index_0_ in df_.columns:
-                    groupby_.append(data_index_0_)
+                groupby_.append(data_columns_0_) if data_columns_0_ and data_columns_0_ in df_.columns else None
+                groupby_.append(data_index_0_) if data_index_0_ and data_index_0_ in df_.columns else None
+                # if data_columns_0_ in df_.columns:
+                #     groupby_.append(data_columns_0_)
+                # if data_index_0_ in df_.columns:
+                #     groupby_.append(data_index_0_)
             else:
-                if data_index_0_ in df_.columns:
-                    groupby_.append(data_index_0_)
-                if data_columns_0_ in df_.columns:
-                    groupby_.append(data_columns_0_)
+                groupby_.append(data_index_0_) if data_index_0_ and data_index_0_ in df_.columns else None
+                groupby_.append(data_columns_0_) if data_columns_0_ and data_columns_0_ in df_.columns else None
+
+                # if data_index_0_ in df_.columns:
+                #     groupby_.append(data_index_0_)
+                # if data_columns_0_ in df_.columns:
+                #     groupby_.append(data_columns_0_)
 
             df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
-            df_grp_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
+
+            # df_grp_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
+
+            dtypes_ = list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns)
+            df_grp_ = df_.groupby(dtypes_, as_index=False).sum() if len(dtypes_) > 0 else None
 
             count_ = None
             sum_ = None
@@ -1786,21 +1805,11 @@ class Crud:
                 count_ = len(df_)
                 if count_ > 0 and data_values_0_k_ in df_.columns:
                     count_ = int(len(df_[data_values_0_k_]))
-                    sum_ = float(
-                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").sum()
-                    )
-                    unique_ = float(
-                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").nunique()
-                    )
-                    mean_ = float(
-                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").mean()
-                    )
-                    stdev_ = float(
-                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").std()
-                    )
-                    var_ = float(
-                        pd.to_numeric(df_[data_values_0_k_], errors="coerce").var()
-                    )
+                    sum_ = float(pd.to_numeric(df_[data_values_0_k_], errors="coerce").sum())
+                    unique_ = float(pd.to_numeric(df_[data_values_0_k_], errors="coerce").nunique())
+                    mean_ = float(pd.to_numeric(df_[data_values_0_k_], errors="coerce").mean())
+                    stdev_ = float(pd.to_numeric(df_[data_values_0_k_], errors="coerce").std())
+                    var_ = float(pd.to_numeric(df_[data_values_0_k_], errors="coerce").var())
 
                 if len(groupby_) > 0:
                     df_ = df_.groupby(groupby_, as_index=False).sum() if data_values_0_v_ == "sum" else df_.groupby(groupby_, as_index=False).count()
@@ -1976,26 +1985,29 @@ class Crud:
 
             returned_views_ = []
             for collection_ in collections_:
-                views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
-                if views_:
-                    for view_ in views_:
-                        id__ = view_["k"]
-                        view__ = view_["v"]
-                        get_view_data_f_ = self.get_view_data_f(user_, id__, source_)
-                        if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
-                            continue
-                        if not get_view_data_f_["result"]:
-                            continue
-                        returned_views_.append({
-                            "id": id__,
-                            "collection": collection_["col_id"],
-                            "properties": get_view_data_f_["properties"],
-                            "self": view__,
-                            "data": get_view_data_f_["data"],
-                            "series": get_view_data_f_["series"],
-                            "pivot": get_view_data_f_["pivot"],
-                            "stats": get_view_data_f_["stats"]
-                        })
+                views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else []
+
+                for view_ in views_:
+                    id__ = view_["k"]
+                    view__ = view_["v"]
+                    get_view_data_f_ = self.get_view_data_f(user_, id__, source_)
+
+                    if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
+                        continue
+
+                    if not get_view_data_f_["result"]:
+                        continue
+
+                    returned_views_.append({
+                        "id": id__,
+                        "collection": collection_["col_id"],
+                        "properties": get_view_data_f_["properties"],
+                        "self": view__,
+                        "data": get_view_data_f_["data"],
+                        "series": get_view_data_f_["series"],
+                        "pivot": get_view_data_f_["pivot"],
+                        "stats": get_view_data_f_["stats"]
+                    })
 
             return {"result": True, "views": returned_views_}
 
@@ -2464,8 +2476,8 @@ class Crud:
         try:
             user_ = obj["userindb"] if "userindb" in obj else None
             col_id_ = obj["collection"]
-            view_ = obj["view"]
-            view_id_ = obj["id"]
+            filter_ = obj["filter"]
+            view_id_ = obj["viewid"]
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             _tags = user_["_tags"]
 
@@ -2481,21 +2493,48 @@ class Crud:
             doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
             if not doc_:
                 raise APIError("collection not found")
+
+            view_ = {
+                "title": "Saved View",
+                "description": "Saved view description",
+                "priority": 1000,
+                "enabled": True,
+                "dashboard": False,
+                "data_filter": filter_,
+                "data_sort": {"_modified_at": -1},
+                "data_excluded": [],
+                "data_index": [],
+                "data_columns": [],
+                "data_values": [],
+                "data_json": True,
+                "data_excel": True,
+                "data_csv": True,
+                "pivot": True,
+                "pivot_totals": True,
+                "chart": True,
+                "chart_type": "Stacked Vertical Bar",
+                "chart_label": True,
+                "chart_gradient": True,
+                "chart_grid": True,
+                "chart_legend": False,
+                "chart_xaxis": True,
+                "chart_xaxis_label": False,
+                "chart_yaxis": True,
+                "chart_yaxis_label": False,
+                "chart_colors": [],
+                "scheduled": False,
+                "scheduled_cron": "15 14,15,16 * * mon,tue",
+                "scheduled_tz": TZ_,
+                "_tags": [
+                    "#Managers",
+                    "#Administrators"
+                ]
+            }
             doc_["col_structure"]["views"][view_id_] = view_
-            structure_ = doc_["col_structure"]
-
-            schema_ext_validate_f_ = self.schema_ext_validate_f(structure_, view_id_)
-            if not schema_ext_validate_f_["result"]:
-                raise APIError(schema_ext_validate_f_["msg"])
-
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = email_
 
             Mongo().db_["_collection"].update_one({"col_id": col_id_}, {"$set": doc_})
-
-            func_ = self.crudschema_validate_f({"collection": f"{col_id_}_data", "structure": structure_})
-            if not func_["result"]:
-                raise APIError(func_["msg"])
 
             Misc().log_f({
                 "type": "Info",
@@ -4047,16 +4086,16 @@ class Auth:
         try:
             api_key_ = bleach.clean(input_["api_key"]) if "api_key" in input_ else None
             if not api_key_ or api_key_ is None:
-                raise APIError("api key must be provided")
+                raise AuthError("api key must be provided")
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": api_key_})
             if not auth_:
-                raise APIError("not authenticated")
+                raise AuthError("not authenticated")
             user_id_ = auth_["aut_id"]
 
             user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
             if not user_:
-                raise APIError("user not found for api")
+                raise APIError("user not found to validate")
 
             firewall_ = self.firewall_f(user_)
             if not firewall_["result"]:
@@ -4069,6 +4108,9 @@ class Auth:
 
         except APIError as exc:
             return Misc().api_error_f(exc)
+
+        except AuthError as exc:
+            return Misc().auth_error_f(exc)
 
         except Exception as exc:
             return Misc().exception_f(exc)
@@ -4809,7 +4851,7 @@ def get_data_f(id_):
         else:
             x_api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else None
             if not x_api_key_:
-                raise AuthError({"result": False, "msg": "X-Api-Key is missing in header"})
+                raise AuthError({"result": False, "msg": "Missing X-Api-Key"})
             user_validate_ = Auth().user_validate_by_api_key_f({"api_key": x_api_key_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_)

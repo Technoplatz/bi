@@ -122,6 +122,10 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}
               </div>
+              <div (click)="doSaveView()" class="data-sq-button">
+                <ion-icon name="save-outline"></ion-icon><br />
+                {{ 'Save' | translate }}
+              </div>
               <div *ngIf="is_crud" (click)="doShowSchema()" class="data-sq-button">
                 <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
                   <ion-img src="../../../assets/icon/json-code.svg"></ion-img>

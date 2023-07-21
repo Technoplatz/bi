@@ -51,7 +51,7 @@
       "minLength": 10,
       "maxLength": 10,
       "pattern": "^[0-9]{10,10}$",
-      "width": 130
+      "width": 110
     },
     "dnn_acc_no": {
       "bsonType": "string",
@@ -91,7 +91,7 @@
       "minLength": 10,
       "maxLength": 10,
       "pattern": "^[0-9]{10,10}$",
-      "width": 130
+      "width": 120
     },
     "dnn_bu_id": {
       "bsonType": "number",
@@ -119,7 +119,7 @@
     "dnn_man_no": {
       "bsonType": "string",
       "title": "Manifest No",
-      "description": "Customs Manifest Number",
+      "description": "Manifest Number",
       "minLength": 18,
       "maxLength": 20,
       "width": 150
@@ -278,6 +278,9 @@
   "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_prd_no"], ["dnn_acc_no", "dnn_status"], ["dnn_shp_id"]],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
+    "dnn_status": 1,
+    "dnn_no": 1,
+    "dnn_line_no": 1,
     "_modified_at": -1
   },
   "parents": [
@@ -295,9 +298,9 @@
       ],
       "filter": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "00-Open,10-OnTheWay,20-Arrived"
+          "key": "odi_completed",
+          "op": "eq",
+          "value": false
         }
       ],
       "get": ["odi_no", "odi_sub_no", "odi_customs"]

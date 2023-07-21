@@ -451,7 +451,7 @@
             {
               "key": "man_status",
               "op": "in",
-              "value": "00-Open,10-OnCustomsProcess"
+              "value": "10-OnCustomsProcess"
             }
           ],
           "set": [
