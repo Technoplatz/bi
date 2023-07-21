@@ -368,13 +368,9 @@ ion-note {
   margin-top: 3px !important;
 }
 
-.pane-sq-button .danger {
-  color: var(--ion-color-danger) !important;
-}
-
 .data-sq-container {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   margin-bottom: 4px;
 }
 
@@ -400,11 +396,11 @@ ion-note {
   font-weight: 600;
   cursor: pointer;
   border-radius: 0px;
-  background-color: var(--ion-color-primary);
-  color: var(--ion-color-white);
+  background-color: var(--ion-color-light);
+  color: var(--ion-color-dark);
   overflow: hidden;
-  flex-basis: 82px;
-  min-width: 86px;
+  flex-basis: 72px;
+  min-width: 72px;
   flex-grow: 0;
 }
 
@@ -413,22 +409,22 @@ ion-note {
 }
 
 .data-sq-button.danger {
-  background-color: var(--ion-color-danger);
-  color: var(--ion-color-white) !important;
+  background-color: var(--ion-color-warning);
+  color: var(--ion-color-dark) !important;
 }
 
 .data-sq-button ion-icon {
-  width: 26px !important;
-  height: 26px !important;
+  width: 20px !important;
+  height: 20px !important;
   margin-bottom: 8px !important;
 }
 
 .data-sq-button ion-img {
-  width: 28px !important;
-  height: 28px !important;
+  width: 20px !important;
+  height: 20px !important;
   margin: auto;
   margin-top: 1px !important;
-  margin-bottom: 8px !important;
+  margin-bottom: 10px !important;
 }
 
 .data-sq-button.disabled {
@@ -1376,11 +1372,20 @@ sup {
 }
 
 .schema-card-container {
+  margin-top: 8px;
   margin-bottom: 4px;
   gap: 4px !important;
   display: flex;
   justify-content: flex-start;
   align-items: center;
+}
+
+.schema-card-container span {
+  color: var(--ion-color-primary);
+  cursor: pointer;
+  margin-right: 5px;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 .schema-card-container ion-card {
@@ -1552,7 +1557,7 @@ sup {
   display: flex !important;
   flex-flow: column;
   height: calc(90vh - 400px);
-  margin-top: -20px;
+  margin-top: 8px;
   margin-bottom: 8px;
   padding: 0px;
 }

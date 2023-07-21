@@ -36,9 +36,8 @@ https://www.gnu.org/licenses.
       <ion-col *ngIf="is_initialized; else dataloading" class="console-right">
         <h6>{{ header | translate }}</h6>
         <h1>{{ subheader }}</h1>
-        <h6>{{ description }}</h6>
         <div class="filler-10"></div>
-        <div *ngIf="id=='_collection'; else schemas" class="template-card-container">
+        <div *ngIf="id=='_collection'" class="template-card-container">
           <ion-card class="single-coll">
             <ion-icon name="rocket-outline" color="primary"></ion-icon>
             <ion-card-header>
@@ -71,19 +70,6 @@ https://www.gnu.org/licenses.
             </ion-card-content>
           </ion-card>
         </div>
-        <ng-template #schemas>
-          <div *ngIf="is_crud" class="schema-card-container">
-            <ion-card *ngFor="let item of schema_ | keyvalue" (click)="doShowSchemaKey(item.key)">
-              <ion-card-header>
-                <ion-card-title>{{ item.value.title }}</ion-card-title>
-                <ion-card-subtitle>{{ item.value.description | translate }}</ion-card-subtitle>
-              </ion-card-header>
-              <ion-card-content>
-                {{ item.value.count }}
-              </ion-card-content>
-            </ion-card>
-          </div>
-        </ng-template>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
@@ -122,37 +108,41 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}
               </div>
-              <div (click)="doSaveView()" class="data-sq-button">
+              <div *ngIf="!jeopen" (click)="doSaveView()" class="data-sq-button">
                 <ion-icon name="save-outline"></ion-icon><br />
                 {{ 'Save' | translate }}
               </div>
-              <div *ngIf="is_crud" (click)="doShowSchema()" class="data-sq-button">
-                <div *ngIf="!jeopen; else nojeopen" class="ion-no-padding">
-                  <ion-img src="../../../assets/icon/json-code.svg"></ion-img>
+              <div *ngIf="is_crud && !jeopen" (click)="doShowSchema()" class="data-sq-button">
+                <div class="ion-no-padding">
+                  <ion-icon name="build-outline"></ion-icon><br />
                   {{ 'Schema' | translate }}
                 </div>
-                <ng-template #nojeopen>
-                  <ion-icon name="close-circle-outline"></ion-icon><br />
-                  {{ 'Close' | translate }}
-                </ng-template>
-              </div>
-              <div *ngIf="jeopen && is_crud" class="data-sq-button ion-no-padding danger" (click)="doSaveSchema()">
-                <span *ngIf="!is_saving">
-                  <ion-icon name="save-outline"></ion-icon><br />
-                  {{ 'Save' | translate }}
-                </span>
-                <span *ngIf="is_saving">
-                  <ion-icon name="hourglass"></ion-icon><br />
-                  {{ 'Saving' | translate }}...
-                </span>
               </div>
             </ion-col>
           </ion-row>
         </ion-grid>
         <ion-grid [class]="schemevis" *ngIf="is_crud">
+          <ion-row *ngIf="jeopen && is_crud" >
+            <ion-col size="12">
+              <ion-button size="small" (click)="doSaveSchema()">
+                <span *ngIf="!is_saving">{{ 'Save Schema' | translate }}</span>
+                <span *ngIf="is_saving">{{ 'Saving' | translate }}...</span>
+              </ion-button>
+              <ion-button size="small" color="light" (click)="doShowSchema()">
+                <ion-icon name="close-circle-outline"></ion-icon>
+                {{ 'Close' | translate }}
+              </ion-button>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12" class="schema-card-container">
+              <span *ngFor="let item of schema_ | keyvalue" (click)="doShowSchemaKey(item.key)">{{ item.value.title }}
+                [{{ item.value.count }}]</span>
+            </ion-col>
+          </ion-row>
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <h4 *ngIf="schema_key">{{ schema_key ? schema_key : 'Full schema' | translate }}</h4>
+              <!-- <h4 *ngIf="schema_key">{{ schema_key ? schema_key : 'Full schema' | translate }}</h4> -->
               <json-editor id="struc" [options]="jeoptions" [data]="structure ? structure : {}"
                 (change)="doChangeSchema($event)" #editor></json-editor>
             </ion-col>
@@ -187,8 +177,9 @@ https://www.gnu.org/licenses.
             <ion-col *ngFor="let item of properties_ | keyvalue : orderByIndex"
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px;' : 'min-width: ' + default_width + 'px;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
-                <span class="column-title">{{ item.value.title }} <span *ngIf="searched && searched[item.key] && searched[item.key].f && is_loaded"
-                    class="danger">[ F ]</span><br />
+                <span class="column-title">{{ item.value.title }} <span
+                    *ngIf="searched && searched[item.key] && searched[item.key].f && is_loaded" class="danger">[ F
+                    ]</span><br />
                 </span>
                 {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
               </div>
