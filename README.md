@@ -22,7 +22,7 @@ The further information can be found at the [official web site](https://bi.techn
 
 Technoplatz BI works on [Docker](#https://www.docker.com) platform which is the leading virtualisation technology for developing, shipping and running business grade applications. Creating a Docker instance on the Cloud is the first step prior to getting started with the installation. We recommend [Debian](#https://www.debian.org) or Debian-based Linux as the main Operating System for the required Cloud instance.
 
-**Debian Linux** 
+**Debian Linux**
 
 Debian is a complete, solid-rock and free Linux Operating System. The word "free" means here doesn't refer to money, instead, it refers to software freedom. In the IT world, there are a lot of reasons to choose Debian or Ubuntu as a user, as a developer and even in enterprise environments. Most Debian users appreciate the stability and the smooth upgrade processes of both packages and the entire distribution. Debian is also widely used by software and hardware developers because it runs on numerous architectures and devices. If you plan to use them in a professional environment there are additional benefits like LTS versions and cloud images.
 
@@ -142,6 +142,131 @@ curl -Lso ~/technoplatz-bi/bi-sh --create-dirs \
 
 ```bash
 ./bi-sh start
+```
+
+## Schema Structure
+
+```json
+{
+  "properties": {},
+  "required": [],
+  "index": [],
+  "unique": [],
+  "sort": {},
+  "parents": [],
+  "actions": [],
+  "links": [],
+  "triggers": [],
+  "views": {}
+}
+```
+
+#### properties
+
+Properties is the part of the Collection schema where data fields are defined. Multiple fields can be provided within a single JSON cluster. [Click](#properties) for details.
+
+#### triggers
+
+Triggers are secondary update processes that are automatically activated after entry, update or deletion processes in collections. It is used to update the same collection or a different target collection in case of any update in the specified data fields of a source collection. [Click](#triggers-1) for details.
+
+### Properties
+
+Standard fields of a property;
+
+**bsonType**: Data type (string, number, date, bool)\
+**title**: The form title of the data field.\
+**description**: A short description of the data field.\
+**placeholder**: Description that appears in the data entry box in forms.\
+**default**: The default value to use when no value is given.\
+**permanent**: Once entered, it cannot be changed (true|false).\
+**width**: The column width in pixels.
+
+#### String Properties
+
+```json
+{
+  "ord_no": {
+    "bsonType": "string",
+    "title": "Order No",
+    "description": "Customer order number",
+    "placeholder": "Please enter an order number",
+    "minWidth": 8,
+    "maxWidth": 16,
+    "pattern": "^[A-Za-z0-9-]{8,16}$",
+    "default": null,
+    "permanent": true,
+    "width": 140
+  }
+}
+```
+
+Enumerates are certain type of string properties with predefined values which allow data entry via selectable options. They provide automatic validation and don't allow to enter any value rather than specified enums.
+
+```json
+{
+  "shp_type": {
+    "bsonType": "string",
+    "title": "Ship Type",
+    "description": "The default shipping type of the carrier",
+    "placeholder": "The goods arrived at customs by",
+    "minWidth": 3,
+    "maxWidth": 4,
+    "enum": ["Sea", "Air", "Truck"],
+    "default": "Truck",
+    "permanent": false,
+    "width": 140
+  }
+}
+```
+
+#### Numeric Properties
+
+```json
+{
+  "foo_serial": {
+    "bsonType": "number | int | decimal | float",
+    "title": "Amount",
+    "description": "Order Amount",
+    "placeholder": "Please enter the order amount in USD",
+    "minimum": 1,
+    "maximum": 999,
+    "default": 1,
+    "counter": false,
+    "width": 140
+  }
+}
+```
+
+### Triggers
+
+```json
+[
+  {
+    "name": "Amount updater",
+    "enabled": true,
+    "operations": ["update", "insert"],
+    "changes": [
+      { "key": "dnn_qty", "op": "gte", "value": 0 },
+      { "key": "dnn_unit_price", "op": "gte", "value": 0 }
+    ],
+    "targets": [
+      {
+        "collection": "delivery",
+        "match": [{ "key": "_id", "value": "_id" }],
+        "filter": [{ "key": "dnn_status", "op": "ne", "value": "70-Delivered" }],
+        "set": [{ "key": "dnn_amount", "value": "dnn_qty * dnn_unit_price" }],
+        "upsert": false
+      },
+      {
+        "collection": "manifest",
+        "match": [{ "key": "man_no", "value": "dnn_man_no" }],
+        "filter": [{ "key": "man_status", "op": "eq", "value": "10-OnCustomsProcess" }],
+        "set": [{ "key": "man_amount", "value": "sum(dnn_amount)" }],
+        "upsert": false
+      }
+    ]
+  }
+]
 ```
 
 ## Impressum

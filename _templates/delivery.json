@@ -46,8 +46,8 @@
     },
     "dnn_bill_no": {
       "bsonType": "string",
-      "title": "Invoice No",
-      "description": "Invoice Number",
+      "title": "Bill No",
+      "description": "Bill Number",
       "minLength": 10,
       "maxLength": 10,
       "pattern": "^[0-9]{10,10}$",
@@ -60,7 +60,7 @@
       "minLength": 10,
       "maxLength": 11,
       "pattern": "^[A-Z0-9-]{10,11}$",
-      "width": 110
+      "width": 120
     },
     "dnn_acc_name": {
       "bsonType": "string",

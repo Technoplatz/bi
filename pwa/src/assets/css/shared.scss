@@ -399,16 +399,12 @@ ion-note {
   background-color: var(--ion-color-light);
   color: var(--ion-color-dark);
   overflow: hidden;
-  flex-basis: 72px;
   min-width: 72px;
   flex-grow: 0;
 }
 
+.data-sq-button.danger,
 .data-sq-button.required {
-  background-color: var(--ion-color-danger) !important;
-}
-
-.data-sq-button.danger {
   background-color: var(--ion-color-warning);
   color: var(--ion-color-dark) !important;
 }
@@ -1554,9 +1550,7 @@ sup {
 }
 
 .jeditor {
-  display: flex !important;
-  flex-flow: column;
-  height: calc(90vh - 400px);
+  min-height: calc(90vh - 400px);
   margin-top: 8px;
   margin-bottom: 8px;
   padding: 0px;

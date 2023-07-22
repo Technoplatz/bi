@@ -52,10 +52,10 @@ https://www.gnu.org/licenses.
                 {{ 'LIVE' | translate }}!
               </div>
               <div (click)="doCopy('view')" class="data-sq-button">
-                <ion-icon *ngIf="!is_url_copied" name="copy-outline"></ion-icon>
+                <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
                 <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
                 <br />
-                <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
+                <span *ngIf="!is_url_copied">{{ 'URL' | translate }}</span>
                 <span *ngIf="is_url_copied">{{ 'Copied' | translate }}</span>
               </div>
               <div (click)="misc.navi.next('collection/'+ col_id)" class="data-sq-button">
@@ -66,16 +66,15 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
-        
+
         <!-- VIEW GRID SECTION -->
         <div *ngIf="view" class="ion-margin-bottom">
-          <h4>{{ 'Shared with' | translate }} {{ view_._tags?.join(' ') }}</h4>
+          <!-- <h4>{{ 'Shared with' | translate }} {{ view_._tags?.join(' ') }}</h4>
           <h6 *ngIf="view_.scheduled; else notscheduled">{{ 'Scheduled' | translate }} at {{ cron_ }}</h6>
           <ng-template #notscheduled><h5>{{ 'Not Scheduled' | translate }}</h5></ng-template>
           <div class="view-infos">
-            <!-- PIVOT -->
             <div [innerHtml]="pivot_" class="pivot"></div>
-          </div>
+          </div> -->
 
           <!-- LIST -->
           <ion-grid class="data-grid ion-no-padding ion-margin-top">
@@ -95,12 +94,24 @@ https://www.gnu.org/licenses.
             <ion-row *ngIf="data && data.length==0" class="ion-nowrap">
               <ion-col size="12" class="ion-no-padding"> {{ 'No data found' | translate }} </ion-col>
             </ion-row>
-            <ion-row></ion-row>
             <ion-row *ngIf="view_count > 0" class="ion-nowrap">
-              <ion-col size="12" class="ion-no-padding"> {{ 'First' | translate }} {{ data.length }} {{ 'rows
+              <ion-col size="12" class="ion-no-padding ion-margin-top"> {{ 'First' | translate }} {{ data.length }} {{
+                'rows
                 displayed' | translate }}.
+                <strong><br />{{ 'Shared with' | translate }} {{ view_._tags?.join(' ') }}</strong>
+                <span *ngIf="view_.scheduled; else notscheduled"><br /><strong>{{ 'Scheduled' | translate }} at {{ cron_
+                  }}</strong></span>
+                <ng-template #notscheduled>
+                  <span><br /><strong>{{ 'Not Scheduled' | translate }}</strong></span>
+                </ng-template>
+                <!-- <div class="view-infos">
+                  <div [innerHtml]="pivot_" class="pivot"></div>
+                </div> -->
               </ion-col>
             </ion-row>
+
+
+
           </ion-grid>
         </div>
 

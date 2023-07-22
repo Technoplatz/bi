@@ -1925,7 +1925,7 @@ class Crud:
             return {
                 "result": True,
                 "series": series_,
-                "data": records_ if scope_ == "external" else [] if scope_ == "propsonly" else records_[:50],
+                "data": records_ if scope_ == "external" else [] if scope_ == "propsonly" else records_[:PREVIEW_ROWS_],
                 "properties": properties_master_,
                 "pivot": pivot_html_,
                 "pivotify": pivotify_html_,
@@ -4247,10 +4247,11 @@ MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
+PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get("PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_token", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
-STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "connectors"]
+STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
 
 app = Flask(__name__)

@@ -103,6 +103,8 @@ services:
     container_name: mongo0
     hostname: ${MONGO_HOST0}
     restart: always
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${SUBNET_MONGO0_IPV4}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
       init:
         condition: service_completed_successfully
@@ -143,6 +145,8 @@ services:
     container_name: mongo1
     hostname: ${MONGO_HOST1}
     restart: always
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${SUBNET_MONGO1_IPV4}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
       init:
         condition: service_completed_successfully
@@ -181,6 +185,8 @@ services:
     container_name: mongo2
     hostname: ${MONGO_HOST2}
     restart: always
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${SUBNET_MONGO2_IPV4}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
       init:
         condition: service_completed_successfully
@@ -223,11 +229,11 @@ services:
     hostname: replicaset
     depends_on:
       mongo0:
-        condition: service_started
+        condition: service_healthy
       mongo1:
-        condition: service_started
+        condition: service_healthy
       mongo2:
-        condition: service_started
+        condition: service_healthy
     labels:
       - com.centurylinklabs.watchtower.enable=true
     volumes:

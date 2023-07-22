@@ -178,8 +178,7 @@ https://www.gnu.org/licenses.
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px;' : 'min-width: ' + default_width + 'px;'">
               <div (click)="doSetSearch(item.key)" class="clicked-item overflow-hidden-item">
                 <span class="column-title">{{ item.value.title }} <span
-                    *ngIf="searched && searched[item.key] && searched[item.key].f && is_loaded" class="danger">[ F
-                    ]</span><br />
+                    *ngIf="searched && searched[item.key] && searched[item.key].f && is_loaded" class="danger">[F]</span><br />
                 </span>
                 {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
               </div>
