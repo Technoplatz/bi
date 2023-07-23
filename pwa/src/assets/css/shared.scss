@@ -410,8 +410,8 @@ ion-note {
 }
 
 .data-sq-button ion-icon {
-  width: 20px !important;
-  height: 20px !important;
+  width: 22px !important;
+  height: 22px !important;
   margin-bottom: 8px !important;
 }
 
@@ -1367,6 +1367,17 @@ sup {
   margin: auto !important;
 }
 
+.schema-flashcard-container {
+  margin-top: 8px;
+  width: 90% !important;
+  line-height: 18px;
+  gap: 8px !important;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .schema-card-container {
   margin-top: 8px;
   margin-bottom: 4px;
@@ -1376,12 +1387,14 @@ sup {
   align-items: center;
 }
 
-.schema-card-container span {
+.schema-card-container span,
+.schema-flashcard-container span {
   color: var(--ion-color-primary);
   cursor: pointer;
   margin-right: 5px;
   font-weight: 600;
-  text-decoration: underline;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .schema-card-container ion-card {

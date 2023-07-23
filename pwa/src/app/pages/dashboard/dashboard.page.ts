@@ -65,8 +65,8 @@ export class DashboardPage implements OnInit {
       this.collections = res && res.data ? res.data : [];
     });
     this.crud.charts.subscribe((res: any) => {
-      this.charts = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type !== "Flashcard" && obj.self.dashboard === true && obj.self.enabled === true) : [];
-      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.self.chart_type === "Flashcard" && obj.self.dashboard === true && obj.self.enabled === true) : [];
+      this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard" && obj.view.dashboard === true && obj.view.enabled === true) : [];
+      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type === "Flashcard" && obj.view.dashboard === true && obj.view.enabled === true) : [];
     });
     this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];

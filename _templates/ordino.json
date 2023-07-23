@@ -45,6 +45,12 @@
       "enum": ["Sea", "Air", "Truck", "Railway"],
       "width": 120
     },
+    "odi_eta_date": {
+      "bsonType": "date",
+      "title": "ETA Date",
+      "description": "Estimated Date of Arrival",
+      "width": 120
+    },
     "odi_arrived": {
       "bsonType": "bool",
       "title": "Arrived",
@@ -56,12 +62,6 @@
       "bsonType": "date",
       "title": "Arrived Date",
       "description": "Date of Arrival"
-    },
-    "odi_eta_date": {
-      "bsonType": "date",
-      "title": "ETA Date",
-      "description": "Estimated Date of Arrival",
-      "width": 120
     },
     "odi_transfer_date": {
       "bsonType": "date",
@@ -318,6 +318,5 @@
       ]
     }
   ],
-  "views": {},
-  "connectors": []
+  "views": {}
 }

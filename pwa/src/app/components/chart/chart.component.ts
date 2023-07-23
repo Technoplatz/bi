@@ -73,7 +73,7 @@ export class ChartComponent implements OnInit {
   }
 
   ngOnChanges() {
-    const view_ = this.item.self;
+    const view_ = this.item.view;
     this.series = this.item.series;
     this.chartStyle = view_.chart_type;
     this.showXAxis = view_.chart_xaxis;

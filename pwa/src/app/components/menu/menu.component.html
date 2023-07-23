@@ -88,7 +88,7 @@ https://www.gnu.org/licenses.
         </ion-button>
         <div *ngIf="views?.length > 0; else noviewsfound">
           <p *ngFor="let item of views" (click)="misc.navi.next('view/' + item.id)" class="clicked-item dark">
-            {{ item.self.title }}
+            {{ item.view.title }}
           </p>
         </div>
         <ng-template #noviewsfound>

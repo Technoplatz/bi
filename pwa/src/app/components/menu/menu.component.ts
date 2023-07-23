@@ -46,11 +46,10 @@ import { Crud } from "../../classes/crud";
 export class MenuComponent implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
-  public views: any = [];
   public segmentsadm: any;
   public user_: any;
-  public charts: any = [];
-  public charts_: any = null;
+  public views: any = [];
+  public views_: any = null;
   public collections_: any = null;
   public collections: any = [];
   public menutoggle: boolean = false;
@@ -63,7 +62,7 @@ export class MenuComponent implements OnInit {
   ) { }
 
   ngOnDestroy() {
-    this.crud.charts.unsubscribe;
+    this.crud.views.unsubscribe;
     this.crud.collections.unsubscribe;
     this.auth.user.unsubscribe;
   }
@@ -72,8 +71,9 @@ export class MenuComponent implements OnInit {
     this.collections_ ? null : this.collections_ = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
     });
-    this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
+    this.views_ ? null : this.views_ = this.crud.views.subscribe((res: any) => {
       this.views = res && res.views ? res.views : [];
+      console.log("*** views", this.views);
     });
     this.auth.user.subscribe((res: any) => {
       this.user_ = res;

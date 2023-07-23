@@ -112,6 +112,7 @@ export class CollectionPage implements OnInit {
   private segmentsadm_: any = environment.segmentsadm;
   public templates: any = [];
   public is_inprogress: boolean = false;
+  public flashcards_: any = [];
   public schema_: any = {
     "properties": { "title": "Properties", "description": "field", "count": 0 },
     "required": { "title": "Required", "description": "compulsory", "count": 0 },
@@ -160,6 +161,9 @@ export class CollectionPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
+    this.crud.charts.subscribe((res: any) => {
+      this.flashcards_ = res && res.views ? res.views.filter((obj: any) => obj.collection === this.id && obj.view.chart_type === "Flashcard") : [];
+    });
     this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
@@ -538,11 +542,11 @@ export class CollectionPage implements OnInit {
       message: "Please enter a view name to save the current filter.",
       inputs: [
         {
-          name: "viewid",
-          id: "viewid",
+          name: "title",
+          id: "title",
           value: null,
           type: "text",
-          placeholder: "Enter a view name"
+          placeholder: "Enter a title for the new view"
         }
       ],
       buttons: [
@@ -561,9 +565,12 @@ export class CollectionPage implements OnInit {
               op: "saveview",
               collection: this.id,
               filter: this.filter,
-              viewid: data.viewid
-            }).then(() => {
-              this.RefreshData(0).then(() => { });
+              title: data.title
+            }).then((res: any) => {
+              console.log("*** res", res);
+              this.misc.doMessage("view saved successfully", "success");
+              this.crud.getAll().then(() => { });
+              this.misc.navi.next("view/" + res.id);
             }).catch((error: any) => {
               this.misc.doMessage(error, "error");
             });
@@ -572,8 +579,8 @@ export class CollectionPage implements OnInit {
       ]
     }).then((alert: any) => {
       alert.present();
-      const viewid: HTMLElement = document.getElementById("viewid")!;
-      setTimeout(() => viewid.focus(), 600);
+      const viewfocus: HTMLElement = document.getElementById("title")!;
+      setTimeout(() => viewfocus.focus(), 600);
     });
   }
 
@@ -585,6 +592,7 @@ export class CollectionPage implements OnInit {
       schema_key: this.schema_key,
       structure: this.structured_ ? this.structured_ : this.structure
     }).then(() => {
+      this.misc.doMessage("schema saved successfully", "success");
       this.crud.getAll().then(() => { });
       this.RefreshData(0).then(() => {
         this.jeopen = false;

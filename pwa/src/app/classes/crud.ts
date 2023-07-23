@@ -268,6 +268,18 @@ export class Crud {
     });
   }
 
+  getViews() {
+    return new Promise((resolve, reject) => {
+      this.misc.apiCall("crud", {
+        op: "views"
+      }).then((res: any) => {
+        resolve(this.views.next(res));
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
   getAnnouncements() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
@@ -289,17 +301,22 @@ export class Crud {
   getAll() {
     return new Promise((resolve, reject) => {
       this.getCharts().then(() => { }).catch((error: any) => {
-        console.error("*** charts", error);
+        console.error("*** charts error", error);
+      }).finally(() => {
+        resolve(true);
+      });
+      this.getViews().then(() => { }).catch((error: any) => {
+        console.error("*** views error", error);
       }).finally(() => {
         resolve(true);
       });
       this.getCollections().then(() => { }).catch((error: any) => {
-        console.error("*** collections", error);
+        console.error("*** collections error", error);
       }).finally(() => {
         resolve(true);
       });
       this.getAnnouncements().then(() => { }).catch((error: any) => {
-        console.error("*** announcements", error);
+        console.error("*** announcements error", error);
       }).finally(() => {
         resolve(true);
       });

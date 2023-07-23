@@ -1254,13 +1254,13 @@ class Crud:
             df_raw_ = get_view_data_f_["dfraw"]
             pivotify_ = get_view_data_f_["pivotify"]
 
-            self_ = get_view_data_f_["self"]
-            _tags = self_["_tags"]
-            vie_title_ = self_["title"]
-            data_json_ = self_["data_json"]
-            data_excel_ = self_["data_excel"]
-            data_csv_ = self_["data_csv"]
-            vie_attach_pivot_ = self_["pivot"]
+            view_ = get_view_data_f_["view"]
+            _tags = view_["_tags"]
+            vie_title_ = view_["title"]
+            data_json_ = view_["data_json"]
+            data_excel_ = view_["data_excel"]
+            data_csv_ = view_["data_csv"]
+            vie_attach_pivot_ = view_["pivot"]
 
             personalizations_to_ = []
             to_ = []
@@ -1651,11 +1651,7 @@ class Crud:
             for property_ in properties_:
                 properties_property_ = properties_[property_]
                 properties_master_[property_] = properties_property_
-                bson_type_ = (
-                    properties_property_["bsonType"]
-                    if "bsonType" in properties_property_
-                    else None
-                )
+                bson_type_ = properties_property_["bsonType"] if "bsonType" in properties_property_ else None
                 if bson_type_ == "array":
                     if "items" in properties_property_:
                         items_ = properties_property_["items"]
@@ -1684,29 +1680,16 @@ class Crud:
             unset_.append("_ID")
 
             for properties_master__ in properties_master_:
-                if (
-                    properties_master__[:1] == "_"
-                    and properties_master__ not in Misc().get_except_underdashes()
-                ):
+                if (properties_master__[:1] == "_" and properties_master__ not in Misc().get_except_underdashes()):
                     unset_.append(properties_master__)
 
             for parent_ in parents_:
                 if "match" in parent_ and "collection" in parent_:
                     parent_collection_ = parent_["collection"]
-                    find_one_ = (
-                        Mongo()
-                        .db_["_collection"]
-                        .find_one({"col_id": parent_collection_})
-                    )
-                    if (
-                        find_one_
-                        and "col_structure" in find_one_
-                        and "properties" in find_one_["col_structure"]
-                    ):
+                    find_one_ = Mongo().db_["_collection"].find_one({"col_id": parent_collection_})
+                    if (find_one_ and "col_structure" in find_one_ and "properties" in find_one_["col_structure"]):
                         for property_ in find_one_["col_structure"]["properties"]:
-                            properties_master_[property_] = find_one_["col_structure"][
-                                "properties"
-                            ][property_]
+                            properties_master_[property_] = find_one_["col_structure"]["properties"][property_]
                         match_ = parent_["match"]
                         pipeline__ = []
                         let_ = {}
@@ -1719,19 +1702,9 @@ class Crud:
                                     pipeline__.append({"$eq": [f"$${key_}", f"${value_}"]})
 
                         pipeline_ = [{"$match": {"$expr": {"$and": pipeline__}}}]
-                        lookup_ = {
-                            "from": f"{parent_collection_}_data",
-                            "let": let_,
-                            "pipeline": pipeline_,
-                            "as": parent_collection_,
-                        }
-                        unwind_ = {
-                            "path": f"${parent_collection_}",
-                            "preserveNullAndEmptyArrays": True
-                        }
-                        replace_with_ = {
-                            "$mergeObjects": ["$$ROOT", f"${parent_collection_}"]
-                        }
+                        lookup_ = {"from": f"{parent_collection_}_data", "let": let_, "pipeline": pipeline_, "as": parent_collection_}
+                        unwind_ = {"path": f"${parent_collection_}", "preserveNullAndEmptyArrays": True}
+                        replace_with_ = {"$mergeObjects": ["$$ROOT", f"${parent_collection_}"]}
                         pipe_.append({"$lookup": lookup_})
                         pipe_.append({"$unwind": unwind_})
                         pipe_.append({"$replaceWith": replace_with_})
@@ -1751,6 +1724,7 @@ class Crud:
 
             records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
             count_ = len(records_) if records_ else 0
+
             df_ = pd.DataFrame(records_).fillna("#N/A")
             df_raw_ = pd.DataFrame(records_).fillna("")
 
@@ -1765,8 +1739,10 @@ class Crud:
             dropped_ = []
             if data_index_0_ in df_.columns:
                 dropped_.append(data_index_0_)
+
             if data_values_0_k_ in df_.columns:
                 dropped_.append(data_values_0_k_)
+
             if data_columns_0_ in df_.columns:
                 dropped_.append(data_columns_0_)
 
@@ -1774,23 +1750,11 @@ class Crud:
             if vie_visual_style_ == "Line":
                 groupby_.append(data_columns_0_) if data_columns_0_ and data_columns_0_ in df_.columns else None
                 groupby_.append(data_index_0_) if data_index_0_ and data_index_0_ in df_.columns else None
-                # if data_columns_0_ in df_.columns:
-                #     groupby_.append(data_columns_0_)
-                # if data_index_0_ in df_.columns:
-                #     groupby_.append(data_index_0_)
             else:
                 groupby_.append(data_index_0_) if data_index_0_ and data_index_0_ in df_.columns else None
                 groupby_.append(data_columns_0_) if data_columns_0_ and data_columns_0_ in df_.columns else None
 
-                # if data_index_0_ in df_.columns:
-                #     groupby_.append(data_index_0_)
-                # if data_columns_0_ in df_.columns:
-                #     groupby_.append(data_columns_0_)
-
             df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
-
-            # df_grp_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False).sum()
-
             dtypes_ = list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns)
             df_grp_ = df_.groupby(dtypes_, as_index=False).sum() if len(dtypes_) > 0 else None
 
@@ -1886,6 +1850,7 @@ class Crud:
 
             pivot_html_ = ""
             pivotify_html_ = ""
+
             if pvs_ and data_index_0_ and data_columns_0_ and aggfunc_ and pivot_totals_:
                 pivot_table_ = pd.pivot_table(
                     df_,
@@ -1932,7 +1897,7 @@ class Crud:
                 "df": df_ if scope_ == "announcement" else None,
                 "dfgrp": df_grp_ if scope_ == "announcement" else None,
                 "dfraw": df_raw_ if scope_ == "announcement" else None,
-                "self": view_,
+                "view": view_,
                 "stats": {
                     "count": count_ if count_ else 0,
                     "sum": sum_ if sum_ and sum_ > 0 else 0,
@@ -1943,14 +1908,14 @@ class Crud:
                 }
             }
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
     def charts_f(self, input_):
         """
@@ -1986,7 +1951,6 @@ class Crud:
             returned_views_ = []
             for collection_ in collections_:
                 views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else []
-
                 for view_ in views_:
                     id__ = view_["k"]
                     view__ = view_["v"]
@@ -2002,12 +1966,69 @@ class Crud:
                         "id": id__,
                         "collection": collection_["col_id"],
                         "properties": get_view_data_f_["properties"],
-                        "self": view__,
+                        "view": view__,
                         "data": get_view_data_f_["data"],
                         "series": get_view_data_f_["series"],
                         "pivot": get_view_data_f_["pivot"],
-                        "stats": get_view_data_f_["stats"]
+                        "stats": get_view_data_f_["stats"],
+                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999
                     })
+
+            returned_views_.sort(key=operator.itemgetter("priority", "id"), reverse=False)
+
+            return {"result": True, "views": returned_views_}
+
+        except pymongo.errors.PyMongoError as exc:
+            return Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
+    def views_f(self, input_):
+        """
+        docstring is in progress
+        """
+        try:
+            user_ = input_["userindb"]
+
+            collections_ = list(Mongo().db_["_collection"].aggregate([
+                {
+                    "$project": {
+                        "col_id": 1,
+                        "col_structure": 1,
+                        "views": {"$objectToArray": "$col_structure.views"}
+                    }
+                }, {
+                    "$match": {
+                        "views": {
+                            "$elemMatch": {
+                                "v.enabled": True,
+                                "v._tags": {
+                                    "$elemMatch": {"$in": user_["_tags"]}
+                                }
+                            }
+                        }
+                    }
+                }
+            ]))
+
+            returned_views_ = []
+            for collection_ in collections_:
+                views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else []
+                for view_ in views_:
+                    id__ = view_["k"]
+                    view__ = view_["v"]
+                    returned_views_.append({
+                        "id": id__,
+                        "collection": collection_["col_id"],
+                        "view": view__,
+                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999
+                    })
+
+            returned_views_.sort(key=operator.itemgetter("priority", "id"), reverse=False)
 
             return {"result": True, "views": returned_views_}
 
@@ -2477,7 +2498,8 @@ class Crud:
             user_ = obj["userindb"] if "userindb" in obj else None
             col_id_ = obj["collection"]
             filter_ = obj["filter"]
-            view_id_ = obj["viewid"]
+            title_ = obj["title"].strip().title()
+            view_id_ = title_.lower().replace(" ", "-")
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             _tags = user_["_tags"]
 
@@ -2495,9 +2517,9 @@ class Crud:
                 raise APIError("collection not found")
 
             view_ = {
-                "title": "Saved View",
-                "description": "Saved view description",
-                "priority": 1000,
+                "title": title_,
+                "description": f"{title_} Description",
+                "priority": 9999,
                 "enabled": True,
                 "dashboard": False,
                 "data_filter": filter_,
@@ -2544,7 +2566,7 @@ class Crud:
                 "document": doc_
             })
 
-            return {"result": True}
+            return {"result": True, "id": view_id_}
 
         except pymongo.errors.PyMongoError as exc:
             Misc().log_f({
@@ -4401,6 +4423,8 @@ def crud_f():
             res_ = Crud().purge_f(input_)
         elif op_ == "charts":
             res_ = Crud().charts_f(input_)
+        elif op_ == "views":
+            res_ = Crud().views_f(input_)
         elif op_ == "announce":
             res_ = Crud().announce_f(input_)
         elif op_ == "collections":

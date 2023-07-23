@@ -42,7 +42,7 @@ https://www.gnu.org/licenses.
           <div class="filler-10"></div>
           <div class="brz-visual-group">
             <div *ngFor="let item of flashcards; let f = index" class="flash-sq"
-              [style]="'background-color:' + (item.self && item.self.chart_colors && item.self.chart_colors[0] ? item.self.chart_colors[0] : '#eee') + ' !important;'"
+              [style]="'background-color:' + (item.view && item.view.chart_colors && item.view.chart_colors[0] ? item.view.chart_colors[0] : '#eee') + ' !important;'"
               #chcontainer>
               <div class="visual-buttons">
                 <ion-button size="small" fill="clear" (click)="doRefresh()" class="clear-dark-button" color="dark"
@@ -54,13 +54,13 @@ https://www.gnu.org/licenses.
                   <ion-icon name="list-outline"></ion-icon>
                 </ion-button>
               </div>
-              <h5>{{ item.self.title }}</h5>
-              {{ item.self.description }}<br />
-              {{ item.collection }} | {{ item.self.data_values[0].value }} {{ 'of' | translate }} {{
-              item.self.data_values[0].key }}
-              <h2>{{ item.stats[item.self.data_values[0].value] }}</h2>
-              <div *ngIf="item.self && item.self.scheduled && item.self.scheduled_cron" class="flash-cron"><ion-icon
-                  name="alarm-outline" size="large"></ion-icon><br />{{ item.self.scheduled_cron }} </div>
+              <h5>{{ item.view.title }}</h5>
+              {{ item.view.description }}<br />
+              {{ item.collection }} | {{ item.view.data_values[0].value }} {{ 'of' | translate }} {{
+              item.view.data_values[0].key }}
+              <h2>{{ item.stats[item.view.data_values[0].value] }}</h2>
+              <div *ngIf="item.view && item.view.scheduled && item.view.scheduled_cron" class="flash-cron"><ion-icon
+                  name="alarm-outline" size="large"></ion-icon><br />{{ item.view.scheduled_cron }} </div>
             </div>
           </div>
 
@@ -81,10 +81,10 @@ https://www.gnu.org/licenses.
                   <ion-icon name="list-outline"></ion-icon>
                 </ion-button>
               </div>
-              <h5>{{ item.self.title }}</h5>
+              <h5>{{ item.view.title }}</h5>
               <div class="full-width">
-                {{ item.self.description }}<br />
-                {{ 'Shared with' | translate }} {{ item.self._tags?.length }} {{ '#Hashtags' | translate }}
+                {{ item.view.description }}<br />
+                {{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}
               </div>
               <div *ngIf="is_refreshing; else showchart" class="app-charts">
                 <ion-item lines="none">

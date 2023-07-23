@@ -119,23 +119,27 @@ export class ViewPage implements OnInit {
     this.misc.getAPIUrl().then((apiHost: any) => {
       this.apiHost = apiHost;
       this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
+        console.log("*** resçç", res);
         if (res && res.views) {
           this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
-          this.view_ = this.view.self;
-          this.subheader = this.view.self.title;
-          this.data = this.view.data ? this.view.data : [];
-          const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
-          this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
-          this.view_properties = this.view.properties;
-          this.view_properties_ = Object.keys(this.view.properties);
-          this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
-          this.col_id = this.view.collection;
-          this.is_loaded = true;
-          this.is_initialized = true;
-          this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
-          this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_api_key;
+          console.log("*** view", this.view);
+          if (this.view) {
+            this.view_ = this.view.view;
+            this.subheader = this.view.view.title;
+            this.data = this.view.data ? this.view.data : [];
+            const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
+            this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
+            this.view_properties = this.view.properties;
+            this.view_properties_ = Object.keys(this.view.properties);
+            this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
+            this.col_id = this.view.collection;
+            this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
+            this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_api_key;
+          }
           this.crud.charts.unsubscribe;
           this.charts_ = null;
+          this.is_loaded = true;
+          this.is_initialized = true;
         }
       });
     });
