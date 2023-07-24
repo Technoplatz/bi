@@ -94,7 +94,7 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Refresh' | translate }}
               </div>
-              <div *ngIf="filter.length>0" (click)="doClearFilter()" class="data-sq-button required">
+              <div *ngIf="filter && filter.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 <br />
                 <span>{{ 'Clear' | translate }}</span>
@@ -108,7 +108,7 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}
               </div>
-              <div *ngIf="!jeopen" (click)="doSaveView()" class="data-sq-button">
+              <div *ngIf="!jeopen && filter.length==0" (click)="doSaveView()" class="data-sq-button">
                 <ion-icon name="save-outline"></ion-icon><br />
                 {{ 'Save' | translate }}
               </div>
@@ -150,14 +150,16 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
-        <ion-grid *ngIf="is_crud">
+        <ion-grid *ngIf="flashcards_ && flashcards_.length > 0">
           <ion-row>
             <ion-col size="12">
-              <div class="schema-flashcard-container">
-                <span *ngFor="let item of flashcards_">{{ item.view.title }}
-                  [{{ item.stats.count }}]</span>
-              </div>
-              
+              <ion-list>
+                <ion-item>
+                  <ion-select class="status-select" aria-label="Status" interface="popover" placeholder="{{ 'Flashcard Filters' | translate }}" (ionChange)="doFlashcard($event)" [compareWith]="compareWith" [(ngModel)]="status_">
+                    <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{ item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-list>
             </ion-col>
           </ion-row>
         </ion-grid>

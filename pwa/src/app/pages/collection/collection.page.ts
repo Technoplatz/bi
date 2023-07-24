@@ -82,6 +82,7 @@ export class CollectionPage implements OnInit {
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public scan_: boolean = false;
+  public status_: any = {};
   private view: any = null;
   public actions: any = [];
   public columns_: any;
@@ -161,31 +162,31 @@ export class CollectionPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
-    this.crud.charts.subscribe((res: any) => {
-      this.flashcards_ = res && res.views ? res.views.filter((obj: any) => obj.collection === this.id && obj.view.chart_type === "Flashcard") : [];
-    });
     this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-        this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-        LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-        this.actions = [];
-        this.RefreshData(0).then(() => {
-          if (this.id === "_collection") {
-            this.misc.apiCall("crud", {
-              op: "template",
-              proc: "list",
-              template: null
-            }).then((res: any) => {
-              this.templates = res && res.templates ? res.templates : [];
-            }).catch((error: any) => {
-              console.error(error);
-              this.misc.doMessage(error, "error");
-            });
-          }
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-        }).finally(() => {
-          this.is_initialized = true;
+        this.storage.get("LSSTATUS_" + this.id).then((LSSTATUS: any) => {
+          this.status_ = LSSTATUS;
+          this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+          LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+          this.actions = [];
+          this.RefreshData(0).then(() => {
+            if (this.id === "_collection") {
+              this.misc.apiCall("crud", {
+                op: "template",
+                proc: "list",
+                template: null
+              }).then((res: any) => {
+                this.templates = res && res.templates ? res.templates : [];
+              }).catch((error: any) => {
+                console.error(error);
+                this.misc.doMessage(error, "error");
+              });
+            }
+          }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          }).finally(() => {
+            this.is_initialized = true;
+          });
         });
       });
     });
@@ -203,6 +204,11 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
+      this.crud.getFlashcards(this.id).then((res: any) => {
+        this.flashcards_ = res && res.data ? res.data : [];
+      }).catch(() => {
+        this.flashcards_ = [];
+      });
       this.crud.getCollection(this.id).then((res: any) => {
         this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
         this.counters_ = res && res.counters ? res.counters : {};
@@ -416,15 +422,18 @@ export class CollectionPage implements OnInit {
   doClearFilter() {
     return new Promise((resolve, reject) => {
       this.filter = [];
-      this.storage.set("LSSFILTER_" + this.id, this.filter).then(() => {
+      this.status_ = null;
+      this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
-          this.doResetSearch(true);
-          this.searched = null;
-          this.sweeped[this.segment] = [];
-          this.RefreshData(0).then(() => {
-            resolve(true);
-          }).catch((res: any) => {
-            this.misc.doMessage(res, "error");
+          this.storage.remove("LSSTATUS_" + this.id).then(() => {
+            this.doResetSearch(true);
+            this.searched = null;
+            this.sweeped[this.segment] = [];
+            this.RefreshData(0).then(() => {
+              resolve(true);
+            }).catch((res: any) => {
+              this.misc.doMessage(res, "error");
+            });
           });
         });
       });
@@ -471,7 +480,10 @@ export class CollectionPage implements OnInit {
       this.searched[k].f = true;
       this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-          this.RefreshData(0);
+          this.storage.remove("LSSTATUS_" + this.id).then(() => {
+            this.status_ = null;
+            this.RefreshData(0);
+          });
         });
       });
     } else {
@@ -492,7 +504,10 @@ export class CollectionPage implements OnInit {
           this.searched[k].f = true;
           this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
             this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-              this.RefreshData(0);
+              this.storage.remove("LSSTATUS_" + this.id).then(() => {
+                this.status_ = null;
+                this.RefreshData(0);
+              });
             });
           });
         }
@@ -535,6 +550,26 @@ export class CollectionPage implements OnInit {
     this.editor.focus();
   }
 
+  doFlashcard(evt: any) {
+    const item_ = evt.detail.value;
+    if (item_ !== "") {
+      this.status_ = item_;
+      this.filter = item_.view.data_filter;
+      this.storage.set("LSSTATUS_" + this.id, this.status_).then(() => {
+        this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+          this.RefreshData(0).then(() => {
+          }).catch((res: any) => {
+            this.misc.doMessage(res, "error");
+          });
+        });
+      });
+    }
+  }
+
+  compareWith(o1: any, o2: any) {
+    return o1 && o2 ? o1.id === o2.id : o1 === o2;
+  }
+
   doSaveView() {
     this.alert.create({
       cssClass: "my-custom-class",
@@ -560,14 +595,12 @@ export class CollectionPage implements OnInit {
         }, {
           text: "SAVE VIEW",
           handler: (data: any) => {
-            console.log("filter", this.filter);
             this.misc.apiCall("/crud", {
               op: "saveview",
               collection: this.id,
               filter: this.filter,
               title: data.title
             }).then((res: any) => {
-              console.log("*** res", res);
               this.misc.doMessage("view saved successfully", "success");
               this.crud.getAll().then(() => { });
               this.misc.navi.next("view/" + res.id);

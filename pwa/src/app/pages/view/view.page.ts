@@ -119,10 +119,8 @@ export class ViewPage implements OnInit {
     this.misc.getAPIUrl().then((apiHost: any) => {
       this.apiHost = apiHost;
       this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
-        console.log("*** resçç", res);
         if (res && res.views) {
           this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
-          console.log("*** view", this.view);
           if (this.view) {
             this.view_ = this.view.view;
             this.subheader = this.view.view.title;

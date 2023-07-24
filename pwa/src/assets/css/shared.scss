@@ -2053,21 +2053,33 @@ app-chart {
   text-align: right;
 }
 
+.status-select-option {
+  margin-left: 16px;
+  font-size: small !important;
+  margin-top: -20px;
+  --highlight-color-focused: #fff;
+}
+
+.status-select-option:first-child {
+  margin-top: 0px !important;
+}
+
 .flash-sq {
   position: relative;
   overflow: hidden;
-  padding: 12px;
-  padding-left: 16px;
-  background-color: #e6e6e6;
+  padding: 10px;
   align-content: flex-start;
-  width: 320px;
-  height: 120px;
+  width: 260px;
+  height: 70px;
   white-space: nowrap !important;
+  border: 2px dotted var(--ion-color-medium);
+  cursor: pointer;
 }
 
 .flash-sq h2 {
-  padding-top: 4px;
-  color: var(--ion-color-dark);
+  padding-top: 0px;
+  color: var(--ion-color-primary);
+  font-size: 1.8em !important;
 }
 
 .flash-sq h5,
@@ -2161,7 +2173,7 @@ app-chart {
   position: absolute;
   max-width: 80px;
   top: 0px;
-  right: 8px;
+  right: 12px;
   margin: 0px;
   padding-top: 10px !important;
 }

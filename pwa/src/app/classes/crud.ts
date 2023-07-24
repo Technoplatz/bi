@@ -268,6 +268,19 @@ export class Crud {
     });
   }
 
+  getFlashcards(colid_: string) {
+    return new Promise((resolve, reject) => {
+      this.misc.apiCall("crud", {
+        op: "flashcards",
+        collection: colid_
+      }).then((res: any) => {
+        resolve(res);
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
   getViews() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {

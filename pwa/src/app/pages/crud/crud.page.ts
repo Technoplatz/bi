@@ -118,7 +118,6 @@ export class CrudPage implements OnInit {
         });
       } else {
         this.crudForm.get(event.target.name)?.setValue(this.input_.replace(/NAVIGATEPREVIOUS|NAVIGATENEXT|UNIDENTIFIED|NULL|CUT|COPY|SHIFT|TAB|CAPSLOCK|METAV|ARROWDOWN|ARROWUP|ARROWLEFT|ARROWRIGHT|BACKSPACE/gi, "").toUpperCase());
-        console.log("*** input_", event.target.name, this.crudForm.get(event.target.name)?.value);
         this.doSubmit();
       }
     } else {
@@ -515,7 +514,7 @@ export class CrudPage implements OnInit {
             collection: this.parent.collection,
             projection: projection_,
             match: filter_,
-            sort: null,
+            sort: { "_modified_at": -1 },
             group: true,
             page: 1,
             limit: 100

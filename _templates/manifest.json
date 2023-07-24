@@ -6,14 +6,6 @@
       "description": "Customs Manifest Number",
       "minLength": 18,
       "maxLength": 20,
-      "width": 150
-    },
-    "man_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Manifest Status",
-      "enum": ["10-OnCustomsProcess", "20-Closed"],
-      "default": "10-OnCustomsProcess",
       "width": 160
     },
     "man_odi_no": {
@@ -33,18 +25,6 @@
       "minLength": 6,
       "maxLength": 20
     },
-    "man_opening_date": {
-      "bsonType": "date",
-      "title": "Manifest Date",
-      "description": "Manifest Opening Date",
-      "width": 150
-    },
-    "man_closing_date": {
-      "bsonType": "date",
-      "title": "Closing Date",
-      "description": "Manifest Closing Date",
-      "width": 150
-    },
     "man_file_no": {
       "bsonType": "string",
       "title": "File No",
@@ -56,19 +36,31 @@
     "man_case_no": {
       "bsonType": "number",
       "title": "Case Number",
-      "description": "Total of Case Number",
+      "description": "Number of cases",
       "width": 120
     },
     "man_amount": {
       "bsonType": "number",
       "title": "Manifest Amount",
-      "description": "Tax and Expenses",
+      "description": "Tax and expenses",
       "default": 0
+    },
+    "man_opening_date": {
+      "bsonType": "date",
+      "title": "Opening Date",
+      "description": "Manifest opening date",
+      "width": 150
+    },
+    "man_closing_date": {
+      "bsonType": "date",
+      "title": "Closing Date",
+      "description": "Manifest closing date",
+      "width": 150
     }
   },
-  "required": ["man_no", "man_opening_date", "man_file_no", "man_status", "man_case_no"],
-  "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_status"], ["man_odi_no"], ["man_file_no"]],
-  "unique": [["man_no"], ["man_no", "man_odi_no", "man_odi_sub_no"], ["man_file_no"]],
+  "required": ["man_no", "man_opening_date", "man_file_no", "man_case_no"],
+  "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_file_no"]],
+  "unique": [["man_no"], ["man_file_no"]],
   "sort": {
     "_modified_at": -1
   },
@@ -138,14 +130,14 @@
   "actions": [],
   "triggers": [
     {
-      "name": "Manifest Open",
+      "name": "Manifest Opening",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "man_status",
-          "op": "eq",
-          "value": "10-OnCustomsProcess"
+          "key": "man_opening_date",
+          "op": "nnull",
+          "value": null
         }
       ],
       "targets": [
@@ -161,44 +153,7 @@
             {
               "key": "dnn_status",
               "op": "in",
-              "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
-            }
-          ],
-          "set": [
-            {
-              "key": "dnn_status",
-              "value": "20-OnCustoms"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    },
-    {
-      "name": "Manifest in Action",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "man_status",
-          "op": "eq",
-          "value": "10-OnCustomsProcess"
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_man_no",
-              "value": "man_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "in",
-              "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+              "value": "20-OnCustoms,30-OnCustomsProcess"
             }
           ],
           "set": [
@@ -217,9 +172,9 @@
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "man_status",
-          "op": "eq",
-          "value": "20-Closed"
+          "key": "man_closing_date",
+          "op": "nnull",
+          "value": null
         }
       ],
       "targets": [
@@ -235,7 +190,7 @@
             {
               "key": "dnn_status",
               "op": "in",
-              "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
+              "value": "30-OnCustomsProcess,40-ClearanceCompleted"
             }
           ],
           "set": [
@@ -245,38 +200,9 @@
             }
           ],
           "upsert": false
-        },
-        {
-          "collection": "ordino",
-          "on_changes_all": true,
-          "match": [
-            {
-              "key": "odi_no",
-              "value": "man_odi_no"
-            },
-            {
-              "key": "odi_sub_no",
-              "value": "man_odi_sub_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "odi_completed",
-              "op": "eq",
-              "value": false
-            }
-          ],
-          "set": [
-            {
-              "key": "odi_completed",
-              "value": true
-            }
-          ],
-          "upsert": false
         }
       ]
     }
   ],
-  "views": {},
-  "connectors": []
+  "views": {}
 }

@@ -1987,6 +1987,73 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def flashcards_f(self, input_):
+        """
+        docstring is in progress
+        """
+        try:
+            user_ = input_["userindb"]
+            col_id_ = input_["collection"]
+
+            flashcards_ = list(Mongo().db_["_collection"].aggregate([{
+                "$project": {
+                    "col_id": 1,
+                    "col_structure": 1,
+                    "views": {"$objectToArray": "$col_structure.views"}
+                }}, {
+                "$match": {
+                    "col_id": col_id_,
+                    "views": {
+                        "$elemMatch": {
+                            "v.enabled": True,
+                            "v.chart_type": "Flashcard",
+                            "v._tags": {
+                                "$elemMatch": {"$in": user_["_tags"]}
+                            }
+                        }
+                    }
+                }
+            }]))
+
+            returned_views_ = []
+            for flashcard_ in flashcards_:
+                col_structure_ = flashcard_["col_structure"]
+                properties_ = col_structure_["properties"]
+                views_ = flashcard_["views"] if "views" in flashcard_ and len(flashcard_["views"]) > 0 else []
+                for view_ in views_:
+                    id__ = view_["k"]
+                    view__ = view_["v"]
+                    if view__["chart_type"] != "Flashcard" or not view__["enabled"]:
+                        continue
+                    count_ = 0
+                    filter_ = view__["data_filter"] if "data_filter" in view__ else []
+                    if len(filter_) > 0:
+                        get_filtered_ = self.get_filtered_f({
+                            "match": filter_,
+                            "properties": properties_ if properties_ else None
+                        })
+                        count_ = Mongo().db_[f"{col_id_}_data"].count_documents(get_filtered_)
+
+                    returned_views_.append({
+                        "id": id__,
+                        "view": view__,
+                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999,
+                        "count": count_
+                    })
+
+            returned_views_.sort(key=operator.itemgetter("priority", "id"), reverse=False)
+
+            return {"result": True, "data": returned_views_}
+
+        except pymongo.errors.PyMongoError as exc:
+            return Misc().mongo_error_f(exc)
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
     def views_f(self, input_):
         """
         docstring is in progress
@@ -4425,6 +4492,8 @@ def crud_f():
             res_ = Crud().charts_f(input_)
         elif op_ == "views":
             res_ = Crud().views_f(input_)
+        elif op_ == "flashcards":
+            res_ = Crud().flashcards_f(input_)
         elif op_ == "announce":
             res_ = Crud().announce_f(input_)
         elif op_ == "collections":
@@ -4444,7 +4513,7 @@ def crud_f():
         elif op_ == "saveview":
             res_ = Crud().saveview_f(input_)
         else:
-            raise APIError(f"{op_} is not a supported operation")
+            raise APIError(f"operation {op_} is not supported")
 
         if not res_["result"]:
             raise APIError(res_)

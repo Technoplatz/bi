@@ -42,7 +42,7 @@
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping Type",
-      "enum": ["Sea", "Air", "Truck", "Railway"],
+      "enum": ["Sea", "Air", "Truck"],
       "width": 120
     },
     "odi_eta_date": {
