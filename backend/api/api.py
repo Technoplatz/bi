@@ -1938,6 +1938,7 @@ class Crud:
                     "$match": {
                         "views": {
                             "$elemMatch": {
+                                "v.chart_type": {"$ne": "Flashcard"},
                                 "v.enabled": True,
                                 "v._tags": {
                                     "$elemMatch": {"$in": user_["_tags"]}
@@ -1954,6 +1955,7 @@ class Crud:
                 for view_ in views_:
                     id__ = view_["k"]
                     view__ = view_["v"]
+
                     get_view_data_f_ = self.get_view_data_f(user_, id__, source_)
 
                     if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
@@ -1994,29 +1996,14 @@ class Crud:
         try:
             user_ = input_["userindb"]
             col_id_ = input_["collection"]
-
-            flashcards_ = list(Mongo().db_["_collection"].aggregate([{
-                "$project": {
-                    "col_id": 1,
-                    "col_structure": 1,
-                    "views": {"$objectToArray": "$col_structure.views"}
-                }}, {
-                "$match": {
-                    "col_id": col_id_,
-                    "views": {
-                        "$elemMatch": {
-                            "v.enabled": True,
-                            "v.chart_type": "Flashcard",
-                            "v._tags": {
-                                "$elemMatch": {"$in": user_["_tags"]}
-                            }
-                        }
-                    }
-                }
-            }]))
-
+            aggregate_project_ = {"$project": {"col_id": 1, "col_structure": 1, "views": {"$objectToArray": "$col_structure.views"}}}
+            aggregate_match_ = {"$match": {"col_id": col_id_, "views": {"$elemMatch": {"v.enabled": True, "v.chart_type": "Flashcard", "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}} if col_id_ is not None else {
+                "$match": {"views": {"$elemMatch": {"v.enabled": True, "v.chart_type": "Flashcard", "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}}
+            aggregate_ = [aggregate_project_, aggregate_match_]
+            flashcards_ = list(Mongo().db_["_collection"].aggregate(aggregate_))
             returned_views_ = []
             for flashcard_ in flashcards_:
+                cid_ = flashcard_["col_id"]
                 col_structure_ = flashcard_["col_structure"]
                 properties_ = col_structure_["properties"]
                 views_ = flashcard_["views"] if "views" in flashcard_ and len(flashcard_["views"]) > 0 else []
@@ -2032,10 +2019,11 @@ class Crud:
                             "match": filter_,
                             "properties": properties_ if properties_ else None
                         })
-                        count_ = Mongo().db_[f"{col_id_}_data"].count_documents(get_filtered_)
+                        count_ = Mongo().db_[f"{cid_}_data"].count_documents(get_filtered_)
 
                     returned_views_.append({
                         "id": id__,
+                        "collection": cid_,
                         "view": view__,
                         "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999,
                         "count": count_

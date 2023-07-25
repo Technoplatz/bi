@@ -51,6 +51,13 @@
       "description": "Manifest opening date",
       "width": 150
     },
+    "man_closed": {
+      "bsonType": "bool",
+      "title": "Closed",
+      "description": "MAnifest Closed",
+      "width": 130,
+      "default": false
+    },
     "man_closing_date": {
       "bsonType": "date",
       "title": "Closing Date",
@@ -94,8 +101,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "eq",
-          "value": "20-OnCustoms"
+          "op": "in",
+          "value": "20-OnCustoms,30-OnCustomsProcess"
         },
         {
           "key": "dnn_odi_no",
@@ -130,7 +137,7 @@
   "actions": [],
   "triggers": [
     {
-      "name": "Manifest Opening",
+      "name": "Opening",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
@@ -167,10 +174,15 @@
       ]
     },
     {
-      "name": "Manifest Completed",
+      "name": "Completed",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": ["update"],
       "changes": [
+        {
+          "key": "man_closed",
+          "op": "eq",
+          "value": true
+        },
         {
           "key": "man_closing_date",
           "op": "nnull",
@@ -197,6 +209,48 @@
             {
               "key": "dnn_status",
               "value": "40-ClearanceCompleted"
+            }
+          ],
+          "upsert": false
+        }
+      ]
+    },
+    {
+      "name": "Completed rollback",
+      "enabled": true,
+      "operations": ["update"],
+      "changes": [
+        {
+          "key": "man_closed",
+          "op": "eq",
+          "value": false
+        },
+        {
+          "key": "man_closing_date",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_man_no",
+              "value": "man_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "dnn_status",
+              "op": "in",
+              "value": "30-OnCustomsProcess,40-ClearanceCompleted"
+            }
+          ],
+          "set": [
+            {
+              "key": "dnn_status",
+              "value": "30-OnCustomsProcess"
             }
           ],
           "upsert": false

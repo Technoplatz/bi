@@ -167,13 +167,6 @@
       "maxLength": 64,
       "width": 160
     },
-    "dnn_qty": {
-      "bsonType": "number",
-      "title": "Quantity",
-      "description": "Quantity",
-      "default": 1,
-      "width": 80
-    },
     "dnn_length": {
       "bsonType": "number",
       "title": "Length",
@@ -198,6 +191,13 @@
       "description": "Gross Weight",
       "default": 0,
       "width": 150
+    },
+    "dnn_qty": {
+      "bsonType": "number",
+      "title": "Quantity",
+      "description": "Quantity",
+      "default": 1,
+      "width": 80
     },
     "dnn_unit_price": {
       "bsonType": "number",
@@ -721,8 +721,54 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
+    "fc-status-00": {
+      "title": "00-Open",
+      "description": "DNs ready to get operated",
+      "priority": 1000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
+      "scheduled": false,
+      "scheduled_cron": "0 10 * 1-5 *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
     "fc-status-10": {
-      "title": "OnTheWay",
+      "title": "10-OnTheWay",
       "description": "DNs stand-by and on the way",
       "priority": 1010,
       "enabled": true,
@@ -768,7 +814,7 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-20": {
-      "title": "OnCustoms",
+      "title": "20-OnCustoms",
       "description": "DNs have just arrived",
       "priority": 1020,
       "enabled": true,
@@ -814,7 +860,7 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-30": {
-      "title": "OnCustomsProcess",
+      "title": "30-OnCustomsProcess",
       "description": "DNs currently on customs process",
       "priority": 1030,
       "enabled": true,
@@ -860,7 +906,7 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-40": {
-      "title": "ClearanceCompleted",
+      "title": "40-ClearanceCompleted",
       "description": "DNs clearance have been completed",
       "priority": 1040,
       "enabled": true,
@@ -906,7 +952,7 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-50": {
-      "title": "OnTheTouchpoint",
+      "title": "50-OnTheTouchpoint",
       "description": "DNs on the Touchpoint",
       "priority": 1050,
       "enabled": true,
@@ -952,7 +998,7 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-60": {
-      "title": "ReadyToBeDelivered",
+      "title": "60-ReadyToBeDelivered",
       "description": "DNs awaiting shipment",
       "priority": 1060,
       "enabled": true,
@@ -994,47 +1040,6 @@
       "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
-    },
-    "vie-penta": {
-      "title": "Saved View",
-      "description": "Saved view description",
-      "priority": 1000,
-      "enabled": true,
-      "dashboard": false,
-      "data_filter": [
-        {
-          "key": "dnn_acc_no",
-          "op": "eq",
-          "value": "1212991286"
-        }
-      ],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": [],
-      "data_columns": [],
-      "data_values": [],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "chart_type": "Stacked Vertical Bar",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": [],
-      "scheduled": false,
-      "scheduled_cron": "15 14,15,16 * * mon,tue",
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     }

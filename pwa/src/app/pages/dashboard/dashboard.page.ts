@@ -64,9 +64,11 @@ export class DashboardPage implements OnInit {
     this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
     });
+    this.crud.flashcards.subscribe((res: any) => {
+      this.flashcards = res && res.data ? res.data : [];
+    });
     this.crud.charts.subscribe((res: any) => {
       this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard" && obj.view.dashboard === true && obj.view.enabled === true) : [];
-      this.flashcards = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type === "Flashcard" && obj.view.dashboard === true && obj.view.enabled === true) : [];
     });
     this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];
@@ -77,6 +79,10 @@ export class DashboardPage implements OnInit {
     this.crud.charts.unsubscribe;
     this.crud.announcements.unsubscribe;
     this.crud.collections.unsubscribe;
+  }
+
+  ionViewWillEnter() {
+    this.crud.getFlashcards(null);
   }
 
   ngOnInit() {

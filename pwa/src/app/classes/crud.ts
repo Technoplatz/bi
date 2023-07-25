@@ -50,6 +50,7 @@ export class Crud {
   public collections = new BehaviorSubject<any>([]);
   public views = new BehaviorSubject<any>([]);
   public charts = new BehaviorSubject<any>([]);
+  public flashcards = new BehaviorSubject<any>([]);
   public visuals = new BehaviorSubject<any>([]);
   public announcements = new BehaviorSubject<any>([]);
 
@@ -268,16 +269,14 @@ export class Crud {
     });
   }
 
-  getFlashcards(colid_: string) {
-    return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
-        op: "flashcards",
-        collection: colid_
-      }).then((res: any) => {
-        resolve(res);
-      }).catch((err: any) => {
-        reject(err);
-      });
+  getFlashcards(colid_: any) {
+    this.misc.apiCall("crud", {
+      op: "flashcards",
+      collection: colid_
+    }).then((res: any) => {
+      this.flashcards.next(res);
+    }).catch((err: any) => {
+      console.error(err);
     });
   }
 

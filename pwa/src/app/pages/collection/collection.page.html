@@ -150,10 +150,10 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
-        <ion-grid *ngIf="flashcards_ && flashcards_.length > 0">
+        <ion-grid *ngIf="flashcards_.length > 0">
           <ion-row>
             <ion-col size="12">
-              <ion-list>
+              <ion-list class="ion-no-padding ion-no-margin">
                 <ion-item>
                   <ion-select class="status-select" aria-label="Status" interface="popover" placeholder="{{ 'Flashcard Filters' | translate }}" (ionChange)="doFlashcard($event)" [compareWith]="compareWith" [(ngModel)]="status_">
                     <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{ item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>

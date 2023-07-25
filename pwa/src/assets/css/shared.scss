@@ -1990,7 +1990,7 @@ ion-checkbox {
   flex-flow: row wrap;
   padding-left: 0px !important;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .visual-error {
@@ -2053,10 +2053,19 @@ app-chart {
   text-align: right;
 }
 
+.status-select {
+  --highlight-color-focused: #fff;
+  --highlight-color-valid: #fff;
+}
+
+.item-radio-checked.sc-ion-select-popover-md {
+  --background: #fff;
+}
+
 .status-select-option {
   margin-left: 16px;
   font-size: small !important;
-  margin-top: -20px;
+  margin-top: -16px;
   --highlight-color-focused: #fff;
 }
 
@@ -2069,15 +2078,15 @@ app-chart {
   overflow: hidden;
   padding: 10px;
   align-content: flex-start;
-  width: 260px;
-  height: 70px;
+  width: 240px;
+  height: 65px;
   white-space: nowrap !important;
   border: 2px dotted var(--ion-color-medium);
   cursor: pointer;
 }
 
 .flash-sq h2 {
-  padding-top: 0px;
+  margin-top: -3px !important;
   color: var(--ion-color-primary);
   font-size: 1.8em !important;
 }
@@ -2088,6 +2097,7 @@ app-chart {
   white-space: nowrap;
   text-overflow: ellipsis !important;
   width: 93%;
+  font-size: 1.2em !important;
 }
 
 .flash-sq h6 {

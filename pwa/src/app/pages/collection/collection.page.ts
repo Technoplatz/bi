@@ -136,13 +136,6 @@ export class CollectionPage implements OnInit {
     private router: Router,
     public misc: Miscellaneous
   ) {
-    this.collections_ = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
-      this.collections_structure = res.structure;
-    });
-    this.user_ = this.auth.user.subscribe((res: any) => {
-      this.user = res;
-    });
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
     this.jeoptions.mode = "code";
@@ -154,14 +147,31 @@ export class CollectionPage implements OnInit {
   }
 
   ngOnDestroy() {
+    this.crud.flashcards.unsubscribe;
+    this.auth.user.unsubscribe;
+    this.crud.collections.unsubscribe;
     this.collections_ = null;
     this.user_ = null;
+  }
+
+  ionViewWillEnter() {
+    this.crud.getFlashcards(this.id);
+    this.crud.flashcards.subscribe((res: any) => {
+      this.flashcards_ = res && res.data ? res.data : [];
+    });
   }
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
+    this.collections_ = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+      this.collections_structure = res.structure;
+    });
+    this.user_ = this.auth.user.subscribe((res: any) => {
+      this.user = res;
+    });
     this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.storage.get("LSSTATUS_" + this.id).then((LSSTATUS: any) => {
@@ -204,11 +214,6 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
-      this.crud.getFlashcards(this.id).then((res: any) => {
-        this.flashcards_ = res && res.data ? res.data : [];
-      }).catch(() => {
-        this.flashcards_ = [];
-      });
       this.crud.getCollection(this.id).then((res: any) => {
         this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
         this.counters_ = res && res.counters ? res.counters : {};
