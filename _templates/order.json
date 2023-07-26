@@ -9,21 +9,6 @@
       "pattern": "^[0-9]{10,10}$",
       "width": 130
     },
-    "ord_order_date": {
-      "bsonType": "date",
-      "title": "Order Date",
-      "description": "Order Date",
-      "width": 130
-    },
-    "ord_acc_no": {
-      "bsonType": "string",
-      "title": "Account No",
-      "description": "Account No",
-      "minLength": 10,
-      "maxLength": 11,
-      "pattern": "^[0-9-]{10,11}$",
-      "width": 110
-    },
     "ord_prd_no": {
       "bsonType": "string",
       "title": "Product ID",
@@ -51,34 +36,57 @@
       "width": 160
     }
   },
-  "required": ["ord_no", "ord_order_date", "ord_acc_no", "ord_prd_no", "ord_unit_price"],
-  "index": [["ord_prd_no"], ["ord_acc_no"], ["ord_no", "ord_prd_no"]],
+  "required": ["ord_no", "ord_prd_no", "ord_unit_price"],
+  "index": [["ord_no"], ["ord_no", "ord_prd_no"]],
   "unique": [["ord_no", "ord_prd_no"]],
   "sort": {
     "_modified_at": -1
   },
-  "parents": [
+  "parents": [],
+  "actions": [],
+  "triggers": [
     {
-      "collection": "account",
-      "match": [
+      "name": "Order price updater",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
         {
-          "key": "ord_acc_no",
-          "value": "acc_no"
+          "key": "ord_unit_price",
+          "op": "gt",
+          "value": 0
         }
       ],
-      "filter": [
+      "targets": [
         {
-          "key": "acc_is_active",
-          "op": "eq",
-          "value": true
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_order_no",
+              "value": "ord_no"
+            },
+            {
+              "key": "dnn_prd_no",
+              "value": "ord_prd_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "dnn_status",
+              "op": "ne",
+              "value": "70-Delivered"
+            }
+          ],
+          "set": [
+            {
+              "key": "dnn_order_price",
+              "value": "ord_unit_price"
+            }
+          ],
+          "upsert": false
         }
-      ],
-      "get": ["acc_no", "acc_name"]
+      ]
     }
   ],
-  "actions": [],
-  "triggers": [],
   "views": {},
-  "links": [],
-  "connectors": []
+  "links": []
 }

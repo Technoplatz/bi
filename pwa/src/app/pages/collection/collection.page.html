@@ -94,7 +94,7 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Refresh' | translate }}
               </div>
-              <div *ngIf="filter && filter.length>0" (click)="doClearFilter()" class="data-sq-button required">
+              <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 <br />
                 <span>{{ 'Clear' | translate }}</span>
@@ -108,7 +108,7 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}
               </div>
-              <div *ngIf="!jeopen && filter.length==0" (click)="doSaveView()" class="data-sq-button">
+              <div *ngIf="!jeopen && filter_.length==0" (click)="doSaveView()" class="data-sq-button">
                 <ion-icon name="save-outline"></ion-icon><br />
                 {{ 'Save' | translate }}
               </div>
@@ -150,14 +150,25 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
-        <ion-grid *ngIf="flashcards_.length > 0">
+        <ion-grid>
           <ion-row>
             <ion-col size="12">
               <ion-list class="ion-no-padding ion-no-margin">
                 <ion-item>
-                  <ion-select class="status-select" aria-label="Status" interface="popover" placeholder="{{ 'Flashcard Filters' | translate }}" (ionChange)="doFlashcard($event)" [compareWith]="compareWith" [(ngModel)]="status_">
-                    <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{ item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>
+                  <ion-select *ngIf="flashcards_?.length > 0; else noflashcards" class="status-select"
+                    aria-label="Status" interface="popover" placeholder="{{ 'Flashcard Filters' | translate }}"
+                    (ionChange)="doFlashcard($event)" [compareWith]="compareWith" [(ngModel)]="status_">
+                    <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{
+                      item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>
                   </ion-select>
+                  <ng-template #noflashcards>
+                    <ion-select class="status-select" aria-label="Status" interface="popover"
+                      placeholder="{{ 'Flashcard Filters' | translate }}" [compareWith]="compareWith"
+                      [(ngModel)]="status_">
+                      <ion-select-option class="status-select-option" value="nfd">{{ 'No filter defined'
+                        }}</ion-select-option>
+                    </ion-select>
+                  </ng-template>
                 </ion-item>
               </ion-list>
             </ion-col>
@@ -296,7 +307,8 @@ https://www.gnu.org/licenses.
             </ion-col>
             <ion-col *ngFor="let item of properties_ | keyvalue : orderByIndex" (click)="goCrud(record, 'update')"
               [style]="item.value.width ? 'min-width: ' + item.value.width + 'px;' : 'min-width: ' + default_width + 'px;'">
-              <span *ngIf="['date', 'array', 'object', 'decimal'].includes(item.value.bsonType); else othertype">
+              <span
+                *ngIf="['date', 'array', 'object', 'decimal', 'bool'].includes(item.value.bsonType); else othertype">
                 <span *ngIf="item.value.bsonType=='date' && record[item.key]">
                   {{ record[item.key].replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }}
                 </span>
@@ -314,6 +326,16 @@ https://www.gnu.org/licenses.
                 </span>
                 <span *ngIf="item.value.bsonType=='decimal'">
                   <span>{{ record[item.key]?.toFixed(2) }}</span>
+                </span>
+                <span *ngIf="item.value.bsonType=='bool'">
+                  <span *ngIf="record[item.key]; else nobooltrue">
+                    <span *ngIf="item.value.truetext">{{ item.value.truetext }}</span>
+                    <span *ngIf="!item.value.truetext">{{ record[item.key]?.toString() }}</span>
+                  </span>
+                  <ng-template #nobooltrue>
+                    <span *ngIf="item.value.falsetext">{{ item.value.falsetext }}</span>
+                    <span *ngIf="!item.value.falsetext">{{ record[item.key]?.toString() }}</span>
+                  </ng-template>
                 </span>
               </span>
               <ng-template #othertype>

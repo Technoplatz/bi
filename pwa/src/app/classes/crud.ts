@@ -269,10 +269,9 @@ export class Crud {
     });
   }
 
-  getFlashcards(colid_: any) {
+  getFlashcards() {
     this.misc.apiCall("crud", {
-      op: "flashcards",
-      collection: colid_
+      op: "flashcards"
     }).then((res: any) => {
       this.flashcards.next(res);
     }).catch((err: any) => {

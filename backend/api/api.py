@@ -262,7 +262,9 @@ class Misc:
             "counter",
             "uuid",
             "dateonly",
-            "decimals"
+            "decimals",
+            "truetext",
+            "falsetext"
         ]
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
@@ -1995,10 +1997,8 @@ class Crud:
         """
         try:
             user_ = input_["userindb"]
-            col_id_ = input_["collection"]
             aggregate_project_ = {"$project": {"col_id": 1, "col_structure": 1, "views": {"$objectToArray": "$col_structure.views"}}}
-            aggregate_match_ = {"$match": {"col_id": col_id_, "views": {"$elemMatch": {"v.enabled": True, "v.chart_type": "Flashcard", "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}} if col_id_ is not None else {
-                "$match": {"views": {"$elemMatch": {"v.enabled": True, "v.chart_type": "Flashcard", "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}}
+            aggregate_match_ = {"$match": {"views": {"$elemMatch": {"v.enabled": True, "v.chart_type": "Flashcard", "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}}
             aggregate_ = [aggregate_project_, aggregate_match_]
             flashcards_ = list(Mongo().db_["_collection"].aggregate(aggregate_))
             returned_views_ = []

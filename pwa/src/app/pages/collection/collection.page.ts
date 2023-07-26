@@ -63,7 +63,7 @@ export class CollectionPage implements OnInit {
   public paget: any = [];
   public id: string = "";
   private template_showed: boolean = false;
-  public filter: any = [];
+  public filter_: any = [];
   public searched: any = null;
   public data: any = [];
   public selected: any = [];
@@ -82,7 +82,8 @@ export class CollectionPage implements OnInit {
   public is_initialized: boolean = false;
   public is_pane_ok: boolean = false;
   public scan_: boolean = false;
-  public status_: any = {};
+  public status_: any = {};  
+  public action_: any = {};
   private view: any = null;
   public actions: any = [];
   public columns_: any;
@@ -144,22 +145,23 @@ export class CollectionPage implements OnInit {
     this.jeoptions.expandAll = false;
     this.jeoptions.navigationBar = true;
     this.jeoptions.name = "schema-structure";
+    this.crud.flashcards.subscribe((res: any) => {
+      this.flashcards_ = res && res.data ? res.data.filter((obj: any) => obj.collection === this.id) : [];
+    });
   }
 
   ngOnDestroy() {
-    this.crud.flashcards.unsubscribe;
     this.auth.user.unsubscribe;
     this.crud.collections.unsubscribe;
     this.collections_ = null;
     this.user_ = null;
   }
 
-  ionViewWillEnter() {
-    this.crud.getFlashcards(this.id);
-    this.crud.flashcards.subscribe((res: any) => {
-      this.flashcards_ = res && res.data ? res.data : [];
-    });
-  }
+  // ionViewDidEnter() {
+  //   this.crud.flashcards.subscribe((res: any) => {
+  //     this.flashcards_ = res && res.data ? res.data.filter((obj: any) => obj.collection === this.id) : [];
+  //   });
+  // }
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
@@ -176,7 +178,7 @@ export class CollectionPage implements OnInit {
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.storage.get("LSSTATUS_" + this.id).then((LSSTATUS: any) => {
           this.status_ = LSSTATUS;
-          this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+          this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
           this.actions = [];
           this.RefreshData(0).then(() => {
@@ -214,6 +216,7 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
+      this.crud.getFlashcards();
       this.crud.getCollection(this.id).then((res: any) => {
         this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
         this.counters_ = res && res.counters ? res.counters : {};
@@ -222,14 +225,14 @@ export class CollectionPage implements OnInit {
         this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
           this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-            this.filter = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+            this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
             this.count = 0;
             this.page = p === 0 ? 1 : p;
             this.misc.apiCall("crud", {
               op: "read",
               collection: this.id,
               projection: null,
-              match: this.filter && this.filter.length > 0 ? this.filter : [],
+              match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
               sort: this.sort,
               page: this.page,
               limit: this.limit
@@ -353,7 +356,7 @@ export class CollectionPage implements OnInit {
           counters: this.counters_,
           structure: this.editor ? this.editor.get() : this.structure,
           sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
-          filter: op === "action" ? this.filter : null,
+          filter: op === "action" ? this.filter_ : null,
           actions: this.actions && this.actions.length > 0 ? this.actions : [],
           actionix: op === "action" && this.actionix >= 0 ? this.actionix : -1,
           view: this.view,
@@ -415,7 +418,7 @@ export class CollectionPage implements OnInit {
 
   doResetSearch(full: boolean) {
     full ? this.searched = {} : null;
-    this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+    this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
       for (let key_ in this.structure.properties) {
         if (this.searched) {
           this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "eq", setmode: false } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_].setmode ? this.searched[key_].setmode : null };
@@ -426,9 +429,9 @@ export class CollectionPage implements OnInit {
 
   doClearFilter() {
     return new Promise((resolve, reject) => {
-      this.filter = [];
+      this.filter_ = [];
       this.status_ = null;
-      this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+      this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
           this.storage.remove("LSSTATUS_" + this.id).then(() => {
             this.doResetSearch(true);
@@ -446,18 +449,18 @@ export class CollectionPage implements OnInit {
   }
 
   doResetSearchItem(k: string) {
-    const n_ = this.filter.length;
+    const n_ = this.filter_.length;
     this.searched[k].actived = false;
     for (let d = 0; d < n_; d++) {
-      if (this.filter[d] && this.filter[d]["key"] === k) {
-        this.filter.splice(d, 1);
+      if (this.filter_[d] && this.filter_[d]["key"] === k) {
+        this.filter_.splice(d, 1);
         this.searched[k].f = false;
         this.searched[k].kw = null;
         this.searched[k].op = "eq";
         this.searched[k].setmode = false;
       }
       if (d === n_ - 1) {
-        this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+        this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
           this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
             this.RefreshData(0);
           });
@@ -468,22 +471,22 @@ export class CollectionPage implements OnInit {
 
   doSearch(k: string, v: string) {
     this.searched[k].setmode = false;
-    if (!this.filter || this.filter.length === 0) {
+    if (!this.filter_ || this.filter_.length === 0) {
       if (["true", "false"].includes(v)) {
-        this.filter.push({
+        this.filter_.push({
           key: k,
           op: v,
           value: null
         });
       } else {
-        this.filter.push({
+        this.filter_.push({
           key: k,
           op: this.searched[k].op,
           value: v
         });
       }
       this.searched[k].f = true;
-      this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+      this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
           this.storage.remove("LSSTATUS_" + this.id).then(() => {
             this.status_ = null;
@@ -493,21 +496,21 @@ export class CollectionPage implements OnInit {
       });
     } else {
       let found = false;
-      const n_ = this.filter.length;
+      const n_ = this.filter_.length;
       for (let d = 0; d < n_; d++) {
-        if (this.filter[d] && this.filter[d]["key"] === k) {
+        if (this.filter_[d] && this.filter_[d]["key"] === k) {
           found = true;
-          this.filter[d]["op"] = this.searched[k].op;
-          this.filter[d]["value"] = v;
+          this.filter_[d]["op"] = this.searched[k].op;
+          this.filter_[d]["value"] = v;
         }
         if (d === n_ - 1) {
-          !found ? this.filter.push({
+          !found ? this.filter_.push({
             key: k,
             op: this.searched[k].op,
             value: v
           }) : null;
           this.searched[k].f = true;
-          this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+          this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
             this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
               this.storage.remove("LSSTATUS_" + this.id).then(() => {
                 this.status_ = null;
@@ -559,9 +562,9 @@ export class CollectionPage implements OnInit {
     const item_ = evt.detail.value;
     if (item_ !== "") {
       this.status_ = item_;
-      this.filter = item_.view.data_filter;
+      this.filter_ = item_.view.data_filter;
       this.storage.set("LSSTATUS_" + this.id, this.status_).then(() => {
-        this.storage.set("LSFILTER_" + this.id, this.filter).then(() => {
+        this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
           this.RefreshData(0).then(() => {
           }).catch((res: any) => {
             this.misc.doMessage(res, "error");
@@ -573,6 +576,11 @@ export class CollectionPage implements OnInit {
 
   compareWith(o1: any, o2: any) {
     return o1 && o2 ? o1.id === o2.id : o1 === o2;
+  }
+
+  doClearAttr() {
+    this.status_ = null;
+    this.action_ = null;
   }
 
   doSaveView() {
@@ -603,7 +611,7 @@ export class CollectionPage implements OnInit {
             this.misc.apiCall("/crud", {
               op: "saveview",
               collection: this.id,
-              filter: this.filter,
+              filter: this.filter_,
               title: data.title
             }).then((res: any) => {
               this.misc.doMessage("view saved successfully", "success");
@@ -657,7 +665,7 @@ export class CollectionPage implements OnInit {
       op: "copykey",
       collection: this.id,
       properties: this.structure.properties,
-      match: this.filter,
+      match: this.filter_,
       sweeped: this.sweeped[this.segment],
       key: key
     }).then((res: any) => {

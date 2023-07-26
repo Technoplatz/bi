@@ -37,29 +37,16 @@ https://www.gnu.org/licenses.
         <h4>{{ 'DASHBOARD' | translate }}</h4>
         <div *ngIf="charts.length > 0 || flashcards.length > 0">
           <div class="filler-10"></div>
-          <!-- <h4>{{ 'SHARED VIEWS' | translate }}</h4> -->
-          <!-- <div class="filler-10"></div> -->
 
           <!-- flashcards -->
           <div class="brz-visual-group">
-            <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer (click)="misc.navi.next('view/' + item.id)">
+            <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer (click)="doFlashcard(item)">
               <div class="visual-buttons">
                 <h2>{{ item.count }}</h2>
-                <!-- <ion-button size="small" fill="clear" (click)="doRefresh()" class="clear-dark-button" color="dark"
-                  mode="ios">
-                  <ion-icon name="sync-outline"></ion-icon>
-                </ion-button>
-                <ion-button size="small" fill="clear" (click)="misc.navi.next('view/' + item.id)"
-                  class="clear-dark-button" color="dark" mode="ios">
-                  <ion-icon name="list-outline"></ion-icon>
-                </ion-button> -->
               </div>
               <h5>{{ item.view.title }}</h5>
               {{ item.collection }} | {{ item.view.data_values[0].value }} {{ 'of' | translate }} {{
               item.view.data_values[0].key }}
-              <!-- <h2>{{ item.stats[item.view.data_values[0].value] }}</h2> -->
-              <!-- <div *ngIf="item.view && item.view.scheduled && item.view.scheduled_cron" class="flash-cron"><ion-icon
-                  name="alarm-outline" size="large"></ion-icon><br />{{ item.view.scheduled_cron }} </div> -->
             </div>
           </div>
 

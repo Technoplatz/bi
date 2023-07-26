@@ -490,20 +490,22 @@
               "key": "blo_status",
               "op": "contains",
               "value": "Order"
+            },
+            {
+              "key": "blo_net_value",
+              "op": "gt",
+              "value": 0
+            },
+            {
+              "key": "blo_line_qty",
+              "op": "gt",
+              "value": 0
             }
           ],
           "set": [
             {
               "key": "ord_no",
               "value": "blo_order_no"
-            },
-            {
-              "key": "ord_order_date",
-              "value": "blo_sales_order_created_date"
-            },
-            {
-              "key": "ord_acc_no",
-              "value": "blo_sold_to_num"
             },
             {
               "key": "ord_prd_no",
@@ -520,6 +522,5 @@
     }
   ],
   "views": {},
-  "links": [],
-  "connectors": []
+  "links": []
 }

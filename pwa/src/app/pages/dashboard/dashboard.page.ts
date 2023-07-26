@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { Storage } from "@ionic/storage";
+import { NavController } from "@ionic/angular";
 import { Crud } from "../../classes/crud";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
@@ -55,10 +56,13 @@ export class DashboardPage implements OnInit {
   public charts: any = [];
   public loadingText: string = environment.misc.loadingText;
   public collections: any = [];
+  public status_: any = {};
+  public filter_: any = [];
 
   constructor(
     private storage: Storage,
     private crud: Crud,
+    private nav: NavController,
     public misc: Miscellaneous
   ) {
     this.crud.collections.subscribe((res: any) => {
@@ -75,17 +79,8 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  ngOnDestroy() {
-    this.crud.charts.unsubscribe;
-    this.crud.announcements.unsubscribe;
-    this.crud.collections.unsubscribe;
-  }
-
-  ionViewWillEnter() {
-    this.crud.getFlashcards(null);
-  }
-
   ngOnInit() {
+    this.crud.getFlashcards();
     this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
       this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
       this.chart_css = "chart-sq " + this.chart_size;
@@ -101,6 +96,17 @@ export class DashboardPage implements OnInit {
         this.is_refreshing = false;
       });
     }
+  }
+
+  doFlashcard(item_: any) {
+    this.status_ = item_;
+    const coll_ = item_.collection;
+    this.filter_ = item_.view.data_filter;
+    this.storage.set("LSSTATUS_" + coll_, this.status_).then(() => {
+      this.storage.set("LSFILTER_" + coll_, this.filter_).then(() => {
+        this.misc.navi.next("collection/" + coll_);
+      });
+    });
   }
 
   doResizeCharts() {

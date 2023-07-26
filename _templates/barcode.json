@@ -58,7 +58,7 @@
   "actions": [],
   "triggers": [
     {
-      "name": "Depot Entries",
+      "name": "Barcode IN",
       "enabled": true,
       "operations": ["insert"],
       "changes": [
@@ -74,7 +74,8 @@
           "match": [
             {
               "key": "ser_case_no",
-              "value": "bar_input"
+              "value": "bar_input",
+              "prefixes": ["1S"]
             }
           ],
           "filter": [],
@@ -96,7 +97,7 @@
             {
               "key": "ser_no",
               "value": "bar_input",
-              "prefixes": ["S", "1S"]
+              "prefixes": ["1P"]
             }
           ],
           "filter": [],
@@ -153,7 +154,8 @@
           "match": [
             {
               "key": "ser_case_no",
-              "value": "bar_input"
+              "value": "bar_input",
+              "prefixes": ["1S"]
             }
           ],
           "filter": [
@@ -181,7 +183,7 @@
             {
               "key": "ser_no",
               "value": "bar_input",
-              "prefixes": ["S", "1S"]
+              "prefixes": ["1P"]
             }
           ],
           "filter": [
@@ -212,7 +214,13 @@
               "prefixes": ["16K"]
             }
           ],
-          "filter": [],
+          "filter": [
+            {
+              "key": "ser_proc_in",
+              "op": "eq",
+              "value": true
+            }
+          ],
           "set": [
             {
               "key": "ser_proc_out",

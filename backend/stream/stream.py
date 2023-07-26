@@ -380,42 +380,6 @@ class Trigger():
         prfx_ = prfxs_[0] if prfxs_ and len(prfxs_) > 0 else prfxs_
         return input_.removeprefix(prfx_)
 
-    async def worker_connectors_f(self, params_):
-        """
-        gets the collection and the fields that affected by the change stream.
-        """
-        try:
-            source_collection_ = params_["collection"]
-            _id = params_["id"]
-            col_id_ = source_collection_.replace("_data", "")
-
-            connectors_ = self.connectors_[col_id_] if col_id_ in self.connectors_ and len(self.connectors_[col_id_]) > 0 else None
-            if not connectors_:
-                raise PassException("!!! no connector found for", col_id_)
-
-            for connector_ in connectors_:
-                enabled_ = connector_["enabled"] if "enabled" in connector_ and connector_["enabled"] is True else False
-                if not enabled_:
-                    continue
-                url_ = connector_["url"] if "enabled" in connector_ and connector_["enabled"] is True else False
-                if not url_:
-                    continue
-                print_(">>> connector_", col_id_, url_)
-
-            return True
-
-        except pymongo.errors.PyMongoError as exc_:
-            self.exception_show_f(exc_)
-
-        except PassException as exc_:
-            self.exception_passed_f(exc_)
-
-        except AppException as exc_:
-            self.exception_show_f(exc_)
-
-        except Exception as exc_:
-            self.exception_show_f(exc_)
-
     async def worker_change_f(self, params_):
         """
         gets the collection and the fields that affected by the change stream.
@@ -657,13 +621,6 @@ class Trigger():
         except Exception as exc_:
             self.exception_show_f(exc_)
 
-    async def starter_connectors_f(self, params_):
-        """
-        docstring is in progress
-        """
-        print_("\n>>> connectors hub started")
-        return await self.worker_connectors_f(params_)
-
     async def starter_changes_f(self, params_):
         """
         docstring is in progress
@@ -735,7 +692,6 @@ class Trigger():
 
                     params_ = {"collection": source_collection_, "properties": source_properties_, "id": _id, "token": token_, "op": op_, "changed": changed_}
                     await asyncio.create_task(self.starter_changes_f(params_))
-                    await asyncio.create_task(self.starter_connectors_f(params_))
 
             current_task_ = asyncio.current_task()
             running_tasks_ = [task for task in asyncio.all_tasks() if task is not current_task_]

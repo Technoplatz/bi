@@ -2076,10 +2076,10 @@ app-chart {
 .flash-sq {
   position: relative;
   overflow: hidden;
-  padding: 10px;
+  padding: 8px;
   align-content: flex-start;
-  width: 240px;
-  height: 65px;
+  width: 220px;
+  height: 58px;
   white-space: nowrap !important;
   border: 2px dotted var(--ion-color-medium);
   cursor: pointer;
@@ -2088,7 +2088,7 @@ app-chart {
 .flash-sq h2 {
   margin-top: -3px !important;
   color: var(--ion-color-primary);
-  font-size: 1.8em !important;
+  font-size: 1.6em !important;
 }
 
 .flash-sq h5,
@@ -2097,7 +2097,7 @@ app-chart {
   white-space: nowrap;
   text-overflow: ellipsis !important;
   width: 93%;
-  font-size: 1.2em !important;
+  font-size: 1.1em !important;
 }
 
 .flash-sq h6 {

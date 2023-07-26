@@ -53,10 +53,12 @@
     },
     "man_closed": {
       "bsonType": "bool",
-      "title": "Closed",
+      "title": "Completed",
       "description": "MAnifest Closed",
-      "width": 130,
-      "default": false
+      "truetext": "Completed",
+      "falsetext": "OnCustomsProcess",
+      "default": false,
+      "width": 140
     },
     "man_closing_date": {
       "bsonType": "date",

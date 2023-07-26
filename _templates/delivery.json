@@ -220,7 +220,7 @@
       "title": "Order Price",
       "description": "Order Price",
       "default": 0,
-      "width": 160
+      "width": 140
     },
     "dnn_order_amount": {
       "bsonType": "number",
@@ -229,7 +229,7 @@
       "default": 0,
       "disabled": false,
       "decimals": 2,
-      "width": 180
+      "width": 150
     },
     "dnn_eta_date": {
       "bsonType": "date",
@@ -315,9 +315,9 @@
       ],
       "filter": [
         {
-          "key": "man_status",
+          "key": "man_closed",
           "op": "eq",
-          "value": "10-OnCustomsProcess"
+          "value": false
         }
       ],
       "get": ["man_no", "man_opening_date"]
@@ -387,47 +387,6 @@
             "key": "dnn_status",
             "op": "eq",
             "value": "00-Open"
-          }
-        ]
-      }
-    },
-    {
-      "id": "link-ordino",
-      "title": "Ordino",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "00-Open"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "10-OnTheWay"
-        },
-        {
-          "key": "dnn_odi_no",
-          "value": null
-        },
-        {
-          "key": "dnn_odi_sub_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs on the way",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Open to 10-OnTheWay.",
-        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "10-OnTheWay"
           }
         ]
       }
