@@ -34,7 +34,7 @@ version: "3.9"
 services:
   edoksis:
     build:
-      context: ./edoksis
+      context: .
       dockerfile: Dockerfile
       args:
         - TZ=${TZ}
@@ -106,15 +106,16 @@ services:
 
 volumes:
   bi-cert-volume:
-    driver: local
     name: bi-cert-volume
+    external: true
   bi-storage-volume:
-    driver: local
     name: bi-storage-volume
+    external: true
 
 networks:
   network0:
     name: network0
+    external: true
     ipam:
       driver: default
       config:
@@ -122,12 +123,12 @@ networks:
 
 secrets:
   mongo_initdb_root_password:
-    file: ./../.mongo/mongo_initdb_root_password
+    file: ./../../.mongo/mongo_initdb_root_password
   mongo_initdb_root_username:
-    file: ./../.mongo/mongo_initdb_root_username
+    file: ./../../.mongo/mongo_initdb_root_username
   mongo_password:
-    file: ./../.mongo/mongo_password
+    file: ./../../.mongo/mongo_password
   mongo_username:
-    file: ./../.mongo/mongo_username
+    file: ./../../.mongo/mongo_username
   mongo_tls_keyfile_password:
-    file: ./../.mongo/mongo_tls_keyfile_password
+    file: ./../../.mongo/mongo_tls_keyfile_password

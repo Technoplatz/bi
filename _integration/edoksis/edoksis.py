@@ -753,21 +753,21 @@ def issue_f():
                 root_ = ElementTree.fromstring(response_.content)
                 for tag in root_.iter(f"{tag_prefix_}Sonuc"):
                     if not tag.text:
-                        raise APIError("!!! missing sonuc tag")
+                        raise EdoksisError("!!! missing sonuc tag")
                     if tag.text == "1":
                         for tag in root_.iter(f"{tag_prefix_}IRsaliyeNo"):
                             if not tag.text:
-                                raise APIError("!!! missing irsaliyeno tag")
+                                raise EdoksisError("!!! missing irsaliyeno tag")
                             waybill_no_ = str(tag.text)
                             for tag in root_.iter(f"{tag_prefix_}IrsaliyeETTN"):
                                 if not tag.text:
-                                    raise APIError("!!! missing irsaliyeettn tag")
+                                    raise EdoksisError("!!! missing irsaliyeettn tag")
                                 waybill_ettn_ = str(tag.text)
                     else:
                         for tag in root_.iter(f"{tag_prefix_}Mesaj"):
                             if not tag.text:
-                                raise APIError("!!! missing mesaj tag")
-                            raise APIError(str(tag.text))
+                                raise EdoksisError("!!! missing mesaj tag")
+                            raise EdoksisError(str(tag.text))
 
                 process_date_ = Misc().get_now_f()
 

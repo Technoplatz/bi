@@ -1853,6 +1853,10 @@ ion-checkbox {
   margin-top: 10px;
 }
 
+.data-grid ion-row {
+  overflow: visible;
+}
+
 .data-grid ion-row ion-col {
   border-right: 1px solid var(--ion-color-light);
   border-bottom: 1px solid var(--ion-color-light);
@@ -1890,6 +1894,10 @@ ion-checkbox {
 .data-grid ion-row:first-child:hover,
 .data-grid ion-row:last-child:hover {
   background: none;
+}
+
+.data-grid .hoverr:hover>ion-col {
+  background-color: #eee;
 }
 
 .dash-colls {

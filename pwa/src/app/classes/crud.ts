@@ -270,12 +270,14 @@ export class Crud {
   }
 
   getFlashcards() {
-    this.misc.apiCall("crud", {
-      op: "flashcards"
-    }).then((res: any) => {
-      this.flashcards.next(res);
-    }).catch((err: any) => {
-      console.error(err);
+    return new Promise((resolve, reject) => {
+      this.misc.apiCall("crud", {
+        op: "flashcards"
+      }).then((res: any) => {
+        resolve(this.flashcards.next(res));
+      }).catch((err: any) => {
+        reject(err);
+      });
     });
   }
 

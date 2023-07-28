@@ -363,7 +363,7 @@ export class SignPage implements OnInit {
       tfac: this.resetForm.get("tfac")?.value
     }).then(() => {
       this.isInProgress = false;
-      this.success_str = "password was reset successfully";
+      this.success_str = "password has been reset successfully";
       this.formtype = "signin"
     }).catch((error: any) => {
       this.isInProgress = false;

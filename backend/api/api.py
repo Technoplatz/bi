@@ -1203,14 +1203,11 @@ class Crud:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             session_.abort_transaction()
             res_ = Misc().mongo_error_f(exc)
-            email_sent_ = Email().send_email_f({
+            Email().send_email_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
                 "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{str(exc_obj_)}"
             })
-            if not email_sent_["result"]:
-                raise APIError(email_sent_["msg"])
-
             res_["msg"] = "file upload error! we have just sent an email with the error details."
             return res_
 

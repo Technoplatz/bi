@@ -80,9 +80,8 @@ export class CollectionPage implements OnInit {
   private counters_: any = {};
   public collections: any = [];
   public is_initialized: boolean = false;
-  public is_pane_ok: boolean = false;
   public scan_: boolean = false;
-  public status_: any = {};  
+  public status_: any = {};
   public action_: any = {};
   private view: any = null;
   public actions: any = [];
@@ -148,6 +147,13 @@ export class CollectionPage implements OnInit {
     this.crud.flashcards.subscribe((res: any) => {
       this.flashcards_ = res && res.data ? res.data.filter((obj: any) => obj.collection === this.id) : [];
     });
+    this.collections_ = this.crud.collections.subscribe((res: any) => {
+      this.collections = res && res.data ? res.data : [];
+      this.collections_structure = res.structure;
+    });
+    this.user_ = this.auth.user.subscribe((res: any) => {
+      this.user = res;
+    });
   }
 
   ngOnDestroy() {
@@ -157,23 +163,20 @@ export class CollectionPage implements OnInit {
     this.user_ = null;
   }
 
-  // ionViewDidEnter() {
-  //   this.crud.flashcards.subscribe((res: any) => {
-  //     this.flashcards_ = res && res.data ? res.data.filter((obj: any) => obj.collection === this.id) : [];
-  //   });
-  // }
-
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
-    this.collections_ = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
-      this.collections_structure = res.structure;
+    this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
+    this.crud.getCollection(this.id).then((res: any) => {
+      this.counters_ = res && res.counters ? res.counters : {};
+      this.subheader = res && res.data ? res.data.col_title : this.id;
+      this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
     });
-    this.user_ = this.auth.user.subscribe((res: any) => {
-      this.user = res;
-    });
+  }
+
+  ionViewDidEnter() {
+    this.is_initialized = false;
     this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.storage.get("LSSTATUS_" + this.id).then((LSSTATUS: any) => {
@@ -216,12 +219,7 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
-      this.crud.getFlashcards();
-      this.crud.getCollection(this.id).then((res: any) => {
-        this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
-        this.counters_ = res && res.counters ? res.counters : {};
-        this.subheader = res && res.data ? res.data.col_title : this.id;
-        this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
+      this.crud.getFlashcards().then(() => {
         this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
           this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -237,47 +235,36 @@ export class CollectionPage implements OnInit {
               page: this.page,
               limit: this.limit
             }).then((res: any) => {
-              if (res.structure && res.structure.properties) {
-                this.editor?.setMode("code");
-                this.doBuildSchema(res.structure);
-                this.data = res.data;
-                this.structure_ori_ = res.structure;
-                this.structure = res.structure;
-                this.actions = this.structure.actions;
-                this.properties_ = res.structure.properties;
-                this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
-                this.count = res.count;
-                this.multicheckbox = false;
-                this.multicheckbox ? this.multicheckbox = false : null;
-                this.selected = new Array(res.data.length).fill(false);
-                this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
-                const lmt = this.pages >= 10 ? 10 : this.pages;
-                this.paget = new Array(lmt);
-                this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
-                this.page_end = this.page_start + 10;
-                this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
-                for (let p = 0; p < this.paget.length; p++) {
-                  this.paget[p] = this.page_start + p;
-                }
-                resolve(true);
-              } else {
-                this.misc.doMessage("no structure found", "error");
-                resolve(true);
+              this.editor?.setMode("code");
+              this.doBuildSchema(res.structure);
+              this.data = res.data;
+              this.structure_ori_ = res.structure;
+              this.structure = res.structure;
+              this.actions = this.structure.actions;
+              this.properties_ = res.structure.properties;
+              this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
+              this.count = res.count;
+              this.multicheckbox = false;
+              this.multicheckbox ? this.multicheckbox = false : null;
+              this.selected = new Array(res.data.length).fill(false);
+              this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
+              const lmt = this.pages >= 10 ? 10 : this.pages;
+              this.paget = new Array(lmt);
+              this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
+              this.page_end = this.page_start + 10;
+              this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
+              for (let p = 0; p < this.paget.length; p++) {
+                this.paget[p] = this.page_start + p;
               }
+              resolve(true);
             }).catch((error: any) => {
               this.misc.doMessage(error, "error");
               reject(error);
             }).finally(() => {
-              this.is_pane_ok = true;
               this.is_loaded = true;
             });
-          }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
-            reject(error);
           });
         });
-      }).catch((res: any) => {
-        this.misc.doMessage(res.error.msg, "error");
       });
     });
   }

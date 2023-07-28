@@ -226,7 +226,7 @@ export class AccountPage implements OnInit {
                   reject(err_);
                 }
               } else if (op_ === "request") {
-                this.misc.doMessage("Backup OTP was sent by email", "success");
+                this.misc.doMessage("Backup OTP has been sent by email", "success");
                 resolve(true);
               } else {
                 const err_ = "invalid operation";

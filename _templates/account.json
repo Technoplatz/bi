@@ -4,68 +4,67 @@
       "bsonType": "string",
       "title": "Account No",
       "description": "Account No",
-      "pattern": "^[A-Z0-9-]{10,16}$",
-      "minLength": 10,
+      "pattern": "^[A-Z0-9-]{9,16}$",
+      "minLength": 9,
       "maxLength": 16
     },
     "acc_nick_name": {
       "bsonType": "string",
       "title": "Nickname",
-      "description": "Account Nick Name",
-      "minLength": 3,
+      "description": "Nick Name",
+      "minLength": 1,
       "maxLength": 16,
-      "pattern": "^[A-Za-z0-9- ]{3,16}$",
       "width": 130
     },
     "acc_name": {
       "bsonType": "string",
       "title": "Business Name",
-      "description": "Account Business Name",
-      "width": 240
+      "description": "Business Name",
+      "width": 260
     },
     "acc_ship_to_street": {
       "bsonType": "string",
-      "title": "Ship To Street",
-      "description": "Shipping Street",
+      "title": "Shipping Street",
+      "description": "Ship to Street",
       "minLength": 2,
       "maxLength": 256,
       "width": 200
     },
+    "acc_ship_to_building": {
+      "bsonType": "string",
+      "title": "Shipping Building",
+      "description": "Ship to building no",
+      "minLength": 0,
+      "maxLength": 64,
+      "width": 170
+    },
     "acc_ship_to_province": {
       "bsonType": "string",
-      "title": "Ship To Province",
-      "description": "Shipping Province",
+      "title": "Province",
+      "description": "Ship to province",
       "minLength": 0,
       "maxLength": 32,
       "width": 170
     },
-    "acc_ship_to_building": {
+    "acc_ship_to_postcode": {
       "bsonType": "string",
-      "title": "Ship To Building",
-      "description": "Shipping building number",
-      "minLength": 0,
+      "title": "Shipping Post Code",
+      "description": "Ship to post code",
+      "minLength": 2,
       "maxLength": 32,
       "width": 170
     },
     "acc_ship_to_city": {
       "bsonType": "string",
-      "title": "Ship To City",
-      "description": "Ship to city",
+      "title": "Shipping City",
+      "description": "Ship to City",
       "minLength": 2,
       "maxLength": 32,
       "width": 140
     },
-    "acc_ship_to_postcode": {
-      "bsonType": "string",
-      "title": "Ship To Post Code",
-      "description": "Shipping post code",
-      "minLength": 2,
-      "maxLength": 32,
-      "width": 170
-    },
     "acc_ship_to_address_id": {
       "bsonType": "string",
-      "title": "Ship To Address ID",
+      "title": "Shipping Address ID",
       "description": "Shipping Address ID",
       "minLength": 8,
       "maxLength": 16,
@@ -73,64 +72,64 @@
     },
     "acc_ship_to_country": {
       "bsonType": "string",
-      "title": "Ship To Country",
-      "description": "Shipping Country",
+      "title": "Shipping Country",
+      "description": "Ship to Country",
       "minLength": 2,
       "maxLength": 16,
       "width": 170
     },
     "acc_bill_to_street": {
       "bsonType": "string",
-      "title": "Bill To Street",
-      "description": "Billing street",
+      "title": "Biling Street",
+      "description": "Bill to street",
       "minLength": 2,
       "maxLength": 256,
       "width": 200
     },
     "acc_bill_to_building": {
       "bsonType": "string",
-      "title": "Bill To Building",
-      "description": "Billing building number",
+      "title": "Billing Building",
+      "description": "Bill to building no",
       "minLength": 0,
-      "maxLength": 32,
+      "maxLength": 64,
       "width": 170
     },
     "acc_bill_to_province": {
       "bsonType": "string",
-      "title": "Bill To Province",
-      "description": "Billing province",
+      "title": "Billing Province",
+      "description": "Bill to province",
       "minLength": 0,
+      "maxLength": 32,
+      "width": 170
+    },
+    "acc_bill_to_postcode": {
+      "bsonType": "string",
+      "title": "Billing Post Code",
+      "description": "Billing to post code",
+      "minLength": 2,
       "maxLength": 32,
       "width": 170
     },
     "acc_bill_to_city": {
       "bsonType": "string",
-      "title": "Bill To City",
-      "description": "Billing city",
+      "title": "Billing City",
+      "description": "Bill to City",
       "minLength": 2,
       "maxLength": 32,
       "width": 140
     },
-    "acc_bill_to_postcode": {
-      "bsonType": "string",
-      "title": "Billing To Post Code",
-      "description": "Billing post code",
-      "minLength": 2,
-      "maxLength": 32,
-      "width": 170
-    },
     "acc_bill_to_address_id": {
       "bsonType": "string",
-      "title": "Bill To Address ID",
-      "description": "Billing Address id",
+      "title": "Billing Address ID",
+      "description": "Billing Address ID",
       "minLength": 8,
       "maxLength": 16,
       "width": 180
     },
     "acc_bill_to_country": {
       "bsonType": "string",
-      "title": "Bill To Country",
-      "description": "Billing Country",
+      "title": "Billing Country",
+      "description": "Bill to Country",
       "minLength": 2,
       "maxLength": 16,
       "width": 170
@@ -139,7 +138,7 @@
       "bsonType": "string",
       "title": "Tax No",
       "description": "Tax Number or ID",
-      "minLength": 10,
+      "minLength": 9,
       "maxLength": 12,
       "width": 120
     },
@@ -153,7 +152,7 @@
     "acc_phone": {
       "bsonType": "string",
       "title": "Phone",
-      "description": "Business phone number",
+      "description": "Phone",
       "minLength": 10,
       "maxLength": 20,
       "pattern": "^[0-9-+]{10,20}$",
@@ -161,8 +160,8 @@
     },
     "acc_fax": {
       "bsonType": "string",
-      "title": "Fax",
-      "description": "Business fax number",
+      "title": "Faximile",
+      "description": "Faximile",
       "minLength": 10,
       "maxLength": 20,
       "pattern": "^[0-9-+]{10,20}$",
@@ -172,18 +171,18 @@
       "bsonType": "string",
       "pattern": "^.+@.+$",
       "title": "Email",
-      "description": "Customer business email",
+      "description": "Customer business e-mail",
       "minLength": 0,
       "maxLength": 64,
       "width": 200
     },
     "acc_web_address": {
       "bsonType": "string",
-      "title": "Web Address",
+      "title": "Web",
       "description": "Web address",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[a-z:/.]{0,64}$",
+      "pattern": "^[a-z:/.-]{0,64}$",
       "width": 200
     },
     "acc_alias": {
@@ -200,19 +199,57 @@
       "title": "Active?",
       "description": "Account is Active",
       "width": 120,
+      "truetext": "Active",
+      "falsetext": "Inactive",
       "default": true
     }
   },
   "required": ["acc_no", "acc_name", "acc_nick_name", "acc_tax_no", "acc_tax_office", "acc_ship_to_street"],
   "index": [["acc_name"], ["acc_nick_name"], ["acc_tax_no"], ["acc_is_active"]],
-  "unique": [["acc_no"], ["acc_nick_name"], ["acc_tax_no"]],
+  "unique": [["acc_no"]],
   "parents": [],
   "actions": [],
   "sort": {
-    "_modified_at": -1
+    "acc_nick_name": 1
   },
   "links": [],
   "triggers": [],
-  "views": {},
-  "connectors": []
+  "views": {
+    "distributors-all": {
+      "title": "Distributors All",
+      "description": "Distributors All Description",
+      "priority": 9999,
+      "enabled": true,
+      "dashboard": false,
+      "data_filter": [],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": [],
+      "data_columns": [],
+      "data_values": [],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "flashcard": false,
+      "chart_type": "Stacked Vertical Bar",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": [],
+      "scheduled": false,
+      "scheduled_cron": "15 14,15,16 * * mon,tue",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    }
+  }
 }

@@ -76,6 +76,8 @@
       "title": "Completed",
       "description": "Customs Clearance Completed",
       "width": 130,
+      "truetext": "Completed",
+      "falsetext": "InProgress",
       "default": false
     }
   },
@@ -357,6 +359,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -408,6 +411,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -459,6 +463,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,

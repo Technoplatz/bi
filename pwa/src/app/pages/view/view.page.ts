@@ -47,7 +47,7 @@ import { environment } from "../../../environments/environment";
 export class ViewPage implements OnInit {
   public loadingText: string = environment.misc.loadingText;
   public defaultColumnWidth: number = environment.misc.defaultColumnWidth;
-  public header: string = "Views";
+  public header: string = "SHARED VIEWS";
   public subheader: string = "";
   public user: any = null;
   public id: string = "";
@@ -55,7 +55,6 @@ export class ViewPage implements OnInit {
   public data: any = [];
   public limit: number = environment.misc.limit;
   public count: number = 0;
-  public is_loaded: boolean = true;
   public multicheckbox: boolean = false;
   public is_initialized: boolean = false;
   public columns_: any;
@@ -105,42 +104,39 @@ export class ViewPage implements OnInit {
       this.user = res ? res : null;
       this.accountf_api_key = res && res.api_key ? res.api_key : null;
     });
+    this.crud.charts.subscribe((res: any) => {
+      if (res && res.views) {
+        this.charts_ = res.views;
+        console.log("*** this.charts_", this.charts_);
+      }
+    });
+    this.misc.getAPIUrl().then((apiHost: any) => {
+      this.apiHost = apiHost;
+    });
   }
 
   ngOnDestroy() {
-    this.crud.charts.unsubscribe;
+    this.auth.user.unsubscribe;
   }
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
-    this.is_loaded = false;
-    this.is_initialized = false;
-    this.misc.getAPIUrl().then((apiHost: any) => {
-      this.apiHost = apiHost;
-      this.charts_ ? null : this.charts_ = this.crud.charts.subscribe((res: any) => {
-        if (res && res.views) {
-          this.view = res.views.filter((obj: any) => obj.id === this.id)[0];
-          if (this.view) {
-            this.view_ = this.view.view;
-            this.subheader = this.view.view.title;
-            this.data = this.view.data ? this.view.data : [];
-            const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
-            this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
-            this.view_properties = this.view.properties;
-            this.view_properties_ = Object.keys(this.view.properties);
-            this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
-            this.col_id = this.view.collection;
-            this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
-            this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_api_key;
-          }
-          this.crud.charts.unsubscribe;
-          this.charts_ = null;
-          this.is_loaded = true;
-          this.is_initialized = true;
-        }
-      });
-    });
+    this.view = this.charts_.filter((obj: any) => obj.id === this.id)[0];
+    if(this.view) {
+      this.view_ = this.view.view;
+      this.subheader = this.view.view.title;
+      this.data = this.view.data ? this.view.data : [];
+      const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
+      this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
+      this.view_properties = this.view.properties;
+      this.view_properties_ = Object.keys(this.view.properties);
+      this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
+      this.col_id = this.view.collection;
+      this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
+      this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_api_key;
+    }
+    this.is_initialized = true;
   }
 
   doOTP(obj: any) {
@@ -171,7 +167,7 @@ export class ViewPage implements OnInit {
                   reject(err_);
                 }
               } else if (op_ === "request") {
-                this.misc.doMessage("Backup OTP was sent by email", "success");
+                this.misc.doMessage("Backup OTP has been sent by email", "success");
                 resolve(true);
               } else {
                 const err_ = "invalid operation";
@@ -229,7 +225,7 @@ export class ViewPage implements OnInit {
                   tfac: announceData && announceData.id ? announceData.id : null,
                   scope: scope
                 }).then(() => {
-                  this.misc.doMessage("view was announced successfully", "success");
+                  this.misc.doMessage("view has been announced successfully", "success");
                 }).catch((error: any) => {
                   this.misc.doMessage(error, "error");
                   console.error(error);

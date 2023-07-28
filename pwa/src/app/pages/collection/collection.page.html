@@ -150,25 +150,17 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
-        <ion-grid>
+        <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
           <ion-row>
             <ion-col size="12">
               <ion-list class="ion-no-padding ion-no-margin">
-                <ion-item>
-                  <ion-select *ngIf="flashcards_?.length > 0; else noflashcards" class="status-select"
+                <ion-item lines="none">
+                  <ion-select class="status-select"
                     aria-label="Status" interface="popover" placeholder="{{ 'Flashcard Filters' | translate }}"
                     (ionChange)="doFlashcard($event)" [compareWith]="compareWith" [(ngModel)]="status_">
                     <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{
                       item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>
                   </ion-select>
-                  <ng-template #noflashcards>
-                    <ion-select class="status-select" aria-label="Status" interface="popover"
-                      placeholder="{{ 'Flashcard Filters' | translate }}" [compareWith]="compareWith"
-                      [(ngModel)]="status_">
-                      <ion-select-option class="status-select-option" value="nfd">{{ 'No filter defined'
-                        }}</ion-select-option>
-                    </ion-select>
-                  </ng-template>
                 </ion-item>
               </ion-list>
             </ion-col>
@@ -176,7 +168,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- ACTION BUTTONS -->
-        <ion-grid *ngIf="is_pane_ok && is_crud && actions?.length > 0"
+        <ion-grid *ngIf="is_crud && actions.length > 0"
           class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="ion-no-margin">
             <ion-col>
@@ -299,7 +291,7 @@ https://www.gnu.org/licenses.
           </ion-row>
 
           <!-- CRUD LIST -->
-          <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item">
+          <ion-row *ngFor="let record of data; let i = index" class="ion-nowrap clicked-item hoverr">
             <ion-col class="ion-text-center check-column">
               <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                 (ionChange)="SetSelectData(i,$event)" mode="md">

@@ -85,7 +85,7 @@
       "minLength": 10,
       "maxLength": 11,
       "pattern": "^[A-Z0-9-]{10,11}$",
-      "width": 120
+      "width": 110
     },
     "dnn_acc_name": {
       "bsonType": "string",
@@ -350,8 +350,8 @@
       "filter": [
         {
           "key": "shp_status",
-          "op": "in",
-          "value": "10-Ready,20-Completed"
+          "op": "eq",
+          "value": "20-Completed"
         }
       ],
       "get": ["shp_id", "shp_waybill_no"]
@@ -478,6 +478,11 @@
           "key": "dnn_unit_price",
           "op": "gte",
           "value": 0
+        },
+        {
+          "key": "dnn_order_price",
+          "op": "gte",
+          "value": 0
         }
       ],
       "targets": [
@@ -554,7 +559,7 @@
     }
   ],
   "views": {
-    "dn-git-view": {
+    "sv-git-view": {
       "title": "GiT 2023",
       "description": "GiT by account and statuses",
       "priority": 2000,
@@ -579,6 +584,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": false,
       "chart_type": "Stacked Vertical Bar",
       "chart_label": true,
       "chart_gradient": true,
@@ -594,7 +600,7 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "dn-buid-view": {
+    "sv-buid-view": {
       "title": "Business Units",
       "description": "GiT by BU Id's",
       "priority": 1000,
@@ -619,6 +625,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": false,
       "chart_type": "Stacked Horizontal Bar",
       "chart_label": true,
       "chart_gradient": true,
@@ -634,7 +641,7 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "dn-statuses-view": {
+    "sv-statuses-view": {
       "title": "Statuses",
       "description": "DN Statuses",
       "priority": 2000,
@@ -665,6 +672,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": false,
       "chart_type": "Pie",
       "chart_label": true,
       "chart_gradient": true,
@@ -711,6 +719,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -757,6 +766,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -803,6 +813,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -849,6 +860,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -895,6 +907,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -941,6 +954,7 @@
       "pivot": true,
       "pivot_totals": true,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,
@@ -981,12 +995,13 @@
           "value": "count"
         }
       ],
-      "data_json": true,
+      "data_json": false,
       "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
+      "data_csv": false,
+      "pivot": false,
+      "pivot_totals": false,
       "chart": true,
+      "flashcard": true,
       "chart_type": "Flashcard",
       "chart_label": true,
       "chart_gradient": true,

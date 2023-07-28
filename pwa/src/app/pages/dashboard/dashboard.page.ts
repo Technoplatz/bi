@@ -72,6 +72,7 @@ export class DashboardPage implements OnInit {
       this.flashcards = res && res.data ? res.data : [];
     });
     this.crud.charts.subscribe((res: any) => {
+      console.log("*** res.views", res.views);
       this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard" && obj.view.dashboard === true && obj.view.enabled === true) : [];
     });
     this.crud.announcements.subscribe((res: any) => {
