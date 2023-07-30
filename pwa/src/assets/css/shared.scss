@@ -470,16 +470,8 @@ ion-note {
 }
 
 .data-ext-columns {
-  min-width: 140px;
-  opacity: 0.6;
-}
-
-.data-at-column {
-  min-width: 140px !important;
-}
-
-.data-by-column {
-  min-width: 200px !important;
+  min-width: 200px;
+  cursor: pointer !important;
 }
 
 .data-id-column {

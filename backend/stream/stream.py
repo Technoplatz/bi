@@ -96,9 +96,9 @@ class Trigger():
         if not refresh_triggers_f_["result"]:
             raise AppException(refresh_triggers_f_["exc"])
 
-        refresh_connectors_f_ = self.refresh_connectors_f()
-        if not refresh_connectors_f_["result"]:
-            raise AppException(refresh_connectors_f_["exc"])
+        refresh_fetchers_f_ = self.refresh_fetchers_f()
+        if not refresh_fetchers_f_["result"]:
+            raise AppException(refresh_fetchers_f_["exc"])
 
         print_(">>> init ended")
 
@@ -132,7 +132,6 @@ class Trigger():
         try:
             print_(">>> getting collections structure...")
             self.properties_ = {}
-            self.connectors_ = {}
             cursor_ = self.db_["_collection"].aggregate([{
                 "$match": {"$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]}
             }])
@@ -162,15 +161,7 @@ class Trigger():
         try:
             print_(">>> getting triggers...")
             self.triggers_ = []
-            cursor_ = self.db_["_collection"].aggregate([{
-                "$match": {
-                    "col_structure.triggers": {
-                        "$elemMatch": {
-                            "enabled": True
-                        }
-                    }
-                }
-            }])
+            cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.triggers": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
                 for trigger_ in item_["col_structure"]["triggers"]:
                     for cluster_ in trigger_["targets"]:
@@ -188,7 +179,7 @@ class Trigger():
 
             if not self.triggers_:
                 print_("!!! triggers passed")
-                raise PassException("!!! no trigger found so passed")
+                raise PassException("!!! no trigger found - passed")
 
             print_(">>> triggers refreshed")
 
@@ -205,20 +196,28 @@ class Trigger():
             print_("!!! refresher exception")
             return {"result": False, "exc": exc_}
 
-    def refresh_connectors_f(self):
+    def refresh_fetchers_f(self):
         """
         docstring is in progress
         """
         try:
-            print_(">>> getting connectors...")
-            self.connectors_ = {}
-            cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.connectors": {"$elemMatch": {"enabled": True}}}}])
+            print_(">>> getting fetchers...")
+            self.fetchers_ = []
+            cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.fetchers": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
-                connectors__ = item_["col_structure"]["connectors"] if "connectors" in item_["col_structure"] and len(item_["col_structure"]["connectors"]) > 0 else None
-                if connectors__:
-                    self.connectors_[item_["col_id"]] = item_["col_structure"]["connectors"]
+                for fetcher_ in item_["col_structure"]["fetchers"]:
+                    self.fetchers_.append({
+                        "collection": fetcher_["collection"],
+                        "match": fetcher_["match"],
+                        "get": fetcher_["get"],
+                        "set": fetcher_["set"]
+                    })
 
-            print_(">>> connectors refreshed", self.connectors_)
+            if not self.fetchers_:
+                print_("!!! fetchers passed")
+                raise PassException("!!! no fetcher found - passed")
+
+            print_(">>> fetchers refreshed", self.fetchers_)
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc_:
@@ -379,6 +378,79 @@ class Trigger():
         """
         prfx_ = prfxs_[0] if prfxs_ and len(prfxs_) > 0 else prfxs_
         return input_.removeprefix(prfx_)
+
+    async def worker_fetchers_f(self, params_):
+        """
+        gets the collection and the fields that affected by the change stream.
+        """
+        try:
+            _id = params_["id"] if "id" in params_ else None
+            collection_ = params_["collection"] if "collection" in params_ else None
+            changed_ = params_["changed"] if "changed" in params_ else None
+            if None in [_id, collection_, changed_]:
+                raise PassException("!!! no changed or _id found")
+
+            fetchers_ = self.fetchers_ if self.fetchers_ and len(self.fetchers_) > 0 else []
+            if not fetchers_:
+                raise PassException("!!! no fetcher found for")
+
+            changed_doc_ = self.db_[collection_].find_one({"_id": _id})
+            if not changed_doc_:
+                raise PassException(f"!!! no changed document found {_id}")
+
+            for fetcher_ in fetchers_:
+                fetcher_col_id_ = fetcher_["collection"] if "collection" in fetcher_ and fetcher_["collection"] is not None else None
+                fetcher_match_ = fetcher_["match"] if "match" in fetcher_ and len(fetcher_["match"]) > 0 else None
+                fetcher_get_ = fetcher_["get"] if "get" in fetcher_ and fetcher_["get"] is not None else None
+                fetcher_set_ = fetcher_["set"] if "set" in fetcher_ and fetcher_["set"] is not None else None
+                if None in [fetcher_col_id_, fetcher_match_, fetcher_get_, fetcher_set_]:
+                    continue
+                document_ = self.db_["_collection"].find_one({"col_id": fetcher_col_id_})
+                if not document_:
+                    print_(f"!!! no fetcher document found: {fetcher_col_id_}")
+                    continue
+                structure_ = document_["col_structure"] if "col_structure" in document_ else None
+                if not structure_:
+                    print_(f"!!! no fetcher structure found: {fetcher_col_id_}")
+                    continue
+                properties_ = structure_["properties"] if "properties" in structure_ else None
+                if not properties_:
+                    print_(f"!!! no fetcher properties found: {fetcher_col_id_}")
+                    continue
+
+                match_new_ = []
+                for fm_ in fetcher_match_:
+                    match_new_.append({"key": fm_["key"], "op": fm_["op"], "value": changed_doc_[fm_["value"]]})
+
+                get_filtered_f_ = self.get_filtered_f({
+                    "match": match_new_,
+                    "properties": properties_
+                })
+                fetcher_document_ = self.db_[f"{fetcher_col_id_}_data"].find_one(get_filtered_f_)
+                if not fetcher_document_:
+                    print_(f"!!! not target document found for {fetcher_col_id_}: {get_filtered_f_}")
+                    continue
+                get_val_ = fetcher_document_[fetcher_get_] if fetcher_get_ in fetcher_document_ else None
+                if not get_val_:
+                    print_(f"!!! no target value found for {fetcher_col_id_}: {get_filtered_f_}")
+                    continue
+                set_ = {}
+                set_[fetcher_set_] = get_val_
+                self.db_[collection_].update_one({"_id": _id}, {"$set": set_})
+
+            return True
+
+        except pymongo.errors.PyMongoError as exc_:
+            self.exception_show_f(exc_)
+
+        except PassException as exc_:
+            self.exception_passed_f(exc_)
+
+        except AppException as exc_:
+            self.exception_show_f(exc_)
+
+        except Exception as exc_:
+            self.exception_show_f(exc_)
 
     async def worker_change_f(self, params_):
         """
@@ -621,6 +693,13 @@ class Trigger():
         except Exception as exc_:
             self.exception_show_f(exc_)
 
+    async def starter_fetchers_f(self, params_):
+        """
+        docstring is in progress
+        """
+        print_("\n>>> fetchers hub started")
+        return await self.worker_fetchers_f(params_)
+
     async def starter_changes_f(self, params_):
         """
         docstring is in progress
@@ -654,9 +733,9 @@ class Trigger():
                         if not refresh_triggers_f_["result"]:
                             print_(">>> triggers refresh error", refresh_triggers_f_["exc"])
                             continue
-                        refresh_connectors_f_ = self.refresh_connectors_f()
-                        if not refresh_connectors_f_["result"]:
-                            print_(">>> connectors refresh error", refresh_connectors_f_["exc"])
+                        refresh_fetchers_f_ = self.refresh_fetchers_f()
+                        if not refresh_fetchers_f_["result"]:
+                            print_(">>> fetchers refresh error", refresh_fetchers_f_["exc"])
                             continue
                         print_(">>> _collection updated and refreshed")
 
@@ -692,6 +771,7 @@ class Trigger():
 
                     params_ = {"collection": source_collection_, "properties": source_properties_, "id": _id, "token": token_, "op": op_, "changed": changed_}
                     await asyncio.create_task(self.starter_changes_f(params_))
+                    await asyncio.create_task(self.starter_fetchers_f(params_))
 
             current_task_ = asyncio.current_task()
             running_tasks_ = [task for task in asyncio.all_tasks() if task is not current_task_]

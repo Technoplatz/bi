@@ -155,9 +155,9 @@ https://www.gnu.org/licenses.
             <ion-col size="12">
               <ion-list class="ion-no-padding ion-no-margin">
                 <ion-item lines="none">
-                  <ion-select class="status-select"
-                    aria-label="Status" interface="popover" placeholder="{{ 'Flashcard Filters' | translate }}"
-                    (ionChange)="doFlashcard($event)" [compareWith]="compareWith" [(ngModel)]="status_">
+                  <ion-select class="status-select" aria-label="Status" interface="popover"
+                    placeholder="{{ 'Flashcard Filters' | translate }}" (ionChange)="doFlashcard($event)"
+                    [compareWith]="compareWith" [(ngModel)]="status_">
                     <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{
                       item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>
                   </ion-select>
@@ -168,8 +168,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- ACTION BUTTONS -->
-        <ion-grid *ngIf="is_crud && actions.length > 0"
-          class="ion-no-padding ion-margin-top ion-margin-bottom">
+        <ion-grid *ngIf="is_crud && actions.length > 0" class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="ion-no-margin">
             <ion-col>
               <span *ngFor="let item of actions; let ac = index">
@@ -268,25 +267,25 @@ https://www.gnu.org/licenses.
                 </div>
               </div>
             </ion-col>
-            <ion-col class="data-ext-columns data-at-column clicked-item"
-              (click)="setSort('_created_at', sort['_created_at'])">
+            <ion-col class="data-ext-columns" (click)="setSort('_created_at', sort['_created_at'])">
               <span class="column-title">{{ 'Created At' }}<br /></span>
               {{ '_created_at' | translate }}
             </ion-col>
-            <ion-col class="data-ext-columns data-by-column clicked-item"
-              (click)="setSort('_created_by', sort['_created_by'])">
+            <ion-col class="data-ext-columns" (click)="setSort('_created_by', sort['_created_by'])">
               <span class="column-title">{{ 'Created by' }}<br /></span>
               {{ '_created_by' | translate }}
             </ion-col>
-            <ion-col *ngIf="!['_log','_backup'].includes(id)" class="data-ext-columns data-at-column clicked-item"
-              (click)="setSort('_modified_at', sort['_modified_at'])">
+            <ion-col class="data-ext-columns" (click)="setSort('_modified_at', sort['_modified_at'])">
               <span class="column-title">{{ 'Modified At' }}<br /></span>
               {{ '_modified_at' | translate }}
             </ion-col>
-            <ion-col *ngIf="!['_log','_backup'].includes(id)" class="data-ext-columns data-by-column clicked-item"
-              (click)="setSort('_modified_by', sort['_modified_by'])">
+            <ion-col class="data-ext-columns" (click)="setSort('_modified_by', sort['_modified_by'])">
               <span class="column-title">{{ 'Modified by' }}<br /></span>
               {{ '_modified_by' | translate }}
+            </ion-col>
+            <ion-col class="data-ext-columns">
+              <span class="column-title">{{ 'ID' }}<br /></span>
+              {{ '_id' | translate }}
             </ion-col>
           </ion-row>
 
@@ -334,18 +333,19 @@ https://www.gnu.org/licenses.
                 <span> {{ record[item.key]?.toString() }} </span>
               </ng-template>
             </ion-col>
-            <ion-col class="data-ext-columns data-at-column" (click)="goCrud(record, 'update')">
+            <ion-col class="data-ext-columns" (click)="goCrud(record, 'update')">
               {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
             </ion-col>
-            <ion-col class="data-ext-columns data-by-column" (click)="goCrud(record, 'update')"> {{ record._created_by
+            <ion-col class="data-ext-columns" (click)="goCrud(record, 'update')"> {{ record._created_by
               }} </ion-col>
-            <ion-col *ngIf="!['_log','_backup'].includes(id)" class="data-ext-columns data-at-column"
-              (click)="goCrud(record, 'update')">
+            <ion-col class="data-ext-columns" (click)="goCrud(record, 'update')">
               {{ record._modified_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
             </ion-col>
-            <ion-col *ngIf="!['_log','_backup'].includes(id)" class="data-ext-columns data-by-column"
-              (click)="goCrud(record, 'update')">
+            <ion-col class="data-ext-columns" (click)="goCrud(record, 'update')">
               {{ record._modified_by }}
+            </ion-col>
+            <ion-col class="data-ext-columns" (click)="goCrud(record, 'update')">
+              {{ record._id }}
             </ion-col>
           </ion-row>
 

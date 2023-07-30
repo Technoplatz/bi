@@ -72,7 +72,7 @@ export class MenuComponent implements OnInit {
       this.collections = res && res.data ? res.data : [];
     });
     this.views_ ? null : this.views_ = this.crud.views.subscribe((res: any) => {
-      this.views = res && res.views ? res.views : [];
+      this.views = res ? res : [];
     });
     this.auth.user.subscribe((res: any) => {
       this.user_ = res;

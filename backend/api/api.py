@@ -410,7 +410,6 @@ class Misc:
         """
         docstring is in progress
         """
-        print_("doc_", doc_)
         for field_ in doc_:
             if isinstance(doc_[field_], str):
                 doc_[field_] = doc_[field_].strip()
@@ -458,32 +457,40 @@ class Misc:
         docstring is in progress
         """
         try:
+            ip_ = self.get_user_ip_f()
             token__ = re.split(" ", bearer_)
             token_ = token__[1] if token__ and len(token__) > 0 and token__[0].lower() == "bearer" else None
             if not token_:
-                raise AuthError("token not found at one")
+                raise AuthError({"msg": "token not found or invalid", "token": token__})
 
             header_ = jwt.get_unverified_header(token_)
             token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
             if not token_finder_:
-                raise AuthError("finder is not valid please use an api token")
+                raise AuthError({"msg": "finder is not valid please use an api token", "finder": token_finder_})
 
             find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
             if not find_:
-                raise AuthError("api token is not defined")
+                raise AuthError({"msg": "api token is not defined", "finder": token_finder_})
             jwt_secret_ = find_["tkn_secret"]
 
             options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
             jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
 
             if not jwt_proc_f_["result"]:
-                raise AuthError(jwt_proc_f_["msg"])
+                raise AuthError({"msg": jwt_proc_f_["msg"], "token": token_})
+
+            jwt_ = jwt_proc_f_["jwt"] if "jwt" in jwt_proc_f_ else None
 
             grant_ = f"tkn_grant_{operation_}"
             if not find_[grant_]:
-                raise AuthError(f"token is not allowed to do {operation_}")
+                raise AuthError({"msg": f"token is not allowed to do {operation_}", "jwt": jwt_})
 
-            return {"result": True}
+            if "tkn_allowed_ips" in find_ and \
+                len(find_["tkn_allowed_ips"]) > 0 and \
+                    (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"]):
+                return {"result": True}
+
+            raise AuthError({"msg": f"IP is not allowed to do {operation_}", "jwt": jwt_})
 
         except AuthError as exc_:
             return ({"result": False, "msg": str(exc_)})
@@ -959,6 +966,13 @@ class Crud:
         str_ = str(data_).replace(r"\D", "").strip()
         return float(str_) if str_ not in ["", None] else None
 
+    def frame_convert_objectid_f(self, data_):
+        """
+        docstring is in progress
+        """
+        str_ = str(data_).strip()
+        return ObjectId(str_)
+
     def purge_f(self, obj):
         """
         docstring is in progress
@@ -1115,6 +1129,7 @@ class Crud:
             find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
+
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
@@ -1163,11 +1178,15 @@ class Crud:
                     else:
                         columns_tobe_deleted_.append(column_)
                 else:
-                    columns_tobe_deleted_.append(column_)
+                    if column_ != "_id":
+                        columns_tobe_deleted_.append(column_)
+                    else:
+                        df_[column_] = df_[column_].apply(self.frame_convert_objectid_f)
 
             # REMOVING UNNECESSRY COLUMNS
             if "_structure" in df_.columns:
                 columns_tobe_deleted_.append("_structure")
+
             if len(columns_tobe_deleted_) > 0:
                 df_.drop(columns_tobe_deleted_, axis=1, inplace=True)
 
@@ -1192,9 +1211,16 @@ class Crud:
             session_db_ = session_client_[MONGO_DB_]
             session_ = session_client_.start_session()
             session_.start_transaction()
-            insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
+            count_ = 0
+
+            if "_id" in df_.columns:
+                upserts_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=False) for doc_ in payload_]
+                insert_many_ = session_db_[collection__].bulk_write(upserts_, session=session_)
+            else:
+                insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
+                count_ = len(insert_many_.inserted_ids)
+
             session_.commit_transaction()
-            count_ = len(insert_many_.inserted_ids)
             session_client_.close()
 
             return {"result": True, "count": count_, "msg": "file was imported successfully"}
@@ -1222,7 +1248,6 @@ class Crud:
         docstring is in progress
         """
         try:
-
             if "collection" not in input_:
                 raise APIError("collection is missing")
 
@@ -1627,7 +1652,7 @@ class Crud:
             return filtered_
 
         except Exception as exc_:
-            print_("!!! exc_", exc_)
+            print_("*** exception", exc_)
             return None
 
     def get_view_data_f(self, user_, view_id_, scope_):
@@ -1676,7 +1701,8 @@ class Crud:
             unset_.append("_created_by")
             unset_.append("_structure")
             unset_.append("_tags")
-            unset_.append("_ID")
+            unset_.append("_id")
+            # unset_.append("_ID")
 
             for properties_master__ in properties_master_:
                 if (properties_master__[:1] == "_" and properties_master__ not in Misc().get_except_underdashes()):
@@ -1937,7 +1963,6 @@ class Crud:
                     "$match": {
                         "views": {
                             "$elemMatch": {
-                                "v.chart_type": {"$ne": "Flashcard"},
                                 "v.enabled": True,
                                 "v._tags": {
                                     "$elemMatch": {"$in": user_["_tags"]}
@@ -1954,6 +1979,12 @@ class Crud:
                 for view_ in views_:
                     id__ = view_["k"]
                     view__ = view_["v"]
+
+                    if "enabled" not in view__ or not view__["enabled"]:
+                        continue
+
+                    if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
+                        continue
 
                     get_view_data_f_ = self.get_view_data_f(user_, id__, source_)
 
@@ -1995,20 +2026,30 @@ class Crud:
         try:
             user_ = input_["userindb"]
             aggregate_project_ = {"$project": {"col_id": 1, "col_structure": 1, "views": {"$objectToArray": "$col_structure.views"}}}
-            aggregate_match_ = {"$match": {"views": {"$elemMatch": {"v.enabled": True, "v.chart_type": "Flashcard", "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}}
+            aggregate_match_ = {"$match": {"views": {"$elemMatch": {"v.enabled": True, "v.flashcard": True, "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}}
             aggregate_ = [aggregate_project_, aggregate_match_]
             flashcards_ = list(Mongo().db_["_collection"].aggregate(aggregate_))
             returned_views_ = []
+
             for flashcard_ in flashcards_:
                 cid_ = flashcard_["col_id"]
                 col_structure_ = flashcard_["col_structure"]
                 properties_ = col_structure_["properties"]
+
                 views_ = flashcard_["views"] if "views" in flashcard_ and len(flashcard_["views"]) > 0 else []
                 for view_ in views_:
                     id__ = view_["k"]
                     view__ = view_["v"]
-                    if view__["chart_type"] != "Flashcard" or not view__["enabled"]:
+
+                    if view__["flashcard"] is not True:
                         continue
+
+                    if "enabled" not in view__ or not view__["enabled"]:
+                        continue
+
+                    if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
+                        continue
+
                     count_ = 0
                     filter_ = view__["data_filter"] if "data_filter" in view__ else []
                     if len(filter_) > 0:
@@ -2069,29 +2110,49 @@ class Crud:
 
             returned_views_ = []
             for collection_ in collections_:
+                cid_ = collection_["col_id"]
+                col_structure_ = collection_["col_structure"]
+                properties_ = col_structure_["properties"]
                 views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else []
                 for view_ in views_:
                     id__ = view_["k"]
                     view__ = view_["v"]
+
+                    if "enabled" not in view__ or not view__["enabled"]:
+                        continue
+
+                    if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
+                        continue
+
+                    count_ = 0
+                    filter_ = view__["data_filter"] if "data_filter" in view__ else []
+                    if len(filter_) > 0:
+                        get_filtered_ = self.get_filtered_f({
+                            "match": filter_,
+                            "properties": properties_ if properties_ else None
+                        })
+                        count_ = Mongo().db_[f"{cid_}_data"].count_documents(get_filtered_)
+
                     returned_views_.append({
                         "id": id__,
                         "collection": collection_["col_id"],
                         "view": view__,
-                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999
+                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999,
+                        "count": count_
                     })
 
             returned_views_.sort(key=operator.itemgetter("priority", "id"), reverse=False)
 
             return {"result": True, "views": returned_views_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
     def collections_f(self, obj):
         """
@@ -2586,6 +2647,7 @@ class Crud:
                 "pivot": True,
                 "pivot_totals": True,
                 "chart": True,
+                "flashcard": False,
                 "chart_type": "Stacked Vertical Bar",
                 "chart_label": True,
                 "chart_gradient": True,
@@ -3130,7 +3192,7 @@ class Crud:
                         structure_ = json.loads(jtxt_)
                 doc_["col_structure"] = structure_
             elif collection_id_ == "_token":
-                tkn_lifetime_ = doc_["tkn_lifetime"] if "tkn_lifetime" in doc_ and doc_["tkn_lifetime"] > 0 else 1440
+                tkn_lifetime_ = int(doc_["tkn_lifetime"]) if "tkn_lifetime" in doc_ and int(doc_["tkn_lifetime"]) > 0 else 1440
                 secret_ = pyotp.random_base32()
                 token_finder_ = pyotp.random_base32()
                 jwt_proc_f_ = Misc().jwt_proc_f("encode", None, secret_, {
@@ -3672,15 +3734,11 @@ class Auth:
         docstring is in progress
         """
         try:
-            pat = re.compile(
-                "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*.-_?&]{8,32}$"
-            )
+            pat = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*.-_?&]{8,32}$")
             if not re.search(pat, password_):
                 raise APIError("Invalid password")
             salt_ = os.urandom(32) if salted_ is None else salted_
-            key_ = hashlib.pbkdf2_hmac(
-                "sha512", password_.encode("utf-8"), salt_, 101010, dklen=128
-            )
+            key_ = hashlib.pbkdf2_hmac("sha512", password_.encode("utf-8"), salt_, 101010, dklen=128)
             return {"result": True, "salt": salt_, "key": key_}
 
         except APIError as exc:
@@ -4323,9 +4381,9 @@ MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get("PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
-PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_token", "_announcement"]
+PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
-STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers"]
+STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
 
 app = Flask(__name__)
@@ -4928,15 +4986,7 @@ def get_data_f(id_):
             if not user_validate_by_token_f_["result"]:
                 raise AuthError(user_validate_by_token_f_)
         else:
-            x_api_key_ = request.headers["X-Api-Key"] if "X-Api-Key" in request.headers and request.headers["X-Api-Key"] != "" else None
-            if not x_api_key_:
-                raise AuthError({"result": False, "msg": "Missing X-Api-Key"})
-            user_validate_ = Auth().user_validate_by_api_key_f({"api_key": x_api_key_})
-            if not user_validate_["result"]:
-                raise AuthError(user_validate_)
-            user_ = user_validate_["user"] if "user" in user_validate_ else None
-            if not user_:
-                raise AuthError({"result": False, "msg": "user not found for view"})
+            raise AuthError({"result": False, "msg": "missing token"})
 
         generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")
         if not generate_view_data_f_["result"]:

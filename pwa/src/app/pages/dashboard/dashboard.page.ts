@@ -32,7 +32,6 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { Storage } from "@ionic/storage";
-import { NavController } from "@ionic/angular";
 import { Crud } from "../../classes/crud";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
@@ -62,18 +61,16 @@ export class DashboardPage implements OnInit {
   constructor(
     private storage: Storage,
     private crud: Crud,
-    private nav: NavController,
     public misc: Miscellaneous
   ) {
     this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
     });
-    this.crud.flashcards.subscribe((res: any) => {
-      this.flashcards = res && res.data ? res.data : [];
+    this.crud.views.subscribe((res: any) => {
+      this.flashcards = res ? res.filter((obj: any) => obj.view.flashcard === true ) : [];
     });
     this.crud.charts.subscribe((res: any) => {
-      console.log("*** res.views", res.views);
-      this.charts = res && res.views ? res.views.filter((obj: any) => obj.view.chart_type !== "Flashcard" && obj.view.dashboard === true && obj.view.enabled === true) : [];
+      this.charts = res && res.views ? res.views.filter((obj: any) => !obj.view.flashcard && obj.view.dashboard) : [];
     });
     this.crud.announcements.subscribe((res: any) => {
       this.announcements = res && res.data ? res.data : [];
@@ -81,7 +78,7 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit() {
-    this.crud.getFlashcards();
+    this.crud.getViews();
     this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
       this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
       this.chart_css = "chart-sq " + this.chart_size;

@@ -1,10 +1,10 @@
 {
   "properties": {
-    "tkn_description": {
+    "tkn_name": {
       "bsonType": "string",
-      "title": "Description",
-      "description": "Token Description",
-      "placeholder": "Short description for Token",
+      "title": "Name",
+      "description": "Token Name",
+      "placeholder": "Short description for token",
       "minLength": 3,
       "maxLength": 128,
       "pattern": "^[a-zA-Z0-9-_ ]{3,128}$",
@@ -25,18 +25,18 @@
       "bsonType": "number",
       "title": "Lifetime",
       "description": "Token validity period in minutes",
-      "placeholder": "Token life time in seconds",
+      "placeholder": "Token life time in minutes",
       "minimum": 1,
       "maximum": 525600,
       "permanent": true,
-      "width": 130
+      "width": 110
     },
     "tkn_is_active": {
       "bsonType": "bool",
       "title": "Is Active",
       "description": "Token Accesibility",
       "default": true,
-      "width": 130
+      "width": 110
     },
     "tkn_grant_read": {
       "bsonType": "bool",
@@ -72,11 +72,29 @@
       "description": "Grant Delete",
       "default": false,
       "width": 140
+    },
+    "tkn_allowed_ips": {
+      "bsonType": "array",
+      "title": "IP Addresses",
+      "description": "Allowed IP addresses",
+      "placeholder": "Enter an IPv4 Address or 0.0.0.0",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 8,
+      "items": {
+        "bsonType": "string",
+        "minLength": 7,
+        "maxLength": 15,
+        "pattern": "^[0-9.]{7,15}$"
+      },
+      "subType": "ip",
+      "manualAdd": true,
+      "width": 160
     }
   },
-  "required": ["tkn_description"],
-  "index": [["tkn_collection_id"], ["tkn_finder", "tkn_is_active"]],
-  "unique": [["tkn_description"], ["tkn_finder"], ["tkn_secret"]],
+  "required": ["tkn_name"],
+  "index": [["tkn_collection_id"]],
+  "unique": [["tkn_name"]],
   "sort": {
     "_modified_at": -1
   }

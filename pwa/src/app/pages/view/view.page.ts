@@ -69,9 +69,7 @@ export class ViewPage implements OnInit {
   public view_properties: any = {};
   public view_properties_: any = {};
   public is_url_copied: boolean = false;
-  public accountf_api_key: string = "";
   public viewurl_: string = "";
-  public is_api_key_copied: boolean = false;
   private segment = "data";
   private is_selected: boolean = false;
   private views: any = [];
@@ -100,16 +98,6 @@ export class ViewPage implements OnInit {
     private router: Router,
     public misc: Miscellaneous
   ) {
-    this.user_ ? null : this.user_ = this.auth.user.subscribe((res: any) => {
-      this.user = res ? res : null;
-      this.accountf_api_key = res && res.api_key ? res.api_key : null;
-    });
-    this.crud.charts.subscribe((res: any) => {
-      if (res && res.views) {
-        this.charts_ = res.views;
-        console.log("*** this.charts_", this.charts_);
-      }
-    });
     this.misc.getAPIUrl().then((apiHost: any) => {
       this.apiHost = apiHost;
     });
@@ -119,24 +107,33 @@ export class ViewPage implements OnInit {
     this.auth.user.unsubscribe;
   }
 
-  ngOnInit() {
+  ngOnInit() { }
+
+  ionViewDidEnter() {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
-    this.view = this.charts_.filter((obj: any) => obj.id === this.id)[0];
-    if(this.view) {
-      this.view_ = this.view.view;
-      this.subheader = this.view.view.title;
-      this.data = this.view.data ? this.view.data : [];
-      const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
-      this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
-      this.view_properties = this.view.properties;
-      this.view_properties_ = Object.keys(this.view.properties);
-      this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
-      this.col_id = this.view.collection;
-      this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
-      this.viewurl_ = this.apiHost + "/get/view/" + this.view.id + "?k=" + this.accountf_api_key;
-    }
-    this.is_initialized = true;
+
+    this.is_initialized = false;
+    this.crud.charts.subscribe((res: any) => {
+      if (res && res.views) {
+        this.charts_ = res.views;
+        this.is_initialized = true;
+        this.view = this.charts_?.filter((obj: any) => obj.id === this.id)[0];
+        if (this.view) {
+          this.view_ = this.view.view;
+          this.subheader = this.view.view.title;
+          this.data = this.view.data ? this.view.data : [];
+          const crontab_ = this.view_.scheduled_cron ? this.view_.scheduled_cron.split(' ') : null;
+          this.cron_ = crontab_ ? "min=" + crontab_[0] + " hour=" + crontab_[1] + " day=" + crontab_[2] + " month=" + crontab_[3] + " week_days=" + crontab_[4] : "";
+          this.view_properties = this.view.properties;
+          this.view_properties_ = Object.keys(this.view.properties);
+          this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
+          this.col_id = this.view.collection;
+          this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
+          this.viewurl_ = this.apiHost + "/get/view/" + this.view.id;
+        }
+      }
+    });
   }
 
   doOTP(obj: any) {
@@ -245,13 +242,10 @@ export class ViewPage implements OnInit {
   }
 
   doCopy(tocopy_: string) {
-    const copied_ = tocopy_ === "api_key" ? this.accountf_api_key : tocopy_ === "view" ? this.viewurl_ : "";
-    this.is_api_key_copied = tocopy_ === "api_key" ? true : false;
     this.is_url_copied = ["view", "collection"].includes(tocopy_) ? true : false;
-    this.misc.copyToClipboard(copied_).then(() => { }).catch((error: any) => {
-      console.error("not copied", error);
+    this.misc.copyToClipboard(this.viewurl_).then(() => { }).catch((error: any) => {
+      console.error("*** copy error", error);
     }).finally(() => {
-      this.is_api_key_copied = false;
       this.is_url_copied = false;
     });
   }

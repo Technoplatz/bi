@@ -144,8 +144,8 @@ export class CollectionPage implements OnInit {
     this.jeoptions.expandAll = false;
     this.jeoptions.navigationBar = true;
     this.jeoptions.name = "schema-structure";
-    this.crud.flashcards.subscribe((res: any) => {
-      this.flashcards_ = res && res.data ? res.data.filter((obj: any) => obj.collection === this.id) : [];
+    this.crud.views.subscribe((res: any) => {
+      this.flashcards_ = res ? res.filter((obj: any) => obj.collection === this.id && obj.view.flashcard === true) : [];
     });
     this.collections_ = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
@@ -219,7 +219,7 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
-      this.crud.getFlashcards().then(() => {
+      this.crud.getViews().then(() => {
         this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
           this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
           this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
