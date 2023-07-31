@@ -70,7 +70,7 @@ export class AdminResolver implements Resolve<any> {
   resolve() {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
-        resolve(LSUSERMETA && LSUSERMETA.perm ? true : false);
+        resolve(LSUSERMETA?.perm ? true : false);
       }).catch((error: any) => {
         reject({ message: error.msg });
       });

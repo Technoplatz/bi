@@ -99,7 +99,6 @@ export class CollectionPage implements OnInit {
   private user_: any;
   public schema_key: any = null;
   public properties_: any = {};
-  public jeopen: boolean = false;
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
   public is_viewsaving: boolean = false;
@@ -115,16 +114,17 @@ export class CollectionPage implements OnInit {
   public is_inprogress: boolean = false;
   public flashcards_: any = [];
   public schema_: any = {
-    "properties": { "title": "Properties", "description": "field", "count": 0 },
-    "required": { "title": "Required", "description": "compulsory", "count": 0 },
-    "index": { "title": "Indexes", "description": "speed", "count": 0 },
-    "actions": { "title": "Actions", "description": "one-click", "count": 0 },
-    "parents": { "title": "Parents", "description": "ancestor", "count": 0 },
-    "triggers": { "title": "Triggers", "description": "automation", "count": 0 },
-    "views": { "title": "Views", "description": "share", "count": 0 },
-    "unique": { "title": "Unique", "description": "unrepeat", "count": 0 },
-    "sort": { "title": "Sort", "description": "order-by", "count": 0 },
-    "links": { "title": "Links", "description": "connection", "count": 0 }
+    "properties": { "title": "Properties", "count": 0 },
+    "required": { "title": "Required", "count": 0 },
+    "index": { "title": "Indexes", "count": 0 },
+    "actions": { "title": "Actions", "count": 0 },
+    "parents": { "title": "Parents", "count": 0 },
+    "triggers": { "title": "Triggers", "count": 0 },
+    "views": { "title": "Views", "count": 0 },
+    "unique": { "title": "Unique", "count": 0 },
+    "sort": { "title": "Sort", "count": 0 },
+    "links": { "title": "Links", "count": 0 },
+    "fetchers": { "title": "Fetchers", "count": 0 }
   }
 
   constructor(
@@ -172,6 +172,8 @@ export class CollectionPage implements OnInit {
       this.counters_ = res && res.counters ? res.counters : {};
       this.subheader = res && res.data ? res.data.col_title : this.id;
       this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
+    }).catch((error: any) => {
+      this.misc.doMessage(error, "error");
     });
   }
 
@@ -193,7 +195,6 @@ export class CollectionPage implements OnInit {
               }).then((res: any) => {
                 this.templates = res && res.templates ? res.templates : [];
               }).catch((error: any) => {
-                console.error(error);
                 this.misc.doMessage(error, "error");
               });
             }
@@ -514,18 +515,17 @@ export class CollectionPage implements OnInit {
     this.searched[k].op = op;
   }
 
-  doShowSchema() {
-    if (this.jeopen) {
-      this.RefreshData(0).then(() => {
-        this.jeopen = false;
-        this.schemevis = "hide"
-        this.structured_ = null;
-      });
-    } else {
+  doShowSchema(shw: boolean) {
+    if (shw) {
       this.editor.setMode("code");
-      this.jeopen = true;
       this.schemevis = "show";
       this.editor.focus();
+    } else {
+      this.RefreshData(0).then(() => {
+        this.schemevis = "hide"
+        this.structured_ ? this.misc.doMessage("changes was discarded", "warning") : null;
+        this.structured_ = null;
+      });
     }
   }
 
@@ -540,7 +540,6 @@ export class CollectionPage implements OnInit {
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
     this.editor.setMode("code");
-    this.jeopen = true;
     this.schemevis = "show";
     this.editor.focus();
   }
@@ -552,8 +551,7 @@ export class CollectionPage implements OnInit {
       this.filter_ = item_.view.data_filter;
       this.storage.set("LSSTATUS_" + this.id, this.status_).then(() => {
         this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-          this.RefreshData(0).then(() => {
-          }).catch((res: any) => {
+          this.RefreshData(0).then(() => { }).catch((res: any) => {
             this.misc.doMessage(res, "error");
           });
         });
@@ -628,7 +626,6 @@ export class CollectionPage implements OnInit {
       this.misc.doMessage("schema saved successfully", "success");
       this.crud.getAll().then(() => { });
       this.RefreshData(0).then(() => {
-        this.jeopen = false;
         this.schemevis = "hide"
       });
     }).catch((error: any) => {

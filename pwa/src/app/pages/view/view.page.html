@@ -69,13 +69,6 @@ https://www.gnu.org/licenses.
 
         <!-- VIEW GRID SECTION -->
         <div *ngIf="view" class="ion-margin-bottom">
-          <!-- <h4>{{ 'Shared with' | translate }} {{ view_._tags?.join(' ') }}</h4>
-          <h6 *ngIf="view_.scheduled; else notscheduled">{{ 'Scheduled' | translate }} at {{ cron_ }}</h6>
-          <ng-template #notscheduled><h5>{{ 'Not Scheduled' | translate }}</h5></ng-template>
-          <div class="view-infos">
-            <div [innerHtml]="pivot_" class="pivot"></div>
-          </div> -->
-
           <!-- LIST -->
           <ion-grid class="data-grid ion-no-padding ion-margin-top">
             <ion-row class="ion-nowrap">
@@ -109,9 +102,6 @@ https://www.gnu.org/licenses.
                 </div> -->
               </ion-col>
             </ion-row>
-
-
-
           </ion-grid>
         </div>
 

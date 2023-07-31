@@ -112,12 +112,11 @@ export class ViewPage implements OnInit {
   ionViewDidEnter() {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
-
     this.is_initialized = false;
     this.crud.charts.subscribe((res: any) => {
+      this.is_initialized = true;
       if (res && res.views) {
         this.charts_ = res.views;
-        this.is_initialized = true;
         this.view = this.charts_?.filter((obj: any) => obj.id === this.id)[0];
         if (this.view) {
           this.view_ = this.view.view;
@@ -132,6 +131,8 @@ export class ViewPage implements OnInit {
           this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
           this.viewurl_ = this.apiHost + "/get/view/" + this.view.id;
         }
+      } else {
+        console.log("*** no charts found");
       }
     });
   }

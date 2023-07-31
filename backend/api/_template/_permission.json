@@ -31,18 +31,22 @@
       "collection": true,
       "width": 150
     },
-    "per_insert": {
-      "bsonType": "bool",
-      "title": "Insert",
-      "description": "Insert Permission",
-      "default": false,
-      "width": 100
-    },
     "per_read": {
       "bsonType": "bool",
       "title": "Read",
       "description": "Read Permission",
       "default": false,
+      "truetext": "Yes",
+      "falsetext": "No",
+      "width": 90
+    },
+    "per_insert": {
+      "bsonType": "bool",
+      "title": "Insert",
+      "description": "Insert Permission",
+      "default": false,
+      "truetext": "Yes",
+      "falsetext": "No",
       "width": 100
     },
     "per_update": {
@@ -50,6 +54,8 @@
       "title": "Update",
       "description": "Update Permission",
       "default": false,
+      "truetext": "Yes",
+      "falsetext": "No",
       "width": 100
     },
     "per_delete": {
@@ -57,6 +63,8 @@
       "title": "Delete",
       "description": "Delete Permission",
       "default": false,
+      "truetext": "Yes",
+      "falsetext": "No",
       "width": 100
     },
     "per_share": {
@@ -64,14 +72,18 @@
       "title": "Share",
       "description": "Sharing Permission",
       "default": false,
-      "width": 100
+      "truetext": "Yes",
+      "falsetext": "No",
+      "width": 90
     },
     "per_schema": {
       "bsonType": "bool",
       "title": "Scheme Update",
       "description": "Scheme Permission",
       "default": false,
-      "width": 100
+      "truetext": "Yes",
+      "falsetext": "No",
+      "width": 120
     },
     "per_match": {
       "bsonType": "array",
@@ -114,7 +126,7 @@
       "title": "Match",
       "description": "Match filter",
       "subType": "filter",
-      "width": 120
+      "width": 100
     }
   },
   "required": ["per_id", "per_tag", "per_collection_id"],

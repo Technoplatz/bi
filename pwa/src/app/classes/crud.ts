@@ -284,13 +284,7 @@ export class Crud {
   getAnnouncements() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
-        op: "read",
-        collection: "_announcement",
-        projection: null,
-        match: [],
-        sort: { "_created_at": -1 },
-        page: 1,
-        limit: 5
+        op: "announcements"
       }).then((res: any) => {
         resolve(this.announcements.next(res));
       }).catch((err: any) => {

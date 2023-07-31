@@ -48,6 +48,7 @@ export class MenuComponent implements OnInit {
   public release = environment.release;
   public segmentsadm: any;
   public user_: any;
+  public perm_: boolean = false;
   public views: any = [];
   public views_: any = null;
   public collections_: any = null;
@@ -76,6 +77,7 @@ export class MenuComponent implements OnInit {
     });
     this.auth.user.subscribe((res: any) => {
       this.user_ = res;
+      this.perm_ = res && res.perm;
       this.segmentsadm = res && res.perm ? environment.segmentsadm : [];
     });
   }

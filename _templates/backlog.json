@@ -451,6 +451,7 @@
     "blo_net_value",
     "blo_order_qty",
     "blo_line_qty",
+    "blo_customer_po",
     "blo_status"
   ],
   "index": [["blo_status"]],
@@ -467,9 +468,29 @@
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "_modified_at",
+          "key": "blo_status",
           "op": "nnull",
           "value": null
+        },
+        {
+          "key": "blo_order_no",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blo_prd_no",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blo_net_value",
+          "op": "gt",
+          "value": 0
+        },
+        {
+          "key": "blo_line_qty",
+          "op": "gt",
+          "value": 0
         }
       ],
       "targets": [
@@ -488,8 +509,8 @@
           "filter": [
             {
               "key": "blo_status",
-              "op": "contains",
-              "value": "Order"
+              "op": "in",
+              "value": "Order Released,Order Entry"
             },
             {
               "key": "blo_net_value",
@@ -522,5 +543,6 @@
     }
   ],
   "views": {},
-  "links": []
+  "links": [],
+  "fetchers": []
 }

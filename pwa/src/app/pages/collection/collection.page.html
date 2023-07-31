@@ -108,11 +108,11 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}
               </div>
-              <div *ngIf="!jeopen && filter_.length==0" (click)="doSaveView()" class="data-sq-button">
+              <div *ngIf="filter_.length==0" (click)="doSaveView()" class="data-sq-button">
                 <ion-icon name="save-outline"></ion-icon><br />
                 {{ 'Save' | translate }}
               </div>
-              <div *ngIf="is_crud && !jeopen" (click)="doShowSchema()" class="data-sq-button">
+              <div *ngIf="is_crud" (click)="doShowSchema(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="build-outline"></ion-icon><br />
                   {{ 'Schema' | translate }}
@@ -123,13 +123,13 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <ion-grid [class]="schemevis" *ngIf="is_crud">
-          <ion-row *ngIf="jeopen && is_crud">
+          <ion-row>
             <ion-col size="12">
               <ion-button size="small" (click)="doSaveSchema()">
                 <span *ngIf="!is_saving">{{ 'Save Schema' | translate }}</span>
                 <span *ngIf="is_saving">{{ 'Saving' | translate }}...</span>
               </ion-button>
-              <ion-button size="small" color="light" (click)="doShowSchema()">
+              <ion-button size="small" color="light" (click)="doShowSchema(false)">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
@@ -143,7 +143,6 @@ https://www.gnu.org/licenses.
           </ion-row>
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <!-- <h4 *ngIf="schema_key">{{ schema_key ? schema_key : 'Full schema' | translate }}</h4> -->
               <json-editor id="struc" [options]="jeoptions" [data]="structure ? structure : {}"
                 (change)="doChangeSchema($event)" #editor></json-editor>
             </ion-col>
@@ -152,11 +151,11 @@ https://www.gnu.org/licenses.
 
         <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
           <ion-row>
-            <ion-col size="12">
+            <ion-col size="6">
               <ion-list class="ion-no-padding ion-no-margin">
                 <ion-item lines="none">
                   <ion-select class="status-select" aria-label="Status" interface="popover"
-                    placeholder="{{ 'Flashcard Filters' | translate }}" (ionChange)="doFlashcard($event)"
+                    placeholder="{{ 'Flashcards' | translate }}" (ionChange)="doFlashcard($event)"
                     [compareWith]="compareWith" [(ngModel)]="status_">
                     <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{
                       item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>

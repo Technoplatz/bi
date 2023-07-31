@@ -373,7 +373,7 @@
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Technoplatz"]
+      "_tags": ["#Technoplatz", "#Managers"]
     },
     "customs-ambarli": {
       "title": "Ambarlı Ordinos",
@@ -479,5 +479,6 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Technoplatz", "#Administrators"]
     }
-  }
+  },
+  "fetchers": []
 }

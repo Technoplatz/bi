@@ -507,7 +507,7 @@ class Misc:
         except Exception as exc_:
             return ({"result": False, "msg": str(exc_)})
 
-    def permitted_user_f(self, user_):
+    def permitted_usertag_f(self, user_):
         """
         docstring is in progress
         """
@@ -1652,7 +1652,6 @@ class Crud:
             return filtered_
 
         except Exception as exc_:
-            print_("*** exception", exc_)
             return None
 
     def get_view_data_f(self, user_, view_id_, scope_):
@@ -2080,6 +2079,23 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def announcements_f(self, input_):
+        """
+        docstring is in progress
+        """
+        try:
+            user_ = input_["userindb"]
+            data_ = list(Mongo().db_["_announcement"].find({"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}).limit(20))
+            announcements_ = json.loads(JSONEncoder().encode(data_))
+
+            return {"result": True, "data": announcements_}
+
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
+
     def views_f(self, input_):
         """
         docstring is in progress
@@ -2163,7 +2179,7 @@ class Crud:
             data_ = []
             structure_ = self.root_schemas_f("_collection")
 
-            if Misc().permitted_user_f(user_):
+            if Misc().permitted_usertag_f(user_):
                 data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
             else:
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
@@ -2175,18 +2191,14 @@ class Crud:
                             {"per_read": True},
                             {"per_update": True},
                             {"per_delete": True},
-                        ],
+                        ]
                     }
                     permissions_ = Mongo().db_["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
                     for permission_ in permissions_:
                         collection_ = Mongo().db_["_collection"].find_one({"col_id": permission_["per_collection_id"]})
                         data_.append(collection_)
 
-            return {
-                "result": True,
-                "data": json.loads(JSONEncoder().encode(data_)),
-                "structure": structure_,
-            }
+            return {"result": True, "data": json.loads(JSONEncoder().encode(data_)), "structure": structure_}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -2208,7 +2220,7 @@ class Crud:
             counters_ = {}
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            if Misc().permitted_user_f(user_):
+            if Misc().permitted_usertag_f(user_):
                 permitted_ = True
             else:
                 permitted_ = False
@@ -2230,7 +2242,7 @@ class Crud:
             if permitted_:
                 data_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
             else:
-                raise APIError(f"no permission for {col_id_}")
+                raise AuthError(f"no collection permission {col_id_}")
 
             if col_id_[:1] != "_":
                 counters_f_ = self.counters_f({"col_id": col_id_})
@@ -2238,14 +2250,17 @@ class Crud:
 
             return {"result": True, "data": data_, "counters": counters_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except AuthError as exc_:
+            return Misc().auth_error_f(exc_)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
     def read_f(self, input_):
         """
@@ -2260,7 +2275,12 @@ class Crud:
             group_ = "group" in input_ and input_["group"] is True
             skip_ = limit_ * (page - 1)
             match_ = input_["match"] if "match" in input_ and len(input_["match"]) > 0 else []
+            allowed_cols_ = ["_collection"]
             is_crud_ = collection_id_[:1] != "_"
+
+            if collection_id_ not in allowed_cols_ and not Misc().permitted_usertag_f(user_) and not is_crud_:
+                raise APIError(f"collection not allowed to read: {collection_id_}")
+
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
             cursor_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
@@ -2616,7 +2636,7 @@ class Crud:
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             _tags = user_["_tags"]
 
-            if not Misc().permitted_user_f(user_):
+            if not Misc().permitted_usertag_f(user_):
                 permission_ = Mongo().db_["_permission"].find_one({
                     "per_collection_id": col_id_,
                     "per_tag": {"$in": _tags},
@@ -3775,29 +3795,30 @@ class Auth:
             user_ = input_["user"]
             user_id_ = user_["usr_id"] if "usr_id" in user_ else None
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-            collection_id_ = input_["collection"] if "collection" in input_ else None
+            collection_id_ = input_["collection"] if "collection" in input_ and input_["collection"] is not None else None
             op_ = input_["op"] if "op" in input_ else None
             administratives_ = ["dump", "backup", "restore"]
-            permissive_ = ["view", "views", "collections", "template"]
+            permissive_ops_ = ["view", "views", "charts", "collections", "announcements", "template"]
             allowmatch_ = []
+            is_crud_ = collection_id_ and collection_id_[:1] == "_"
 
             if not user_id_:
                 raise APIError(f"user not found {user_id_}")
+
+            if Misc().permitted_usertag_f(user_):
+                return {"result": True, "allowmatch": allowmatch_}
+
+            if not collection_id_:
+                return {"result": True, "allowmatch": allowmatch_} if op_ in permissive_ops_ else {"result": False, "allowmatch": allowmatch_}
 
             op_ = "read" if op_ in ["collection"] else input_["op"]
             if not op_:
                 raise APIError(f"operation is missing {op_}")
 
-            if Misc().permitted_user_f(user_):
-                return {"result": True, "allowmatch": allowmatch_}
-
             if op_ in administratives_:
-                raise AuthError(f"no {op_} permission for {collection_id_}")
+                raise AuthError(f"no admin permission {op_}")
 
-            if not collection_id_:
-                return {"result": True, "allowmatch": allowmatch_} if op_ in permissive_ else {"result": False, "allowmatch": allowmatch_}
-
-            if collection_id_[:1] == "_" and op_ == "read":
+            if is_crud_ and op_ == "read":
                 return {"result": True, "allowmatch": allowmatch_}
 
             collection_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_})
@@ -4025,7 +4046,7 @@ class Auth:
                 raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
-            perm_ = Misc().permitted_user_f(user_)
+            perm_ = Misc().permitted_usertag_f(user_)
             payload_ = {
                 "iss": "Technoplatz",
                 "aud": "api",
@@ -4414,6 +4435,7 @@ def storage_f():
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
             raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
             raise SessionError({"result": False, "msg": "user session not found"})
@@ -4424,19 +4446,28 @@ def storage_f():
 
         file_ = request.files["file"]
         if not file_:
-            raise APIError("no file found")
+            raise APIError("no file received")
 
-        collection__ = form_["collection"]
-        col_check_ = Crud().inner_collection_f(collection__)
+        collection_ = form_["collection"]
+        col_check_ = Crud().inner_collection_f(collection_)
         if not col_check_["result"]:
             raise APIError(col_check_["msg"])
+
+        permission_f_ = Auth().permission_f({
+            "user": jwt_validate_f_["user"],
+            "auth": jwt_validate_f_["auth"],
+            "collection": collection_,
+            "op": "import",
+        })
+        if not permission_f_["result"]:
+            raise AuthError(permission_f_["msg"])
 
         prefix_ = col_check_["collection"]["col_prefix"]
 
         import_f_ = Crud().import_f({
             "form": form_,
             "file": file_,
-            "collection": collection__,
+            "collection": collection_,
             "user": user_,
             "prefix": prefix_,
         })
@@ -4446,11 +4477,14 @@ def storage_f():
 
         return json.dumps({"result": import_f_["result"], "count": import_f_["count"] if "count" in import_f_ and import_f_["count"] >= 0 else 0, "msg": import_f_["msg"] if "msg" in import_f_ else None}, default=json_util.default, sort_keys=False), 200, Security().header_simple_f()
 
-    except APIError as exc:
-        return {"msg": str(exc), "status": 400}
+    except AuthError as exc_:
+        return {"msg": str(exc_), "status": 401}
 
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
+    except APIError as exc_:
+        return {"msg": str(exc_), "status": 400}
+
+    except Exception as exc_:
+        return {"msg": str(exc_), "status": 500}
 
 
 @app.route("/crud", methods=["POST"], endpoint="crud")
@@ -4471,16 +4505,17 @@ def crud_f():
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
             raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
             raise SessionError({"result": False, "msg": "user session not found"})
+
         input_["user"] = user_
         input_["userindb"] = user_
-        email_ = user_["usr_id"] if "usr_id" in user_ else None
-
         collection_ = input_["collection"] if "collection" in input_ else None
         match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
         allowmatch_ = []
+
         permission_f_ = Auth().permission_f({
             "user": jwt_validate_f_["user"],
             "auth": jwt_validate_f_["auth"],
@@ -4509,6 +4544,7 @@ def crud_f():
 
         if op_ in ["announce"]:
             tfac_ = input_["tfac"]
+            email_ = user_["usr_id"] if "usr_id" in user_ else None
             verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
             if not verify_otp_f_["result"]:
                 raise APIError(verify_otp_f_)
@@ -4535,6 +4571,8 @@ def crud_f():
             res_ = Crud().charts_f(input_)
         elif op_ == "views":
             res_ = Crud().views_f(input_)
+        elif op_ == "announcements":
+            res_ = Crud().announcements_f(input_)
         elif op_ == "flashcards":
             res_ = Crud().flashcards_f(input_)
         elif op_ == "announce":

@@ -260,5 +260,6 @@
       ]
     }
   ],
-  "views": {}
+  "views": {},
+  "fetchers": []
 }

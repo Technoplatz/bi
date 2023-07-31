@@ -1028,7 +1028,7 @@
   },
   "fetchers": [
     {
-      "name": "get customer price from order",
+      "name": "get customer price from orderi",
       "enabled": true,
       "collection": "order",
       "match": [

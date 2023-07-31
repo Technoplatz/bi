@@ -108,5 +108,6 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     }
-  }
+  },
+  "fetchers": []
 }

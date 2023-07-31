@@ -88,5 +88,6 @@
     }
   ],
   "views": {},
-  "links": []
+  "links": [],
+  "fetchers": []
 }
