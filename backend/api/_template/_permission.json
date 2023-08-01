@@ -14,7 +14,7 @@
       "bsonType": "string",
       "minLength": 3,
       "maxLength": 64,
-      "pattern": "^[#@][a-zA-Z0-9]{4,64}$",
+      "pattern": "^[#@][a-zA-Z0-9-]{4,64}$",
       "title": "Tag",
       "description": "Enter a tag #...",
       "required": true,

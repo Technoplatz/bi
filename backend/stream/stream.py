@@ -205,6 +205,10 @@ class Trigger():
             self.fetchers_ = []
             cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.fetchers": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
+                if "col_structure" not in item_:
+                    continue
+                if "fetchers" not in item_["col_structure"]:
+                    continue
                 for fetcher_ in item_["col_structure"]["fetchers"]:
                     self.fetchers_.append({
                         "collection": fetcher_["collection"],

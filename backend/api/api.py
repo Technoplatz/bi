@@ -942,8 +942,7 @@ class Crud:
         """
         docstring is in progress
         """
-        str_ = str(data_).strip()
-        return str_ in ["true", "TRUE"]
+        return str(data_).strip().lower() == "true"
 
     def frame_convert_datetime_f(self, data_):
         """
@@ -4457,7 +4456,7 @@ def storage_f():
             "user": jwt_validate_f_["user"],
             "auth": jwt_validate_f_["auth"],
             "collection": collection_,
-            "op": "import",
+            "op": "import"
         })
         if not permission_f_["result"]:
             raise AuthError(permission_f_["msg"])

@@ -50,7 +50,7 @@ https://www.gnu.org/licenses.
                 <ng-template #noscan>
                     <ion-button *ngIf="collection!='_backup' && collection!='_storage' && op!='filter' && !isInProgress"
                         (click)="doSubmit()">
-                        <span *ngIf="op=='action'; else noaction"> {{ 'RUN ACTION' | translate }} </span>
+                        <span *ngIf="op=='action'; else noaction"> {{ 'SAVE & RUN' | translate }} </span>
                         <ng-template #noaction> {{ 'SAVE' | translate }} </ng-template>
                     </ion-button>
                 </ng-template>

@@ -47,27 +47,27 @@
     "dnn_odi_no": {
       "bsonType": "string",
       "title": "Ordino No",
-      "description": "Main Ordino Number",
+      "description": "Primary ordino number",
+      "pattern": "^[0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "pattern": "^[0-9A-Z-]{1,20}$",
       "width": 170
     },
     "dnn_odi_sub_no": {
       "bsonType": "string",
       "title": "Ordino Sub No",
-      "description": "Sub Ordino Number",
-      "minLength": 6,
-      "maxLength": 20,
-      "pattern": "^[0-9A-Z-]{6,20}$"
+      "description": "Secondary ordino number",
+      "pattern": "^[0-9A-Z-_/ ]{1,20}$",
+      "minLength": 1,
+      "maxLength": 20
     },
     "dnn_man_no": {
       "bsonType": "string",
       "title": "Manifest No",
-      "description": "Manifest Number",
-      "minLength": 18,
-      "maxLength": 20,
-      "width": 150
+      "description": "Manifest number",
+      "minLength": 1,
+      "maxLength": 32,
+      "width": 160
     },
     "dnn_bill_no": {
       "bsonType": "string",
@@ -574,7 +574,7 @@
     "sv-git-view": {
       "title": "GiT 2023",
       "description": "GiT by account and statuses",
-      "priority": 2000,
+      "priority": 1000,
       "enabled": true,
       "dashboard": true,
       "data_filter": [],
@@ -615,7 +615,7 @@
     "sv-buid-view": {
       "title": "GiT BUID",
       "description": "DN counts by buid and status",
-      "priority": 1000,
+      "priority": 1010,
       "enabled": true,
       "dashboard": true,
       "data_filter": [],
