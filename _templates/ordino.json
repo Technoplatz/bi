@@ -51,6 +51,13 @@
       "description": "Estimated Date of Arrival",
       "width": 120
     },
+    "odi_amount": {
+      "bsonType": "number",
+      "title": "Amount",
+      "description": "Ordino Amount",
+      "default": 0,
+      "width": 100
+    },
     "odi_arrived": {
       "bsonType": "bool",
       "title": "Arrived",

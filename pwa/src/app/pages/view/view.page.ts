@@ -179,7 +179,6 @@ export class ViewPage implements OnInit {
             }
           }).catch((error: any) => {
             this.otp_show = false;
-            console.error(error);
             this.misc.doMessage(error, "error");
             reject(error);
           });
@@ -226,7 +225,6 @@ export class ViewPage implements OnInit {
                   this.misc.doMessage("view has been announced successfully", "success");
                 }).catch((error: any) => {
                   this.misc.doMessage(error, "error");
-                  console.error(error);
                 });
               }
             }
@@ -236,7 +234,6 @@ export class ViewPage implements OnInit {
         });
       }).catch((error: any) => {
         this.in_otp_process = this.in_otp_process_test = false;
-        console.error(error);
         this.misc.doMessage(error, "error");
       });
     }

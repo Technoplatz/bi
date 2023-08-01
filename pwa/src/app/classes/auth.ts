@@ -103,7 +103,6 @@ export class Auth {
             resolve(true);
             this.misc.navi.next("/dashboard");
             this.crud.getAll().then(() => { }).catch((error: any) => {
-              console.error(error);
               this.misc.doMessage(error, "error");
               reject(error);
             });

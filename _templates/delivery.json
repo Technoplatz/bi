@@ -359,8 +359,8 @@
   ],
   "actions": [
     {
-      "id": "to-open",
-      "title": "To Open",
+      "id": "stby-to-open",
+      "title": "Standby to Open",
       "enabled": true,
       "match": [
         {
@@ -535,7 +535,7 @@
       ]
     },
     {
-      "name": "Manifest updater",
+      "name": "Ordino updater",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
@@ -547,17 +547,21 @@
       ],
       "targets": [
         {
-          "collection": "manifest",
+          "collection": "ordino",
           "match": [
             {
-              "key": "man_no",
-              "value": "dnn_man_no"
+              "key": "odi_no",
+              "value": "dnn_odi_no"
+            },
+            {
+              "key": "odi_sub_no",
+              "value": "dnn_odi_sub_no"
             }
           ],
           "filter": [],
           "set": [
             {
-              "key": "man_amount",
+              "key": "odi_amount",
               "value": "sum(dnn_amount)"
             }
           ],
@@ -609,8 +613,8 @@
       "_tags": ["#Managers", "#Administrators"]
     },
     "sv-buid-view": {
-      "title": "Business Units",
-      "description": "GiT by BU Id's",
+      "title": "GiT BUID",
+      "description": "DN counts by buid and status",
       "priority": 1000,
       "enabled": true,
       "dashboard": true,
@@ -634,7 +638,7 @@
       "pivot_totals": true,
       "chart": true,
       "flashcard": false,
-      "chart_type": "Stacked Horizontal Bar",
+      "chart_type": "Stacked Vertical Bar",
       "chart_label": true,
       "chart_gradient": true,
       "chart_grid": true,
@@ -643,7 +647,7 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
+      "chart_colors": ["#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#e60049", "#00bfa0"],
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
       "scheduled_tz": "Europe/Berlin",

@@ -60,27 +60,27 @@
     "ser_proc_in": {
       "bsonType": "bool",
       "title": "Income",
-      "description": "Depot Income",
+      "description": "Touchpoint entry",
       "default": false,
       "width": 110
     },
     "ser_proc_out": {
       "bsonType": "bool",
       "title": "Outgoing",
-      "description": "Depot Out",
+      "description": "Touchpoint exit",
       "default": false,
       "width": 120
     },
     "ser_proc_in_date": {
       "bsonType": "date",
       "title": "In Date",
-      "description": "Depot Income Date",
+      "description": "Incoming Date",
       "width": 140
     },
     "ser_proc_out_date": {
       "bsonType": "date",
-      "title": "In Date",
-      "description": "Depot Outgoing Date",
+      "title": "Out Date",
+      "description": "Outgoing Date",
       "width": 150
     }
   },
@@ -95,7 +95,7 @@
   "actions": [],
   "triggers": [
     {
-      "name": "Barcode Readin",
+      "name": "Barcode read in",
       "enabled": true,
       "operations": ["insert", "update"],
       "changes": [
@@ -136,7 +136,7 @@
       ]
     },
     {
-      "name": "Barcode Readin Cancel",
+      "name": "Barcode readin cancel",
       "enabled": true,
       "operations": ["insert", "update"],
       "changes": [

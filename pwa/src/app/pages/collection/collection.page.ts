@@ -616,24 +616,29 @@ export class CollectionPage implements OnInit {
   }
 
   doSaveSchema() {
-    this.is_saving = true;
-    this.misc.apiCall("/crud", {
-      op: "saveschema",
-      collection: this.id,
-      schema_key: this.schema_key,
-      structure: this.structured_ ? this.structured_ : this.structure
-    }).then(() => {
-      this.misc.doMessage("schema saved successfully", "success");
-      this.crud.getAll().then(() => { });
-      this.RefreshData(0).then(() => {
-        this.schemevis = "hide"
+    if (this.structured_) {
+      this.is_saving = true;
+      this.misc.apiCall("/crud", {
+        op: "saveschema",
+        collection: this.id,
+        schema_key: this.schema_key,
+        structure: this.structured_
+      }).then(() => {
+        this.misc.doMessage("schema saved successfully", "success");
+        this.crud.getAll().then(() => { });
+        this.RefreshData(0).then(() => {
+          this.schemevis = "hide"
+        });
+      }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.structured_ = null;
+        this.is_saving = false;
       });
-    }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
-    }).finally(() => {
-      this.structured_ = null;
-      this.is_saving = false;
-    });
+    } else {
+      this.misc.doMessage("no changes detected in the schema", "warning");
+    }
+
   }
 
   doUploadModal() {
@@ -674,7 +679,11 @@ export class CollectionPage implements OnInit {
   }
 
   doChangeSchema(ev: any) {
-    ev && ev.isTrusted ? null : this.structured_ = ev;
+    if (!ev.isTrusted) {
+      this.structured_ = ev;
+    } else {
+      console.error("*** ev", ev);
+    }
   }
 
   doInstallTemplate(item_: any, ix: number) {
@@ -688,7 +697,6 @@ export class CollectionPage implements OnInit {
         this.misc.doMessage(res.msg, "success");
         this.misc.navi.next("dashboard");
       }).catch((error: any) => {
-        console.error(error);
         this.misc.doMessage(error, "error");
       }).finally(() => {
         this.RefreshData(0).then(() => {

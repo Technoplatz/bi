@@ -41,7 +41,7 @@
     },
     "man_amount": {
       "bsonType": "number",
-      "title": "Manifest Amount",
+      "title": "Expenses",
       "description": "Tax and expenses",
       "default": 0
     },
