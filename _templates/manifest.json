@@ -39,12 +39,6 @@
       "description": "Number of cases",
       "width": 120
     },
-    "man_amount": {
-      "bsonType": "number",
-      "title": "Expenses",
-      "description": "Tax and expenses",
-      "default": 0
-    },
     "man_opening_date": {
       "bsonType": "date",
       "title": "Opening Date",
@@ -65,6 +59,18 @@
       "title": "Closing Date",
       "description": "Manifest closing date",
       "width": 150
+    },
+    "man_gov_purchase_date": {
+      "bsonType": "date",
+      "title": "Purchase Date",
+      "description": "Purchase date",
+      "width": 190
+    },
+    "man_gov_approval_date": {
+      "bsonType": "date",
+      "title": "Approval Date",
+      "description": "Approval date",
+      "width": 180
     }
   },
   "required": ["man_no", "man_opening_date", "man_file_no", "man_case_no"],

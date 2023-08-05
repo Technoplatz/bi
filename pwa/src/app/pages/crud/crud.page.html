@@ -50,7 +50,7 @@ https://www.gnu.org/licenses.
                 <ng-template #noscan>
                     <ion-button *ngIf="collection!='_backup' && collection!='_storage' && op!='filter' && !isInProgress"
                         (click)="doSubmit()">
-                        <span *ngIf="op=='action'; else noaction"> {{ 'SAVE & RUN' | translate }} </span>
+                        <span *ngIf="op=='action'; else noaction"> {{ 'RUN' | translate }} </span>
                         <ng-template #noaction> {{ 'SAVE' | translate }} </ng-template>
                     </ion-button>
                 </ng-template>
@@ -154,11 +154,11 @@ https://www.gnu.org/licenses.
         <ng-template #nolink>
             <div *ngIf="isnoninteractive_; else interactive" class="ion-margin-top">
                 <h5>{{ 'This action is non-interactive' | translate }}.</h5>
-                {{ 'Please click RUN ACTION button directly' | translate }}.
+                {{ 'Please click RUN button directly' | translate }}.
             </div>
             <ng-template #interactive>
                 <div class="ion-margin-top">
-                    <h5>{{ collection | titlecase }} {{ 'Data Form' | translate }}</h5>
+                    <h5>{{ collection | titlecase }} {{ 'Form' | translate }}</h5>
                 </div>
             </ng-template>
             <form [formGroup]="crudForm" enctype="multipart/form-data">
@@ -168,7 +168,7 @@ https://www.gnu.org/licenses.
                         <div class="ion-margin-top full-flex ion-margin-bottom">
                             <ion-button *ngFor="let item of links" (click)="doLink(item)" color="dark" size="default"
                                 slot="end">
-                                <ion-icon name="attach-outline"></ion-icon> {{ item.get }}
+                                <ion-icon name="link-outline"></ion-icon> {{ item.btntext ? item.btntext : item.get }}
                             </ion-button>
                         </div>
                     </ion-item>
@@ -195,7 +195,8 @@ https://www.gnu.org/licenses.
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="false"
-                                        [disabled]="field.disabled" [readonly]="field.readonly" [name]="field.name">
+                                        [disabled]="field.disabled" [readonly]="field.readonly" [name]="field.name"
+                                        (ionChange)="doTextManipulate($event, field)">
                                     </ion-input>
                                     <ng-template #istextarea>
                                         <ion-textarea class="ion-no-padding" cols="64" [(ngModel)]="data_[field.name]"
@@ -207,7 +208,6 @@ https://www.gnu.org/licenses.
                                             spellcheck="false" debounce="500">
                                         </ion-textarea>
                                     </ng-template>
-
                                 </div>
                                 <ng-template #checkpassword>
                                     <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"

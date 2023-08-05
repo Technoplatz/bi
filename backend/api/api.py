@@ -264,7 +264,8 @@ class Misc:
             "dateonly",
             "decimals",
             "truetext",
-            "falsetext"
+            "falsetext",
+            "casetype"
         ]
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
@@ -333,16 +334,13 @@ class Misc:
         """
         docstring is in progress
         """
-        res_ = str(exc_)
-        self.post_notification(res_)
-        return {"result": False, "msg": res_}
+        return {"result": False, "msg": str(exc_)}
 
     def pass_exception_f(self, exc_):
         """
         docstring is in progress
         """
-        res_ = str(exc_)
-        return {"result": False, "msg": res_}
+        return {"result": False, "msg": str(exc_)}
 
     def auth_error_f(self, exc_):
         """
@@ -1004,10 +1002,7 @@ class Crud:
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
 
-            get_filtered_ = self.get_filtered_f({
-                "match": match_,
-                "properties": structure_["properties"] if "properties" in structure_ else None
-            })
+            get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
 
             ts_ = Misc().get_timestamp_f()
             bin_ = f"{collection_id_}_bin_{ts_}"
@@ -1055,10 +1050,7 @@ class Crud:
 
             get_filtered_ = {}
             if len(match_) > 0:
-                get_filtered_ = self.get_filtered_f({
-                    "match": match_,
-                    "properties": properties_ if properties_ else None
-                })
+                get_filtered_ = self.get_filtered_f({"match": match_, "properties": properties_ if properties_ else None})
 
             ids_ = []
             for _id in sweeped_:
@@ -1489,11 +1481,7 @@ class Crud:
 
             filter0_ = {}
             filter0_[get_] = {"$in": linked_}
-            filter1_ = self.get_filtered_f({
-                "match": match_,
-                "properties": target_properties_,
-                "data": data_
-            })
+            filter1_ = self.get_filtered_f({"match": match_, "properties": target_properties_, "data": data_})
             filter_ = {"$and": [filter0_, filter1_]}
 
             update_many_ = Mongo().db_[data_collection_].update_many(filter_, {"$set": setc_})
@@ -1503,19 +1491,23 @@ class Crud:
 
             notification_ = link_["notification"] if "notification" in link_ else None
             notify_ = notification_ and "notify" in notification_ and notification_["notify"] is True
+            attachment_ = notification_ and "attachment" in notification_ and notification_["attachment"] is True
+            files_ = []
 
             if notify_:
                 subject_ = notification_["subject"] if "subject" in notification_ else "Link Completed"
-                fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
-                if not fields_:
-                    raise AppException("no fields field found in link")
                 body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
-                type_ = "csv"
-                file_ = f"/cron/link-{Misc().get_timestamp_f()}.{type_}"
-                query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
-                command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={data_collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
-                call(command_, shell=True)
-                files_ = [{"filename": file_, "filetype": type_}]
+                if attachment_:
+                    fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
+                    if not fields_:
+                        raise AppException("no fields field found in link")
+                    type_ = "csv"
+                    file_ = f"/cron/link-{Misc().get_timestamp_f()}.{type_}"
+                    query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
+                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={data_collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+                    call(command_, shell=True)
+                    files_ = [{"filename": file_, "filetype": type_}] if attachment_ else []
+
                 email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
@@ -1651,6 +1643,7 @@ class Crud:
             return filtered_
 
         except Exception as exc_:
+            print_("!!! get filtered exception", exc_)
             return None
 
     def get_view_data_f(self, user_, view_id_, scope_):
@@ -1735,10 +1728,7 @@ class Crud:
 
             vie_filter_ = view_["data_filter"] if "data_filter" in view_ else []
             if len(vie_filter_) > 0:
-                get_filtered_ = self.get_filtered_f({
-                    "match": vie_filter_,
-                    "properties": properties_master_ if properties_master_ else None
-                })
+                get_filtered_ = self.get_filtered_f({"match": vie_filter_, "properties": properties_master_ if properties_master_ else None})
                 pipe_.append({"$match": get_filtered_})
 
             if unset_ and len(unset_) > 0:
@@ -1747,10 +1737,8 @@ class Crud:
 
             records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
             count_ = len(records_) if records_ else 0
-
             df_ = pd.DataFrame(records_).fillna("#N/A")
             df_raw_ = pd.DataFrame(records_).fillna("")
-
             vie_visual_style_ = view_["chart_type"] if "chart_type" in view_ else "Vertical Bar"
             data_index_0_ = view_["data_index"][0] if "data_index" in view_ and len(view_["data_index"]) > 0 else None
             data_values_0_k_ = view_["data_values"][0]["key"] if "data_values" in view_ and len(view_["data_values"]) > 0 and "key" in view_["data_values"][0] else None
@@ -1758,8 +1746,8 @@ class Crud:
             data_columns_0_ = view_["data_columns"][0] if "data_columns" in view_ and len(view_["data_columns"]) > 0 else None
             pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ else False
             data_values_ = view_["data_values"] if "data_values" in view_ and len(["data_values"]) > 0 else None
-
             dropped_ = []
+
             if data_index_0_ in df_.columns:
                 dropped_.append(data_index_0_)
 
@@ -1770,12 +1758,17 @@ class Crud:
                 dropped_.append(data_columns_0_)
 
             groupby_ = []
+
             if vie_visual_style_ == "Line":
-                groupby_.append(data_columns_0_) if data_columns_0_ and data_columns_0_ in df_.columns else None
-                groupby_.append(data_index_0_) if data_index_0_ and data_index_0_ in df_.columns else None
+                if data_columns_0_ and data_columns_0_ in df_.columns:
+                    groupby_.append(data_columns_0_)
+                if data_index_0_ and data_index_0_ in df_.columns:
+                    groupby_.append(data_index_0_)
             else:
-                groupby_.append(data_index_0_) if data_index_0_ and data_index_0_ in df_.columns else None
-                groupby_.append(data_columns_0_) if data_columns_0_ and data_columns_0_ in df_.columns else None
+                if data_index_0_ and data_index_0_ in df_.columns:
+                    groupby_.append(data_index_0_)
+                if data_columns_0_ and data_columns_0_ in df_.columns:
+                    groupby_.append(data_columns_0_)
 
             df_ = df_.drop([x for x in df_.columns if x not in dropped_], axis=1)
             dtypes_ = list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns)
@@ -2051,10 +2044,7 @@ class Crud:
                     count_ = 0
                     filter_ = view__["data_filter"] if "data_filter" in view__ else []
                     if len(filter_) > 0:
-                        get_filtered_ = self.get_filtered_f({
-                            "match": filter_,
-                            "properties": properties_ if properties_ else None
-                        })
+                        get_filtered_ = self.get_filtered_f({"match": filter_, "properties": properties_ if properties_ else None})
                         count_ = Mongo().db_[f"{cid_}_data"].count_documents(get_filtered_)
 
                     returned_views_.append({
@@ -2142,10 +2132,7 @@ class Crud:
                     count_ = 0
                     filter_ = view__["data_filter"] if "data_filter" in view__ else []
                     if len(filter_) > 0:
-                        get_filtered_ = self.get_filtered_f({
-                            "match": filter_,
-                            "properties": properties_ if properties_ else None
-                        })
+                        get_filtered_ = self.get_filtered_f({"match": filter_, "properties": properties_ if properties_ else None})
                         count_ = Mongo().db_[f"{cid_}_data"].count_documents(get_filtered_)
 
                     returned_views_.append({
@@ -2288,12 +2275,7 @@ class Crud:
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True else False
-
-            get_filtered_ = self.get_filtered_f({
-                "match": match_,
-                "properties": structure_["properties"] if "properties" in structure_ else None
-            })
-
+            get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
             if group_:
@@ -2804,7 +2786,7 @@ class Crud:
                     "user": user_
                 })
                 if not link_f_["result"]:
-                    raise APIError(link_f_["msg"])
+                    raise AppException(link_f_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -2827,6 +2809,9 @@ class Crud:
                 "document": str(exc)
             })
             return Misc().mongo_error_f(exc)
+
+        except AppException as exc:
+            return Misc().app_exception_f(exc)
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -3046,34 +3031,22 @@ class Crud:
             if not set_ and not apis_:
                 raise AppException("no set or apis provided in action")
 
-            notify_ = False
             notification_ = action_["notification"] if "notification" in action_ else None
+            notify_ = notification_ and notification_["notify"] is True
+            filter_ = notification_["filter"] if notification_ and "filter" in notification_ and len(notification_["filter"]) > 0 else None
+            fields_ = notification_["fields"].replace(" ", "") if notification_ and "fields" in notification_ else None
+            attachment_ = notification_ and "attachment" in notification_ and notification_["attachment"] is True
             get_notification_filtered_ = None
-            if notification_:
-                if "notify" not in notification_:
-                    raise AppException("no notify field found in notification")
-                notify_ = notification_["notify"] is True
-                subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
-                body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
-                fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
-                if not fields_:
-                    raise AppException("no fields field found in notification")
-                filter_ = notification_["filter"] if "filter" in notification_ and len(notification_["filter"]) > 0 else None
-                if filter_:
-                    get_notification_filtered_ = self.get_filtered_f({
-                        "match": filter_,
-                        "properties": properties_
-                    })
+
+            if notify_ and filter_:
+                get_notification_filtered_ = self.get_filtered_f({"match": filter_, "properties": properties_})
 
             match_ = action_["match"] if "match" in action_ and len(action_["match"]) > 0 else {}
-            get_filtered_ = self.get_filtered_f({
-                "match": match_,
-                "properties": properties_
-            })
+            get_filtered_ = self.get_filtered_f({"match": match_, "properties": properties_})
 
             if ids_ and len(ids_) > 0:
                 get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
-                if notify_ and get_notification_filtered_:
+                if get_notification_filtered_:
                     get_notification_filtered_ = {"$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]}
             else:
                 if apis_:
@@ -3127,7 +3100,9 @@ class Crud:
                 response_content_ += f"{res_content_}"
 
             if notify_:
-                if get_notification_filtered_:
+                subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
+                body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
+                if get_notification_filtered_ and attachment_:
                     type_ = "csv"
                     file_ = f"/cron/action-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
@@ -5023,6 +4998,7 @@ def get_data_f(id_):
             if not user_validate_by_token_f_["result"]:
                 raise AuthError(user_validate_by_token_f_)
         else:
+            print_("!!! missing token", id_)
             raise AuthError({"result": False, "msg": "missing token"})
 
         generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")

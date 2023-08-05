@@ -85,17 +85,6 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  doRefresh() {
-    if (!this.is_refreshing) {
-      this.is_refreshing = true;
-      this.crud.getAll().then(() => { }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.is_refreshing = false;
-      });
-    }
-  }
-
   doFlashcard(item_: any) {
     this.status_ = item_;
     const coll_ = item_.collection;

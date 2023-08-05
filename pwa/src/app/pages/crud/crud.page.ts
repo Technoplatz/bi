@@ -565,6 +565,17 @@ export class CrudPage implements OnInit {
     }
   }
 
+  doTextManipulate(event: any, field: any) {
+    const val_ = event.detail.value;
+    if (field?.casetype === "lowercase") {
+      this.data_[field.name] = val_.toLowerCase();
+    } else if (field?.casetype === "uppercase") {
+      this.data_[field.name] = val_.toUpperCase();
+    } else if (field?.casetype === "capitalize") {
+      this.data_[field.name] = val_.charAt(0).toUpperCase() + val_.slice(1)
+    }
+  }
+
   doDateAssign(event: any, fn: string) {
     const date_ = this.misc.getFormattedDate(event.detail.value);
     this.data_[fn] = date_;

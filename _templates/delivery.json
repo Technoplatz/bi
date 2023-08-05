@@ -379,14 +379,49 @@
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
-        "subject": "DNs are stand by",
+        "subject": "New DNs uploaded",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Standby to 00-Open at once.",
-        "fields": "dnn_no,dnn_status",
+        "attachment": true,
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": [
           {
             "key": "dnn_status",
             "op": "eq",
             "value": "00-Open"
+          }
+        ]
+      }
+    },
+    {
+      "id": "open-to-stby",
+      "title": "Open to Standby",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "00-Standby"
+        }
+      ],
+      "one_click": true,
+      "_tags": ["#Managers", "#Administrators"],
+      "notification": {
+        "notify": true,
+        "subject": "Open DNs returned to Standby",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Open to 00-Standby at once.",
+        "attachment": true,
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "00-Standby"
           }
         ]
       }
@@ -700,10 +735,57 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
+    "fc-status-00s": {
+      "title": "00-Standby",
+      "description": "DNs in 00-Standby status",
+      "priority": 1000,
+      "enabled": true,
+      "dashboard": true,
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Standby"
+        }
+      ],
+      "data_sort": {
+        "_modified_at": -1
+      },
+      "data_excluded": [],
+      "data_index": ["dnn_status"],
+      "data_columns": [],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
+      "data_json": true,
+      "data_excel": true,
+      "data_csv": true,
+      "pivot": true,
+      "pivot_totals": true,
+      "chart": true,
+      "flashcard": true,
+      "chart_type": "Flashcard",
+      "chart_label": true,
+      "chart_gradient": true,
+      "chart_grid": true,
+      "chart_legend": false,
+      "chart_xaxis": true,
+      "chart_xaxis_label": false,
+      "chart_yaxis": true,
+      "chart_yaxis_label": false,
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
+      "scheduled": false,
+      "scheduled_cron": "0 10 * 1-5 *",
+      "scheduled_tz": "Europe/Berlin",
+      "_tags": ["#Managers", "#Administrators"]
+    },
     "fc-status-00": {
       "title": "00-Open",
       "description": "DNs ready to get operated",
-      "priority": 1000,
+      "priority": 1001,
       "enabled": true,
       "dashboard": true,
       "data_filter": [

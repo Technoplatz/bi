@@ -138,7 +138,7 @@ export class CollectionPage implements OnInit {
   ) {
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "code";
+    this.jeoptions.mode = "tree";
     this.jeoptions.statusBar = true;
     this.jeoptions.enableSort = false;
     this.jeoptions.expandAll = false;
@@ -154,6 +154,7 @@ export class CollectionPage implements OnInit {
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res;
     });
+    this.crud.getViews().then(() => { });
   }
 
   ngOnDestroy() {
@@ -220,50 +221,48 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
-      this.crud.getViews().then(() => {
-        this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-          this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
-          this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-            this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-            this.count = 0;
-            this.page = p === 0 ? 1 : p;
-            this.misc.apiCall("crud", {
-              op: "read",
-              collection: this.id,
-              projection: null,
-              match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
-              sort: this.sort,
-              page: this.page,
-              limit: this.limit
-            }).then((res: any) => {
-              this.editor?.setMode("code");
-              this.doBuildSchema(res.structure);
-              this.data = res.data;
-              this.structure_ori_ = res.structure;
-              this.structure = res.structure;
-              this.actions = this.structure.actions;
-              this.properties_ = res.structure.properties;
-              this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
-              this.count = res.count;
-              this.multicheckbox = false;
-              this.multicheckbox ? this.multicheckbox = false : null;
-              this.selected = new Array(res.data.length).fill(false);
-              this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
-              const lmt = this.pages >= 10 ? 10 : this.pages;
-              this.paget = new Array(lmt);
-              this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
-              this.page_end = this.page_start + 10;
-              this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
-              for (let p = 0; p < this.paget.length; p++) {
-                this.paget[p] = this.page_start + p;
-              }
-              resolve(true);
-            }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-              reject(error);
-            }).finally(() => {
-              this.is_loaded = true;
-            });
+      this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
+        this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
+        this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+          this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+          this.count = 0;
+          this.page = p === 0 ? 1 : p;
+          this.misc.apiCall("crud", {
+            op: "read",
+            collection: this.id,
+            projection: null,
+            match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
+            sort: this.sort,
+            page: this.page,
+            limit: this.limit
+          }).then((res: any) => {
+            this.editor?.setMode(this.jeoptions.mode);
+            this.doBuildSchema(res.structure);
+            this.data = res.data;
+            this.structure_ori_ = res.structure;
+            this.structure = res.structure;
+            this.actions = this.structure.actions;
+            this.properties_ = res.structure.properties;
+            this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
+            this.count = res.count;
+            this.multicheckbox = false;
+            this.multicheckbox ? this.multicheckbox = false : null;
+            this.selected = new Array(res.data.length).fill(false);
+            this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
+            const lmt = this.pages >= 10 ? 10 : this.pages;
+            this.paget = new Array(lmt);
+            this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
+            this.page_end = this.page_start + 10;
+            this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
+            for (let p = 0; p < this.paget.length; p++) {
+              this.paget[p] = this.page_start + p;
+            }
+            resolve(true);
+          }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+            reject(error);
+          }).finally(() => {
+            this.is_loaded = true;
           });
         });
       });
@@ -308,7 +307,7 @@ export class CollectionPage implements OnInit {
                 doc: null,
                 is_crud: true
               }).then(() => {
-                this.id === "_collection" ? this.crud.getAll().then(() => { }) : null;
+                this.id === "_collection" ? this.crud.getAll().then(() => { }) : this.crud.getViews().then(() => { });
                 this.RefreshData(0);
               }).catch((res: any) => {
                 this.misc.doMessage(res && res.msg ? res.msg : res, "error");
@@ -357,7 +356,7 @@ export class CollectionPage implements OnInit {
         if (op === "action" && res.data.res) {
           this.misc.doMessage(res.data.res.content, "success");
         }
-        this.id === "_collection" ? this.crud.getAll().then(() => { }) : null;
+        this.id === "_collection" ? this.crud.getAll().then(() => { }) : this.crud.getViews().then(() => { });
         this.RefreshData(0);
       }
     });
@@ -517,7 +516,7 @@ export class CollectionPage implements OnInit {
 
   doShowSchema(shw: boolean) {
     if (shw) {
-      this.editor.setMode("code");
+      this.editor.setMode(this.jeoptions.mode);
       this.schemevis = "show";
       this.editor.focus();
     } else {
@@ -539,7 +538,7 @@ export class CollectionPage implements OnInit {
     this.doSetSchemaKey(key);
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
-    this.editor.setMode("code");
+    this.editor.setMode(this.jeoptions.mode);
     this.schemevis = "show";
     this.editor.focus();
   }

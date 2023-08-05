@@ -1437,7 +1437,7 @@ sup {
 
 .template-card-container {
   margin-top: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   gap: 8px !important;
   display: flex;
   justify-content: flex-start;
@@ -2079,7 +2079,7 @@ app-chart {
   overflow: hidden;
   padding: 8px;
   align-content: flex-start;
-  width: 220px;
+  width: 240px;
   height: 58px;
   white-space: nowrap !important;
   border: 2px dotted var(--ion-color-medium);
@@ -2087,9 +2087,9 @@ app-chart {
 }
 
 .flash-sq h2 {
-  margin-top: -3px !important;
+  margin-top: -8px !important;
   color: var(--ion-color-primary);
-  font-size: 1.6em !important;
+  font-size: 2.5em !important;
 }
 
 .flash-sq h5,

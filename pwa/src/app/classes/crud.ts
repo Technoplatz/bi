@@ -78,6 +78,7 @@ export class Crud {
         const maximum_ = p.maximum > 0 ? p.maximum : null;
         const minItems_ = p.minItems && p.minItems >= 0 ? p.minItems : null;
         const maxItems_ = p.maxItems && p.maxItems >= 0 ? p.maxItems : null;
+        const casetype_ = p.casetype ? p.casetype : null;
         const items_ = p.items ? p.items : null;
         const password_ = p.password ? true : false;
         const pattern_ = p.pattern ? p.pattern : null;
@@ -139,7 +140,8 @@ export class Crud {
           manualAdd: manualAdd_,
           placeholder: placeholder_,
           counter: counter_,
-          dateonly: dateonly_
+          dateonly: dateonly_,
+          casetype: casetype_
         });
         const kvval_: any = [{
           key: null,

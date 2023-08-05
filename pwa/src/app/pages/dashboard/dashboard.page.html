@@ -45,8 +45,8 @@ https://www.gnu.org/licenses.
                 <h2>{{ item.count }}</h2>
               </div>
               <h5>{{ item.view.title }}</h5>
-              {{ item.collection }} | {{ item.view.data_values[0]?.value }} {{ 'of' | translate }} {{
-              item.view.data_values[0]?.key }}
+              {{ item.collection }} | {{ item.view.data_values[0]?.value }}
+              <!-- {{ 'of' | translate }} {{ item.view.data_values[0]?.key }} -->
             </div>
           </div>
 
@@ -54,10 +54,6 @@ https://www.gnu.org/licenses.
           <div class="brz-visual-group ion-margin-bottom">
             <div *ngFor="let item of charts; let i = index" [class]="chart_css" #chcontainer>
               <div class="visual-buttons">
-                <ion-button size="small" fill="clear" (click)="doRefresh()" class="clear-dark-button" color="dark"
-                  mode="ios">
-                  <ion-icon name="sync-outline"></ion-icon>
-                </ion-button>
                 <ion-button size="small" fill="clear" (click)="doResizeCharts()" class="clear-dark-button" color="dark"
                   mode="ios">
                   <ion-icon name="expand-outline"></ion-icon>

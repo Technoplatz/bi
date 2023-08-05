@@ -237,6 +237,57 @@ Enumerates are certain type of string properties with predefined values which al
 }
 ```
 
+### Actions
+
+```json
+[
+  {
+    "id": "stby-to-open",
+    "title": "Standby to Open",
+    "enabled": true,
+    "otp_required": true,
+    "one_click": true,
+    "match": [{ "key": "dnn_status", "op": "eq", "value": "00-Standby" }],
+    "set": [{ "key": "dnn_status", "value": "00-Open" }],
+    "_tags": ["#Managers", "#Administrators"],
+    "notification": {
+      "notify": true,
+      "subject": "Email subject",
+      "body": "Email body in HTML",
+      "attachment": true,
+      "fields": "dnn_no,dnn_status",
+      "filter": [{ "key": "dnn_status", "op": "eq", "value": "00-Open" }]
+    }
+  }
+]
+```
+
+### Links
+
+```json
+[
+  {
+    "collection": "delivery",
+    "get": "dnn_no",
+    "match": [{ "key": "dnn_status", "op": "eq", "value": "00-Open" }],
+    "set": [
+      { "key": "dnn_odi_no", "value": "odi_no" },
+      { "key": "dnn_odi_sub_no", "value": "odi_sub_no" },
+      { "key": "dnn_status", "value": "10-OnTheWay" }
+    ],
+    "btntext": "Add DNs",
+    "_tags": ["#Managers", "#Technoplatz", "#Operation"],
+    "notification": {
+      "notify": true,
+      "subject": "Ordino Attached",
+      "body": "Email body in HTML",
+      "attachment": true,
+      "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name"
+    }
+  }
+]
+```
+
 ### Triggers
 
 ```json
