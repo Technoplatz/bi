@@ -6,3 +6,4 @@ pytz
 datetime
 requests
 get-docker-secret
+python-dotenv

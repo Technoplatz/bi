@@ -123,6 +123,7 @@
           "value": "10-OnTheWay"
         }
       ],
+      "autofill": true,
       "btntext": "Add DNs",
       "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
@@ -163,11 +164,17 @@
         "subject": "Ordino is on customs",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been arrived.",
         "fields": "odi_no,odi_sub_no,odi_ship_type",
+        "attachment": true,
         "filter": [
           {
             "key": "odi_arrived",
             "op": "eq",
             "value": true
+          },
+          {
+            "key": "odi_completed",
+            "op": "null",
+            "value": null
           }
         ]
       }
@@ -176,7 +183,6 @@
       "id": "act-ordino-arrived-cancel",
       "title": "Arrived Cancel",
       "enabled": true,
-      "rollback": true,
       "match": [
         {
           "key": "odi_arrived",
@@ -198,7 +204,7 @@
       "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
         "notify": false,
-        "subject": "Ordino Arrival Canceled",
+        "subject": "Ordino arrival canceled",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been rolled back.",
         "fields": "odi_no,odi_sub_no,odi_ship_type",
         "filter": [

@@ -11,6 +11,18 @@
       "permanent": true,
       "width": 80
     },
+    "shp_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status",
+      "minLength": 5,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9-]{5,16}$",
+      "enum": ["10-Ready", "20-Completed", "99-Error"],
+      "default": "10-Ready",
+      "readonly": false,
+      "width": 120
+    },
     "shp_date": {
       "bsonType": "date",
       "title": "Ship Date",
@@ -54,6 +66,7 @@
       "minLength": 6,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
+      "casetype": "uppercase",
       "width": 140
     },
     "shp_notes": {
@@ -64,18 +77,6 @@
       "minLength": 0,
       "maxLength": 512,
       "width": 200
-    },
-    "shp_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Status",
-      "minLength": 5,
-      "maxLength": 16,
-      "pattern": "^[A-Za-z0-9-]{5,16}$",
-      "enum": ["10-Ready", "20-Completed", "99-Error"],
-      "default": "10-Ready",
-      "readonly": false,
-      "width": 110
     },
     "shp_waybill_no": {
       "bsonType": "string",
@@ -141,6 +142,11 @@
           "key": "dnn_status",
           "op": "in",
           "value": "50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        },
+        {
+          "key": "dnn_acc_no",
+          "op": "eq",
+          "value": "shp_acc_no"
         }
       ],
       "set": [
@@ -153,13 +159,15 @@
           "value": "60-ReadyToBeDelivered"
         }
       ],
+      "autofill": true,
+      "btntext": "delivery",
       "_tags": ["#Managers", "#Technoplatz", "#Administrators"]
     }
   ],
   "actions": [
     {
-      "id": "waybill-issue",
-      "title": "Kesme",
+      "id": "ewaybill-issue",
+      "title": "E-Waybill Issue",
       "enabled": true,
       "match": [
         {
@@ -169,10 +177,6 @@
         }
       ],
       "set": [
-        {
-          "key": "shp_date",
-          "value": null
-        },
         {
           "key": "shp_notes",
           "value": null
@@ -206,6 +210,7 @@
             "shipment_waybill_date_field": "shp_waybill_date",
             "shipment_account_no_field": "shp_acc_no",
             "shipment_status_field": "shp_status",
+            "shipment_notes_field": "shp_notes",
             "shipment_status_set_value": "20-Completed",
             "account_collection": "account_data",
             "account_no_field": "acc_no",
@@ -226,8 +231,8 @@
       ]
     },
     {
-      "id": "waybill-download",
-      "title": "Download",
+      "id": "ewaybill-download",
+      "title": "E-Waybill Download",
       "enabled": true,
       "match": [
         {

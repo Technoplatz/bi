@@ -136,11 +136,17 @@ https://www.gnu.org/licenses.
     </div>
     <ng-template #norelation>
         <div *ngIf="tab=='link'; else nolink" class="ion-padding-bottom ion-margin-top">
+            <h5>{{ 'Link to' | translate }} {{ link_?.collection }} {{ 'collection' | translate }}</h5>
             <ion-item lines="full" class="ion-no-margin ion-margin-bottom full-width">
-                <h6>{{ 'Attached' | translate }} {{ link_?.collection }} {{ 'items' | translate }}:</h6>
+                <div class="ion-margin-top ion-margin-bottom">
+                    <ion-button color="dark" size="default" (click)="doGetLinked()">
+                        <ion-icon name="code-download-outline"></ion-icon>
+                        <span *ngIf="reloading">{{ 'running' | translate }}...</span>
+                        <span *ngIf="!reloading">{{ 'get' | translate }} {{ link_?.get }}</span>
+                    </ion-button>
+                </div>
                 <ion-label position="stacked">
-                    {{ 'Below' | translate }} <span class="danger">{{ link_?.get }}</span> {{ 'items' | translate }} in
-                    <span class="danger">{{ link_?.collection }}</span> {{ 'collection will be attached' | translate }}.
+                    {{ 'Linked Items' | translate }}:
                 </ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
                     spellcheck="false" class="link-data" counter="true" maxlength="512" clearOnEdit="true"
@@ -148,8 +154,7 @@ https://www.gnu.org/licenses.
                     counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
                 </ion-textarea>
             </ion-item>
-            {{ 'Maximum number of lines allowed is 256' | translate }}.<br />{{ 'Please provide your data and click
-            ATTACH button' | translate }}.
+            {{ 'Maximum number of lines allowed is 100' | translate }}.
         </div>
         <ng-template #nolink>
             <div *ngIf="isnoninteractive_; else interactive" class="ion-margin-top">
@@ -166,9 +171,9 @@ https://www.gnu.org/licenses.
                     class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
                     <ion-item *ngIf="['insert','update','link'].includes(op) && links?.length > 0">
                         <div class="ion-margin-top full-flex ion-margin-bottom">
-                            <ion-button *ngFor="let item of links" (click)="doLink(item)" color="dark" size="default"
+                            <ion-button *ngFor="let item of links" (click)="doGoLink(item)" color="dark" size="default"
                                 slot="end">
-                                <ion-icon name="link-outline"></ion-icon> {{ item.btntext ? item.btntext : item.get }}
+                                <ion-icon name="link-outline"></ion-icon> {{ item.btntext ? item.btntext : item.collection }}
                             </ion-button>
                         </div>
                     </ion-item>
@@ -254,10 +259,11 @@ https://www.gnu.org/licenses.
                                     <ng-template>
                                         <ion-datetime [id]="field.name"
                                             [presentation]="field.dateonly ? 'date' : 'date-time'" [multiple]="false"
-                                            [value]="data_[field.name]?.replace(' ', 'T').substr(0,19)"
-                                            [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
-                                            [firstDayOfWeek]="1" [showDefaultButtons]="true"
-                                            displayFormat="field.dateonly ? 'DD.MM.YYYY' : 'DD.MM.YYYY HH:mm'"
+                                            [value]="data_[field.name]?.substring(0, 19).replace(' ', 'T') + 'Z'"
+                                            [showClearButton]="true"
+                                            (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
+                                            [showDefaultButtons]="true"
+                                            displayFormat="field.dateonly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm'"
                                             [readonly]="field.readonly" [disabled]="field.disabled">
                                             <span slot="title">{{ field.title }}</span>
                                         </ion-datetime>

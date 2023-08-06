@@ -461,6 +461,10 @@ def issue_f():
         if not shipment_status_field_:
             raise APIError("missing shipment status field in mapping")
 
+        shipment_notes_field_ = map_["shipment_notes_field"] if "shipment_notes_field" in map_ and map_["shipment_notes_field"] is not None else None
+        if not shipment_notes_field_:
+            raise APIError("missing shipment notes field in mapping")
+
         shipment_status_set_value_ = map_["shipment_status_set_value"] if "shipment_status_set_value" in map_ and map_["shipment_status_set_value"] is not None else None
         if not shipment_status_set_value_:
             raise APIError("missing shipment ok value in mapping")
@@ -540,6 +544,7 @@ def issue_f():
         if not shipments_:
             raise APIError("no shipment id provided")
 
+        err_ = False
         for shipment_ in shipments_:
             try:
 
@@ -564,14 +569,6 @@ def issue_f():
                 line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
                 if not deliveries_ or line_count_ == 0:
                     raise EdoksisError(f"no deliveries found with {delivery_shipment_id_field_}={shipment_id_}")
-
-                # prior_filter_ = {}
-                # prior_filter_[delivery_shipment_id_field_] = shipment_id_
-                # prior_deliveries_ = session_db_[delivery_collection_].find(prior_filter_)
-                # if prior_deliveries_.explain().get("executionStats", {}).get("nReturned") > 0 and \
-                #         delivery_waybill_no_field_ in prior_deliveries_ and \
-                #         prior_deliveries_[delivery_waybill_no_field_] is not None:
-                #     raise EdoksisError(f"shipment id was already issued in {delivery_collection_}")
 
                 shipment_account_no_ = shipment_[shipment_account_no_field_]
                 delivery_account_filter1_ = delivery_account_filter2_ = {}
@@ -622,7 +619,7 @@ def issue_f():
                 shp_date_ = shipment_["shp_date"] if "shp_date" in shipment_ else None
                 issue_date_ = shp_date_.strftime("%Y-%m-%d")
                 issue_time_ = shp_date_.strftime("%H:%M:%S")
-                notes_ = ""
+                notes_ = f"{shipment_[shipment_notes_field_]} " if shipment_notes_field_ in shipment_ else ""
 
                 despatch_lines_ = ""
                 line_id_ = 0
@@ -751,6 +748,7 @@ def issue_f():
 
                 response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
                 root_ = ElementTree.fromstring(response_.content)
+
                 for tag in root_.iter(f"{tag_prefix_}Sonuc"):
                     if not tag.text:
                         raise EdoksisError("!!! missing sonuc tag")
@@ -792,31 +790,36 @@ def issue_f():
                 session_.commit_transaction()
 
             except EdoksisError as exc_:
+                err_ = True
                 content_ += f"{shipment_id_}: {str(exc_)}<br />"
                 session_.abort_transaction()
 
             except pymongo.errors.PyMongoError as exc_:
+                err_ = True
                 content_ += f"{shipment_id_}: {str(exc_)}<br />"
                 session_.abort_transaction()
 
             except Exception as exc_:
+                err_ = True
                 content_ += f"{shipment_id_}: {str(exc_)}<br />"
                 session_.abort_transaction()
 
-        get_waybill_f_ = Edoksis().get_waybill_f({
-            "shipment_ettn_field": shipment_ettn_field_,
-            "shipment_id_field": shipment_id_field_,
-            "shipment_collection": shipment_collection_,
-            "document_format": document_format_,
-            "tag_prefix": tag_prefix_,
-            "ids": object_ids_
-        })
-        if not get_waybill_f_["result"]:
-            raise APIError(get_waybill_f_["msg"])
-
-        files_ = get_waybill_f_["files"] if "files" in get_waybill_f_ and len(get_waybill_f_["files"]) > 0 else []
+        files_ = []
+        if not err_:
+            get_waybill_f_ = Edoksis().get_waybill_f({
+                "shipment_ettn_field": shipment_ettn_field_,
+                "shipment_id_field": shipment_id_field_,
+                "shipment_collection": shipment_collection_,
+                "document_format": document_format_,
+                "tag_prefix": tag_prefix_,
+                "ids": object_ids_
+            })
+            if not get_waybill_f_["result"]:
+                raise APIError(get_waybill_f_["msg"])
+            files_ = get_waybill_f_["files"] if "files" in get_waybill_f_ and len(get_waybill_f_["files"]) > 0 else []
 
         res_ = {"result": True, "content": content_, "files": files_}
+
         response_ = make_response(res_, 200)
 
     except pymongo.errors.PyMongoError as exc_:

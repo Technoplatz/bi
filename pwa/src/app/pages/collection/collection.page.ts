@@ -681,7 +681,7 @@ export class CollectionPage implements OnInit {
     if (!ev.isTrusted) {
       this.structured_ = ev;
     } else {
-      console.error("*** ev", ev);
+      console.error("*** event", ev);
     }
   }
 

@@ -47,9 +47,9 @@
     },
     "man_closed": {
       "bsonType": "bool",
-      "title": "Completed",
+      "title": "Closed",
       "description": "Manifest Closed",
-      "truetext": "Completed",
+      "truetext": "Closed",
       "falsetext": "OnCustomsProcess",
       "default": false,
       "width": 140
@@ -77,7 +77,8 @@
   "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_file_no"]],
   "unique": [["man_no"]],
   "sort": {
-    "_modified_at": -1
+    "man_odi_no": 1,
+    "man_odi_sub_no": 1
   },
   "parents": [
     {
@@ -121,6 +122,11 @@
           "key": "dnn_odi_sub_no",
           "op": "eq",
           "value": "man_odi_sub_no"
+        },
+        {
+          "key": "dnn_man_no",
+          "op": "null",
+          "value": null
         }
       ],
       "set": [
@@ -133,11 +139,14 @@
           "value": "30-OnCustomsProcess"
         }
       ],
+      "autofill": true,
+      "btntext": "Add DNs",
       "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
         "notify": true,
         "subject": "Manifest Created",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs has been linked to a manifest.",
+        "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_man_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name"
       }
     }
@@ -145,44 +154,7 @@
   "actions": [],
   "triggers": [
     {
-      "name": "Opening",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "man_opening_date",
-          "op": "nnull",
-          "value": null
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_man_no",
-              "value": "man_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "in",
-              "value": "20-OnCustoms,30-OnCustomsProcess"
-            }
-          ],
-          "set": [
-            {
-              "key": "dnn_status",
-              "value": "30-OnCustomsProcess"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    },
-    {
-      "name": "Completed",
+      "name": "Closed",
       "enabled": true,
       "operations": ["update"],
       "changes": [
@@ -190,11 +162,6 @@
           "key": "man_closed",
           "op": "eq",
           "value": true
-        },
-        {
-          "key": "man_closing_date",
-          "op": "nnull",
-          "value": null
         }
       ],
       "targets": [
@@ -224,7 +191,7 @@
       ]
     },
     {
-      "name": "Completed rollback",
+      "name": "Closed rollback",
       "enabled": true,
       "operations": ["update"],
       "changes": [

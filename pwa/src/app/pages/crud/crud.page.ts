@@ -106,6 +106,7 @@ export class CrudPage implements OnInit {
   private views: any = [];
   private view: any = null;
   private structure__: any = {};
+  private link_projection_: any = {};
   private input_: string = "";
 
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
@@ -490,9 +491,57 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doLink(link_: any) {
+  doGoLink(link_: any) {
     this.tab = "link";
     this.link_ = link_;
+  }
+
+  doGetLinked() {
+    let filter_ = [];
+    this.link_text = "";
+    const match_ = this.link_?.match;
+    const collection_ = this.link_?.collection;
+    const get_ = this.link_?.get;
+    const autofill_ = this.link_?.autofill;
+    if (match_ && collection_ && this.link_projection_ && get_ && autofill_) {
+      this.reloading = true;
+      this.link_projection_ = {};
+      this.link_projection_[get_] = 1;
+      for (let l = 0; l < match_.length; l++) {
+        filter_.push({
+          key: match_[l].key,
+          op: match_[l].op,
+          value: this.properties_[match_[l].value] ? this.data_[match_[l].value] !== "" ? this.data_[match_[l].value] : null : match_[l].value
+        })
+        if (l === match_.length - 1) {
+          console.log("*** filter", filter_);
+          this.misc.apiCall("crud", {
+            op: "read",
+            collection: collection_,
+            projection: this.link_projection_,
+            match: filter_,
+            sort: this.link_projection_,
+            group: true,
+            page: 1,
+            limit: 100
+          }).then((res: any) => {
+            const data_ = res.data;
+            if (data_) {
+              for (let d = 0; d < data_.length; d++) {
+                this.link_text += data_[d][get_];
+                if (d === data_.length - 1) { } else {
+                  this.link_text += "\n";
+                }
+              }
+            }
+          }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          }).finally(() => {
+            this.reloading = false;
+          });
+        }
+      }
+    }
   }
 
   doParent(parent_: any) {

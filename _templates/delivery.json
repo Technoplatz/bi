@@ -93,7 +93,7 @@
       "description": "Account Name",
       "minLength": 1,
       "maxLength": 64,
-      "width": 140
+      "width": 240
     },
     "dnn_date": {
       "bsonType": "date",
@@ -427,51 +427,14 @@
       }
     },
     {
-      "id": "link-manifest",
-      "title": "Manifest",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "in",
-          "value": "20-OnCustoms,30-OnCustomsProcess"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "30-OnCustomsProcess"
-        },
-        {
-          "key": "dnn_man_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs on customs process",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 20-OnCustoms to 30-OnCustomsProcess.",
-        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no,dnn_man_no",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "30-OnCustomsProcess"
-          }
-        ]
-      }
-    },
-    {
       "id": "get-ready",
-      "title": "Ready",
+      "title": "ReadyToBeDelivered",
       "enabled": true,
       "match": [
         {
           "key": "dnn_status",
           "op": "in",
-          "value": "00-Open,50-OnTheTouchpoint,60-ReadyToBeDelivered,70-Delivered"
+          "value": "50-OnTheTouchpoint,60-ReadyToBeDelivered"
         }
       ],
       "set": [

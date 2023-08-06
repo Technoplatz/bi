@@ -192,7 +192,7 @@
       "description": "Alias",
       "minLength": 0,
       "maxLength": 64,
-      "width": 240
+      "width": 250
     },
     "acc_is_active": {
       "bsonType": "bool",
@@ -214,43 +214,6 @@
   },
   "links": [],
   "triggers": [],
-  "views": {
-    "distributors-all": {
-      "title": "Distributors All",
-      "description": "Distributors All Description",
-      "priority": 9999,
-      "enabled": true,
-      "dashboard": false,
-      "data_filter": [],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": [],
-      "data_columns": [],
-      "data_values": [],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "flashcard": false,
-      "chart_type": "Stacked Vertical Bar",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": [],
-      "scheduled": false,
-      "scheduled_cron": "15 14,15,16 * * mon,tue",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
-    }
-  },
+  "views": {},
   "fetchers": []
 }

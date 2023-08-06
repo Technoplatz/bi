@@ -275,6 +275,7 @@ Enumerates are certain type of string properties with predefined values which al
       { "key": "dnn_odi_sub_no", "value": "odi_sub_no" },
       { "key": "dnn_status", "value": "10-OnTheWay" }
     ],
+    "autofill": true,
     "btntext": "Add DNs",
     "_tags": ["#Managers", "#Technoplatz", "#Operation"],
     "notification": {
@@ -303,7 +304,7 @@ Enumerates are certain type of string properties with predefined values which al
     "targets": [
       {
         "collection": "delivery",
-        "match": [{ "key": "_id", "value": "_id" }],
+        "match": [{ "key": "_id", "value": "_id", "prefixes": ["16K"] }],
         "filter": [{ "key": "dnn_status", "op": "ne", "value": "70-Delivered" }],
         "set": [{ "key": "dnn_amount", "value": "dnn_qty * dnn_unit_price" }],
         "upsert": false

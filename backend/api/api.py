@@ -893,7 +893,7 @@ class Crud:
                         elif property_["bsonType"] == "decimal":
                             document_[k] = doc_[k] * 1.00 if document_[k] is not None else document_[k]
                         elif property_["bsonType"] == "bool":
-                            document_[k] = True if document_[k] and document_[k] in [True, "true", "True", "TRUE"] else False
+                            document_[k] = document_[k] and document_[k] in [True, "true", "True", "TRUE"]
                     else:
                         if property_["bsonType"] == "bool":
                             document_[k] = False
@@ -2255,11 +2255,11 @@ class Crud:
         try:
             user_ = input_["user"]
             limit_ = input_["limit"]
-            page = input_["page"]
+            page_ = input_["page"]
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]
             group_ = "group" in input_ and input_["group"] is True
-            skip_ = limit_ * (page - 1)
+            skip_ = limit_ * (page_ - 1)
             match_ = input_["match"] if "match" in input_ and len(input_["match"]) > 0 else []
             allowed_cols_ = ["_collection"]
             is_crud_ = collection_id_[:1] != "_"
@@ -2776,6 +2776,7 @@ class Crud:
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
+
             Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
             if is_crud_ and link_ and linked_:
@@ -4507,6 +4508,7 @@ def crud_f():
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
                 raise APIError({"result": False, "msg": "document must be included in the request"})
+
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_)
