@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "dnb_no": {
+      "bsonType": "string",
+      "title": "DN No",
+      "description": "Delivery Number",
+      "minLength": 10,
+      "maxLength": 16,
+      "pattern": "^[0-9-]{10,16}$",
+      "width": 110
+    },
+    "dnb_odi_no": {
+      "bsonType": "string",
+      "title": "Ordino No",
+      "description": "Primary ordino number",
+      "pattern": "^[0-9A-Z-_./ ]{1,20}$",
+      "minLength": 1,
+      "maxLength": 20,
+      "casetype": "uppercase",
+      "width": 170
+    },
+    "dnb_odi_sub_no": {
+      "bsonType": "string",
+      "title": "Ordino Sub No",
+      "description": "Secondary ordino number",
+      "pattern": "^[0-9A-Z-_/ ]{1,20}$",
+      "minLength": 1,
+      "maxLength": 20,
+      "casetype": "uppercase"
+    }
+  },
+  "required": ["dnb_no"],
+  "index": [["dnb_odi_no", "dnb_odi_sub_no"]],
+  "unique": [["dnb_no"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [],
+  "actions": [],
+  "links": [],
+  "triggers": [],
+  "views": {},
+  "fetchers": []
+}

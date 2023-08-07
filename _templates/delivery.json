@@ -51,6 +51,7 @@
       "pattern": "^[0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
+      "casetype": "uppercase",
       "width": 170
     },
     "dnn_odi_sub_no": {
@@ -59,7 +60,8 @@
       "description": "Secondary ordino number",
       "pattern": "^[0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
-      "maxLength": 20
+      "maxLength": 20,
+      "casetype": "uppercase"
     },
     "dnn_man_no": {
       "bsonType": "string",
@@ -141,6 +143,7 @@
           "replace": ""
         }
       ],
+      "casetype": "uppercase",
       "width": 130
     },
     "dnn_prd_description": {
@@ -463,6 +466,45 @@
   "links": [],
   "triggers": [
     {
+      "name": "DN base updater",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        {
+          "key": "_modified_at",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "dnbase",
+          "match": [
+            {
+              "key": "dnb_no",
+              "value": "dnn_no"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "dnb_no",
+              "value": "dnn_no"
+            },
+            {
+              "key": "dnb_odi_no",
+              "value": "dnn_odi_no"
+            },
+            {
+              "key": "dnb_odi_sub_no",
+              "value": "dnn_odi_sub_no"
+            }
+          ],
+          "upsert": true
+        }
+      ]
+    },
+    {
       "name": "DN amount updater",
       "enabled": true,
       "operations": ["update", "insert"],
@@ -526,41 +568,6 @@
             {
               "key": "dnn_order_amount",
               "value": "dnn_qty * dnn_order_price"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    },
-    {
-      "name": "Ordino updater",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "dnn_amount",
-          "op": "gte",
-          "value": 0
-        }
-      ],
-      "targets": [
-        {
-          "collection": "ordino",
-          "match": [
-            {
-              "key": "odi_no",
-              "value": "dnn_odi_no"
-            },
-            {
-              "key": "odi_sub_no",
-              "value": "dnn_odi_sub_no"
-            }
-          ],
-          "filter": [],
-          "set": [
-            {
-              "key": "odi_amount",
-              "value": "sum(dnn_amount)"
             }
           ],
           "upsert": false

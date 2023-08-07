@@ -7,6 +7,7 @@
       "pattern": "^[0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
+      "casetype": "uppercase",
       "width": 170
     },
     "odi_sub_no": {
@@ -15,7 +16,9 @@
       "description": "Secondary ordino number",
       "pattern": "^[0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
-      "maxLength": 20
+      "maxLength": 20,
+      "casetype": "uppercase",
+      "width": 170
     },
     "odi_date": {
       "bsonType": "date",
@@ -51,13 +54,6 @@
       "description": "Estimated Date of Arrival",
       "dateonly": true,
       "width": 120
-    },
-    "odi_amount": {
-      "bsonType": "number",
-      "title": "Amount",
-      "description": "Ordino Amount",
-      "default": 0,
-      "width": 110
     },
     "odi_arrived": {
       "bsonType": "bool",

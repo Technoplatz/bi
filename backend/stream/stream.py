@@ -646,10 +646,11 @@ class Trigger():
                         else:
                             set_[target_field_] = round(eval(value_), decimals_) if decimals_ else eval(value_)
                     elif type_ == "sourcevalue":
-                        set_[target_field_] = \
-                            str(full_document_[value_]) if source_bson_type_ and source_bson_type_ == "string" else \
-                            full_document_[value_] * 1 if source_bson_type_ and source_bson_type_ in self.numerics_ else \
-                            full_document_[value_]
+                        if full_document_ and value_ in full_document_:
+                            set_[target_field_] = \
+                                str(full_document_[value_]) if source_bson_type_ and source_bson_type_ == "string" else \
+                                full_document_[value_] * 1 if source_bson_type_ and source_bson_type_ in self.numerics_ else \
+                                full_document_[value_]
                     elif type_ == "targetvalue":
                         set_[target_field_] = f"${value_}"
                     elif type_ == "string":

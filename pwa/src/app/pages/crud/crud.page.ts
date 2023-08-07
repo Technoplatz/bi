@@ -514,7 +514,6 @@ export class CrudPage implements OnInit {
           value: this.properties_[match_[l].value] ? this.data_[match_[l].value] !== "" ? this.data_[match_[l].value] : null : match_[l].value
         })
         if (l === match_.length - 1) {
-          console.log("*** filter", filter_);
           this.misc.apiCall("crud", {
             op: "read",
             collection: collection_,

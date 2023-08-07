@@ -38,7 +38,7 @@ services:
       dockerfile: Dockerfile
       args:
         - TZ=${TZ}
-    image: ${HUB}/technoplatz/bi-edoksis:${VERSION}
+    image: ${HUB}/technoplatz/bi-intg-edoksis:${VERSION}
     container_name: edoksis
     hostname: edoksis
     restart: always

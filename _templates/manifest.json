@@ -6,6 +6,7 @@
       "description": "Manifest number",
       "minLength": 1,
       "maxLength": 32,
+      "casetype": "uppercase",
       "width": 160
     },
     "man_odi_no": {
@@ -15,6 +16,7 @@
       "pattern": "^[0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
+      "casetype": "uppercase",
       "width": 170
     },
     "man_odi_sub_no": {
@@ -23,6 +25,7 @@
       "description": "Secondary ordino number",
       "pattern": "^[0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
+      "casetype": "uppercase",
       "maxLength": 20
     },
     "man_file_no": {
