@@ -321,6 +321,36 @@ Enumerates are certain type of string properties with predefined values which al
 ]
 ```
 
+```json
+[
+  {
+    "name": "Closed",
+    "enabled": true,
+    "operations": ["update"],
+    "changes": [{ "key": "man_closed", "op": "eq", "value": true }],
+    "targets": [
+      {
+        "collection": "delivery",
+        "match": [{ "key": "dnn_man_no", "value": "man_no" }],
+        "filter": [{ "key": "dnn_status", "op": "in", "value": "30-OnCustomsProcess,40-ClearanceCompleted" }],
+        "set": [{ "key": "dnn_status", "value": "40-ClearanceCompleted" }],
+        "upsert": false,
+        "notification": {
+          "notify": true,
+          "subject": "Customs clearance completed",
+          "body": "Hi,<br /><br />Manifest has been closed.",
+          "collection": "delivery",
+          "key": "man_no",
+          "fields": "dnn_no,dnn_line_no,dnn_man_no",
+          "filter": [{ "key": "dnn_man_no", "op": "eq", "value": "man_no" }],
+          "attachment": true
+        }
+      }
+    ]
+  }
+]
+```
+
 ## Impressum
 
 Angaben gemäß § 5 TMG\

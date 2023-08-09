@@ -24,6 +24,7 @@
       "bsonType": "date",
       "title": "Ordino Date",
       "description": "Ordino Opening Date",
+      "dateonly": true,
       "width": 120
     },
     "odi_from": {
@@ -37,7 +38,7 @@
       "bsonType": "string",
       "title": "Customs",
       "description": "Customs Location",
-      "enum": ["AHL", "Halkalı", "Ambarlı"],
+      "enum": ["IGA", "Halkalı", "Ambarlı", "AHL"],
       "width": 110
     },
     "odi_ship_type": {
@@ -45,13 +46,6 @@
       "title": "Ship Type",
       "description": "Shipping Type",
       "enum": ["Sea", "Air", "Truck"],
-      "dateonly": true,
-      "width": 120
-    },
-    "odi_eta_date": {
-      "bsonType": "date",
-      "title": "ETA Date",
-      "description": "Estimated Date of Arrival",
       "dateonly": true,
       "width": 120
     },
@@ -311,163 +305,6 @@
       ]
     }
   ],
-  "views": {
-    "customs-halkali": {
-      "title": "Halkalı Ordinos",
-      "description": "Ordinos from Halkalı customs",
-      "priority": 1000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [
-        {
-          "key": "odi_customs",
-          "op": "eq",
-          "value": "Halkalı"
-        },
-        {
-          "key": "odi_completed",
-          "op": "eq",
-          "value": false
-        }
-      ],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["odi_from"],
-      "data_columns": ["odi_ship_type"],
-      "data_values": [
-        {
-          "key": "odi_no",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "flashcard": true,
-      "chart_type": "Flashcard",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
-      "scheduled": false,
-      "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Technoplatz", "#Managers"]
-    },
-    "customs-ambarli": {
-      "title": "Ambarlı Ordinos",
-      "description": "Ordinos from Ambarlı customs",
-      "priority": 1000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [
-        {
-          "key": "odi_customs",
-          "op": "eq",
-          "value": "Ambarlı"
-        },
-        {
-          "key": "odi_completed",
-          "op": "eq",
-          "value": false
-        }
-      ],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["odi_from"],
-      "data_columns": ["odi_ship_type"],
-      "data_values": [
-        {
-          "key": "odi_no",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "flashcard": true,
-      "chart_type": "Flashcard",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
-      "scheduled": false,
-      "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
-    },
-    "customs-ahl": {
-      "title": "AHL Ordinos",
-      "description": "Ordinos from AHL customs",
-      "priority": 1000,
-      "enabled": true,
-      "dashboard": true,
-      "data_filter": [
-        {
-          "key": "odi_customs",
-          "op": "eq",
-          "value": "AHL"
-        },
-        {
-          "key": "odi_completed",
-          "op": "eq",
-          "value": false
-        }
-      ],
-      "data_sort": {
-        "_modified_at": -1
-      },
-      "data_excluded": [],
-      "data_index": ["odi_from"],
-      "data_columns": ["odi_ship_type"],
-      "data_values": [
-        {
-          "key": "odi_no",
-          "value": "count"
-        }
-      ],
-      "data_json": true,
-      "data_excel": true,
-      "data_csv": true,
-      "pivot": true,
-      "pivot_totals": true,
-      "chart": true,
-      "flashcard": true,
-      "chart_type": "Flashcard",
-      "chart_label": true,
-      "chart_gradient": true,
-      "chart_grid": true,
-      "chart_legend": false,
-      "chart_xaxis": true,
-      "chart_xaxis_label": false,
-      "chart_yaxis": true,
-      "chart_yaxis_label": false,
-      "chart_colors": ["#e60049", "#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
-      "scheduled": false,
-      "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Technoplatz", "#Administrators"]
-    }
-  },
+  "views": {},
   "fetchers": []
 }

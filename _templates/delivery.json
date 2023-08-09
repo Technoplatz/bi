@@ -576,10 +576,10 @@
     }
   ],
   "views": {
-    "sv-git-view": {
-      "title": "GiT 2023",
-      "description": "GiT by account and statuses",
-      "priority": 1000,
+    "sv-git-master": {
+      "title": "GiT Master",
+      "description": "GiT Internal",
+      "priority": 2010,
       "enabled": true,
       "dashboard": true,
       "data_filter": [],
@@ -617,10 +617,10 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "sv-buid-view": {
-      "title": "GiT BUID",
-      "description": "DN counts by buid and status",
-      "priority": 1010,
+    "sv-git-buid": {
+      "title": "Delivery BUId's",
+      "description": "Records by dnn_bu_id and dnn_status",
+      "priority": 2020,
       "enabled": true,
       "dashboard": true,
       "data_filter": [],
@@ -658,12 +658,12 @@
       "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
-    "sv-statuses-view": {
-      "title": "Statuses",
-      "description": "DN Statuses",
-      "priority": 2000,
+    "sv-dn-statuses": {
+      "title": "Delivery Statuses",
+      "description": "Records by dnn_status",
+      "priority": 2030,
       "enabled": true,
-      "dashboard": false,
+      "dashboard": true,
       "data_filter": [
         {
           "key": "dnn_status",
@@ -699,7 +699,7 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
+      "chart_colors": ["#fd7f6f", "#7eb0d5", "#bd7ebe", "#b2e061", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
       "scheduled_tz": "Europe/Berlin",

@@ -464,11 +464,11 @@ class Misc:
             header_ = jwt.get_unverified_header(token_)
             token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
             if not token_finder_:
-                raise AuthError({"msg": "finder is not valid please use an api token", "finder": token_finder_})
+                raise AuthError({"msg": "finder is not valid please use an api token"})
 
             find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
             if not find_:
-                raise AuthError({"msg": "api token is not defined", "finder": token_finder_})
+                raise AuthError({"msg": "invalid token"})
             jwt_secret_ = find_["tkn_secret"]
 
             options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
@@ -484,7 +484,7 @@ class Misc:
                 raise AuthError({"msg": f"token is not allowed to do {operation_}", "jwt": jwt_})
 
             if "tkn_allowed_ips" in find_ and \
-                len(find_["tkn_allowed_ips"]) > 0 and \
+                    len(find_["tkn_allowed_ips"]) > 0 and \
                     (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"]):
                 return {"result": True}
 
@@ -547,9 +547,7 @@ class Misc:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
                         to_.append(member_["usr_id"])
-                        personalizations_.append(
-                            {"email": member_["usr_id"], "name": member_["usr_name"]}
-                        )
+                        personalizations_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
 
             return {"result": True, "to": personalizations_}
 
@@ -582,8 +580,7 @@ class Misc:
                 kav_value_ = kav_["kav_value"] if "kav_value" in kav_ and kav_["kav_value"] is not None else None
                 if not kav_key_ or not kav_value_ or not kav_as_:
                     raise APIError("missing kv keys")
-                setto__ = \
-                    datetime.strptime(kav_value_[:10], "%Y-%m-%d") if kav_as_ == "date" \
+                setto__ = datetime.strptime(kav_value_[:10], "%Y-%m-%d") if kav_as_ == "date" \
                     else bool(kav_value_) if kav_as_ == "bool" \
                     else float(kav_value_) if kav_as_ in ["float", "number", "decimal"] \
                     else int(kav_value_) if kav_as_ == "int" \
@@ -1541,9 +1538,11 @@ class Crud:
                     if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
                         fres_ = None
                         typ = properties_[mat_["key"]]["bsonType"] if mat_["key"] in properties_ else "string"
+
                         value_ = mat_["value"]
                         if data_ and value_ in data_ and data_[value_] is not None:
                             value_ = data_[value_]
+
                         if mat_["op"] in ["eq", "contains"]:
                             if typ in ["number", "decimal", "float"]:
                                 fres_ = float(value_)
@@ -2431,99 +2430,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def schema_ext_validate_f(self, structure_, _id):
-        """
-        docstring is in progress
-        """
-        try:
-
-            views_ = structure_["views"] if structure_ and "views" in structure_ else None
-            if not views_:
-                raise APIError("no views found")
-
-            errstr_ = ""
-            for vie_ in views_:
-                if _id is not None and vie_ != _id:
-                    continue
-                view_ = views_[vie_]
-                title_ = view_["title"] if "title" in view_ and view_["title"] != "" else None
-                description_ = view_["description"] if "description" in view_ and view_["description"] != "" else None
-                priority_ = view_["priority"] if "priority" in view_ and isinstance(view_["priority"], int) else None
-                enabled_ = view_["enabled"] if "enabled" in view_ and view_["enabled"] in [True, False] else None
-                dashboard_ = view_["dashboard"] if "dashboard" in view_ and view_["dashboard"] in [True, False] else None
-                data_json_ = view_["data_json"] if "data_json" in view_ and view_["data_json"] in [True, False] else None
-                data_excel_ = view_["data_excel"] if "data_excel" in view_ and view_["data_excel"] in [True, False] else None
-                data_csv_ = view_["data_csv"] if "data_csv" in view_ and view_["data_csv"] in [True, False] else None
-                pivot_ = view_["pivot"] if "pivot" in view_ and view_["pivot"] in [True, False] else None
-                pivot_totals_ = view_["pivot_totals"] if "pivot_totals" in view_ and view_["pivot_totals"] in [True, False] else None
-                chart_ = view_["chart"] if "chart" in view_ and view_["chart"] in [True, False] else None
-                chart_type_ = view_["chart_type"] if "chart_type" in view_ and \
-                    view_["chart_type"] in ["Flashcard", "Vertical Bar", "Normalized Vertical Bar", "Stacked Vertical Bar",
-                                            "Grouped Vertical Bar", "Horizontal Bar", "Normalized Horizontal Bar", "Stacked Horizontal Bar", "Grouped Horizontal Bar", "Line", "Pie", "Doughnut"] else None
-                chart_label_ = view_["chart_label"] if "chart_label" in view_ and view_["chart_label"] in [True, False] else None
-                chart_gradient_ = view_["chart_gradient"] if "chart_gradient" in view_ and view_["chart_gradient"] in [True, False] else None
-                chart_grid_ = view_["chart_grid"] if "chart_grid" in view_ and view_["chart_grid"] in [True, False] else None
-                chart_legend_ = view_["chart_legend"] if "chart_legend" in view_ and view_["chart_legend"] in [True, False] else None
-                chart_xaxis_ = view_["chart_xaxis"] if "chart_xaxis" in view_ and view_["chart_xaxis"] in [True, False] else None
-                chart_xaxis_label_ = view_["chart_xaxis_label"] if "chart_xaxis_label" in view_ and view_["chart_xaxis_label"] in [True, False] else None
-                chart_yaxis_ = view_["chart_yaxis"] if "chart_yaxis" in view_ and view_["chart_yaxis"] in [True, False] else None
-                chart_yaxis_label_ = view_["chart_yaxis_label"] if "chart_yaxis_label" in view_ and view_["chart_yaxis_label"] in [True, False] else None
-                chart_colors_ = view_["chart_colors"] if "chart_colors" in view_ else None
-                scheduled_ = view_["scheduled"] if "scheduled" in view_ and view_["scheduled"] in [True, False] else None
-                scheduled_cron_ = view_["scheduled_cron"] if "scheduled_cron" in view_ else None
-                scheduled_tz_ = view_["scheduled_tz"] if "scheduled_tz" in view_ else None
-                data_filter_ = view_["data_filter"] if "data_filter" in view_ else None
-                data_sort_ = view_["data_sort"] if "data_sort" in view_ else None
-                data_excluded = view_["data_excluded"] if "data_excluded" in view_ else None
-                data_index_ = view_["data_index"] if "data_index" in view_ and len(view_["data_index"]) > 0 else None
-                data_columns_ = view_["data_columns"] if "data_columns" in view_ and len(view_["data_columns"]) > 0 else None
-                data_values_ = view_["data_values"] if "data_values" in view_ and len(view_["data_values"]) > 0 else None
-
-                errarr_ = []
-                errarr_.append("title is missing") if title_ is None else _Noop()
-                errarr_.append("description is missing") if description_ is None else _Noop()
-                errarr_.append("priority is missing") if priority_ is None else _Noop()
-                errarr_.append("enabled is missing") if enabled_ is None else _Noop()
-                errarr_.append("dashboard is missing") if dashboard_ is None else _Noop()
-                errarr_.append("data_json is missing") if data_json_ is None else _Noop()
-                errarr_.append("data_excel is missing") if data_excel_ is None else _Noop()
-                errarr_.append("data_csv is missing") if data_csv_ is None else _Noop()
-                errarr_.append("pivot is missing") if pivot_ is None else _Noop()
-                errarr_.append("pivot_totals is missing") if pivot_totals_ is None else _Noop()
-                errarr_.append("chart is missing") if chart_ is None else _Noop()
-                errarr_.append("chart_type is missing") if chart_type_ is None else _Noop()
-                errarr_.append("chart_label is missing") if chart_label_ is None else _Noop()
-                errarr_.append("chart_gradient is missing") if chart_gradient_ is None else _Noop()
-                errarr_.append("chart_grid is missing") if chart_grid_ is None else _Noop()
-                errarr_.append("chart_legend is missing") if chart_legend_ is None else _Noop()
-                errarr_.append("chart_xaxis is missing") if chart_xaxis_ is None else _Noop()
-                errarr_.append("chart_xaxis_label is missing") if chart_xaxis_label_ is None else _Noop()
-                errarr_.append("chart_yaxis is missing") if chart_yaxis_ is None else _Noop()
-                errarr_.append("chart_yaxis_label is missing") if chart_yaxis_label_ is None else _Noop()
-                errarr_.append("chart_colors is missing") if chart_colors_ is None else _Noop()
-                errarr_.append("scheduled is missing") if scheduled_ is None else _Noop()
-                errarr_.append("scheduled_cron is missing") if scheduled_cron_ is None else _Noop()
-                errarr_.append("scheduled_tz is missing") if scheduled_tz_ is None else _Noop()
-                errarr_.append("data_filter is missing") if data_filter_ is None else _Noop()
-                errarr_.append("data_sort is missing") if data_sort_ is None else _Noop()
-                errarr_.append("data_excluded is missing") if data_excluded is None else _Noop()
-                errarr_.append("data_values is missing") if data_values_ is None else _Noop()
-                errarr_.append("data_columns is missing") if data_columns_ is None and chart_type_ not in ["Flashcard", "Pie"] else _Noop()
-                errarr_.append("data_index is missing") if data_index_ is None and chart_type_ not in ["Flashcard"] else _Noop()
-
-                if len(errarr_) > 0:
-                    errstr_ += f"{vie_}: "
-                    errstr_ += ", ".join(errarr_) + " "
-
-            if errstr_ != "":
-                errstr_ = f"!!! view schema error: {errstr_}"
-                raise APIError(errstr_)
-
-            return {"result": True}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
     def saveschema_f(self, obj):
         """
         docstring is in progress
@@ -3353,9 +3259,7 @@ class Email:
             files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
             html_ = f"{msg['html']}" if "html" in msg else None
             tags_ = msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
-            personalizations_ = (
-                msg["personalizations"] if "personalizations" in msg else None
-            )
+            personalizations_ = msg["personalizations"] if "personalizations" in msg else None
             subject_ = msg["subject"] if "subject" in msg else None
 
             if subject_ is None:
@@ -3401,9 +3305,7 @@ class Email:
                 "subject": subject_,
                 "html": html_
             }
-
             email_sent_ = self.send_email_smtp_f(msg_)
-
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
 
@@ -4397,7 +4299,7 @@ log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
-@app.route("/import", methods=["POST"], endpoint="import")
+@ app.route("/import", methods=["POST"], endpoint="import")
 def storage_f():
     """
     docstring is in progress
@@ -4462,7 +4364,7 @@ def storage_f():
         return {"msg": str(exc_), "status": 500}
 
 
-@app.route("/crud", methods=["POST"], endpoint="crud")
+@ app.route("/crud", methods=["POST"], endpoint="crud")
 def crud_f():
     """
     docstring is in progress
@@ -4609,7 +4511,7 @@ def crud_f():
         return response_
 
 
-@app.route("/otp", methods=["POST"])
+@ app.route("/otp", methods=["POST"])
 def otp_f():
     """
     docstring is in progress
@@ -4682,7 +4584,7 @@ def otp_f():
         return response_
 
 
-@app.route("/auth", methods=["POST"], endpoint="auth")
+@ app.route("/auth", methods=["POST"], endpoint="auth")
 def auth_f():
     """
     docstring is in progress
@@ -4772,7 +4674,7 @@ def auth_f():
         return response_
 
 
-@app.route("/post", methods=["POST"])
+@ app.route("/post", methods=["POST"])
 def post_f():
     """
     docstring is in progress

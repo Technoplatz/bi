@@ -33,9 +33,15 @@ https://www.gnu.org/licenses.
 import os
 import re
 import asyncio
+import smtplib
+import json
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from datetime import datetime
 from functools import partial
-from decimal import Decimal
+from subprocess import call
 from bson.objectid import ObjectId
 from get_docker_secret import get_docker_secret
 import pytz
@@ -64,22 +70,22 @@ class Trigger():
         docstring is in progress
         """
         print_(">>> init started")
-        mongo_rs_ = os.environ.get("MONGO_RS")
-        mongo_host0_ = os.environ.get("MONGO_HOST0")
-        mongo_host1_ = os.environ.get("MONGO_HOST1")
-        mongo_host2_ = os.environ.get("MONGO_HOST2")
-        mongo_port0_ = int(os.environ.get("MONGO_PORT0"))
-        mongo_port1_ = int(os.environ.get("MONGO_PORT1"))
-        mongo_port2_ = int(os.environ.get("MONGO_PORT2"))
-        mongo_db_ = os.environ.get("MONGO_DB")
-        mngo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
-        mongo_username_ = get_docker_secret("mongo_username", default="")
-        mongo_password_ = get_docker_secret("mongo_password", default="")
-        mongo_tls_cert_keyfile_password_ = get_docker_secret("mongo_tls_keyfile_password", default="")
-        mongo_tls_ = os.environ.get("MONGO_TLS")
-        mongo_tls_cert_keyfile_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
-        mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")
-        mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
+        # mongo_rs_ = os.environ.get("MONGO_RS")
+        # mongo_host0_ = os.environ.get("MONGO_HOST0")
+        # mongo_host1_ = os.environ.get("MONGO_HOST1")
+        # mongo_host2_ = os.environ.get("MONGO_HOST2")
+        # mongo_port0_ = int(os.environ.get("MONGO_PORT0"))
+        # mongo_port1_ = int(os.environ.get("MONGO_PORT1"))
+        # mongo_port2_ = int(os.environ.get("MONGO_PORT2"))
+        # mongo_db_ = os.environ.get("MONGO_DB")
+        # mngo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
+        # mongo_username_ = get_docker_secret("mongo_username", default="")
+        # mongo_password_ = get_docker_secret("mongo_password", default="")
+        # mongo_tls_cert_keyfile_password_ = get_docker_secret("mongo_tls_keyfile_password", default="")
+        # mongo_tls_ = os.environ.get("MONGO_TLS")
+        # mongo_tls_cert_keyfile_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
+        # mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")
+        # mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
         self.operations_ = ["insert", "update", "replace", "delete"]
         self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
@@ -124,6 +130,18 @@ class Trigger():
         """
         tz_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
         return datetime.now(pytz.timezone(tz_))
+
+    def get_timestamp_f(self):
+        """
+        docstring is in progress
+        """
+        dt_ = self.get_now_f()
+        mon_ = ("0" + str(dt_.month))[-2:]
+        day_ = ("0" + str(dt_.day))[-2:]
+        hou_ = ("0" + str(dt_.hour))[-2:]
+        min_ = ("0" + str(dt_.minute))[-2:]
+        sec_ = ("0" + str(dt_.second))[-2:]
+        return f"{dt_.year}{mon_}{day_}{hou_}{min_}{sec_}"
 
     def refresh_properties_f(self):
         """
@@ -174,7 +192,8 @@ class Trigger():
                             "match": cluster_["match"] if "match" in cluster_ and len(cluster_["match"]) > 0 else [],
                             "filter": cluster_["filter"] if "filter" in cluster_ and len(cluster_["filter"]) > 0 else [],
                             "set": cluster_["set"] if "set" in cluster_ and len(cluster_["set"]) > 0 else [],
-                            "upsert": "upsert" in cluster_ and cluster_["upsert"] is True
+                            "upsert": "upsert" in cluster_ and cluster_["upsert"] is True,
+                            "notification": cluster_["notification"] if "notification" in cluster_ else None,
                         })
 
             if not self.triggers_:
@@ -239,6 +258,7 @@ class Trigger():
         try:
             match_ = obj["match"]
             properties_ = obj["properties"] if "properties" in obj else None
+            data_ = obj["data"] if "data" in obj else None
             fand_ = []
             filtered_ = {}
             if properties_:
@@ -246,26 +266,31 @@ class Trigger():
                     if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
                         fres_ = None
                         typ = properties_[mat_["key"]]["bsonType"] if mat_["key"] in properties_ else "string"
+
+                        value_ = mat_["value"]
+                        if data_ and value_ in data_ and data_[value_] is not None:
+                            value_ = data_[value_]
+
                         if mat_["op"] in ["eq", "contains"]:
                             if typ in ["number", "int", "decimal"]:
-                                fres_ = float(mat_["value"])
+                                fres_ = float(value_)
                             elif typ == "bool":
-                                fres_ = bool(mat_["value"])
+                                fres_ = bool(value_)
                             elif typ == "date":
-                                fres_ = datetime.strptime(mat_["value"][:10], "%Y-%m-%d")
+                                fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
                             else:
-                                fres_ = {"$regex": mat_["value"], "$options": "i"} if mat_["value"] else {"$regex": "", "$options": "i"}
+                                fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
                         elif mat_["op"] in ["ne", "nc"]:
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$not": {"$eq": float(mat_["value"])}}
+                                fres_ = {"$not": {"$eq": float(value_)}}
                             elif typ == "bool":
-                                fres_ = {"$not": {"$eq": bool(mat_["value"])}}
+                                fres_ = {"$not": {"$eq": bool(value_)}}
                             elif typ == "date":
-                                fres_ = {"$not": {"$eq": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}}
+                                fres_ = {"$not": {"$eq": datetime.strptime(value_[:10], "%Y-%m-%d")}}
                             else:
-                                fres_ = {"$not": {"$regex": mat_["value"], "$options": "i"}} if mat_["value"] else {"$not": {"$regex": "", "$options": "i"}}
+                                fres_ = {"$not": {"$regex": value_, "$options": "i"}} if value_ else {"$not": {"$regex": "", "$options": "i"}}
                         elif mat_["op"] in ["in", "nin"]:
-                            separated_ = re.split(",", mat_["value"])
+                            separated_ = re.split(",", value_)
                             list_ = [s.strip() for s in separated_] if mat_["key"] != "_id" else [ObjectId(s.strip()) for s in separated_]
                             if mat_["op"] == "in":
                                 fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
@@ -273,32 +298,32 @@ class Trigger():
                                 fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
                         elif mat_["op"] == "gt":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$gt": float(mat_["value"])}
+                                fres_ = {"$gt": float(value_)}
                             elif typ == "date":
-                                fres_ = {"$gt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
+                                fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$gt": mat_["value"]}
+                                fres_ = {"$gt": value_}
                         elif mat_["op"] == "gte":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$gte": float(mat_["value"])}
+                                fres_ = {"$gte": float(value_)}
                             elif typ == "date":
-                                fres_ = {"$gte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
+                                fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$gte": mat_["value"]}
+                                fres_ = {"$gte": value_}
                         elif mat_["op"] == "lt":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$lt": float(mat_["value"])}
+                                fres_ = {"$lt": float(value_)}
                             elif typ == "date":
-                                fres_ = {"$lt": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
+                                fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$lt": mat_["value"]}
+                                fres_ = {"$lt": value_}
                         elif mat_["op"] == "lte":
                             if typ in ["number", "decimal"]:
-                                fres_ = {"$lte": float(mat_["value"])}
+                                fres_ = {"$lte": float(value_)}
                             elif typ == "date":
-                                fres_ = {"$lte": datetime.strptime(mat_["value"][:10], "%Y-%m-%d")}
+                                fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                             else:
-                                fres_ = {"$lte": mat_["value"]}
+                                fres_ = {"$lte": value_}
                         elif mat_["op"] == "true":
                             fres_ = {"$eq": True}
                         elif mat_["op"] == "false":
@@ -383,6 +408,84 @@ class Trigger():
         prfx_ = prfxs_[0] if prfxs_ and len(prfxs_) > 0 else prfxs_
         return input_.removeprefix(prfx_)
 
+    def get_users_from_tags_f(self, tags_):
+        """
+        docstring is in progress
+        """
+        try:
+            personalizations_ = []
+            to_ = []
+            users_ = self.db_["_user"].find({"usr_enabled": True, "_tags": {"$elemMatch": {"$in": tags_}}})
+            if users_:
+                for member_ in users_:
+                    if member_["usr_id"] not in to_:
+                        to_.append(member_["usr_id"])
+                        personalizations_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
+
+            return {"result": True, "to": personalizations_}
+
+        except pymongo.errors.PyMongoError as exc_:
+            return {"result": False, "to": personalizations_, "msg": str(exc_)}
+
+        except Exception as exc_:
+            return {"result": False, "to": personalizations_, "msg": str(exc_)}
+
+    def send_email_smtp_f(self, msg):
+        """
+        docstring is in progress
+        """
+        try:
+            company_name_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
+            smtp_server_ = os.environ.get("SMTP_SERVER")
+            smtp_port_ = os.environ.get("SMTP_PORT")
+            smtp_userid_ = os.environ.get("SMTP_USERID")
+            smtp_password_ = os.environ.get("SMTP_PASSWORD")
+            from_email_ = os.environ.get("FROM_EMAIL")
+            disclaimer_ = f"<p>Sincerely,</p><p>{company_name_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {company_name_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
+            email_from_ = f"{company_name_} <{from_email_}>"
+            html_ = f"{msg['html']} {disclaimer_}"
+            server_ = smtplib.SMTP_SSL(smtp_server_, smtp_port_)
+            server_.ehlo()
+            server_.login(smtp_userid_, smtp_password_)
+            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
+
+            message_ = MIMEMultipart()
+            message_["From"] = email_from_
+            message_["Subject"] = msg["subject"]
+            message_.attach(MIMEText(html_, "html"))
+
+            for file_ in files_:
+                filename_ = file_["filename"]
+                with open(f"{filename_}", "rb") as attachment_:
+                    part_ = MIMEBase("application", "octet-stream")
+                    part_.set_payload(attachment_.read())
+                encoders.encode_base64(part_)
+                filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
+                part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
+                message_.attach(part_)
+
+            recipients_ = []
+            recipients_str_ = ""
+            for recipient_ in msg["personalizations"]["to"]:
+                email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
+                recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
+                recipients_.append(recipient_["email"])
+
+            message_["To"] = recipients_str_
+            server_.sendmail(email_from_, recipients_, message_.as_string())
+            server_.close()
+
+            return {"result": True}
+
+        except smtplib.SMTPResponseException as exc_:
+            self.exception_show_f(exc_)
+
+        except smtplib.SMTPServerDisconnected as exc_:
+            self.exception_show_f(exc_)
+
+        except Exception as exc_:
+            self.exception_show_f(exc_)
+
     async def worker_fetchers_f(self, params_):
         """
         gets the collection and the fields that affected by the change stream.
@@ -409,14 +512,17 @@ class Trigger():
                 fetcher_set_ = fetcher_["set"] if "set" in fetcher_ and fetcher_["set"] is not None else None
                 if None in [fetcher_col_id_, fetcher_match_, fetcher_get_, fetcher_set_]:
                     continue
+
                 document_ = self.db_["_collection"].find_one({"col_id": fetcher_col_id_})
                 if not document_:
                     print_(f"!!! no fetcher document found: {fetcher_col_id_}")
                     continue
+
                 structure_ = document_["col_structure"] if "col_structure" in document_ else None
                 if not structure_:
                     print_(f"!!! no fetcher structure found: {fetcher_col_id_}")
                     continue
+
                 properties_ = structure_["properties"] if "properties" in structure_ else None
                 if not properties_:
                     print_(f"!!! no fetcher properties found: {fetcher_col_id_}")
@@ -424,20 +530,27 @@ class Trigger():
 
                 match_new_ = []
                 for fm_ in fetcher_match_:
-                    match_new_.append({"key": fm_["key"], "op": fm_["op"], "value": changed_doc_[fm_["value"]]})
+                    if fm_["value"] in changed_doc_:
+                        match_new_.append({"key": fm_["key"], "op": fm_["op"], "value": changed_doc_[fm_["value"]]})
+
+                if not match_new_:
+                    continue
 
                 get_filtered_f_ = self.get_filtered_f({
                     "match": match_new_,
                     "properties": properties_
                 })
+
                 fetcher_document_ = self.db_[f"{fetcher_col_id_}_data"].find_one(get_filtered_f_)
                 if not fetcher_document_:
                     print_(f"!!! not target document found for {fetcher_col_id_}: {get_filtered_f_}")
                     continue
+
                 get_val_ = fetcher_document_[fetcher_get_] if fetcher_get_ in fetcher_document_ else None
                 if not get_val_:
                     print_(f"!!! no target value found for {fetcher_col_id_}: {get_filtered_f_}")
                     continue
+
                 set_ = {}
                 set_[fetcher_set_] = get_val_
                 self.db_[collection_].update_one({"_id": _id}, {"$set": set_})
@@ -470,6 +583,10 @@ class Trigger():
 
             source_collection_id_ = source_collection_.replace("_data", "")
             changed_keys_ = list(changed_.keys())
+
+            if not changed_keys_:
+                raise PassException(">>> passed, no changed keys")
+
             print_(f">>> change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
 
             trigger_targets_ = \
@@ -510,7 +627,7 @@ class Trigger():
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
-                    print_(f"not full document found: {match_}")
+                    print_(f"full document not found ({source_collection_}): {match_}")
                     continue
 
                 match_ = {}
@@ -555,6 +672,7 @@ class Trigger():
                         {"$match": changes_filter0_},
                         {"$group": {"_id": None, "count": {"$sum": 1}}},
                         {"$project": {"_id": 0}}])
+
                     for doc_ in aggregate0_:
                         count0_ = doc_["count"] if "count" in doc_ else 0
 
@@ -678,13 +796,71 @@ class Trigger():
                     set_["_created_by"] = "_automation"
 
                 set_["_resume_token"] = token_
-
-                print_(f">>> updating... {set_}, upsert={upsert_}")
                 update_many_ = self.db_[target_collection_].update_many(match_, {"$set": set_}, upsert=upsert_)
                 count_ = update_many_.matched_count
                 print_(">>> updated :)", {"coll": target_collection_, "match": match_, "set": set_, "count": count_})
 
-            return True
+                notification_ = target_["notification"] if "notification" in target_ else None
+                if notification_:
+                    notify_ = "notify" in notification_ and notification_["notify"] is True
+                    attachment_ = "attachment" in notification_ and notification_["attachment"] is True
+                    subject_ = notification_["subject"] if "subject" in notification_ and notification_["subject"] != "" else None
+                    body_ = notification_["body"] if "body" in notification_ and notification_["body"] != "" else None
+                    ncollection_ = notification_['collection'] if "collection" in notification_ and notification_["collection"] != "" else None
+                    fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ and notification_["fields"] != "" else None
+                    nkey_ = notification_["key"] if "key" in notification_ and notification_["key"] != "" else None
+                    nfilter_ = notification_["filter"] if "filter" in notification_ and len(notification_["filter"]) > 0 else None
+                    tags_ = notification_["_tags"] if "_tags" in notification_ and len(notification_["_tags"]) > 0 else None
+                    if not (notify_ and subject_ and body_ and ncollection_ and fields_ and nfilter_ and nkey_ and tags_):
+                        continue
+                    keyf_ = full_document_[nkey_]
+                    get_users_from_tags_f_ = self.get_users_from_tags_f(tags_)
+                    if not get_users_from_tags_f_["result"]:
+                        print_("!!! error get_users_from_tags_f_:", get_users_from_tags_f_["msg"])
+                        continue
+                    to_ = get_users_from_tags_f_["to"] if "to" in get_users_from_tags_f_ and len(get_users_from_tags_f_["to"]) > 0 else None
+                    if not to_:
+                        print_("!!! _tags to not found")
+                        continue
+
+                    personalizations_ = {"to": get_users_from_tags_f_["to"]}
+                    files_ = []
+                    subject_ += f" - {keyf_}"
+                    type_ = "csv"
+
+                    ndocument_ = self.db_["_collection"].find_one({"col_id": ncollection_})
+                    if not ndocument_:
+                        print_("!!! notification collection not found", ncollection_)
+                        continue
+
+                    nproperties_ = ndocument_["col_structure"]["properties"] if "col_structure" in ndocument_ and "properties" in ndocument_["col_structure"] else None
+                    if not nproperties_:
+                        continue
+
+                    if attachment_:
+                        query_ = json.dumps(self.get_filtered_f({
+                            "match": nfilter_,
+                            "properties": nproperties_,
+                            "data": full_document_
+                        }))
+                        file_ = f"/docs/stream-{self.get_timestamp_f()}.{type_}"
+                        ncollection_ += "_data"
+                        command_ = f"mongoexport --quiet --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}'"
+
+                        call(command_, shell=True)
+                        files_ = [{"filename": file_, "filetype": type_}]
+
+                    msg_ = {
+                        "files": files_,
+                        "personalizations": personalizations_,
+                        "subject": subject_,
+                        "html": body_
+                    }
+                    email_sent_ = self.send_email_smtp_f(msg_)
+                    if not email_sent_["result"]:
+                        raise PassException(email_sent_["msg"])
+
+            return {"result": True}
 
         except pymongo.errors.PyMongoError as exc_:
             self.exception_show_f(exc_)
@@ -794,6 +970,25 @@ class Trigger():
             print_("!!! exited exception", exc_)
             self.exception_show_f(exc_)
 
+
+mongo_rs_ = os.environ.get("MONGO_RS")
+mongo_host0_ = os.environ.get("MONGO_HOST0")
+mongo_host1_ = os.environ.get("MONGO_HOST1")
+mongo_host2_ = os.environ.get("MONGO_HOST2")
+mongo_port0_ = int(os.environ.get("MONGO_PORT0"))
+mongo_port1_ = int(os.environ.get("MONGO_PORT1"))
+mongo_port2_ = int(os.environ.get("MONGO_PORT2"))
+mongo_db_ = os.environ.get("MONGO_DB")
+mngo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
+mongo_username_ = get_docker_secret("mongo_username", default="")
+mongo_password_ = get_docker_secret("mongo_password", default="")
+mongo_tls_cert_keyfile_password_ = get_docker_secret("mongo_tls_keyfile_password", default="")
+mongo_tls_ = os.environ.get("MONGO_TLS")
+mongo_tls_cert_keyfile_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
+mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")
+mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
+mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
+mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 
 if __name__ == "__main__":
     print_ = partial(print, flush=True)

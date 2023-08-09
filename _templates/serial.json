@@ -64,18 +64,18 @@
       "default": false,
       "width": 110
     },
+    "ser_proc_in_date": {
+      "bsonType": "date",
+      "title": "In Date",
+      "description": "Depot Income Date",
+      "width": 140
+    },
     "ser_proc_out": {
       "bsonType": "bool",
       "title": "Outgoing",
       "description": "Depot Out",
       "default": false,
       "width": 120
-    },
-    "ser_proc_in_date": {
-      "bsonType": "date",
-      "title": "In Date",
-      "description": "Depot Income Date",
-      "width": 140
     },
     "ser_proc_out_date": {
       "bsonType": "date",

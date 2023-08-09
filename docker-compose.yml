@@ -288,6 +288,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
     volumes:
       - bi-cert-volume:/cert
+      - bi-storage-volume:/docs
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -308,6 +309,12 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERID=${SMTP_USERID}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - COMPANY_NAME=${COMPANY_NAME}
     links:
       - replicaset
     extra_hosts:

@@ -99,9 +99,14 @@
       "get": ["odi_no", "odi_sub_no"],
       "filter": [
         {
-          "key": "odi_completed",
+          "key": "odi_arrived",
           "op": "eq",
-          "value": false
+          "value": true
+        },
+        {
+          "key": "odi_completed",
+          "op": "ne",
+          "value": true
         }
       ]
     }
@@ -189,7 +194,24 @@
               "value": "40-ClearanceCompleted"
             }
           ],
-          "upsert": false
+          "upsert": false,
+          "notification": {
+            "notify": true,
+            "subject": "Customs clearance completed",
+            "body": "Hi,<br /><br />Manifest has been closed.",
+            "collection": "delivery",
+            "fields": "dnn_no,dnn_line_no,dnn_man_no",
+            "key": "man_no",
+            "filter": [
+              {
+                "key": "dnn_man_no",
+                "op": "eq",
+                "value": "man_no"
+              }
+            ],
+            "attachment": true,
+            "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
+          }
         }
       ]
     },
