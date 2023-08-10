@@ -200,13 +200,18 @@
             "subject": "Customs clearance completed",
             "body": "Hi,<br /><br />Manifest has been closed.",
             "collection": "delivery",
-            "fields": "dnn_no,dnn_line_no,dnn_man_no",
+            "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_man_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
             "key": "man_no",
             "filter": [
               {
                 "key": "dnn_man_no",
                 "op": "eq",
                 "value": "man_no"
+              },
+              {
+                "key": "dnn_status",
+                "op": "eq",
+                "value": "40-ClearanceCompleted"
               }
             ],
             "attachment": true,

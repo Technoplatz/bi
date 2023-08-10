@@ -297,7 +297,7 @@ class Misc:
         except Exception as exc_:
             return ({"result": False, "msg": str(exc_), "exc": str(exc_)})
 
-    def post_notification(self, exc):
+    def post_notification(self, exc_):
         """
         docstring is in progress
         """
@@ -306,7 +306,7 @@ class Misc:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
             line_ = exc_tb_.tb_lineno
-            exception_ = str(exc)
+            exception_ = str(exc_)
             notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
             if resp_.status_code != 200:

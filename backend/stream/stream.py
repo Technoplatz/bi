@@ -31,6 +31,7 @@ https://www.gnu.org/licenses.
 """
 
 import os
+import sys
 import re
 import asyncio
 import smtplib
@@ -46,6 +47,7 @@ from bson.objectid import ObjectId
 from get_docker_secret import get_docker_secret
 import pytz
 import pymongo
+import requests
 
 
 class AppException(BaseException):
@@ -115,13 +117,23 @@ class Trigger():
         print_(">>> passed:", str(exc))
         return True
 
-    def exception_show_f(self, exc):
+    def exception_reported_f(self, exc_):
         """
         docstring is in progress
         """
-        line_no_ = exc.__traceback__.tb_lineno if hasattr(exc, "__traceback__") and hasattr(exc.__traceback__, "tb_lineno") else None
-        name_ = type(exc).__name__ if hasattr(type(exc), "__name__") else "Exception"
-        print_(f"!!! worker exception type {name_} at line {line_no_}:", str(exc))
+        line_no_ = exc_.__traceback__.tb_lineno if hasattr(exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
+        name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
+        print_(f"!!! worker exception type: {name_}, line: {line_no_}:", str(exc_))
+        if notification_slack_hook_url_:
+            exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
+            file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
+            line_ = exc_tb_.tb_lineno
+            exception_ = str(exc_)
+            notification_str_ = f"TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
+            resp_ = requests.post(notification_slack_hook_url_, json.dumps({"text": str(notification_str_)}), timeout=10)
+            if resp_.status_code != 200:
+                print_("*** notification error", resp_)
+
         return True
 
     def get_now_f(self):
@@ -162,15 +174,15 @@ class Trigger():
 
         except pymongo.errors.PyMongoError as exc_:
             print_("!!! refresher mongo error")
-            return {"result": False, "exc": exc_}
+            return {"result": False, "msg": str(exc_)}
 
         except AppException as exc_:
             print_("!!! refresher app exception")
-            return {"result": False, "exc": exc_}
+            return {"result": False, "msg": str(exc_)}
 
         except Exception as exc_:
             print_("!!! refresher exception")
-            return {"result": False, "exc": exc_}
+            return {"result": False, "msg": str(exc_)}
 
     def refresh_triggers_f(self):
         """
@@ -197,7 +209,6 @@ class Trigger():
                         })
 
             if not self.triggers_:
-                print_("!!! triggers passed")
                 raise PassException("!!! no trigger found - passed")
 
             print_(">>> triggers refreshed")
@@ -205,15 +216,16 @@ class Trigger():
             return {"result": True}
 
         except PassException as exc_:
-            return {"result": True, "exc": exc_}
+            self.exception_passed_f(exc_)
+            return {"result": True, "msg": str(exc_)}
 
         except pymongo.errors.PyMongoError as exc_:
-            print_("!!! refresher mongo error")
-            return {"result": False, "exc": exc_}
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except Exception as exc_:
-            print_("!!! refresher exception")
-            return {"result": False, "exc": exc_}
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
     def refresh_fetchers_f(self):
         """
@@ -237,19 +249,22 @@ class Trigger():
                     })
 
             if not self.fetchers_:
-                print_("!!! fetchers passed")
                 raise PassException("!!! no fetcher found - passed")
 
             print_(">>> fetchers refreshed", self.fetchers_)
             return {"result": True}
 
+        except PassException as exc_:
+            self.exception_passed_f(exc_)
+            return {"result": True, "msg": str(exc_)}
+
         except pymongo.errors.PyMongoError as exc_:
-            print_("!!! refresher mongo error")
-            return {"result": False, "exc": exc_}
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except Exception as exc_:
-            print_("!!! refresher exception")
-            return {"result": False, "exc": exc_}
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
     def get_filtered_f(self, obj):
         """
@@ -358,7 +373,7 @@ class Trigger():
             return filtered_
 
         except Exception as exc_:
-            print_("!!! exc_", exc_)
+            self.exception_reported_f(exc_)
             return None
 
     def aggregater_sum_f(self, coll_, filter_, field_):
@@ -374,11 +389,11 @@ class Trigger():
             return sum_
 
         except pymongo.errors.PyMongoError as exc_:
-            print_("!!! sum mongo error", str(exc_))
+            self.exception_reported_f(exc_)
             return 0
 
         except Exception as exc_:
-            print_("!!! sum exception", str(exc_))
+            self.exception_reported_f(exc_)
             return 0
 
     def aggregater_count_f(self, coll_, filter_):
@@ -394,11 +409,11 @@ class Trigger():
             return count_
 
         except pymongo.errors.PyMongoError as exc_:
-            print_("!!! count mongo error", str(exc_))
+            self.exception_reported_f(exc_)
             return 0
 
         except Exception as exc_:
-            print_("!!! count exception", str(exc_))
+            self.exception_reported_f(exc_)
             return 0
 
     def prefix_remove_f(self, input_, prfxs_):
@@ -478,13 +493,16 @@ class Trigger():
             return {"result": True}
 
         except smtplib.SMTPResponseException as exc_:
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except smtplib.SMTPServerDisconnected as exc_:
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except Exception as exc_:
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
     async def worker_fetchers_f(self, params_):
         """
@@ -555,19 +573,23 @@ class Trigger():
                 set_[fetcher_set_] = get_val_
                 self.db_[collection_].update_one({"_id": _id}, {"$set": set_})
 
-            return True
-
-        except pymongo.errors.PyMongoError as exc_:
-            self.exception_show_f(exc_)
+            return {"result": True}
 
         except PassException as exc_:
             self.exception_passed_f(exc_)
+            return {"result": True, "msg": str(exc_)}
+
+        except pymongo.errors.PyMongoError as exc_:
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except AppException as exc_:
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except Exception as exc_:
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
     async def worker_change_f(self, params_):
         """
@@ -587,7 +609,7 @@ class Trigger():
             if not changed_keys_:
                 raise PassException(">>> passed, no changed keys")
 
-            print_(f">>> change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
+            print_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_keys_, changed_)
 
             trigger_targets_ = \
                 [tg_ for tg_ in self.triggers_ if tg_["source"] == source_collection_id_ and op_ in tg_["operations"] and
@@ -862,17 +884,21 @@ class Trigger():
 
             return {"result": True}
 
-        except pymongo.errors.PyMongoError as exc_:
-            self.exception_show_f(exc_)
-
         except PassException as exc_:
             self.exception_passed_f(exc_)
+            return {"result": True, "msg": str(exc_)}
+
+        except pymongo.errors.PyMongoError as exc_:
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except AppException as exc_:
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
         except Exception as exc_:
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
+            return {"result": False, "msg": str(exc_)}
 
     async def starter_fetchers_f(self, params_):
         """
@@ -959,16 +985,13 @@ class Trigger():
             await asyncio.wait(running_tasks_)
 
         except pymongo.errors.PyMongoError as exc_:
-            print_("!!! exited mongo error", exc_)
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
 
         except AppException as exc_:
-            print_("!!! exited app error", exc_)
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
 
         except Exception as exc_:
-            print_("!!! exited exception", exc_)
-            self.exception_show_f(exc_)
+            self.exception_reported_f(exc_)
 
 
 mongo_rs_ = os.environ.get("MONGO_RS")
@@ -989,6 +1012,7 @@ mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_
 mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
 mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
+notification_slack_hook_url_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 
 if __name__ == "__main__":
     print_ = partial(print, flush=True)
