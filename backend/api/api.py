@@ -3676,8 +3676,8 @@ class Auth:
             op_ = input_["op"] if "op" in input_ else None
             administratives_ = ["dump", "backup", "restore"]
             permissive_ops_ = ["view", "views", "charts", "collections", "announcements", "template"]
+            is_not_crud_ = collection_id_ and collection_id_[:1] == "_"
             allowmatch_ = []
-            is_crud_ = collection_id_ and collection_id_[:1] == "_"
 
             if not user_id_:
                 raise APIError(f"user not found {user_id_}")
@@ -3695,7 +3695,7 @@ class Auth:
             if op_ in administratives_:
                 raise AuthError(f"no admin permission {op_}")
 
-            if is_crud_ and op_ == "read":
+            if is_not_crud_ and op_ == "read":
                 return {"result": True, "allowmatch": allowmatch_}
 
             collection_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_})

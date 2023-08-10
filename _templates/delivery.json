@@ -586,7 +586,7 @@
       "data_sort": {
         "_modified_at": -1
       },
-      "data_excluded": ["inv_dnn_no"],
+      "data_excluded": ["odi_sub_no", "odi_no", "inv_dnn_no"],
       "data_index": ["acc_nick_name"],
       "data_columns": ["dnn_status"],
       "data_values": [
@@ -615,7 +615,7 @@
       "scheduled": false,
       "scheduled_cron": "15 14,15,16 * * mon,tue",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "sv-git-buid": {
       "title": "Delivery BUId's",
@@ -656,7 +656,7 @@
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "sv-dn-statuses": {
       "title": "Delivery Statuses",
@@ -703,7 +703,7 @@
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-00s": {
       "title": "00-Standby",
@@ -797,7 +797,7 @@
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-10": {
       "title": "10-OnTheWay",
@@ -844,7 +844,7 @@
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-20": {
       "title": "20-OnCustoms",
@@ -891,7 +891,7 @@
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-30": {
       "title": "30-OnCustomsProcess",
@@ -938,7 +938,7 @@
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-40": {
       "title": "40-ClearanceCompleted",
@@ -985,7 +985,7 @@
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-50": {
       "title": "50-OnTheTouchpoint",
@@ -1032,7 +1032,7 @@
       "scheduled": false,
       "scheduled_cron": "30 9,17 * 1-5 *",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-60": {
       "title": "60-ReadyToBeDelivered",
@@ -1079,7 +1079,7 @@
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
     }
   },
   "fetchers": [
