@@ -46,6 +46,7 @@
       "bsonType": "date",
       "title": "Opening Date",
       "description": "Manifest opening date",
+      "dateonly": true,
       "width": 150
     },
     "man_closed": {
@@ -61,18 +62,21 @@
       "bsonType": "date",
       "title": "Closing Date",
       "description": "Manifest closing date",
+      "dateonly": true,
       "width": 150
     },
     "man_gov_purchase_date": {
       "bsonType": "date",
       "title": "Purchase Date",
       "description": "Purchase date",
+      "dateonly": true,
       "width": 190
     },
     "man_gov_approval_date": {
       "bsonType": "date",
       "title": "Approval Date",
       "description": "Approval date",
+      "dateonly": true,
       "width": 180
     }
   },

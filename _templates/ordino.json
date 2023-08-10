@@ -69,6 +69,7 @@
       "bsonType": "date",
       "title": "Trasfer Date",
       "description": "Transfer Date",
+      "dateonly": true,
       "width": 150
     },
     "odi_completed": {
