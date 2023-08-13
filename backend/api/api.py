@@ -1709,6 +1709,8 @@ class Crud:
                         pipeline__ = []
                         let_ = {}
                         for match__ in match_:
+                            if "exclude" in match__ and match__["exclude"] is True:
+                                continue
                             if match__["key"] and match__["value"]:
                                 key_ = match__["key"]
                                 value_ = match__["value"]
@@ -2299,7 +2301,7 @@ class Crud:
                 "data": docs_,
                 "count": count_,
                 "structure": structure_,
-                "reconfig": reconfig_,
+                "reconfig": reconfig_
             }
 
         except pymongo.errors.PyMongoError as exc:
@@ -2329,7 +2331,7 @@ class Crud:
                 "$jsonSchema": {
                     "bsonType": "object",
                     "properties": {},
-                    "required": ["_id"],
+                    "required": ["_id"]
                 }
             }
 

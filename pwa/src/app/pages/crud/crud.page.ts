@@ -605,7 +605,6 @@ export class CrudPage implements OnInit {
     for (let k = 0; k < this.field_parents.match.length; k++) {
       if (this.field_parents.match[k].key) {
         this.data_[this.field_parents.match[k].key] = item_[this.field_parents.match[k].value];
-        this.crudForm.get(this.field_parents.match[k].key)?.setValue(item_[this.field_parents.match[k].value]);
       }
       if (k === this.field_parents.match.length - 1) {
         this.tab = "data";
