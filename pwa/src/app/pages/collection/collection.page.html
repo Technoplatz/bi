@@ -34,8 +34,12 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col *ngIf="is_initialized; else dataloading" class="console-right">
-        <h6>{{ header | translate }}</h6>
-        <h1>{{ subheader }}</h1>
+        <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
+          <ion-icon *ngIf="!menutoggle" name="arrow-back-outline"></ion-icon>
+          <ion-icon *ngIf="menutoggle" name="arrow-forward-outline"></ion-icon>
+          {{ header | translate }}
+        </ion-button>
+        <h2>{{ subheader }}</h2>
         <div class="filler-10"></div>
         <div *ngIf="id=='_collection'" class="template-card-container">
           <ion-card class="single-coll">
@@ -153,24 +157,6 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
-        <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
-          <ion-row>
-            <ion-col size="4">
-              <ion-list class="ion-no-padding ion-no-margin">
-                <ion-item lines="none">
-                  <ion-label position="stacked">{{ 'Flashcard Filters' | translate }}:</ion-label>
-                  <ion-select class="status-select" aria-label="Status" interface="popover" mode="md"
-                    placeholder="{{ 'Please select an option' | translate }}" (ionChange)="doFlashcard($event)"
-                    [compareWith]="compareWith" [(ngModel)]="status_">
-                    <ion-select-option class="status-select-option" *ngFor="let item of flashcards_" [value]="item">{{
-                      item.view.title }}&nbsp;&nbsp;&nbsp;[{{ item.count }}]</ion-select-option>
-                  </ion-select>
-                </ion-item>
-              </ion-list>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-
         <!-- ACTION BUTTONS -->
         <ion-grid *ngIf="is_crud && actions.length > 0" class="ion-no-padding ion-margin-top ion-margin-bottom">
           <ion-row class="ion-no-margin">
@@ -187,10 +173,19 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
+        <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
+          <ion-row>
+            <ion-col size="12" class="schema-flashcard-container">
+              <div *ngFor="let item of flashcards_" (click)="doFlashcard(item)">{{
+                item.view.title }}<br /><span>{{ item.count }}</span></div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
         <!-- CRUD GRID SECTION -->
-        <ion-grid *ngIf="is_initialized; else dataloading" class="ion-no-padding data-grid">
+        <ion-grid *ngIf="data.length >= 0" class="ion-no-padding data-grid">
           <!-- CRUD HEADERS -->
-          <ion-row *ngIf="data.length >= 0" class="ion-nowrap search-row">
+          <ion-row class="ion-nowrap search-row">
             <ion-col class="ion-text-center check-column">
               <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)" mode="md">
               </ion-checkbox>

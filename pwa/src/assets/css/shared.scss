@@ -621,6 +621,7 @@ form ion-item ion-label {
 .dash-button {
   --padding-start: 0px !important;
   font-weight: bold;
+  font-size: 14px;
   cursor: pointer !important;
 }
 
@@ -630,6 +631,7 @@ form ion-item ion-label {
   border-bottom: 1px dotted var(--ion-color-primary);
   font-weight: bold;
   margin-bottom: 8px;
+  font-size: 14px;
   pointer-events: none !important;
 }
 
@@ -687,8 +689,9 @@ form ion-item ion-label {
   height: calc(100vh - 38px);
   overflow: scroll !important;
   padding-left: 20px;
-  padding-top: 24px;
+  padding-top: 16px;
   position: sticky !important;
+  white-space: nowrap;
 }
 
 .menu-side {
@@ -930,7 +933,7 @@ ion-label {
 
 app-menu {
   margin-top: 0px;
-  width: 260px !important;
+  width: 270px !important;
   border-right: 1px solid var(--ion-color-light);
   z-index: 999;
 }
@@ -1365,9 +1368,19 @@ sup {
   line-height: 18px;
   gap: 8px !important;
   display: flex;
-  justify-content: flex-start;
   align-items: center;
-  flex-wrap: wrap;
+  cursor: pointer;
+}
+
+.schema-flashcard-container div {
+  border-right: 1px solid #ccc;
+  padding-right: 10px;
+}
+
+.schema-flashcard-container div span {
+  font-weight: 600;
+  font-size: medium;
+  color: var(--ion-color-primary) !important;
 }
 
 .schema-card-container {
@@ -1379,14 +1392,11 @@ sup {
   align-items: center;
 }
 
-.schema-card-container span,
-.schema-flashcard-container span {
+.schema-card-container span {
   color: var(--ion-color-primary);
-  cursor: pointer;
   margin-right: 5px;
   font-weight: 600;
   font-size: 14px;
-  white-space: nowrap;
 }
 
 .schema-card-container ion-card {
@@ -1446,7 +1456,7 @@ sup {
 
 .template-card-container ion-card {
   border-radius: 0px;
-  width: 280px;
+  min-width: 280px;
   height: 195px;
   box-shadow: none !important;
   border: 5px solid var(--ion-color-medium);
@@ -2079,7 +2089,7 @@ app-chart {
   overflow: hidden;
   padding: 8px;
   align-content: flex-start;
-  width: 238px;
+  min-width: 238px;
   height: 58px;
   white-space: nowrap !important;
   border: 2px dotted var(--ion-color-medium);
@@ -2116,17 +2126,17 @@ app-chart {
 }
 
 .chart-sq.small {
-  width: 320px;
+  min-width: 320px;
   height: 340px;
 }
 
 .chart-sq.medium {
-  width: 645px;
+  min-width: 645px;
   height: 580px;
 }
 
 .chart-sq.large {
-  width: 1220px !important;
+  min-width: 1220px !important;
   height: 1080px;
 }
 

@@ -113,6 +113,7 @@ export class CollectionPage implements OnInit {
   public templates: any = [];
   public is_inprogress: boolean = false;
   public flashcards_: any = [];
+  public menutoggle: boolean = false;
   public schema_: any = {
     "properties": { "title": "Properties", "count": 0 },
     "required": { "title": "Required", "count": 0 },
@@ -543,8 +544,7 @@ export class CollectionPage implements OnInit {
     this.editor.focus();
   }
 
-  doFlashcard(evt: any) {
-    const item_ = evt.detail.value;
+  doFlashcard(item_: any) {
     if (item_ !== "") {
       this.status_ = item_;
       this.filter_ = item_.view.data_filter;
@@ -556,6 +556,15 @@ export class CollectionPage implements OnInit {
         });
       });
     }
+  }
+
+  doMenuToggle() {
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      this.menutoggle = !LSMENUTOGGLE ? true : false;
+      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
+        this.misc.menutoggle.next(this.menutoggle);
+      });
+    });
   }
 
   compareWith(o1: any, o2: any) {

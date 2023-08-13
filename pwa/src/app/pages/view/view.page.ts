@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { AlertController } from "@ionic/angular";
+import { Storage } from "@ionic/storage";
 import { Router } from "@angular/router";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
@@ -90,13 +91,15 @@ export class ViewPage implements OnInit {
   public view: any = null;
   public view_: any = {};
   public cron_: string = "";
+  public menutoggle: boolean = false;
 
   constructor(
     private crud: Crud,
     private auth: Auth,
     private alert: AlertController,
     private router: Router,
-    public misc: Miscellaneous
+    public misc: Miscellaneous,
+    private storage: Storage
   ) {
     this.misc.getAPIUrl().then((apiHost: any) => {
       this.apiHost = apiHost;
@@ -245,6 +248,15 @@ export class ViewPage implements OnInit {
       console.error("*** copy error", error);
     }).finally(() => {
       this.is_url_copied = false;
+    });
+  }
+
+  doMenuToggle() {
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      this.menutoggle = !LSMENUTOGGLE ? true : false;
+      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
+        this.misc.menutoggle.next(this.menutoggle);
+      });
     });
   }
 

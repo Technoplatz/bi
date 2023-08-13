@@ -2291,6 +2291,7 @@ class Crud:
                 project__["count"] = "$count"
                 cursor_ = Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": group__}, {"$project": project__}, {"$sort": sort__}, {"$limit": limit_}])
             else:
+                sort__ = {"_modified_at": -1}
                 cursor_ = Mongo().db_[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
 
             docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []

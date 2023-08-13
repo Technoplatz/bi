@@ -84,8 +84,7 @@
   "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_file_no"]],
   "unique": [["man_no"]],
   "sort": {
-    "man_odi_no": 1,
-    "man_odi_sub_no": 1
+    "_modified_at": -1
   },
   "parents": [
     {
