@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 #
 
-FROM python:3.9-slim
+FROM python:3.11-slim
 RUN DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y cron dirmngr gnupg2 apt-transport-https ca-certificates software-properties-common wget libmagic-dev curl iputils-ping

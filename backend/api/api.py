@@ -63,10 +63,10 @@ from jose import jwt
 import numexpr as ne
 from flask import Flask, request, send_from_directory, make_response
 from flask_cors import CORS
-from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 from croniter import croniter
 from get_docker_secret import get_docker_secret
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 class APIError(BaseException):
@@ -2266,7 +2266,7 @@ class Crud:
             is_crud_ = collection_id_[:1] != "_"
 
             if collection_id_ not in allowed_cols_ and not Misc().permitted_usertag_f(user_) and not is_crud_:
-                raise APIError(f"collection not allowed to read: {collection_id_}")
+                raise AuthError(f"collection is not allowed to read: {collection_id_}")
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
@@ -2301,8 +2301,11 @@ class Crud:
                 "data": docs_,
                 "count": count_,
                 "structure": structure_,
-                "reconfig": reconfig_,
+                "reconfig": reconfig_
             }
+
+        except AuthError as exc_:
+            return Misc().auth_error_f(exc_)
 
         except pymongo.errors.PyMongoError as exc:
             Misc().log_f({
