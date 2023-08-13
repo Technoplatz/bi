@@ -2301,7 +2301,7 @@ class Crud:
                 "data": docs_,
                 "count": count_,
                 "structure": structure_,
-                "reconfig": reconfig_
+                "reconfig": reconfig_,
             }
 
         except pymongo.errors.PyMongoError as exc:
@@ -2331,7 +2331,7 @@ class Crud:
                 "$jsonSchema": {
                     "bsonType": "object",
                     "properties": {},
-                    "required": ["_id"]
+                    "required": ["_id"],
                 }
             }
 
