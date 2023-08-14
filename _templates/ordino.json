@@ -4,7 +4,7 @@
       "bsonType": "string",
       "title": "Ordino No",
       "description": "Primary ordino number",
-      "pattern": "^[0-9A-Z-_./ ]{1,20}$",
+      "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
       "casetype": "uppercase",
@@ -14,7 +14,7 @@
       "bsonType": "string",
       "title": "Ordino Sub No",
       "description": "Secondary ordino number",
-      "pattern": "^[0-9A-Z-_/ ]{1,20}$",
+      "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
       "casetype": "uppercase",
@@ -31,7 +31,7 @@
       "bsonType": "string",
       "title": "Shipped From",
       "description": "Country where the goods are loaded",
-      "enum": ["China", "Hungary", "Germany", "USA", "Netherlands", "UK"],
+      "enum": ["China", "Hungary", "Netherlands"],
       "width": 110
     },
     "odi_customs": {
@@ -40,14 +40,6 @@
       "description": "Customs Location",
       "enum": ["IGA", "Halkalı", "Ambarlı", "AHL"],
       "width": 110
-    },
-    "odi_ship_type": {
-      "bsonType": "string",
-      "title": "Ship Type",
-      "description": "Shipping Type",
-      "enum": ["Sea", "Air", "Truck"],
-      "dateonly": true,
-      "width": 120
     },
     "odi_arrived": {
       "bsonType": "bool",
@@ -65,13 +57,6 @@
       "dateonly": true,
       "width": 140
     },
-    "odi_transfer_date": {
-      "bsonType": "date",
-      "title": "Trasfer Date",
-      "description": "Transfer Date",
-      "dateonly": true,
-      "width": 150
-    },
     "odi_completed": {
       "bsonType": "bool",
       "title": "Completed",
@@ -82,8 +67,8 @@
       "default": false
     }
   },
-  "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_ship_type", "odi_customs"],
-  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_ship_type"], ["odi_customs", "odi_completed"]],
+  "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],
+  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_customs", "odi_completed"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
     "_modified_at": -1
@@ -154,7 +139,7 @@
         "notify": false,
         "subject": "Ordino is on customs",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been arrived.",
-        "fields": "odi_no,odi_sub_no,odi_ship_type",
+        "fields": "odi_no,odi_sub_no",
         "attachment": true,
         "filter": [
           {
@@ -197,7 +182,7 @@
         "notify": false,
         "subject": "Ordino arrival canceled",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached ordinos has been rolled back.",
-        "fields": "odi_no,odi_sub_no,odi_ship_type",
+        "fields": "odi_no,odi_sub_no",
         "filter": [
           {
             "key": "odi_arrived",

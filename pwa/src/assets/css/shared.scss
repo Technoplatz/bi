@@ -326,7 +326,6 @@ ion-note {
   color: var(--ion-color-dark);
   font-weight: normal !important;
   line-height: normal !important;
-  margin-bottom: 16px;
 }
 
 .pane-stat-num {
@@ -399,7 +398,7 @@ ion-note {
   background-color: var(--ion-color-light);
   color: var(--ion-color-dark);
   overflow: hidden;
-  min-width: 72px;
+  min-width: 76px;
   flex-grow: 0;
 }
 
@@ -1397,6 +1396,7 @@ sup {
   margin-right: 5px;
   font-weight: 600;
   font-size: 14px;
+  cursor: pointer;
 }
 
 .schema-card-container ion-card {
@@ -1457,6 +1457,7 @@ sup {
 .template-card-container ion-card {
   border-radius: 0px;
   min-width: 280px;
+  max-width: 280px;
   height: 195px;
   box-shadow: none !important;
   border: 5px solid var(--ion-color-medium);
@@ -1473,6 +1474,7 @@ sup {
   margin-top: 0px !important;
   line-height: normal;
   font-size: small;
+  white-space: pre-wrap;
 }
 
 .template-card-container ion-card p {

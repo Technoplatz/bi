@@ -904,14 +904,12 @@ class Trigger():
         """
         docstring is in progress
         """
-        print_("\n>>> fetchers hub started")
         return await self.worker_fetchers_f(params_)
 
     async def starter_changes_f(self, params_):
         """
         docstring is in progress
         """
-        print_("\n>>> changes hub started")
         return await self.worker_change_f(params_)
 
     async def changes_stream_f(self):
@@ -946,11 +944,8 @@ class Trigger():
                             continue
                         print_(">>> _collection updated and refreshed")
 
-                    print_("\n>>> it is a change", source_collection_id_)
-
                     source_properties_ = self.properties_[source_collection_id_] if source_collection_id_ in self.properties_ else None
                     if source_properties_ is None:
-                        print_("!!! no source properties found", source_collection_id_)
                         continue
 
                     op_ = event_["operationType"] if "operationType" in event_ and event_["operationType"] in self.operations_ else None

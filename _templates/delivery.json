@@ -39,7 +39,8 @@
         "RE-Remittance",
         "SP-ServicePack",
         "EX-Exported",
-        "AR-Archived"
+        "AR-Archived",
+        "ND-NotDefined"
       ],
       "default": "00-Standby",
       "width": 170
@@ -161,14 +162,6 @@
       "minLength": 0,
       "maxLength": 8,
       "width": 130
-    },
-    "dnn_prd_family": {
-      "bsonType": "string",
-      "title": "Family",
-      "description": "Product Family",
-      "minLength": 0,
-      "maxLength": 64,
-      "width": 160
     },
     "dnn_length": {
       "bsonType": "number",
@@ -331,6 +324,11 @@
         {
           "key": "dnn_acc_no",
           "value": "acc_no"
+        },
+        {
+          "key": "dnn_acc_name",
+          "value": "acc_name",
+          "exclude": true
         }
       ],
       "filter": [
