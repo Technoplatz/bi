@@ -103,14 +103,9 @@
       "get": ["odi_no", "odi_sub_no"],
       "filter": [
         {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": true
-        },
-        {
-          "key": "odi_completed",
+          "key": "odi_status",
           "op": "ne",
-          "value": true
+          "value": "00-Open"
         }
       ]
     }
@@ -200,7 +195,7 @@
           ],
           "upsert": false,
           "notification": {
-            "notify": true,
+            "notify": false,
             "subject": "Customs clearance completed",
             "body": "Hi,<br /><br />Manifest has been closed.",
             "collection": "delivery",

@@ -16,12 +16,12 @@
       "title": "Status",
       "description": "Status",
       "minLength": 5,
-      "maxLength": 16,
-      "pattern": "^[A-Za-z0-9-]{5,16}$",
-      "enum": ["10-Ready", "20-Completed", "99-Error"],
-      "default": "10-Ready",
+      "maxLength": 32,
+      "pattern": "^[A-Za-z0-9-]{5,32}$",
+      "enum": ["10-ReadyToBeDelivered", "20-Shipped", "99-Error"],
+      "default": "10-ReadyToBeDelivered",
       "readonly": false,
-      "width": 120
+      "width": 160
     },
     "shp_date": {
       "bsonType": "date",
@@ -86,14 +86,14 @@
       "pattern": "^[A-Z0-9-]{16,18}$",
       "minLength": 0,
       "maxLength": 18,
-      "readonly": false,
+      "readonly": true,
       "width": 150
     },
     "shp_waybill_date": {
       "bsonType": "date",
       "title": "Waybill Date",
       "description": "Waybill generated date",
-      "readonly": false,
+      "readonly": true,
       "width": 150
     },
     "shp_ettn": {
@@ -104,7 +104,7 @@
       "pattern": "^[a-z0-9-]{32,40}$",
       "minLength": 32,
       "maxLength": 40,
-      "readonly": false,
+      "readonly": true,
       "width": 270
     }
   },
@@ -211,7 +211,7 @@
             "shipment_account_no_field": "shp_acc_no",
             "shipment_status_field": "shp_status",
             "shipment_notes_field": "shp_notes",
-            "shipment_status_set_value": "20-Completed",
+            "shipment_status_set_value": "20-Shipped",
             "account_collection": "account_data",
             "account_no_field": "acc_no",
             "delivery_collection": "delivery_data",
@@ -238,7 +238,7 @@
         {
           "key": "shp_status",
           "op": "eq",
-          "value": "20-Completed"
+          "value": "20-Shipped"
         }
       ],
       "set": [],

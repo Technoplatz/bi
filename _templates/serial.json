@@ -3,7 +3,7 @@
     "ser_no": {
       "bsonType": "string",
       "title": "Serial No",
-      "description": "Serial Number",
+      "description": "Serial number",
       "minLength": 4,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9-]{4,16}$",
@@ -13,7 +13,7 @@
     "ser_dnn_no": {
       "bsonType": "string",
       "title": "DN No",
-      "description": "Delivery Number",
+      "description": "Delivery number",
       "minLength": 10,
       "maxLength": 16,
       "pattern": "^[0-9-]{10,16}$",
@@ -22,7 +22,7 @@
     "ser_line_no": {
       "bsonType": "string",
       "title": "Line",
-      "description": "Line Number",
+      "description": "Line number",
       "minLength": 1,
       "maxLength": 4,
       "pattern": "^[0-9]{1,4}$",
@@ -51,7 +51,7 @@
     "ser_case_no": {
       "bsonType": "string",
       "title": "Case No",
-      "description": "Case Number",
+      "description": "Case number",
       "minLength": 18,
       "maxLength": 18,
       "pattern": "^[0-9-]{18,18}$",
@@ -67,8 +67,19 @@
     "ser_proc_in_date": {
       "bsonType": "date",
       "title": "In Date",
-      "description": "Depot Income Date",
+      "description": "Touchpoint incoming date",
       "width": 140
+    },
+    "ser_location": {
+      "bsonType": "string",
+      "title": "Location",
+      "description": "Stored location",
+      "minLength": 0,
+      "maxLength": 8,
+      "pattern": "^[A-Z]{0,8}$",
+      "enum": ["A", "D", "S"],
+      "default": "S",
+      "width": 110
     },
     "ser_proc_out": {
       "bsonType": "bool",
@@ -80,7 +91,7 @@
     "ser_proc_out_date": {
       "bsonType": "date",
       "title": "In Date",
-      "description": "Depot Outgoing Date",
+      "description": "Touchpoint outgoing date",
       "width": 150
     }
   },

@@ -49,7 +49,7 @@
       "bsonType": "string",
       "title": "Ordino No",
       "description": "Primary ordino number",
-      "pattern": "^[0-9A-Z-_./ ]{1,20}$",
+      "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
       "casetype": "uppercase",
@@ -59,10 +59,11 @@
       "bsonType": "string",
       "title": "Ordino Sub No",
       "description": "Secondary ordino number",
-      "pattern": "^[0-9A-Z-_/ ]{1,20}$",
+      "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase"
+      "casetype": "uppercase",
+      "width": 170
     },
     "dnn_man_no": {
       "bsonType": "string",
@@ -95,7 +96,7 @@
       "title": "Account Name",
       "description": "Account Name",
       "minLength": 1,
-      "maxLength": 64,
+      "maxLength": 128,
       "width": 240
     },
     "dnn_date": {
@@ -160,7 +161,7 @@
       "title": "Group",
       "description": "Product Group",
       "minLength": 0,
-      "maxLength": 8,
+      "maxLength": 32,
       "width": 130
     },
     "dnn_length": {
@@ -231,6 +232,7 @@
       "bsonType": "date",
       "title": "ETA Date",
       "description": "ETA date",
+      "dateonly": true,
       "width": 120
     },
     "dnn_shp_id": {
@@ -294,9 +296,9 @@
       ],
       "filter": [
         {
-          "key": "odi_completed",
-          "op": "eq",
-          "value": false
+          "key": "odi_status",
+          "op": "ne",
+          "value": "00-Open"
         }
       ],
       "get": ["odi_no", "odi_sub_no", "odi_customs"]
