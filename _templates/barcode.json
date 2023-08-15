@@ -11,6 +11,16 @@
       "maxLength": 3,
       "width": 110
     },
+    "bar_location": {
+      "bsonType": "string",
+      "title": "Location",
+      "description": "Stored location",
+      "minLength": 0,
+      "maxLength": 8,
+      "enum": ["A", "D", "S"],
+      "default": "S",
+      "width": 110
+    },
     "bar_input": {
       "bsonType": "string",
       "title": "Barcode",
@@ -87,6 +97,10 @@
             {
               "key": "ser_proc_in_date",
               "value": "$current_date"
+            },
+            {
+              "key": "ser_location",
+              "value": "bar_location"
             }
           ],
           "upsert": false
@@ -109,6 +123,10 @@
             {
               "key": "ser_proc_in_date",
               "value": "$current_date"
+            },
+            {
+              "key": "ser_location",
+              "value": "bar_location"
             }
           ],
           "upsert": false
@@ -131,6 +149,10 @@
             {
               "key": "ser_proc_in_date",
               "value": "$current_date"
+            },
+            {
+              "key": "ser_location",
+              "value": "bar_location"
             }
           ],
           "upsert": false

@@ -6,7 +6,7 @@
       "description": "Serial number",
       "minLength": 4,
       "maxLength": 16,
-      "pattern": "^[A-Za-z0-9-]{4,16}$",
+      "pattern": "^[A-Za-z0-9-?]{4,16}$",
       "casetype": "uppercase",
       "width": 110
     },
@@ -53,8 +53,8 @@
       "title": "Case No",
       "description": "Case number",
       "minLength": 18,
-      "maxLength": 18,
-      "pattern": "^[0-9-]{18,18}$",
+      "maxLength": 20,
+      "pattern": "^[0-9-]{18,20}$",
       "width": 150
     },
     "ser_proc_in": {
@@ -76,8 +76,6 @@
       "description": "Stored location",
       "minLength": 0,
       "maxLength": 8,
-      "pattern": "^[A-Z]{0,8}$",
-      "enum": ["A", "D", "S"],
       "default": "S",
       "width": 110
     },
@@ -96,7 +94,7 @@
     }
   },
   "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_case_no"],
-  "index": [["ser_dnn_no"], ["ser_case_no"]],
+  "index": [["ser_proc_in"], ["ser_dnn_no"], ["ser_case_no"]],
   "unique": [["ser_no"]],
   "sort": {
     "_modified_at": -1

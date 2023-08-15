@@ -759,13 +759,15 @@ class Trigger():
                     parts_ = re.split("([+-/*()])", value_)
                     chkgroupbys_ = re.findall("[a-zA-Z_]+", value_)
                     chkgroup0_ = chkgroupbys_[0]
+
                     type_ = \
-                        "enum" if target_enum_ else \
                         "sourcevalue" if value_ in source_properties_ else \
                         "targetvalue" if value_ in target_properties_ else \
+                        "enum" if target_enum_ else \
                         "string" if target_bson_type_ == "string" else \
                         "formula" if len(parts_) > 1 or chkgroup0_ in self.groupbys_ else \
                         target_bson_type_
+                    
                     if type_ == "formula":
                         if target_bson_type_ in self.numerics_:
                             if chkgroup0_ in self.groupbys_:

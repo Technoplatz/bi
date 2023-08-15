@@ -565,14 +565,15 @@ export class CrudPage implements OnInit {
             sort: { "_modified_at": -1 },
             group: true,
             page: 1,
-            limit: 100
+            limit: 1000
           }).then((res: any) => {
             if (res && res.data) {
               this.related = res.data;
               for (let k = 0; k < this.related.length; k++) {
                 this.related[k].selected = true;
                 if (k === this.related.length - 1) {
-                  this.relatedx = this.related = this.related.sort((a: any, b: any) => (a.selected ? -1 : 1));
+                  this.relatedx = this.related;
+                  // this.relatedx = this.related = this.related.sort((a: any, b: any) => (a.selected ? -1 : 1));
                   this.reloading = false;
                 }
               }

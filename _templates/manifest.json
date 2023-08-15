@@ -55,9 +55,9 @@
       "title": "Closed",
       "description": "Manifest Closed",
       "truetext": "Closed",
-      "falsetext": "OnCustomsProcess",
+      "falsetext": "Open",
       "default": false,
-      "width": 140
+      "width": 110
     },
     "man_closing_date": {
       "bsonType": "date",
@@ -104,8 +104,8 @@
       "filter": [
         {
           "key": "odi_status",
-          "op": "ne",
-          "value": "00-Open"
+          "op": "in",
+          "value": "10-OnTheWay,20-OnCustoms"
         }
       ]
     }
