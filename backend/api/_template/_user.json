@@ -9,7 +9,8 @@
       "maxLength": 64,
       "required": true,
       "placeholder": "Enter a business e-mail",
-      "width": 200
+      "casetype": "lowercase",
+      "width": 240
     },
     "usr_name": {
       "bsonType": "string",
