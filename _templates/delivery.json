@@ -103,6 +103,7 @@
       "bsonType": "date",
       "title": "DN Date",
       "description": "DN Date",
+      "dateonly": true,
       "width": 120
     },
     "dnn_po_id": {

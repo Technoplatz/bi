@@ -157,15 +157,10 @@ https://www.gnu.org/licenses.
             {{ 'Maximum number of lines allowed is 100' | translate }}.
         </div>
         <ng-template #nolink>
-            <div *ngIf="isnoninteractive_; else interactive" class="ion-margin-top">
+            <div *ngIf="isnoninteractive_" class="ion-margin-top">
                 <h5>{{ 'This action is non-interactive' | translate }}.</h5>
                 {{ 'Please click RUN button directly' | translate }}.
             </div>
-            <ng-template #interactive>
-                <div class="ion-margin-top">
-                    <h5>{{ collection | titlecase }} {{ 'Form' | translate }}</h5>
-                </div>
-            </ng-template>
             <form [formGroup]="crudForm" enctype="multipart/form-data">
                 <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
                     class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
@@ -173,7 +168,8 @@ https://www.gnu.org/licenses.
                         <div class="ion-margin-top full-flex ion-margin-bottom">
                             <ion-button *ngFor="let item of links" (click)="doGoLink(item)" color="dark" size="default"
                                 slot="end">
-                                <ion-icon name="link-outline"></ion-icon> {{ item.btntext ? item.btntext : item.collection }}
+                                <ion-icon name="link-outline"></ion-icon> {{ item.btntext ? item.btntext :
+                                item.collection }}
                             </ion-button>
                         </div>
                     </ion-item>
@@ -260,9 +256,8 @@ https://www.gnu.org/licenses.
                                         <ion-datetime [id]="field.name"
                                             [presentation]="field.dateonly ? 'date' : 'date-time'" [multiple]="false"
                                             [value]="data_[field.name]?.substring(0, 19).replace(' ', 'T') + 'Z'"
-                                            [showClearButton]="true"
-                                            (ionChange)="doDateAssign($event, field.name)" [firstDayOfWeek]="1"
-                                            [showDefaultButtons]="true"
+                                            [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
+                                            [firstDayOfWeek]="1" [showDefaultButtons]="true"
                                             displayFormat="field.dateonly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm'"
                                             [readonly]="field.readonly" [disabled]="field.disabled">
                                             <span slot="title">{{ field.title }}</span>
@@ -353,4 +348,4 @@ https://www.gnu.org/licenses.
     </ion-item>
 </ion-content>
 <br />
-<modal-footer><modal-footer></modal-footer></modal-footer>
+<modal-footer [collection]="collection"></modal-footer>

@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Input } from "@angular/core";
 
 @Component({
   selector: "modal-footer",
@@ -39,6 +39,8 @@ import { Component, OnInit } from "@angular/core";
 })
 
 export class ModalFooterComponent implements OnInit {
+  @Input() collection: string = "";
+
   constructor() { }
 
   ngOnInit() { }
