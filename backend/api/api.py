@@ -1972,16 +1972,26 @@ class Crud:
                     id__ = view_["k"]
                     view__ = view_["v"]
 
+                    print_("*** 0-id__", id__)
+
                     if "enabled" not in view__ or not view__["enabled"]:
                         continue
+
+                    print_("*** 1-id__", id__)
 
                     if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
                         continue
 
+                    print_("*** 2-id__", id__)
+
                     get_view_data_f_ = self.get_view_data_f(user_, id__, source_)
+
+                    print_("*** 3-id__", get_view_data_f_)
 
                     if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
                         continue
+
+                    print_("*** 4-id__", id__)
 
                     if not get_view_data_f_["result"]:
                         continue

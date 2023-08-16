@@ -6,7 +6,7 @@
       "description": "Order Number",
       "minLength": 10,
       "maxLength": 10,
-      "pattern": "^[0-9]{10,10}$",
+      "pattern": "^[0-9-]{10,10}$",
       "width": 130
     },
     "ord_prd_no": {
@@ -69,13 +69,7 @@
               "value": "ord_prd_no"
             }
           ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "ne",
-              "value": "70-Delivered"
-            }
-          ],
+          "filter": [],
           "set": [
             {
               "key": "dnn_order_price",

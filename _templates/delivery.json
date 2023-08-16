@@ -6,7 +6,7 @@
       "description": "Delivery Number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9-]{10,16}$",
+      "pattern": "^[0-9A-Z-]{10,16}$",
       "width": 110
     },
     "dnn_line_no": {
@@ -33,7 +33,7 @@
         "60-ReadyToBeDelivered",
         "70-Delivered",
         "BL-Backlog",
-        "NE-Missing",
+        "MI-Missing",
         "TX-Tarex",
         "WF-WriteOff",
         "RE-Remittance",
@@ -77,9 +77,9 @@
       "bsonType": "string",
       "title": "Bill No",
       "description": "Bill Number",
-      "minLength": 10,
-      "maxLength": 10,
-      "pattern": "^[0-9]{10,10}$",
+      "minLength": 1,
+      "maxLength": 16,
+      "pattern": "^[0-9A-Z]{1,16}$",
       "width": 110
     },
     "dnn_acc_no": {
@@ -265,22 +265,15 @@
       "minLength": 0,
       "maxLength": 16,
       "width": 130
-    },
-    "dnn_invoice_date": {
-      "bsonType": "date",
-      "title": "Invoice Date",
-      "description": "Cusomer Invoice Date",
-      "width": 140
     }
   },
-  "required": ["dnn_no", "dnn_acc_no", "dnn_status", "dnn_prd_no"],
+  "required": ["dnn_no", "dnn_acc_no", "dnn_bill_no", "dnn_status", "dnn_prd_no"],
   "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_prd_no"], ["dnn_acc_no", "dnn_status"], ["dnn_shp_id"]],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
     "dnn_status": 1,
     "dnn_no": 1,
-    "dnn_line_no": 1,
-    "_modified_at": -1
+    "dnn_line_no": 1
   },
   "parents": [
     {
@@ -429,39 +422,6 @@
           }
         ]
       }
-    },
-    {
-      "id": "get-ready",
-      "title": "ReadyToBeDelivered",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "in",
-          "value": "50-OnTheTouchpoint,60-ReadyToBeDelivered"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "60-ReadyToBeDelivered"
-        }
-      ],
-      "one_click": false,
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs are ready to be delivered",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 50-OnTheTouchpoint to 60-ReadyToBeDelivered.",
-        "fields": "dnn_no,dnn_odi_no,dnn_odi_sub_no,dnn_man_no",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "60-ReadyToBeDelivered"
-          }
-        ]
-      }
     }
   ],
   "links": [],
@@ -506,7 +466,7 @@
       ]
     },
     {
-      "name": "DN amount updater",
+      "name": "Amounts updater",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
@@ -535,13 +495,7 @@
               "value": "_id"
             }
           ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "ne",
-              "value": "70-Delivered"
-            }
-          ],
+          "filter": [],
           "set": [
             {
               "key": "dnn_amount",
@@ -558,13 +512,7 @@
               "value": "_id"
             }
           ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "ne",
-              "value": "70-Delivered"
-            }
-          ],
+          "filter": [],
           "set": [
             {
               "key": "dnn_order_amount",
@@ -616,7 +564,7 @@
       "scheduled": false,
       "scheduled_cron": "15 14,15,16 * * mon,tue",
       "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": ["#Managers", "#Administrators", "#Technoplatz", "#Logistics"]
     },
     "sv-git-buid": {
       "title": "Delivery BUId's",

@@ -1,20 +1,20 @@
 {
   "properties": {
-    "zzz_no": {
+    "zzz_string": {
       "bsonType": "string",
-      "title": "No",
-      "description": "Record No",
-      "placeholder": "Record No",
+      "title": "String",
+      "description": "String Field",
+      "placeholder": "",
       "pattern": "^[a-zA-Z0-9-]{1,64}$",
       "minLength": 1,
       "maxLength": 64,
       "width": 140
     },
-    "zzz_status": {
+    "zzz_enum": {
       "bsonType": "string",
-      "title": "Status",
-      "description": "Record Status",
-      "placeholder": "Status",
+      "title": "Enum",
+      "description": "String Field with Enumerate",
+      "placeholder": "",
       "enum": ["00-Open", "10-InProgress", "20-Closed", "30-Finalized"],
       "default": "00-Open",
       "width": 140
@@ -22,33 +22,34 @@
     "zzz_date": {
       "bsonType": "date",
       "title": "Date",
-      "description": "Record Date",
-      "placeholder": "Date",
+      "description": "Date Field",
+      "placeholder": "",
       "width": 140
     },
-    "zzz_qty": {
+    "zzz_number": {
       "bsonType": "number",
-      "title": "Quantity",
-      "description": "Quantity",
-      "placeholder": "Quantity",
+      "title": "Number",
+      "description": "Number Field",
+      "placeholder": "",
       "default": 1,
       "width": 140
     },
-    "zzz_is_disabled": {
+    "zzz_bool": {
       "bsonType": "bool",
-      "title": "Is Disabled?",
-      "description": "Is Disabled?",
+      "title": "Bool",
+      "description": "Boolean Field",
       "default": false,
       "width": 140
     }
   },
-  "required": ["zzz_no", "zzz_status"],
-  "index": [["zzz_no"], ["zzz_status"]],
-  "unique": [["zzz_no"]],
+  "required": ["zzz_string"],
+  "index": [["zzz_string"]],
+  "unique": [["zzz_string"]],
   "parents": [],
   "links": [],
   "actions": [],
   "triggers": [],
   "views": {},
-  "sort": { "_modified_at": -1 }
+  "sort": { "zzz_string": 1 },
+  "fetchers": []
 }

@@ -737,11 +737,9 @@ class Trigger():
                         continue
 
                 filter_ = {}
-                target_filters_ = target_["filter"] if "filter" in target_ and len(target_["filter"]) > 0 and not upsert_ else None
-
-                if target_filters_:
+                if "filter" in target_ and len(target_["filter"]) > 0 and not upsert_:
                     filter_ = self.get_filtered_f({
-                        "match": target_filters_,
+                        "match": target_["filter"],
                         "properties": target_properties_
                     })
                 match_ = {**match_, **filter_}
