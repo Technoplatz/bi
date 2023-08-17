@@ -16,7 +16,7 @@
       "description": "Delivery number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9-]{10,16}$",
+      "pattern": "^[0-9A-Z-]{10,16}$",
       "width": 110
     },
     "ser_line_no": {

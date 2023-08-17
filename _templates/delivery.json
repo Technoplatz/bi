@@ -7,7 +7,7 @@
       "minLength": 10,
       "maxLength": 16,
       "pattern": "^[0-9A-Z-]{10,16}$",
-      "width": 110
+      "width": 120
     },
     "dnn_line_no": {
       "bsonType": "string",
@@ -268,7 +268,7 @@
     }
   },
   "required": ["dnn_no", "dnn_acc_no", "dnn_bill_no", "dnn_status", "dnn_prd_no"],
-  "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_prd_no"], ["dnn_acc_no", "dnn_status"], ["dnn_shp_id"]],
+  "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_shp_id"], ["dnn_man_no"], ["dnn_odi_no", "dnn_odi_sub_no"]],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
     "dnn_status": 1,
@@ -427,45 +427,6 @@
   "links": [],
   "triggers": [
     {
-      "name": "DN base updater",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "_modified_at",
-          "op": "nnull",
-          "value": null
-        }
-      ],
-      "targets": [
-        {
-          "collection": "dnbase",
-          "match": [
-            {
-              "key": "dnb_no",
-              "value": "dnn_no"
-            }
-          ],
-          "filter": [],
-          "set": [
-            {
-              "key": "dnb_no",
-              "value": "dnn_no"
-            },
-            {
-              "key": "dnb_odi_no",
-              "value": "dnn_odi_no"
-            },
-            {
-              "key": "dnb_odi_sub_no",
-              "value": "dnn_odi_sub_no"
-            }
-          ],
-          "upsert": true
-        }
-      ]
-    },
-    {
       "name": "Amounts updater",
       "enabled": true,
       "operations": ["update", "insert"],
@@ -500,20 +461,7 @@
             {
               "key": "dnn_amount",
               "value": "dnn_qty * dnn_unit_price"
-            }
-          ],
-          "upsert": false
-        },
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "_id",
-              "value": "_id"
-            }
-          ],
-          "filter": [],
-          "set": [
+            },
             {
               "key": "dnn_order_amount",
               "value": "dnn_qty * dnn_order_price"
@@ -531,7 +479,13 @@
       "priority": 2010,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
@@ -572,7 +526,13 @@
       "priority": 2020,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },

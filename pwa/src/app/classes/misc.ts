@@ -82,22 +82,30 @@ export class Miscellaneous {
         this.getAPIUrl().then((apiHost) => {
           const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
           const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
-          this.http.post<any>(apiHost + "/" + url, posted, {
+          let hdr_: any = {
             headers: new HttpHeaders({
               "Content-Type": "application/json",
               "Authorization": "Bearer " + token_,
               "X-Api-Key": api_key_
             }),
             observe: "response"
-            // responseType: "blob" as "json"
-          }).subscribe((res: any) => {
+          }
+          if (posted.responseType) {
+            hdr_.responseType = posted.responseType;
+          }
+          this.http.post<any>(apiHost + "/" + url, posted, hdr_).subscribe((res: any) => {
             const res_ = res.body;
-            if (res_ && res_.result) {
+            if (posted.responseType) {
               resolve(res_);
             } else {
-              console.error("*** api negative", res_);
-              reject(res_ && res_.msg ? res_.msg : res_);
+              if (res_?.result) {
+                resolve(res_);
+              } else {
+                console.error("*** api negative", res_);
+                reject(res_ && res_.msg ? res_.msg : res_);
+              }
             }
+
           }, (res: any) => {
             const res_ = res;
             if (res_.error && res_.status) {

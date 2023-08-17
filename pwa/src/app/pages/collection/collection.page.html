@@ -86,7 +86,7 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
               </div>
-              <div *ngIf="!is_loaded" class="data-sq-button">
+              <div *ngIf="!is_loaded" class="data-sq-button required">
                 <ion-icon name="hourglass-outline"></ion-icon>
                 <br />
                 {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
@@ -111,9 +111,12 @@ https://www.gnu.org/licenses.
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone' | translate }}<br />{{ 'Record' | translate }}
               </div>
-              <div (click)="MultiCrud('delete')" class="data-sq-button">
-                <ion-icon *ngIf="is_deleting" name="hourglass-outline"></ion-icon>
-                <ion-icon *ngIf="!is_deleting" name="trash-outline"></ion-icon><br />
+              <div *ngIf="is_deleting" class="data-sq-button required">
+                <ion-icon name="hourglass-outline"></ion-icon><br />
+                {{ 'Deleting' | translate }}<br />{{ 'Records' | translate }}...
+              </div>
+              <div *ngIf="!is_deleting" (click)="MultiCrud('delete')" class="data-sq-button">
+                <ion-icon name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}<br />{{ 'Record' | translate }}
               </div>
               <div *ngIf="is_crud && filter_.length==0" (click)="doSaveView()" class="data-sq-button">

@@ -1581,7 +1581,7 @@ json-editor,
 json-editor .jsoneditor,
 json-editor>div,
 json-editor jsoneditor-outer {
-  width: 99.5%;
+  width: 99.5% !important;
   height: 100%;
   min-height: 320px;
 }

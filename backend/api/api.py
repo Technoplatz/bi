@@ -459,36 +459,34 @@ class Misc:
             token__ = re.split(" ", bearer_)
             token_ = token__[1] if token__ and len(token__) > 0 and token__[0].lower() == "bearer" else None
             if not token_:
-                raise AuthError({"msg": "token not found or invalid", "token": token__})
+                raise AuthError("token not found")
 
             header_ = jwt.get_unverified_header(token_)
             token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
             if not token_finder_:
-                raise AuthError({"msg": "finder is not valid please use an api token"})
+                raise AuthError("please use an api token")
 
             find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
             if not find_:
-                raise AuthError({"msg": "invalid token"})
+                raise AuthError("invalid token")
             jwt_secret_ = find_["tkn_secret"]
 
             options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
             jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
 
             if not jwt_proc_f_["result"]:
-                raise AuthError({"msg": jwt_proc_f_["msg"], "token": token_})
-
-            jwt_ = jwt_proc_f_["jwt"] if "jwt" in jwt_proc_f_ else None
+                raise AuthError(jwt_proc_f_["msg"])
 
             grant_ = f"tkn_grant_{operation_}"
             if not find_[grant_]:
-                raise AuthError({"msg": f"token is not allowed to do {operation_}", "jwt": jwt_})
+                raise AuthError(f"token is not allowed to do {operation_}")
 
             if "tkn_allowed_ips" in find_ and \
                     len(find_["tkn_allowed_ips"]) > 0 and \
                     (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"]):
                 return {"result": True}
 
-            raise AuthError({"msg": f"IP is not allowed to do {operation_}", "jwt": jwt_})
+            raise AuthError(f"IP is not allowed to do {operation_}")
 
         except AuthError as exc_:
             return ({"result": False, "msg": str(exc_)})
@@ -1679,8 +1677,10 @@ class Crud:
                 parents_ = col_structure_["parents"]
 
             pipe_ = []
-            set_ = {"$set": {"_ID": {"$toObjectId": "$_id"}}}
-            pipe_.append(set_)
+            vie_filter_ = view_["data_filter"] if "data_filter" in view_ else []
+            if len(vie_filter_) > 0:
+                get_filtered_ = self.get_filtered_f({"match": vie_filter_, "properties": properties_master_ if properties_master_ else None})
+                pipe_.append({"$match": get_filtered_ })
 
             unset_ = []
             unset_.append("_modified_by")
@@ -1727,16 +1727,15 @@ class Crud:
                         pipe_.append({"$replaceWith": replace_with_})
                         unset_.append(parent_collection_)
 
-            vie_filter_ = view_["data_filter"] if "data_filter" in view_ else []
-            if len(vie_filter_) > 0:
-                get_filtered_ = self.get_filtered_f({"match": vie_filter_, "properties": properties_master_ if properties_master_ else None})
-                pipe_.append({"$match": get_filtered_})
-
             if unset_ and len(unset_) > 0:
                 unset_ = list(dict.fromkeys(unset_))
                 pipe_.append({"$unset": unset_})
 
+            set_ = {"$set": {"_ID": {"$toObjectId": "$_id"}}}
+            pipe_.append(set_)
+
             records_ = json.loads(JSONEncoder().encode(list(Mongo().db_[collection_id_].aggregate(pipe_))))
+
             count_ = len(records_) if records_ else 0
             df_ = pd.DataFrame(records_).fillna("#N/A")
             df_raw_ = pd.DataFrame(records_).fillna("")
@@ -1956,6 +1955,7 @@ class Crud:
                         "views": {
                             "$elemMatch": {
                                 "v.enabled": True,
+                                "v.flashcard": { "$ne": True },
                                 "v._tags": {
                                     "$elemMatch": {"$in": user_["_tags"]}
                                 }
@@ -1972,26 +1972,19 @@ class Crud:
                     id__ = view_["k"]
                     view__ = view_["v"]
 
-                    print_("*** 0-id__", id__)
-
                     if "enabled" not in view__ or not view__["enabled"]:
                         continue
 
-                    print_("*** 1-id__", id__)
+                    if "flashcard" in view__ and view__["flashcard"] is True:
+                        continue
 
                     if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
                         continue
 
-                    print_("*** 2-id__", id__)
-
                     get_view_data_f_ = self.get_view_data_f(user_, id__, source_)
-
-                    print_("*** 3-id__", get_view_data_f_)
 
                     if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
                         continue
-
-                    print_("*** 4-id__", id__)
 
                     if not get_view_data_f_["result"]:
                         continue
@@ -3701,15 +3694,15 @@ class Auth:
             if Misc().permitted_usertag_f(user_):
                 return {"result": True, "allowmatch": allowmatch_}
 
+            if op_ in administratives_:
+                raise AuthError(f"no permission for {op_}")
+
             if not collection_id_:
                 return {"result": True, "allowmatch": allowmatch_} if op_ in permissive_ops_ else {"result": False, "allowmatch": allowmatch_}
 
             op_ = "read" if op_ in ["collection"] else input_["op"]
             if not op_:
                 raise APIError(f"operation is missing {op_}")
-
-            if op_ in administratives_:
-                raise AuthError(f"no admin permission {op_}")
 
             if is_not_crud_ and op_ == "read":
                 return {"result": True, "allowmatch": allowmatch_}
@@ -4872,34 +4865,42 @@ def get_dump_f():
         if not validate_["result"]:
             raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
 
-        input_ = request.json
-        user_ = input_["user"] if "user" in input_ else None
+        jwt_validate_f_ = Auth().jwt_validate_f()
+        if not jwt_validate_f_["result"]:
+            raise AuthError(jwt_validate_f_["msg"])
+
+        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise APIError("invalid credentials")
+            raise AuthError("user session not found")
 
-        email_ = user_["email"] if "email" in user_ else None
-        token_ = user_["token"] if "token" in user_ else None
-        validate_ = Auth().user_validate_by_basic_auth_f({"userid": email_, "token": token_})
-        if not validate_["result"]:
-            raise APIError(validate_["msg"] if "msg" in validate_ else "request not validated")
+        permission_f_ = Auth().permission_f({
+            "user": jwt_validate_f_["user"],
+            "auth": jwt_validate_f_["auth"],
+            "collection": "_backup",
+            "op": "dump"
+        })
+        if not permission_f_["result"]:
+            raise AuthError(permission_f_["msg"])
 
+        input_ = request.json
         id_ = bleach.clean(input_["id"])
         if not id_:
             raise APIError("dump not selected")
 
         file_ = f"{id_}.gz"
         directory_ = "/dump"
+        header_ = Security().header_simple_f()
 
-        return send_from_directory(directory=directory_, path=file_, as_attachment=True), 200, Security().header_simple_f()
+        return send_from_directory(directory=directory_, path=file_, as_attachment=True), 200, header_
 
-    except AuthError as exc:
-        return {"msg": str(exc), "status": 401}
+    except AuthError as exc_:
+        return {"msg": str(exc_), "status": 401}
 
-    except APIError as exc:
-        return {"msg": str(exc), "status": 400}
+    except APIError as exc_:
+        return {"msg": str(exc_), "status": 400}
 
-    except Exception as exc:
-        return {"msg": str(exc), "status": 500}
+    except Exception as exc_:
+        return {"msg": str(exc_), "status": 500}
 
 
 @ app.route("/get/view/<string:id_>", methods=["GET"])
