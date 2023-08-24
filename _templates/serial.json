@@ -70,15 +70,6 @@
       "description": "Touchpoint incoming date",
       "width": 140
     },
-    "ser_location": {
-      "bsonType": "string",
-      "title": "Location",
-      "description": "Stored location",
-      "minLength": 0,
-      "maxLength": 8,
-      "default": "S",
-      "width": 110
-    },
     "ser_proc_out": {
       "bsonType": "bool",
       "title": "Outgoing",

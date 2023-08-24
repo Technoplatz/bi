@@ -1,29 +1,19 @@
 {
   "properties": {
-    "bar_proc": {
+    "bar_operation": {
       "bsonType": "string",
-      "title": "Process",
-      "description": "Process Identifier",
-      "enum": ["in", "out"],
-      "default": "in",
-      "pattern": "^[a-z]{2,3}$",
-      "minLength": 2,
-      "maxLength": 3,
-      "width": 110
-    },
-    "bar_location": {
-      "bsonType": "string",
-      "title": "Location",
-      "description": "Stored location",
-      "minLength": 0,
-      "maxLength": 8,
-      "enum": ["A", "D", "S"],
-      "default": "S",
+      "title": "Operation",
+      "description": "Operation identifier",
+      "enum": ["TP_IN", "TP_OUT"],
+      "default": "TP_IN",
+      "pattern": "^[A-Z0-9_]{3,16}$",
+      "minLength": 3,
+      "maxLength": 16,
       "width": 110
     },
     "bar_input": {
       "bsonType": "string",
-      "title": "Barcode",
+      "title": "Input",
       "description": "Read barcode",
       "pattern": "^[A-Za-z0-9-]{1,32}$",
       "scan": true,
@@ -32,15 +22,15 @@
       "width": 200
     }
   },
-  "required": ["bar_proc", "bar_input"],
-  "index": [["bar_proc"], ["bar_input"]],
-  "unique": [["bar_proc", "bar_input"]],
+  "required": ["bar_operation", "bar_input"],
+  "index": [["bar_operation"], ["bar_input"]],
+  "unique": [["bar_operation", "bar_input"]],
   "sort": {
     "_modified_at": -1
   },
   "parents": [
     {
-      "name": "CASE",
+      "name": "serials by case no",
       "collection": "serial",
       "match": [
         {
@@ -52,7 +42,7 @@
       "get": ["ser_case_no", "ser_dnn_no"]
     },
     {
-      "name": "DNs",
+      "name": "serials by dnn no",
       "collection": "serial",
       "match": [
         {
@@ -68,14 +58,14 @@
   "actions": [],
   "triggers": [
     {
-      "name": "Barcode IN",
+      "name": "Incoming goods",
       "enabled": true,
       "operations": ["insert"],
       "changes": [
         {
-          "key": "bar_proc",
+          "key": "bar_operation",
           "op": "eq",
-          "value": "in"
+          "value": "TP_IN"
         }
       ],
       "targets": [
@@ -97,10 +87,6 @@
             {
               "key": "ser_proc_in_date",
               "value": "$current_date"
-            },
-            {
-              "key": "ser_location",
-              "value": "bar_location"
             }
           ],
           "upsert": false
@@ -123,10 +109,6 @@
             {
               "key": "ser_proc_in_date",
               "value": "$current_date"
-            },
-            {
-              "key": "ser_location",
-              "value": "bar_location"
             }
           ],
           "upsert": false
@@ -149,10 +131,6 @@
             {
               "key": "ser_proc_in_date",
               "value": "$current_date"
-            },
-            {
-              "key": "ser_location",
-              "value": "bar_location"
             }
           ],
           "upsert": false
@@ -160,14 +138,14 @@
       ]
     },
     {
-      "name": "Depot Outgoing",
+      "name": "Outgoing goods",
       "enabled": true,
       "operations": ["insert"],
       "changes": [
         {
-          "key": "bar_proc",
+          "key": "bar_operation",
           "op": "eq",
-          "value": "out"
+          "value": "TP_OUT"
         }
       ],
       "targets": [

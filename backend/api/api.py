@@ -450,59 +450,6 @@ class Misc:
         temp_ = set()
         return [x for x in array_ if x not in temp_ and not temp_.add(x)]
 
-    def user_validate_by_token_f(self, bearer_, operation_):
-        """
-        docstring is in progress
-        """
-        try:
-            ip_ = self.get_user_ip_f()
-            token__ = re.split(" ", bearer_)
-            token_ = token__[1] if token__ and len(token__) > 0 and token__[0].lower() == "bearer" else None
-            if not token_:
-                raise AuthError("token not found")
-
-            header_ = jwt.get_unverified_header(token_)
-            token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
-            if not token_finder_:
-                raise AuthError("please use an api token")
-
-            find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
-            if not find_:
-                raise AuthError("invalid token")
-            jwt_secret_ = find_["tkn_secret"]
-
-            options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
-            jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
-
-            if not jwt_proc_f_["result"]:
-                raise AuthError(jwt_proc_f_["msg"])
-
-            grant_ = f"tkn_grant_{operation_}"
-            if not find_[grant_]:
-                raise AuthError(f"token is not allowed to do {operation_}")
-
-            if "tkn_allowed_ips" in find_ and \
-                    len(find_["tkn_allowed_ips"]) > 0 and \
-                    (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"]):
-                return {"result": True}
-
-            raise AuthError(f"IP is not allowed to do {operation_}")
-
-        except AuthError as exc_:
-            return ({"result": False, "msg": str(exc_)})
-
-        except jwt.ExpiredSignatureError as exc_:
-            return ({"result": False, "msg": str(exc_)})
-
-        except jwt.JWTClaimsError as exc_:
-            return ({"result": False, "msg": str(exc_)})
-
-        except jwt.JWTError as exc_:
-            return ({"result": False, "msg": str(exc_)})
-
-        except Exception as exc_:
-            return ({"result": False, "msg": str(exc_)})
-
     def permitted_usertag_f(self, user_):
         """
         docstring is in progress
@@ -678,6 +625,136 @@ class Mongo:
 
         except Exception as exc:
             return Misc().exception_f(exc)
+
+
+class Iot:
+    """
+    docstring is in progress
+    """
+
+    def __init__(self):
+        """
+        docstring is in progress
+        """
+        self.props_ = Misc().props_
+        self.xtra_props_ = Misc().xtra_props_
+
+    def query_f(self, searched_):
+        """
+        docstring is in progress
+        """
+        res_ = {}
+        try:
+            aggregate_ = []
+            match_ = {
+                "$match": {"$or": [
+                    {"ser_dnn_no": {"$regex": searched_,  "$options": "i"}},
+                    {"ser_case_no": {"$regex": searched_,  "$options": "i"}}
+                ]}
+            }
+            group_ = {
+                "$group": {"_id": {"ser_case_no": "$ser_case_no", "ser_dnn_no": "$ser_dnn_no", "ser_line_no": "$ser_line_no", "ser_prd_no": "$ser_prd_no"},
+                           "count": {"$sum": 1},
+                           "ser_proc_in_count": {"$sum": {"$cond": [{"$eq": ["$ser_proc_in", True]}, 1, 0]}},
+                           "ser_proc_out_count": {"$sum": {"$cond": [{"$eq": ["$ser_proc_out", True]}, 1, 0]}},
+                           "ser_proc_in_date": {"$first": "$ser_proc_in_date"},
+                           "ser_proc_out_date": {"$first": "$ser_proc_out_date"}
+                           }
+            }
+            replacewith_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_id"]}}
+            limit_ = {"$limit": 100}
+            sort_ = {"$sort": {"ser_proc_in_date": -1}}
+            lookup_delivery_ = {"$lookup": {
+                "from": "delivery_data",
+                "let": {"p_ser_dnn_no": "$ser_dnn_no", "p_ser_line_no": "$ser_line_no"},
+                "pipeline": [
+                    {"$match": {"$expr": {"$and": [{"$eq": ["$dnn_no", "$$p_ser_dnn_no"]}, {"$eq": ["$dnn_line_no", "$$p_ser_line_no"]}]}}},
+                    {"$unset": ["_modified_count", "_created_at", "_created_by", "_modified_at", "_modified_by"]}
+                ],
+                "as": "delivery",
+            }}
+            unwind_delivery_ = { "$unwind": { "path": "$delivery", "preserveNullAndEmptyArrays": True }}
+            replacewith_delivery_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$delivery"]}}
+            unset_delivery_ = {"$unset": "delivery"}
+
+            if searched_:
+                aggregate_.append(match_)
+
+            aggregate_.append(group_)
+            aggregate_.append(replacewith_)
+            aggregate_.append(sort_)
+            aggregate_.append(limit_)
+            aggregate_.append(lookup_delivery_)
+            aggregate_.append(unwind_delivery_)
+            aggregate_.append(replacewith_delivery_)
+            aggregate_.append(unset_delivery_)
+
+            cursor_ = Mongo().db_["serial_data"].aggregate(aggregate_)
+            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+
+            res_ = {"result": True, "payload": docs_, "msg": None, "status": 200}
+
+        except APIError as exc_:
+            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 400}
+
+        except Exception as exc_:
+            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 500}
+
+        finally:
+            return res_
+
+    def scan_f(self, aut_id_):
+        """
+        docstring is in progress
+        """
+        res_ = {}
+        try:
+            data_ = request.json
+            iot_operation_ = data_["iot_operation"] if "iot_operation" in data_ and data_["iot_operation"] is not None else None
+            iot_input_ = data_["iot_input"] if "iot_input" in data_ and data_["iot_input"] is not None else None
+            iot_collection_ = data_["iot_collection"] if "iot_collection" in data_ and data_["iot_collection"] is not None else None
+            map_operation_ = data_["map_operation"] if "map_operation" in data_ and data_["map_operation"] is not None else None
+            map_input_ = data_["map_input"] if "map_input" in data_ and data_["map_input"] is not None else None
+
+            if iot_operation_ is None or \
+                    iot_input_ is None or \
+                    iot_collection_ is None or \
+                    map_operation_ is None or \
+                    map_input_ is None:
+                raise APIError("invalid data")
+
+            collection_ = Mongo().db_["_collection"].find_one({"col_id": iot_collection_})
+            if not collection_:
+                raise APIError(f"collection not found: {iot_collection_}")
+            structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+            if not structure_:
+                raise APIError(f"structure not found in {iot_collection_}")
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise APIError(f"properties not found in {iot_collection_} structure")
+
+            doc_ = {}
+            doc_[map_operation_] = iot_operation_
+            doc_[map_input_] = iot_input_
+            doc_["_created_at"] = Misc().get_now_f()
+            doc_["_created_by"] = aut_id_
+            doc_["_modified_at"] = Misc().get_now_f()
+            doc_["_modified_by"] = aut_id_
+
+            Mongo().db_[f"{iot_collection_}_data"].insert_one(doc_)
+
+            payload_ = {}
+
+            res_ = {"result": True, "payload": payload_, "msg": "record posted successfully", "status": 200}
+
+        except APIError as exc_:
+            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 400}
+
+        except Exception as exc_:
+            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 500}
+
+        finally:
+            return res_
 
 
 class Crud:
@@ -1680,7 +1757,7 @@ class Crud:
             vie_filter_ = view_["data_filter"] if "data_filter" in view_ else []
             if len(vie_filter_) > 0:
                 get_filtered_ = self.get_filtered_f({"match": vie_filter_, "properties": properties_master_ if properties_master_ else None})
-                pipe_.append({"$match": get_filtered_ })
+                pipe_.append({"$match": get_filtered_})
 
             unset_ = []
             unset_.append("_modified_by")
@@ -1955,7 +2032,7 @@ class Crud:
                         "views": {
                             "$elemMatch": {
                                 "v.enabled": True,
-                                "v.flashcard": { "$ne": True },
+                                "v.flashcard": {"$ne": True},
                                 "v._tags": {
                                     "$elemMatch": {"$in": user_["_tags"]}
                                 }
@@ -3551,6 +3628,59 @@ class Auth:
     docstring is in progress
     """
 
+    def access_validate_by_api_token_f(self, bearer_, operation_):
+        """
+        docstring is in progress
+        """
+        try:
+            ip_ = Misc().get_user_ip_f()
+            token__ = re.split(" ", bearer_)
+            token_ = token__[1] if token__ and len(token__) > 0 and token__[0].lower() == "bearer" else None
+            if not token_:
+                raise AuthError("token not found")
+
+            header_ = jwt.get_unverified_header(token_)
+            token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
+            if not token_finder_:
+                raise AuthError("please use an api token")
+
+            find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
+            if not find_:
+                raise AuthError("invalid token")
+            jwt_secret_ = find_["tkn_secret"]
+
+            options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
+            jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
+
+            if not jwt_proc_f_["result"]:
+                raise AuthError(jwt_proc_f_["msg"])
+
+            grant_ = f"tkn_grant_{operation_}"
+            if not find_[grant_]:
+                raise AuthError(f"token is not allowed to do {operation_}")
+
+            if "tkn_allowed_ips" in find_ and \
+                    len(find_["tkn_allowed_ips"]) > 0 and \
+                    (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"]):
+                return {"result": True}
+
+            raise AuthError(f"IP is not allowed to do {operation_}")
+
+        except AuthError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except jwt.ExpiredSignatureError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except jwt.JWTClaimsError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except jwt.JWTError as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
+        except Exception as exc_:
+            return ({"result": False, "msg": str(exc_)})
+
     def verify_otp_f(self, email_, tfac_, op_):
         """
         docstring is in progress
@@ -4171,7 +4301,7 @@ class Auth:
             if not otp_send_["result"]:
                 raise APIError(otp_send_["msg"])
 
-            return {"result": True, "msg": "user needs to be validated by OTP"}
+            return {"result": True, "msg": "user also needs to be validated by OTP"}
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -4294,7 +4424,7 @@ STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort",
 PROP_KEYS_ = ["bsonType", "title", "description"]
 
 app = Flask(__name__)
-origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101"]
+origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101", f"http://{DOMAIN_}:8102"]
 app.config["CORS_ORIGINS"] = origins_
 app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
@@ -4683,6 +4813,60 @@ def auth_f():
         return response_
 
 
+@ app.route("/iot", methods=["POST"])
+def iot_post_f():
+    """
+    docstring is in progress
+    """
+    status_ = 200
+    res_ = {}
+
+    try:
+        if not request.headers:
+            raise AuthError("no headers provided")
+
+        x_api_key_ = request.headers.get("X-Api-Key", None)
+        if not x_api_key_:
+            raise AuthError("no api key provided")
+        auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": x_api_key_})
+        if not auth_:
+            raise AuthError("account not found")
+        aut_id_ = auth_["aut_id"]
+
+        if not request.json:
+            raise APIError("no data provided")
+
+        requestj_ = request.json
+        process_ = requestj_["process"] if "process" in requestj_ else None
+
+        if not process_:
+            raise APIError("no process provided")
+
+        if process_ == "scan":
+            res_ = Iot().scan_f(aut_id_)
+        elif process_ == "query":
+            searched_ = requestj_["searched"] if "searched" in requestj_ else None
+            res_ = Iot().query_f(searched_)
+
+    except AuthError as exc_:
+        res_ = {"result": False, "payload": None, "msg": str(exc_)}
+        status_ = 401
+
+    except APIError as exc_:
+        res_ = {"result": False, "payload": None, "msg": str(exc_)}
+        status_ = 400
+
+    except Exception as exc_:
+        res_ = {"result": False, "payload": None, "msg": str(exc_)}
+        status_ = 500
+
+    finally:
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = status_
+        response_.mimetype = "application/json"
+        return response_
+
+
 @ app.route("/post", methods=["POST"])
 def post_f():
     """
@@ -4715,9 +4899,9 @@ def post_f():
         if not split_ or len(split_) != 2 or split_[0].lower() != "bearer":
             raise AuthError("invalid authorization bearer")
 
-        user_validate_by_token_f_ = Misc().user_validate_by_token_f(x_api_token_, operation_)
-        if not user_validate_by_token_f_["result"]:
-            raise AuthError(user_validate_by_token_f_["msg"])
+        access_validate_by_api_token_f_ = Auth().access_validate_by_api_token_f(x_api_token_, operation_)
+        if not access_validate_by_api_token_f_["result"]:
+            raise AuthError(access_validate_by_api_token_f_["msg"])
 
         if not request.json:
             raise APIError("no json data provided")
@@ -4915,9 +5099,9 @@ def get_data_f(id_):
         user_ = None
         api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
         if api_token_:
-            user_validate_by_token_f_ = Misc().user_validate_by_token_f(api_token_, "read")
-            if not user_validate_by_token_f_["result"]:
-                raise AuthError(user_validate_by_token_f_)
+            access_validate_by_api_token_f_ = Auth().access_validate_by_api_token_f(api_token_, "read")
+            if not access_validate_by_api_token_f_["result"]:
+                raise AuthError(access_validate_by_api_token_f_)
         else:
             print_("!!! missing token", id_)
             raise AuthError({"result": False, "msg": "missing token"})

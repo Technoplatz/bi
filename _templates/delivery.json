@@ -993,7 +993,7 @@
   },
   "fetchers": [
     {
-      "name": "get customer price from orderi",
+      "name": "get customer price from order",
       "enabled": true,
       "collection": "order",
       "match": [
