@@ -134,8 +134,7 @@ class Trigger():
         """
         docstring is in progress
         """
-        tz_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
-        return datetime.now(pytz.timezone(tz_))
+        return datetime.now()
 
     def get_timestamp_f(self):
         """
@@ -664,17 +663,9 @@ class Trigger():
                         item_["value"] in full_document_ and \
                         (item_["key"] in target_properties_ or item_["value"] == "_id") \
                         else None
-                    prefixes__ = item_["prefixes"] if "prefixes" in item_ and item_["prefixes"] is not None and len(item_["prefixes"]) > 0 else None
 
                     if key__ and value__:
-                        fdval_ = full_document_[value__]
-                        if prefixes__:
-                            for prefix__ in prefixes__:
-                                if fdval_[:len(prefix__)] == prefix__:
-                                    fdval_ = fdval_.removeprefix(prefix__)
-                                    break
-                        match_[key__] = fdval_
-                        match_for_aggregate_[value__] = fdval_
+                        match_[key__] = match_for_aggregate_[value__] = full_document_[value__]
                     else:
                         continue
 
@@ -706,16 +697,9 @@ class Trigger():
                             item_["value"] in full_document_ and \
                             (item_["key"] in target_properties_ or item_["value"] == "_id") \
                             else None
-                        prefixes__ = item_["prefixes"] if "prefixes" in item_ and item_["prefixes"] is not None and len(item_["prefixes"]) > 0 else None
 
                         if key__ and value__:
-                            fdval_ = full_document_[value__]
-                            if prefixes__:
-                                for prefix__ in prefixes__:
-                                    if fdval_[:len(prefix__)] == prefix__:
-                                        fdval_ = fdval_.removeprefix(prefix__)
-                                        break
-                            match1_[key__] = fdval_
+                            match1_[key__] = full_document_[value__]
                         else:
                             continue
 
@@ -812,9 +796,9 @@ class Trigger():
 
                 set_["_modified_at"] = self.get_now_f()
                 set_["_modified_by"] = "_automation"
-                if op_ in ["insert", "upsert"]:
-                    set_["_created_at"] = self.get_now_f()
-                    set_["_created_by"] = "_automation"
+                if upsert_ is True:
+                    set_["_created_at"] = set_["_modified_at"]
+                    set_["_created_by"] = set_["_modified_by"]
 
                 set_["_resume_token"] = token_
                 update_many_ = self.db_[target_collection_].update_many(match_, {"$set": set_}, upsert=upsert_)

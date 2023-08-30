@@ -503,7 +503,6 @@
       "chart_colors": ["#ea5545", "#87bc45", "#27aeef", "#ede15b", "#b33dc6", "#f46a9b", "#ef9b20", "#edbf33", "#bdcf32"],
       "scheduled": true,
       "scheduled_cron": "15 14,15,16 * * mon,tue",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
     "mer-status-view": {
@@ -549,7 +548,6 @@
       "chart_colors": ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
     "mer-market-view": {
@@ -589,7 +587,6 @@
       "chart_colors": ["#e60049", "#0bb4ff", "#9b19f5", "#50e991", "#e6d800", "#ffa300", "#dc0ab4", "#b3d4ff", "#00bfa0"],
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-10": {
@@ -635,7 +632,6 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": true,
       "scheduled_cron": "0 10 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-20": {
@@ -681,7 +677,6 @@
       "chart_colors": ["#b2e061", "#8bd3c7", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-50": {
@@ -727,7 +722,6 @@
       "chart_colors": ["#fd7f6f", "#ffb55a", "#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#7eb0d5", "#b2e061"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     }
   }

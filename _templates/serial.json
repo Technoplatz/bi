@@ -48,44 +48,44 @@
       "casetype": "uppercase",
       "width": 130
     },
-    "ser_case_no": {
+    "ser_sscc_no": {
       "bsonType": "string",
-      "title": "Case No",
-      "description": "Case number",
+      "title": "SSCC No",
+      "description": "SSCC number",
       "minLength": 18,
       "maxLength": 20,
       "pattern": "^[0-9-]{18,20}$",
       "width": 150
     },
-    "ser_proc_in": {
+    "ser_is_in": {
       "bsonType": "bool",
       "title": "Income",
-      "description": "Depot Income",
+      "description": "Touchpoint income",
       "default": false,
       "width": 110
     },
-    "ser_proc_in_date": {
+    "ser_in_date": {
       "bsonType": "date",
       "title": "In Date",
       "description": "Touchpoint incoming date",
       "width": 140
     },
-    "ser_proc_out": {
+    "ser_is_out": {
       "bsonType": "bool",
       "title": "Outgoing",
-      "description": "Depot Out",
+      "description": "Touchpoint outgoing",
       "default": false,
       "width": 120
     },
-    "ser_proc_out_date": {
+    "ser_out_date": {
       "bsonType": "date",
-      "title": "In Date",
+      "title": "Out Date",
       "description": "Touchpoint outgoing date",
       "width": 150
     }
   },
-  "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_case_no"],
-  "index": [["ser_proc_in"], ["ser_dnn_no"], ["ser_case_no"]],
+  "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
+  "index": [["ser_is_in"], ["ser_dnn_no"], ["ser_sscc_no"], ["ser_dnn_no", "ser_sscc_no"]],
   "unique": [["ser_no"]],
   "sort": {
     "_modified_at": -1
@@ -99,7 +99,7 @@
       "enabled": true,
       "match": [
         {
-          "key": "ser_proc_in",
+          "key": "ser_is_in",
           "op": "eq",
           "value": false
         }
@@ -120,11 +120,11 @@
         "notify": false,
         "subject": "Serials DN updated",
         "body": "Hi,<br /><br />We would like to let you know that dn info was updated.",
-        "fields": "ser_no,ser_dnn_no,ser_prd_no,ser_case_no",
+        "fields": "ser_no,ser_dnn_no,ser_prd_no,ser_sscc_no",
         "attachment": false,
         "filter": [
           {
-            "key": "ser_proc_in",
+            "key": "ser_is_in",
             "op": "eq",
             "value": false
           }
@@ -136,10 +136,10 @@
     {
       "name": "Barcode Readin",
       "enabled": true,
-      "operations": ["insert", "update"],
+      "operations": ["update"],
       "changes": [
         {
-          "key": "ser_proc_in",
+          "key": "ser_is_in",
           "op": "eq",
           "value": true
         }
@@ -177,10 +177,10 @@
     {
       "name": "Barcode Readin Cancel",
       "enabled": true,
-      "operations": ["insert", "update"],
+      "operations": ["update"],
       "changes": [
         {
-          "key": "ser_proc_in",
+          "key": "ser_is_in",
           "op": "eq",
           "value": false
         }
@@ -201,8 +201,8 @@
           "filter": [
             {
               "key": "dnn_status",
-              "op": "eq",
-              "value": "50-OnTheTouchpoint"
+              "op": "in",
+              "value": "40-ClearanceCompleted,50-OnTheTouchpoint"
             }
           ],
           "set": [

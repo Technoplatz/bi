@@ -9,7 +9,7 @@
       "pattern": "^[A-Z0-9_]{3,16}$",
       "minLength": 3,
       "maxLength": 16,
-      "width": 110
+      "width": 120
     },
     "bar_input": {
       "bsonType": "string",
@@ -20,9 +20,16 @@
       "minLength": 1,
       "maxLength": 32,
       "width": 200
+    },
+    "bar_mode": {
+      "bsonType": "string",
+      "title": "Mode",
+      "description": "Entry Mode",
+      "enum": ["auto", "manual"],
+      "width": 100
     }
   },
-  "required": ["bar_operation", "bar_input"],
+  "required": ["bar_operation", "bar_input", "bar_mode"],
   "index": [["bar_operation"], ["bar_input"]],
   "unique": [["bar_operation", "bar_input"]],
   "sort": {
@@ -30,16 +37,16 @@
   },
   "parents": [
     {
-      "name": "serials by case no",
+      "name": "serials by sscc no",
       "collection": "serial",
       "match": [
         {
           "key": "bar_input",
-          "value": "ser_case_no"
+          "value": "ser_sscc_no"
         }
       ],
       "filter": [],
-      "get": ["ser_case_no", "ser_dnn_no"]
+      "get": ["ser_sscc_no", "ser_dnn_no"]
     },
     {
       "name": "serials by dnn no",
@@ -51,7 +58,7 @@
         }
       ],
       "filter": [],
-      "get": ["ser_dnn_no", "ser_case_no"]
+      "get": ["ser_dnn_no", "ser_sscc_no"]
     }
   ],
   "links": [],
@@ -60,7 +67,7 @@
     {
       "name": "Incoming goods",
       "enabled": true,
-      "operations": ["insert"],
+      "operations": ["insert", "update"],
       "changes": [
         {
           "key": "bar_operation",
@@ -73,19 +80,19 @@
           "collection": "serial",
           "match": [
             {
-              "key": "ser_case_no",
+              "key": "ser_sscc_no",
               "value": "bar_input",
-              "prefixes": ["1S"]
+              "prefixes": ["00"]
             }
           ],
           "filter": [],
           "set": [
             {
-              "key": "ser_proc_in",
+              "key": "ser_is_in",
               "value": true
             },
             {
-              "key": "ser_proc_in_date",
+              "key": "ser_in_date",
               "value": "$current_date"
             }
           ],
@@ -103,11 +110,11 @@
           "filter": [],
           "set": [
             {
-              "key": "ser_proc_in",
+              "key": "ser_is_in",
               "value": true
             },
             {
-              "key": "ser_proc_in_date",
+              "key": "ser_in_date",
               "value": "$current_date"
             }
           ],
@@ -125,11 +132,11 @@
           "filter": [],
           "set": [
             {
-              "key": "ser_proc_in",
+              "key": "ser_is_in",
               "value": true
             },
             {
-              "key": "ser_proc_in_date",
+              "key": "ser_in_date",
               "value": "$current_date"
             }
           ],
@@ -140,7 +147,7 @@
     {
       "name": "Outgoing goods",
       "enabled": true,
-      "operations": ["insert"],
+      "operations": ["insert", "update"],
       "changes": [
         {
           "key": "bar_operation",
@@ -153,25 +160,25 @@
           "collection": "serial",
           "match": [
             {
-              "key": "ser_case_no",
+              "key": "ser_sscc_no",
               "value": "bar_input",
-              "prefixes": ["1S"]
+              "prefixes": ["00"]
             }
           ],
           "filter": [
             {
-              "key": "ser_proc_in",
+              "key": "ser_is_in",
               "op": "eq",
               "value": true
             }
           ],
           "set": [
             {
-              "key": "ser_proc_out",
+              "key": "ser_is_out",
               "value": true
             },
             {
-              "key": "ser_proc_out_date",
+              "key": "ser_out_date",
               "value": "$current_date"
             }
           ],
@@ -188,18 +195,18 @@
           ],
           "filter": [
             {
-              "key": "ser_proc_in",
+              "key": "ser_is_in",
               "op": "eq",
               "value": true
             }
           ],
           "set": [
             {
-              "key": "ser_proc_out",
+              "key": "ser_is_out",
               "value": true
             },
             {
-              "key": "ser_proc_out_date",
+              "key": "ser_out_date",
               "value": "$current_date"
             }
           ],
@@ -216,18 +223,18 @@
           ],
           "filter": [
             {
-              "key": "ser_proc_in",
+              "key": "ser_is_in",
               "op": "eq",
               "value": true
             }
           ],
           "set": [
             {
-              "key": "ser_proc_out",
+              "key": "ser_is_out",
               "value": true
             },
             {
-              "key": "ser_proc_out_date",
+              "key": "ser_out_date",
               "value": "$current_date"
             }
           ],

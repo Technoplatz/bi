@@ -49,7 +49,6 @@ from functools import partial
 from subprocess import call
 from random import randint
 from datetime import datetime, timedelta
-import pytz
 from pymongo import MongoClient
 import pymongo
 import bson
@@ -122,22 +121,32 @@ class Schedular:
         """
         docstring is in progress
         """
-        scheduled_ = view_["scheduled"] if "scheduled" in view_ else None
-        scheduled_cron_ = view_["scheduled_cron"] if "scheduled_cron" in view_ else None
-        scheduled_tz_ = view_["scheduled_tz"] if "scheduled_tz" in view_ else "Europe/Berlin"
-        if not (scheduled_ and scheduled_cron_ and scheduled_tz_):
-            return {"result": False, "msg": "not scheduled"}
-        if not croniter.is_valid(scheduled_cron_):
-            return {"result": False, "msg": "invalid crontab"}
-        separated_ = re.split(" ", scheduled_cron_)
-        if not (separated_ and len(separated_) == 5):
-            return {"result": False, "msg": "invalid cron separation"}
-        minute_ = separated_[0].strip()
-        hour_ = separated_[1].strip()
-        day_ = separated_[2].strip()
-        month_ = separated_[3].strip()
-        day_of_week_ = separated_[4].lower().strip()
-        return {"result": True, "minute": str(minute_), "hour": str(hour_), "day": str(day_), "month": str(month_), "day_of_week": str(day_of_week_), "tz": str(scheduled_tz_)}
+        try:
+            scheduled_ = view_["scheduled"] if "scheduled" in view_ else None
+            if not scheduled_:
+                raise PassException("view not scheduled")
+
+            scheduled_cron_ = view_["scheduled_cron"] if "scheduled_cron" in view_ else None
+            if not croniter.is_valid(scheduled_cron_):
+                return {"result": False, "msg": "invalid crontab"}
+
+            separated_ = re.split(" ", scheduled_cron_)
+            if not (separated_ and len(separated_) == 5):
+                return {"result": False, "msg": "invalid cron separation"}
+
+            minute_ = separated_[0].strip()
+            hour_ = separated_[1].strip()
+            day_ = separated_[2].strip()
+            month_ = separated_[3].strip()
+            day_of_week_ = separated_[4].lower().strip()
+
+            return {"result": True, "minute": str(minute_), "hour": str(hour_), "day": str(day_), "month": str(month_), "day_of_week": str(day_of_week_)}
+
+        except PassException as exc_:
+            return Misc().pass_exception_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
     def schedule_views_f(self, sched_):
         """
@@ -180,7 +189,7 @@ class Schedular:
                         "scope": "live"
                     }]
                     sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_[
-                                   "month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, timezone=cron_looker_f_["tz"], replace_existing=True, args=args_)
+                                   "month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, replace_existing=True, args=args_)
                     print_("scheduled", id__)
 
             return {"result": True}
@@ -196,7 +205,7 @@ class Schedular:
         docstring is in progress
         """
         try:
-            sched_ = BackgroundScheduler(timezone=TZ_, daemon=True)
+            sched_ = BackgroundScheduler(daemon=True)
             sched_.remove_all_jobs()
 
             schedule_views_f_ = self.schedule_views_f(sched_)
@@ -204,8 +213,8 @@ class Schedular:
                 raise APIError(schedule_views_f_["msg"])
 
             args_ = {"user": {"email": "cron"}, "op": "dump"}
-            sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", timezone=TZ_, replace_existing=True, args=[args_])
-            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", timezone=TZ_, replace_existing=True, args=[sched_])
+            sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", replace_existing=True, args=[args_])
+            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", replace_existing=True, args=[sched_])
             sched_.start()
             return True
 
@@ -417,7 +426,7 @@ class Misc:
         """
         docstring is in progress
         """
-        return datetime.now(pytz.timezone(TZ_))
+        return datetime.now()
 
     def allowed_file(self, filename):
         """
@@ -639,7 +648,7 @@ class Iot:
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
 
-    def query_f(self, searched_):
+    def barcode_query_f(self, searched_):
         """
         docstring is in progress
         """
@@ -649,21 +658,21 @@ class Iot:
             match_ = {
                 "$match": {"$or": [
                     {"ser_dnn_no": {"$regex": searched_,  "$options": "i"}},
-                    {"ser_case_no": {"$regex": searched_,  "$options": "i"}}
+                    {"ser_sscc_no": {"$regex": searched_,  "$options": "i"}}
                 ]}
             }
             group_ = {
-                "$group": {"_id": {"ser_case_no": "$ser_case_no", "ser_dnn_no": "$ser_dnn_no", "ser_line_no": "$ser_line_no", "ser_prd_no": "$ser_prd_no"},
+                "$group": {"_id": {"ser_sscc_no": "$ser_sscc_no", "ser_dnn_no": "$ser_dnn_no", "ser_line_no": "$ser_line_no", "ser_prd_no": "$ser_prd_no"},
                            "count": {"$sum": 1},
-                           "ser_proc_in_count": {"$sum": {"$cond": [{"$eq": ["$ser_proc_in", True]}, 1, 0]}},
-                           "ser_proc_out_count": {"$sum": {"$cond": [{"$eq": ["$ser_proc_out", True]}, 1, 0]}},
-                           "ser_proc_in_date": {"$first": "$ser_proc_in_date"},
-                           "ser_proc_out_date": {"$first": "$ser_proc_out_date"}
+                           "ser_in_count": {"$sum": {"$cond": [{"$eq": ["$ser_is_in", True]}, 1, 0]}},
+                           "ser_out_count": {"$sum": {"$cond": [{"$eq": ["$ser_is_out", True]}, 1, 0]}},
+                           "ser_in_date": {"$first": "$ser_in_date"},
+                           "ser_out_date": {"$first": "$ser_out_date"}
                            }
             }
             replacewith_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_id"]}}
             limit_ = {"$limit": 100}
-            sort_ = {"$sort": {"ser_proc_in_date": -1}}
+            sort_ = {"$sort": {"ser_in_date": -1}}
             lookup_delivery_ = {"$lookup": {
                 "from": "delivery_data",
                 "let": {"p_ser_dnn_no": "$ser_dnn_no", "p_ser_line_no": "$ser_line_no"},
@@ -673,7 +682,7 @@ class Iot:
                 ],
                 "as": "delivery",
             }}
-            unwind_delivery_ = { "$unwind": { "path": "$delivery", "preserveNullAndEmptyArrays": True }}
+            unwind_delivery_ = {"$unwind": {"path": "$delivery", "preserveNullAndEmptyArrays": True}}
             replacewith_delivery_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$delivery"]}}
             unset_delivery_ = {"$unset": "delivery"}
 
@@ -703,49 +712,88 @@ class Iot:
         finally:
             return res_
 
-    def scan_f(self, aut_id_):
+    def barcode_scan_f(self, aut_id_):
         """
         docstring is in progress
         """
         res_ = {}
         try:
             data_ = request.json
-            iot_operation_ = data_["iot_operation"] if "iot_operation" in data_ and data_["iot_operation"] is not None else None
-            iot_input_ = data_["iot_input"] if "iot_input" in data_ and data_["iot_input"] is not None else None
-            iot_collection_ = data_["iot_collection"] if "iot_collection" in data_ and data_["iot_collection"] is not None else None
-            map_operation_ = data_["map_operation"] if "map_operation" in data_ and data_["map_operation"] is not None else None
-            map_input_ = data_["map_input"] if "map_input" in data_ and data_["map_input"] is not None else None
+            bar_operation_ = data_["bar_operation"] if "bar_operation" in data_ and data_["bar_operation"] is not None else None
+            bar_input_ = data_["bar_input"] if "bar_input" in data_ and data_["bar_input"] is not None else None
+            bar_mode_ = data_["bar_mode"] if "bar_mode" in data_ and data_["bar_mode"] in ["auto", "manual"] else "auto"
 
-            if iot_operation_ is None or \
-                    iot_input_ is None or \
-                    iot_collection_ is None or \
-                    map_operation_ is None or \
-                    map_input_ is None:
-                raise APIError("invalid data")
+            if bar_operation_ is None or bar_input_ is None:
+                raise APIError("invalid inputs")
 
-            collection_ = Mongo().db_["_collection"].find_one({"col_id": iot_collection_})
-            if not collection_:
-                raise APIError(f"collection not found: {iot_collection_}")
-            structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
-            if not structure_:
-                raise APIError(f"structure not found in {iot_collection_}")
-            properties_ = structure_["properties"] if "properties" in structure_ else None
-            if not properties_:
-                raise APIError(f"properties not found in {iot_collection_} structure")
+            prefixes_ = ["1S", "1P", "P", "1K", "S", "Q", "16K", "00"]
+            if bar_mode_ == "auto":
+                for prfx_ in prefixes_:
+                    if bar_input_.startswith(prfx_):
+                        bar_input_ = bar_input_.removeprefix(prfx_)
+                        break
 
             doc_ = {}
-            doc_[map_operation_] = iot_operation_
-            doc_[map_input_] = iot_input_
-            doc_["_created_at"] = Misc().get_now_f()
-            doc_["_created_by"] = aut_id_
+            doc_["bar_operation"] = bar_operation_
+            doc_["bar_input"] = bar_input_
+            doc_["bar_mode"] = bar_mode_
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = aut_id_
+            filter_ = {"bar_operation": bar_operation_, "bar_input": bar_input_}
 
-            Mongo().db_[f"{iot_collection_}_data"].insert_one(doc_)
+            read_ = Mongo().db_["barcode_data"].find_one(filter_)
+            if not read_:
+                doc_["_created_at"] = doc_["_modified_at"]
+                doc_["_created_by"] = doc_["_modified_by"]
+                Mongo().db_["barcode_data"].insert_one(doc_)
+            else:
+                Mongo().db_["barcode_data"].update_one(filter_, {"$set": doc_}, upsert=True)
 
-            payload_ = {}
+            data_ = {}
+            payload_ = []
+            total_ = total_in_ = total_out_ = 0
+            find_one_ = Mongo().db_["serial_data"].find_one({"$or": [{"ser_sscc_no": bar_input_}, {"ser_dnn_no": bar_input_}]})
+            if find_one_:
+                ser_dnn_no_ = find_one_["ser_dnn_no"] if "ser_dnn_no" in find_one_ else None
+                if ser_dnn_no_:
+                    delivery_ = Mongo().db_["delivery_data"].find_one({"dnn_no": ser_dnn_no_})
+                    if delivery_:
+                        aggregate_ = []
+                        match_ = {"$match": {"ser_dnn_no": ser_dnn_no_}}
+                        group_ = {"$group": {"_id": {"ser_dnn_no": "$ser_dnn_no", "ser_sscc_no": "$ser_sscc_no"},
+                                             "count": {"$sum": 1},
+                                             "ser_in_count": {"$sum": {"$cond": [{"$eq": ["$ser_is_in", True]}, 1, 0]}},
+                                             "ser_out_count": {"$sum": {"$cond": [{"$eq": ["$ser_is_out", True]}, 1, 0]}}
+                                             }
+                                  }
+                        replacewith_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_id"]}}
+                        sort_ = {"$sort": {"ser_sscc_no": 1}}
+                        aggregate_.append(match_)
+                        aggregate_.append(group_)
+                        aggregate_.append(replacewith_)
+                        aggregate_.append(sort_)
+                        cursor_ = Mongo().db_["serial_data"].aggregate(aggregate_)
+                        payload_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+                    else:
+                        raise APIError(f"delivery not found {ser_dnn_no_}")
+                else:
+                    raise APIError(f"delivery not defined in {bar_mode_} mode")
+            else:
+                raise APIError(f"input not found in {bar_mode_} mode")
 
-            res_ = {"result": True, "payload": payload_, "msg": "record posted successfully", "status": 200}
+            for pl_ in payload_:
+                total_ += pl_["count"]
+                total_in_ += pl_["ser_in_count"]
+                total_out_ += pl_["ser_out_count"]
+
+            data_["payload"] = payload_
+            data_["input"] = bar_input_
+            data_["delivery"] = delivery_
+            data_["total"] = total_
+            data_["total_in"] = total_in_
+            data_["total_out"] = total_out_
+
+            res_ = {"result": True, "data": data_, "msg": f"{bar_input_} OK", "status": 200}
 
         except APIError as exc_:
             res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 400}
@@ -1261,10 +1309,8 @@ class Crud:
             df_.replace([np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True)
 
             # SETTING THE DEFAULTS
-            df_["_created_at"] = Misc().get_now_f()
-            df_["_created_by"] = email_
-            df_["_modified_at"] = Misc().get_now_f()
-            df_["_modified_by"] = email_
+            df_["_created_at"] = df_["_modified_at"] = Misc().get_now_f()
+            df_["_created_by"] = df_["_modified_by"] = email_
             df_["_modified_count"] = 0
 
             # BULK INSERT DF INTO DATABASE
@@ -2653,7 +2699,6 @@ class Crud:
                 "chart_colors": [],
                 "scheduled": False,
                 "scheduled_cron": "15 14,15,16 * * mon,tue",
-                "scheduled_tz": TZ_,
                 "_tags": [
                     "#Managers",
                     "#Administrators"
@@ -4380,7 +4425,6 @@ class Auth:
             return Misc().exception_f(exc)
 
 
-TZ_ = os.environ.get("TZ") if os.environ.get("TZ") else "Europe/Berlin"
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
@@ -4424,7 +4468,7 @@ STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort",
 PROP_KEYS_ = ["bsonType", "title", "description"]
 
 app = Flask(__name__)
-origins_ = [f"http://{DOMAIN_}", f"https://{DOMAIN_}", f"http://{DOMAIN_}:8100", f"http://{DOMAIN_}:8101", f"http://{DOMAIN_}:8102"]
+origins_ = [f"https://{DOMAIN_}", "https://localhost", "capacitor://localhost", "http://localhost:8100", "http://localhost:8101", "http://localhost:8102"]
 app.config["CORS_ORIGINS"] = origins_
 app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
@@ -4813,7 +4857,7 @@ def auth_f():
         return response_
 
 
-@ app.route("/iot", methods=["POST"])
+@ app.route("/barcode", methods=["POST"])
 def iot_post_f():
     """
     docstring is in progress
@@ -4838,15 +4882,18 @@ def iot_post_f():
 
         requestj_ = request.json
         process_ = requestj_["process"] if "process" in requestj_ else None
-
         if not process_:
             raise APIError("no process provided")
 
+        email_ = requestj_["email"] if "email" in requestj_ else None
+        if not email_ or email_ != aut_id_:
+            raise AuthError("invalid user")
+
         if process_ == "scan":
-            res_ = Iot().scan_f(aut_id_)
+            res_ = Iot().barcode_scan_f(aut_id_)
         elif process_ == "query":
             searched_ = requestj_["searched"] if "searched" in requestj_ else None
-            res_ = Iot().query_f(searched_)
+            res_ = Iot().barcode_query_f(searched_)
 
     except AuthError as exc_:
         res_ = {"result": False, "payload": None, "msg": str(exc_)}

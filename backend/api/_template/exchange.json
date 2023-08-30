@@ -78,7 +78,6 @@
       "chart_colors": ["#b33dc6", "#87bc45", "#f46a9b", "#27aeef", "#ef9b20", "#ea5545", "#edbf33", "#ede15b", "#bdcf32"],
       "scheduled": false,
       "scheduled_cron": "15 10,16 * * 1-5",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Technoplatz"]
     }
   }
