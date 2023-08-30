@@ -45,7 +45,6 @@ from functools import partial
 from subprocess import call
 from bson.objectid import ObjectId
 from get_docker_secret import get_docker_secret
-import pytz
 import pymongo
 import requests
 

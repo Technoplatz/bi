@@ -2,6 +2,5 @@ asyncio
 pymongo[tls]
 dnspython
 partial
-pytz
 get-docker-secret
 requests

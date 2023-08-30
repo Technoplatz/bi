@@ -41,7 +41,6 @@ from xml.etree import ElementTree
 from bson.objectid import ObjectId
 import requests
 from pymongo import MongoClient
-import pytz
 import pymongo
 from get_docker_secret import get_docker_secret
 from flask import Flask, request, make_response
@@ -90,7 +89,6 @@ app.config["CORS_HEADERS"] = [
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 CORS(app)
 
-TZ_ = os.environ.get("TZ")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -169,7 +167,7 @@ class Misc:
         """
         docstring is in progress
         """
-        return datetime.now(pytz.timezone(TZ_))
+        return datetime.now()
 
     def exception_show_f(self, exc_):
         """
@@ -612,8 +610,8 @@ def issue_f():
                 shipment_cityname_ = account_["acc_ship_to_city"] if "acc_ship_to_city" in account_ else None
                 shipment_postalzone_ = account_["acc_ship_to_postcode"] if "acc_ship_to_postcode" in account_ else None
                 shipment_countryname_ = account_["acc_ship_to_country"] if "acc_ship_to_country" in account_ else None
-                shipment_actualdespatchdate_ = datetime.now(pytz.timezone(TZ_)).strftime("%Y-%m-%d")
-                shipment_actualdespatchtime_ = datetime.now(pytz.timezone(TZ_)).strftime("%H:%M:%S")
+                shipment_actualdespatchdate_ = datetime.now().strftime("%Y-%m-%d")
+                shipment_actualdespatchtime_ = datetime.now().strftime("%H:%M:%S")
                 customer_alias_ = account_["acc_alias"] if "acc_alias" in account_ else None
                 zarf_ettn_ = str(uuid.uuid4())
                 shp_date_ = shipment_["shp_date"] if "shp_date" in shipment_ else None

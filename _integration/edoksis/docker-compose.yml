@@ -36,8 +36,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - TZ=${TZ}
     image: ${HUB}/technoplatz/bi-intg-edoksis:${VERSION}
     container_name: edoksis
     hostname: edoksis
@@ -50,7 +48,6 @@ services:
     ports:
       - "${EDOKSIS_PORT}:80"
     environment:
-      - TZ=${TZ}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST0=${MONGO_HOST0}
