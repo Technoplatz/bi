@@ -35,7 +35,7 @@ export const environment = {
   sanitizerEnabled: true,
   production: false,
   appVersion: require("../../package.json").version + "-dev",
-  release: "Brezel Edition",
+  release: "Brezel",
   apiPort: "8443",
   support_url: "#",
   misc: {

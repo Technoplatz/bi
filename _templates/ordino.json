@@ -41,13 +41,14 @@
       "enum": ["IGA", "Halkalı", "Ambarlı", "AHL"],
       "width": 110
     },
-    "odi_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Ordino status",
-      "enum": ["00-Open", "10-OnTheWay", "20-OnCustoms", "30-OnCustomsProcess", "40-Closed"],
-      "default": "10-OnTheWay",
-      "width": 170
+    "odi_arrived": {
+      "bsonType": "bool",
+      "title": "Arrived?",
+      "description": "Ordino arrived or not",
+      "truetext": "Arrived",
+      "falsetext": "OnTheWay",
+      "default": false,
+      "width": 120
     },
     "odi_arrived_date": {
       "bsonType": "date",
@@ -57,8 +58,8 @@
       "width": 140
     }
   },
-  "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs", "odi_status"],
-  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_customs"], ["odi_status"]],
+  "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],
+  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_customs"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
     "_modified_at": -1
@@ -109,16 +110,16 @@
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "odi_status",
+          "key": "odi_arrived",
           "op": "eq",
-          "value": "20-OnCustoms"
+          "value": true
         }
       ],
       "conditions": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "10-OnTheWay,20-OnCustoms"
+          "key": "odi_arrived",
+          "op": "ne",
+          "value": true
         }
       ],
       "targets": [
@@ -157,16 +158,16 @@
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "odi_status",
+          "key": "odi_arrived",
           "op": "eq",
-          "value": "10-OnTheWay"
+          "value": false
         }
       ],
       "conditions": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "10-OnTheWay,20-OnCustoms"
+          "key": "odi_arrived",
+          "op": "ne",
+          "value": false
         }
       ],
       "targets": [

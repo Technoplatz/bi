@@ -62,7 +62,6 @@ export class CollectionPage implements OnInit {
   public is_crud: boolean = false;
   public paget: any = [];
   public id: string = "";
-  private template_showed: boolean = false;
   public filter_: any = [];
   public searched: any = null;
   public data: any = [];
@@ -76,7 +75,6 @@ export class CollectionPage implements OnInit {
   public is_loaded: boolean = true;
   private is_selected: boolean = false;
   public multicheckbox: boolean = false;
-  private master: any = {};
   private counters_: any = {};
   public collections: any = [];
   public is_initialized: boolean = false;
@@ -86,12 +84,9 @@ export class CollectionPage implements OnInit {
   private view: any = null;
   public actions: any = [];
   public columns_: any;
-  private menu_toggle: boolean = false;
   public view_mode: any = {};
   private sweeped: any = [];
   private actionix: number = -1;
-  private views_structure: any;
-  private collections_structure: any;
   private menu: string = "";
   private page_end: number = 1;
   private clonok: number = -1;
@@ -101,7 +96,6 @@ export class CollectionPage implements OnInit {
   public properties_: any = {};
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
-  public is_viewsaving: boolean = false;
   public sort: any = {};
   public structure: any = {};
   public schemevis: any = "hide";
@@ -150,17 +144,16 @@ export class CollectionPage implements OnInit {
     });
     this.collections_ = this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
-      this.collections_structure = res.structure;
     });
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res;
     });
-    this.crud.getViews().then(() => { });
   }
 
   ngOnDestroy() {
     this.auth.user.unsubscribe;
     this.crud.collections.unsubscribe;
+    this.crud.views.unsubscribe;
     this.collections_ = null;
     this.user_ = null;
   }
@@ -264,6 +257,7 @@ export class CollectionPage implements OnInit {
             reject(error);
           }).finally(() => {
             this.is_loaded = true;
+            this.crud.getAll().then(() => { });
           });
         });
       });
@@ -308,7 +302,6 @@ export class CollectionPage implements OnInit {
                 doc: null,
                 is_crud: true
               }).then(() => {
-                this.id === "_collection" ? this.crud.getAll().then(() => { }) : this.crud.getViews().then(() => { });
                 this.RefreshData(0);
               }).catch((res: any) => {
                 this.misc.doMessage(res && res.msg ? res.msg : res, "error");
@@ -357,7 +350,6 @@ export class CollectionPage implements OnInit {
         if (op === "action" && res.data.res) {
           this.misc.doMessage(res.data.res.content, "success");
         }
-        this.id === "_collection" ? this.crud.getAll().then(() => { }) : this.crud.getViews().then(() => { });
         this.RefreshData(0);
       }
     });
@@ -633,7 +625,6 @@ export class CollectionPage implements OnInit {
         structure: this.structured_
       }).then(() => {
         this.misc.doMessage("schema saved successfully", "success");
-        this.crud.getAll().then(() => { });
         this.RefreshData(0).then(() => {
           this.schemevis = "hide"
         });
@@ -708,9 +699,7 @@ export class CollectionPage implements OnInit {
         this.misc.doMessage(error, "error");
       }).finally(() => {
         this.RefreshData(0).then(() => {
-          this.crud.getAll().then(() => {
-            this.templates[ix].processing = false;
-          });
+          this.templates[ix].processing = false;
         });
       });
     }

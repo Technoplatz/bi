@@ -86,9 +86,9 @@
       "bsonType": "string",
       "title": "Account No",
       "description": "Account No",
-      "minLength": 10,
-      "maxLength": 11,
-      "pattern": "^[A-Z0-9-]{10,11}$",
+      "minLength": 9,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{9,16}$",
       "width": 110
     },
     "dnn_acc_name": {
@@ -268,7 +268,14 @@
     }
   },
   "required": ["dnn_no", "dnn_acc_no", "dnn_bill_no", "dnn_status", "dnn_prd_no"],
-  "index": [["dnn_acc_no"], ["dnn_status"], ["dnn_shp_id"], ["dnn_man_no"], ["dnn_odi_no", "dnn_odi_sub_no"]],
+  "index": [
+    ["dnn_acc_no"],
+    ["dnn_status"],
+    ["dnn_shp_id"],
+    ["dnn_man_no"],
+    ["dnn_odi_no", "dnn_odi_sub_no"],
+    ["dnn_order_no", "dnn_prd_no"]
+  ],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
     "dnn_status": 1,
@@ -991,25 +998,5 @@
       "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
     }
   },
-  "fetchers": [
-    {
-      "name": "get customer price from order",
-      "enabled": true,
-      "collection": "order",
-      "match": [
-        {
-          "key": "ord_no",
-          "op": "eq",
-          "value": "dnn_order_no"
-        },
-        {
-          "key": "ord_prd_no",
-          "op": "eq",
-          "value": "dnn_prd_no"
-        }
-      ],
-      "get": "ord_unit_price",
-      "set": "dnn_order_price"
-    }
-  ]
+  "fetchers": []
 }

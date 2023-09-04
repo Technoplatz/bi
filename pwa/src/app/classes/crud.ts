@@ -275,8 +275,7 @@ export class Crud {
       this.misc.apiCall("crud", {
         op: "views"
       }).then((res: any) => {
-        this.views.next(res.views);
-        resolve(true);
+        resolve(this.views.next(res.views));
       }).catch((err: any) => {
         reject(err);
       });
@@ -309,11 +308,6 @@ export class Crud {
       });
       this.getCollections().then(() => { }).catch((error: any) => {
         console.error("*** collections error", error);
-      }).finally(() => {
-        resolve(true);
-      });
-      this.getAnnouncements().then(() => { }).catch((error: any) => {
-        console.error("*** announcements error", error);
       }).finally(() => {
         resolve(true);
       });

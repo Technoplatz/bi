@@ -79,6 +79,7 @@ export class DashboardPage implements OnInit {
 
   ngOnInit() {
     this.crud.getViews();
+    this.crud.getAnnouncements();
     this.storage.get("LSCHARTSIZE").then((LSCHARTSIZE: any) => {
       this.chart_size = LSCHARTSIZE ? LSCHARTSIZE : "small";
       this.chart_css = "chart-sq " + this.chart_size;

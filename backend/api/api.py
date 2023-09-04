@@ -648,13 +648,14 @@ class Iot:
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
 
-    def barcode_query_f(self, searched_):
+    def barcode_query_f(self, searched_, page_):
         """
         docstring is in progress
         """
         res_ = {}
         try:
             aggregate_ = []
+            limitn_ = 50
             match_ = {
                 "$match": {"$or": [
                     {"ser_dnn_no": {"$regex": searched_,  "$options": "i"}},
@@ -671,7 +672,8 @@ class Iot:
                            }
             }
             replacewith_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_id"]}}
-            limit_ = {"$limit": 100}
+            skip_ = {"$skip": limitn_ * (page_ - 1)}
+            limit_ = {"$limit": limitn_}
             sort_ = {"$sort": {"ser_in_date": -1}}
             lookup_delivery_ = {"$lookup": {
                 "from": "delivery_data",
@@ -692,6 +694,7 @@ class Iot:
             aggregate_.append(group_)
             aggregate_.append(replacewith_)
             aggregate_.append(sort_)
+            aggregate_.append(skip_)
             aggregate_.append(limit_)
             aggregate_.append(lookup_delivery_)
             aggregate_.append(unwind_delivery_)
@@ -752,7 +755,7 @@ class Iot:
             data_ = {}
             payload_ = []
             total_ = total_in_ = total_out_ = 0
-            find_one_ = Mongo().db_["serial_data"].find_one({"$or": [{"ser_sscc_no": bar_input_}, {"ser_dnn_no": bar_input_}]})
+            find_one_ = Mongo().db_["serial_data"].find_one({"$or": [{"ser_dnn_no": bar_input_}, {"ser_sscc_no": bar_input_}]})
             if find_one_:
                 ser_dnn_no_ = find_one_["ser_dnn_no"] if "ser_dnn_no" in find_one_ else None
                 if ser_dnn_no_:
@@ -2137,64 +2140,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def flashcards_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = input_["userindb"]
-            aggregate_project_ = {"$project": {"col_id": 1, "col_structure": 1, "views": {"$objectToArray": "$col_structure.views"}}}
-            aggregate_match_ = {"$match": {"views": {"$elemMatch": {"v.enabled": True, "v.flashcard": True, "v._tags": {"$elemMatch": {"$in": user_["_tags"]}}}}}}
-            aggregate_ = [aggregate_project_, aggregate_match_]
-            flashcards_ = list(Mongo().db_["_collection"].aggregate(aggregate_))
-            returned_views_ = []
-
-            for flashcard_ in flashcards_:
-                cid_ = flashcard_["col_id"]
-                col_structure_ = flashcard_["col_structure"]
-                properties_ = col_structure_["properties"]
-
-                views_ = flashcard_["views"] if "views" in flashcard_ and len(flashcard_["views"]) > 0 else []
-                for view_ in views_:
-                    id__ = view_["k"]
-                    view__ = view_["v"]
-
-                    if view__["flashcard"] is not True:
-                        continue
-
-                    if "enabled" not in view__ or not view__["enabled"]:
-                        continue
-
-                    if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
-                        continue
-
-                    count_ = 0
-                    filter_ = view__["data_filter"] if "data_filter" in view__ else []
-                    if len(filter_) > 0:
-                        get_filtered_ = self.get_filtered_f({"match": filter_, "properties": properties_ if properties_ else None})
-                        count_ = Mongo().db_[f"{cid_}_data"].count_documents(get_filtered_)
-
-                    returned_views_.append({
-                        "id": id__,
-                        "collection": cid_,
-                        "view": view__,
-                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999,
-                        "count": count_
-                    })
-
-            returned_views_.sort(key=operator.itemgetter("priority", "id"), reverse=False)
-
-            return {"result": True, "data": returned_views_}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def announcements_f(self, input_):
         """
         docstring is in progress
@@ -2357,11 +2302,7 @@ class Crud:
             else:
                 raise AuthError(f"no collection permission {col_id_}")
 
-            if col_id_[:1] != "_":
-                counters_f_ = self.counters_f({"col_id": col_id_})
-                counters_ = counters_f_["counters"] if counters_f_["result"] is True and "counters" in counters_f_ else {}
-
-            return {"result": True, "data": data_, "counters": counters_}
+            return {"result": True, "data": data_}
 
         except AuthError as exc_:
             return Misc().auth_error_f(exc_)
@@ -2729,46 +2670,6 @@ class Crud:
                 "document": str(exc)
             })
 
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def counters_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            col_id_ = input_["col_id"] if "col_id" in input_ else None
-            if not col_id_:
-                raise APIError("collection is missing")
-
-            counters_ = {}
-            get_properties_ = self.get_properties_f(col_id_)
-            if not get_properties_["result"]:
-                raise APIError(get_properties_["msg"])
-            properties_ = get_properties_["properties"]
-            for property_ in properties_:
-                prop_ = properties_[property_]
-                if prop_["bsonType"] in ["int", "number", "float", "decimal", "string"] and "counter" in prop_ and prop_["counter"] is True:
-                    counter_name_ = f"{property_.upper()}_COUNTER"
-                    find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
-                    if not find_one_:
-                        raise APIError(f"missing _kv for {property_}")
-                    if prop_["bsonType"] in ["int", "number", "float", "decimal"]:
-                        value_ = find_one_["kav_value"] if "kav_value" in find_one_ and int(find_one_["kav_value"]) >= 0 else 0
-                        value_ = int(value_) + 1
-                    else:
-                        value_ = find_one_["kav_value"]
-
-                    counters_[property_] = value_
-
-            return {"result": True, "counters": counters_}
-
-        except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -4181,16 +4082,16 @@ class Auth:
         try:
             authorization_ = request.headers.get("Authorization", None)
             if not authorization_:
-                raise AuthError("invalid authorization request")
+                raise AuthError("authorization is required")
 
             authb_ = "Bearer "
             ix_ = authorization_.find(authb_)
             if ix_ != 0:
-                raise PassException("no token provided")
+                raise PassException("invalid access token")
 
             token_ = authorization_.replace(authb_, "")
             if not token_:
-                raise PassException("no token provided")
+                raise PassException("no access token provided")
 
             x_api_key_ = request.headers.get("X-Api-Key", None)
             if not x_api_key_:
@@ -4618,8 +4519,6 @@ def crud_f():
             res_ = Crud().insert_f(input_)
         elif op_ in ["clone", "delete"]:
             res_ = Crud().multiple_f(input_)
-        elif op_ in ["counterset", "counterget"]:
-            res_ = Crud().counters_f(input_)
         elif op_ == "action":
             res_ = Crud().action_f(input_)
         elif op_ == "remove":
@@ -4634,8 +4533,6 @@ def crud_f():
             res_ = Crud().views_f(input_)
         elif op_ == "announcements":
             res_ = Crud().announcements_f(input_)
-        elif op_ == "flashcards":
-            res_ = Crud().flashcards_f(input_)
         elif op_ == "announce":
             res_ = Crud().announce_f(input_)
         elif op_ == "collections":
@@ -4857,7 +4754,7 @@ def auth_f():
         return response_
 
 
-@ app.route("/barcode", methods=["POST"])
+@ app.route("/iot", methods=["POST"])
 def iot_post_f():
     """
     docstring is in progress
@@ -4869,31 +4766,29 @@ def iot_post_f():
         if not request.headers:
             raise AuthError("no headers provided")
 
-        x_api_key_ = request.headers.get("X-Api-Key", None)
-        if not x_api_key_:
-            raise AuthError("no api key provided")
-        auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": x_api_key_})
-        if not auth_:
-            raise AuthError("account not found")
-        aut_id_ = auth_["aut_id"]
-
         if not request.json:
             raise APIError("no data provided")
+
+        jwt_validate_f_ = Auth().jwt_validate_f()
+        if not jwt_validate_f_["result"]:
+            raise AuthError(jwt_validate_f_["msg"])
+
+        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+        if not user_:
+            raise AuthError("user session not found")
+        aut_id_ = user_["email"]
 
         requestj_ = request.json
         process_ = requestj_["process"] if "process" in requestj_ else None
         if not process_:
             raise APIError("no process provided")
 
-        email_ = requestj_["email"] if "email" in requestj_ else None
-        if not email_ or email_ != aut_id_:
-            raise AuthError("invalid user")
-
         if process_ == "scan":
             res_ = Iot().barcode_scan_f(aut_id_)
         elif process_ == "query":
             searched_ = requestj_["searched"] if "searched" in requestj_ else None
-            res_ = Iot().barcode_query_f(searched_)
+            page_ = requestj_["page"] if "page" in requestj_ else 1
+            res_ = Iot().barcode_query_f(searched_, page_)
 
     except AuthError as exc_:
         res_ = {"result": False, "payload": None, "msg": str(exc_)}
