@@ -31,11 +31,27 @@
       "casetype": "lowercase",
       "width": 150
     },
+    "que_scheduled": {
+      "bsonType": "bool",
+      "title": "Scheduled",
+      "default": false,
+      "description": "Scheduled or not",
+      "width": 130
+    },
+    "que_scheduled_cron": {
+      "bsonType": "string",
+      "title": "Cron",
+      "description": "Schedule cron",
+      "minLength": 0,
+      "maxLength": 32,
+      "pattern": "^[a-z0-9/*-, ]{0,32}$",
+      "width": 160
+    },
     "que_aggregate": {
       "bsonType": "object",
       "title": "Aggregate",
       "description": "Query aggregate",
-      "width": 120
+      "width": 130
     },
     "_tags": {
       "bsonType": "array",
@@ -58,6 +74,6 @@
   "index": [["que_collection_id"]],
   "unique": [["que_id"]],
   "sort": {
-    "_modified_at": 1
+    "_modified_at": -1
   }
 }

@@ -148,6 +148,45 @@ class Schedular:
         except Exception as exc_:
             return Misc().exception_f(exc_)
 
+    def schedule_queries_f(self, sched_):
+        """
+        docstring is in progress
+        """
+        try:
+            queries_ = Mongo().db_["_query"].find({"que_scheduled": True})
+            if not queries_:
+                return {"result": True}
+
+            for item_ in queries_:
+                id__ = item_["que_id"] if "que_id" in item_ else None
+                if not id__:
+                    print_(f"!!! invalid query id {item_}")
+                    continue
+                scheduled_cron_ = item_["que_scheduled_cron"] if "que_scheduled_cron" in item_ else None
+                if not croniter.is_valid(scheduled_cron_):
+                    print_(f"!!! invalid cron {id__}")
+                    continue
+                separated_ = re.split(" ", scheduled_cron_)
+                if not (separated_ and len(separated_) == 5):
+                    print_(f"!!! invalid cron separation {id__}, {separated_}")
+                    continue
+                minute_ = separated_[0].strip()
+                hour_ = separated_[1].strip()
+                day_ = separated_[2].strip()
+                month_ = separated_[3].strip()
+                day_of_week_ = separated_[4].lower().strip()
+                args_ = [item_]
+                sched_.add_job(Crud().query_run_f, "cron", minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, id=id__, replace_existing=True, args=args_)
+                print_(f"İİİ scheduled {id__} {scheduled_cron_}")
+
+            return {"result": True}
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
     def schedule_views_f(self, sched_):
         """
         docstring is in progress
@@ -210,9 +249,14 @@ class Schedular:
             if not schedule_views_f_["result"]:
                 raise APIError(schedule_views_f_["msg"])
 
+            schedule_queries_f_ = self.schedule_queries_f(sched_)
+            if not schedule_queries_f_["result"]:
+                raise APIError(schedule_queries_f_["msg"])
+
             args_ = {"user": {"email": "cron"}, "op": "dump"}
             sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", replace_existing=True, args=[args_])
             sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", replace_existing=True, args=[sched_])
+            sched_.add_job(self.schedule_queries_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_queries", replace_existing=True, args=[sched_])
             sched_.start()
             return True
 
@@ -1334,6 +1378,64 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def query_run_f(self, input_):
+        """
+        docstring is in progress
+        """
+        try:
+            print_("İİİ cron runs", input_)
+
+            _tags = input_["_tags"]
+            que_id_ = input_["que_id"]
+            que_title_ = input_["que_title"]
+            que_collection_id_ = input_["que_collection_id"]
+            que_aggregate_ = input_["que_aggregate"]
+
+            personalizations_to_ = []
+            to_ = []
+            users_ = Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": _tags}}})
+            if users_:
+                for member_ in users_:
+                    if member_["usr_id"] not in to_:
+                        to_.append(member_["usr_id"])
+                        personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
+
+            if not personalizations_to_:
+                print_(f">>> no query subscribers found {que_id_}")
+                return {"result": True}
+            personalizations_ = {"to": personalizations_to_}
+
+            aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(que_aggregate_)
+            df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(aggregated_)))).fillna("")
+
+            files_ = []
+            get_timestamp_f_ = Misc().get_timestamp_f()
+            file_excel_ = f"/cron/query-{que_id_}-{get_timestamp_f_}.xlsx"
+            df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
+            files_.append({"filename": file_excel_, "filetype": "xlsx"})
+            html_ = "Ok"
+            subject_ = que_title_
+
+            email_sent_ = Email().send_email_f({
+                "personalizations": personalizations_,
+                "html": html_,
+                "subject": subject_,
+                "files": files_
+            })
+            if not email_sent_["result"]:
+                raise APIError(email_sent_["msg"])
+
+            return {"result": True}
+
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
+
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
+
     def announce_f(self, input_):
         """
         docstring is in progress
@@ -2125,7 +2227,7 @@ class Crud:
         """
         try:
             user_ = input_["userindb"]
-            aggregate_ = list(Mongo().db_["_query"].aggregate([{"$match": {"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}}]))
+            aggregate_ = list(Mongo().db_["_query"].aggregate([{"$match": {"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}}, {"$sort": {"_modified_at": -1}}]))
             return {"result": True, "data": json.loads(JSONEncoder().encode(aggregate_))}
 
         except pymongo.errors.PyMongoError as exc:
@@ -2354,7 +2456,7 @@ class Crud:
                         fields_.append(prj_)
 
             if not limited_:
-                que_aggregate_.append({ "$limit": 100 })
+                que_aggregate_.append({"$limit": 100})
 
             aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(que_aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(aggregated_)))
@@ -3402,9 +3504,6 @@ class Email:
             if subject_ is None:
                 raise APIError("subject is missing")
 
-            if op_ is None or op_ == "":
-                raise APIError("email operation is missing")
-
             if html_ is None or html_ == "":
                 raise APIError("email message is missing")
 
@@ -3421,7 +3520,6 @@ class Email:
                 raise APIError("to list is missing")
 
             msg_ = {
-                "op": op_,
                 "files": files_,
                 "personalizations": personalizations_,
                 "subject": subject_,
