@@ -41,42 +41,19 @@ https://www.gnu.org/licenses.
         </ion-button>
         <h2>{{ subheader }}</h2>
         <div class="filler-10"></div>
-        <div *ngIf="id=='_collection'" class="template-card-container">
-          <ion-card class="single-coll">
-            <ion-icon name="rocket-outline" color="primary"></ion-icon>
-            <ion-card-header>
-              <ion-card-title>{{ 'Single Collection' }}</ion-card-title>
-              <ion-card-subtitle>{{ 'by' | translate }} {{ 'Yourself' }}</ion-card-subtitle>
-            </ion-card-header>
-            <ion-button (click)="goCrud(null, 'insert')" size="small">
-              <ion-spinner *ngIf="is_inprogress; else noproc" name="dots"></ion-spinner>
-              <ng-template #noproc>
-                {{ 'SETUP' | translate }}
-              </ng-template>
-            </ion-button>
-            <ion-card-content>
-              {{ 'An elementary collection consists of 4 basic data types; string, number, date and boolean' }}.
-            </ion-card-content>
-          </ion-card>
-          <ion-card *ngFor="let item of templates; let t = index">
-            <ion-card-header>
-              <ion-card-title>{{ item.title }}</ion-card-title>
-              <ion-card-subtitle>{{ 'by' | translate }} {{ item.by }}</ion-card-subtitle>
-            </ion-card-header>
-            <ion-button (click)="doInstallTemplate(item, t)" size="small">
-              <ion-spinner *ngIf="templates[t].processing; else noproc" name="dots"></ion-spinner>
-              <ng-template #noproc>
-                {{ 'INSTALL' | translate }}
-              </ng-template>
-            </ion-button>
-            <ion-card-content>
-              {{ item.description }}
-            </ion-card-content>
-          </ion-card>
+        <div *ngIf="['_collection', '_query'].includes(id)" class="template-card-container">
+          <ion-button (click)="misc.navi.next('admin/_collection')">
+            <ion-icon name="rocket-outline"></ion-icon>
+            {{ 'Data Collections' }}
+          </ion-button>
+          <ion-button (click)="misc.navi.next('admin/_query')">
+            <ion-icon name="list-outline"></ion-icon>
+            {{ 'Database Queries' }}
+          </ion-button>
         </div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
-            <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
+            <ion-col size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="doUploadModal()" class="data-sq-button">
                 <ion-icon name="cloud-upload-outline"></ion-icon><br />
                 {{ 'Upload' | translate }}<br />{{ 'File' | translate }}
@@ -96,7 +73,12 @@ https://www.gnu.org/licenses.
                 {{ 'Scan' | translate }}<br />{{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
-                <div *ngIf="!['_collection', '_log', '_announcement'].includes(id)" (click)="goCrud(null, 'insert')"
+                <div *ngIf="!['_collection', '_query', '_log', '_announcement'].includes(id)"
+                  (click)="goCrud(null, 'insert')" class="data-sq-button">
+                  <ion-icon name="add-circle-outline"></ion-icon><br />
+                  {{ 'New' | translate }}<br />{{ 'Record' | translate }}
+                </div>
+                <div *ngIf="['_collection', '_query'].includes(id)" (click)="goCrud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
                   {{ 'New' | translate }}<br />{{ 'Record' | translate }}

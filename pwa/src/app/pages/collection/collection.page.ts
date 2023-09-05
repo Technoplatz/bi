@@ -84,7 +84,6 @@ export class CollectionPage implements OnInit {
   private view: any = null;
   public actions: any = [];
   public columns_: any;
-  public view_mode: any = {};
   private sweeped: any = [];
   private actionix: number = -1;
   private menu: string = "";
@@ -162,7 +161,7 @@ export class CollectionPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
-    this.header = this.is_crud ? "COLLECTIONS" : "ADMINISTRATION";
+    this.header = this.is_crud ? "COLLECTIONS" : ["_collection", "_query"].includes(this.id) ? "STUDIO" : "ADMINISTRATION";
     this.crud.getCollection(this.id).then((res: any) => {
       this.counters_ = res && res.counters ? res.counters : {};
       this.subheader = res && res.data ? res.data.col_title : this.id;
@@ -515,7 +514,7 @@ export class CollectionPage implements OnInit {
     } else {
       this.RefreshData(0).then(() => {
         this.schemevis = "hide"
-        this.structured_ ? this.misc.doMessage("changes was discarded", "warning") : null;
+        this.structured_ ? this.misc.doMessage("changes were discarded", "warning") : null;
         this.structured_ = null;
       });
     }

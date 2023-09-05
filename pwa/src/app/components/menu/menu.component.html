@@ -54,7 +54,7 @@ https://www.gnu.org/licenses.
     <ion-item *ngIf="perm_" lines="none" class="dash-item">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('admin/_collection')">
-          <ion-icon name="cube-outline"></ion-icon>{{ "Studio" | translate }}
+          <ion-icon name="color-palette-outline"></ion-icon>{{ "Studio" | translate }}
         </ion-button>
       </ion-label>
     </ion-item>
@@ -72,6 +72,23 @@ https://www.gnu.org/licenses.
         <ng-template #nocollectionsfound>
           <p>
             {{ "No collections found" | translate }}
+          </p>
+        </ng-template>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="eye-outline"></ion-icon>{{ "Queries" | translate }}
+        </ion-button>
+        <div *ngIf="queries_?.length > 0; else noqueryfound">
+          <p *ngFor="let item_ of queries_" (click)="misc.navi.next('query/' + item_.que_id)" class="clicked-item dark">
+            {{ item_.que_title }}
+          </p>
+        </div>
+        <ng-template #noqueryfound>
+          <p>
+            {{ "No query found" | translate }}
           </p>
         </ng-template>
       </ion-label>

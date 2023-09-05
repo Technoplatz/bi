@@ -105,7 +105,6 @@ export class Miscellaneous {
                 reject(res_ && res_.msg ? res_.msg : res_);
               }
             }
-
           }, (res: any) => {
             const res_ = res;
             if (res_.error && res_.status) {

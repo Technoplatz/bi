@@ -153,7 +153,6 @@ class Schedular:
         docstring is in progress
         """
         try:
-            print_("*** scheduled views started", Misc().get_now_f())
             collections_ = list(Mongo().db_["_collection"].aggregate([{
                 "$project": {
                     "col_id": 1,
@@ -175,7 +174,6 @@ class Schedular:
             for collection_ in collections_:
                 views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
                 if not views_:
-                    print_(f"!!! no view found to schedule for {collection_['col_id']}")
                     continue
                 for view_ in views_:
                     id__ = view_["k"]
@@ -190,7 +188,7 @@ class Schedular:
                     }]
                     sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_[
                                    "month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, replace_existing=True, args=args_)
-                    print_("scheduled", id__)
+                    print_(">>> view scheduled", Misc().get_now_f(), id__, cron_looker_f_["hour"], cron_looker_f_["minute"], cron_looker_f_["day"])
 
             return {"result": True}
 
@@ -407,12 +405,6 @@ class Misc:
         sec_ = ("0" + str(dt_.second))[-2:]
         return f"{dt_.year}{mon_}{day_}{hou_}{min_}{sec_}"
 
-    def get_jdate_f(self):
-        """
-        docstring is in progress
-        """
-        return int(datetime.today().timestamp())
-
     def set_strip_doc_f(self, doc_):
         """
         docstring is in progress
@@ -428,36 +420,20 @@ class Misc:
         """
         return datetime.now()
 
-    def allowed_file(self, filename):
-        """
-        docstring is in progress
-        """
-        return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["UPLOAD_EXTENSIONS"]
-
     def get_user_ip_f(self):
         """
         docstring is in progress
         """
-        return request.headers["cf-connecting-ip"] if "cf-connecting-ip" in request.headers else bleach.clean(request.access_route[-1])
+        if request:
+            return request.headers["cf-connecting-ip"] if "cf-connecting-ip" in request.headers else request.access_route[-1]
 
-    def get_user_host_f(self):
-        """
-        docstring is in progress
-        """
-        return request.headers["cf-connecting-ip"] if "cf-connecting-ip" in request.headers else bleach.clean(request.access_route[-1])
+        return "0.0.0.0"
 
     def get_except_underdashes(self):
         """
         docstring is in progress
         """
         return ["_tags"]
-
-    def make_array_unique_f(self, array_):
-        """
-        docstring is in progress
-        """
-        temp_ = set()
-        return [x for x in array_ if x not in temp_ and not temp_.add(x)]
 
     def permitted_usertag_f(self, user_):
         """
@@ -483,7 +459,10 @@ class Misc:
                             properties_new__ = self.properties_cleaner_f(items_properties_)
                             properties_property_["items"]["properties"] = properties_new__
                     if field_ == "bsonType":
-                        dict_[field_] = [properties_property_[field_], "null"]
+                        if properties_property_[field_] == "object":
+                            dict_[field_] = [properties_property_[field_], "array", "null"]
+                        else:
+                            dict_[field_] = [properties_property_[field_], "null"]
                     else:
                         dict_[field_] = properties_property_[field_]
             properties_new_[property_] = dict_
@@ -1412,8 +1391,8 @@ class Crud:
             if data_json_:
                 file_json_ = f"/cron/{id_}.json"
                 file_json_raw_ = f"/cron/{id_}-detail.json"
-                df_.to_json(f"{file_json_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
-                df_raw_.to_json(f"{file_json_raw_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=True)
+                df_.to_json(f"{file_json_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=False)
+                df_raw_.to_json(f"{file_json_raw_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=False)
                 files_.append({"filename": file_json_, "filetype": "json"})
                 files_.append({"filename": file_json_raw_, "filetype": "json"})
             if data_csv_:
@@ -2140,6 +2119,21 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+    def queries_f(self, input_):
+        """
+        docstring is in progress
+        """
+        try:
+            user_ = input_["userindb"]
+            aggregate_ = list(Mongo().db_["_query"].aggregate([{"$match": {"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}}]))
+            return {"result": True, "data": json.loads(JSONEncoder().encode(aggregate_))}
+
+        except pymongo.errors.PyMongoError as exc:
+            return Misc().mongo_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
     def announcements_f(self, input_):
         """
         docstring is in progress
@@ -2275,7 +2269,6 @@ class Crud:
             user_ = obj["userindb"]
             col_id_ = obj["collection"]
             data_ = {}
-            counters_ = {}
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
             if Misc().permitted_usertag_f(user_):
@@ -2312,6 +2305,70 @@ class Crud:
 
         except APIError as exc_:
             return Misc().api_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
+
+    def query_f(self, obj):
+        """
+        docstring is in progress
+        """
+        try:
+            user_ = obj["userindb"]
+            que_id_ = obj["id"]
+            query_ = {}
+            data_ = []
+            fields_ = []
+            permitted_ = False
+
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+            if Misc().permitted_usertag_f(user_):
+                permitted_ = True
+            else:
+                for usr_tag_ in usr_tags_:
+                    if usr_tag_ in query_["_tags"]:
+                        permitted_ = True
+                        break
+            if not permitted_:
+                raise AuthError(f"no query permission for {que_id_}")
+
+            query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
+            if not query_:
+                raise APIError(f"query not found {que_id_}")
+
+            que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ else None
+            if not que_collection_id_:
+                raise APIError(f"collection not found {que_id_}")
+
+            que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
+            if not que_aggregate_:
+                raise APIError(f"no aggregation found {que_id_}")
+
+            limited_ = False
+            for agg_ in que_aggregate_:
+                if "$limit" in agg_:
+                    limited_ = True
+                elif "$project" in agg_:
+                    fields_ = []
+                    for prj_ in agg_["$project"]:
+                        fields_.append(prj_)
+
+            if not limited_:
+                que_aggregate_.append({ "$limit": 100 })
+
+            aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(que_aggregate_)
+            data_ = json.loads(JSONEncoder().encode(list(aggregated_)))
+
+            return {"result": True, "query": query_, "data": data_, "fields": fields_}
+
+        except AuthError as exc_:
+            return Misc().auth_error_f(exc_)
+
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
+
+        except pymongo.errors.PyMongoError as exc_:
+            return Misc().mongo_error_f(exc_)
 
         except Exception as exc_:
             return Misc().exception_f(exc_)
@@ -2496,6 +2553,47 @@ class Crud:
                 raise APIError(schemavalidate_["msg"])
 
             return {"result": True}
+
+        except APIError as exc:
+            return Misc().api_error_f(exc)
+
+        except Exception as exc:
+            return Misc().exception_f(exc)
+
+    def savequery_f(self, obj):
+        """
+        docstring is in progress
+        """
+        try:
+            que_id_ = obj["id"] if "id" in obj and obj["id"] is not None else None
+            aggregate_ = obj["aggregate"] if "aggregate" in obj and obj["aggregate"] is not None else None
+            user_ = obj["userindb"] if "userindb" in obj and obj["userindb"] is not None else None
+
+            if not user_:
+                raise AuthError("user not found")
+
+            if not aggregate_:
+                raise APIError("aggregate not found")
+
+            if not que_id_:
+                raise APIError("query not found")
+
+            if not Misc().permitted_usertag_f(user_):
+                raise AuthError("no permission")
+
+            Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": {
+                "que_aggregate": aggregate_,
+                "_modified_at": Misc().get_now_f(),
+                "_modified_by": user_["usr_id"]
+            }, "$inc": {"_modified_count": 1}})
+
+            return {"result": True}
+
+        except pymongo.errors.PyMongoError as exc:
+            return Misc().mongo_error_f(exc)
+
+        except AuthError as exc_:
+            return Misc().auth_error_f(exc_)
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -3214,14 +3312,6 @@ class Crud:
             return Misc().exception_f(exc_)
 
 
-class _Noop:
-    def __init__(self, level=0):
-        self.level = level
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-
 class Email:
     """
     docstring is in progress
@@ -3797,7 +3887,7 @@ class Auth:
                     per_delete_ = "per_delete" in permission_check_ and permission_check_["per_delete"] is True
                     per_share_ = "per_share" in permission_check_ and permission_check_["per_share"] is True
                     per_schema_ = "per_schema" in permission_check_ and permission_check_["per_schema"] is True
-                    if ((op_ == "saveschema" and per_schema_) or
+                    if ((op_ in ["saveschema", "savequery"] and per_schema_) or
                         (op_ == "announce" and per_share_) or
                         (op_ == "read" and per_read_) or
                         (op_ in ["insert", "import"] and per_insert_) or
@@ -4481,7 +4571,7 @@ def crud_f():
             "user": jwt_validate_f_["user"],
             "auth": jwt_validate_f_["auth"],
             "collection": collection_,
-            "op": op_,
+            "op": op_
         })
         if not permission_f_["result"]:
             raise AuthError(permission_f_)
@@ -4494,7 +4584,6 @@ def crud_f():
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
                 raise APIError({"result": False, "msg": "document must be included in the request"})
-
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_)
@@ -4529,6 +4618,8 @@ def crud_f():
             res_ = Crud().purge_f(input_)
         elif op_ == "charts":
             res_ = Crud().charts_f(input_)
+        elif op_ == "queries":
+            res_ = Crud().queries_f(input_)
         elif op_ == "views":
             res_ = Crud().views_f(input_)
         elif op_ == "announcements":
@@ -4539,6 +4630,8 @@ def crud_f():
             res_ = Crud().collections_f(input_)
         elif op_ == "collection":
             res_ = Crud().collection_f(input_)
+        elif op_ == "query":
+            res_ = Crud().query_f(input_)
         elif op_ == "parent":
             res_ = Crud().parent_f(input_)
         elif op_ == "link":
@@ -4549,6 +4642,8 @@ def crud_f():
             res_ = Crud().template_f(input_)
         elif op_ == "saveschema":
             res_ = Crud().saveschema_f(input_)
+        elif op_ == "savequery":
+            res_ = Crud().savequery_f(input_)
         elif op_ == "saveview":
             res_ = Crud().saveview_f(input_)
         else:

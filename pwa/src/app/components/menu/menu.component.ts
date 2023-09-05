@@ -50,9 +50,8 @@ export class MenuComponent implements OnInit {
   public user_: any;
   public perm_: boolean = false;
   public views: any = [];
-  public views_: any = null;
-  public collections_: any = null;
   public collections: any = [];
+  public queries_: any = [];
   public menutoggle: boolean = false;
 
   constructor(
@@ -63,17 +62,21 @@ export class MenuComponent implements OnInit {
   ) { }
 
   ngOnDestroy() {
+    this.crud.queries.unsubscribe;
     this.crud.views.unsubscribe;
     this.crud.collections.unsubscribe;
     this.auth.user.unsubscribe;
   }
 
   ngOnInit() {
-    this.collections_ ? null : this.collections_ = this.crud.collections.subscribe((res: any) => {
+    this.crud.collections.subscribe((res: any) => {
       this.collections = res && res.data ? res.data : [];
     });
-    this.views_ ? null : this.views_ = this.crud.views.subscribe((res: any) => {
+    this.crud.views.subscribe((res: any) => {
       this.views = res ? res : [];
+    });
+    this.crud.queries.subscribe((res: any) => {
+      this.queries_ = res;
     });
     this.auth.user.subscribe((res: any) => {
       this.user_ = res;

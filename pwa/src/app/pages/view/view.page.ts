@@ -242,7 +242,7 @@ export class ViewPage implements OnInit {
     }
   }
 
-  doCopy(tocopy_: string) {
+  copy_url(tocopy_: string) {
     this.is_url_copied = ["view", "collection"].includes(tocopy_) ? true : false;
     this.misc.copyToClipboard(this.viewurl_).then(() => { }).catch((error: any) => {
       console.error("*** copy error", error);

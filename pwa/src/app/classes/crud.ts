@@ -49,6 +49,7 @@ export class Crud {
   public objects = this.objectsListener.asObservable();
   public collections = new BehaviorSubject<any>([]);
   public views = new BehaviorSubject<any>([]);
+  public queries = new BehaviorSubject<any>([]);
   public charts = new BehaviorSubject<any>([]);
   public visuals = new BehaviorSubject<any>([]);
   public announcements = new BehaviorSubject<any>([]);
@@ -256,6 +257,19 @@ export class Crud {
     });
   }
 
+  getQuery(id: string) {
+    return new Promise((resolve, reject) => {
+      this.misc.apiCall("crud", {
+        id: id,
+        op: "query",
+      }).then((res: any) => {
+        resolve(res);
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
   getCharts() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
@@ -276,6 +290,18 @@ export class Crud {
         op: "views"
       }).then((res: any) => {
         resolve(this.views.next(res.views));
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
+  getQueries() {
+    return new Promise((resolve, reject) => {
+      this.misc.apiCall("crud", {
+        op: "queries"
+      }).then((res: any) => {
+        resolve(this.queries.next(res && res.result ? res.data : []));
       }).catch((err: any) => {
         reject(err);
       });
@@ -303,6 +329,11 @@ export class Crud {
       });
       this.getViews().then(() => { }).catch((error: any) => {
         console.error("*** views error", error);
+      }).finally(() => {
+        resolve(true);
+      });
+      this.getQueries().then(() => { }).catch((error: any) => {
+        console.error("*** queries error", error);
       }).finally(() => {
         resolve(true);
       });

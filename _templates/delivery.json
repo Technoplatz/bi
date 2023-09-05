@@ -45,6 +45,13 @@
       "default": "00-Standby",
       "width": 170
     },
+    "dnn_ship_type": {
+      "bsonType": "string",
+      "title": "Ship Type",
+      "description": "Shipping type",
+      "enum": ["Air", "Sea", "Truck"],
+      "width": 120
+    },
     "dnn_odi_no": {
       "bsonType": "string",
       "title": "Ordino No",
@@ -274,7 +281,8 @@
     ["dnn_shp_id"],
     ["dnn_man_no"],
     ["dnn_odi_no", "dnn_odi_sub_no"],
-    ["dnn_order_no", "dnn_prd_no"]
+    ["dnn_order_no", "dnn_prd_no"],
+    ["dnn_acc_no", "dnn_status"]
   ],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
@@ -522,10 +530,9 @@
       "chart_yaxis": true,
       "chart_yaxis_label": false,
       "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
-      "scheduled": false,
-      "scheduled_cron": "15 14,15,16 * * mon,tue",
-      "scheduled_tz": "Europe/Berlin",
-      "_tags": ["#Managers", "#Administrators", "#Technoplatz", "#Logistics"]
+      "scheduled": true,
+      "scheduled_cron": "30 15 * * mon,tue",
+      "_tags": ["#Technoplatz"]
     },
     "sv-git-buid": {
       "title": "Delivery BUId's",
@@ -571,7 +578,6 @@
       "chart_colors": ["#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#e60049", "#00bfa0"],
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "sv-dn-statuses": {
@@ -618,7 +624,6 @@
       "chart_colors": ["#fd7f6f", "#7eb0d5", "#bd7ebe", "#b2e061", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-00s": {
@@ -665,7 +670,6 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-00": {
@@ -712,7 +716,6 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-10": {
@@ -759,7 +762,6 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-20": {
@@ -806,7 +808,6 @@
       "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-30": {
@@ -853,7 +854,6 @@
       "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-40": {
@@ -900,7 +900,6 @@
       "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-50": {
@@ -947,7 +946,6 @@
       "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "30 9,17 * 1-5 *",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-60": {
@@ -994,7 +992,6 @@
       "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
-      "scheduled_tz": "Europe/Berlin",
       "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
     }
   },

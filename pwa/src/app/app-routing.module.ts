@@ -115,6 +115,15 @@ const routes: Routes = [
     }
   },
   {
+    path: "query/:p",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/query/query.module").then((m) => m.QueryPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
     path: "view/:p",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/view/view.module").then((m) => m.ViewPageModule),

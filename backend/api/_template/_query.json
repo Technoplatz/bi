@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "que_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "title": "ID",
+      "description": "Query ID",
+      "casetype": "lowercase",
+      "width": 150
+    },
+    "que_title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "title": "Title",
+      "description": "Query Title",
+      "casetype": "capitalize",
+      "width": 150
+    },
+    "que_collection_id": {
+      "bsonType": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "title": "Collection ID",
+      "description": "Collection ID",
+      "required": true,
+      "collection": true,
+      "casetype": "lowercase",
+      "width": 150
+    },
+    "que_aggregate": {
+      "bsonType": "object",
+      "title": "Aggregate",
+      "description": "Query aggregate",
+      "width": 120
+    },
+    "_tags": {
+      "bsonType": "array",
+      "uniqueItems": false,
+      "minItems": 0,
+      "maxItems": 256,
+      "items": {
+        "bsonType": "string",
+        "minLength": 2,
+        "maxLength": 64,
+        "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
+      },
+      "title": "Tags",
+      "description": "Enter a tag #...",
+      "manualAdd": true,
+      "width": 300
+    }
+  },
+  "required": ["que_id", "que_title", "que_collection_id"],
+  "index": [["que_collection_id"]],
+  "unique": [["que_id"]],
+  "sort": {
+    "_modified_at": 1
+  }
+}

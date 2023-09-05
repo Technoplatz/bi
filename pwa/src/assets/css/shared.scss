@@ -1446,39 +1446,27 @@ sup {
 }
 
 .template-card-container {
-  margin-top: 16px;
+  gap: 0px !important;
   margin-bottom: 16px;
-  gap: 8px !important;
   display: flex;
   justify-content: flex-start;
   align-items: center;
 }
 
 .template-card-container ion-card {
+  margin-top: 16px;
+  margin-bottom: 16px;
   border-radius: 0px;
   min-width: 280px;
   max-width: 280px;
-  height: 195px;
   box-shadow: none !important;
   border: 5px solid var(--ion-color-medium);
   color: var(--ion-color-dark);
-  overflow: hidden !important;
   margin: 0px;
 }
 
 .template-card-container ion-card.single-coll {
   border: 5px solid var(--ion-color-primary) !important;
-}
-
-.template-card-container ion-card ion-card-content {
-  margin-top: 0px !important;
-  line-height: normal;
-  font-size: small;
-  white-space: pre-wrap;
-}
-
-.template-card-container ion-card p {
-  margin-top: 4px !important;
 }
 
 .template-card-container ion-card ion-button {
@@ -1682,7 +1670,7 @@ ion-checkbox {
 }
 
 .search-row ion-col {
-  overflow: visible !important;
+  overflow: hidden !important;
 }
 
 .search-row ion-col span {
