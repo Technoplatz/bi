@@ -28,39 +28,7 @@
   "parents": [],
   "links": [],
   "actions": [],
-  "triggers": [
-    {
-      "name": "Delivery updater",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "inv_no",
-          "op": "nnull",
-          "value": null
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_no",
-              "value": "inv_dnn_no"
-            }
-          ],
-          "filter": [],
-          "set": [
-            {
-              "key": "dnn_invoice_no",
-              "value": "inv_no"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    }
-  ],
+  "triggers": [],
   "views": {},
   "fetchers": []
 }

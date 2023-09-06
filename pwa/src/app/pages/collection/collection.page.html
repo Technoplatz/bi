@@ -184,8 +184,8 @@ https://www.gnu.org/licenses.
                 </span>
                 {{ item.key }} <ion-icon name="caret-down" class="search-caret"></ion-icon>
               </div>
-              <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
-                <div *ngIf="!searched[item.key].setmode">
+              <div *ngIf="searched && searched[item.key]?.actived && !searched[item.key].setmode" class="search-box">
+                <!-- <div *ngIf="!searched[item.key].setmode"> -->
                   <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
                   <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
                     <ion-icon name="arrow-down"></ion-icon>
@@ -248,7 +248,7 @@ https://www.gnu.org/licenses.
                   <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
                     {{ 'Cancel' | translate }}
                   </ion-button>
-                </div>
+                <!-- </div> -->
               </div>
             </ion-col>
             <ion-col class="data-ext-columns" (click)="setSort('_created_at', sort['_created_at'])">
