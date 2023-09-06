@@ -353,7 +353,7 @@ class Misc:
         docstring is in progress
         """
         if NOTIFICATION_SLACK_HOOK_URL_:
-            ip_ = self.get_user_ip_f()
+            ip_ = self.get_client_ip_f()
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
             line_ = exc_tb_.tb_lineno
@@ -420,7 +420,7 @@ class Misc:
                 "log_type": obj["type"],
                 "log_date": self.get_now_f(),
                 "log_user_id": obj["user"],
-                "log_ip": Misc().get_user_ip_f(),
+                "log_ip": Misc().get_client_ip_f(),
                 "log_collection_id": obj["collection"] if "collection" in obj else None,
                 "log_operation": obj["op"] if "op" in obj else None,
                 "log_document": str(obj["document"]) if "document" in obj else None,
@@ -464,7 +464,7 @@ class Misc:
         """
         return datetime.now()
 
-    def get_user_ip_f(self):
+    def get_client_ip_f(self):
         """
         docstring is in progress
         """
@@ -1383,8 +1383,6 @@ class Crud:
         docstring is in progress
         """
         try:
-            print_("İİİ cron runs", input_)
-
             _tags = input_["_tags"]
             que_id_ = input_["que_id"]
             que_title_ = input_["que_title"]
@@ -1411,7 +1409,7 @@ class Crud:
             files_ = []
             get_timestamp_f_ = Misc().get_timestamp_f()
             file_excel_ = f"/cron/query-{que_id_}-{get_timestamp_f_}.xlsx"
-            df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
+            df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", date_format="DD.MM.YYYY", datetime_format="DD.MM.YYYY HH:MM:SS", header=True, index=False)
             files_.append({"filename": file_excel_, "filetype": "xlsx"})
             html_ = "Ok"
             subject_ = que_title_
@@ -3644,7 +3642,7 @@ class OTP:
                     "aut_otp_validated": validated_,
                     "_otp_validated_at": Misc().get_now_f(),
                     "_otp_validated_by": email_,
-                    "_otp_validated_ip": Misc().get_user_ip_f(),
+                    "_otp_validated_ip": Misc().get_client_ip_f(),
                 }, "$inc": {"_modified_count": 1}
                 })
             else:
@@ -3652,7 +3650,7 @@ class OTP:
                     "aut_otp_validated": validated_,
                     "_otp_not_validated_at": Misc().get_now_f(),
                     "_otp_not_validated_by": email_,
-                    "_otp_not_validated_ip": Misc().get_user_ip_f()
+                    "_otp_not_validated_ip": Misc().get_client_ip_f()
                 }, "$inc": {"_modified_count": 1}
                 })
                 raise AuthError("invalid otp")
@@ -3665,7 +3663,7 @@ class OTP:
                 "document": {
                     "otp": otp_,
                     "success": validated_,
-                    "ip": Misc().get_user_ip_f(),
+                    "ip": Misc().get_client_ip_f(),
                     "_modified_at": Misc().get_now_f(),
                     "_modified_by": email_,
                 }})
@@ -3762,12 +3760,12 @@ class Auth:
     docstring is in progress
     """
 
-    def access_validate_by_api_token_f(self, bearer_, operation_):
+    def access_validate_by_api_token_f(self, bearer_, operation_, qid_):
         """
         docstring is in progress
         """
         try:
-            ip_ = Misc().get_user_ip_f()
+            ip_ = Misc().get_client_ip_f()
             token__ = re.split(" ", bearer_)
             token_ = token__[1] if token__ and len(token__) > 0 and token__[0].lower() == "bearer" else None
             if not token_:
@@ -3776,7 +3774,7 @@ class Auth:
             header_ = jwt.get_unverified_header(token_)
             token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
             if not token_finder_:
-                raise AuthError("please use an api token")
+                raise AuthError("please use an api access token")
 
             find_ = Mongo().db_["_token"].find_one({"tkn_finder": token_finder_, "tkn_is_active": True})
             if not find_:
@@ -3791,14 +3789,17 @@ class Auth:
 
             grant_ = f"tkn_grant_{operation_}"
             if not find_[grant_]:
-                raise AuthError(f"token is not allowed to do {operation_}")
+                raise AuthError(f"token is not allowed to perform {operation_}")
 
-            if "tkn_allowed_ips" in find_ and \
-                    len(find_["tkn_allowed_ips"]) > 0 and \
-                    (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"]):
-                return {"result": True}
+            if qid_ and "tkn_allowed_queries" in find_ and len(find_["tkn_allowed_queries"]) > 0:
+                if qid_ not in find_["tkn_allowed_queries"]:
+                    raise AuthError(f"token is not allowed to read {qid_}")
 
-            raise AuthError(f"IP is not allowed to do {operation_}")
+            if not ("tkn_allowed_ips" in find_ and len(find_["tkn_allowed_ips"]) > 0 and
+                    (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"])):
+                raise AuthError(f"IP is not allowed to do {operation_}")
+
+            return {"result": True}
 
         except AuthError as exc_:
             return ({"result": False, "msg": str(exc_)})
@@ -4020,7 +4021,7 @@ class Auth:
         docstring is in progress
         """
         try:
-            ip_ = Misc().get_user_ip_f()
+            ip_ = Misc().get_client_ip_f()
             tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             allowed_ = Mongo().db_["_firewall"].find_one({
                 "$or": [
@@ -4228,7 +4229,7 @@ class Auth:
             })
 
             user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_, "api_key": api_key_}
-            ip_ = Misc().get_user_ip_f()
+            ip_ = Misc().get_client_ip_f()
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -4494,7 +4495,7 @@ class Auth:
                 "_qr_modified_count": 0,
                 "_created_at": Misc().get_now_f(),
                 "_created_by": email_,
-                "_created_ip": Misc().get_user_ip_f(),
+                "_created_ip": Misc().get_client_ip_f(),
                 "_modified_at": Misc().get_now_f(),
                 "_modified_by": email_,
             })
@@ -5034,7 +5035,7 @@ def post_f():
         if not split_ or len(split_) != 2 or split_[0].lower() != "bearer":
             raise AuthError("invalid authorization bearer")
 
-        access_validate_by_api_token_f_ = Auth().access_validate_by_api_token_f(x_api_token_, operation_)
+        access_validate_by_api_token_f_ = Auth().access_validate_by_api_token_f(x_api_token_, operation_, None)
         if not access_validate_by_api_token_f_["result"]:
             raise AuthError(access_validate_by_api_token_f_["msg"])
 
@@ -5222,11 +5223,73 @@ def get_dump_f():
         return {"msg": str(exc_), "status": 500}
 
 
+@ app.route("/get/query/<string:id_>", methods=["GET"])
+def get_query_f(id_):
+    """
+    docstring is in progress
+    """
+    status_code_ = 200
+    res_ = None
+    id_ = bleach.clean(id_)
+    try:
+        if not request.headers:
+            raise AuthError({"result": False, "msg": "no header provided"})
+
+        x_api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
+        if not x_api_token_:
+            raise AuthError({"result": False, "msg": "missing token"})
+
+        func_ = Auth().access_validate_by_api_token_f(x_api_token_, "read", id_)
+        if not func_["result"]:
+            raise AuthError(func_)
+
+        query_ = Mongo().db_["_query"].find_one({"que_id": id_})
+        if not query_:
+            raise AuthError({"result": False, "msg": "query not found"})
+
+        que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
+        if not que_aggregate_:
+            raise AuthError({"result": False, "msg": "invalid query aggregation"})
+
+        que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ else None
+        if not que_collection_id_:
+            raise AuthError({"result": False, "msg": "invalid query collection"})
+
+        aggregate_ = []
+        for agg_ in que_aggregate_:
+            if "$limit" in agg_ or "$skip" in agg_:
+                continue
+            aggregate_.append(agg_)
+
+        aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
+        res_ = json.loads(JSONEncoder().encode(list(aggregated_)))
+
+    except AuthError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        status_code_ = 401
+
+    except APIError as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        status_code_ = 400
+
+    except Exception as exc_:
+        res_ = ast.literal_eval(str(exc_))
+        status_code_ = 500
+
+    finally:
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = status_code_
+        response_.mimetype = "application/json"
+        return response_
+
+
 @ app.route("/get/view/<string:id_>", methods=["GET"])
 def get_data_f(id_):
     """
     docstring is in progress
     """
+    status_code_ = 200
+    res_ = None
     try:
         if not request.headers:
             raise AuthError({"result": False, "msg": "no header provided"})
@@ -5234,7 +5297,7 @@ def get_data_f(id_):
         user_ = None
         api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
         if api_token_:
-            access_validate_by_api_token_f_ = Auth().access_validate_by_api_token_f(api_token_, "read")
+            access_validate_by_api_token_f_ = Auth().access_validate_by_api_token_f(api_token_, "read", id_)
             if not access_validate_by_api_token_f_["result"]:
                 raise AuthError(access_validate_by_api_token_f_)
         else:
@@ -5246,29 +5309,22 @@ def get_data_f(id_):
             raise APIError(generate_view_data_f_)
 
         res_ = generate_view_data_f_["data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 200
-        response_.mimetype = "application/json"
-        return response_
 
     except AuthError as exc_:
         res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 401
-        response_.mimetype = "application/json"
-        return response_
+        status_code_ = 401
 
     except APIError as exc_:
         res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 400
-        response_.mimetype = "application/json"
-        return response_
+        status_code_ = 400
 
     except Exception as exc_:
         res_ = ast.literal_eval(str(exc_))
+        status_code_ = 500
+
+    finally:
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 500
+        response_.status_code = status_code_
         response_.mimetype = "application/json"
         return response_
 

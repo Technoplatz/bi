@@ -58,16 +58,6 @@ https://www.gnu.org/licenses.
                 <ion-icon name="cloud-upload-outline"></ion-icon><br />
                 {{ 'Upload' | translate }}<br />{{ 'File' | translate }}
               </div>
-              <div *ngIf="is_loaded" (click)="RefreshData(0)" class="data-sq-button">
-                <ion-icon name="sync-circle-outline"></ion-icon>
-                <br />
-                {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
-              </div>
-              <div *ngIf="!is_loaded" class="data-sq-button required">
-                <ion-icon name="hourglass-outline"></ion-icon>
-                <br />
-                {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
-              </div>
               <div *ngIf="scan_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-outline"></ion-icon><br />
                 {{ 'Scan' | translate }}<br />{{ 'Barcode' | translate }}
@@ -84,6 +74,16 @@ https://www.gnu.org/licenses.
                   {{ 'New' | translate }}<br />{{ 'Record' | translate }}
                 </div>
               </ng-template>
+              <div *ngIf="is_loaded" (click)="RefreshData(0)" class="data-sq-button">
+                <ion-icon name="sync-circle-outline"></ion-icon>
+                <br />
+                {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
+              </div>
+              <div *ngIf="!is_loaded" class="data-sq-button required">
+                <ion-icon name="hourglass-outline"></ion-icon>
+                <br />
+                {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
+              </div>
               <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 <br />

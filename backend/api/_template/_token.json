@@ -25,8 +25,8 @@
       "bsonType": "number",
       "title": "Lifetime",
       "description": "Token validity period in minutes",
-      "placeholder": "Token life time in minutes",
-      "minimum": 1,
+      "placeholder": "Token lifetime 3-525600 mins",
+      "minimum": 3,
       "maximum": 525600,
       "permanent": true,
       "width": 110
@@ -90,6 +90,23 @@
       "subType": "ip",
       "manualAdd": true,
       "width": 160
+    },
+    "tkn_allowed_queries": {
+      "bsonType": "array",
+      "title": "Queries",
+      "description": "Allowed queries",
+      "placeholder": "Enter a query id",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 8,
+      "items": {
+        "bsonType": "string",
+        "minLength": 3,
+        "maxLength": 64,
+        "pattern": "^[a-z0-9-_]{3,64}$"
+      },
+      "manualAdd": true,
+      "width": 180
     }
   },
   "required": ["tkn_name"],
