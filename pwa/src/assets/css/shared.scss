@@ -1846,6 +1846,37 @@ ion-checkbox {
   padding: 0.4rem;
 }
 
+.data-table {
+  margin-top: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--ion-color-light);
+  border-collapse: collapse;
+}
+
+.data-table td,
+.data-table th {
+  padding: 0.4rem;
+  text-align: left !important;
+  border: 1px solid var(--ion-color-light);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-table tr:not(:first-child):hover {
+  background-color: #eee;
+}
+
+.data-table tr:last-child:hover {
+  background-color: unset !important;
+}
+
+.data-table tr:first-child {
+  border-bottom: 2px solid var(--ion-color-medium);
+  cursor: pointer;
+}
+
 .data-grid {
   margin-top: 10px;
 }

@@ -177,7 +177,7 @@ class Schedular:
                 day_of_week_ = separated_[4].lower().strip()
                 args_ = [item_]
                 sched_.add_job(Crud().query_run_f, "cron", minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, id=id__, replace_existing=True, args=args_)
-                print_(f"İİİ scheduled {id__} {scheduled_cron_}")
+                print_(f">>> scheduled {id__} {scheduled_cron_}")
 
             return {"result": True}
 
@@ -1383,11 +1383,14 @@ class Crud:
         docstring is in progress
         """
         try:
-            _tags = input_["_tags"]
             que_id_ = input_["que_id"]
             que_title_ = input_["que_title"]
             que_collection_id_ = input_["que_collection_id"]
             que_aggregate_ = input_["que_aggregate"]
+            _tags = input_["_tags"]
+            get_timestamp_f_ = Misc().get_timestamp_f()
+
+            print_(">>> query runs", que_id_, get_timestamp_f_)
 
             personalizations_to_ = []
             to_ = []
@@ -1401,27 +1404,40 @@ class Crud:
             if not personalizations_to_:
                 print_(f">>> no query subscribers found {que_id_}")
                 return {"result": True}
+
             personalizations_ = {"to": personalizations_to_}
 
-            aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(que_aggregate_)
+            aggregate_ = []
+            limit_found_ = False
+            for agg_ in que_aggregate_:
+                if "$skip" in agg_:
+                    continue
+                if "$limit" in agg_:
+                    limit_found_ = True
+                    agg_["$limit"] = DEFAULT_AGGREGATION_LIMIT_
+                aggregate_.append(agg_)
+
+            if not limit_found_:
+                aggregate_.append({"$limit": DEFAULT_AGGREGATION_LIMIT_})
+
+            aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(aggregated_)))).fillna("")
 
             files_ = []
-            get_timestamp_f_ = Misc().get_timestamp_f()
             file_excel_ = f"/cron/query-{que_id_}-{get_timestamp_f_}.xlsx"
-            df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", date_format="DD.MM.YYYY", datetime_format="DD.MM.YYYY HH:MM:SS", header=True, index=False)
+            df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
             files_.append({"filename": file_excel_, "filetype": "xlsx"})
             html_ = "Ok"
-            subject_ = que_title_
-
             email_sent_ = Email().send_email_f({
                 "personalizations": personalizations_,
                 "html": html_,
-                "subject": subject_,
+                "subject": que_title_,
                 "files": files_
             })
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
+
+            print_(">>> query ended", que_id_, get_timestamp_f_)
 
             return {"result": True}
 
@@ -1767,7 +1783,7 @@ class Crud:
                             elif typ == "date":
                                 fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
                             else:
-                                fres_ = {"$eq": value_ }
+                                fres_ = {"$eq": value_}
                         elif mat_["op"] in ["ne", "nc"]:
                             if typ in ["number", "decimal", "float"]:
                                 fres_ = {"$not": {"$eq": float(value_)}}
@@ -2427,6 +2443,8 @@ class Crud:
         try:
             user_ = obj["userindb"]
             que_id_ = obj["id"]
+            page_ = obj["page"]
+            limit_ = obj["limit"]
             query_ = {}
             data_ = []
             fields_ = []
@@ -2455,19 +2473,20 @@ class Crud:
             if not que_aggregate_:
                 raise APIError(f"no aggregation found {que_id_}")
 
-            limited_ = False
+            aggregate_ = []
             for agg_ in que_aggregate_:
-                if "$limit" in agg_:
-                    limited_ = True
-                elif "$project" in agg_:
+                if "$limit" in agg_ or "$skip" in agg_:
+                    continue
+                if "$project" in agg_:
                     fields_ = []
                     for prj_ in agg_["$project"]:
                         fields_.append(prj_)
+                aggregate_.append(agg_)
 
-            if not limited_:
-                que_aggregate_.append({"$limit": 100})
+            aggregate_.append({"$skip": limit_ * (page_ - 1)})
+            aggregate_.append({"$limit": limit_})
 
-            aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(que_aggregate_)
+            aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(aggregated_)))
 
             return {"result": True, "query": query_, "data": data_, "fields": fields_}
@@ -2935,6 +2954,10 @@ class Crud:
                 })
                 if not link_f_["result"]:
                     raise AppException(link_f_["msg"])
+
+
+            if collection_ == "_query":
+                a = 1
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -4567,6 +4590,7 @@ PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
+DEFAULT_AGGREGATION_LIMIT_ = 1000
 
 app = Flask(__name__)
 origins_ = [f"https://{DOMAIN_}", "https://localhost", "capacitor://localhost", "http://localhost:8100", "http://localhost:8101", "http://localhost:8102"]

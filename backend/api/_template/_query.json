@@ -8,7 +8,7 @@
       "title": "ID",
       "description": "Query ID",
       "casetype": "lowercase",
-      "width": 150
+      "width": 170
     },
     "que_title": {
       "bsonType": "string",

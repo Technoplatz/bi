@@ -55,21 +55,17 @@ export class QueryPage implements OnInit {
   private submenu: string = "";
   public user: any = null;
   public perm: boolean = false;
-  public paget: any = [];
   public id: string = "";
   public data_: any = [];
   public pages: any = [];
-  public limit: number = environment.misc.limit;
-  public page: number = 1;
-  private page_start: number = 1;
-  public count: number = 0;
+  public limit_: number = environment.misc.limit;
+  public count_: number = 0;
   public is_loaded: boolean = true;
   public is_initialized: boolean = false;
   public status_: any = {};
   public columns_: any;
   public view_mode: any = {};
   private menu: string = "";
-  private page_end: number = 1;
   public schema_key: any = null;
   public fields_: any = {};
   public is_saving: boolean = false;
@@ -85,6 +81,11 @@ export class QueryPage implements OnInit {
   public menutoggle: boolean = false;
   public is_url_copied: boolean = false;
   public query_url_: string = "";
+  public pages_: number = 1;
+  private page_start_: number = 1;
+  private page_end_: number = 1;
+  public page_: number = 1;
+  public paget_: any = [];
 
   constructor(
     private storage: Storage,
@@ -112,21 +113,31 @@ export class QueryPage implements OnInit {
       this.menu = this.router.url.split("/")[1];
       this.id = this.submenu = this.router.url.split("/")[2];
       this.query_url_ = apiHost + "/get/query/" + this.id;
-      this.RefreshData(0).then(() => {
+      this.RefreshData(1).then(() => {
         this.is_initialized = true;
       });
     });
   }
 
-  RefreshData(p: number) {
+  RefreshData(page_: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = false;
-      this.crud.getQuery(this.id).then((res: any) => {
+      this.page_ = page_ === 0 ? 1 : page_;
+      this.crud.getQuery(this.id, this.page_, this.limit_).then((res: any) => {
         if (res && res.query) {
           this.subheader = res.query.que_title;
           this.aggregate_ = res.query.que_aggregate;
           this.fields_ = res.fields;
           this.data_ = res.data;
+          this.count_ = 135;
+          this.pages_ = this.count_ > 0 ? Math.ceil(this.count_ / this.limit_) : environment.misc.default_page;
+          const lmt = this.pages_ >= 10 ? 10 : this.pages_;
+          this.paget_ = new Array(lmt);
+          this.page_start_ = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
+          this.page_end_ = this.page_start_ + 10;
+          for (let p = 0; p < this.paget_.length; p++) {
+            this.paget_[p] = this.page_start_ + p;
+          }
           resolve(true);
         } else {
           this.misc.doMessage("no data found", "error");

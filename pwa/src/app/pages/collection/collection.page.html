@@ -79,7 +79,7 @@ https://www.gnu.org/licenses.
                 <br />
                 <span>{{ 'Clear' | translate }}<br />{{ 'Filter' | translate }}</span>
               </div>
-              <div (click)="MultiCrud('clone')" class="data-sq-button">
+              <div *ngIf="id!=='_query'" (click)="MultiCrud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone' | translate }}<br />{{ 'Record' | translate }}
               </div>
@@ -87,7 +87,7 @@ https://www.gnu.org/licenses.
                 <ion-icon name="hourglass-outline"></ion-icon><br />
                 {{ 'Deleting' | translate }}<br />{{ 'Records' | translate }}...
               </div>
-              <div *ngIf="!is_deleting" (click)="MultiCrud('delete')" class="data-sq-button">
+              <div *ngIf="!is_deleting && id!=='_query'" (click)="MultiCrud('delete')" class="data-sq-button">
                 <ion-icon name="trash-outline"></ion-icon><br />
                 {{ 'Delete' | translate }}<br />{{ 'Record' | translate }}
               </div>
@@ -162,9 +162,8 @@ https://www.gnu.org/licenses.
           <!-- CRUD HEADERS -->
           <ion-row class="ion-nowrap search-row">
             <ion-col *ngIf="id==='_query'" class="ion-text-center check-column">
-              
             </ion-col>
-            <ion-col class="ion-text-center check-column">
+            <ion-col *ngIf="id!=='_query'" class="ion-text-center check-column">
               <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)" mode="md">
               </ion-checkbox>
             </ion-col>
@@ -179,72 +178,72 @@ https://www.gnu.org/licenses.
               </div>
               <div *ngIf="searched && searched[item.key]?.actived && !searched[item.key].setmode" class="search-box">
                 <!-- <div *ngIf="!searched[item.key].setmode"> -->
-                  <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
-                  <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
-                    <ion-icon name="arrow-down"></ion-icon>
+                <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
+                <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
+                  <ion-icon name="arrow-down"></ion-icon>
+                </ion-button>
+                <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
+                  <ion-icon name="arrow-up"></ion-icon>
+                </ion-button>
+                <ion-button color="light" size="small" (click)="setCopy(item.key)">
+                  <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-outline"></ion-icon>
+                  <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
+                  <ion-icon *ngIf="is_key_copying" name="hourglass-outline"></ion-icon>
+                </ion-button>
+                <br />
+                <div *ngIf="item.value.bsonType!='bool'" class="search-ops">
+                  <ion-button [color]="searched[item.key].op == 'contains' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'contains')">
+                    in
                   </ion-button>
-                  <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
-                    <ion-icon name="arrow-up"></ion-icon>
+                  <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'eq')">
+                    =
                   </ion-button>
-                  <ion-button color="light" size="small" (click)="setCopy(item.key)">
-                    <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-outline"></ion-icon>
-                    <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
-                    <ion-icon *ngIf="is_key_copying" name="hourglass-outline"></ion-icon>
+                  <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'ne')">
+                    &ne;
                   </ion-button>
-                  <br />
-                  <div *ngIf="item.value.bsonType!='bool'" class="search-ops">
-                    <ion-button [color]="searched[item.key].op == 'contains' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'contains')">
-                      in
-                    </ion-button>
-                    <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'eq')">
-                      =
-                    </ion-button>
-                    <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'ne')">
-                      &ne;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'gte')">
-                      &ge;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'lte')">
-                      &le;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'null')">
-                      &#9723;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'nnull')">
-                      &#9724;
-                    </ion-button>
-                  </div>
-                  <div *ngIf="item.value.bsonType=='bool'">
-                    <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'true')">
-                      {{ 'True' | translate }}
-                    </ion-button>
-                    <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'false')">
-                      {{ 'False' | translate }}
-                    </ion-button>
-                  </div>
-                  <div>
-                    <ion-input *ngIf="item.value.bsonType!='bool'"
-                      [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
-                      [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
-                      class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
-                    </ion-input>
-                  </div>
-                  <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
-                    {{ 'Search' | translate }}
+                  <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'gte')">
+                    &ge;
                   </ion-button>
-                  <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
-                    {{ 'Cancel' | translate }}
+                  <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'lte')">
+                    &le;
                   </ion-button>
+                  <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'null')">
+                    &#9723;
+                  </ion-button>
+                  <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'nnull')">
+                    &#9724;
+                  </ion-button>
+                </div>
+                <div *ngIf="item.value.bsonType=='bool'">
+                  <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'true')">
+                    {{ 'True' | translate }}
+                  </ion-button>
+                  <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
+                    (click)="doSetSearchItemOp(item.key, 'false')">
+                    {{ 'False' | translate }}
+                  </ion-button>
+                </div>
+                <div>
+                  <ion-input *ngIf="item.value.bsonType!='bool'"
+                    [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
+                    [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
+                    class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
+                  </ion-input>
+                </div>
+                <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
+                  {{ 'Search' | translate }}
+                </ion-button>
+                <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
+                  {{ 'Cancel' | translate }}
+                </ion-button>
                 <!-- </div> -->
               </div>
             </ion-col>
@@ -275,7 +274,7 @@ https://www.gnu.org/licenses.
             <ion-col *ngIf="id==='_query'" class="ion-text-center check-column" (click)="go_query(record)">
               <ion-icon name="play"></ion-icon>
             </ion-col>
-            <ion-col class="ion-text-center check-column">
+            <ion-col *ngIf="id!=='_query'" class="ion-text-center check-column">
               <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                 (ionChange)="SetSelectData(i,$event)" mode="md">
               </ion-checkbox>
