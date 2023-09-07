@@ -1690,6 +1690,11 @@ ion-checkbox {
   --padding-bottom: 3px;
 }
 
+.search-ops ion-button {
+  --padding-start: 8px !important;
+  --padding-end: 8px !important;
+}
+
 .search-box {
   position: fixed;
   padding: 8px;

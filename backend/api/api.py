@@ -1349,7 +1349,7 @@ class Crud:
             count_ = 0
 
             if "_id" in df_.columns:
-                upserts_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=False) for doc_ in payload_]
+                upserts_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=True) for doc_ in payload_]
                 insert_many_ = session_db_[collection__].bulk_write(upserts_, session=session_)
             else:
                 insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
@@ -1746,7 +1746,7 @@ class Crud:
                         if data_ and value_ in data_ and data_[value_] is not None:
                             value_ = data_[value_]
 
-                        if mat_["op"] in ["eq", "contains"]:
+                        if mat_["op"] == "contains":
                             if typ in ["number", "decimal", "float"]:
                                 fres_ = float(value_)
                             elif typ == "int":
@@ -1757,6 +1757,17 @@ class Crud:
                                 fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
                             else:
                                 fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
+                        elif mat_["op"] == "eq":
+                            if typ in ["number", "decimal", "float"]:
+                                fres_ = float(value_)
+                            elif typ == "int":
+                                fres_ = int(value_)
+                            elif typ == "bool":
+                                fres_ = bool(value_)
+                            elif typ == "date":
+                                fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
+                            else:
+                                fres_ = {"$eq": value_ }
                         elif mat_["op"] in ["ne", "nc"]:
                             if typ in ["number", "decimal", "float"]:
                                 fres_ = {"$not": {"$eq": float(value_)}}

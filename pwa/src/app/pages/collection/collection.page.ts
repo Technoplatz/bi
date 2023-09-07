@@ -400,7 +400,7 @@ export class CollectionPage implements OnInit {
     this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
       for (let key_ in this.structure.properties) {
         if (this.searched) {
-          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "eq", setmode: false } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_].setmode ? this.searched[key_].setmode : null };
+          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains", setmode: false } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_].setmode ? this.searched[key_].setmode : null };
         }
       }
     });
@@ -435,7 +435,7 @@ export class CollectionPage implements OnInit {
         this.filter_.splice(d, 1);
         this.searched[k].f = false;
         this.searched[k].kw = null;
-        this.searched[k].op = "eq";
+        this.searched[k].op = "contains";
         this.searched[k].setmode = false;
       }
       if (d === n_ - 1) {

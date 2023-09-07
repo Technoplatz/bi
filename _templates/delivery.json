@@ -49,7 +49,9 @@
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping type",
-      "enum": ["Air", "Sea", "Truck"],
+      "minLength": 0,
+      "maxLength": 8,
+      "pattern": "^[A-Za-z]{0,8}$",
       "width": 120
     },
     "dnn_odi_no": {
@@ -264,14 +266,6 @@
       "title": "Waybill Date",
       "description": "Waybill Document Date",
       "width": 140
-    },
-    "dnn_invoice_no": {
-      "bsonType": "string",
-      "title": "Invoice No",
-      "description": "Cusomer Invoice Number",
-      "minLength": 0,
-      "maxLength": 16,
-      "width": 130
     }
   },
   "required": ["dnn_no", "dnn_acc_no", "dnn_bill_no", "dnn_status", "dnn_prd_no"],

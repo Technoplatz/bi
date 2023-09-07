@@ -55,8 +55,8 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="doUploadModal()" class="data-sq-button">
-                <ion-icon name="cloud-upload-outline"></ion-icon><br />
-                {{ 'Upload' | translate }}<br />{{ 'File' | translate }}
+                <ion-icon name="download-outline"></ion-icon><br />
+                {{ 'Import' | translate }}<br />{{ 'File' | translate }}
               </div>
               <div *ngIf="scan_; else newrecord" (click)="goCrud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-outline"></ion-icon><br />
@@ -199,7 +199,11 @@ https://www.gnu.org/licenses.
                     <ion-icon *ngIf="is_key_copying" name="hourglass-outline"></ion-icon>
                   </ion-button>
                   <br />
-                  <div *ngIf="item.value.bsonType!='bool'">
+                  <div *ngIf="item.value.bsonType!='bool'" class="search-ops">
+                    <ion-button [color]="searched[item.key].op == 'contains' ? 'primary' : 'light'" size="small"
+                      (click)="doSetSearchItemOp(item.key, 'contains')">
+                      in
+                    </ion-button>
                     <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
                       (click)="doSetSearchItemOp(item.key, 'eq')">
                       =

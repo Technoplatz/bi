@@ -186,6 +186,9 @@ class Trigger():
             cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.triggers": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
                 for trigger_ in item_["col_structure"]["triggers"]:
+                    enabled_ = "enabled" in trigger_ and trigger_["enabled"] is True
+                    if not enabled_:
+                        continue
                     for cluster_ in trigger_["targets"]:
                         self.triggers_.append({
                             "source": item_["col_id"],
@@ -233,6 +236,9 @@ class Trigger():
                 if "fetchers" not in item_["col_structure"]:
                     continue
                 for fetcher_ in item_["col_structure"]["fetchers"]:
+                    enabled_ = "enabled" in fetcher_ and fetcher_["enabled"] is True
+                    if not enabled_:
+                        continue
                     self.fetchers_.append({
                         "collection": fetcher_["collection"],
                         "match": fetcher_["match"],
