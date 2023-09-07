@@ -51,7 +51,6 @@ export class MenuComponent implements OnInit {
   public perm_: boolean = false;
   public views: any = [];
   public collections: any = [];
-  public queries_: any = [];
   public menutoggle: boolean = false;
 
   constructor(
@@ -74,9 +73,6 @@ export class MenuComponent implements OnInit {
     });
     this.crud.views.subscribe((res: any) => {
       this.views = res ? res : [];
-    });
-    this.crud.queries.subscribe((res: any) => {
-      this.queries_ = res;
     });
     this.auth.user.subscribe((res: any) => {
       this.user_ = res;

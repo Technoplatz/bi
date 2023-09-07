@@ -704,4 +704,8 @@ export class CollectionPage implements OnInit {
     }
   }
 
+  go_query(record_: any) {
+    this.misc.navi.next("/query/" + record_.que_id);
+  }
+
 }

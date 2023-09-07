@@ -25,9 +25,9 @@
       "bsonType": "number",
       "title": "Lifetime",
       "description": "Token validity period in minutes",
-      "placeholder": "Token lifetime 3-525600 mins",
+      "placeholder": "Token lifetime 3-518400 mins",
       "minimum": 3,
-      "maximum": 525600,
+      "maximum": 518400,
       "permanent": true,
       "width": 110
     },

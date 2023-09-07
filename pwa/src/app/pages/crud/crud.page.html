@@ -196,14 +196,15 @@ https://www.gnu.org/licenses.
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="false"
-                                        [disabled]="field.disabled" [readonly]="field.readonly" [name]="field.name"
-                                        (ionChange)="doTextManipulate($event, field)">
+                                        [disabled]="field.disabled"
+                                        [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly"
+                                        [name]="field.name" (ionChange)="doTextManipulate($event, field)">
                                     </ion-input>
                                     <ng-template #istextarea>
                                         <ion-textarea class="ion-no-padding" cols="64" [(ngModel)]="data_[field.name]"
-                                            [readonly]="field.readonly" [disabled]="field.disabled" auto-grow="true"
-                                            [maxlength]="field.maxLength" [minlength]="field.minLength"
-                                            autocorrect="off"
+                                            [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly"
+                                            [disabled]="field.disabled" auto-grow="true" [maxlength]="field.maxLength"
+                                            [minlength]="field.minLength" autocorrect="off"
                                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                             [formControlName]="field.name" [required]="field.required"
                                             spellcheck="false" debounce="500">
@@ -259,7 +260,8 @@ https://www.gnu.org/licenses.
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
                                             [firstDayOfWeek]="1" [showDefaultButtons]="true"
                                             displayFormat="field.dateonly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm'"
-                                            [readonly]="field.readonly" [disabled]="field.disabled">
+                                            [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly"
+                                            [disabled]="field.disabled">
                                             <span slot="title">{{ field.title }}</span>
                                         </ion-datetime>
                                     </ng-template>
@@ -281,7 +283,8 @@ https://www.gnu.org/licenses.
                             class="ion-no-padding" [formControlName]="field.name" type="number"
                             [required]="field.required" [(ngModel)]="data_[field.name]"
                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                            [disabled]="field.disabled" [readonly]="field.readonly">
+                            [disabled]="field.disabled"
+                            [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly">
                         </ion-input>
                         <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
                             [(ngModel)]="data_[field.name]">
