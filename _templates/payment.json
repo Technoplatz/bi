@@ -1,0 +1,32 @@
+{
+  "properties": {
+    "pay_dnn_no": {
+      "bsonType": "string",
+      "title": "DN No",
+      "description": "Delivery Number",
+      "minLength": 10,
+      "maxLength": 16,
+      "pattern": "^[0-9A-Z-]{10,16}$",
+      "width": 110
+    },
+    "pay_date": {
+      "bsonType": "date",
+      "title": "Payment Date",
+      "description": "Payment date",
+      "dateonly": true,
+      "width": 120
+    }
+  },
+  "required": ["pay_dnn_no", "pay_date"],
+  "index": [["pay_date"]],
+  "unique": [["pay_dnn_no"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {},
+  "fetchers": []
+}

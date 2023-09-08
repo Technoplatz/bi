@@ -110,7 +110,7 @@ https://www.gnu.org/licenses.
             </td>
           </tr>
           <tr>
-            <td colspan="10">
+            <td [attr.colspan]="fields_?.length+1">
               <ion-button size="small" fill="clear" (click)="RefreshData(0)" class="ion-no-padding ion-margin-end">
                 <span *ngIf="count_ > limit_">
                   {{ (page_ - 1) * limit_ + 1 }} -

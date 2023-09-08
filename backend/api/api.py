@@ -102,13 +102,14 @@ class JSONEncoder(json.JSONEncoder):
     """
     docstring is in progress
     """
-
     def default(self, o):
         """
         docstring is in progress
         """
-        if isinstance(o, ObjectId) or isinstance(o, datetime):
+        if isinstance(o, ObjectId):
             return str(o)
+        if isinstance(o, datetime):
+            return o.isoformat()
         return json.JSONEncoder.default(self, o)
 
 
@@ -116,7 +117,6 @@ class Schedular:
     """
     docstring is in progress
     """
-
     def cron_looker_f(self, view_):
         """
         docstring is in progress
@@ -2477,7 +2477,7 @@ class Crud:
             match_ = {}
             for agg_ in que_aggregate_:
                 if "$match" in agg_:
-                     match_ = agg_["$match"]
+                    match_ = agg_["$match"]
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
                 if "$project" in agg_:
@@ -2957,7 +2957,6 @@ class Crud:
                 })
                 if not link_f_["result"]:
                     raise AppException(link_f_["msg"])
-
 
             if collection_ == "_query":
                 a = 1
