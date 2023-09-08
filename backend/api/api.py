@@ -2474,7 +2474,10 @@ class Crud:
                 raise APIError(f"no aggregation found {que_id_}")
 
             aggregate_ = []
+            match_ = {}
             for agg_ in que_aggregate_:
+                if "$match" in agg_:
+                     match_ = agg_["$match"]
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
                 if "$project" in agg_:
@@ -2485,11 +2488,11 @@ class Crud:
 
             aggregate_.append({"$skip": limit_ * (page_ - 1)})
             aggregate_.append({"$limit": limit_})
-
             aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(aggregated_)))
+            count_ = Mongo().db_[f"{que_collection_id_}_data"].count_documents(match_)
 
-            return {"result": True, "query": query_, "data": data_, "fields": fields_}
+            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_}
 
         except AuthError as exc_:
             return Misc().auth_error_f(exc_)

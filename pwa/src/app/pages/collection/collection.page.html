@@ -79,7 +79,7 @@ https://www.gnu.org/licenses.
                 <br />
                 <span>{{ 'Clear' | translate }}<br />{{ 'Filter' | translate }}</span>
               </div>
-              <div *ngIf="id!=='_query'" (click)="MultiCrud('clone')" class="data-sq-button">
+              <div (click)="MultiCrud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone' | translate }}<br />{{ 'Record' | translate }}
               </div>
@@ -163,7 +163,7 @@ https://www.gnu.org/licenses.
           <ion-row class="ion-nowrap search-row">
             <ion-col *ngIf="id==='_query'" class="ion-text-center check-column">
             </ion-col>
-            <ion-col *ngIf="id!=='_query'" class="ion-text-center check-column">
+            <ion-col class="ion-text-center check-column">
               <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)" mode="md">
               </ion-checkbox>
             </ion-col>
@@ -274,7 +274,7 @@ https://www.gnu.org/licenses.
             <ion-col *ngIf="id==='_query'" class="ion-text-center check-column" (click)="go_query(record)">
               <ion-icon name="play"></ion-icon>
             </ion-col>
-            <ion-col *ngIf="id!=='_query'" class="ion-text-center check-column">
+            <ion-col class="ion-text-center check-column">
               <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                 (ionChange)="SetSelectData(i,$event)" mode="md">
               </ion-checkbox>

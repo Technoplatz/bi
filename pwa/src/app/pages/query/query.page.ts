@@ -129,7 +129,7 @@ export class QueryPage implements OnInit {
           this.aggregate_ = res.query.que_aggregate;
           this.fields_ = res.fields;
           this.data_ = res.data;
-          this.count_ = 135;
+          this.count_ = res.count;
           this.pages_ = this.count_ > 0 ? Math.ceil(this.count_ / this.limit_) : environment.misc.default_page;
           const lmt = this.pages_ >= 10 ? 10 : this.pages_;
           this.paget_ = new Array(lmt);
