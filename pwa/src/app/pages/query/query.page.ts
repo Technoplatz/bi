@@ -31,6 +31,8 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit, ViewChild } from "@angular/core";
+
+import { ModalController, AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
@@ -38,6 +40,7 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
+import { CrudPage } from "../crud/crud.page";
 
 @Component({
   selector: "app-query",
@@ -52,7 +55,6 @@ export class QueryPage implements OnInit {
   public header: string = "QUERIES";
   public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
-  private submenu: string = "";
   public user: any = null;
   public perm: boolean = false;
   public id: string = "";
@@ -65,7 +67,6 @@ export class QueryPage implements OnInit {
   public status_: any = {};
   public columns_: any;
   public view_mode: any = {};
-  private menu: string = "";
   public schema_key: any = null;
   public fields_: any = {};
   public is_saving: boolean = false;
@@ -73,7 +74,6 @@ export class QueryPage implements OnInit {
   public sort: any = {};
   public schemevis: any = "hide";
   public aggregate_: any = [];
-  private aggregated_: any = [];
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public templates: any = [];
@@ -82,17 +82,24 @@ export class QueryPage implements OnInit {
   public is_url_copied: boolean = false;
   public query_url_: string = "";
   public pages_: number = 1;
-  private page_start_: number = 1;
-  private page_end_: number = 1;
   public page_: number = 1;
   public paget_: any = [];
+  private schema_: any = {};
+  private menu: string = "";
+  private aggregated_: any = [];
+  private page_start_: number = 1;
+  private page_end_: number = 1;
+  private submenu: string = "";
+  private query_: any = {};
+  private collections_: any = [];
 
   constructor(
+    public misc: Miscellaneous,
     private storage: Storage,
     private auth: Auth,
     private crud: Crud,
     private router: Router,
-    public misc: Miscellaneous
+    private modal: ModalController
   ) {
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
@@ -102,6 +109,12 @@ export class QueryPage implements OnInit {
     this.jeoptions.expandAll = false;
     this.jeoptions.navigationBar = true;
     this.jeoptions.name = "aggregate";
+    this.auth.user.subscribe((res: any) => {
+      this.user = res;
+    });
+    this.crud.collections.subscribe((res: any) => {
+      this.collections_ = res && res.data ? res.data : [];
+    });
   }
 
   ngOnDestroy() {
@@ -109,12 +122,15 @@ export class QueryPage implements OnInit {
   }
 
   ngOnInit() {
-    this.misc.getAPIUrl().then((apiHost: any) => {
-      this.menu = this.router.url.split("/")[1];
-      this.id = this.submenu = this.router.url.split("/")[2];
-      this.query_url_ = apiHost + "/get/query/" + this.id;
-      this.RefreshData(1).then(() => {
-        this.is_initialized = true;
+    this.storage.get("LSQUERY").then((LSQUERY_: any) => {
+      this.query_ = LSQUERY_;
+      this.misc.getAPIUrl().then((apiHost: any) => {
+        this.menu = this.router.url.split("/")[1];
+        this.id = this.submenu = this.router.url.split("/")[2];
+        this.query_url_ = apiHost + "/get/query/" + this.id;
+        this.RefreshData(1).then(() => {
+          this.is_initialized = true;
+        });
       });
     });
   }
@@ -123,13 +139,14 @@ export class QueryPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = false;
       this.page_ = page_ === 0 ? 1 : page_;
-      this.crud.getQuery(this.id, this.page_, this.limit_).then((res: any) => {
+      this.crud.get_query_data(this.id, this.page_, this.limit_).then((res: any) => {
         if (res && res.query) {
           this.subheader = res.query.que_title;
           this.aggregate_ = res.query.que_aggregate;
           this.fields_ = res.fields;
           this.data_ = res.data;
           this.count_ = res.count;
+          this.schema_ = res.schema;
           this.pages_ = this.count_ > 0 ? Math.ceil(this.count_ / this.limit_) : environment.misc.default_page;
           const lmt = this.pages_ >= 10 ? 10 : this.pages_;
           this.paget_ = new Array(lmt);
@@ -215,6 +232,39 @@ export class QueryPage implements OnInit {
     }).finally(() => {
       this.is_url_copied = false;
     });
+  }
+
+  async edit_query() {
+    const modal = await this.modal.create({
+      component: CrudPage,
+      backdropDismiss: true,
+      cssClass: "crud-modal",
+      componentProps: {
+        shuttle: {
+          op: "update",
+          collection: "_query",
+          collections: this.collections_,
+          views: [],
+          user: this.user,
+          data: this.query_,
+          counters: null,
+          structure: this.schema_,
+          sweeped: [],
+          filter: null,
+          actions: [],
+          actionix: -1,
+          view: null,
+          scan: null
+        }
+      }
+    });
+    modal.onDidDismiss().then((res: any) => {
+      if (res.data.modified && res.data.res.result) {
+        this.misc.doMessage("query updated successfully", "success");
+        this.RefreshData(0);
+      }
+    });
+    return await modal.present();
   }
 
 }

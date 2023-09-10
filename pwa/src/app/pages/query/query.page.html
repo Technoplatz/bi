@@ -43,7 +43,7 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
               <div (click)="misc.navi.next('/admin/_query')" class="data-sq-button">
-                <ion-icon name="list-outline"></ion-icon>
+                <ion-icon name="arrow-back-circle-outline"></ion-icon>
                 <br />
                 {{ 'Query' | translate }}<br />{{ 'List' | translate }}
               </div>
@@ -67,7 +67,13 @@ https://www.gnu.org/licenses.
               <div (click)="show_aggregation(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="code-working-outline"></ion-icon><br />
-                  {{ 'Edit' | translate }}<br />{{ 'Aggregation' | translate }}
+                  {{ 'Edit' | translate }}<br />{{ 'Aggregate' | translate }}
+                </div>
+              </div>
+              <div (click)="edit_query()" class="data-sq-button">
+                <div class="ion-no-padding">
+                  <ion-icon name="settings-outline"></ion-icon><br />
+                  {{ 'Edit' | translate }}<br />{{ 'Query' | translate }}
                 </div>
               </div>
             </ion-col>

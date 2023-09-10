@@ -1387,6 +1387,7 @@ class Crud:
             que_title_ = input_["que_title"]
             que_collection_id_ = input_["que_collection_id"]
             que_aggregate_ = input_["que_aggregate"]
+            que_message_body_ = input_["que_message_body"] if "que_message_body" in input_ else "" 
             _tags = input_["_tags"]
             get_timestamp_f_ = Misc().get_timestamp_f()
 
@@ -1427,10 +1428,9 @@ class Crud:
             file_excel_ = f"/cron/query-{que_id_}-{get_timestamp_f_}.xlsx"
             df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
             files_.append({"filename": file_excel_, "filetype": "xlsx"})
-            html_ = "Ok"
             email_sent_ = Email().send_email_f({
                 "personalizations": personalizations_,
-                "html": html_,
+                "html": que_message_body_,
                 "subject": que_title_,
                 "files": files_
             })
@@ -1860,8 +1860,10 @@ class Crud:
                             array_.append(array2_)
 
                         fpart_ = {}
-                        if mat_["op"] in ["null", "nnull"]:
+                        if mat_["op"] == "null":
                             fpart_["$or"] = array_
+                        if mat_["op"] == "nnull":
+                            fpart_["$and"] = array_
                         else:
                             fpart_[mat_["key"]] = fres_
 
@@ -2450,6 +2452,10 @@ class Crud:
             fields_ = []
             permitted_ = False
 
+            schema_ = self.root_schemas_f("_query")
+            if not schema_:
+                raise AuthError(f"no schema found {que_id_}")
+
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             if Misc().permitted_usertag_f(user_):
                 permitted_ = True
@@ -2492,7 +2498,7 @@ class Crud:
             data_ = json.loads(JSONEncoder().encode(list(aggregated_)))
             count_ = Mongo().db_[f"{que_collection_id_}_data"].count_documents(match_)
 
-            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_}
+            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
 
         except AuthError as exc_:
             return Misc().auth_error_f(exc_)
@@ -2957,9 +2963,6 @@ class Crud:
                 })
                 if not link_f_["result"]:
                     raise AppException(link_f_["msg"])
-
-            if collection_ == "_query":
-                a = 1
 
             log_ = Misc().log_f({
                 "type": "Info",

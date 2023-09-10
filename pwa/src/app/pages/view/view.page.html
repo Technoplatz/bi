@@ -35,8 +35,6 @@ https://www.gnu.org/licenses.
     <ion-row *ngIf="is_initialized; else dataloading">
       <ion-col class="console-right">
         <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
-          <ion-icon *ngIf="!menutoggle" name="arrow-back-outline"></ion-icon>
-          <ion-icon *ngIf="menutoggle" name="arrow-forward-outline"></ion-icon>
           {{ header | translate }}
         </ion-button>
         <h2>{{ subheader }}</h2>

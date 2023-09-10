@@ -49,9 +49,18 @@
     },
     "que_aggregate": {
       "bsonType": "object",
-      "title": "Aggregate",
-      "description": "Query aggregate",
+      "title": "Aggregation",
+      "description": "Query aggregation",
       "width": 130
+    },
+    "que_message_body": {
+      "bsonType": "string",
+      "minLength": 0,
+      "maxLength": 512,
+      "title": "Body",
+      "description": "Query email body",
+      "textarea": true,
+      "width": 150
     },
     "_tags": {
       "bsonType": "array",

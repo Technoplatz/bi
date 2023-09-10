@@ -257,7 +257,7 @@ export class Crud {
     });
   }
 
-  getQuery(id_: string, page_: number, limit_: number) {
+  get_query_data(id_: string, page_: number, limit_: number) {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
         id: id_,

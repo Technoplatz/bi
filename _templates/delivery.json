@@ -6,8 +6,7 @@
       "description": "Delivery Number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9A-Z-]{10,16}$",
-      "width": 120
+      "pattern": "^[0-9A-Z-]{10,16}$"
     },
     "dnn_line_no": {
       "bsonType": "string",
@@ -15,8 +14,7 @@
       "description": "Line Number",
       "minLength": 1,
       "maxLength": 4,
-      "pattern": "^[0-9]{1,4}$",
-      "width": 110
+      "pattern": "^[0-9]{1,4}$"
     },
     "dnn_status": {
       "bsonType": "string",
@@ -42,8 +40,7 @@
         "AR-Archived",
         "ND-NotDefined"
       ],
-      "default": "00-Standby",
-      "width": 170
+      "default": "00-Standby"
     },
     "dnn_ship_type": {
       "bsonType": "string",
@@ -51,8 +48,7 @@
       "description": "Shipping type",
       "minLength": 0,
       "maxLength": 8,
-      "pattern": "^[A-Za-z]{0,8}$",
-      "width": 120
+      "pattern": "^[A-Za-z]{0,8}$"
     },
     "dnn_odi_no": {
       "bsonType": "string",
@@ -61,8 +57,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase",
-      "width": 170
+      "casetype": "uppercase"
     },
     "dnn_odi_sub_no": {
       "bsonType": "string",
@@ -71,16 +66,14 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase",
-      "width": 170
+      "casetype": "uppercase"
     },
     "dnn_man_no": {
       "bsonType": "string",
       "title": "Manifest No",
       "description": "Manifest number",
       "minLength": 1,
-      "maxLength": 32,
-      "width": 160
+      "maxLength": 32
     },
     "dnn_bill_no": {
       "bsonType": "string",
@@ -88,8 +81,7 @@
       "description": "Bill Number",
       "minLength": 1,
       "maxLength": 16,
-      "pattern": "^[0-9A-Z]{1,16}$",
-      "width": 110
+      "pattern": "^[0-9A-Z]{1,16}$"
     },
     "dnn_acc_no": {
       "bsonType": "string",
@@ -97,31 +89,27 @@
       "description": "Account No",
       "minLength": 9,
       "maxLength": 16,
-      "pattern": "^[A-Z0-9-]{9,16}$",
-      "width": 110
+      "pattern": "^[A-Z0-9-]{9,16}$"
     },
     "dnn_acc_name": {
       "bsonType": "string",
       "title": "Account Name",
       "description": "Account Name",
       "minLength": 1,
-      "maxLength": 128,
-      "width": 240
+      "maxLength": 128
     },
     "dnn_date": {
       "bsonType": "date",
       "title": "DN Date",
       "description": "DN Date",
-      "dateonly": true,
-      "width": 120
+      "dateonly": true
     },
     "dnn_po_id": {
       "bsonType": "string",
       "title": "PO ID",
       "description": "Purchase Order Id",
       "minLength": 1,
-      "maxLength": 64,
-      "width": 260
+      "maxLength": 64
     },
     "dnn_order_no": {
       "bsonType": "string",
@@ -129,14 +117,12 @@
       "description": "Order Number",
       "minLength": 10,
       "maxLength": 10,
-      "pattern": "^[0-9]{10,10}$",
-      "width": 120
+      "pattern": "^[0-9]{10,10}$"
     },
     "dnn_bu_id": {
       "bsonType": "number",
       "title": "BU ID",
-      "description": "Business Unit Id",
-      "width": 100
+      "description": "Business Unit Id"
     },
     "dnn_prd_no": {
       "bsonType": "string",
@@ -155,70 +141,60 @@
           "replace": ""
         }
       ],
-      "casetype": "uppercase",
-      "width": 130
+      "casetype": "uppercase"
     },
     "dnn_prd_description": {
       "bsonType": "string",
       "title": "Description",
       "description": "Product Description",
       "minLength": 1,
-      "maxLength": 256,
-      "width": 280
+      "maxLength": 256
     },
     "dnn_prd_group": {
       "bsonType": "string",
       "title": "Group",
       "description": "Product Group",
       "minLength": 0,
-      "maxLength": 32,
-      "width": 130
+      "maxLength": 32
     },
     "dnn_length": {
       "bsonType": "number",
       "title": "Length",
-      "description": "Length",
-      "width": 100
+      "description": "Length"
     },
     "dnn_width": {
       "bsonType": "number",
       "title": "Width",
-      "description": "Width",
-      "width": 100
+      "description": "Width"
     },
     "dnn_height": {
       "bsonType": "number",
       "title": "Height",
-      "description": "Height",
-      "width": 100
+      "description": "Height"
     },
     "dnn_gross_weight": {
       "bsonType": "number",
       "title": "Gross Weight",
       "description": "Gross Weight",
-      "default": 0,
-      "width": 150
+      "default": 0
     },
     "dnn_qty": {
       "bsonType": "number",
       "title": "Quantity",
       "description": "Quantity",
-      "default": 1,
-      "width": 80
+      "default": 1
     },
     "dnn_unit_price": {
       "bsonType": "number",
       "title": "Price",
       "description": "Unit Price",
-      "default": 0,
-      "width": 130
+      "default": 0
     },
     "dnn_amount": {
       "bsonType": "number",
       "title": "Amount",
       "description": "Line Amount",
       "default": 0,
-      "width": 110,
       "decimals": 2,
       "disabled": false
     },
@@ -226,8 +202,7 @@
       "bsonType": "number",
       "title": "Order Price",
       "description": "Order Price",
-      "default": 0,
-      "width": 140
+      "default": 0
     },
     "dnn_order_amount": {
       "bsonType": "number",
@@ -235,37 +210,32 @@
       "description": "Order Amount",
       "default": 0,
       "disabled": false,
-      "decimals": 2,
-      "width": 150
+      "decimals": 2
     },
     "dnn_eta_date": {
       "bsonType": "date",
       "title": "ETA Date",
       "description": "ETA date",
-      "dateonly": true,
-      "width": 120
+      "dateonly": true
     },
     "dnn_shp_id": {
       "bsonType": "number",
       "title": "Shipment ID",
       "description": "Shipment ID",
       "minimum": 0,
-      "maximum": 999999,
-      "width": 110
+      "maximum": 999999
     },
     "dnn_waybill_no": {
       "title": "Waybill No",
       "bsonType": "string",
       "description": "Shipment Waybill Number",
       "minLength": 0,
-      "maxLength": 16,
-      "width": 140
+      "maxLength": 16
     },
     "dnn_waybill_date": {
       "bsonType": "date",
       "title": "Waybill Date",
-      "description": "Waybill Document Date",
-      "width": 140
+      "description": "Waybill Document Date"
     }
   },
   "required": ["dnn_no", "dnn_acc_no", "dnn_bill_no", "dnn_status", "dnn_prd_no"],

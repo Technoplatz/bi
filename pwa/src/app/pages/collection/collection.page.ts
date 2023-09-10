@@ -266,7 +266,7 @@ export class CollectionPage implements OnInit {
   doAction(ix_: any) {
     if (this.actions[ix_]?.one_click || this.sweeped[this.segment]?.length > 0) {
       this.actionix = ix_;
-      this.goCrud(null, "action");
+      this.go_crud(null, "action");
     } else {
       this.misc.doMessage("please make a selection to run this action", "error");
     }
@@ -276,7 +276,7 @@ export class CollectionPage implements OnInit {
     if (this.data.length > 0 && this.is_selected) {
       if (op_ === "action") {
         if (this.structure && this.structure.actions && this.structure.actions.length > 0) {
-          this.goCrud(null, op_);
+          this.go_crud(null, op_);
         } else {
           this.misc.doMessage("no action defined for the collection", "error");
         }
@@ -320,39 +320,41 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  async goCrud(rec: any, op: string) {
-    const modal = await this.modal.create({
-      component: CrudPage,
-      backdropDismiss: true,
-      cssClass: "crud-modal",
-      componentProps: {
-        shuttle: {
-          op: op,
-          collection: this.id ? this.id : null,
-          collections: this.collections ? this.collections : [],
-          views: this.views ? this.views : [],
-          user: this.user,
-          data: rec,
-          counters: this.counters_,
-          structure: this.editor ? this.editor.get() : this.structure,
-          sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
-          filter: op === "action" ? this.filter_ : null,
-          actions: this.actions && this.actions.length > 0 ? this.actions : [],
-          actionix: op === "action" && this.actionix >= 0 ? this.actionix : -1,
-          view: this.view,
-          scan: this.scan_
+  async go_crud(rec: any, op: string) {
+    if (this.id === "_query") { this.go_query(rec) } else {
+      const modal = await this.modal.create({
+        component: CrudPage,
+        backdropDismiss: true,
+        cssClass: "crud-modal",
+        componentProps: {
+          shuttle: {
+            op: op,
+            collection: this.id ? this.id : null,
+            collections: this.collections ? this.collections : [],
+            views: this.views ? this.views : [],
+            user: this.user,
+            data: rec,
+            counters: this.counters_,
+            structure: this.editor ? this.editor.get() : this.structure,
+            sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
+            filter: op === "action" ? this.filter_ : null,
+            actions: this.actions && this.actions.length > 0 ? this.actions : [],
+            actionix: op === "action" && this.actionix >= 0 ? this.actionix : -1,
+            view: this.view,
+            scan: this.scan_
+          }
         }
-      }
-    });
-    modal.onDidDismiss().then((res: any) => {
-      if (res.data.modified || this.scan_) {
-        if (op === "action" && res.data.res) {
-          this.misc.doMessage(res.data.res.content, "success");
+      });
+      modal.onDidDismiss().then((res: any) => {
+        if (res.data.modified || this.scan_) {
+          if (op === "action" && res.data.res) {
+            this.misc.doMessage(res.data.res.content, "success");
+          }
+          this.RefreshData(0);
         }
-        this.RefreshData(0);
-      }
-    });
-    return await modal.present();
+      });
+      return await modal.present();
+    }
   }
 
   async GetIsSelectData() {
@@ -705,7 +707,9 @@ export class CollectionPage implements OnInit {
   }
 
   go_query(record_: any) {
-    this.misc.navi.next("/query/" + record_.que_id);
+    this.storage.set("LSQUERY", record_).then(() => {
+      this.misc.navi.next("/query/" + record_.que_id);
+    });
   }
 
 }

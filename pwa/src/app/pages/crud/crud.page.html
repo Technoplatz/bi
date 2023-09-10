@@ -61,7 +61,7 @@ https://www.gnu.org/licenses.
                     <ion-icon name="close-circle-outline"></ion-icon>
                     {{ 'Cancel' |
                     translate }} </ion-button>
-                <ion-button *ngIf="op=='update'" color="danger" (click)="doRemove()" class="end-item">
+                <ion-button *ngIf="op=='update' && collection!='_query'" color="danger" (click)="doRemove()" class="end-item">
                     <ion-icon name="trash-bin-outline"></ion-icon>
                     {{ 'Delete' | translate }}&nbsp;
                 </ion-button>
