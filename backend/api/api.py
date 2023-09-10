@@ -102,6 +102,7 @@ class JSONEncoder(json.JSONEncoder):
     """
     docstring is in progress
     """
+
     def default(self, o):
         """
         docstring is in progress
@@ -117,6 +118,7 @@ class Schedular:
     """
     docstring is in progress
     """
+
     def cron_looker_f(self, view_):
         """
         docstring is in progress
@@ -153,8 +155,10 @@ class Schedular:
         docstring is in progress
         """
         try:
+            print_(">>> scheduled queries started")
             queries_ = Mongo().db_["_query"].find({"que_scheduled": True})
             if not queries_:
+                print_("!!! no queries found to schedule")
                 return {"result": True}
 
             for item_ in queries_:
@@ -162,22 +166,34 @@ class Schedular:
                 if not id__:
                     print_(f"!!! invalid query id {item_}")
                     continue
+
                 scheduled_cron_ = item_["que_scheduled_cron"] if "que_scheduled_cron" in item_ else None
                 if not croniter.is_valid(scheduled_cron_):
                     print_(f"!!! invalid cron {id__}")
                     continue
+
                 separated_ = re.split(" ", scheduled_cron_)
                 if not (separated_ and len(separated_) == 5):
                     print_(f"!!! invalid cron separation {id__}, {separated_}")
                     continue
+
                 minute_ = separated_[0].strip()
                 hour_ = separated_[1].strip()
                 day_ = separated_[2].strip()
                 month_ = separated_[3].strip()
                 day_of_week_ = separated_[4].lower().strip()
-                args_ = [item_]
+
+                args_ = [{
+                    "que_id": item_["que_id"],
+                    "que_title": item_["que_title"] if "que_title" in item_ else item_["que_id"],
+                    "que_collection_id": item_["que_collection_id"],
+                    "que_aggregate": item_["que_aggregate"],
+                    "que_message_body": item_["que_message_body"] if "que_message_body" in item_ else "HTML",
+                    "_tags": item_["_tags"] if "_tags" in item_ and len(item_["_tags"]) > 0 else ["#Administrators"]
+                }]
+
                 sched_.add_job(Crud().query_run_f, "cron", minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, id=id__, replace_existing=True, args=args_)
-                print_(f">>> scheduled {id__} {scheduled_cron_}")
+                print_(f">>> scheduled job query {id__} {scheduled_cron_}")
 
             return {"result": True}
 
@@ -192,6 +208,7 @@ class Schedular:
         docstring is in progress
         """
         try:
+            print_(">>> scheduled views started")
             collections_ = list(Mongo().db_["_collection"].aggregate([{
                 "$project": {
                     "col_id": 1,
@@ -227,7 +244,7 @@ class Schedular:
                     }]
                     sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_[
                                    "month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, replace_existing=True, args=args_)
-                    print_(">>> view scheduled", Misc().get_now_f(), id__, cron_looker_f_["hour"], cron_looker_f_["minute"], cron_looker_f_["day"])
+                    print_(">>> scheduled view", Misc().get_now_f(), id__, cron_looker_f_["hour"], cron_looker_f_["minute"], cron_looker_f_["day"])
 
             return {"result": True}
 
@@ -1384,14 +1401,14 @@ class Crud:
         """
         try:
             que_id_ = input_["que_id"]
-            que_title_ = input_["que_title"]
+            que_title_ = input_["que_title"] if "que_title" in input_ else que_id_
             que_collection_id_ = input_["que_collection_id"]
             que_aggregate_ = input_["que_aggregate"]
-            que_message_body_ = input_["que_message_body"] if "que_message_body" in input_ else "" 
-            _tags = input_["_tags"]
+            que_message_body_ = input_["que_message_body"] if "que_message_body" in input_ and input_["que_message_body"]  != "" else "HTML"
+            _tags = input_["_tags"] if "_tags" in input_ and len(input_["_tags"]) > 0 else ["#Administrators"]
             get_timestamp_f_ = Misc().get_timestamp_f()
 
-            print_(">>> query runs", que_id_, get_timestamp_f_)
+            print_(">>> query runs", get_timestamp_f_, que_id_)
 
             personalizations_to_ = []
             to_ = []
@@ -2963,6 +2980,12 @@ class Crud:
                 })
                 if not link_f_["result"]:
                     raise AppException(link_f_["msg"])
+
+            # if collection_id_ == "_query":
+            #     sched_ = BackgroundScheduler(daemon=True)
+            #     schedule_queries_f_ = Schedular().schedule_queries_f(sched_)
+            #     if not schedule_queries_f_["result"]:
+            #         raise APIError(schedule_queries_f_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",

@@ -178,8 +178,7 @@ Standard fields of a property;
 **description**: A short description of the data field.\
 **placeholder**: Description that appears in the data entry box in forms.\
 **default**: The default value to use when no value is given.\
-**permanent**: Once entered, it cannot be changed (true|false).\
-**width**: The column width in pixels.
+**permanent**: Once entered, it cannot be changed (true|false).
 
 #### String Properties
 
@@ -194,8 +193,7 @@ Standard fields of a property;
     "maxWidth": 16,
     "pattern": "^[A-Za-z0-9-]{8,16}$",
     "default": null,
-    "permanent": true,
-    "width": 140
+    "permanent": true
   }
 }
 ```
@@ -213,8 +211,7 @@ Enumerates are certain type of string properties with predefined values which al
     "maxWidth": 4,
     "enum": ["Sea", "Air", "Truck"],
     "default": "Truck",
-    "permanent": false,
-    "width": 140
+    "permanent": false
   }
 }
 ```
@@ -231,8 +228,7 @@ Enumerates are certain type of string properties with predefined values which al
     "minimum": 1,
     "maximum": 999,
     "default": 1,
-    "counter": false,
-    "width": 140
+    "counter": false
   }
 }
 ```

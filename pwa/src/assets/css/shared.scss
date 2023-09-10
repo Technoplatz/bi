@@ -1619,6 +1619,7 @@ ion-checkbox {
 .search-input {
   margin-top: 16px !important;
   margin-bottom: 8px !important;
+  border-bottom: 1px solid #ddd;
 }
 
 .setmode-grid {
@@ -1696,14 +1697,13 @@ ion-checkbox {
 }
 
 .search-box {
-  position: fixed;
+  position: absolute;
   padding: 8px;
   width: 240px;
   height: auto;
   margin-left: -7px;
-  margin-top: 7px;
-  border-top: 0px;
-  border: 2px solid var(--ion-color-dark);
+  margin-top: 8px;
+  border: 1px solid var(--ion-color-dark);
   z-index: 999999 !important;
   background-color: #fff;
   cursor: default;
@@ -1856,7 +1856,7 @@ ion-checkbox {
 
 .data-table td,
 .data-table th {
-  padding: 0.4rem;
+  padding: 0.5rem;
   text-align: left !important;
   border: 1px solid var(--ion-color-light);
   max-width: 260px;
@@ -1874,7 +1874,7 @@ ion-checkbox {
 }
 
 .data-table tr:first-child {
-  border-bottom: 2px solid var(--ion-color-medium);
+  border-bottom: 2px solid var(--ion-color-dark);
   cursor: pointer;
 }
 

@@ -162,10 +162,10 @@ https://www.gnu.org/licenses.
             </th>
             <th *ngFor="let item of properties_ | keyvalue : orderByIndex">
               <div (click)="doSetSearch(item.key)">
-                {{ item.value.title }} <span *ngIf="searched && searched[item.key] && searched[item.key].f"
-                  class="danger">[F]</span>
+                {{ item.value.title }} 
+                <span *ngIf="searched && searched[item.key] && searched[item.key].f" class="danger">[F]</span>
                 <br />
-                {{ item.key }}
+                <ion-text color="primary">{{ item.key }}</ion-text>
               </div>
               <div *ngIf="searched && searched[item.key]?.actived && !searched[item.key].setmode" class="search-box">
                 <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
