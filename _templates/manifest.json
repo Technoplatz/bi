@@ -253,5 +253,6 @@
     }
   ],
   "views": {},
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }

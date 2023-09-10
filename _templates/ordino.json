@@ -195,5 +195,6 @@
     }
   ],
   "views": {},
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }

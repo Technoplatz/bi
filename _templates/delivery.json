@@ -959,5 +959,6 @@
       "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
     }
   },
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }

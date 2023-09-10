@@ -192,5 +192,6 @@
   "links": [],
   "triggers": [],
   "views": {},
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }

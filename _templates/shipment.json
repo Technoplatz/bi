@@ -264,5 +264,6 @@
   ],
   "triggers": [],
   "views": {},
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }

@@ -157,7 +157,9 @@ curl -Lso ~/technoplatz-bi/bi-sh --create-dirs \
   "actions": [],
   "links": [],
   "triggers": [],
-  "views": {}
+  "views": {}, 
+  "fetchers": [],
+  "import": {}
 }
 ```
 

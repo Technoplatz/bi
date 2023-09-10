@@ -26,5 +26,6 @@
   "actions": [],
   "triggers": [],
   "views": {},
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }

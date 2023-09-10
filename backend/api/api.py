@@ -1404,7 +1404,7 @@ class Crud:
             que_title_ = input_["que_title"] if "que_title" in input_ else que_id_
             que_collection_id_ = input_["que_collection_id"]
             que_aggregate_ = input_["que_aggregate"]
-            que_message_body_ = input_["que_message_body"] if "que_message_body" in input_ and input_["que_message_body"]  != "" else "HTML"
+            que_message_body_ = input_["que_message_body"] if "que_message_body" in input_ and input_["que_message_body"] != "" else "HTML"
             _tags = input_["_tags"] if "_tags" in input_ and len(input_["_tags"]) > 0 else ["#Administrators"]
             get_timestamp_f_ = Misc().get_timestamp_f()
 
@@ -3478,61 +3478,54 @@ class Email:
     """
     docstring is in progress
     """
+    # def send_email_smtp_f(self, msg):
+    #     """
+    #     docstring is in progress
+    #     """
+    #     try:
+    #         EMAIL_DISCLAIMER_HTML_ = os.environ.get("EMAIL_DISCLAIMER_HTML")
+    #         email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
+    #         html_ = f"{msg['html']} {EMAIL_DISCLAIMER_HTML_}"
+    #         server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
+    #         server_.ehlo()
+    #         server_.login(SMTP_USERID_, SMTP_PASSWORD_)
 
-    def __init__(self):
-        """
-        docstring is in progress
-        """
-        self.disclaimer_ = f"<p>Sincerely,</p><p>{COMPANY_NAME_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
-        self.disclaimer_text_ = f"\n\nSincerely,\n\n{COMPANY_NAME_}\n\nPLEASE DO NOT REPLY THIS EMAIL\n--------------------------------\nThis email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {COMPANY_NAME_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission."
+    #         message_ = MIMEMultipart()
+    #         message_["From"] = email_from_
+    #         message_["Subject"] = msg["subject"]
+    #         message_.attach(MIMEText(html_, "html"))
 
-    def send_email_smtp_f(self, msg):
-        """
-        docstring is in progress
-        """
-        try:
-            email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
-            html_ = f"{msg['html']} {self.disclaimer_}"
-            server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
-            server_.ehlo()
-            server_.login(SMTP_USERID_, SMTP_PASSWORD_)
+    #         for file_ in msg["files"]:
+    #             filename_ = file_["filename"]
+    #             with open(f"{filename_}", "rb") as attachment_:
+    #                 part_ = MIMEBase("application", "octet-stream")
+    #                 part_.set_payload(attachment_.read())
+    #             encoders.encode_base64(part_)
+    #             filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
+    #             part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
+    #             message_.attach(part_)
 
-            message_ = MIMEMultipart()
-            message_["From"] = email_from_
-            message_["Subject"] = msg["subject"]
-            message_.attach(MIMEText(html_, "html"))
+    #         recipients_ = []
+    #         recipients_str_ = ""
+    #         for recipient_ in msg["personalizations"]["to"]:
+    #             email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
+    #             recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
+    #             recipients_.append(recipient_["email"])
 
-            for file_ in msg["files"]:
-                filename_ = file_["filename"]
-                with open(f"{filename_}", "rb") as attachment_:
-                    part_ = MIMEBase("application", "octet-stream")
-                    part_.set_payload(attachment_.read())
-                encoders.encode_base64(part_)
-                filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
-                part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
-                message_.attach(part_)
+    #         message_["To"] = recipients_str_
+    #         server_.sendmail(email_from_, recipients_, message_.as_string())
+    #         server_.close()
 
-            recipients_ = []
-            recipients_str_ = ""
-            for recipient_ in msg["personalizations"]["to"]:
-                email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
-                recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
-                recipients_.append(recipient_["email"])
+    #         return {"result": True}
 
-            message_["To"] = recipients_str_
-            server_.sendmail(email_from_, recipients_, message_.as_string())
-            server_.close()
+    #     except smtplib.SMTPResponseException as exc_:
+    #         return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
 
-            return {"result": True}
+    #     except smtplib.SMTPServerDisconnected as exc_:
+    #         return {"result": True, "exc": str(exc_)}
 
-        except smtplib.SMTPResponseException as exc_:
-            return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
-
-        except smtplib.SMTPServerDisconnected as exc_:
-            return {"result": True, "exc": str(exc_)}
-
-        except Exception as exc_:
-            return Misc().exception_f(f"smtp exception: {exc_}")
+    #     except Exception as exc_:
+    #         return Misc().exception_f(f"smtp exception: {exc_}")
 
     def send_email_f(self, msg):
         """
@@ -3541,7 +3534,7 @@ class Email:
         try:
             op_ = msg["op"] if "op" in msg else None
             files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
-            html_ = f"{msg['html']}" if "html" in msg else None
+            html_ = f"{msg['html']} {EMAIL_DISCLAIMER_HTML_}" if "html" in msg else EMAIL_DISCLAIMER_HTML_
             tags_ = msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
             personalizations_ = msg["personalizations"] if "personalizations" in msg else None
             subject_ = msg["subject"] if "subject" in msg else None
@@ -3579,23 +3572,61 @@ class Email:
             if "to" not in personalizations_ or len(personalizations_["to"]) == 0:
                 raise APIError("to list is missing")
 
-            msg_ = {
-                "files": files_,
-                "personalizations": personalizations_,
-                "subject": subject_,
-                "html": html_
-            }
-            email_sent_ = self.send_email_smtp_f(msg_)
-            if not email_sent_["result"]:
-                raise APIError(email_sent_["msg"])
+            # msg_ = {
+            #     "files": files_,
+            #     "personalizations": personalizations_,
+            #     "subject": subject_,
+            #     "html": html_
+            # }
+
+            # email_sent_ = self.send_email_smtp_f(msg_)
+            # if not email_sent_["result"]:
+            #     raise APIError(email_sent_["msg"])
+
+            email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
+            server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
+            server_.ehlo()
+            server_.login(SMTP_USERID_, SMTP_PASSWORD_)
+
+            message_ = MIMEMultipart()
+            message_["From"] = email_from_
+            message_["Subject"] = subject_
+            message_.attach(MIMEText(html_, "html"))
+
+            for file_ in files_:
+                filename_ = file_["filename"]
+                with open(f"{filename_}", "rb") as attachment_:
+                    part_ = MIMEBase("application", "octet-stream")
+                    part_.set_payload(attachment_.read())
+                encoders.encode_base64(part_)
+                filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
+                part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
+                message_.attach(part_)
+
+            recipients_ = []
+            recipients_str_ = ""
+            for recipient_ in personalizations_["to"]:
+                email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
+                recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
+                recipients_.append(recipient_["email"])
+
+            message_["To"] = recipients_str_
+            server_.sendmail(email_from_, recipients_, message_.as_string())
+            server_.close()
 
             return {"result": True}
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except smtplib.SMTPResponseException as exc_:
+            return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except smtplib.SMTPServerDisconnected as exc_:
+            return {"result": True, "exc": str(exc_)}
+
+        except APIError as exc_:
+            return Misc().api_error_f(exc_)
+
+        except Exception as exc_:
+            return Misc().exception_f(exc_)
 
 
 class Security:
@@ -4586,6 +4617,7 @@ SMTP_PORT_ = os.environ.get("SMTP_PORT")
 SMTP_USERID_ = os.environ.get("SMTP_USERID")
 SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
 FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
+EMAIL_DISCLAIMER_HTML_=os.environ.get("EMAIL_DISCLAIMER_HTML")
 EMAIL_TFA_SUBJECT_ = "Your Backup OTP"
 EMAIL_SIGNUP_SUBJECT_ = "Welcome"
 EMAIL_SIGNIN_SUBJECT_ = "New Sign-in"
@@ -4616,7 +4648,7 @@ PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get("PREVIEW_R
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
-STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers"]
+STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers", "import"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
 DEFAULT_AGGREGATION_LIMIT_ = 1000
 

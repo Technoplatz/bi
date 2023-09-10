@@ -39,8 +39,8 @@
       "title": "Cron",
       "description": "Schedule cron",
       "minLength": 0,
-      "maxLength": 27,
-      "pattern": "^[a-z,]{0,27}$"
+      "maxLength": 64,
+      "pattern": "^[a-z0-9*\\-,/ ]{0,64}$"
     },
     "que_aggregate": {
       "bsonType": "object",

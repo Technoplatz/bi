@@ -79,5 +79,6 @@
       "_tags": ["#Technoplatz"]
     }
   },
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }

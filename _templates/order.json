@@ -80,5 +80,6 @@
   ],
   "views": {},
   "links": [],
-  "fetchers": []
+  "fetchers": [],
+  "import": {}
 }
