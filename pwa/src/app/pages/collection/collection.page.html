@@ -252,6 +252,10 @@ https://www.gnu.org/licenses.
               {{ 'Modified By' | translate }}<br />
               {{ '_modified_by' }}
             </th>
+            <th>
+              {{ 'Record ID' | translate }}<br />
+              {{ '_id' }}
+            </th>
           </tr>
           <tr *ngFor="let record of data; let i = index">
             <td>
@@ -304,6 +308,9 @@ https://www.gnu.org/licenses.
             </td>
             <td>
               {{ record._modified_by }}
+            </td>
+            <td>
+              {{ record._id }}
             </td>
           </tr>
         </table>

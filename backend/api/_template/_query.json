@@ -7,8 +7,7 @@
       "pattern": "^[a-z0-9-_]{3,64}$",
       "title": "ID",
       "description": "Query ID",
-      "casetype": "lowercase",
-      "width": 170
+      "casetype": "lowercase"
     },
     "que_title": {
       "bsonType": "string",
@@ -16,8 +15,7 @@
       "maxLength": 32,
       "title": "Title",
       "description": "Query Title",
-      "casetype": "capitalize",
-      "width": 150
+      "casetype": "capitalize"
     },
     "que_collection_id": {
       "bsonType": "string",
@@ -28,15 +26,13 @@
       "description": "Collection ID",
       "required": true,
       "collection": true,
-      "casetype": "lowercase",
-      "width": 150
+      "casetype": "lowercase"
     },
     "que_scheduled": {
       "bsonType": "bool",
       "title": "Scheduled",
       "default": false,
-      "description": "Scheduled or not",
-      "width": 130
+      "description": "Scheduled or not"
     },
     "que_scheduled_cron": {
       "bsonType": "string",
@@ -44,14 +40,12 @@
       "description": "Schedule cron",
       "minLength": 0,
       "maxLength": 32,
-      "pattern": "^[a-z0-9*\\-,/ ]{0,32}$",
-      "width": 160
+      "pattern": "^[a-z0-9*\\-,/ ]{0,32}$"
     },
     "que_aggregate": {
       "bsonType": "object",
       "title": "Aggregation",
-      "description": "Query aggregation",
-      "width": 130
+      "description": "Query aggregation"
     },
     "que_message_body": {
       "bsonType": "string",
@@ -59,8 +53,7 @@
       "maxLength": 512,
       "title": "Body",
       "description": "Query email body",
-      "textarea": true,
-      "width": 150
+      "textarea": true
     },
     "_tags": {
       "bsonType": "array",
@@ -75,8 +68,7 @@
       },
       "title": "Tags",
       "description": "Enter a tag #...",
-      "manualAdd": true,
-      "width": 300
+      "manualAdd": true
     }
   },
   "required": ["que_id", "que_title", "que_collection_id"],

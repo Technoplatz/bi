@@ -7,8 +7,7 @@
       "pattern": "^[a-z0-9-]{3,64}$",
       "title": "ID",
       "description": "ID",
-      "default": "database-dump",
-      "width": 220
+      "default": "database-dump"
     },
     "ano_vie_id": {
       "bsonType": "string",
@@ -16,22 +15,19 @@
       "maxLength": 64,
       "pattern": "^[a-z0-9-]{3,64}$",
       "title": "ID",
-      "description": "View ID",
-      "width": 230
+      "description": "View ID"
     },
     "ano_vie_title": {
       "bsonType": "string",
       "minLength": 1,
       "maxLength": 64,
       "title": "Title",
-      "description": "View Title",
-      "width": 230
+      "description": "View Title"
     },
     "ano_scope": {
       "bsonType": "string",
       "title": "Type",
-      "description": "Type",
-      "width": 110
+      "description": "Type"
     },
     "ano_to": {
       "bsonType": "array",
@@ -45,8 +41,7 @@
       },
       "title": "To",
       "description": "To List",
-      "manualAdd": false,
-      "width": 300
+      "manualAdd": false
     },
     "_tags": {
       "bsonType": "array",
@@ -61,8 +56,7 @@
       },
       "title": "Tags",
       "description": "Enter a tag #...",
-      "manualAdd": false,
-      "width": 300
+      "manualAdd": false
     }
   },
   "required": ["ano_id", "ano_scope", "ano_vie_id", "ano_vie_title"],

@@ -115,7 +115,6 @@ export const environment = {
     { "key": "false", "op": "", "value": "false" }
   ],
   segmentsadm: [
-    { "id": "_announcement", "title": "Announcements", "description": "Data announcements of shared views." },
     { "id": "_user", "title": "Users", "description": "Internal users and data subscribers." },
     { "id": "_permission", "title": "Permissions", "description": "Database collection permissions." },
     { "id": "_firewall", "title": "Firewall", "description": "IP Firewall" },

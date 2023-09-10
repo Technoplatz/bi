@@ -6,8 +6,7 @@
       "maxLength": 64,
       "pattern": "^[a-zA-Z0-9- ]+$",
       "title": "Rule Name",
-      "description": "Rule Name",
-      "width": 180
+      "description": "Rule Name"
     },
     "fwa_tag": {
       "bsonType": "string",
@@ -15,8 +14,7 @@
       "maxLength": 64,
       "pattern": "^[#@][a-zA-Z0-9]{4,64}$",
       "title": "Tag",
-      "description": "Enter a tag #...",
-      "width": 140
+      "description": "Enter a tag #..."
     },
     "fwa_source_ip": {
       "bsonType": "string",
@@ -24,15 +22,13 @@
       "maxLength": 15,
       "title": "Source IP",
       "description": "Source IP",
-      "required": true,
-      "width": 120
+      "required": true
     },
     "fwa_enabled": {
       "bsonType": "bool",
       "title": "Enabled",
       "default": true,
-      "description": "Enabled or not",
-      "width": 120
+      "description": "Enabled or not"
     }
   },
   "required": ["fwa_name", "fwa_source_ip", "fwa_tag"],

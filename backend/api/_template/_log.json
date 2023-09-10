@@ -8,15 +8,13 @@
       "description": "Log type",
       "enum": ["Info", "Error", "Warning", "Denied", "Announcement", "Automation"],
       "pattern": "^[a-zA-Z]{1,16}$",
-      "required": true,
-      "width": 100
+      "required": true
     },
     "log_date": {
       "bsonType": "date",
       "title": "Date",
       "description": "Log date",
-      "required": true,
-      "width": 140
+      "required": true
     },
     "log_user_id": {
       "bsonType": "string",
@@ -24,16 +22,14 @@
       "maxLength": 64,
       "title": "User",
       "description": "User id",
-      "required": true,
-      "width": 180
+      "required": true
     },
     "log_ip": {
       "bsonType": "string",
       "minLength": 1,
       "maxLength": 16,
       "title": "IP",
-      "description": "IP address",
-      "width": 140
+      "description": "IP address"
     },
     "log_collection_id": {
       "bsonType": "string",
@@ -42,8 +38,7 @@
       "pattern": "^[a-z0-9-_]{3,64}$",
       "title": "Collection",
       "description": "Collection ID",
-      "permanent": true,
-      "width": 140
+      "permanent": true
     },
     "log_operation": {
       "bsonType": "string",
@@ -51,8 +46,7 @@
       "maxLength": 64,
       "title": "Operation",
       "description": "Operation",
-      "required": true,
-      "width": 120
+      "required": true
     },
     "log_document": {
       "bsonType": "string",
@@ -60,8 +54,7 @@
       "description": "Document",
       "textarea": true,
       "minLength": 0,
-      "maxLength": 2048,
-      "width": 180
+      "maxLength": 2048
     }
   },
   "required": ["log_type", "log_date", "log_user_id", "log_operation"],

@@ -8,8 +8,7 @@
       "title": "ID",
       "description": "Backup ID",
       "permanent": true,
-      "default": "database-dump",
-      "width": 250
+      "default": "database-dump"
     },
     "bak_description": {
       "bsonType": "string",
@@ -18,8 +17,7 @@
       "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß.,;?*_/()! -]{0,128}$",
       "title": "Description",
       "description": "Description",
-      "textarea": true,
-      "width": 160
+      "textarea": true
     },
     "bak_process": {
       "bsonType": "string",
@@ -27,23 +25,20 @@
       "description": "Backup Type",
       "enum": ["backup", "restore"],
       "default": "backup",
-      "permanent": true,
-      "width": 90
+      "permanent": true
     },
     "bak_type": {
       "bsonType": "string",
       "title": "Backup Type",
       "description": "Backup Type",
       "enum": ["gzip"],
-      "default": "gzip",
-      "width": 90
+      "default": "gzip"
     },
     "bak_size": {
       "bsonType": "number",
       "title": "Size",
       "description": "File Size",
-      "permanent": true,
-      "width": 90
+      "permanent": true
     }
   },
   "required": ["bak_id", "bak_type"],

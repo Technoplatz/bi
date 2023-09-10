@@ -9,8 +9,7 @@
       "maxLength": 64,
       "required": true,
       "placeholder": "Enter a business e-mail",
-      "casetype": "lowercase",
-      "width": 240
+      "casetype": "lowercase"
     },
     "usr_name": {
       "bsonType": "string",
@@ -18,8 +17,7 @@
       "maxLength": 64,
       "title": "Name",
       "description": "Full Name",
-      "required": true,
-      "width": 140
+      "required": true
     },
     "usr_scope": {
       "bsonType": "string",
@@ -29,14 +27,12 @@
       "description": "User Scope",
       "enum": ["Internal", "External", "Administrator"],
       "required": true,
-      "default": "Internal",
-      "width": 100
+      "default": "Internal"
     },
     "usr_enabled": {
       "bsonType": "bool",
       "title": "Enabled",
-      "description": "Enabled or not",
-      "width": 110
+      "description": "Enabled or not"
     },
     "_tags": {
       "bsonType": "array",
@@ -52,8 +48,7 @@
       "title": "Tags",
       "description": "Enter a tag #...",
       "subType": "tag",
-      "manualAdd": true,
-      "width": 300
+      "manualAdd": true
     }
   },
   "required": ["usr_id", "usr_name", "usr_scope"],

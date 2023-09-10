@@ -7,8 +7,7 @@
       "placeholder": "Short description for token",
       "minLength": 3,
       "maxLength": 128,
-      "pattern": "^[a-zA-Z0-9-_ ]{3,128}$",
-      "width": 160
+      "pattern": "^[a-zA-Z0-9-_ ]{3,128}$"
     },
     "tkn_collection_id": {
       "bsonType": "string",
@@ -18,8 +17,7 @@
       "title": "Collection",
       "description": "Collection ID",
       "collection": true,
-      "permanent": true,
-      "width": 140
+      "permanent": true
     },
     "tkn_lifetime": {
       "bsonType": "number",
@@ -28,50 +26,43 @@
       "placeholder": "Token lifetime 3-518400 mins",
       "minimum": 3,
       "maximum": 518400,
-      "permanent": true,
-      "width": 110
+      "permanent": true
     },
     "tkn_is_active": {
       "bsonType": "bool",
       "title": "Is Active",
       "description": "Token Accesibility",
-      "default": true,
-      "width": 110
+      "default": true
     },
     "tkn_grant_read": {
       "bsonType": "bool",
       "title": "Grant Read",
       "description": "Grant Read",
-      "default": false,
-      "width": 130
+      "default": false
     },
     "tkn_grant_insert": {
       "bsonType": "bool",
       "title": "Grant Insert",
       "description": "Grant Insert",
-      "default": false,
-      "width": 130
+      "default": false
     },
     "tkn_grant_update": {
       "bsonType": "bool",
       "title": "Grant Update",
       "description": "Grant Update",
-      "default": false,
-      "width": 140
+      "default": false
     },
     "tkn_grant_upsert": {
       "bsonType": "bool",
       "title": "Grant Upsert",
       "description": "Grant Upsert",
-      "default": false,
-      "width": 140
+      "default": false
     },
     "tkn_grant_delete": {
       "bsonType": "bool",
       "title": "Grant Delete",
       "description": "Grant Delete",
-      "default": false,
-      "width": 140
+      "default": false
     },
     "tkn_allowed_ips": {
       "bsonType": "array",
@@ -88,8 +79,7 @@
         "pattern": "^[0-9.]{7,15}$"
       },
       "subType": "ip",
-      "manualAdd": true,
-      "width": 160
+      "manualAdd": true
     },
     "tkn_allowed_queries": {
       "bsonType": "array",
@@ -105,8 +95,7 @@
         "maxLength": 64,
         "pattern": "^[a-z0-9-_]{3,64}$"
       },
-      "manualAdd": true,
-      "width": 180
+      "manualAdd": true
     }
   },
   "required": ["tkn_name"],

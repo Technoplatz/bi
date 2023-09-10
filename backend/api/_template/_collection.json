@@ -7,8 +7,7 @@
       "pattern": "^[a-z0-9-_]{3,64}$",
       "title": "ID",
       "description": "Collection ID",
-      "casetype": "lowercase",
-      "width": 150
+      "casetype": "lowercase"
     },
     "col_title": {
       "bsonType": "string",
@@ -16,8 +15,7 @@
       "maxLength": 32,
       "title": "Title",
       "description": "Collection Title",
-      "casetype": "capitalize",
-      "width": 150
+      "casetype": "capitalize"
     },
     "col_description": {
       "bsonType": "string",
@@ -25,8 +23,7 @@
       "maxLength": 256,
       "title": "Description",
       "description": "Collection Description",
-      "casetype": "capitalize",
-      "width": 220
+      "casetype": "capitalize"
     },
     "col_prefix": {
       "bsonType": "string",
@@ -35,8 +32,7 @@
       "pattern": "^[a-z]{3,3}$",
       "title": "Prefix",
       "description": "Column Prefix - 3 characters lower case",
-      "casetype": "lowercase",
-      "width": 110
+      "casetype": "lowercase"
     },
     "col_priority": {
       "bsonType": "number",
@@ -45,14 +41,12 @@
       "placeholder": "Priority",
       "minimum": 0,
       "maximum": 1000000,
-      "default": 100,
-      "width": 130
+      "default": 100
     },
     "col_structure": {
       "bsonType": "object",
       "title": "Structure",
-      "description": "Collection Structure",
-      "width": 120
+      "description": "Collection Structure"
     }
   },
   "required": ["col_id", "col_title", "col_prefix"],

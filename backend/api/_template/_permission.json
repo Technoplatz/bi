@@ -7,8 +7,7 @@
       "pattern": "^[a-z0-9-]{3,64}$",
       "title": "ID",
       "description": "Permission ID",
-      "required": true,
-      "width": 240
+      "required": true
     },
     "per_tag": {
       "bsonType": "string",
@@ -17,8 +16,7 @@
       "pattern": "^[#@][a-zA-Z0-9-]{4,64}$",
       "title": "Tag",
       "description": "Enter a tag #...",
-      "required": true,
-      "width": 140
+      "required": true
     },
     "per_collection_id": {
       "bsonType": "string",
@@ -28,8 +26,7 @@
       "title": "Collection ID",
       "description": "Collection ID",
       "required": true,
-      "collection": true,
-      "width": 150
+      "collection": true
     },
     "per_read": {
       "bsonType": "bool",
@@ -37,8 +34,7 @@
       "description": "Read Permission",
       "default": false,
       "truetext": "Yes",
-      "falsetext": "No",
-      "width": 90
+      "falsetext": "No"
     },
     "per_insert": {
       "bsonType": "bool",
@@ -46,8 +42,7 @@
       "description": "Insert Permission",
       "default": false,
       "truetext": "Yes",
-      "falsetext": "No",
-      "width": 100
+      "falsetext": "No"
     },
     "per_update": {
       "bsonType": "bool",
@@ -55,8 +50,7 @@
       "description": "Update Permission",
       "default": false,
       "truetext": "Yes",
-      "falsetext": "No",
-      "width": 100
+      "falsetext": "No"
     },
     "per_delete": {
       "bsonType": "bool",
@@ -64,8 +58,7 @@
       "description": "Delete Permission",
       "default": false,
       "truetext": "Yes",
-      "falsetext": "No",
-      "width": 100
+      "falsetext": "No"
     },
     "per_share": {
       "bsonType": "bool",
@@ -73,8 +66,7 @@
       "description": "Sharing Permission",
       "default": false,
       "truetext": "Yes",
-      "falsetext": "No",
-      "width": 90
+      "falsetext": "No"
     },
     "per_schema": {
       "bsonType": "bool",
@@ -82,8 +74,7 @@
       "description": "Scheme Permission",
       "default": false,
       "truetext": "Yes",
-      "falsetext": "No",
-      "width": 120
+      "falsetext": "No"
     },
     "per_match": {
       "bsonType": "array",
@@ -125,8 +116,7 @@
       },
       "title": "Match",
       "description": "Match filter",
-      "subType": "filter",
-      "width": 100
+      "subType": "filter"
     }
   },
   "required": ["per_id", "per_tag", "per_collection_id"],

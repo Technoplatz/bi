@@ -7,8 +7,7 @@
       "placeholder": "",
       "pattern": "^[a-zA-Z0-9-]{1,64}$",
       "minLength": 1,
-      "maxLength": 64,
-      "width": 140
+      "maxLength": 64
     },
     "zzz_enum": {
       "bsonType": "string",
@@ -16,30 +15,26 @@
       "description": "String Field with Enumerate",
       "placeholder": "",
       "enum": ["00-Open", "10-InProgress", "20-Closed", "30-Finalized"],
-      "default": "00-Open",
-      "width": 140
+      "default": "00-Open"
     },
     "zzz_date": {
       "bsonType": "date",
       "title": "Date",
       "description": "Date Field",
-      "placeholder": "",
-      "width": 140
+      "placeholder": ""
     },
     "zzz_number": {
       "bsonType": "number",
       "title": "Number",
       "description": "Number Field",
       "placeholder": "",
-      "default": 1,
-      "width": 140
+      "default": 1
     },
     "zzz_bool": {
       "bsonType": "bool",
       "title": "Bool",
       "description": "Boolean Field",
-      "default": false,
-      "width": 140
+      "default": false
     }
   },
   "required": ["zzz_string"],
