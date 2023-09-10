@@ -13,134 +13,117 @@
       "title": "Nickname",
       "description": "Nick Name",
       "minLength": 1,
-      "maxLength": 16,
-      "width": 130
+      "maxLength": 16
     },
     "acc_name": {
       "bsonType": "string",
       "title": "Business Name",
-      "description": "Business Name",
-      "width": 260
+      "description": "Business Name"
     },
     "acc_ship_to_street": {
       "bsonType": "string",
       "title": "Shipping Street",
       "description": "Ship to Street",
       "minLength": 2,
-      "maxLength": 256,
-      "width": 200
+      "maxLength": 256
     },
     "acc_ship_to_building": {
       "bsonType": "string",
       "title": "Shipping Building",
       "description": "Ship to building no",
       "minLength": 0,
-      "maxLength": 64,
-      "width": 170
+      "maxLength": 64
     },
     "acc_ship_to_province": {
       "bsonType": "string",
       "title": "Province",
       "description": "Ship to province",
       "minLength": 0,
-      "maxLength": 32,
-      "width": 170
+      "maxLength": 32
     },
     "acc_ship_to_postcode": {
       "bsonType": "string",
       "title": "Shipping Post Code",
       "description": "Ship to post code",
       "minLength": 2,
-      "maxLength": 32,
-      "width": 170
+      "maxLength": 32
     },
     "acc_ship_to_city": {
       "bsonType": "string",
       "title": "Shipping City",
       "description": "Ship to City",
       "minLength": 2,
-      "maxLength": 32,
-      "width": 140
+      "maxLength": 32
     },
     "acc_ship_to_address_id": {
       "bsonType": "string",
       "title": "Shipping Address ID",
       "description": "Shipping Address ID",
       "minLength": 8,
-      "maxLength": 16,
-      "width": 180
+      "maxLength": 16
     },
     "acc_ship_to_country": {
       "bsonType": "string",
       "title": "Shipping Country",
       "description": "Ship to Country",
       "minLength": 2,
-      "maxLength": 16,
-      "width": 170
+      "maxLength": 16
     },
     "acc_bill_to_street": {
       "bsonType": "string",
       "title": "Biling Street",
       "description": "Bill to street",
       "minLength": 2,
-      "maxLength": 256,
-      "width": 200
+      "maxLength": 256
     },
     "acc_bill_to_building": {
       "bsonType": "string",
       "title": "Billing Building",
       "description": "Bill to building no",
       "minLength": 0,
-      "maxLength": 64,
-      "width": 170
+      "maxLength": 64
     },
     "acc_bill_to_province": {
       "bsonType": "string",
       "title": "Billing Province",
       "description": "Bill to province",
       "minLength": 0,
-      "maxLength": 32,
-      "width": 170
+      "maxLength": 32
     },
     "acc_bill_to_postcode": {
       "bsonType": "string",
       "title": "Billing Post Code",
       "description": "Billing to post code",
       "minLength": 2,
-      "maxLength": 32,
-      "width": 170
+      "maxLength": 32
     },
     "acc_bill_to_city": {
       "bsonType": "string",
       "title": "Billing City",
       "description": "Bill to City",
       "minLength": 2,
-      "maxLength": 32,
-      "width": 140
+      "maxLength": 32
     },
     "acc_bill_to_address_id": {
       "bsonType": "string",
       "title": "Billing Address ID",
       "description": "Billing Address ID",
       "minLength": 8,
-      "maxLength": 16,
-      "width": 180
+      "maxLength": 16
     },
     "acc_bill_to_country": {
       "bsonType": "string",
       "title": "Billing Country",
       "description": "Bill to Country",
       "minLength": 2,
-      "maxLength": 16,
-      "width": 170
+      "maxLength": 16
     },
     "acc_tax_no": {
       "bsonType": "string",
       "title": "Tax No",
       "description": "Tax Number or ID",
       "minLength": 9,
-      "maxLength": 12,
-      "width": 120
+      "maxLength": 12
     },
     "acc_tax_office": {
       "bsonType": "string",
@@ -155,8 +138,7 @@
       "description": "Phone",
       "minLength": 10,
       "maxLength": 20,
-      "pattern": "^[0-9-+]{10,20}$",
-      "width": 150
+      "pattern": "^[0-9-+]{10,20}$"
     },
     "acc_fax": {
       "bsonType": "string",
@@ -164,8 +146,7 @@
       "description": "Faximile",
       "minLength": 10,
       "maxLength": 20,
-      "pattern": "^[0-9-+]{10,20}$",
-      "width": 150
+      "pattern": "^[0-9-+]{10,20}$"
     },
     "acc_email": {
       "bsonType": "string",
@@ -173,8 +154,7 @@
       "title": "Email",
       "description": "Customer business e-mail",
       "minLength": 0,
-      "maxLength": 64,
-      "width": 200
+      "maxLength": 64
     },
     "acc_web_address": {
       "bsonType": "string",
@@ -182,8 +162,7 @@
       "description": "Web address",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[a-z:/.-]{0,64}$",
-      "width": 200
+      "pattern": "^[a-z:/.-]{0,64}$"
     },
     "acc_alias": {
       "bsonType": "string",
@@ -191,14 +170,12 @@
       "title": "Alias",
       "description": "Alias",
       "minLength": 0,
-      "maxLength": 64,
-      "width": 250
+      "maxLength": 64
     },
     "acc_is_active": {
       "bsonType": "bool",
       "title": "Active?",
       "description": "Account is Active",
-      "width": 120,
       "truetext": "Active",
       "falsetext": "Inactive",
       "default": true

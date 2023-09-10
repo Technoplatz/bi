@@ -6,8 +6,7 @@
       "description": "Order Number",
       "minLength": 10,
       "maxLength": 10,
-      "pattern": "^[0-9-]{10,10}$",
-      "width": 130
+      "pattern": "^[0-9-]{10,10}$"
     },
     "ord_prd_no": {
       "bsonType": "string",
@@ -25,15 +24,13 @@
           "find": "_",
           "replace": ""
         }
-      ],
-      "width": 130
+      ]
     },
     "ord_unit_price": {
       "bsonType": "number",
       "title": "Unit Price",
       "description": "Unit Price",
-      "default": 0,
-      "width": 160
+      "default": 0
     }
   },
   "required": ["ord_no", "ord_prd_no", "ord_unit_price"],

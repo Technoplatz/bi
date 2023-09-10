@@ -7,8 +7,7 @@
       "minLength": 4,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9-?]{4,16}$",
-      "casetype": "uppercase",
-      "width": 110
+      "casetype": "uppercase"
     },
     "ser_dnn_no": {
       "bsonType": "string",
@@ -16,8 +15,7 @@
       "description": "Delivery number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9A-Z-]{10,16}$",
-      "width": 110
+      "pattern": "^[0-9A-Z-]{10,16}$"
     },
     "ser_line_no": {
       "bsonType": "string",
@@ -25,8 +23,7 @@
       "description": "Line number",
       "minLength": 1,
       "maxLength": 4,
-      "pattern": "^[0-9]{1,4}$",
-      "width": 110
+      "pattern": "^[0-9]{1,4}$"
     },
     "ser_prd_no": {
       "bsonType": "string",
@@ -45,8 +42,7 @@
           "replace": ""
         }
       ],
-      "casetype": "uppercase",
-      "width": 130
+      "casetype": "uppercase"
     },
     "ser_sscc_no": {
       "bsonType": "string",
@@ -54,34 +50,29 @@
       "description": "SSCC number",
       "minLength": 18,
       "maxLength": 20,
-      "pattern": "^[0-9-]{18,20}$",
-      "width": 150
+      "pattern": "^[0-9-]{18,20}$"
     },
     "ser_is_in": {
       "bsonType": "bool",
       "title": "Income",
       "description": "Touchpoint income",
-      "default": false,
-      "width": 110
+      "default": false
     },
     "ser_in_date": {
       "bsonType": "date",
       "title": "In Date",
-      "description": "Touchpoint incoming date",
-      "width": 140
+      "description": "Touchpoint incoming date"
     },
     "ser_is_out": {
       "bsonType": "bool",
       "title": "Outgoing",
       "description": "Touchpoint outgoing",
-      "default": false,
-      "width": 120
+      "default": false
     },
     "ser_out_date": {
       "bsonType": "date",
       "title": "Out Date",
-      "description": "Touchpoint outgoing date",
-      "width": 150
+      "description": "Touchpoint outgoing date"
     }
   },
   "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],

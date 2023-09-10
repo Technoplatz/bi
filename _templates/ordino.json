@@ -7,8 +7,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase",
-      "width": 170
+      "casetype": "uppercase"
     },
     "odi_sub_no": {
       "bsonType": "string",
@@ -17,45 +16,39 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase",
-      "width": 170
+      "casetype": "uppercase"
     },
     "odi_date": {
       "bsonType": "date",
       "title": "Ordino Date",
       "description": "Ordino Opening Date",
-      "dateonly": true,
-      "width": 120
+      "dateonly": true
     },
     "odi_from": {
       "bsonType": "string",
       "title": "Shipped From",
       "description": "Country where the goods are loaded",
-      "enum": ["China", "Hungary", "Netherlands"],
-      "width": 110
+      "enum": ["China", "Hungary", "Netherlands"]
     },
     "odi_customs": {
       "bsonType": "string",
       "title": "Customs",
       "description": "Customs Location",
-      "enum": ["IGA", "Halkalı", "Ambarlı", "AHL"],
-      "width": 110
+      "enum": ["IGA", "Halkalı", "Ambarlı", "AHL"]
     },
     "odi_arrived": {
       "bsonType": "bool",
       "title": "Arrived?",
-      "description": "Ordino arrived or not",
+      "description": "Ordino arrived",
       "truetext": "Arrived",
       "falsetext": "OnTheWay",
-      "default": false,
-      "width": 120
+      "default": false
     },
     "odi_arrived_date": {
       "bsonType": "date",
       "title": "Arrived Date",
       "description": "Date of Arrival",
-      "dateonly": true,
-      "width": 140
+      "dateonly": true
     }
   },
   "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],

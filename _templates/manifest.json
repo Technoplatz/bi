@@ -6,8 +6,7 @@
       "description": "Manifest number",
       "minLength": 1,
       "maxLength": 32,
-      "casetype": "uppercase",
-      "width": 160
+      "casetype": "uppercase"
     },
     "man_odi_no": {
       "bsonType": "string",
@@ -16,8 +15,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase",
-      "width": 170
+      "casetype": "uppercase"
     },
     "man_odi_sub_no": {
       "bsonType": "string",
@@ -26,29 +24,25 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase",
-      "width": 170
+      "casetype": "uppercase"
     },
     "man_file_no": {
       "bsonType": "string",
       "title": "File No",
       "description": "Internal File Number",
       "minLength": 1,
-      "maxLength": 32,
-      "width": 110
+      "maxLength": 32
     },
     "man_case_no": {
       "bsonType": "number",
       "title": "Case Number",
-      "description": "Number of cases",
-      "width": 120
+      "description": "Number of cases"
     },
     "man_opening_date": {
       "bsonType": "date",
       "title": "Opening Date",
       "description": "Manifest opening date",
-      "dateonly": true,
-      "width": 150
+      "dateonly": true
     },
     "man_closed": {
       "bsonType": "bool",
@@ -56,29 +50,25 @@
       "description": "Manifest Closed",
       "truetext": "Closed",
       "falsetext": "Open",
-      "default": false,
-      "width": 110
+      "default": false
     },
     "man_closing_date": {
       "bsonType": "date",
       "title": "Closing Date",
       "description": "Manifest closing date",
-      "dateonly": true,
-      "width": 150
+      "dateonly": true
     },
     "man_gov_purchase_date": {
       "bsonType": "date",
       "title": "Purchase Date",
       "description": "Purchase date",
-      "dateonly": true,
-      "width": 190
+      "dateonly": true
     },
     "man_gov_approval_date": {
       "bsonType": "date",
       "title": "Approval Date",
       "description": "Approval date",
-      "dateonly": true,
-      "width": 180
+      "dateonly": true
     }
   },
   "required": ["man_no", "man_opening_date", "man_file_no", "man_case_no"],
@@ -195,7 +185,7 @@
           ],
           "upsert": false,
           "notification": {
-            "notify": false,
+            "notify": true,
             "subject": "Customs clearance completed",
             "body": "Hi,<br /><br />Manifest has been closed.",
             "collection": "delivery",

@@ -502,8 +502,8 @@
       "title": "Delivery BUId's",
       "description": "Records by dnn_bu_id and dnn_status",
       "priority": 2020,
-      "enabled": true,
-      "dashboard": true,
+      "enabled": false,
+      "dashboard": false,
       "data_filter": [
         {
           "key": "dnn_status",

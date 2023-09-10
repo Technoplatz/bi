@@ -140,13 +140,13 @@ https://www.gnu.org/licenses.
             <ion-item lines="full" class="ion-no-margin ion-margin-bottom full-width">
                 <div class="ion-margin-top ion-margin-bottom">
                     <ion-button color="dark" size="default" (click)="doGetLinked()">
-                        <ion-icon name="code-download-outline"></ion-icon>
-                        <span *ngIf="reloading">{{ 'running' | translate }}...</span>
-                        <span *ngIf="!reloading">{{ 'get' | translate }} {{ link_?.get }}</span>
+                        <ion-icon name="search-outline"></ion-icon>
+                        <span *ngIf="reloading">{{ 'Running' | translate }}...</span>
+                        <span *ngIf="!reloading">{{ 'Find' | translate }} {{ link_?.get }}</span>
                     </ion-button>
                 </div>
                 <ion-label position="stacked">
-                    {{ 'Linked Items' | translate }}:
+                    {{ 'Items to be linked' | translate }}:
                 </ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
                     spellcheck="false" class="link-data" counter="true" maxlength="512" clearOnEdit="true"
@@ -154,7 +154,7 @@ https://www.gnu.org/licenses.
                     counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
                 </ion-textarea>
             </ion-item>
-            {{ 'Maximum number of lines allowed is 100' | translate }}.
+            {{ 'The maximum number of' | translate }} {{ link_?.get }} {{ 'allowed is 100' }}.
         </div>
         <ng-template #nolink>
             <div *ngIf="isnoninteractive_" class="ion-margin-top">

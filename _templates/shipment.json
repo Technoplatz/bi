@@ -8,8 +8,7 @@
       "minimum": 0,
       "maximum": 999999,
       "counter": true,
-      "permanent": true,
-      "width": 80
+      "permanent": true
     },
     "shp_status": {
       "bsonType": "string",
@@ -20,15 +19,13 @@
       "pattern": "^[A-Za-z0-9-]{5,32}$",
       "enum": ["10-ReadyToBeDelivered", "20-Shipped", "99-Error"],
       "default": "10-ReadyToBeDelivered",
-      "readonly": false,
-      "width": 160
+      "readonly": false
     },
     "shp_date": {
       "bsonType": "date",
       "title": "Ship Date",
       "description": "Shipment Date",
-      "dateonly": false,
-      "width": 120
+      "dateonly": false
     },
     "shp_acc_no": {
       "bsonType": "string",
@@ -36,8 +33,7 @@
       "description": "Account No",
       "minLength": 10,
       "maxLength": 11,
-      "pattern": "^[A-Z0-9-]{10,11}$",
-      "width": 130
+      "pattern": "^[A-Z0-9-]{10,11}$"
     },
     "shp_carrier_name": {
       "bsonType": "string",
@@ -45,8 +41,7 @@
       "description": "Carrier name or driver name surname",
       "placeholder": "Carrier or driver Name",
       "minLength": 2,
-      "maxLength": 32,
-      "width": 180
+      "maxLength": 32
     },
     "shp_carrier_id": {
       "bsonType": "string",
@@ -55,8 +50,7 @@
       "placeholder": "Carrier Tax/Id No",
       "minLength": 10,
       "maxLength": 12,
-      "pattern": "^[0-9]{10,12}$",
-      "width": 140
+      "pattern": "^[0-9]{10,12}$"
     },
     "shp_vehicle_id": {
       "bsonType": "string",
@@ -66,8 +60,7 @@
       "minLength": 6,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
-      "casetype": "uppercase",
-      "width": 140
+      "casetype": "uppercase"
     },
     "shp_notes": {
       "bsonType": "string",
@@ -75,8 +68,7 @@
       "description": "Shipment notes to carrier or customer",
       "placeholder": "Shipment Notes",
       "minLength": 0,
-      "maxLength": 512,
-      "width": 200
+      "maxLength": 512
     },
     "shp_waybill_no": {
       "bsonType": "string",
@@ -86,15 +78,13 @@
       "pattern": "^[A-Z0-9-]{16,18}$",
       "minLength": 0,
       "maxLength": 18,
-      "readonly": true,
-      "width": 150
+      "readonly": true
     },
     "shp_waybill_date": {
       "bsonType": "date",
       "title": "Waybill Date",
       "description": "Waybill generated date",
-      "readonly": true,
-      "width": 150
+      "readonly": true
     },
     "shp_ettn": {
       "bsonType": "string",
@@ -104,12 +94,11 @@
       "pattern": "^[a-z0-9-]{32,40}$",
       "minLength": 32,
       "maxLength": 40,
-      "readonly": true,
-      "width": 270
+      "readonly": true
     }
   },
   "sort": {
-    "_modified_at": -1
+    "shp_id": -1
   },
   "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_vehicle_id"],
   "index": [["shp_id"], ["shp_acc_no"], ["shp_waybill_no"]],

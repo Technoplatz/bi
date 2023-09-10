@@ -54,7 +54,7 @@ https://www.gnu.org/licenses.
     <ion-item *ngIf="perm_" lines="none" class="dash-item">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('admin/_collection')">
-          <ion-icon name="color-palette-outline"></ion-icon>{{ "Studio" | translate }}
+          <ion-icon name="folder-open-outline"></ion-icon>{{ "Collections" | translate }}
         </ion-button>
       </ion-label>
     </ion-item>
@@ -68,7 +68,7 @@ https://www.gnu.org/licenses.
     <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="server-outline"></ion-icon>{{ "Data Collections" | translate }}
+          <ion-icon name="server-outline"></ion-icon>{{ "Database" | translate }}
         </ion-button>
         <div *ngIf="collections?.length > 0; else nocollectionsfound">
           <p *ngFor="let item of collections" (click)="misc.navi.next('collection/'+ item.col_id)"

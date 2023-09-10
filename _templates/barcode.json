@@ -8,8 +8,7 @@
       "default": "TP_IN",
       "pattern": "^[A-Z0-9_]{3,16}$",
       "minLength": 3,
-      "maxLength": 16,
-      "width": 120
+      "maxLength": 16
     },
     "bar_input": {
       "bsonType": "string",
@@ -18,15 +17,13 @@
       "pattern": "^[A-Za-z0-9-]{1,32}$",
       "scan": true,
       "minLength": 1,
-      "maxLength": 32,
-      "width": 200
+      "maxLength": 32
     },
     "bar_mode": {
       "bsonType": "string",
       "title": "Mode",
       "description": "Entry Mode",
-      "enum": ["auto", "manual"],
-      "width": 100
+      "enum": ["auto", "manual"]
     }
   },
   "required": ["bar_operation", "bar_input", "bar_mode"],

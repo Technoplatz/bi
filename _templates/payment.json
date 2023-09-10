@@ -6,15 +6,13 @@
       "description": "Delivery Number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9A-Z-]{10,16}$",
-      "width": 110
+      "pattern": "^[0-9A-Z-]{10,16}$"
     },
     "pay_date": {
       "bsonType": "date",
       "title": "Payment Date",
       "description": "Payment date",
-      "dateonly": true,
-      "width": 120
+      "dateonly": true
     }
   },
   "required": ["pay_dnn_no", "pay_date"],

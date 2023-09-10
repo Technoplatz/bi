@@ -264,8 +264,12 @@ https://www.gnu.org/licenses.
               </ion-checkbox>
             </td>
             <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex" (click)="go_crud(record, 'update')">
-              <span *ngIf="item_.value.bsonType=='date'; else else1">{{ record[item_.key] |
-                date:'dd.MM.yyyy HH:mm:ss' }}</span>
+              <span *ngIf="item_.value.bsonType=='date'; else else1">
+                <span *ngIf="item_.value?.dateonly; else nodateonly">{{ record[item_.key] | date:'dd.MM.yyyy' }}</span>
+                <ng-template #nodateonly>
+                  {{ record[item_.key] | date:'dd.MM.yyyy HH:mm:ss' }}
+                </ng-template>
+              </span>
               <ng-template #else1>
                 <span *ngIf="item_.value.bsonType=='array'; else else2">
                   <span *ngIf="item_.value.items?.bsonType=='object'; else noarrayobject">

@@ -3,146 +3,122 @@
     "blo_status": {
       "bsonType": "string",
       "title": "Status",
-      "description": "Status",
-      "width": 140
+      "description": "Status"
     },
     "blo_territory": {
       "bsonType": "string",
       "title": "Territory",
-      "description": "Territory",
-      "width": 140
+      "description": "Territory"
     },
     "blo_market": {
       "bsonType": "string",
       "title": "Market",
-      "description": "Market",
-      "width": 140
+      "description": "Market"
     },
     "blo_region": {
       "bsonType": "string",
       "title": "Region",
-      "description": "Region",
-      "width": 140
+      "description": "Region"
     },
     "blo_sub_region": {
       "bsonType": "string",
       "title": "Sub Region",
-      "description": "Sub Region",
-      "width": 140
+      "description": "Sub Region"
     },
     "blo_country": {
       "bsonType": "string",
       "title": "Country",
-      "description": "Country",
-      "width": 140
+      "description": "Country"
     },
     "blo_brand": {
       "bsonType": "string",
       "title": "Brand",
-      "description": "Brand",
-      "width": 140
+      "description": "Brand"
     },
     "blo_sub_brand": {
       "bsonType": "string",
       "title": "Sub Brand",
-      "description": "Sub Brand",
-      "width": 140
+      "description": "Sub Brand"
     },
     "blo_prd_group": {
       "bsonType": "string",
       "title": "Group",
-      "description": "Group",
-      "width": 140
+      "description": "Group"
     },
     "blo_sales_segment": {
       "bsonType": "string",
       "title": "Sales Segment",
-      "description": "Sales Segment",
-      "width": 140
+      "description": "Sales Segment"
     },
     "blo_crm_contract_no": {
       "bsonType": "string",
       "title": "CRM Contract No",
-      "description": "CRM Contract No",
-      "width": 140
+      "description": "CRM Contract No"
     },
     "blo_gln": {
       "bsonType": "string",
       "title": "GLN",
-      "description": "GLN",
-      "width": 140
+      "description": "GLN"
     },
     "blo_dist_channel": {
       "bsonType": "string",
       "title": "Dist Channel",
-      "description": "Dist Channel",
-      "width": 140
+      "description": "Dist Channel"
     },
     "blo_family": {
       "bsonType": "string",
       "title": "Family",
-      "description": "Family",
-      "width": 140
+      "description": "Family"
     },
     "blo_market_name": {
       "bsonType": "string",
       "title": "Market Name",
-      "description": "Market Name",
-      "width": 140
+      "description": "Market Name"
     },
     "blo_prd_no": {
       "bsonType": "string",
       "title": "Product No",
-      "description": "Product No",
-      "width": 140
+      "description": "Product No"
     },
     "blo_machine_type": {
       "bsonType": "string",
       "title": "Machine Type",
-      "description": "Machine Type",
-      "width": 140
+      "description": "Machine Type"
     },
     "blo_order_no": {
       "bsonType": "string",
       "title": "Order No",
-      "description": "Order No",
-      "width": 140
+      "description": "Order No"
     },
     "blo_eta_date": {
       "bsonType": "string",
       "title": "ETA Date",
-      "description": "ETA Date",
-      "width": 140
+      "description": "ETA Date"
     },
     "blo_psd": {
       "bsonType": "string",
       "title": "PSD",
-      "description": "PSD",
-      "width": 140
+      "description": "PSD"
     },
     "blo_psd_comment": {
       "bsonType": "string",
       "title": "PSD Comment",
-      "description": "PSD Comment",
-      "width": 140
+      "description": "PSD Comment"
     },
     "blo_psd_reason_code": {
       "bsonType": "string",
       "title": "PSD Reason Code",
-      "description": "PSD Reason Code",
-      "width": 140
+      "description": "PSD Reason Code"
     },
     "blo_prd_description": {
       "bsonType": "string",
       "title": "Product Description",
-      "description": "Product Description",
-      "width": 140
+      "description": "Product Description"
     },
     "blo_customer_po": {
       "bsonType": "string",
       "title": "Customer PO",
-      "description": "Customer PO",
-      "width": 140
+      "description": "Customer PO"
     },
     "blo_sales_order_item": {
       "bsonType": "string",
@@ -150,296 +126,247 @@
       "description": "Sales Order Item",
       "minLength": 1,
       "maxLength": 6,
-      "pattern": "^[0-9]{1,6}$",
-      "width": 170
+      "pattern": "^[0-9]{1,6}$"
     },
     "blo_mfg_po": {
       "bsonType": "string",
       "title": "MFG PO",
-      "description": "MFG PO",
-      "width": 140
+      "description": "MFG PO"
     },
     "blo_mfg_po_item": {
       "bsonType": "string",
       "title": "MFG PO Item",
-      "description": "MFG PO Item",
-      "width": 140
+      "description": "MFG PO Item"
     },
     "blo_mfg_sales_order": {
       "bsonType": "string",
       "title": "MFG Sales Order",
-      "description": "MFG Sales Order",
-      "width": 140
+      "description": "MFG Sales Order"
     },
     "blo_mfg_sales_order_item": {
       "bsonType": "string",
       "title": "MFG Sales Order Item",
-      "description": "MFG Sales Order Item",
-      "width": 140
+      "description": "MFG Sales Order Item"
     },
     "blo_site": {
       "bsonType": "string",
       "title": "Site",
-      "description": "Site",
-      "width": 140
+      "description": "Site"
     },
     "blo_shipping_point": {
       "bsonType": "string",
       "title": "Shipping Point",
-      "description": "Shipping Point",
-      "width": 140
+      "description": "Shipping Point"
     },
     "blo_mot": {
       "bsonType": "string",
       "title": "MOT",
-      "description": "MOT",
-      "width": 140
+      "description": "MOT"
     },
     "blo_sales_order_sc": {
       "bsonType": "string",
       "title": "Sales Order SC",
-      "description": "Sales Order SC",
-      "width": 140
+      "description": "Sales Order SC"
     },
     "blo_dnn_no": {
       "bsonType": "string",
       "title": "DNN No",
-      "description": "DNN No",
-      "width": 140
+      "description": "DNN No"
     },
     "blo_dnn_item": {
       "bsonType": "string",
       "title": "DNN Item",
-      "description": "DNN Item",
-      "width": 140
+      "description": "DNN Item"
     },
     "blo_billing": {
       "bsonType": "string",
       "title": "Billing",
-      "description": "Billing",
-      "width": 140
+      "description": "Billing"
     },
     "blo_route": {
       "bsonType": "string",
       "title": "Route",
-      "description": "Route",
-      "width": 140
+      "description": "Route"
     },
     "blo_transit_time": {
       "bsonType": "string",
       "title": "Transit Time",
-      "description": "Transit Time",
-      "width": 140
+      "description": "Transit Time"
     },
     "blo_priority_code": {
       "bsonType": "string",
       "title": "Priority Code",
-      "description": "Priority Code",
-      "width": 140
+      "description": "Priority Code"
     },
     "blo_header_block": {
       "bsonType": "string",
       "title": "Header Block",
-      "description": "Header Block",
-      "width": 140
+      "description": "Header Block"
     },
     "blo_item_block": {
       "bsonType": "string",
       "title": "Item Block",
-      "description": "Item Block",
-      "width": 140
+      "description": "Item Block"
     },
     "blo_credit": {
       "bsonType": "string",
       "title": "Credit",
-      "description": "Credit",
-      "width": 140
+      "description": "Credit"
     },
     "blo_sold_to_num": {
       "bsonType": "string",
       "title": "Sold To Num",
-      "description": "Sold To Num",
-      "width": 140
+      "description": "Sold To Num"
     },
     "blo_sold_to_name": {
       "bsonType": "string",
       "title": "Sold To Name",
-      "description": "Sold To Name",
-      "width": 140
+      "description": "Sold To Name"
     },
     "blo_end_customer_id": {
       "bsonType": "string",
       "title": "End Customer ID",
-      "description": "End Customer ID",
-      "width": 140
+      "description": "End Customer ID"
     },
     "blo_end_customer_name": {
       "bsonType": "string",
       "title": "End Customer Name",
-      "description": "End Customer Name",
-      "width": 140
+      "description": "End Customer Name"
     },
     "blo_ship_to_num": {
       "bsonType": "string",
       "title": "Ship To Num",
-      "description": "Ship To Num",
-      "width": 140
+      "description": "Ship To Num"
     },
     "blo_ship_to_name": {
       "bsonType": "string",
       "title": "Ship To Name",
-      "description": "Ship To Name",
-      "width": 140
+      "description": "Ship To Name"
     },
     "blo_sales_order_created_date": {
       "bsonType": "date",
       "title": "Sales Order Created Date",
-      "description": "Sales Order Created Date",
-      "width": 140
+      "description": "Sales Order Created Date"
     },
     "blo_credit_release_date": {
       "bsonType": "date",
       "title": "Credit Release Date",
-      "description": "Credit Release Date",
-      "width": 140
+      "description": "Credit Release Date"
     },
     "blo_mfg_po_date": {
       "bsonType": "date",
       "title": "MFG PO Date",
-      "description": "MFG PO Date",
-      "width": 140
+      "description": "MFG PO Date"
     },
     "blo_ship_date": {
       "bsonType": "date",
       "title": "Ship Date",
-      "description": "Ship Date",
-      "width": 140
+      "description": "Ship Date"
     },
     "blo_pod": {
       "bsonType": "date",
       "title": "POD",
-      "description": "POD",
-      "width": 140
+      "description": "POD"
     },
     "blo_crad": {
       "bsonType": "date",
       "title": "Crad",
-      "description": "Crad",
-      "width": 140
+      "description": "Crad"
     },
     "blo_rsd": {
       "bsonType": "date",
       "title": "RSD",
-      "description": "RSD",
-      "width": 140
+      "description": "RSD"
     },
     "blo_month": {
       "bsonType": "number",
       "title": "Month",
-      "description": "Month",
-      "width": 140
+      "description": "Month"
     },
     "blo_quarter": {
       "bsonType": "string",
       "title": "Quarter",
-      "description": "Quarter",
-      "width": 140
+      "description": "Quarter"
     },
     "blo_order_qty": {
       "bsonType": "number",
       "title": "Order Qty",
-      "description": "Order Qty",
-      "width": 140
+      "description": "Order Qty"
     },
     "blo_line_qty": {
       "bsonType": "number",
       "title": "Line Qty",
-      "description": "Line Qty",
-      "width": 140
+      "description": "Line Qty"
     },
     "blo_local_currency": {
       "bsonType": "string",
       "title": "Local Currency",
-      "description": "Local Currency",
-      "width": 140
+      "description": "Local Currency"
     },
     "blo_net_value": {
       "bsonType": "number",
       "title": "Net Value",
-      "description": "Net Value",
-      "width": 140
+      "description": "Net Value"
     },
     "blo_usd_net_value": {
       "bsonType": "number",
       "title": "USD Net Value",
-      "description": "USD Net Value",
-      "width": 140
+      "description": "USD Net Value"
     },
     "blo_billing_date": {
       "bsonType": "date",
       "title": "Billing Date",
-      "description": "Billing Date",
-      "width": 140
+      "description": "Billing Date"
     },
     "blo_status_detail": {
       "bsonType": "string",
       "title": "Status Detail",
-      "description": "Status Detail",
-      "width": 140
+      "description": "Status Detail"
     },
     "blo_hierarchy": {
       "bsonType": "string",
       "title": "Hierarchy",
-      "description": "Hierarchy",
-      "width": 140
+      "description": "Hierarchy"
     },
     "blo_sales_office": {
       "bsonType": "string",
       "title": "Sales Office",
-      "description": "Sales Office",
-      "width": 140
+      "description": "Sales Office"
     },
     "blo_sales_order_type": {
       "bsonType": "string",
       "title": "Sales Order Type",
-      "description": "Sales Order Type",
-      "width": 140
+      "description": "Sales Order Type"
     },
     "blo_header_billing_block": {
       "bsonType": "string",
       "title": "Header Billing Block",
-      "description": "Header Billing Block",
-      "width": 140
+      "description": "Header Billing Block"
     },
     "blo_item_billing_block": {
       "bsonType": "string",
       "title": "Item Billing Block",
-      "description": "Item Billing Block",
-      "width": 140
+      "description": "Item Billing Block"
     },
     "blo_lts_status": {
       "bsonType": "string",
       "title": "LTS Status",
-      "description": "LTS Status",
-      "width": 140
+      "description": "LTS Status"
     },
     "blo_lts_message": {
       "bsonType": "string",
       "title": "LTS Message",
-      "description": "LTS Message",
-      "width": 140
+      "description": "LTS Message"
     },
     "blo_lts_status_date": {
       "bsonType": "date",
       "title": "LTS Status Date",
-      "description": "LTS Status Date",
-      "width": 140
+      "description": "LTS Status Date"
     },
     "blo_critical_status": {
       "bsonType": "string",
       "title": "Critical Status",
-      "description": "Critical Status",
-      "width": 140
+      "description": "Critical Status"
     }
   },
   "required": [

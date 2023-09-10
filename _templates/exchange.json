@@ -3,31 +3,27 @@
     "exc_date": {
       "bsonType": "date",
       "title": "Date",
-      "description": "Date",
-      "width": 120
+      "description": "Date"
     },
     "exc_exchange": {
       "bsonType": "string",
       "title": "Status",
       "description": "Record Status",
       "enum": ["EUR", "TRY", "USD"],
-      "default": "EUR",
-      "width": 130
+      "default": "EUR"
     },
     "exc_currency": {
       "bsonType": "string",
       "title": "Currency",
       "description": "Exchange Currency",
       "enum": ["EUR", "TRY", "USD"],
-      "default": "USD",
-      "width": 120
+      "default": "USD"
     },
     "exc_rate": {
       "bsonType": "number",
       "title": "Rate",
       "description": "Exchange Rate",
-      "default": 1,
-      "width": 90
+      "default": 1
     }
   },
   "required": ["exc_date", "exc_exchange"],
@@ -45,8 +41,8 @@
       "title": "Exchanges Rates",
       "description": "Figure 2023",
       "priority": 4000,
-      "enabled": true,
-      "dashboard": true,
+      "enabled": false,
+      "dashboard": false,
       "data_filter": [],
       "data_sort": {
         "_modified_at": -1

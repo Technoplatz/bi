@@ -6,8 +6,7 @@
       "description": "Delivery Number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9A-Z-]{10,16}$",
-      "width": 110
+      "pattern": "^[0-9A-Z-]{10,16}$"
     },
     "inv_no": {
       "bsonType": "string",
@@ -15,8 +14,7 @@
       "description": "Invoice No",
       "minLength": 10,
       "maxLength": 10,
-      "pattern": "^[0-9]{10,10}$",
-      "width": 130
+      "pattern": "^[0-9]{10,10}$"
     }
   },
   "required": ["inv_dnn_no", "inv_no"],
