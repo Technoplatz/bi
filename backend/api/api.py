@@ -1432,11 +1432,11 @@ class Crud:
                     continue
                 if "$limit" in agg_:
                     limit_found_ = True
-                    agg_["$limit"] = DEFAULT_AGGREGATION_LIMIT_
+                    agg_["$limit"] = API_DEFAULT_AGGREGATION_LIMIT_
                 aggregate_.append(agg_)
 
             if not limit_found_:
-                aggregate_.append({"$limit": DEFAULT_AGGREGATION_LIMIT_})
+                aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
             aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(aggregated_)))).fillna("")
@@ -4627,6 +4627,7 @@ API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
+API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
@@ -4650,7 +4651,6 @@ PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers", "import"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
-DEFAULT_AGGREGATION_LIMIT_ = 1000
 
 app = Flask(__name__)
 origins_ = [f"https://{DOMAIN_}", "https://localhost", "capacitor://localhost", "http://localhost:8100", "http://localhost:8101", "http://localhost:8102"]
