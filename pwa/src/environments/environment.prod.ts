@@ -44,7 +44,7 @@ export const environment = {
     default_collation: '{"locale": "tr"}',
     default_page: 1,
     default_icon: "medical-outline",
-    limit: 29,
+    limit: 25,
     limits: [20, 50, 100],
     loadingText: "Bitte warten Sie",
     defaultColumnWidth: 140,

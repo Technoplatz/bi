@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "ban_no": {
+      "bsonType": "string",
+      "title": "No",
+      "description": "Bandrol number",
+      "placeholder": "Bandrol number",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9-]{1,64}$"
+    },
+    "ban_date": {
+      "bsonType": "date",
+      "title": "Date",
+      "description": "Record Date",
+      "placeholder": "Date",
+      "dateonly": true
+    }
+  },
+  "required": ["ban_no", "ban_date"],
+  "index": [["ban_no"]],
+  "unique": [["ban_no"]],
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {},
+  "sort": {
+    "ban_date": -1
+  },
+  "fetchers": [],
+  "import": {}
+}

@@ -1109,8 +1109,8 @@ class Crud:
         """
         docstring is in progress
         """
-        str_ = str(data_).strip()
-        return datetime.fromisoformat(str_) if str_ not in [" ", "0", "0.0", "NaT", "NaN", "nat", "nan", np.nan, np.double, None] else None
+        date_ = str(data_).strip()
+        return datetime.fromisoformat(date_) if date_ not in [" ", "0", "0.0", "NaT", "NaN", "nat", "nan", np.nan, np.double, None] else None
 
     def frame_convert_string_f(self, data_):
         """
@@ -1284,10 +1284,22 @@ class Crud:
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
 
+            col_structure_ = find_one_["col_structure"] if "col_structure" in find_one_ else None
+            if not col_structure_:
+                raise APIError(f"no structure found {collection_}")
+
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
             properties_ = get_properties_["properties"]
+
+            # GET DEFAULT VALUES OF THE REQUIRED FIELDS
+            defaults_ = {}
+            required_ = col_structure_["required"] if "required" in col_structure_ and len(col_structure_["required"]) > 0 else []
+            if required_:
+                for req_ in required_:
+                    if req_ in properties_ and "default" in properties_[req_] and properties_[req_]["default"] is not None:
+                        defaults_[req_] = properties_[req_]["default"]
 
             # CREATE A DATAFRAME
             if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
@@ -1308,6 +1320,12 @@ class Crud:
 
             # MAKING COLUMN NAMES PRETTY
             df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
+
+            # SETS DEFAULT VALUES
+            if defaults_:
+                for key_, value_ in defaults_.items():
+                    if key_ not in df_.columns:
+                        df_[key_] = value_
 
             # CONVERTING DATASET COLUMNS
             columns_tobe_deleted_ = []
@@ -1384,7 +1402,7 @@ class Crud:
             Email().send_email_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
-                "html": f"Hi,<br /><br />Here's the data upload result about file that you've just tried to upload;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{str(exc_obj_)}"
+                "html": f"Hi,<br /><br />Here's the data upload result about file that you've just uploaded;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{str(exc_obj_)}"
             })
             res_["msg"] = "file upload error! we have just sent an email with the error details."
             return res_
@@ -4364,7 +4382,7 @@ class Auth:
         try:
             authorization_ = request.headers.get("Authorization", None)
             if not authorization_:
-                raise AuthError("authorization is required")
+                raise AuthError("authorization required")
 
             authb_ = "Bearer "
             ix_ = authorization_.find(authb_)
@@ -4617,7 +4635,7 @@ SMTP_PORT_ = os.environ.get("SMTP_PORT")
 SMTP_USERID_ = os.environ.get("SMTP_USERID")
 SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
 FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
-EMAIL_DISCLAIMER_HTML_=os.environ.get("EMAIL_DISCLAIMER_HTML")
+EMAIL_DISCLAIMER_HTML_ = os.environ.get("EMAIL_DISCLAIMER_HTML")
 EMAIL_TFA_SUBJECT_ = "Your Backup OTP"
 EMAIL_SIGNUP_SUBJECT_ = "Welcome"
 EMAIL_SIGNIN_SUBJECT_ = "New Sign-in"

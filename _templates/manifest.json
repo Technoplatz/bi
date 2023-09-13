@@ -71,8 +71,8 @@
       "dateonly": true
     }
   },
-  "required": ["man_no", "man_opening_date", "man_file_no", "man_case_no"],
-  "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_file_no"]],
+  "required": ["man_no", "man_odi_no", "man_odi_sub_no", "man_opening_date", "man_file_no", "man_case_no"],
+  "index": [["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_odi_sub_no"], ["man_file_no"]],
   "unique": [["man_no"]],
   "sort": {
     "_modified_at": -1
@@ -137,7 +137,7 @@
         }
       ],
       "autofill": true,
-      "btntext": "Add DNs",
+      "btntext": "Deliveries",
       "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
         "notify": true,
@@ -173,8 +173,8 @@
           "filter": [
             {
               "key": "dnn_status",
-              "op": "in",
-              "value": "30-OnCustomsProcess,40-ClearanceCompleted"
+              "op": "eq",
+              "value": "30-OnCustomsProcess"
             }
           ],
           "set": [
@@ -237,8 +237,8 @@
           "filter": [
             {
               "key": "dnn_status",
-              "op": "in",
-              "value": "30-OnCustomsProcess,40-ClearanceCompleted"
+              "op": "eq",
+              "value": "40-ClearanceCompleted"
             }
           ],
           "set": [

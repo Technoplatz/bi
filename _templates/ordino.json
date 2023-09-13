@@ -38,7 +38,7 @@
     },
     "odi_arrived": {
       "bsonType": "bool",
-      "title": "Arrived?",
+      "title": "Is Arrived?",
       "description": "Ordino arrived",
       "truetext": "Arrived",
       "falsetext": "OnTheWay",
@@ -46,13 +46,13 @@
     },
     "odi_arrived_date": {
       "bsonType": "date",
-      "title": "Arrived Date",
+      "title": "Arrival Date",
       "description": "Date of Arrival",
       "dateonly": true
     }
   },
   "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],
-  "index": [["odi_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_customs"]],
+  "index": [["odi_no"], ["odi_sub_no"], ["odi_from"], ["odi_customs"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
     "_modified_at": -1
@@ -89,7 +89,7 @@
       "notification": {
         "notify": true,
         "subject": "DNs Linked to Ordino",
-        "body": "Hi,<br /><br />We would like to let you know that attached DNs has been linked to an Ordino.",
+        "body": "Hi,<br /><br />We would like to let you know that attached DNs has been linked to ordino.",
         "attachment": true,
         "fields": "dnn_odi_no,dnn_odi_sub_no,dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty"
       }
@@ -131,8 +131,8 @@
           "filter": [
             {
               "key": "dnn_status",
-              "op": "in",
-              "value": "10-OnTheWay,20-OnCustoms"
+              "op": "eq",
+              "value": "10-OnTheWay"
             }
           ],
           "set": [
@@ -179,8 +179,8 @@
           "filter": [
             {
               "key": "dnn_status",
-              "op": "in",
-              "value": "10-OnTheWay,20-OnCustoms"
+              "op": "eq",
+              "value": "20-OnCustoms"
             }
           ],
           "set": [
