@@ -321,7 +321,7 @@ export class CollectionPage implements OnInit {
   }
 
   async go_crud(rec: any, op: string) {
-    if (this.id === "_query") { this.go_query(rec) } else {
+    if (this.id === "_query" && op !== "insert") { this.go_query(rec) } else {
       const modal = await this.modal.create({
         component: CrudPage,
         backdropDismiss: true,

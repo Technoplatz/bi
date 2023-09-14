@@ -581,6 +581,7 @@ class Misc:
                     else str(kav_value_) if kav_as_ == "string" \
                     else str(kav_value_)
             elif setto_[:1] == "=":
+                decimals_ = int(properties_[key_]["decimals"]) if "decimals" in properties_[key_] and int(properties_[key_]["decimals"]) >= 0 else None
                 forward_ = setto_[1:]
                 if not forward_:
                     raise APIError("missing = value")
@@ -589,7 +590,8 @@ class Misc:
                 for part_ in formula_parts_:
                     val_ = self.set_value_f(key_, part_, properties_, data_)
                     formula_ = formula_.replace(part_, val_)
-                setto__ = ne.evaluate(formula_)
+                # setto__ = ne.evaluate(formula_)
+                setto__ = round(ne.evaluate(formula_), decimals_) if decimals_ else ne.evaluate(formula_)
             else:
                 setto__ = setto_
 
@@ -1126,6 +1128,13 @@ class Crud:
         str_ = str(data_).replace(r"\D", "").strip()
         return float(str_) if str_ not in ["", None] else None
 
+    def frame_convert_int_f(self, data_):
+        """
+        docstring is in progress
+        """
+        str_ = str(data_).replace(r"\D", "").strip()
+        return int(str_) if str_ not in ["", None] else None
+
     def frame_convert_objectid_f(self, data_):
         """
         docstring is in progress
@@ -1301,6 +1310,12 @@ class Crud:
                     if req_ in properties_ and "default" in properties_[req_] and properties_[req_]["default"] is not None:
                         defaults_[req_] = properties_[req_]["default"]
 
+            import_ = col_structure_["import"] if "import" in col_structure_ else None
+            if not import_:
+                raise APIError(f"no import instruction provided {collection_}")
+            purge_ = import_["purge"] if "purge" in import_ and import_["purge"] is True else False
+            ignored_ = import_["ignored"] if "ignored" in import_ and len(import_["ignored"]) > 0 else []
+
             # CREATE A DATAFRAME
             if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
                 filesize_ = file_.tell()
@@ -1321,12 +1336,6 @@ class Crud:
             # MAKING COLUMN NAMES PRETTY
             df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
 
-            # SETS DEFAULT VALUES
-            if defaults_:
-                for key_, value_ in defaults_.items():
-                    if key_ not in df_.columns:
-                        df_[key_] = value_
-
             # CONVERTING DATASET COLUMNS
             columns_tobe_deleted_ = []
             for column_ in df_.columns:
@@ -1345,7 +1354,9 @@ class Crud:
                                     replace_ = repl_["replace"] if "replace" in repl_ and repl_["replace"] is not None else ""
                                     if find_ and replace_ is not None:
                                         df_[column_] = df_[column_].str.replace(find_, replace_, regex=True)
-                        elif property_["bsonType"] in ["number", "int", "decimal"]:
+                        elif property_["bsonType"] == "int":
+                            df_[column_] = df_[column_].apply(self.frame_convert_int_f)
+                        elif property_["bsonType"] in ["number", "decimal"]:
                             df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                     else:
                         columns_tobe_deleted_.append(column_)
@@ -1354,6 +1365,18 @@ class Crud:
                         columns_tobe_deleted_.append(column_)
                     else:
                         df_[column_] = df_[column_].apply(self.frame_convert_objectid_f)
+
+            # SETS DEFAULT VALUES
+            if defaults_:
+                for key_, value_ in defaults_.items():
+                    if key_ not in df_.columns:
+                        df_[key_] = value_
+
+            # SETS IGNORED COLUMNS
+            if ignored_:
+                for ignored__ in ignored_:
+                    if ignored__ in df_.columns:
+                        df_[ignored__] = None
 
             # REMOVING UNNECESSRY COLUMNS
             if "_structure" in df_.columns:
@@ -1382,6 +1405,9 @@ class Crud:
             session_ = session_client_.start_session()
             session_.start_transaction()
             count_ = 0
+
+            if purge_:
+                session_db_[collection__].delete_many({})
 
             if "_id" in df_.columns:
                 upserts_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=True) for doc_ in payload_]

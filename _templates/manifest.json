@@ -36,7 +36,8 @@
     "man_case_no": {
       "bsonType": "number",
       "title": "Case Number",
-      "description": "Number of cases"
+      "description": "Number of cases",
+      "default": 1
     },
     "man_opening_date": {
       "bsonType": "date",
@@ -48,8 +49,6 @@
       "bsonType": "bool",
       "title": "Closed",
       "description": "Manifest Closed",
-      "truetext": "Closed",
-      "falsetext": "Open",
       "default": false
     },
     "man_closing_date": {
@@ -107,8 +106,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "in",
-          "value": "20-OnCustoms,30-OnCustomsProcess"
+          "op": "eq",
+          "value": "20-OnCustoms"
         },
         {
           "key": "dnn_odi_no",
@@ -142,7 +141,7 @@
       "notification": {
         "notify": true,
         "subject": "Manifest Created",
-        "body": "Hi,<br /><br />We would like to let you know that the attached DNs has been linked to a manifest.",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to manifest.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_man_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name"
       }

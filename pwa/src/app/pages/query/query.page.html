@@ -83,7 +83,7 @@ https://www.gnu.org/licenses.
         <ion-grid [class]="schemevis">
           <ion-row>
             <ion-col size="12">
-              <ion-button (click)="save_query()">
+              <ion-button (click)="save_aggregation()">
                 <span *ngIf="!is_saving">{{ 'Save Aggregation' | translate }}</span>
                 <span *ngIf="is_saving">{{ 'Saving' | translate }}...</span>
               </ion-button>

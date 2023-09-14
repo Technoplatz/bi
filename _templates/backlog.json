@@ -91,14 +91,16 @@
       "description": "Order No"
     },
     "blo_eta_date": {
-      "bsonType": "string",
+      "bsonType": "date",
       "title": "ETA Date",
-      "description": "ETA Date"
+      "description": "ETA Date",
+      "dateonly": true
     },
     "blo_psd": {
-      "bsonType": "string",
+      "bsonType": "date",
       "title": "PSD",
-      "description": "PSD"
+      "description": "PSD",
+      "dateonly": true
     },
     "blo_psd_comment": {
       "bsonType": "string",
@@ -246,37 +248,44 @@
     "blo_sales_order_created_date": {
       "bsonType": "date",
       "title": "Sales Order Created Date",
-      "description": "Sales Order Created Date"
+      "description": "Sales Order Created Date",
+      "dateonly": true
     },
     "blo_credit_release_date": {
       "bsonType": "date",
       "title": "Credit Release Date",
-      "description": "Credit Release Date"
+      "description": "Credit Release Date",
+      "dateonly": true
     },
     "blo_mfg_po_date": {
       "bsonType": "date",
       "title": "MFG PO Date",
-      "description": "MFG PO Date"
+      "description": "MFG PO Date",
+      "dateonly": true
     },
     "blo_ship_date": {
       "bsonType": "date",
       "title": "Ship Date",
-      "description": "Ship Date"
+      "description": "Ship Date",
+      "dateonly": true
     },
     "blo_pod": {
       "bsonType": "date",
       "title": "POD",
-      "description": "POD"
+      "description": "POD",
+      "dateonly": true
     },
     "blo_crad": {
       "bsonType": "date",
       "title": "Crad",
-      "description": "Crad"
+      "description": "Crad",
+      "dateonly": true
     },
     "blo_rsd": {
       "bsonType": "date",
       "title": "RSD",
-      "description": "RSD"
+      "description": "RSD",
+      "dateonly": true
     },
     "blo_month": {
       "bsonType": "number",
@@ -316,7 +325,8 @@
     "blo_billing_date": {
       "bsonType": "date",
       "title": "Billing Date",
-      "description": "Billing Date"
+      "description": "Billing Date",
+      "dateonly": true
     },
     "blo_status_detail": {
       "bsonType": "string",
@@ -361,7 +371,8 @@
     "blo_lts_status_date": {
       "bsonType": "date",
       "title": "LTS Status Date",
-      "description": "LTS Status Date"
+      "description": "LTS Status Date",
+      "dateonly": true
     },
     "blo_critical_status": {
       "bsonType": "string",
@@ -382,7 +393,7 @@
     "blo_status"
   ],
   "index": [["blo_status"]],
-  "unique": [],
+  "unique": [["blo_order_no", "blo_sales_order_item"]],
   "sort": {
     "_modified_at": -1
   },
@@ -472,5 +483,8 @@
   "views": {},
   "links": [],
   "fetchers": [],
-  "import": {}
+  "import": {
+    "purge": true,
+    "ignored": ["blo_dnn_item"]
+  }
 }

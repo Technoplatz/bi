@@ -57,15 +57,6 @@
       "minLength": 1,
       "maxLength": 128
     },
-    "dnn_ship_type": {
-      "bsonType": "string",
-      "title": "Ship Type",
-      "description": "Shipping type",
-      "enum": ["Air", "Sea", "Truck", "Other"],
-      "minLength": 0,
-      "maxLength": 8,
-      "pattern": "^[A-Za-z]{0,8}$"
-    },
     "dnn_odi_no": {
       "bsonType": "string",
       "title": "Ordino No",
@@ -90,6 +81,15 @@
       "description": "Manifest number",
       "minLength": 1,
       "maxLength": 32
+    },
+    "dnn_ship_type": {
+      "bsonType": "string",
+      "title": "Ship Type",
+      "description": "Shipping type",
+      "enum": ["Air", "Sea", "Truck", "Other"],
+      "minLength": 0,
+      "maxLength": 8,
+      "pattern": "^[A-Za-z]{0,8}$"
     },
     "dnn_bill_no": {
       "bsonType": "string",
@@ -193,7 +193,8 @@
       "bsonType": "number",
       "title": "Price",
       "description": "Unit Price",
-      "default": 0
+      "default": 0,
+      "decimals": 2
     },
     "dnn_amount": {
       "bsonType": "number",

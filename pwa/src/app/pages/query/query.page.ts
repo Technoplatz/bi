@@ -128,7 +128,7 @@ export class QueryPage implements OnInit {
         this.menu = this.router.url.split("/")[1];
         this.id = this.submenu = this.router.url.split("/")[2];
         this.query_url_ = apiHost + "/get/query/" + this.id;
-        this.RefreshData(1).then(() => {
+        this.RefreshData(0).then(() => {
           this.is_initialized = true;
         });
       });
@@ -194,7 +194,7 @@ export class QueryPage implements OnInit {
     });
   }
 
-  save_query() {
+  save_aggregation() {
     if (this.aggregated_) {
       this.is_saving = true;
       this.misc.apiCall("/crud", {

@@ -51,16 +51,18 @@ https://www.gnu.org/licenses.
                 {{ 'Scan' | translate }}<br />{{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
-                <div *ngIf="!['_collection', '_query', '_log', '_announcement'].includes(id)"
+                <div *ngIf="!['_collection', '_log', '_announcement'].includes(id)"
                   (click)="go_crud(null, 'insert')" class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
                   {{ 'New' | translate }}<br />{{ 'Record' | translate }}
                 </div>
-                <div *ngIf="['_collection', '_query'].includes(id)" (click)="go_crud(null, 'insert')"
+                <!-- <ng-template #wunderdashes>
+                  <div *ngIf="['_collection', '_query'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
                   {{ 'New' | translate }}<br />{{ 'Record' | translate }}
                 </div>
+                </ng-template> -->
               </ng-template>
               <div *ngIf="is_loaded" (click)="RefreshData(0)" class="data-sq-button">
                 <ion-icon name="sync-circle-outline"></ion-icon>
@@ -162,7 +164,7 @@ https://www.gnu.org/licenses.
             </th>
             <th *ngFor="let item of properties_ | keyvalue : orderByIndex">
               <div (click)="doSetSearch(item.key)">
-                {{ item.value.title }} 
+                {{ item.value.title }}
                 <span *ngIf="searched && searched[item.key] && searched[item.key].f" class="danger">[F]</span>
                 <br />
                 <ion-text color="primary">{{ item.key }}</ion-text>

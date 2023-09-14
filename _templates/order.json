@@ -30,54 +30,19 @@
       "bsonType": "number",
       "title": "Unit Price",
       "description": "Unit Price",
-      "default": 0
+      "default": 0,
+      "decimals": 2
     }
   },
   "required": ["ord_no", "ord_prd_no", "ord_unit_price"],
-  "index": [["ord_no"], ["ord_no", "ord_prd_no"]],
+  "index": [["ord_no"], ["ord_prd_no"]],
   "unique": [["ord_no", "ord_prd_no"]],
   "sort": {
     "_modified_at": -1
   },
   "parents": [],
   "actions": [],
-  "triggers": [
-    {
-      "name": "Order price updater",
-      "enabled": true,
-      "operations": ["update", "insert"],
-      "changes": [
-        {
-          "key": "ord_unit_price",
-          "op": "gt",
-          "value": 0
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_order_no",
-              "value": "ord_no"
-            },
-            {
-              "key": "dnn_prd_no",
-              "value": "ord_prd_no"
-            }
-          ],
-          "filter": [],
-          "set": [
-            {
-              "key": "dnn_order_price",
-              "value": "ord_unit_price"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    }
-  ],
+  "triggers": [],
   "views": {},
   "links": [],
   "fetchers": [],
