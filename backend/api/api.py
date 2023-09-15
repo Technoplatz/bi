@@ -203,57 +203,6 @@ class Schedular:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def schedule_views_f(self, sched_):
-        """
-        docstring is in progress
-        """
-        try:
-            print_(">>> scheduled views started")
-            collections_ = list(Mongo().db_["_collection"].aggregate([{
-                "$project": {
-                    "col_id": 1,
-                    "col_structure": 1,
-                    "views": {"$objectToArray": "$col_structure.views"}
-                }}, {
-                "$match": {
-                    "views": {
-                        "$elemMatch": {
-                            "$and": [{"v.enabled": True}, {"v.scheduled": True}]
-                        }
-                    }
-                }
-            }]))
-
-            if not collections_:
-                return {"result": True}
-
-            for collection_ in collections_:
-                views_ = collection_["views"] if "views" in collection_ and len(collection_["views"]) > 0 else None
-                if not views_:
-                    continue
-                for view_ in views_:
-                    id__ = view_["k"]
-                    view__ = view_["v"]
-                    cron_looker_f_ = self.cron_looker_f(view__)
-                    if not cron_looker_f_["result"]:
-                        continue
-                    args_ = [{
-                        "collection": collection_["col_id"],
-                        "id": id__,
-                        "scope": "live"
-                    }]
-                    sched_.add_job(Crud().announce_f, "cron", minute=cron_looker_f_["minute"], hour=cron_looker_f_["hour"], day=cron_looker_f_["day"], month=cron_looker_f_[
-                                   "month"], day_of_week=cron_looker_f_["day_of_week"], id=id__, replace_existing=True, args=args_)
-                    print_(">>> scheduled view", Misc().get_now_f(), id__, cron_looker_f_["hour"], cron_looker_f_["minute"], cron_looker_f_["day"])
-
-            return {"result": True}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def main_f(self):
         """
         docstring is in progress
@@ -262,17 +211,12 @@ class Schedular:
             sched_ = BackgroundScheduler(daemon=True)
             sched_.remove_all_jobs()
 
-            schedule_views_f_ = self.schedule_views_f(sched_)
-            if not schedule_views_f_["result"]:
-                raise APIError(schedule_views_f_["msg"])
-
             schedule_queries_f_ = self.schedule_queries_f(sched_)
             if not schedule_queries_f_["result"]:
                 raise APIError(schedule_queries_f_["msg"])
 
             args_ = {"user": {"email": "cron"}, "op": "dump"}
             sched_.add_job(Crud().dump_f, "cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", replace_existing=True, args=[args_])
-            sched_.add_job(self.schedule_views_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_views", replace_existing=True, args=[sched_])
             sched_.add_job(self.schedule_queries_f, "cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_queries", replace_existing=True, args=[sched_])
             sched_.start()
             return True
@@ -1664,30 +1608,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def parent_f(self, obji):
-        """
-        docstring is in progress
-        """
-        try:
-            collection_ = obji["collection"]
-            fields_ = obji["fields"]
-
-            data_collection_ = f"{collection_}_data"
-            projection_ = {}
-            for field_ in fields_:
-                projection_[field_] = 1
-
-            cursor_ = Mongo().db_[data_collection_].find(filter={}, projection=projection_).limit(1000)
-            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
-
-            return {"result": True, "data": docs_}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def link_f(self, obj_):
         """
         docstring is in progress
@@ -3033,12 +2953,6 @@ class Crud:
                 })
                 if not link_f_["result"]:
                     raise AppException(link_f_["msg"])
-
-            # if collection_id_ == "_query":
-            #     sched_ = BackgroundScheduler(daemon=True)
-            #     schedule_queries_f_ = Schedular().schedule_queries_f(sched_)
-            #     if not schedule_queries_f_["result"]:
-            #         raise APIError(schedule_queries_f_["msg"])
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -4879,8 +4793,6 @@ def crud_f():
             res_ = Crud().collection_f(input_)
         elif op_ == "query":
             res_ = Crud().query_f(input_)
-        elif op_ == "parent":
-            res_ = Crud().parent_f(input_)
         elif op_ == "link":
             res_ = Crud().link_f(input_)
         elif op_ in ["backup", "restore"]:

@@ -38,7 +38,8 @@
         "SP-ServicePack",
         "EX-Exported",
         "AR-Archived",
-        "ND-NotDefined"
+        "ND-NotDefined",
+        "RJ-Rejected"
       ],
       "default": "00-Standby"
     },
@@ -216,18 +217,6 @@
       "description": "Shipment ID",
       "minimum": 0,
       "maximum": 999999
-    },
-    "dnn_waybill_no": {
-      "title": "Waybill No",
-      "bsonType": "string",
-      "description": "Shipment Waybill Number",
-      "minLength": 0,
-      "maxLength": 16
-    },
-    "dnn_waybill_date": {
-      "bsonType": "date",
-      "title": "Waybill Date",
-      "description": "Waybill Document Date"
     }
   },
   "required": [
@@ -277,9 +266,9 @@
       ],
       "filter": [
         {
-          "key": "odi_status",
+          "key": "odi_closed",
           "op": "ne",
-          "value": "00-Open"
+          "value": true
         }
       ],
       "get": ["odi_no", "odi_sub_no", "odi_customs"]
@@ -322,23 +311,6 @@
         }
       ],
       "get": ["acc_no", "acc_name"]
-    },
-    {
-      "collection": "shipment",
-      "match": [
-        {
-          "key": "dnn_shp_id",
-          "value": "shp_id"
-        }
-      ],
-      "filter": [
-        {
-          "key": "shp_status",
-          "op": "eq",
-          "value": "20-Completed"
-        }
-      ],
-      "get": ["shp_id", "shp_waybill_no"]
     }
   ],
   "actions": [
@@ -360,6 +332,7 @@
         }
       ],
       "one_click": true,
+      "icon": "megaphone",
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -394,6 +367,7 @@
         }
       ],
       "one_click": true,
+      "icon": "time",
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -406,6 +380,80 @@
             "key": "dnn_status",
             "op": "eq",
             "value": "00-Standby"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rtd",
+      "title": "ReadyToBeDelivered",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "50-OnTheTouchpoint"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
+      "one_click": false,
+      "icon": "flag",
+      "_tags": ["#Technoplatz"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs ready to be delivered",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs is ready to be delivered.",
+        "attachment": true,
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "60-ReadyToBeDelivered"
+          }
+        ]
+      }
+    },
+    {
+      "id": "shipment",
+      "title": "Shipment",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "70-Delivered"
+        },
+        {
+          "key": "dnn_shp_id",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "icon": "bus",
+      "_tags": ["#Technoplatz"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs shipped",
+        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was shipped.",
+        "attachment": true,
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "70-Delivered"
           }
         ]
       }

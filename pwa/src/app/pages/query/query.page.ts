@@ -83,6 +83,8 @@ export class QueryPage implements OnInit {
   public pages_: number = 1;
   public page_: number = 1;
   public paget_: any = [];
+  public que_scheduled_cron_:string = "";
+  public _tags:any = [];
   private schema_: any = {};
   private menu: string = "";
   private aggregated_: any = [];
@@ -127,19 +129,21 @@ export class QueryPage implements OnInit {
         this.menu = this.router.url.split("/")[1];
         this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
         this.query_url_ = apiHost + "/get/query/" + this.id;
-        this.RefreshData(0).then(() => {
+        this.refresh_data(0).then(() => {
           this.is_initialized = true;
         });
       });
     });
   }
 
-  RefreshData(page_: number) {
+  refresh_data(page_: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = false;
       this.page_ = page_ === 0 ? 1 : page_;
       this.crud.get_query_data(this.id, this.page_, this.limit_).then((res: any) => {
         if (res && res.query) {
+          this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
+          this._tags = res.query?._tags;
           this.subheader = res.query.que_title;
           this.aggregate_ = res.query.que_aggregate;
           this.fields_ = res.fields;
@@ -178,7 +182,7 @@ export class QueryPage implements OnInit {
       this.schemevis = "show";
       this.editor.focus();
     } else {
-      this.RefreshData(0).then(() => {
+      this.refresh_data(0).then(() => {
         this.aggregated_ ? this.misc.doMessage("changes were discarded", "warning") : null;
       }).finally(() => {
         this.schemevis = "hide";
@@ -205,7 +209,7 @@ export class QueryPage implements OnInit {
         aggregate: this.aggregated_
       }).then(() => {
         this.misc.doMessage("query saved successfully", "success");
-        this.RefreshData(0).then(() => {
+        this.refresh_data(0).then(() => {
           this.schemevis = "hide"
         });
       }).catch((error: any) => {
@@ -263,7 +267,7 @@ export class QueryPage implements OnInit {
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified && res.data.res.result) {
         this.misc.doMessage("query updated successfully", "success");
-        this.RefreshData(0);
+        this.refresh_data(0);
       }
     });
     return await modal.present();

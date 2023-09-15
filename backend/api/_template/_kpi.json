@@ -1,0 +1,38 @@
+{
+  "properties": {
+    "kpi_group": {
+      "bsonType": "string",
+      "title": "Group",
+      "description": "KPI group id",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9_-]{1,64}$",
+      "casetype": "lowercase"
+    },
+    "kpi_key": {
+      "bsonType": "string",
+      "title": "KPI Key",
+      "description": "KPI key",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "kpi_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "kpi_date": {
+      "bsonType": "date",
+      "title": "Date",
+      "description": "Process date"
+    }
+  },
+  "required": ["kpi_group", "kpi_key", "kpi_status", "kpi_date"],
+  "index": [["kpi_group", "kpi_key"], ["kpi_group"], ["kpi_key"]],
+  "unique": [["kpi_group", "kpi_key", "kpi_status"]],
+  "sort": {
+    "_created_at": -1
+  }
+}
