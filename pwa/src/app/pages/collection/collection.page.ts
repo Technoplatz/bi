@@ -321,40 +321,38 @@ export class CollectionPage implements OnInit {
   }
 
   async go_crud(rec: any, op: string) {
-    if (this.id === "_query" && op !== "insert") { this.go_query(rec) } else {
-      const modal = await this.modal.create({
-        component: CrudPage,
-        backdropDismiss: true,
-        cssClass: "crud-modal",
-        componentProps: {
-          shuttle: {
-            op: op,
-            collection: this.id ? this.id : null,
-            collections: this.collections ? this.collections : [],
-            views: this.views ? this.views : [],
-            user: this.user,
-            data: rec,
-            counters: this.counters_,
-            structure: this.editor ? this.editor.get() : this.structure,
-            sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
-            filter: op === "action" ? this.filter_ : null,
-            actions: this.actions && this.actions.length > 0 ? this.actions : [],
-            actionix: op === "action" && this.actionix >= 0 ? this.actionix : -1,
-            view: this.view,
-            scan: this.scan_
-          }
+    const modal = await this.modal.create({
+      component: CrudPage,
+      backdropDismiss: true,
+      cssClass: "crud-modal",
+      componentProps: {
+        shuttle: {
+          op: op,
+          collection: this.id ? this.id : null,
+          collections: this.collections ? this.collections : [],
+          views: this.views ? this.views : [],
+          user: this.user,
+          data: rec,
+          counters: this.counters_,
+          structure: this.editor ? this.editor.get() : this.structure,
+          sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
+          filter: op === "action" ? this.filter_ : null,
+          actions: this.actions && this.actions.length > 0 ? this.actions : [],
+          actionix: op === "action" && this.actionix >= 0 ? this.actionix : -1,
+          view: this.view,
+          scan: this.scan_
         }
-      });
-      modal.onDidDismiss().then((res: any) => {
-        if (res.data.modified || this.scan_) {
-          if (op === "action" && res.data.res) {
-            this.misc.doMessage(res.data.res.content, "success");
-          }
-          this.RefreshData(0);
+      }
+    });
+    modal.onDidDismiss().then((res: any) => {
+      if (res.data.modified || this.scan_) {
+        if (op === "action" && res.data.res) {
+          this.misc.doMessage(res.data.res.content, "success");
         }
-      });
-      return await modal.present();
-    }
+        this.RefreshData(0);
+      }
+    });
+    return await modal.present();
   }
 
   async GetIsSelectData() {

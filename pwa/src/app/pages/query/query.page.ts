@@ -66,7 +66,6 @@ export class QueryPage implements OnInit {
   public is_initialized: boolean = false;
   public status_: any = {};
   public columns_: any;
-  public view_mode: any = {};
   public schema_key: any = null;
   public fields_: any = {};
   public is_saving: boolean = false;
@@ -126,7 +125,7 @@ export class QueryPage implements OnInit {
       this.query_ = LSQUERY_;
       this.misc.getAPIUrl().then((apiHost: any) => {
         this.menu = this.router.url.split("/")[1];
-        this.id = this.submenu = this.router.url.split("/")[2];
+        this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
         this.query_url_ = apiHost + "/get/query/" + this.id;
         this.RefreshData(0).then(() => {
           this.is_initialized = true;
@@ -160,6 +159,8 @@ export class QueryPage implements OnInit {
           this.misc.doMessage("no data found", "error");
           reject();
         }
+      }).catch((msg: any) => {
+        this.misc.doMessage(msg, "error");
       }).finally(() => {
         this.is_loaded = true;
         this.is_initialized = true;
@@ -178,8 +179,9 @@ export class QueryPage implements OnInit {
       this.editor.focus();
     } else {
       this.RefreshData(0).then(() => {
-        this.schemevis = "hide"
         this.aggregated_ ? this.misc.doMessage("changes were discarded", "warning") : null;
+      }).finally(() => {
+        this.schemevis = "hide";
         this.aggregated_ = null;
       });
     }

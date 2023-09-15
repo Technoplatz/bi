@@ -2536,28 +2536,37 @@ class Crud:
             if not que_collection_id_:
                 raise APIError(f"collection not found {que_id_}")
 
-            que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
+            que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and query_["que_aggregate"] is not None else None
             if not que_aggregate_:
-                raise APIError(f"no aggregation found {que_id_}")
+                return {"result": True, "query": query_, "data": [], "count": 0, "fields": [], "schema": schema_}
 
-            aggregate_ = []
-            match_ = {}
+            aggregate_base_ = []
             for agg_ in que_aggregate_:
-                if "$match" in agg_:
-                    match_ = agg_["$match"]
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
                 if "$project" in agg_:
                     fields_ = []
                     for prj_ in agg_["$project"]:
                         fields_.append(prj_)
-                aggregate_.append(agg_)
+                aggregate_base_.append(agg_)
 
+            aggregate_ = aggregate_base_.copy()
             aggregate_.append({"$skip": limit_ * (page_ - 1)})
             aggregate_.append({"$limit": limit_})
-            aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
-            data_ = json.loads(JSONEncoder().encode(list(aggregated_)))
-            count_ = Mongo().db_[f"{que_collection_id_}_data"].count_documents(match_)
+
+            aggregate_stats_ = aggregate_base_.copy()
+            aggregate_stats_.append({"$count": "count"})
+
+            facet_ = [{"$facet": {
+                "stats": aggregate_stats_,
+                "data": aggregate_
+            }}]
+
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(facet_)
+            cursore_ = json.loads(JSONEncoder().encode(list(cursor_)))
+            data_ = cursore_[0]["data"] if cursore_ and "data" in cursore_[0] else []
+            stats_ = cursore_[0]["stats"] if cursore_ and "stats" in cursore_[0] else []
+            count_ = stats_[0]["count"] if stats_ else 0
 
             return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
 

@@ -37,16 +37,11 @@ https://www.gnu.org/licenses.
         <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
           {{ header | translate }}
         </ion-button>
-        <h2>{{ subheader }}</h2>
+        <h3>{{ subheader }} [{{ count_ }}]</h3>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
-            <ion-col *ngIf="!view_mode[id]" size="12" class="data-sq-container">
-              <div (click)="misc.navi.next('/admin/_query')" class="data-sq-button">
-                <ion-icon name="arrow-back-circle-outline"></ion-icon>
-                <br />
-                {{ 'Query' | translate }}<br />{{ 'List' | translate }}
-              </div>
+            <ion-col size="12" class="data-sq-container">
               <div *ngIf="is_loaded" (click)="RefreshData(0)" class="data-sq-button">
                 <ion-icon name="sync-circle-outline"></ion-icon>
                 <br />
@@ -102,7 +97,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
-        <table *ngIf="data_.length >= 0" class="data-table">
+        <table *ngIf="data_.length > 0; else nodata" class="data-table">
           <tr>
             <th>#</th>
             <th *ngFor="let item_ of fields_">
@@ -117,18 +112,11 @@ https://www.gnu.org/licenses.
           </tr>
           <tr>
             <td [attr.colspan]="fields_?.length+1">
-              <ion-button size="small" fill="clear" (click)="RefreshData(0)" class="ion-no-padding ion-margin-end">
-                <span *ngIf="count_ > limit_">
-                  {{ (page_ - 1) * limit_ + 1 }} -
-                  <span *ngIf="(page_ - 1) * limit_ + limit_ <= count_">{{ (page_ - 1) * limit_ + limit_ }}</span>
-                  <span *ngIf="(page_ - 1) * limit_ + limit_ > count_">{{ count_ }}</span>
-                  {{ 'of' | translate }}&nbsp;
-                </span>
-                {{ count_ }} {{ 'records' | translate }}
+              <ion-button *ngIf="page_ > 1" size="small" fill="clear" (click)="RefreshData(0)"
+                class="ion-no-padding ion-margin-end">
+                <ion-icon name="play-skip-back"></ion-icon>
               </ion-button>
               <span *ngIf="page_ > 10">
-                <ion-button size="small" fill="clear" (click)="RefreshData(1)" class="ion-no-padding"> 1 ...
-                </ion-button>
                 <ion-button size="small" fill="clear" (click)="RefreshData(page_-1)" class="ion-no-padding">
                   <ion-icon name="caret-back"></ion-icon>
                 </ion-button>
@@ -143,16 +131,21 @@ https://www.gnu.org/licenses.
                 </ion-button>
               </span>
               <span *ngIf="pages_ > 10 && page_ < pages_">
+                <ion-button size="small" fill="clear" (click)="RefreshData(pages_)" class="ion-no-padding">
+                  ...&nbsp;&nbsp;{{ pages_ }}
+                </ion-button>
                 <ion-button size="small" fill="clear" (click)="RefreshData(page_+1)" class="ion-no-padding">
                   <ion-icon name="caret-forward"></ion-icon>
-                </ion-button>
-                <ion-button size="small" fill="clear" (click)="RefreshData(pages_)" class="ion-no-padding">
-                  ... {{ pages_ }}
                 </ion-button>
               </span>
             </td>
           </tr>
         </table>
+        <ng-template #nodata>
+          <div class="ion-margin-top">
+            <h6>{{ 'No data or aggregation found' | translate }}!</h6>
+            {{ 'Please edit your aggregation' | translate }}.</div>
+        </ng-template>
       </ion-col>
       <ng-template #dataloading>
         <ion-col class="warten-sie">

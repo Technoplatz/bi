@@ -51,18 +51,11 @@ https://www.gnu.org/licenses.
                 {{ 'Scan' | translate }}<br />{{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
-                <div *ngIf="!['_collection', '_log', '_announcement'].includes(id)"
-                  (click)="go_crud(null, 'insert')" class="data-sq-button">
-                  <ion-icon name="add-circle-outline"></ion-icon><br />
-                  {{ 'New' | translate }}<br />{{ 'Record' | translate }}
-                </div>
-                <!-- <ng-template #wunderdashes>
-                  <div *ngIf="['_collection', '_query'].includes(id)" (click)="go_crud(null, 'insert')"
+                <div *ngIf="!['_collection', '_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
                   {{ 'New' | translate }}<br />{{ 'Record' | translate }}
                 </div>
-                </ng-template> -->
               </ng-template>
               <div *ngIf="is_loaded" (click)="RefreshData(0)" class="data-sq-button">
                 <ion-icon name="sync-circle-outline"></ion-icon>
@@ -158,6 +151,9 @@ https://www.gnu.org/licenses.
         </ion-grid>
         <table *ngIf="data.length >= 0" class="data-table">
           <tr>
+            <th *ngIf="id=='_query'">
+              &nbsp;
+            </th>
             <th>
               <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)" mode="md">
               </ion-checkbox>
@@ -260,6 +256,9 @@ https://www.gnu.org/licenses.
             </th>
           </tr>
           <tr *ngFor="let record of data; let i = index">
+            <td *ngIf="id=='_query'" (click)="go_query(record)">
+              <ion-icon name="play"></ion-icon>
+            </td>
             <td>
               <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                 (ionChange)="SetSelectData(i,$event)" mode="md">
