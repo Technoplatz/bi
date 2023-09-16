@@ -106,6 +106,8 @@
         }
       ],
       "one_click": false,
+      "uniqueness": false,
+      "unique": null,
       "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
         "notify": false,

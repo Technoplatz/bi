@@ -333,6 +333,8 @@
       ],
       "one_click": true,
       "icon": "megaphone",
+      "uniqueness": false,
+      "unique": null,
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -368,6 +370,8 @@
       ],
       "one_click": true,
       "icon": "time",
+      "uniqueness": false,
+      "unique": null,
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -403,6 +407,8 @@
       ],
       "one_click": false,
       "icon": "flag",
+      "uniqueness": false,
+      "unique": null,
       "_tags": ["#Technoplatz"],
       "notification": {
         "notify": true,
@@ -442,6 +448,8 @@
       ],
       "one_click": false,
       "icon": "bus",
+      "uniqueness": true,
+      "unique": "dnn_acc_no",
       "_tags": ["#Technoplatz"],
       "notification": {
         "notify": true,

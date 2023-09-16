@@ -172,6 +172,8 @@
         }
       ],
       "one_click": false,
+      "uniqueness": false,
+      "unique": null,
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -210,6 +212,8 @@
             "delivery_account_no_field": "dnn_acc_no",
             "delivery_product_no_field": "dnn_prd_no",
             "delivery_product_desc_field": "dnn_prd_description",
+            "delivery_waybill_no_field": "dnn_waybill_no",
+            "delivery_waybill_date_field": "dnn_waybill_date",
             "delivery_status_field": "dnn_status",
             "delivery_set_status": "70-Delivered",
             "document_format": 2
@@ -231,6 +235,8 @@
       "set": [],
       "noninteractive": true,
       "one_click": false,
+      "uniqueness": false,
+      "unique": null,
       "_tags": ["#Managers", "#Administrators"],
       "apis": [
         {
