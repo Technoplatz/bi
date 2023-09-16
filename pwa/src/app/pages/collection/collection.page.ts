@@ -180,7 +180,7 @@ export class CollectionPage implements OnInit {
           this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
           this.actions = [];
-          this.RefreshData(0).then(() => {
+          this.refresh_data(0).then(() => {
             if (this.id === "_collection") {
               this.misc.apiCall("crud", {
                 op: "template",
@@ -210,7 +210,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  RefreshData(p: number) {
+  refresh_data(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
@@ -301,7 +301,7 @@ export class CollectionPage implements OnInit {
                 doc: null,
                 is_crud: true
               }).then(() => {
-                this.RefreshData(0);
+                this.refresh_data(0);
               }).catch((res: any) => {
                 this.misc.doMessage(res && res.msg ? res.msg : res, "error");
               }).finally(() => {
@@ -349,7 +349,7 @@ export class CollectionPage implements OnInit {
         if (op === "action" && res.data.res) {
           this.misc.doMessage(res.data.res.content, "success");
         }
-        this.RefreshData(0);
+        this.refresh_data(0);
       }
     });
     return await modal.present();
@@ -384,7 +384,7 @@ export class CollectionPage implements OnInit {
   setSort(key: string, d: number) {
     this.sort = {};
     this.sort[key] = d ? d * -1 : 1;
-    this.RefreshData(0);
+    this.refresh_data(0);
   }
 
   doSetSearch(k: string) {
@@ -416,7 +416,7 @@ export class CollectionPage implements OnInit {
             this.doResetSearch(true);
             this.searched = null;
             this.sweeped[this.segment] = [];
-            this.RefreshData(0).then(() => {
+            this.refresh_data(0).then(() => {
               resolve(true);
             }).catch((res: any) => {
               this.misc.doMessage(res, "error");
@@ -441,7 +441,7 @@ export class CollectionPage implements OnInit {
       if (d === n_ - 1) {
         this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
           this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-            this.RefreshData(0);
+            this.refresh_data(0);
           });
         });
       }
@@ -469,7 +469,7 @@ export class CollectionPage implements OnInit {
         this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
           this.storage.remove("LSSTATUS_" + this.id).then(() => {
             this.status_ = null;
-            this.RefreshData(0);
+            this.refresh_data(0);
           });
         });
       });
@@ -493,7 +493,7 @@ export class CollectionPage implements OnInit {
             this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
               this.storage.remove("LSSTATUS_" + this.id).then(() => {
                 this.status_ = null;
-                this.RefreshData(0);
+                this.refresh_data(0);
               });
             });
           });
@@ -512,7 +512,7 @@ export class CollectionPage implements OnInit {
       this.schemevis = "show";
       this.editor.focus();
     } else {
-      this.RefreshData(0).then(() => {
+      this.refresh_data(0).then(() => {
         this.schemevis = "hide"
         this.structured_ ? this.misc.doMessage("changes were discarded", "warning") : null;
         this.structured_ = null;
@@ -541,7 +541,7 @@ export class CollectionPage implements OnInit {
       this.filter_ = item_.view.data_filter;
       this.storage.set("LSSTATUS_" + this.id, this.status_).then(() => {
         this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-          this.RefreshData(0).then(() => { }).catch((res: any) => {
+          this.refresh_data(0).then(() => { }).catch((res: any) => {
             this.misc.doMessage(res, "error");
           });
         });
@@ -624,7 +624,7 @@ export class CollectionPage implements OnInit {
         structure: this.structured_
       }).then(() => {
         this.misc.doMessage("schema saved successfully", "success");
-        this.RefreshData(0).then(() => {
+        this.refresh_data(0).then(() => {
           this.schemevis = "hide"
         });
       }).catch((error: any) => {
@@ -641,7 +641,7 @@ export class CollectionPage implements OnInit {
 
   doUploadModal() {
     this.misc.doUploadModal(this.id).then(() => {
-      this.RefreshData(0).then(() => { });
+      this.refresh_data(0).then(() => { });
     });
   }
 
@@ -697,7 +697,7 @@ export class CollectionPage implements OnInit {
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
       }).finally(() => {
-        this.RefreshData(0).then(() => {
+        this.refresh_data(0).then(() => {
           this.templates[ix].processing = false;
         });
       });

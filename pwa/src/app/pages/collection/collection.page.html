@@ -37,7 +37,8 @@ https://www.gnu.org/licenses.
         <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
           {{ header | translate }}
         </ion-button>
-        <h2>{{ subheader }}</h2>
+        <h3>{{ subheader }}</h3>
+        <span *ngIf="is_loaded">{{ count }} records were filtered.</span><span *ngIf="!is_loaded">...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -57,7 +58,7 @@ https://www.gnu.org/licenses.
                   {{ 'New' | translate }}<br />{{ 'Record' | translate }}
                 </div>
               </ng-template>
-              <div *ngIf="is_loaded" (click)="RefreshData(0)" class="data-sq-button">
+              <div *ngIf="is_loaded" (click)="refresh_data(0)" class="data-sq-button">
                 <ion-icon name="sync-circle-outline"></ion-icon>
                 <br />
                 {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
@@ -323,24 +324,17 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="data.length >= 0" class="ion-no-padding data-grid">
           <ion-row *ngIf="count>=0" class="pagination">
             <ion-col size="12" class="ion-no-padding pages-col">
-              <ion-button size="small" fill="clear" (click)="RefreshData(0)" class="ion-no-padding ion-margin-end">
-                <span *ngIf="count > limit">
-                  {{ (page - 1) * limit + 1 }} -
-                  <span *ngIf="(page - 1) * limit + limit <= count">{{ (page - 1) * limit + limit }}</span>
-                  <span *ngIf="(page - 1) * limit + limit > count">{{ count }}</span>
-                  {{ 'of' | translate }}&nbsp;
-                </span>
-                {{ count }} {{ 'records' | translate }}
+              <ion-button *ngIf="page > 1" size="small" fill="clear" (click)="refresh_data(0)"
+                class="ion-no-padding ion-margin-end">
+                <ion-icon name="play-skip-back"></ion-icon>
               </ion-button>
               <span *ngIf="page > 10">
-                <ion-button size="small" fill="clear" (click)="RefreshData(1)" class="ion-no-padding"> 1 ...
-                </ion-button>
-                <ion-button size="small" fill="clear" (click)="RefreshData(page-1)" class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(page-1)" class="ion-no-padding">
                   <ion-icon name="caret-back"></ion-icon>
                 </ion-button>
               </span>
               <span *ngFor="let in of paget; let i = index">
-                <ion-button *ngIf="page != in" size="small" fill="clear" (click)="RefreshData(in)"
+                <ion-button *ngIf="page != in" size="small" fill="clear" (click)="refresh_data(in)"
                   class="ion-no-padding">
                   <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
                 </ion-button>
@@ -349,11 +343,11 @@ https://www.gnu.org/licenses.
                 </ion-button>
               </span>
               <span *ngIf="pages > 10 && page < pages">
-                <ion-button size="small" fill="clear" (click)="RefreshData(page+1)" class="ion-no-padding">
-                  <ion-icon name="caret-forward"></ion-icon>
-                </ion-button>
-                <ion-button size="small" fill="clear" (click)="RefreshData(pages)" class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(pages)" class="ion-no-padding">
                   ... {{ pages }}
+                </ion-button>
+                <ion-button size="small" fill="clear" (click)="refresh_data(page+1)" class="ion-no-padding">
+                  <ion-icon name="caret-forward"></ion-icon>
                 </ion-button>
               </span>
             </ion-col>

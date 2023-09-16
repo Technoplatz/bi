@@ -32,8 +32,7 @@
       "minLength": 7,
       "maxLength": 16,
       "pattern": "^[A-Z0-9-]{7,16}$",
-      "replacement": [
-        {
+      "replacement": [{
           "find": "-",
           "replace": ""
         },
@@ -76,137 +75,118 @@
     }
   },
   "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
-  "index": [["ser_is_in"], ["ser_dnn_no"], ["ser_sscc_no"], ["ser_dnn_no", "ser_sscc_no"]],
-  "unique": [["ser_no"]],
+  "index": [
+    ["ser_is_in"],
+    ["ser_dnn_no"],
+    ["ser_sscc_no"],
+    ["ser_dnn_no", "ser_sscc_no"]
+  ],
+  "unique": [
+    ["ser_no"]
+  ],
   "sort": {
     "_modified_at": -1
   },
   "parents": [],
   "links": [],
-  "actions": [
-    {
-      "id": "act-assign-dn-und-spc",
-      "title": "DN Update",
-      "enabled": true,
-      "match": [
-        {
-          "key": "ser_is_in",
-          "op": "eq",
-          "value": false
-        }
-      ],
-      "set": [
-        {
-          "key": "ser_dnn_no",
-          "value": null
-        },
-        {
-          "key": "ser_prd_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "uniqueness": false,
-      "unique": null,
-      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
-      "notification": {
-        "notify": false,
-        "subject": "Serials DN updated",
-        "body": "Hi,<br /><br />We would like to let you know that dn info was updated.",
-        "fields": "ser_no,ser_dnn_no,ser_prd_no,ser_sscc_no",
-        "attachment": false,
-        "filter": [
-          {
-            "key": "ser_is_in",
-            "op": "eq",
-            "value": false
-          }
-        ]
+  "actions": [{
+    "id": "act-assign-dn-und-spc",
+    "title": "DN Update",
+    "enabled": true,
+    "match": [{
+      "key": "ser_is_in",
+      "op": "eq",
+      "value": false
+    }],
+    "set": [{
+        "key": "ser_dnn_no",
+        "value": null
+      },
+      {
+        "key": "ser_prd_no",
+        "value": null
       }
+    ],
+    "one_click": false,
+    "uniqueness": false,
+    "unique": [],
+    "_tags": ["#Managers", "#Technoplatz", "#Operation"],
+    "notification": {
+      "notify": false,
+      "subject": "Serials DN updated",
+      "body": "Hi,<br /><br />We would like to let you know that dn info was updated.",
+      "fields": "ser_no,ser_dnn_no,ser_prd_no,ser_sscc_no",
+      "attachment": false,
+      "filter": [{
+        "key": "ser_is_in",
+        "op": "eq",
+        "value": false
+      }]
     }
-  ],
-  "triggers": [
-    {
+  }],
+  "triggers": [{
       "name": "Barcode Readin",
       "enabled": true,
       "operations": ["update"],
-      "changes": [
-        {
-          "key": "ser_is_in",
+      "changes": [{
+        "key": "ser_is_in",
+        "op": "eq",
+        "value": true
+      }],
+      "targets": [{
+        "collection": "delivery",
+        "match": [{
+            "key": "dnn_no",
+            "value": "ser_dnn_no"
+          },
+          {
+            "key": "dnn_line_no",
+            "value": "ser_line_no"
+          }
+        ],
+        "filter": [{
+          "key": "dnn_status",
           "op": "eq",
-          "value": true
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_no",
-              "value": "ser_dnn_no"
-            },
-            {
-              "key": "dnn_line_no",
-              "value": "ser_line_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "eq",
-              "value": "40-ClearanceCompleted"
-            }
-          ],
-          "set": [
-            {
-              "key": "dnn_status",
-              "value": "50-OnTheTouchpoint"
-            }
-          ],
-          "upsert": false
-        }
-      ]
+          "value": "40-ClearanceCompleted"
+        }],
+        "set": [{
+          "key": "dnn_status",
+          "value": "50-OnTheTouchpoint"
+        }],
+        "upsert": false
+      }]
     },
     {
       "name": "Barcode Readin Cancel",
       "enabled": true,
       "operations": ["update"],
-      "changes": [
-        {
-          "key": "ser_is_in",
+      "changes": [{
+        "key": "ser_is_in",
+        "op": "eq",
+        "value": false
+      }],
+      "targets": [{
+        "collection": "delivery",
+        "match": [{
+            "key": "dnn_no",
+            "value": "ser_dnn_no"
+          },
+          {
+            "key": "dnn_line_no",
+            "value": "ser_line_no"
+          }
+        ],
+        "filter": [{
+          "key": "dnn_status",
           "op": "eq",
-          "value": false
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_no",
-              "value": "ser_dnn_no"
-            },
-            {
-              "key": "dnn_line_no",
-              "value": "ser_line_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "eq",
-              "value": "50-OnTheTouchpoint"
-            }
-          ],
-          "set": [
-            {
-              "key": "dnn_status",
-              "value": "40-ClearanceCompleted"
-            }
-          ],
-          "upsert": false
-        }
-      ]
+          "value": "50-OnTheTouchpoint"
+        }],
+        "set": [{
+          "key": "dnn_status",
+          "value": "40-ClearanceCompleted"
+        }],
+        "upsert": false
+      }]
     }
   ],
   "views": {},

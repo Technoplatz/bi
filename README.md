@@ -157,7 +157,7 @@ curl -Lso ~/technoplatz-bi/bi-sh --create-dirs \
   "actions": [],
   "links": [],
   "triggers": [],
-  "views": {}, 
+  "views": {},
   "fetchers": [],
   "import": {}
 }
@@ -240,21 +240,26 @@ Enumerates are certain type of string properties with predefined values which al
 ```json
 [
   {
-    "id": "stby-to-open",
-    "title": "Standby to Open",
+    "id": "shipment",
+    "title": "Shipment",
     "enabled": true,
-    "otp_required": true,
-    "one_click": true,
-    "match": [{ "key": "dnn_status", "op": "eq", "value": "00-Standby" }],
-    "set": [{ "key": "dnn_status", "value": "00-Open" }],
-    "_tags": ["#Managers", "#Administrators"],
+    "match": [{ "key": "dnn_status", "op": "eq", "value": "60-ReadyToBeDelivered" }],
+    "set": [
+      { "key": "dnn_status", "value": "70-Delivered" },
+      { "key": "dnn_shp_id", "value": null }
+    ],
+    "one_click": false,
+    "icon": "bus",
+    "uniqueness": true,
+    "unique": ["dnn_acc_no"],
+    "_tags": ["#Technoplatz"],
     "notification": {
       "notify": true,
-      "subject": "Email subject",
-      "body": "Email body in HTML",
+      "subject": "DNs shipped",
+      "body": "Hi,<br /><br />We would like to let you know that attached DNs was shipped.",
       "attachment": true,
-      "fields": "dnn_no,dnn_status",
-      "filter": [{ "key": "dnn_status", "op": "eq", "value": "00-Open" }]
+      "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+      "filter": [{ "key": "dnn_status", "op": "eq", "value": "70-Delivered" }]
     }
   }
 ]

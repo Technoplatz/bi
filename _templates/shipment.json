@@ -173,7 +173,7 @@
       ],
       "one_click": false,
       "uniqueness": false,
-      "unique": null,
+      "unique": [],
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -236,7 +236,7 @@
       "noninteractive": true,
       "one_click": false,
       "uniqueness": false,
-      "unique": null,
+      "unique": [],
       "_tags": ["#Managers", "#Administrators"],
       "apis": [
         {

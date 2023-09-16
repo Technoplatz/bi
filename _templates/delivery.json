@@ -212,11 +212,13 @@
       "dateonly": true
     },
     "dnn_shp_id": {
-      "bsonType": "number",
+      "bsonType": "string",
       "title": "Shipment ID",
       "description": "Shipment ID",
-      "minimum": 0,
-      "maximum": 999999
+      "minLength": 14,
+      "maxLength": 14,
+      "pattern": "^[0-9]{14,14}$",
+      "timestamp": true
     }
   },
   "required": [
@@ -334,7 +336,7 @@
       "one_click": true,
       "icon": "megaphone",
       "uniqueness": false,
-      "unique": null,
+      "unique": [],
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -371,7 +373,7 @@
       "one_click": true,
       "icon": "time",
       "uniqueness": false,
-      "unique": null,
+      "unique": [],
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
@@ -408,7 +410,7 @@
       "one_click": false,
       "icon": "flag",
       "uniqueness": false,
-      "unique": null,
+      "unique": [],
       "_tags": ["#Technoplatz"],
       "notification": {
         "notify": true,
@@ -449,7 +451,7 @@
       "one_click": false,
       "icon": "bus",
       "uniqueness": true,
-      "unique": "dnn_acc_no",
+      "unique": ["dnn_acc_no"],
       "_tags": ["#Technoplatz"],
       "notification": {
         "notify": true,

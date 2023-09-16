@@ -272,6 +272,7 @@ class Misc:
             "replacement",
             "placeholder",
             "counter",
+            "timestamp",
             "uuid",
             "dateonly",
             "decimals",
@@ -3194,7 +3195,7 @@ class Crud:
             apis_ = action_["apis"] if "apis" in action_ and len(action_["apis"]) > 0 else []
             set_ = action_["set"] if "set" in action_ else None
             uniqueness_ = "uniqueness" in action_ and action_["uniqueness"] is True
-            unique_ = action_["unique"] if "unique" in action_ and action_["unique"] in properties_ else None
+            unique_ = action_["unique"] if "unique" in action_ and len(action_["unique"]) > 0 else None
 
             if not set_ and not apis_:
                 raise AppException("no set or apis provided in action")
@@ -3221,9 +3222,13 @@ class Crud:
                     raise AppException("no selection was made")
 
             if uniqueness_ and unique_:
-                uniques_ = list(Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": f"${unique_}", "count": {"$sum": 1}}}]))
+                unique_ = set(unique_)
+                group_ = {}
+                for uq_ in unique_:
+                    group_[uq_] = f"${uq_}"
+                uniques_ = list(Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": group_, "count": {"$sum": 1}}}]))
                 if uniques_ and len(uniques_) > 1:
-                    raise AppException(f"{unique_} must be unique in selection")
+                    raise AppException(f"{(','.join(unique_))} must be unique in selection")
 
             response_content_ = "Action Result:"
             count_ = 0
