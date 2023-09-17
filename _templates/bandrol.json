@@ -14,7 +14,7 @@
       "title": "Date",
       "description": "Record Date",
       "placeholder": "Date",
-      "dateonly": true
+      "dateOnly": true
     }
   },
   "required": ["ban_no", "ban_date"],

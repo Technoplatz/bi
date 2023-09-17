@@ -1,31 +1,21 @@
 {
   "properties": {
     "shp_id": {
-      "bsonType": "number",
+      "bsonType": "string",
       "title": "ID",
       "description": "Shipment ID",
-      "placeholder": "Shipment ID",
-      "minimum": 0,
-      "maximum": 999999,
-      "counter": true,
+      "placeholder": "Automatically assigned",
+      "minLength": 14,
+      "maxLength": 14,
+      "pattern": "^[0-9]{14,14}$",
+      "timestamp": true,
       "permanent": true
-    },
-    "shp_status": {
-      "bsonType": "string",
-      "title": "Status",
-      "description": "Status",
-      "minLength": 5,
-      "maxLength": 32,
-      "pattern": "^[A-Za-z0-9-]{5,32}$",
-      "enum": ["10-ReadyToBeDelivered", "20-Shipped", "99-Error"],
-      "default": "10-ReadyToBeDelivered",
-      "readonly": false
     },
     "shp_date": {
       "bsonType": "date",
       "title": "Ship Date",
       "description": "Shipment Date",
-      "dateonly": false
+      "dateOnly": false
     },
     "shp_acc_no": {
       "bsonType": "string",
@@ -60,7 +50,7 @@
       "minLength": 6,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "shp_notes": {
       "bsonType": "string",
@@ -70,7 +60,7 @@
       "minLength": 0,
       "maxLength": 512
     },
-    "shp_waybill_no": {
+    "shp_wayb_no": {
       "bsonType": "string",
       "title": "Waybill No",
       "description": "Waybill serial number",
@@ -80,13 +70,13 @@
       "maxLength": 18,
       "readonly": true
     },
-    "shp_waybill_date": {
+    "shp_wayb_date": {
       "bsonType": "date",
       "title": "Waybill Date",
       "description": "Waybill generated date",
       "readonly": true
     },
-    "shp_ettn": {
+    "shp_wayb_ettn": {
       "bsonType": "string",
       "title": "Waybill ETTN",
       "description": "Waybill ETTN",
@@ -101,7 +91,7 @@
     "shp_id": -1
   },
   "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_vehicle_id"],
-  "index": [["shp_id"], ["shp_acc_no"], ["shp_waybill_no"]],
+  "index": [["shp_id"], ["shp_acc_no"], ["shp_wayb_no"]],
   "unique": [["shp_id"]],
   "parents": [
     {
@@ -129,8 +119,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "in",
-          "value": "50-OnTheTouchpoint,60-ReadyToBeDelivered"
+          "op": "eq",
+          "value": "60-ReadyToBeDelivered"
         },
         {
           "key": "dnn_acc_no",
@@ -145,91 +135,24 @@
         },
         {
           "key": "dnn_status",
-          "value": "60-ReadyToBeDelivered"
+          "value": "70-Delivered"
         }
       ],
       "autofill": true,
       "btntext": "delivery",
-      "_tags": ["#Managers", "#Technoplatz", "#Administrators"]
+      "_tags": ["#Technoplatz"]
     }
   ],
   "actions": [
-    {
-      "id": "ewaybill-issue",
-      "title": "E-Waybill Issue",
-      "enabled": true,
-      "match": [
-        {
-          "key": "shp_status",
-          "op": "eq",
-          "value": "10-Ready"
-        }
-      ],
-      "set": [
-        {
-          "key": "shp_notes",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs Shipped",
-        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
-        "fields": "dnn_no,dnn_status",
-        "filter": []
-      },
-      "apis": [
-        {
-          "id": "waybill-issue",
-          "name": "Waybill Issue",
-          "enabled": true,
-          "url": "http://172.18.0.8/issue",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "method": "post",
-          "map": {
-            "tag_prefix": "{http://tempuri.org/}",
-            "shipment_collection": "shipment_data",
-            "shipment_id_field": "shp_id",
-            "shipment_ettn_field": "shp_ettn",
-            "shipment_waybill_no_field": "shp_waybill_no",
-            "shipment_waybill_date_field": "shp_waybill_date",
-            "shipment_account_no_field": "shp_acc_no",
-            "shipment_status_field": "shp_status",
-            "shipment_notes_field": "shp_notes",
-            "shipment_status_set_value": "20-Shipped",
-            "account_collection": "account_data",
-            "account_no_field": "acc_no",
-            "delivery_collection": "delivery_data",
-            "delivery_shipment_id_field": "dnn_shp_id",
-            "delivery_qty_field": "dnn_qty",
-            "delivery_no_field": "dnn_no",
-            "delivery_account_no_field": "dnn_acc_no",
-            "delivery_product_no_field": "dnn_prd_no",
-            "delivery_product_desc_field": "dnn_prd_description",
-            "delivery_waybill_no_field": "dnn_waybill_no",
-            "delivery_waybill_date_field": "dnn_waybill_date",
-            "delivery_status_field": "dnn_status",
-            "delivery_set_status": "70-Delivered",
-            "document_format": 2
-          }
-        }
-      ]
-    },
     {
       "id": "ewaybill-download",
       "title": "E-Waybill Download",
       "enabled": true,
       "match": [
         {
-          "key": "shp_status",
-          "op": "eq",
-          "value": "20-Shipped"
+          "key": "shp_wayb_ettn",
+          "op": "nnull",
+          "value": null
         }
       ],
       "set": [],
@@ -252,7 +175,7 @@
             "tag_prefix": "{http://tempuri.org/}",
             "shipment_collection": "shipment_data",
             "shipment_id_field": "shp_id",
-            "shipment_ettn_field": "shp_ettn",
+            "shipment_ettn_field": "shp_wayb_ettn",
             "document_format": 2
           }
         }

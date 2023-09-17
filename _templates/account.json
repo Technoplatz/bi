@@ -176,8 +176,8 @@
       "bsonType": "bool",
       "title": "Active?",
       "description": "Account is Active",
-      "truetext": "Active",
-      "falsetext": "Inactive",
+      "trueText": "Active",
+      "falseText": "Inactive",
       "default": true
     }
   },

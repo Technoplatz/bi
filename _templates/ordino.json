@@ -7,7 +7,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "odi_sub_no": {
       "bsonType": "string",
@@ -16,13 +16,13 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "odi_date": {
       "bsonType": "date",
       "title": "Ordino Date",
       "description": "Ordino Opening Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "odi_from": {
       "bsonType": "string",
@@ -40,15 +40,15 @@
       "bsonType": "bool",
       "title": "Is Arrived?",
       "description": "Ordino arrived",
-      "truetext": "Arrived",
-      "falsetext": "OnTheWay",
+      "trueText": "Arrived",
+      "falseText": "OnTheWay",
       "default": false
     },
     "odi_arrived_date": {
       "bsonType": "date",
       "title": "Arrival Date",
       "description": "Date of Arrival",
-      "dateonly": true
+      "dateOnly": true
     }
   },
   "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],

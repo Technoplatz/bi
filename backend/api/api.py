@@ -274,11 +274,11 @@ class Misc:
             "counter",
             "timestamp",
             "uuid",
-            "dateonly",
+            "dateOnly",
             "decimals",
-            "truetext",
-            "falsetext",
-            "casetype"
+            "trueText",
+            "falseText",
+            "caseType"
         ]
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
@@ -3203,7 +3203,6 @@ class Crud:
             notification_ = action_["notification"] if "notification" in action_ else None
             notify_ = notification_ and notification_["notify"] is True
             filter_ = notification_["filter"] if notification_ and "filter" in notification_ and len(notification_["filter"]) > 0 else None
-            fields_ = notification_["fields"].replace(" ", "") if notification_ and "fields" in notification_ else None
             attachment_ = notification_ and "attachment" in notification_ and notification_["attachment"] is True
             get_notification_filtered_ = None
 
@@ -3242,29 +3241,49 @@ class Crud:
                 response_content_ += f"<br />{count_} record(s) were updated."
 
             files_ = []
-
             for api_ in apis_:
-                api_id_ = api_["id"] if "id" in api_ else None
-                if not api_id_:
-                    raise AppException("invalid id in action api")
+                id_ = api_["id"] if "id" in api_ and api_["id"] is not None else None
+                if not id_:
+                    print_("!!! no action api id found")
+                    continue
                 enabled_ = "enabled" in api_ and api_["enabled"] is True
                 if not enabled_:
+                    print_(f"!!! action api not enabled: {id_}")
                     continue
                 url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
                 if not url_:
-                    raise AppException("invalid url in action api")
+                    print_(f"!!! invalid url in action api: {id_}")
+                    continue
                 headers_ = api_["headers"] if "headers" in api_ else None
                 if not headers_:
-                    raise AppException("invalid http headers in action api")
+                    print_(f"!!! invalid headers in action api: {id_}")
+                    continue
                 method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
                 if not method_:
-                    raise AppException("invalid http method in action api")
+                    print_(f"!!! invalid method in action api: {id_}")
+                    continue
                 map_ = api_["map"] if "map" in api_ else None
                 if not map_:
-                    raise AppException("invalid mapping in action api")
+                    print_(f"!!! no map found: {id_}")
+                    continue
 
-                json_ = {"ids": JSONEncoder().encode(ids_), "map": map_, "email": email_}
-                response_ = requests.post(url_, json=json_, headers=headers_, timeout=60)
+                json_ = {}
+                for key_, value_ in map_.items():
+                    if value_ in doc_:
+                        json_["key"] = value_
+                        json_["value"] = doc_[value_]
+                if not json_:
+                    print_(f"!!! no mapping values found: {id_}")
+                    continue
+                json_["ids"] = []
+                if ids_ and len(ids_) > 0:
+                    json_["ids"] = ids_
+
+                response_ = requests.post(url_, json=json.loads(JSONEncoder().encode(json_)), headers=headers_, timeout=60)
+                if not response_:
+                    print_(f"!!! action api reponse error: {id_}")
+                    continue
+
                 res_ = json.loads(response_.content)
                 res_content_ = res_["content"] if "content" in res_ else ""
                 res_files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
@@ -3274,20 +3293,20 @@ class Crud:
 
                 if res_files_:
                     files_ += res_files_
-
                 response_content_ += f"{res_content_}"
 
             if notify_:
                 subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
                 body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
-                if get_notification_filtered_ and attachment_:
+                fields_ = ",".join(notification_["fields"]) if "fields" in notification_ and str(type(notification_["fields"])) == "<class 'list'>" and len(
+                    notification_["fields"]) > 0 else notification_["fields"].replace(" ", "") if notification_ and "fields" in notification_ else None
+                if get_notification_filtered_ and fields_ and attachment_:
                     type_ = "csv"
                     file_ = f"/cron/action-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
                     command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
                     files_ += [{"filename": file_, "filetype": type_}]
-
                 email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])

@@ -169,7 +169,8 @@ export class CrudPage implements OnInit {
       this.scanned_ = LSSCANNED ? LSSCANNED : [];
       this.doGetAllAktions(this.op).then((res: any) => {
         this.aktions = res;
-        this.crud.initForm(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views, this.counters).then((res: any) => {
+        console.log("*** ax", this.structure__);
+        this.crud.initForm(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views, this.counters, this.actionix).then((res: any) => {
           this.tab = "data";
           this.crudForm = res.form;
           this.fields = res.fields;
@@ -227,7 +228,8 @@ export class CrudPage implements OnInit {
               controls_[form_ctrl_filter_[k][0]] = form_ctrl_filter_[k][1];
               if (k === form_ctrl_filter_.length - 1) {
                 for (let f = 0; f < action_.set.length; f++) {
-                  action_.set[f].value === "$CURRENT_DATE" ? action_.set[f].value = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000)).toISOString().substring(0, 19) : null;
+                  const ndate_ = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000));
+                  action_.set[f].value === "$CURRENT_DATE" ? action_.set[f].value = ndate_.toISOString().substring(0, 19) : action_.set[f].value === "$TIMESTAMP" ? action_.set[f].value = ndate_.toISOString().replace(/-|:|T/gi, '').substring(0, 14) : null;
                   this.data_[action_.set[f].key] = action_.set[f].value;
                   this.crudForm.get(action_.set[f].key)?.setValue(action_.set[f].value);
                   if (f === action_.set.length - 1) {
@@ -615,11 +617,11 @@ export class CrudPage implements OnInit {
 
   doTextManipulate(event: any, field: any) {
     const val_ = event.detail.value;
-    if (field?.casetype === "lowercase") {
+    if (field?.caseType === "lowercase") {
       this.data_[field.name] = val_.toLowerCase();
-    } else if (field?.casetype === "uppercase") {
+    } else if (field?.caseType === "uppercase") {
       this.data_[field.name] = val_.toUpperCase();
-    } else if (field?.casetype === "capitalize") {
+    } else if (field?.caseType === "capitalize") {
       this.data_[field.name] = val_.charAt(0).toUpperCase() + val_.slice(1)
     }
   }

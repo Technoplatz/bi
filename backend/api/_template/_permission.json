@@ -33,48 +33,48 @@
       "title": "Read",
       "description": "Read Permission",
       "default": false,
-      "truetext": "Yes",
-      "falsetext": "No"
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "per_insert": {
       "bsonType": "bool",
       "title": "Insert",
       "description": "Insert Permission",
       "default": false,
-      "truetext": "Yes",
-      "falsetext": "No"
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "per_update": {
       "bsonType": "bool",
       "title": "Update",
       "description": "Update Permission",
       "default": false,
-      "truetext": "Yes",
-      "falsetext": "No"
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "per_delete": {
       "bsonType": "bool",
       "title": "Delete",
       "description": "Delete Permission",
       "default": false,
-      "truetext": "Yes",
-      "falsetext": "No"
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "per_share": {
       "bsonType": "bool",
       "title": "Share",
       "description": "Sharing Permission",
       "default": false,
-      "truetext": "Yes",
-      "falsetext": "No"
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "per_schema": {
       "bsonType": "bool",
       "title": "Scheme Update",
       "description": "Scheme Permission",
       "default": false,
-      "truetext": "Yes",
-      "falsetext": "No"
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "per_match": {
       "bsonType": "array",

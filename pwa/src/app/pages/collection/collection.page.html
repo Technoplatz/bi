@@ -267,8 +267,8 @@ https://www.gnu.org/licenses.
             </td>
             <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex" (click)="go_crud(record, 'update')">
               <span *ngIf="item_.value.bsonType=='date'; else else1">
-                <span *ngIf="item_.value?.dateonly; else nodateonly">{{ record[item_.key] | date:'dd.MM.yyyy' }}</span>
-                <ng-template #nodateonly>
+                <span *ngIf="item_.value?.dateOnly; else nodateOnly">{{ record[item_.key] | date:'dd.MM.yyyy' }}</span>
+                <ng-template #nodateOnly>
                   {{ record[item_.key] | date:'dd.MM.yyyy HH:mm:ss' }}
                 </ng-template>
               </span>
@@ -285,10 +285,10 @@ https://www.gnu.org/licenses.
               </ng-template>
               <ng-template #else2>
                 <span *ngIf="item_.value.bsonType=='bool'; else else3">
-                  <span *ngIf="record[item_.key] && item_.value.truetext">{{ item_.value.truetext }}</span>
-                  <span *ngIf="record[item_.key] && !item_.value.truetext">{{ 'TRUE' | translate }}</span>
-                  <span *ngIf="!record[item_.key] && item_.value.falsetext">{{ item_.value.falsetext }}</span>
-                  <span *ngIf="!record[item_.key] && !item_.value.falsetext">{{ 'FALSE' | translate }}</span>
+                  <span *ngIf="record[item_.key] && item_.value.trueText">{{ item_.value.trueText }}</span>
+                  <span *ngIf="record[item_.key] && !item_.value.trueText">{{ 'TRUE' | translate }}</span>
+                  <span *ngIf="!record[item_.key] && item_.value.falseText">{{ item_.value.falseText }}</span>
+                  <span *ngIf="!record[item_.key] && !item_.value.falseText">{{ 'FALSE' | translate }}</span>
                 </span>
               </ng-template>
               <ng-template #else3>

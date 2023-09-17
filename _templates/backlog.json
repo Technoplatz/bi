@@ -94,13 +94,13 @@
       "bsonType": "date",
       "title": "ETA Date",
       "description": "ETA Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_psd": {
       "bsonType": "date",
       "title": "PSD",
       "description": "PSD",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_psd_comment": {
       "bsonType": "string",
@@ -249,43 +249,43 @@
       "bsonType": "date",
       "title": "Sales Order Created Date",
       "description": "Sales Order Created Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_credit_release_date": {
       "bsonType": "date",
       "title": "Credit Release Date",
       "description": "Credit Release Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_mfg_po_date": {
       "bsonType": "date",
       "title": "MFG PO Date",
       "description": "MFG PO Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_ship_date": {
       "bsonType": "date",
       "title": "Ship Date",
       "description": "Ship Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_pod": {
       "bsonType": "date",
       "title": "POD",
       "description": "POD",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_crad": {
       "bsonType": "date",
       "title": "Crad",
       "description": "Crad",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_rsd": {
       "bsonType": "date",
       "title": "RSD",
       "description": "RSD",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_month": {
       "bsonType": "number",
@@ -326,7 +326,7 @@
       "bsonType": "date",
       "title": "Billing Date",
       "description": "Billing Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_status_detail": {
       "bsonType": "string",
@@ -372,7 +372,7 @@
       "bsonType": "date",
       "title": "LTS Status Date",
       "description": "LTS Status Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "blo_critical_status": {
       "bsonType": "string",

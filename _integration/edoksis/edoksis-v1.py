@@ -313,9 +313,6 @@ def download_f():
         if content_type_ != "application/json":
             raise APIError(f"invalid content type: {request['Content-Type']}")
 
-        if not request.data:
-            raise APIError("no data requested")
-
         json_ = request.json
         if not json_:
             raise APIError("no request json provided")
@@ -402,24 +399,30 @@ def issue_f():
     docstring is in progress
     """
     try:
+        print_("*** debug0")
         content_ = ""
 
         if not request.headers:
             raise AuthError("no headers provided")
 
+        print_("*** debug1", request.headers)
+
         content_type_ = request.headers.get("Content-Type", None) if "Content-Type" in request.headers and request.headers["Content-Type"] != "" else None
         if not content_type_:
             raise APIError("no content type provided")
 
+        print_("*** debug2", content_type_)
+
         if content_type_ != "application/json":
             raise APIError(f"invalid content type: {request['Content-Type']}")
 
-        if not request.data:
-            raise APIError("no data requested")
+        print_("*** debug3", content_type_)
 
         json_ = request.json
         if not json_:
             raise APIError("no request json provided")
+
+        print_("*** debug4", json_)
 
         map_ = json_["map"] if "map" in json_ else None
         if not map_:

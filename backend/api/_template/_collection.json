@@ -7,7 +7,7 @@
       "pattern": "^[a-z0-9-_]{3,64}$",
       "title": "ID",
       "description": "Collection ID",
-      "casetype": "lowercase"
+      "caseType": "lowercase"
     },
     "col_title": {
       "bsonType": "string",
@@ -15,7 +15,7 @@
       "maxLength": 32,
       "title": "Title",
       "description": "Collection Title",
-      "casetype": "capitalize"
+      "caseType": "capitalize"
     },
     "col_description": {
       "bsonType": "string",
@@ -23,7 +23,7 @@
       "maxLength": 256,
       "title": "Description",
       "description": "Collection Description",
-      "casetype": "capitalize"
+      "caseType": "capitalize"
     },
     "col_prefix": {
       "bsonType": "string",
@@ -32,7 +32,7 @@
       "pattern": "^[a-z]{3,3}$",
       "title": "Prefix",
       "description": "Column Prefix - 3 characters lower case",
-      "casetype": "lowercase"
+      "caseType": "lowercase"
     },
     "col_priority": {
       "bsonType": "number",

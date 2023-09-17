@@ -255,11 +255,11 @@ https://www.gnu.org/licenses.
                                 <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
                                     <ng-template>
                                         <ion-datetime [id]="field.name"
-                                            [presentation]="field.dateonly ? 'date' : 'date-time'" [multiple]="false"
+                                            [presentation]="field.dateOnly ? 'date' : 'date-time'" [multiple]="false"
                                             [value]="data_[field.name]?.substring(0, 19).replace(' ', 'T') + 'Z'"
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
                                             [firstDayOfWeek]="1" [showDefaultButtons]="true"
-                                            displayFormat="field.dateonly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm'"
+                                            displayFormat="field.dateOnly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm'"
                                             [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly"
                                             [disabled]="field.disabled">
                                             <span slot="title">{{ field.title }}</span>

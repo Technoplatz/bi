@@ -65,7 +65,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "dnn_odi_sub_no": {
       "bsonType": "string",
@@ -74,7 +74,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "dnn_man_no": {
       "bsonType": "string",
@@ -104,7 +104,7 @@
       "bsonType": "date",
       "title": "DN Date",
       "description": "DN Date",
-      "dateonly": true
+      "dateOnly": true
     },
     "dnn_po_id": {
       "bsonType": "string",
@@ -143,7 +143,7 @@
           "replace": ""
         }
       ],
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "dnn_prd_description": {
       "bsonType": "string",
@@ -209,16 +209,75 @@
       "bsonType": "date",
       "title": "ETA Date",
       "description": "ETA date",
-      "dateonly": true
+      "dateOnly": true
     },
-    "dnn_shp_id": {
+    "dnn_wayb_id": {
       "bsonType": "string",
-      "title": "Shipment ID",
-      "description": "Shipment ID",
+      "title": "Waybill ID",
+      "description": "Waybill ID",
+      "placeholder": "Automatically assigned",
       "minLength": 14,
       "maxLength": 14,
       "pattern": "^[0-9]{14,14}$",
-      "timestamp": true
+      "timestamp": true,
+      "permanent": true
+    },
+    "dnn_wayb_date": {
+      "bsonType": "date",
+      "title": "Waybill Date",
+      "description": "Waybill generated date",
+      "dateOnly": false,
+      "permanent": true
+    },
+    "dnn_wayb_cname": {
+      "bsonType": "string",
+      "title": "Carrier Name",
+      "description": "Carrier name or driver name surname",
+      "placeholder": "Carrier or driver Name",
+      "minLength": 2,
+      "maxLength": 32,
+      "permanent": true
+    },
+    "dnn_wayb_cid": {
+      "bsonType": "string",
+      "title": "Carrier Tax/ID No",
+      "description": "Carrier tax no or driver id",
+      "placeholder": "Carrier Tax/Id No",
+      "minLength": 10,
+      "maxLength": 12,
+      "pattern": "^[0-9]{10,12}$",
+      "permanent": true
+    },
+    "dnn_wayb_vid": {
+      "bsonType": "string",
+      "title": "Vehicle Plate",
+      "description": "Vehicle plate number",
+      "placeholder": "Vehicle plate number",
+      "minLength": 6,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9 ]{6,16}$",
+      "caseType": "uppercase",
+      "permanent": true
+    },
+    "dnn_wayb_no": {
+      "bsonType": "string",
+      "title": "Waybill No",
+      "description": "Waybill serial number",
+      "placeholder": "Automatically assigned",
+      "pattern": "^[A-Z0-9-]{16,18}$",
+      "minLength": 0,
+      "maxLength": 18,
+      "readonly": true
+    },
+    "dnn_wayb_ettn": {
+      "bsonType": "string",
+      "title": "ETTN",
+      "description": "Waybill ETTN",
+      "placeholder": "Automatically assigned",
+      "pattern": "^[a-z0-9-]{32,40}$",
+      "minLength": 32,
+      "maxLength": 40,
+      "readonly": true
     }
   },
   "required": [
@@ -240,7 +299,6 @@
   "index": [
     ["dnn_acc_no"],
     ["dnn_status"],
-    ["dnn_shp_id"],
     ["dnn_man_no"],
     ["dnn_odi_no", "dnn_odi_sub_no"],
     ["dnn_order_no", "dnn_prd_no"],
@@ -444,21 +502,77 @@
           "value": "70-Delivered"
         },
         {
-          "key": "dnn_shp_id",
+          "key": "dnn_wayb_date",
+          "value": null
+        },
+        {
+          "key": "dnn_wayb_id",
+          "value": "$TIMESTAMP"
+        },
+        {
+          "key": "dnn_wayb_cname",
+          "value": null
+        },
+        {
+          "key": "dnn_wayb_cid",
+          "value": null
+        },
+        {
+          "key": "dnn_wayb_vid",
+          "value": null
+        },
+        {
+          "key": "dnn_wayb_no",
+          "value": null
+        },
+        {
+          "key": "dnn_wayb_ettn",
           "value": null
         }
       ],
+      "required": ["dnn_status", "dnn_wayb_id", "dnn_wayb_date", "dnn_wayb_cname", "dnn_wayb_cid", "dnn_wayb_vid"],
+      "readonly": ["dnn_status", "dnn_wayb_id", "dnn_wayb_no", "dnn_wayb_ettn"],
       "one_click": false,
       "icon": "bus",
       "uniqueness": true,
       "unique": ["dnn_acc_no"],
       "_tags": ["#Technoplatz"],
+      "apis": [
+        {
+          "id": "api-edoksis-issue",
+          "enabled": true,
+          "url": "http://172.18.0.8/issue",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "map": {
+            "key": "dnn_wayb_id"
+          }
+        }
+      ],
       "notification": {
         "notify": true,
         "subject": "DNs shipped",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was shipped.",
         "attachment": true,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "fields": [
+          "dnn_no",
+          "dnn_line_no",
+          "dnn_status",
+          "dnn_acc_no",
+          "dnn_acc_name",
+          "dnn_prd_no",
+          "dnn_prd_description",
+          "dnn_qty",
+          "dnn_wayb_id",
+          "dnn_wayb_date",
+          "dnn_wayb_cname",
+          "dnn_wayb_cid",
+          "dnn_wayb_vid",
+          "dnn_wayb_no",
+          "dnn_wayb_ettn"
+        ],
         "filter": [
           {
             "key": "dnn_status",

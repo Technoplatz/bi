@@ -6,7 +6,7 @@
       "description": "Manifest number",
       "minLength": 1,
       "maxLength": 32,
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "man_odi_no": {
       "bsonType": "string",
@@ -15,7 +15,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "man_odi_sub_no": {
       "bsonType": "string",
@@ -24,7 +24,7 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "casetype": "uppercase"
+      "caseType": "uppercase"
     },
     "man_file_no": {
       "bsonType": "string",
@@ -43,7 +43,7 @@
       "bsonType": "date",
       "title": "Opening Date",
       "description": "Manifest opening date",
-      "dateonly": true
+      "dateOnly": true
     },
     "man_closed": {
       "bsonType": "bool",
@@ -55,19 +55,19 @@
       "bsonType": "date",
       "title": "Closing Date",
       "description": "Manifest closing date",
-      "dateonly": true
+      "dateOnly": true
     },
     "man_gov_purchase_date": {
       "bsonType": "date",
       "title": "Purchase Date",
       "description": "Purchase date",
-      "dateonly": true
+      "dateOnly": true
     },
     "man_gov_approval_date": {
       "bsonType": "date",
       "title": "Approval Date",
       "description": "Approval date",
-      "dateonly": true
+      "dateOnly": true
     }
   },
   "required": ["man_no", "man_odi_no", "man_odi_sub_no", "man_opening_date", "man_file_no", "man_case_no"],

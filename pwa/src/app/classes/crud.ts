@@ -58,7 +58,7 @@ export class Crud {
     private misc: Miscellaneous
   ) { }
 
-  initForm(op: string, structure: any, form: any, data: any, collections: any, views: any, counters: any) {
+  initForm(op: string, structure: any, form: any, data: any, collections: any, views: any, counters: any, actionix_: number) {
     return new Promise((resolve, reject) => {
       let i = 0;
       let init: any = {};
@@ -71,7 +71,7 @@ export class Crud {
         const arrayInc_ = bsonType_ === "array" ? true : false;
         const objectInc_ = bsonType_ === "object" ? true : false;
         const title_ = p.title;
-        const required_ = structure.required && structure.required.indexOf(item) !== -1 ? true : false;
+        const required_ = structure.required && structure.required.indexOf(item) !== -1 ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].required?.indexOf(item) !== -1 ? true : false;
         const description_ = p.description ? p.description : null;
         const minLength_ = p.minLength > 0 ? p.minLength : null;
         const maxLength_ = p.maxLength > 0 ? p.maxLength : null;
@@ -79,7 +79,8 @@ export class Crud {
         const maximum_ = p.maximum > 0 ? p.maximum : null;
         const minItems_ = p.minItems && p.minItems >= 0 ? p.minItems : null;
         const maxItems_ = p.maxItems && p.maxItems >= 0 ? p.maxItems : null;
-        const casetype_ = p.casetype ? p.casetype : null;
+        const caseType_ = p.caseType ? p.caseType : null;
+        const timestamp_ = p.timestamp && ["action", "insert"].includes(op) ? true : false;
         const items_ = p.items ? p.items : null;
         const password_ = p.password ? true : false;
         const pattern_ = p.pattern ? p.pattern : null;
@@ -92,8 +93,8 @@ export class Crud {
         const property_ = p.property ? true : false;
         const kv_ = p.subType === "keyvalue" ? true : false;
         const permanent_ = p.permanent ? true : false;
-        const readonly_ = p.readonly ? true : false;
-        const dateonly_ = p.dateonly ? true : false;
+        const readonly_ = p.readonly ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].readonly?.indexOf(item) !== -1 ? true : false;
+        const dateOnly_ = p.dateOnly ? true : false;
         const collection_ = p.collection ? true : false;
         const textarea_ = p.textarea ? true : false;
         const disabled_ = p.disabled && p.disabled === true ? true : false;
@@ -141,14 +142,15 @@ export class Crud {
           manualAdd: manualAdd_,
           placeholder: placeholder_,
           counter: counter_,
-          dateonly: dateonly_,
-          casetype: casetype_
+          dateOnly: dateOnly_,
+          caseType: caseType_,
+          timestamp: timestamp_
         });
         const kvval_: any = [{
           key: null,
           value: null
         }];
-        init[item] = counters && counters[item] ? counters[item] : default_ ? default_ : arrayInc_ ? kv_ ? kvval_ : [] : objectInc_ ? {} : null;
+        init[item] = timestamp_ ? new Date(Date.now() - tzoffset).toISOString().replace(/-|:|T/gi, '').substring(0, 14) : counters && counters[item] ? counters[item] : default_ ? default_ : arrayInc_ ? kv_ ? kvval_ : [] : objectInc_ ? {} : null;
         form.addControl(item, new UntypedFormControl({ "value": data && data[item] ? data[item] : init[item], "disabled": disabled_ || (item === "id" && op === "update" && (data[item] || init[item])) ? true : false }, Validators.compose(v)));
         if (i === Object.keys(structure.properties).length - 1) {
           resolve({

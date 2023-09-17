@@ -12,7 +12,7 @@
       "bsonType": "date",
       "title": "Payment Date",
       "description": "Payment date",
-      "dateonly": true
+      "dateOnly": true
     }
   },
   "required": ["pay_dnn_no", "pay_date"],
