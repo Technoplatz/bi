@@ -364,7 +364,7 @@ def issue_f():
     """
     docstring is in progress
     """
-    content_ = ""
+    content_ = "Shipments:"
     try:
         if not request.headers:
             raise AuthError("no headers provided")
@@ -609,7 +609,7 @@ def issue_f():
         set_["_modified_by"] = email_
         update_one_ = session_db_["shipment_data"].update_one({"shp_id": shipment_id_}, {"$set": set_}, upsert=True)
         inserted_id_ = update_one_.upserted_id if update_one_.upserted_id else update_one_.inserted_id if update_one_.inserted_id else None
-        content_ += f"{shipment_id_}: OK<br />"
+        content_ += f"<br />{shipment_id_}: OK"
         session_.commit_transaction()
 
         files_ = []
@@ -657,7 +657,7 @@ def multi_issue_f():
     """
     docstring is in progress
     """
-    content_ = ""
+    content_ = "Shipments:"
     try:
         if not request.headers:
             raise AuthError("no headers provided")
@@ -683,83 +683,83 @@ def multi_issue_f():
 
         email_ = json_["email"] if "email" in json_ else "shipment"
 
-        shipment_collection_ = map_["shipment_collection"] if "shipment_collection" in map_ and map_["shipment_collection"] is not None else None
+        shipment_collection_ = map_["shipment_collection"] if "shipment_collection" in map_ else None
         if not shipment_collection_:
             raise APIError("missing shipment collection in mapping")
 
-        shipment_id_field_ = map_["shipment_id_field"] if "shipment_id_field" in map_ and map_["shipment_id_field"] is not None else None
+        shipment_id_field_ = map_["shipment_id_field"] if "shipment_id_field" in map_ else None
         if not shipment_id_field_:
             raise APIError("missing shipment id field in mapping")
 
-        shipment_ettn_field_ = map_["shipment_ettn_field"] if "shipment_ettn_field" in map_ and map_["shipment_ettn_field"] is not None else None
+        shipment_ettn_field_ = map_["shipment_ettn_field"] if "shipment_ettn_field" in map_ else None
         if not shipment_ettn_field_:
             raise APIError("missing shipment ettn field in mapping")
 
-        shipment_waybill_no_field_ = map_["shipment_waybill_no_field"] if "shipment_waybill_no_field" in map_ and map_["shipment_waybill_no_field"] is not None else None
+        shipment_waybill_no_field_ = map_["shipment_waybill_no_field"] if "shipment_waybill_no_field" in map_ else None
         if not shipment_waybill_no_field_:
             raise APIError("missing shipment waybill no field in mapping")
 
-        shipment_waybill_date_field_ = map_["shipment_waybill_date_field"] if "shipment_waybill_date_field" in map_ and map_["shipment_waybill_date_field"] is not None else None
+        shipment_waybill_date_field_ = map_["shipment_waybill_date_field"] if "shipment_waybill_date_field" in map_ else None
         if not shipment_waybill_date_field_:
             raise APIError("missing shipment waybill date field in mapping")
 
-        shipment_account_no_field_ = map_["shipment_account_no_field"] if "shipment_account_no_field" in map_ and map_["shipment_account_no_field"] is not None else None
+        shipment_account_no_field_ = map_["shipment_account_no_field"] if "shipment_account_no_field" in map_ else None
         if not shipment_account_no_field_:
             raise APIError("missing shipment account no field in mapping")
 
-        shipment_notes_field_ = map_["shipment_notes_field"] if "shipment_notes_field" in map_ and map_["shipment_notes_field"] is not None else None
+        shipment_notes_field_ = map_["shipment_notes_field"] if "shipment_notes_field" in map_ else None
         if not shipment_notes_field_:
             raise APIError("missing shipment notes field in mapping")
 
-        account_collection_ = map_["account_collection"] if "account_collection" in map_ and map_["account_collection"] is not None else None
+        account_collection_ = map_["account_collection"] if "account_collection" in map_ else None
         if not account_collection_:
             raise APIError("missing account collection in mapping")
 
-        account_no_field_ = map_["account_no_field"] if "account_no_field" in map_ and map_["account_no_field"] is not None else None
+        account_no_field_ = map_["account_no_field"] if "account_no_field" in map_ else None
         if not account_no_field_:
             raise APIError("missing account no field in mapping")
 
-        delivery_collection_ = map_["delivery_collection"] if "delivery_collection" in map_ and map_["delivery_collection"] is not None else None
+        delivery_collection_ = map_["delivery_collection"] if "delivery_collection" in map_ else None
         if not delivery_collection_:
             raise APIError("missing delivery collection in mapping")
 
-        delivery_shipment_id_field_ = map_["delivery_shipment_id_field"] if "delivery_shipment_id_field" in map_ and map_["delivery_shipment_id_field"] is not None else None
+        delivery_shipment_id_field_ = map_["delivery_shipment_id_field"] if "delivery_shipment_id_field" in map_ else None
         if not delivery_shipment_id_field_:
             raise APIError("missing delivery shipment id field in mapping")
 
-        delivery_qty_field_ = map_["delivery_qty_field"] if "delivery_qty_field" in map_ and map_["delivery_qty_field"] is not None else None
+        delivery_qty_field_ = map_["delivery_qty_field"] if "delivery_qty_field" in map_ else None
         if not delivery_qty_field_:
             raise APIError("missing delivery qty field in mapping")
 
-        delivery_no_field_ = map_["delivery_no_field"] if "delivery_no_field" in map_ and map_["delivery_no_field"] is not None else None
+        delivery_no_field_ = map_["delivery_no_field"] if "delivery_no_field" in map_ else None
         if not delivery_no_field_:
             raise APIError("missing delivery no field in mapping")
 
-        delivery_account_no_field_ = map_["delivery_account_no_field"] if "delivery_account_no_field" in map_ and map_["delivery_account_no_field"] is not None else None
+        delivery_account_no_field_ = map_["delivery_account_no_field"] if "delivery_account_no_field" in map_ else None
         if not delivery_account_no_field_:
             raise APIError("missing delivery account no field in mapping")
 
-        delivery_product_no_field_ = map_["delivery_product_no_field"] if "delivery_product_no_field" in map_ and map_["delivery_product_no_field"] is not None else None
+        delivery_product_no_field_ = map_["delivery_product_no_field"] if "delivery_product_no_field" in map_ else None
         if not delivery_product_no_field_:
             raise APIError("missing delivery product no field in mapping")
 
-        delivery_product_desc_field_ = map_["delivery_product_desc_field"] if "delivery_product_desc_field" in map_ and map_["delivery_product_desc_field"] is not None else None
+        delivery_product_desc_field_ = map_["delivery_product_desc_field"] if "delivery_product_desc_field" in map_ else None
         if not delivery_product_desc_field_:
             raise APIError("missing delivery product description field in mapping")
 
-        delivery_set_status_ = map_["delivery_set_status"] if "delivery_set_status" in map_ and map_["delivery_set_status"] is not None else None
+        delivery_set_status_ = map_["delivery_set_status"] if "delivery_set_status" in map_ else None
         if not delivery_set_status_:
             raise APIError("missing delivery set status in mapping")
 
-        delivery_status_field_ = map_["delivery_status_field"] if "delivery_status_field" in map_ and map_["delivery_status_field"] is not None else None
+        delivery_status_field_ = map_["delivery_status_field"] if "delivery_status_field" in map_ else None
         if not delivery_status_field_:
             raise APIError("missing delivery status field in mapping")
 
-        tag_prefix_ = map_["tag_prefix"] if "tag_prefix" in map_ and map_["tag_prefix"] is not None else None
+        tag_prefix_ = map_["tag_prefix"] if "tag_prefix" in map_ else None
         if not tag_prefix_:
             raise APIError("missing tag prefix in mapping")
 
-        document_format_ = map_["document_format"] if "document_format" in map_ and map_["document_format"] is not None else None
+        document_format_ = map_["document_format"] if "document_format" in map_ else None
         if not document_format_:
             raise APIError("missing document format in mapping")
 
@@ -1025,22 +1025,22 @@ def multi_issue_f():
                 set_["_modified_by"] = email_
                 deliveries_ = session_db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
 
-                content_ += f"{shipment_id_}: OK<br />"
+                content_ += f"<br />{shipment_id_}: OK"
                 session_.commit_transaction()
 
             except EdoksisError as exc_:
                 err_ = True
-                content_ += f"{shipment_id_}: {str(exc_)}<br />"
+                content_ += f"<br />{shipment_id_}: {str(exc_)}"
                 session_.abort_transaction()
 
             except pymongo.errors.PyMongoError as exc_:
                 err_ = True
-                content_ += f"{shipment_id_}: {str(exc_)}<br />"
+                content_ += f"<br />{shipment_id_}: {str(exc_)}"
                 session_.abort_transaction()
 
             except Exception as exc_:
                 err_ = True
-                content_ += f"{shipment_id_}: {str(exc_)}<br />"
+                content_ += f"<br />{shipment_id_}: {str(exc_)}"
                 session_.abort_transaction()
 
         files_ = []
@@ -1062,25 +1062,25 @@ def multi_issue_f():
         response_ = make_response(res_, 200)
 
     except pymongo.errors.PyMongoError as exc_:
-        content_ += f"Db Error: {str(exc_)}<br />"
+        content_ += f"<br />Db Error: {str(exc_)}"
         res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
         response_ = make_response(res_, 500)
 
     except AuthError as exc_:
-        content_ += f"Auth Error: {str(exc_)}<br />"
+        content_ += f"<br />Auth Error: {str(exc_)}"
         res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
         response_ = make_response(content_, 401)
 
     except APIError as exc_:
-        content_ += f"API Error: {str(exc_)}<br />"
+        content_ += f"<br />API Error: {str(exc_)}"
         res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
         response_ = make_response(content_, 400)
 
     except Exception as exc_:
-        content_ += f"Exception: {str(exc_)}<br />"
+        content_ += f"<br />Exception: {str(exc_)}"
         res_ = {"result": False, "content": content_}
         Misc().exception_show_f(exc_)
         response_ = make_response(content_, 500)

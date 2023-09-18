@@ -162,6 +162,7 @@
         }
       ],
       "one_click": false,
+      "icon": "newspaper-outline",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Administrators"],
@@ -223,6 +224,7 @@
       "set": [],
       "noninteractive": true,
       "one_click": false,
+      "icon": "cloud-download-outline",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Administrators"],

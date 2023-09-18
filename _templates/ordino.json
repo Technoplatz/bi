@@ -21,34 +21,32 @@
     "odi_date": {
       "bsonType": "date",
       "title": "Ordino Date",
-      "description": "Ordino Opening Date",
+      "description": "Ordino opening date",
       "dateOnly": true
     },
     "odi_from": {
       "bsonType": "string",
-      "title": "Shipped From",
-      "description": "Country where the goods are loaded",
+      "title": "From",
+      "description": "Country where the goods were loaded",
       "enum": ["China", "Hungary", "Netherlands"]
     },
     "odi_customs": {
       "bsonType": "string",
       "title": "Customs",
-      "description": "Customs Location",
+      "description": "Customs location",
       "enum": ["IGA", "Halkalı", "Ambarlı", "AHL"]
-    },
-    "odi_arrived": {
-      "bsonType": "bool",
-      "title": "Is Arrived?",
-      "description": "Ordino arrived",
-      "trueText": "Arrived",
-      "falseText": "OnTheWay",
-      "default": false
     },
     "odi_arrived_date": {
       "bsonType": "date",
       "title": "Arrival Date",
-      "description": "Date of Arrival",
+      "description": "Date of arrival",
       "dateOnly": true
+    },
+    "odi_closed": {
+      "bsonType": "bool",
+      "title": "Closed",
+      "description": "Ordino closed",
+      "default": false
     }
   },
   "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],
@@ -84,7 +82,7 @@
         }
       ],
       "autofill": true,
-      "btntext": "Add DNs",
+      "btntext": "Deliveries",
       "_tags": ["#Managers", "#Technoplatz", "#Operation"],
       "notification": {
         "notify": true,
@@ -103,14 +101,14 @@
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": true
+          "key": "odi_arrived_date",
+          "op": "nnull",
+          "value": null
         }
       ],
       "conditions": [
         {
-          "key": "odi_arrived",
+          "key": "odi_closed",
           "op": "ne",
           "value": true
         }
@@ -151,16 +149,16 @@
       "operations": ["update", "insert"],
       "changes": [
         {
-          "key": "odi_arrived",
-          "op": "eq",
-          "value": false
+          "key": "odi_arrived_date",
+          "op": "null",
+          "value": null
         }
       ],
       "conditions": [
         {
-          "key": "odi_arrived",
+          "key": "odi_closed",
           "op": "ne",
-          "value": false
+          "value": true
         }
       ],
       "targets": [

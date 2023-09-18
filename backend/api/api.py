@@ -2420,15 +2420,15 @@ class Crud:
         except Exception as exc_:
             return Misc().exception_f(exc_)
 
-    def query_f(self, obj):
+    def query_internal_f(self, obj_):
         """
         docstring is in progress
         """
         try:
-            user_ = obj["userindb"]
-            que_id_ = obj["id"]
-            page_ = obj["page"]
-            limit_ = obj["limit"]
+            user_ = obj_["userindb"]
+            que_id_ = obj_["id"]
+            page_ = obj_["page"] if "page" in obj_ and obj_["page"] > 0 else 1
+            limit_ = obj_["limit"] if "limit" in obj_ and obj_["limit"] > 0 else API_QUERY_PAGE_SIZE_
             query_ = {}
             data_ = []
             fields_ = []
@@ -2474,12 +2474,10 @@ class Crud:
             aggregate_ = aggregate_base_.copy()
             aggregate_.append({"$skip": limit_ * (page_ - 1)})
             aggregate_.append({"$limit": limit_})
-
-            aggregate_stats_ = aggregate_base_.copy()
-            aggregate_stats_.append({"$count": "count"})
+            aggregate_base_.append({"$count": "count"})
 
             facet_ = [{"$facet": {
-                "stats": aggregate_stats_,
+                "stats": aggregate_base_,
                 "data": aggregate_
             }}]
 
@@ -4629,6 +4627,7 @@ API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_H
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
+API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
@@ -4826,7 +4825,7 @@ def crud_f():
         elif op_ == "collection":
             res_ = Crud().collection_f(input_)
         elif op_ == "query":
-            res_ = Crud().query_f(input_)
+            res_ = Crud().query_internal_f(input_)
         elif op_ == "link":
             res_ = Crud().link_f(input_)
         elif op_ in ["backup", "restore"]:

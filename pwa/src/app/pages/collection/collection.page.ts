@@ -508,7 +508,7 @@ export class CollectionPage implements OnInit {
 
   doShowSchema(shw: boolean) {
     if (shw) {
-      this.editor.setMode(this.jeoptions.mode);
+      this.editor?.setMode(this.jeoptions.mode);
       this.schemevis = "show";
       this.editor.focus();
     } else {
@@ -530,7 +530,7 @@ export class CollectionPage implements OnInit {
     this.doSetSchemaKey(key);
     this.structured_ = null;
     this.structure = this.structure_ori_[key];
-    this.editor.setMode(this.jeoptions.mode);
+    this.editor?.setMode(this.jeoptions.mode);
     this.schemevis = "show";
     this.editor.focus();
   }
