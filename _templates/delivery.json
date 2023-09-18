@@ -157,8 +157,8 @@
       "title": "Group",
       "description": "Product Group",
       "minLength": 0,
-      "maxLength": 16,
-      "pattern": "^[A-Za-z]{0,16}$"
+      "maxLength": 32,
+      "pattern": "^[A-Za-z]{0,32}$"
     },
     "dnn_length": {
       "bsonType": "number",

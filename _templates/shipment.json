@@ -130,7 +130,7 @@
       ],
       "set": [
         {
-          "key": "dnn_shp_id",
+          "key": "dnn_wayb_id",
           "value": "shp_id"
         },
         {
@@ -145,8 +145,73 @@
   ],
   "actions": [
     {
-      "id": "ewaybill-download",
-      "title": "E-Waybill Download",
+      "id": "waybill-issue",
+      "title": "E-Waybill",
+      "enabled": true,
+      "match": [
+        {
+          "key": "shp_status",
+          "op": "eq",
+          "value": "10-Ready"
+        }
+      ],
+      "set": [
+        {
+          "key": "shp_notes",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Administrators"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs Shipped",
+        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
+        "fields": "dnn_no,dnn_status",
+        "filter": []
+      },
+      "apis": [
+        {
+          "id": "multi-issue",
+          "name": "Waybill Issue",
+          "enabled": true,
+          "url": "http://172.18.0.8/multi-issue",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "map": {
+            "tag_prefix": "{http://tempuri.org/}",
+            "shipment_collection": "shipment_data",
+            "shipment_id_field": "shp_id",
+            "shipment_ettn_field": "shp_wayb_ettn",
+            "shipment_waybill_no_field": "shp_wayb_no",
+            "shipment_waybill_date_field": "shp_wayb_date",
+            "shipment_account_no_field": "shp_acc_no",
+            "shipment_notes_field": "shp_notes",
+            "account_collection": "account_data",
+            "account_no_field": "acc_no",
+            "delivery_collection": "delivery_data",
+            "delivery_shipment_id_field": "dnn_wayb_id",
+            "delivery_qty_field": "dnn_qty",
+            "delivery_no_field": "dnn_no",
+            "delivery_account_no_field": "dnn_acc_no",
+            "delivery_product_no_field": "dnn_prd_no",
+            "delivery_product_desc_field": "dnn_prd_description",
+            "delivery_waybill_no_field": "dnn_wayb_no",
+            "delivery_waybill_date_field": "dnn_wayb_date",
+            "delivery_status_field": "dnn_status",
+            "delivery_set_status": "70-Delivered",
+            "document_format": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "waybill-download",
+      "title": "Download",
       "enabled": true,
       "match": [
         {

@@ -42,4 +42,4 @@ WORKDIR /app
 COPY . /app
 RUN echo "python3 -m pip install --upgrade pip" >/run_module.sh
 RUN pip install -r requirements.txt
-CMD ["python3", "edoksis-v2.py"]
+CMD ["python3", "edoksis.py"]

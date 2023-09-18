@@ -145,7 +145,6 @@ export class CrudPage implements OnInit {
   }
 
   ngOnInit() {
-    // console.log("*** shuttle", this.shuttle);
     this.modified = false;
     this.collection = this.shuttle.collection;
     this.user = this.shuttle.user;
@@ -169,7 +168,6 @@ export class CrudPage implements OnInit {
       this.scanned_ = LSSCANNED ? LSSCANNED : [];
       this.doGetAllAktions(this.op).then((res: any) => {
         this.aktions = res;
-        console.log("*** ax", this.structure__);
         this.crud.initForm(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views, this.counters, this.actionix).then((res: any) => {
           this.tab = "data";
           this.crudForm = res.form;

@@ -3188,6 +3188,7 @@ class Crud:
             if not action_:
                 raise AppException("action not found")
 
+            action_id_ = action_["id"] if "id" in action_ and action_["id"] is not None else "action"
             tags_ = action_["_tags"] if "_tags" in action_ and len(action_["_tags"]) > 0 else None
             if not tags_:
                 raise AppException("no tags found in action")
@@ -3278,6 +3279,8 @@ class Crud:
                 json_["ids"] = []
                 if ids_ and len(ids_) > 0:
                     json_["ids"] = ids_
+                json_["map"] = map_
+                json_["email"] = email_
 
                 response_ = requests.post(url_, json=json.loads(JSONEncoder().encode(json_)), headers=headers_, timeout=60)
                 if not response_:
@@ -3302,7 +3305,7 @@ class Crud:
                     notification_["fields"]) > 0 else notification_["fields"].replace(" ", "") if notification_ and "fields" in notification_ else None
                 if get_notification_filtered_ and fields_ and attachment_:
                     type_ = "csv"
-                    file_ = f"/cron/action-{Misc().get_timestamp_f()}.{type_}"
+                    file_ = f"/cron/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
                     command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
                     call(command_, shell=True)
