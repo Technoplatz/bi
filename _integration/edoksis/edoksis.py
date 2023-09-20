@@ -42,9 +42,8 @@ from bson.objectid import ObjectId
 import requests
 from pymongo import MongoClient
 import pymongo
-from bson import json_util
 from get_docker_secret import get_docker_secret
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, escape
 from flask_cors import CORS
 
 
@@ -302,8 +301,7 @@ def download_f():
     """
     docstring is in progress
     """
-    response_ = None
-    content_ = ""
+    status_code_, res_, exc_, content_, files_ = 200, {}, None, "", []
     try:
         if not request.headers:
             raise AuthError("no headers provided")
@@ -333,28 +331,22 @@ def download_f():
         files_ = get_waybill_f_["files"]
         content_ = get_waybill_f_["content"]
 
-        res_ = {"result": True, "content": content_, "files": files_}
-        response_ = make_response(res_, 200)
+    except AuthError as exc__:
+        status_code_, exc_ = 401, exc__
 
-    except AuthError as exc_:
-        Misc().exception_show_f(exc_)
-        content_ += f"<br />Auth Error: {str(exc_)}"
-        res_ = {"result": False, "content": content_}
-        response_ = make_response(res_, 401)
+    except APIError as exc__:
+        status_code_, exc_ = 400, exc__
 
-    except APIError as exc_:
-        Misc().exception_show_f(exc_)
-        content_ += f"<br />API Error: {str(exc_)}"
-        res_ = {"result": False, "content": content_}
-        response_ = make_response(res_, 400)
-
-    except Exception as exc_:
-        Misc().exception_show_f(exc_)
-        content_ += f"<br />Exception: {str(exc_)}"
-        res_ = {"result": False, "content": content_}
-        response_ = make_response(res_, 500)
+    except Exception as exc__:
+        status_code_, exc_ = 500, exc__
 
     finally:
+        result_ = status_code_ == 200
+        if not result_:
+            Misc().exception_show_f(exc_)
+            content_ = f"Error {status_code_}. Please check logs."
+        res_ = {"result": result_, "content": escape(content_), "files": files_}
+        response_ = make_response(res_, status_code_)
         response_.mimetype = "application/json"
         return response_
 
