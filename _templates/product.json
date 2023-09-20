@@ -1,0 +1,85 @@
+{
+  "properties": {
+    "prd_no": {
+      "bsonType": "string",
+      "title": "Product ID",
+      "description": "Product ID",
+      "minLength": 7,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{7,16}$",
+      "replacement": [
+        {
+          "find": "-",
+          "replace": ""
+        },
+        {
+          "find": "_",
+          "replace": ""
+        }
+      ],
+      "caseType": "uppercase"
+    },
+    "prd_description": {
+      "bsonType": "string",
+      "title": "Description",
+      "description": "Product Description",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "prd_group": {
+      "bsonType": "string",
+      "title": "Group",
+      "description": "Product Group",
+      "minLength": 0,
+      "maxLength": 32,
+      "pattern": "^[A-Za-z&/ ]{0,32}$",
+      "enum": [
+        "CDT",
+        "CNB",
+        "CSP",
+        "DSK",
+        "DSW",
+        "FOC",
+        "IPH",
+        "IPP",
+        "LEP",
+        "LPT",
+        "MOB",
+        "MON",
+        "OPS",
+        "OPT",
+        "PAD",
+        "PCM",
+        "PNS",
+        "POP",
+        "PSV",
+        "PWS",
+        "SRV",
+        "STR",
+        "TRA",
+        "WSD",
+        "WSN",
+        "XHC",
+        "XHE",
+        "XHO",
+        "XHR",
+        "XHS",
+        "XSP",
+        "OTH"
+      ]
+    }
+  },
+  "required": ["prd_no", "prd_description", "prd_group"],
+  "index": [["prd_group"]],
+  "unique": [["prd_no"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [],
+  "actions": [],
+  "links": [],
+  "triggers": [],
+  "views": {},
+  "fetchers": [],
+  "import": {}
+}

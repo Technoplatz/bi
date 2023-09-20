@@ -134,9 +134,7 @@ export class CollectionPage implements OnInit {
     this.jeoptions.modes = ["tree", "code", "text"]
     this.jeoptions.mode = "tree";
     this.jeoptions.statusBar = true;
-    this.jeoptions.enableSort = false;
-    this.jeoptions.expandAll = false;
-    this.jeoptions.navigationBar = true;
+    this.jeoptions.navigationBar = false;
     this.jeoptions.name = "schema-structure";
     this.crud.views.subscribe((res: any) => {
       this.flashcards_ = res ? res.filter((obj: any) => obj.collection === this.id && obj.view.flashcard === true) : [];

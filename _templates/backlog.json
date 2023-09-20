@@ -123,12 +123,9 @@
       "description": "Customer PO"
     },
     "blo_sales_order_item": {
-      "bsonType": "string",
+      "bsonType": "int",
       "title": "Sales Order Item",
-      "description": "Sales Order Item",
-      "minLength": 1,
-      "maxLength": 6,
-      "pattern": "^[0-9]{1,6}$"
+      "description": "Sales Order Item"
     },
     "blo_mfg_po": {
       "bsonType": "string",
@@ -393,7 +390,7 @@
     "blo_status"
   ],
   "index": [["blo_status"]],
-  "unique": [["blo_order_no", "blo_sales_order_item"]],
+  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item"]],
   "sort": {
     "_modified_at": -1
   },
@@ -447,8 +444,8 @@
           "filter": [
             {
               "key": "blo_status",
-              "op": "in",
-              "value": "Order Released,Order Entry"
+              "op": "contains",
+              "value": "Order"
             },
             {
               "key": "blo_net_value",
