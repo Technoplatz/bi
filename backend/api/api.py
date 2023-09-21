@@ -290,9 +290,12 @@ class Misc:
         type_ = input_["type"] if "type" in input_ else None
         fields_ = input_["fields"] if "fields" in input_ else None
         query_ = input_["query"] if "query" in input_ else None
+        loc_ = input_["loc"] if "loc" in input_ else None
 
         commands_ = {
-            "mongoexport": f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+            "mongoexport": f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}",
+            "mongorestore": f"mongorestore --host '{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}' --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password '{MONGO_PASSWORD_}' --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude={MONGO_DB_}._backup --nsExclude={MONGO_DB_}._auth --nsExclude={MONGO_DB_}._user --nsExclude={MONGO_DB_}._log --drop --quiet",
+            "mongodump": f"mongodump --host '{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}' --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password '{MONGO_PASSWORD_}' --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
         }
         return commands_[command_] if command_ in commands_ else False
 
@@ -604,8 +607,12 @@ class Mongo:
             file_ = f"{id_}.gz"
             loc_ = f"/dump/{file_}"
             type_ = "gzip"
-            command_ = f'mongodump --host "{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password "{MONGO_PASSWORD_}" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}'
-            os.system(command_)
+
+            command_ = Misc().commands_f("mongodump", { "type": type_, "loc": loc_ })
+            if not command_:
+                raise APIError("dump command error")
+            subprocess.call("mongodump", command_, shell=True)
+
             size_ = os.path.getsize(loc_)
             return {"result": True, "id": id_, "type": type_, "size": size_}
 
@@ -621,12 +628,13 @@ class Mongo:
         """
         try:
             id_ = obj["id"]
-            file_ = f"{id_}.gz"
-            loc_ = f"/dump/{file_}"
+            loc_ = f"/dump/{id_}.gz"
             type_ = "gzip"
 
-            command_ = f'mongorestore --host "{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}" --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password "{MONGO_PASSWORD_}" --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude="{MONGO_DB_}._backup" --nsExclude="{MONGO_DB_}._auth" --nsExclude="{MONGO_DB_}._user" --nsExclude="{MONGO_DB_}._log" --drop --quiet'
-            os.system(command_)
+            command_ = Misc().commands_f("mongorestore", { "type": type_, "loc": loc_ })
+            if not command_:
+                raise APIError("restore command error")
+            subprocess.call("mongorestore", command_, shell=True)
 
             size_ = os.path.getsize(loc_)
             return {"result": True, "id": id_, "type": type_, "size": size_}
@@ -1610,15 +1618,9 @@ class Crud:
                     file_ = f"/cron/link-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
 
-                    command_ = Misc().commands_f("mongoexport", {
-                        "query": query_,
-                        "fields": fields_,
-                        "type": type_,
-                        "file": file_,
-                        "collection": collection_
-                    })
+                    command_ = Misc().commands_f("mongoexport", { "query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_ })
                     if not command_:
-                        raise APIError("link command error")
+                        raise APIError("export command error")
                     subprocess.call("mongoexport", command_, shell=True)
 
                     files_ = [{"filename": file_, "filetype": type_}] if attachment_ else []
@@ -3214,15 +3216,9 @@ class Crud:
                     file_ = f"/cron/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
 
-                    command_ = Misc().commands_f("mongoexport", {
-                        "query": query_,
-                        "fields": fields_,
-                        "type": type_,
-                        "file": file_,
-                        "collection": collection_
-                    })
+                    command_ = Misc().commands_f("mongoexport", { "query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_ })
                     if not command_:
-                        raise APIError("action command error")
+                        raise APIError("export command error")
                     subprocess.call("mongoexport", command_, shell=True)
 
                     files_ += [{"filename": file_, "filetype": type_}]
