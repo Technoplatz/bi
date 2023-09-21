@@ -41,7 +41,7 @@ import operator
 import smtplib
 import hashlib
 import ast
-from subprocess import call
+import subprocess
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -62,6 +62,7 @@ from jose import jwt
 import numexpr as ne
 from flask import Flask, request, send_from_directory, make_response
 from flask_cors import CORS
+from markupsafe import escape
 import requests
 from croniter import croniter
 from get_docker_secret import get_docker_secret
@@ -610,9 +611,12 @@ class Mongo:
             command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
             if not command_:
                 raise APIError("dump command error")
-            call(command_, shell=True)
+            subprocess.call(["mongodump", command_])
 
+            if not fullpath_.startswith(API_DUMPFILE_PATH_):
+                raise APIError("dump file not allowed")
             size_ = os.path.getsize(fullpath_)
+
             return {"result": True, "id": id_, "type": type_, "size": size_}
 
         except pymongo.errors.PyMongoError as exc__:
@@ -637,7 +641,7 @@ class Mongo:
             command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
             if not command_:
                 raise APIError("restore command error")
-            call(command_, shell=True)
+            subprocess.call(["mongorestore", command_])
 
             size_ = os.path.getsize(fullpath_)
             return {"result": True, "id": id_, "type": type_, "size": size_}
@@ -1627,7 +1631,7 @@ class Crud:
                     command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     if not command_:
                         raise APIError("export command error")
-                    call(command_, shell=True)
+                    subprocess.call(["mongoexport", command_])
 
                     files_ = [{"name": file_, "type": type_}] if attachment_ else []
 
@@ -3225,7 +3229,7 @@ class Crud:
                     command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     if not command_:
                         raise APIError("export command error")
-                    call(command_, shell=True)
+                    subprocess.call(["mongoexport", command_])
 
                     files_ += [{"name": file_, "type": type_}]
 
@@ -4821,6 +4825,7 @@ def auth_f():
     """
     docstring is in progress
     """
+    sc__, res_ = 200, {}
     try:
         validate_ = Security().validate_app_request_f()
         if not validate_["result"]:
@@ -4833,7 +4838,7 @@ def auth_f():
             raise APIError({"result": False, "msg": "no operation found"})
         op_ = input_["op"]
 
-        user_, auth_, token_ = None, None, None
+        user_, auth_ = None, None
 
         if op_ in ["signout", "apikeygen", "apikeyget"]:
             jwt_validate_f_ = Auth().jwt_validate_f()
@@ -4842,7 +4847,7 @@ def auth_f():
             auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
             user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
             if not auth_:
-                raise SessionError("account data not found")
+                raise SessionError({"result": False, "msg": "no authentication"})
 
         if op_ == "signup":
             res_ = Auth().signup_f()
@@ -4861,47 +4866,30 @@ def auth_f():
             input_["auth"] = auth_
             res_ = Auth().account_f(input_)
         else:
-            raise APIError({"result": False, "msg": f"operation not supported {op_}"})
+            raise APIError({"result": False, "msg": f"operation not supported: {op_}"})
 
         if not res_["result"]:
             raise AuthError(res_)
 
         user_ = res_["user"] if res_ and "user" in res_ else None
-        token_ = user_["token"] if op_ == "tfac" and "token" in user_ and user_["token"] is not None else None
+        # token_ = user_["token"] if op_ == "tfac" and "token" in user_ and user_["token"] is not None else None
         res_ = {"result": True, "user": user_}
 
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        if token_ is not None:
-            response_.headers.add("A-Auth-Token", token_)
-        response_.status_code = 200
-        response_.mimetype = "application/json"
-        return response_
+    except APIError as exc__:
+        sc__, res_ = 400, ast.literal_eval(str(exc__))
 
-    except APIError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 400
-        response_.mimetype = "application/json"
-        return response_
+    except SessionError as exc__:
+        sc__, res_ = 403, ast.literal_eval(str(exc__))
 
-    except SessionError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 403
-        response_.mimetype = "application/json"
-        return response_
+    except AuthError as exc__:
+        sc__, res_ = 401, ast.literal_eval(str(exc__))
 
-    except AuthError as exc_:
-        res_ = ast.literal_eval(str(exc_))
+    except Exception as exc__:
+        sc__, res_ = 500, ast.literal_eval(str(exc__))
+        
+    finally:
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 401
-        response_.mimetype = "application/json"
-        return response_
-
-    except Exception as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 500
+        response_.status_code = sc__
         response_.mimetype = "application/json"
         return response_
 
