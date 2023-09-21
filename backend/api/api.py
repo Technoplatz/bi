@@ -41,12 +41,12 @@ import operator
 import smtplib
 import hashlib
 import ast
+import subprocess
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from functools import partial
-from subprocess import call
 from random import randint
 from datetime import datetime, timedelta
 from pymongo import MongoClient
@@ -280,6 +280,21 @@ class Misc:
             "falseText",
             "caseType"
         ]
+
+    def commands_f(self, command_, input_):
+        """
+        docstring is in progress
+        """
+        collection_ = input_["collection"] if "collection" in input_ else None
+        file_ = input_["file"] if "file" in input_ else None
+        type_ = input_["type"] if "type" in input_ else None
+        fields_ = input_["fields"] if "fields" in input_ else None
+        query_ = input_["query"] if "query" in input_ else None
+
+        commands_ = {
+            "mongoexport": f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
+        }
+        return commands_[command_] if command_ in commands_ else False
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
         """
@@ -838,114 +853,6 @@ class Crud:
             properties_ = structure_["properties"]
 
             return {"result": True, "properties": properties_}
-
-        except APIError as exc_:
-            return Misc().api_error_f(exc_)
-
-        except Exception as exc_:
-            return Misc().exception_f(exc_)
-
-    def template_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            proc_ = input_["proc"] if "proc" in input_ else None
-            if proc_ not in ["list", "install"]:
-                raise APIError("invalid template request")
-
-            _id = input_["id"] if "id" in input_ else None
-            if proc_ == "install" and not _id:
-                raise APIError("no template selected")
-
-            user_ = input_["user"] if "user" in input_ else None
-            if not user_:
-                raise APIError("user not provided")
-            email_ = user_["usr_id"]
-
-            templates_ = None
-            path_ = "/app/_template/templates.json"
-            if not os.path.isfile(path_):
-                raise APIError("no templates found")
-
-            with open(path_, "r", encoding="utf-8") as fopen_:
-                templates_ = list(json.loads(fopen_.read()))
-                templates_.sort(key=operator.itemgetter("sort"), reverse=False)
-
-            if proc_ == "list":
-                return {"result": True, "templates": templates_}
-
-            notification_ = []
-            for template_ in templates_:
-                if _id != template_["_id"]:
-                    continue
-                collections_ = template_["collections"]
-                for collection_ in collections_:
-                    col_id_ = collection_['col_id']
-                    col_title_ = collection_['col_title']
-                    col_description_ = collection_["col_description"]
-                    collection__ = f"{col_id_}_data"
-                    prefix_ = collection_["prefix"] if "prefix" in collection_ else "zzz"
-                    scheme_file_ = f"{col_id_}.json"
-                    data_file_ = f"{collection__}.json"
-                    suffix_ = Misc().get_timestamp_f()
-
-                    find_one_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
-                    if find_one_:
-                        notification_.append(f"collection already exists: {col_id_}")
-                        continue
-
-                    find_one_ = Mongo().db_["_collection"].find_one({"col_prefix": prefix_})
-                    if find_one_:
-                        notification_.append(f"collection prefix already exists: {prefix_}")
-                        continue
-
-                    if collection__ in Mongo().db_.list_collection_names():
-                        Mongo().db_[collection__].aggregate([{"$match": {}}, {"$out": f"{collection__}_bin_{suffix_}"}])
-                        Mongo().db_[collection__].drop()
-
-                    scheme_path_ = f"/app/_template/{scheme_file_}"
-                    if os.path.isfile(scheme_path_):
-                        with open(scheme_path_, "r", encoding="utf-8") as fopen_:
-                            jtxt_ = fopen_.read()
-                            jtxt_ = jtxt_.replace("zzz_", f"{prefix_}_")
-                            structure_ = json.loads(jtxt_)
-
-                        Mongo().db_["_collection"].insert_one({
-                            "col_id": col_id_,
-                            "col_title": col_title_,
-                            "col_description": col_description_,
-                            "col_prefix": prefix_,
-                            "col_structure": structure_,
-                            "_created_at": Misc().get_now_f(),
-                            "_created_by": email_,
-                            "_modified_at": Misc().get_now_f(),
-                            "_modified_by": email_,
-                            "_modified_count": 0
-                        })
-
-                        schemavalidate_ = self.crudschema_validate_f({"collection": collection__, "structure": structure_})
-                        if not schemavalidate_["result"]:
-                            notification_.append(schemavalidate_["msg"])
-                            continue
-
-                        data_path_ = f"/app/_template/{data_file_}"
-                        if os.path.isfile(data_path_):
-                            command_ = f"mongoimport --quiet --file={data_path_} --collection={collection__} --mode=insert --jsonArray --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_}"
-                            call(command_, shell=True)
-                            Mongo().db_[collection__].update_many({}, {"$set": {
-                                "_created_at": Misc().get_now_f(),
-                                "_created_by": email_,
-                                "_modified_at": Misc().get_now_f(),
-                                "_modified_by": email_,
-                                "_modified_count": 0
-                            }})
-
-            msg_ = "<br />".join(notification_) if len(notification_) > 0 else "template installed successfully"
-            return {"result": True, "msg": msg_}
-
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
 
         except APIError as exc_:
             return Misc().api_error_f(exc_)
@@ -1660,7 +1567,7 @@ class Crud:
                 raise APIError("collection properties is missing")
             target_properties_ = get_properties_["properties"]
 
-            data_collection_ = f"{col_id_}_data"
+            collection_ = f"{col_id_}_data"
             setc_ = {}
 
             for set__ in set_:
@@ -1675,14 +1582,14 @@ class Crud:
                             setc_["_modified_by"] = usr_id_
 
             if not setc_:
-                raise APIError(f"no assignments to set {data_collection_}")
+                raise APIError(f"no assignments to set {collection_}")
 
             filter0_ = {}
             filter0_[get_] = {"$in": linked_}
             filter1_ = self.get_filtered_f({"match": match_, "properties": target_properties_, "data": data_})
             filter_ = {"$and": [filter0_, filter1_]}
 
-            update_many_ = Mongo().db_[data_collection_].update_many(filter_, {"$set": setc_})
+            update_many_ = Mongo().db_[collection_].update_many(filter_, {"$set": setc_})
             count_ = update_many_.matched_count
             if count_ == 0:
                 raise AppException("no record found to get linked")
@@ -1702,8 +1609,18 @@ class Crud:
                     type_ = "csv"
                     file_ = f"/cron/link-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
-                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={data_collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
-                    call(command_, shell=True)
+
+                    command_ = Misc().commands_f("mongoexport", {
+                        "query": query_,
+                        "fields": fields_,
+                        "type": type_,
+                        "file": file_,
+                        "collection": collection_
+                    })
+                    if not command_:
+                        raise APIError("link command error")
+                    subprocess.call("mongoexport", command_, shell=True)
+
                     files_ = [{"filename": file_, "filetype": type_}] if attachment_ else []
 
                 email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
@@ -3296,9 +3213,20 @@ class Crud:
                     type_ = "csv"
                     file_ = f"/cron/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
-                    command_ = f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}"
-                    call(command_, shell=True)
+
+                    command_ = Misc().commands_f("mongoexport", {
+                        "query": query_,
+                        "fields": fields_,
+                        "type": type_,
+                        "file": file_,
+                        "collection": collection_
+                    })
+                    if not command_:
+                        raise APIError("action command error")
+                    subprocess.call("mongoexport", command_, shell=True)
+
                     files_ += [{"filename": file_, "filetype": type_}]
+
                 email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
@@ -3334,7 +3262,6 @@ class Crud:
             if exc_:
                 res_ = exc_
             return res_
-
 
     def insert_f(self, obj):
         """
@@ -4820,8 +4747,6 @@ def crud_f():
             res_ = Crud().link_f(input_)
         elif op_ in ["backup", "restore"]:
             res_ = Crud().dump_f(input_)
-        elif op_ == "template":
-            res_ = Crud().template_f(input_)
         elif op_ == "saveschema":
             res_ = Crud().saveschema_f(input_)
         elif op_ == "savequery":

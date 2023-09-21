@@ -103,7 +103,6 @@ export class CollectionPage implements OnInit {
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   private segmentsadm_: any = environment.segmentsadm;
-  public templates: any = [];
   public is_inprogress: boolean = false;
   public flashcards_: any = [];
   public menutoggle: boolean = false;
@@ -178,19 +177,7 @@ export class CollectionPage implements OnInit {
           this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
           this.actions = [];
-          this.refresh_data(0).then(() => {
-            if (this.id === "_collection") {
-              this.misc.apiCall("crud", {
-                op: "template",
-                proc: "list",
-                template: null
-              }).then((res: any) => {
-                this.templates = res && res.templates ? res.templates : [];
-              }).catch((error: any) => {
-                this.misc.doMessage(error, "error");
-              });
-            }
-          }).catch((error: any) => {
+          this.refresh_data(0).then(() => { }).catch((error: any) => {
             this.misc.doMessage(error, "error");
           }).finally(() => {
             this.is_initialized = true;
@@ -681,26 +668,6 @@ export class CollectionPage implements OnInit {
       this.structured_ = ev;
     } else {
       console.error("*** event", ev);
-    }
-  }
-
-  doInstallTemplate(item_: any, ix: number) {
-    if (!this.templates[ix].processing) {
-      this.templates[ix].processing = true;
-      this.misc.apiCall("crud", {
-        op: "template",
-        proc: "install",
-        id: item_._id
-      }).then((res: any) => {
-        this.misc.doMessage(res.msg, "success");
-        this.misc.navi.next("dashboard");
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.refresh_data(0).then(() => {
-          this.templates[ix].processing = false;
-        });
-      });
     }
   }
 
