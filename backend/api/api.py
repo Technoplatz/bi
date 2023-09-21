@@ -41,7 +41,7 @@ import operator
 import smtplib
 import hashlib
 import ast
-import subprocess
+from subprocess import call
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -602,25 +602,27 @@ class Mongo:
         docstring is in progress
         """
         try:
-            ts_ = Misc().get_timestamp_f()
-            id_ = f"dump-{MONGO_DB_}-{ts_}"
-            file_ = f"{id_}.gz"
-            loc_ = f"/dump/{file_}"
+            id_ = f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}"
+            fn_ = f"{id_}.gz"
+            fullpath_ = os.path.normpath(os.path.join(API_DUMPFILE_PATH_, fn_))
             type_ = "gzip"
 
-            command_ = Misc().commands_f("mongodump", { "type": type_, "loc": loc_ })
+            command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
             if not command_:
                 raise APIError("dump command error")
-            subprocess.call("mongodump", command_, shell=True)
+            call(command_, shell=True)
 
-            size_ = os.path.getsize(loc_)
+            size_ = os.path.getsize(fullpath_)
             return {"result": True, "id": id_, "type": type_, "size": size_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
+
+        except Exception as exc__:
+            return Misc().exception_f(exc__)
 
     def restore_f(self, obj):
         """
@@ -628,22 +630,26 @@ class Mongo:
         """
         try:
             id_ = obj["id"]
-            loc_ = f"/dump/{id_}.gz"
+            fn_ = f"{id_}.gz"
+            fullpath_ = os.path.normpath(os.path.join(API_DUMPFILE_PATH_, fn_))
             type_ = "gzip"
 
-            command_ = Misc().commands_f("mongorestore", { "type": type_, "loc": loc_ })
+            command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
             if not command_:
                 raise APIError("restore command error")
-            subprocess.call("mongorestore", command_, shell=True)
+            call(command_, shell=True)
 
-            size_ = os.path.getsize(loc_)
+            size_ = os.path.getsize(fullpath_)
             return {"result": True, "id": id_, "type": type_, "size": size_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
+
+        except Exception as exc__:
+            return Misc().exception_f(exc__)
 
 
 class Iot:
@@ -1346,9 +1352,9 @@ class Crud:
             df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(aggregated_)))).fillna("")
 
             files_ = []
-            file_excel_ = f"/cron/query-{que_id_}-{get_timestamp_f_}.xlsx"
+            file_excel_ = f"{API_WORKFILE_PATH_}/query-{que_id_}-{get_timestamp_f_}.xlsx"
             df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
-            files_.append({"filename": file_excel_, "filetype": "xlsx"})
+            files_.append({"name": file_excel_, "type": "xlsx"})
             email_sent_ = Email().send_email_f({
                 "personalizations": personalizations_,
                 "html": que_message_body_,
@@ -1426,26 +1432,26 @@ class Crud:
 
             files_ = []
             if data_json_:
-                file_json_ = f"/cron/{id_}.json"
-                file_json_raw_ = f"/cron/{id_}-detail.json"
+                file_json_ = f"{API_WORKFILE_PATH_}/{id_}.json"
+                file_json_raw_ = f"{API_WORKFILE_PATH_}/{id_}-detail.json"
                 df_.to_json(f"{file_json_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=False)
                 df_raw_.to_json(f"{file_json_raw_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=False)
-                files_.append({"filename": file_json_, "filetype": "json"})
-                files_.append({"filename": file_json_raw_, "filetype": "json"})
+                files_.append({"name": file_json_, "type": "json"})
+                files_.append({"name": file_json_raw_, "type": "json"})
             if data_csv_:
-                file_csv_ = f"/cron/{id_}.csv"
-                file_csv_raw_ = f"/cron/{id_}-detail.csv"
+                file_csv_ = f"{API_WORKFILE_PATH_}/{id_}.csv"
+                file_csv_raw_ = f"{API_WORKFILE_PATH_}/{id_}-detail.csv"
                 df_.to_csv(f"{file_csv_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
                 df_raw_.to_csv(f"{file_csv_raw_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
-                files_.append({"filename": file_csv_, "filetype": "csv"})
-                files_.append({"filename": file_csv_raw_, "filetype": "csv"})
+                files_.append({"name": file_csv_, "type": "csv"})
+                files_.append({"name": file_csv_raw_, "type": "csv"})
             if data_excel_:
-                file_excel_ = f"/cron/{id_}.xlsx"
-                file_excel_raw_ = f"/cron/{id_}-detail.xlsx"
+                file_excel_ = f"{API_WORKFILE_PATH_}/{id_}.xlsx"
+                file_excel_raw_ = f"{API_WORKFILE_PATH_}/{id_}-detail.xlsx"
                 df_.to_excel(f"{file_excel_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
                 df_raw_.to_excel(f"{file_excel_raw_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
-                files_.append({"filename": file_excel_, "filetype": "xlsx"})
-                files_.append({"filename": file_excel_raw_, "filetype": "xlsx"})
+                files_.append({"name": file_excel_, "type": "xlsx"})
+                files_.append({"name": file_excel_raw_, "type": "xlsx"})
 
             body_ = ""
             if vie_attach_pivot_:
@@ -1615,15 +1621,15 @@ class Crud:
                     if not fields_:
                         raise AppException("no fields field found in link")
                     type_ = "csv"
-                    file_ = f"/cron/link-{Misc().get_timestamp_f()}.{type_}"
+                    file_ = f"{API_WORKFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
 
-                    command_ = Misc().commands_f("mongoexport", { "query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_ })
+                    command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     if not command_:
                         raise APIError("export command error")
-                    subprocess.call("mongoexport", command_, shell=True)
+                    call(command_, shell=True)
 
-                    files_ = [{"filename": file_, "filetype": type_}] if attachment_ else []
+                    files_ = [{"name": file_, "type": type_}] if attachment_ else []
 
                 email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
@@ -3213,15 +3219,15 @@ class Crud:
                     notification_["fields"]) > 0 else notification_["fields"].replace(" ", "") if notification_ and "fields" in notification_ else None
                 if get_notification_filtered_ and fields_ and attachment_:
                     type_ = "csv"
-                    file_ = f"/cron/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
+                    file_ = f"{API_WORKFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
 
-                    command_ = Misc().commands_f("mongoexport", { "query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_ })
+                    command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     if not command_:
                         raise APIError("export command error")
-                    subprocess.call("mongoexport", command_, shell=True)
+                    call(command_, shell=True)
 
-                    files_ += [{"filename": file_, "filetype": type_}]
+                    files_ += [{"name": file_, "type": type_}]
 
                 email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
@@ -3390,54 +3396,6 @@ class Email:
     """
     docstring is in progress
     """
-    # def send_email_smtp_f(self, msg):
-    #     """
-    #     docstring is in progress
-    #     """
-    #     try:
-    #         EMAIL_DISCLAIMER_HTML_ = os.environ.get("EMAIL_DISCLAIMER_HTML")
-    #         email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
-    #         html_ = f"{msg['html']} {EMAIL_DISCLAIMER_HTML_}"
-    #         server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
-    #         server_.ehlo()
-    #         server_.login(SMTP_USERID_, SMTP_PASSWORD_)
-
-    #         message_ = MIMEMultipart()
-    #         message_["From"] = email_from_
-    #         message_["Subject"] = msg["subject"]
-    #         message_.attach(MIMEText(html_, "html"))
-
-    #         for file_ in msg["files"]:
-    #             filename_ = file_["filename"]
-    #             with open(f"{filename_}", "rb") as attachment_:
-    #                 part_ = MIMEBase("application", "octet-stream")
-    #                 part_.set_payload(attachment_.read())
-    #             encoders.encode_base64(part_)
-    #             filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
-    #             part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
-    #             message_.attach(part_)
-
-    #         recipients_ = []
-    #         recipients_str_ = ""
-    #         for recipient_ in msg["personalizations"]["to"]:
-    #             email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
-    #             recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
-    #             recipients_.append(recipient_["email"])
-
-    #         message_["To"] = recipients_str_
-    #         server_.sendmail(email_from_, recipients_, message_.as_string())
-    #         server_.close()
-
-    #         return {"result": True}
-
-    #     except smtplib.SMTPResponseException as exc_:
-    #         return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
-
-    #     except smtplib.SMTPServerDisconnected as exc_:
-    #         return {"result": True, "exc": str(exc_)}
-
-    #     except Exception as exc_:
-    #         return Misc().exception_f(f"smtp exception: {exc_}")
 
     def send_email_f(self, msg):
         """
@@ -3484,17 +3442,6 @@ class Email:
             if "to" not in personalizations_ or len(personalizations_["to"]) == 0:
                 raise APIError("to list is missing")
 
-            # msg_ = {
-            #     "files": files_,
-            #     "personalizations": personalizations_,
-            #     "subject": subject_,
-            #     "html": html_
-            # }
-
-            # email_sent_ = self.send_email_smtp_f(msg_)
-            # if not email_sent_["result"]:
-            #     raise APIError(email_sent_["msg"])
-
             email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
             server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
             server_.ehlo()
@@ -3506,13 +3453,18 @@ class Email:
             message_.attach(MIMEText(html_, "html"))
 
             for file_ in files_:
-                filename_ = file_["filename"]
-                with open(f"{filename_}", "rb") as attachment_:
+                fn_ = file_["name"] if "name" in file_ else None
+                if not fn_:
+                    raise APIError("file not defined")
+                if not fn_.startswith(API_WORKFILE_PATH_):
+                    raise APIError("file not allowed")
+                fn_ = file_["name"].replace(f"{API_WORKFILE_PATH_}/", "")
+                fullpath_ = os.path.normpath(os.path.join(API_WORKFILE_PATH_, fn_))
+                with open(f"{fullpath_}", "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
-                filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
-                part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
+                part_.add_header("Content-Disposition", f"attachment; filename= {fn_}")
                 message_.attach(part_)
 
             recipients_ = []
@@ -4542,6 +4494,8 @@ API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
 API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
+API_WORKFILE_PATH_ = f"/{os.environ.get('API_WORKFILE_PATH')}"
+API_DUMPFILE_PATH_ = f"/{os.environ.get('API_DUMPFILE_PATH')}"
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")

@@ -100,6 +100,7 @@ MONGO_TLS_ = str(os.environ.get("MONGO_TLS")).lower() == "true"
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
+API_WORKFILE_PATH_ = f"/{os.environ.get('API_WORKFILE_PATH')}"
 EDOKSIS_USER_ = os.environ.get("EDOKSIS_USER")
 EDOKSIS_PASSWORD_ = os.environ.get("EDOKSIS_PASSWORD")
 EDOKSIS_VKN_ = os.environ.get("EDOKSIS_VKN")
@@ -247,12 +248,12 @@ class Edoksis:
                                 raise APIError("!!! missing icerik tag")
                             document_ = base64.b64decode(tag.text)
                             fn_ = f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}"
-                            filenamewpath_ = f"/docs/{fn_}"
-                            os.makedirs(os.path.dirname(filenamewpath_), exist_ok=True)
-                            with open(filenamewpath_, "wb") as file_:
+                            fullpath_ = os.path.normpath(os.path.join(API_WORKFILE_PATH_, fn_))
+                            os.makedirs(os.path.dirname(fullpath_), exist_ok=True)
+                            with open(fullpath_, "wb") as file_:
                                 file_.write(document_)
                                 file_.close()
-                            files_.append({"filename": filenamewpath_, "filetype": file_type_})
+                            files_.append({"name": fullpath_, "type": file_type_})
                     else:
                         for tag in root_.iter(f"{Edoksis().tag_prefix_}Mesaj"):
                             if not tag.text:
@@ -531,11 +532,7 @@ def issue_f():
 
         request_xml_ = request_xml_.strip()
         if len(request_xml_) > EDOKSIS_XML_SIZE_:
-            raise APIError(f"issue request too long: {len(request_xml_)}")
-
-        match_ = re.search(r'^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$', request_xml_)
-        if match_:
-            raise APIError("invalid issue request")
+            raise APIError("issue request too long")
 
         headers_ = {
             "Content-Type": "application/soap+xml; charset=utf-8",
