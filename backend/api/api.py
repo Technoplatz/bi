@@ -840,11 +840,12 @@ class Crud:
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
 
-    def root_schemas_f(self, schema):
+    def root_schemas_f(self, schema_):
         """
         docstring is in progress
         """
-        return json.loads(open(f"/app/_template/{schema}.json", "r", encoding="utf-8").read())
+        fullpath_ = f"/app/_template/{schema_}.json"
+        return json.loads(open(fullpath_, "r", encoding="utf-8").read()) if schema_.startswith("_") and os.path.isfile(fullpath_) else False
 
     def validate_iso8601_f(self, strv):
         """
@@ -1011,73 +1012,6 @@ class Crud:
         """
         str_ = str(data_).strip()
         return ObjectId(str_)
-
-    def purge_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            collection_id_ = obj["collection"]
-            user_ = obj["user"] if "user" in obj else None
-            email_ = user_["email"] if user_ and "email" in user_ else None
-            match_ = obj["match"]
-            tfac_ = obj["tfac"] if "tfac" in obj and obj["tfac"] else None
-
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
-            if not auth_:
-                raise APIError(f"user auth not found {email_}")
-
-            verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "purge")
-            if not verify_otp_f_["result"]:
-                raise APIError(verify_otp_f_["msg"])
-
-            is_crud_ = collection_id_[:1] != "_"
-            collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-
-            cursor_ = (
-                Mongo().db_["_collection"].find_one({"col_id": collection_id_})
-                if is_crud_
-                else self.root_schemas_f(f"{collection_}")
-            )
-            if not cursor_:
-                raise APIError(f"collection not found to purge: {collection_}")
-
-            structure_ = cursor_["col_structure"] if is_crud_ else cursor_
-
-            get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
-
-            ts_ = Misc().get_timestamp_f()
-            bin_ = f"{collection_id_}_bin_{ts_}"
-            Mongo().db_[bin_].insert_many(Mongo().db_[collection_].find(get_filtered_))
-            Mongo().db_[collection_].delete_many(get_filtered_)
-
-            log_ = Misc().log_f({
-                "type": "Info",
-                "collection": collection_,
-                "op": "purge",
-                "user": email_,
-                "document": get_filtered_
-            })
-            if not log_["result"]:
-                raise APIError(log_["msg"])
-
-            return {"result": True}
-
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_,
-                "op": "purge",
-                "user": email_,
-                "document": str(exc)
-            })
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
 
     def copykey_f(self, obj):
         """
@@ -3297,7 +3231,7 @@ class Crud:
             doc_["_created_by"] = doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
 
             if collection_id_ == "_collection":
-                file_ = "template-zero.json"
+                file_ = "_template.json"
                 prefix_ = doc_["col_prefix"] if "col_prefix" in doc_ else "zzz"
                 path_ = f"/app/_template/{file_}"
                 if os.path.isfile(path_):
@@ -4608,6 +4542,7 @@ def crud_f():
     """
     docstring is in progress
     """
+    sc__, res_ = 200, {}
     try:
         input_ = request.json
         if "op" not in input_:
@@ -4624,7 +4559,7 @@ def crud_f():
 
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise SessionError({"result": False, "msg": "user session not found"})
+            raise SessionError({"result": False, "msg": "user session ended"})
 
         input_["user"] = user_
         input_["userindb"] = user_
@@ -4648,7 +4583,7 @@ def crud_f():
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
-                raise APIError({"result": False, "msg": "document must be included in the request"})
+                raise APIError({"result": False, "msg": "no document included"})
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_)
@@ -4679,8 +4614,6 @@ def crud_f():
             res_ = Crud().remove_f(input_)
         elif op_ == "copykey":
             res_ = Crud().copykey_f(input_)
-        elif op_ == "purge":
-            res_ = Crud().purge_f(input_)
         elif op_ == "charts":
             res_ = Crud().charts_f(input_)
         elif op_ == "queries":
@@ -4708,41 +4641,26 @@ def crud_f():
         elif op_ == "saveview":
             res_ = Crud().saveview_f(input_)
         else:
-            raise APIError(f"operation {op_} is not supported")
+            raise APIError(f"invalid operation: {op_}")
 
         if not res_["result"]:
             raise APIError(res_)
 
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 200
-        response_.mimetype = "application/json"
-        return response_
+    except APIError as exc__:
+        sc__, res_ = 400, ast.literal_eval(str(exc__))
 
-    except APIError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 400
-        response_.mimetype = "application/json"
-        return response_
+    except AuthError as exc__:
+        sc__, res_ = 401, ast.literal_eval(str(exc__))
 
-    except AuthError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 401
-        response_.mimetype = "application/json"
-        return response_
+    except SessionError as exc__:
+        sc__, res_ = 403, ast.literal_eval(str(exc__))
 
-    except SessionError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 403
-        response_.mimetype = "application/json"
-        return response_
+    except Exception as exc__:
+        sc__, res_ = 500, ast.literal_eval(str(exc__))
 
-    except Exception as exc_:
-        res_ = ast.literal_eval(str(exc_))
+    finally:
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 500
+        response_.status_code = sc__
         response_.mimetype = "application/json"
         return response_
 
@@ -4886,7 +4804,7 @@ def auth_f():
 
     except Exception as exc__:
         sc__, res_ = 500, ast.literal_eval(str(exc__))
-        
+
     finally:
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.status_code = sc__

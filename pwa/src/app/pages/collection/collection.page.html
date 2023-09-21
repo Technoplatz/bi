@@ -52,7 +52,7 @@ https://www.gnu.org/licenses.
                 {{ 'Scan' | translate }}<br />{{ 'Barcode' | translate }}
               </div>
               <ng-template #newrecord>
-                <div *ngIf="!['_collection', '_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
+                <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
                   {{ 'New' | translate }}<br />{{ 'Record' | translate }}
