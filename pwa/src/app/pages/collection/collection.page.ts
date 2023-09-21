@@ -212,6 +212,8 @@ export class CollectionPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.doSetSchemaKey(null);
+      this.schemevis = "hide";
+      this.structured_ = null;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -511,7 +513,7 @@ export class CollectionPage implements OnInit {
       this.editor.focus();
     } else {
       this.refresh_data(0).then(() => {
-        this.schemevis = "hide"
+        this.schemevis = "hide";
         this.structured_ ? this.misc.doMessage("changes were discarded", "warning") : null;
         this.structured_ = null;
       });

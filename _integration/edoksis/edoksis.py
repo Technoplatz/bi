@@ -40,20 +40,15 @@ from datetime import datetime
 from xml.etree import ElementTree
 from bson.objectid import ObjectId
 import requests
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 import pymongo
 from get_docker_secret import get_docker_secret
-from flask import Flask, request, make_response, escape
+from flask import Flask, request, make_response
+from markupsafe import escape
 from flask_cors import CORS
 
 
 class APIError(BaseException):
-    """
-    docstring is in progress
-    """
-
-
-class EdoksisError(BaseException):
     """
     docstring is in progress
     """
@@ -108,6 +103,7 @@ MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "Tr
 EDOKSIS_USER_ = os.environ.get("EDOKSIS_USER")
 EDOKSIS_PASSWORD_ = os.environ.get("EDOKSIS_PASSWORD")
 EDOKSIS_VKN_ = os.environ.get("EDOKSIS_VKN")
+EDOKSIS_XML_SIZE_ = int(os.environ.get("EDOKSIS_XML_SIZE"))
 CUSTOMIZATION_ID_ = os.environ.get("CUSTOMIZATION_ID")
 UBL_VERSION_ID_ = os.environ.get("UBL_VERSION_ID")
 ADVICE_TYPE_CODE_ = os.environ.get("ADVICE_TYPE_CODE")
@@ -194,106 +190,84 @@ class Edoksis:
         """
         docstring is in progress
         """
-        res_ = None
-        files_ = []
-        content_ = ""
+        exc_, files_ = None, []
         try:
             object_ids_ = input_["ids"]
-            document_format_ = 2
-            file_type_ = "xml" if document_format_ == 1 else "pdf" if document_format_ == 2 else "html" if document_format_ == 3 else None
-            if not file_type_:
-                raise APIError("missing file type")
-
-            projection_ = {}
-            projection_["shp_wayb_ettn"] = 1
-            projection_["shp_id"] = 1
-            cursor_ = Mongo().db_["shipment_data"].find(filter={"_id": {"$in": [ObjectId(o_) for o_ in object_ids_]}}, projection=projection_)
+            document_format_, file_type_ = 2, "pdf"
+            cursor_ = Mongo().db_["shipment_data"].find(filter={"_id": {"$in": [ObjectId(o_) for o_ in object_ids_]}})
             shipments_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
             if not shipments_:
-                raise APIError("no shipment id provided")
+                raise APIError("no shipment found")
 
             for shipment_ in shipments_:
-
                 shipment_ettn_ = shipment_["shp_wayb_ettn"] if "shp_wayb_ettn" in shipment_ else None
                 shipment_id_ = shipment_["shp_id"] if "shp_id" in shipment_ else None
+                request_xml_ = f'''
+                <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
+                    <soap:Header/>
+                    <soap:Body>
+                        <tem:IrsaliyeIndir xmlns="http://tempuri.org/">
+                            <tem:Girdi>
+                                <tem:Kimlik>
+                                    <tem:Kullanici>{EDOKSIS_USER_}</tem:Kullanici>
+                                    <tem:Sifre>{EDOKSIS_PASSWORD_}</tem:Sifre>
+                                </tem:Kimlik>
+                                <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
+                                <tem:IrsaliyeETTN>{shipment_ettn_}</tem:IrsaliyeETTN>
+                                <tem:Tipi>2</tem:Tipi>
+                                <tem:Format>{document_format_}</tem:Format>
+                            </tem:Girdi>
+                        </tem:IrsaliyeIndir>
+                    </soap:Body>
+                </soap:Envelope>
+                '''
 
-                try:
-                    request_xml_ = f'''
-                    <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
-                        <soap:Header/>
-                        <soap:Body>
-                            <tem:IrsaliyeIndir xmlns="http://tempuri.org/">
-                                <tem:Girdi>
-                                    <tem:Kimlik>
-                                        <tem:Kullanici>{EDOKSIS_USER_}</tem:Kullanici>
-                                        <tem:Sifre>{EDOKSIS_PASSWORD_}</tem:Sifre>
-                                    </tem:Kimlik>
-                                    <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
-                                    <tem:IrsaliyeETTN>{shipment_ettn_}</tem:IrsaliyeETTN>
-                                    <tem:Tipi>2</tem:Tipi>\
-                                    <tem:Format>{document_format_}</tem:Format>\
-                                </tem:Girdi>
-                            </tem:IrsaliyeIndir>
-                        </soap:Body>
-                    </soap:Envelope>
-                    '''
+                request_xml_ = request_xml_.strip()
+                if len(request_xml_) > EDOKSIS_XML_SIZE_:
+                    raise APIError("issue request too long")
 
-                    request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
-                    headers_ = {
-                        "Content-Type": "application/soap+xml; charset=utf-8",
-                        "Content-Length": str(len(request_xml_)),
-                        "SOAPAction": "IrsaliyeIndir"
-                    }
+                match_ = re.search(r'^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$', request_xml_)
+                if match_:
+                    raise APIError("invalid download request")
 
-                    response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
-                    root_ = ElementTree.fromstring(response_.content)
+                headers_ = {
+                    "Content-Type": "application/soap+xml; charset=utf-8",
+                    "Content-Length": str(len(request_xml_)),
+                    "SOAPAction": "IrsaliyeIndir"
+                }
+                response_ = requests.post(EDOKSIS_URL_, data=request_xml_.encode("utf-8"), headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
+                root_ = ElementTree.fromstring(response_.content)
 
-                    for tag in root_.iter(f"{Edoksis().tag_prefix_}Sonuc"):
-                        if not tag.text:
-                            raise EdoksisError("!!! missing sonuc tag")
-                        if tag.text == "1":
-                            for tag in root_.iter(f"{Edoksis().tag_prefix_}Icerik"):
-                                if not tag.text:
-                                    raise EdoksisError("!!! missing icerik tag")
-                                document_ = base64.b64decode(tag.text)
-                                fn_ = f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}"
-                                filenamewpath_ = f"/docs/{fn_}"
-                                try:
-                                    os.makedirs(os.path.dirname(filenamewpath_), exist_ok=True)
-                                    with open(filenamewpath_, "wb") as file_:
-                                        file_.write(document_)
-                                        file_.close()
-                                    content_ += f"<br />{fn_}: OK"
-                                    files_.append({"filename": filenamewpath_, "filetype": file_type_})
-                                except Exception as exc_:
-                                    content_ += f"<br />{shipment_id_}: {str(exc_)}"
-                        else:
-                            for tag in root_.iter(f"{Edoksis().tag_prefix_}Mesaj"):
-                                if not tag.text:
-                                    raise EdoksisError("!!! missing mesaj tag")
-                                content_ += f"<br />{shipment_id_}: {str(tag.text)}"
-                                raise EdoksisError(str(tag.text))
+                for tag in root_.iter(f"{Edoksis().tag_prefix_}Sonuc"):
+                    if not tag.text:
+                        raise APIError("!!! missing sonuc tag")
+                    if tag.text == "1":
+                        for tag in root_.iter(f"{Edoksis().tag_prefix_}Icerik"):
+                            if not tag.text:
+                                raise APIError("!!! missing icerik tag")
+                            document_ = base64.b64decode(tag.text)
+                            fn_ = f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}"
+                            filenamewpath_ = f"/docs/{fn_}"
+                            os.makedirs(os.path.dirname(filenamewpath_), exist_ok=True)
+                            with open(filenamewpath_, "wb") as file_:
+                                file_.write(document_)
+                                file_.close()
+                            files_.append({"filename": filenamewpath_, "filetype": file_type_})
+                    else:
+                        for tag in root_.iter(f"{Edoksis().tag_prefix_}Mesaj"):
+                            if not tag.text:
+                                raise APIError("!!! missing mesaj tag")
+                            raise APIError(str(tag.text))
 
-                except EdoksisError as exc_:
-                    content_ += f"<br />{shipment_id_}: {str(exc_)}"
+        except APIError as exc__:
+            exc_ = exc__
 
-                except Exception as exc_:
-                    content_ += f"<br />{shipment_id_}: {str(exc_)}"
-
-            res_ = {"result": True, "content": content_, "files": files_}
-
-        except APIError as exc_:
-            Misc().exception_show_f(exc_)
-            content_ += f"<br />API Error: {str(exc_)}"
-            res_ = {"result": False, "content": content_, "msg": str(exc_)}
-
-        except Exception as exc_:
-            Misc().exception_show_f(exc_)
-            content_ += f"<br />Exception: {str(exc_)}"
-            res_ = {"result": False, "content": content_, "msg": str(exc_)}
+        except Exception as exc__:
+            exc_ = exc__
 
         finally:
-            return res_
+            res_ = exc_ is None
+            return {"result": res_, "exc": escape(exc_), "files": files_}
 
 
 @app.route("/download", methods=["POST"], endpoint="download")
@@ -301,7 +275,7 @@ def download_f():
     """
     docstring is in progress
     """
-    status_code_, res_, exc_, content_, files_ = 200, {}, None, "", []
+    status_code_, res_, exc_, files_ = 200, {}, None, []
     try:
         if not request.headers:
             raise AuthError("no headers provided")
@@ -309,7 +283,6 @@ def download_f():
         content_type_ = request.headers.get("Content-Type", None) if "Content-Type" in request.headers and request.headers["Content-Type"] != "" else None
         if not content_type_:
             raise APIError("no content type provided")
-
         if content_type_ != "application/json":
             raise APIError(f"invalid content type: {request['Content-Type']}")
 
@@ -321,15 +294,11 @@ def download_f():
         if not ids_:
             raise APIError("no input ids provided")
 
-        get_waybill_f_ = Edoksis().get_waybill_f({
-            "ids": ids_
-        })
-
+        get_waybill_f_ = Edoksis().get_waybill_f({"ids": ids_})
         if not get_waybill_f_["result"]:
-            raise APIError(get_waybill_f_["msg"])
+            raise APIError(get_waybill_f_["exc"])
 
         files_ = get_waybill_f_["files"]
-        content_ = get_waybill_f_["content"]
 
     except AuthError as exc__:
         status_code_, exc_ = 401, exc__
@@ -341,11 +310,10 @@ def download_f():
         status_code_, exc_ = 500, exc__
 
     finally:
-        result_ = status_code_ == 200
-        if not result_:
+        ok_ = status_code_ == 200
+        if not ok_:
             Misc().exception_show_f(exc_)
-            content_ = f"Error {status_code_}. Please check logs."
-        res_ = {"result": result_, "content": escape(content_), "files": files_}
+        res_ = {"result": ok_, "content": "OK" if ok_ else escape(exc_), "files": files_}
         response_ = make_response(res_, status_code_)
         response_.mimetype = "application/json"
         return response_
@@ -356,7 +324,7 @@ def issue_f():
     """
     docstring is in progress
     """
-    content_ = "Shipments:"
+    status_code_, exc_, files_ = 200, None, []
     try:
         if not request.headers:
             raise AuthError("no headers provided")
@@ -375,25 +343,22 @@ def issue_f():
         value_ = json_["value"] if "value" in json_ and json_["value"] is not None else None
         if not value_:
             raise APIError("no map value provided")
+
         filter_ = {}
         filter_[key_] = value_
         shipment_id_ = value_
-
         email_ = json_["email"] if "email" in json_ else "shipment"
+        # ids_ = json_["ids"] if "ids" in json_ else None
+        # filter_ = {"_id": {"$in": [ObjectId(i) for i in ids_]}}
 
-        session_client_ = MongoClient(Mongo().connstr_)
-        session_db_ = session_client_[MONGO_DB_]
-        session_ = session_client_.start_session()
-        session_.start_transaction()
-
-        deliveries_ = session_db_["delivery_data"].find(filter_)
+        deliveries_ = list(Mongo().db_["delivery_data"].find(filter_))
         if not deliveries_:
-            raise EdoksisError(f"delivery not found {shipment_id_}")
+            raise APIError(f"no delivery found {shipment_id_}")
 
         account_no_ = deliveries_[0]["dnn_acc_no"]
-        account_ = session_db_["account_data"].find_one({"acc_no": account_no_})
+        account_ = Mongo().db_["account_data"].find_one({"acc_no": account_no_})
         if not account_:
-            raise EdoksisError("account not found")
+            raise APIError("account not found")
 
         deliverycustomerparty_websiteuri_ = account_["acc_web_address"] if "acc_web_address" in account_ else None
         deliverycustomerparty_id_ = account_["acc_tax_no"] if "acc_tax_no" in account_ else None
@@ -443,6 +408,23 @@ def issue_f():
             shp_date_ = delivery_["dnn_wayb_date"] if "dnn_wayb_date" in delivery_ else None
             issue_date_ = shp_date_.strftime("%Y-%m-%d")
             issue_time_ = shp_date_.strftime("%H:%M:%S")
+
+        set_ = {}
+        set_["shp_id"] = shipment_id_
+        set_["shp_date"] = shp_date_
+        set_["shp_acc_no"] = account_no_
+        set_["shp_carrier_name"] = shipment_partynamename_
+        set_["shp_carrier_id"] = shipment_partyidentificationid_
+        set_["shp_vehicle_id"] = shipment_licenseplateid_
+        set_["shp_notes"] = notes_
+        set_["shp_wayb_no"] = None
+        set_["shp_wayb_date"] = None
+        set_["shp_wayb_ettn"] = None
+        set_["_created_at"] = Misc().get_now_f()
+        set_["_created_by"] = email_
+        set_["_modified_at"] = Misc().get_now_f()
+        set_["_modified_by"] = email_
+        update_one_ = Mongo().db_["shipment_data"].update_one({"shp_id": shipment_id_}, {"$set": set_}, upsert=True)
 
         request_xml_ = f'''
         <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
@@ -547,99 +529,81 @@ def issue_f():
         </soap:Envelope>
         '''
 
-        request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
+        request_xml_ = request_xml_.strip()
+        if len(request_xml_) > EDOKSIS_XML_SIZE_:
+            raise APIError(f"issue request too long: {len(request_xml_)}")
+
+        match_ = re.search(r'^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$', request_xml_)
+        if match_:
+            raise APIError("invalid issue request")
+
         headers_ = {
             "Content-Type": "application/soap+xml; charset=utf-8",
             "Content-Length": str(len(request_xml_)),
             "SOAPAction": "IrsaliyeZarfGonderYapisal"
         }
 
-        response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
+        response_ = requests.post(EDOKSIS_URL_, data=request_xml_.encode("utf-8"), headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
         if response_.status_code != 200:
-            raise EdoksisError(f"edoksis connection error: { str(response_) }")
+            raise APIError(f"edoksis connection error: { str(response_) }")
 
         root_ = ElementTree.fromstring(response_.content)
         for tag in root_.iter(f"{Edoksis().tag_prefix_}Sonuc"):
             if not tag.text:
-                raise EdoksisError("!!! missing sonuc tag")
+                raise APIError("!!! missing sonuc tag")
             if tag.text == "1":
                 for tag in root_.iter(f"{Edoksis().tag_prefix_}IRsaliyeNo"):
                     if not tag.text:
-                        raise EdoksisError("!!! missing irsaliyeno tag")
+                        raise APIError("!!! missing irsaliyeno tag")
                     waybill_no_ = str(tag.text)
                     for tag in root_.iter(f"{Edoksis().tag_prefix_}IrsaliyeETTN"):
                         if not tag.text:
-                            raise EdoksisError("!!! missing irsaliyeettn tag")
+                            raise APIError("!!! missing irsaliyeettn tag")
                         waybill_ettn_ = str(tag.text)
             else:
                 for tag in root_.iter(f"{Edoksis().tag_prefix_}Mesaj"):
                     if not tag.text:
-                        raise EdoksisError("!!! missing mesaj tag")
-                    raise EdoksisError(str(tag.text))
-
-        process_date_ = Misc().get_now_f()
+                        raise APIError("!!! missing mesaj tag")
+                    raise APIError(str(tag.text))
 
         set_ = {}
         set_["dnn_wayb_ettn"] = waybill_ettn_
         set_["dnn_wayb_no"] = waybill_no_
-        deliveries_ = session_db_["delivery_data"].update_many(filter_, {"$set": set_})
+        deliveries_ = Mongo().db_["delivery_data"].update_many(filter_, {"$set": set_})
 
         set_ = {}
-        set_["shp_id"] = shipment_id_
-        set_["shp_date"] = shp_date_
-        set_["shp_acc_no"] = account_no_
-        set_["shp_carrier_name"] = shipment_partynamename_
-        set_["shp_carrier_id"] = shipment_partyidentificationid_
-        set_["shp_vehicle_id"] = shipment_licenseplateid_
-        set_["shp_notes"] = notes_
         set_["shp_wayb_no"] = waybill_no_
-        set_["shp_wayb_date"] = process_date_
+        set_["shp_wayb_date"] = Misc().get_now_f()
         set_["shp_wayb_ettn"] = waybill_ettn_
-        set_["_created_at"] = process_date_
-        set_["_created_by"] = email_
-        set_["_modified_at"] = process_date_
+        set_["_modified_at"] = Misc().get_now_f()
         set_["_modified_by"] = email_
-        update_one_ = session_db_["shipment_data"].update_one({"shp_id": shipment_id_}, {"$set": set_}, upsert=True)
-        inserted_id_ = update_one_.upserted_id if update_one_.upserted_id else update_one_.inserted_id if update_one_.inserted_id else None
-        content_ += f"<br />{shipment_id_}: OK"
-        session_.commit_transaction()
+        update_one_ = Mongo().db_["shipment_data"].find_one_and_update({"shp_id": shipment_id_}, {"$set": set_}, return_document=ReturnDocument.AFTER, upsert=True)
+        ids__ = str(update_one_["_id"])
 
-        files_ = []
-        if inserted_id_:
-            get_waybill_f_ = Edoksis().get_waybill_f({"ids": [inserted_id_]})
+        if ids__:
+            get_waybill_f_ = Edoksis().get_waybill_f({"ids": [ids__]})
             if not get_waybill_f_["result"]:
-                raise APIError(get_waybill_f_["msg"])
+                raise APIError(get_waybill_f_["exc"])
             files_ = get_waybill_f_["files"] if "files" in get_waybill_f_ and len(get_waybill_f_["files"]) > 0 else []
 
-        res_ = {"result": True, "content": content_, "files": files_}
+    except pymongo.errors.PyMongoError as exc__:
+        status_code_, exc_ = 500, exc__
 
-        response_ = make_response(res_, 200)
+    except AuthError as exc__:
+        status_code_, exc_ = 401, exc__
 
-    except pymongo.errors.PyMongoError as exc_:
-        content_ += f"Db Error: {str(exc_)}<br />"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(res_, 500)
+    except APIError as exc__:
+        status_code_, exc_ = 400, exc__
 
-    except AuthError as exc_:
-        content_ += f"Auth Error: {str(exc_)}<br />"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(content_, 401)
-
-    except APIError as exc_:
-        content_ += f"API Error: {str(exc_)}<br />"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(content_, 400)
-
-    except Exception as exc_:
-        content_ += f"Exception: {str(exc_)}<br />"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(content_, 500)
+    except Exception as exc__:
+        status_code_, exc_ = 500, exc__
 
     finally:
+        ok_ = status_code_ == 200
+        if not ok_:
+            Misc().exception_show_f(exc_)
+        res_ = {"result": ok_, "content": "OK" if ok_ else escape(exc_), "files": files_}
+        response_ = make_response(res_, status_code_)
         response_.mimetype = "application/json"
         return response_
 
@@ -649,7 +613,7 @@ def multi_issue_f():
     """
     docstring is in progress
     """
-    content_ = "Shipments:"
+    status_code_, exc_, files_ = 200, None, []
     try:
         if not request.headers:
             raise AuthError("no headers provided")
@@ -755,285 +719,266 @@ def multi_issue_f():
         if not document_format_:
             raise APIError("missing document format in mapping")
 
-        session_client_ = MongoClient(Mongo().connstr_)
-        session_db_ = session_client_[MONGO_DB_]
-        session_ = session_client_.start_session()
-
         shipments_ = []
         projection_ = {}
         projection_[shipment_id_field_] = 1
 
         object_ids_ = [ObjectId(i) for i in ids_]
-        cursor_ = session_db_[shipment_collection_].find(filter={"_id": {"$in": object_ids_}}, projection=projection_)
+        cursor_ = Mongo().db_[shipment_collection_].find(filter={"_id": {"$in": object_ids_}}, projection=projection_)
         shipments_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
         if not shipments_:
             raise APIError("no shipment id provided")
 
         err_ = False
         for shipment_ in shipments_:
-            try:
+            shipment_id_ = shipment_[shipment_id_field_] if shipment_id_field_ in shipment_ else None
+            if not shipment_id_:
+                continue
 
-                shipment_id_ = shipment_[shipment_id_field_] if shipment_id_field_ in shipment_ else None
-                if not shipment_id_:
-                    continue
+            shipment_filter_ = {}
+            shipment_filter_[shipment_id_field_] = shipment_id_
+            shipment_ = Mongo().db_[shipment_collection_].find_one(shipment_filter_)
+            if not shipment_:
+                raise APIError("shipment not found")
 
-                session_.start_transaction()
+            if shipment_[shipment_ettn_field_] is not None or shipment_[shipment_waybill_no_field_] is not None:
+                raise APIError("shipment was already issued")
 
-                shipment_filter_ = {}
-                shipment_filter_[shipment_id_field_] = shipment_id_
-                shipment_ = session_db_[shipment_collection_].find_one(shipment_filter_)
-                if not shipment_:
-                    raise EdoksisError("shipment not found")
+            delivery_filter_ = {}
+            delivery_filter_[delivery_shipment_id_field_] = shipment_id_
+            deliveries_ = Mongo().db_[delivery_collection_].find(delivery_filter_)
+            line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
+            if not deliveries_ or line_count_ == 0:
+                raise APIError(f"no deliveries found with {delivery_shipment_id_field_}={shipment_id_}")
 
-                if shipment_[shipment_ettn_field_] is not None or shipment_[shipment_waybill_no_field_] is not None:
-                    raise EdoksisError("shipment was already issued")
+            shipment_account_no_ = shipment_[shipment_account_no_field_]
+            delivery_account_filter1_ = delivery_account_filter2_ = {}
+            delivery_account_filter1_[delivery_shipment_id_field_] = shipment_id_
+            delivery_account_filter2_[delivery_account_no_field_] = {"$ne": shipment_account_no_}
+            delivery_account_filter_ = {"$and": [delivery_account_filter1_, delivery_account_filter2_]}
+            delivery_accounts_ = Mongo().db_[delivery_collection_].find(delivery_account_filter_).explain().get("executionStats", {}).get("nReturned")
+            if delivery_accounts_ > 0:
+                raise APIError(f"account numbers in {delivery_collection_} don't match with {shipment_collection_}")
 
-                delivery_filter_ = {}
-                delivery_filter_[delivery_shipment_id_field_] = shipment_id_
-                deliveries_ = session_db_[delivery_collection_].find(delivery_filter_)
-                line_count_ = deliveries_.explain().get("executionStats", {}).get("nReturned")
-                if not deliveries_ or line_count_ == 0:
-                    raise EdoksisError(f"no deliveries found with {delivery_shipment_id_field_}={shipment_id_}")
+            account_filter_ = {}
+            account_filter_[account_no_field_] = shipment_[shipment_account_no_field_]
+            account_ = Mongo().db_[account_collection_].find_one(account_filter_)
+            if not account_:
+                raise APIError("account not found")
 
-                shipment_account_no_ = shipment_[shipment_account_no_field_]
-                delivery_account_filter1_ = delivery_account_filter2_ = {}
-                delivery_account_filter1_[delivery_shipment_id_field_] = shipment_id_
-                delivery_account_filter2_[delivery_account_no_field_] = {"$ne": shipment_account_no_}
-                delivery_account_filter_ = {"$and": [delivery_account_filter1_, delivery_account_filter2_]}
-                delivery_accounts_ = session_db_[delivery_collection_].find(delivery_account_filter_).explain().get("executionStats", {}).get("nReturned")
-                if delivery_accounts_ > 0:
-                    raise EdoksisError(f"account numbers in {delivery_collection_} don't match with {shipment_collection_}")
+            deliverycustomerparty_websiteuri_ = account_["acc_web_address"] if "acc_web_address" in account_ else None
+            deliverycustomerparty_id_ = account_["acc_tax_no"] if "acc_tax_no" in account_ else None
+            deliverycustomerparty_name_ = account_["acc_name"] if "acc_name" in account_ else None
+            deliverycustomerparty_postaladdressid_ = account_["acc_bill_to_address_id"] if "acc_bill_to_address_id" in account_ else None
+            deliverycustomerparty_streetname_ = account_["acc_bill_to_street"] if "acc_bill_to_street" in account_ else None
+            deliverycustomerparty_buildingnumber_ = account_["acc_bill_to_building"] if "acc_bill_to_building" in account_ else None
+            deliverycustomerparty_citysubdivisionname_ = account_["acc_bill_to_province"] if "acc_bill_to_province" in account_ else None
+            deliverycustomerparty_cityname_ = account_["acc_bill_to_city"] if "acc_bill_to_city" in account_ else None
+            deliverycustomerparty_postalzone_ = account_["acc_bill_to_postcode"] if "acc_bill_to_postcode" in account_ else None
+            deliverycustomerparty_countryname_ = account_["acc_bill_to_country"] if "acc_bill_to_country" in account_ else None
+            deliverycustomerparty_taxschemename_ = account_["acc_tax_office"] if "acc_tax_office" in account_ else None
+            deliverycustomerparty_telephone_ = account_["acc_phone"] if "acc_phone" in account_ else None
+            deliverycustomerparty_telefax_ = account_["acc_fax"] if "acc_fax" in account_ else None
+            deliverycustomerparty_electronicmail_ = account_["acc_email"] if "acc_email" in account_ else None
+            shipment_licenseplateid_ = shipment_["shp_vehicle_id"] if "shp_vehicle_id" in shipment_ else None
+            shipment_licenseplateidscheme_ = "PLAKA"
+            shipment_partyidentificationid_ = shipment_["shp_carrier_id"] if "shp_carrier_id" in shipment_ else None
+            shipment_partynamename_ = shipment_["shp_carrier_name"] if "shp_carrier_name" in shipment_ else None
+            shipment_postaladdressid_ = account_["acc_ship_to_address_id"] if "acc_ship_to_address_id" in account_ else None
+            shipment_streetname_ = account_["acc_ship_to_street"] if "acc_ship_to_street" in account_ else None
+            shipment_buildingnumber_ = account_["acc_ship_to_building"] if "acc_ship_to_building" in account_ else None
+            shipment_citysubdivisionname_ = account_["acc_ship_to_province"] if "acc_ship_to_province" in account_ else None
+            shipment_cityname_ = account_["acc_ship_to_city"] if "acc_ship_to_city" in account_ else None
+            shipment_postalzone_ = account_["acc_ship_to_postcode"] if "acc_ship_to_postcode" in account_ else None
+            shipment_countryname_ = account_["acc_ship_to_country"] if "acc_ship_to_country" in account_ else None
+            shipment_actualdespatchdate_ = datetime.now().strftime("%Y-%m-%d")
+            shipment_actualdespatchtime_ = datetime.now().strftime("%H:%M:%S")
+            customer_alias_ = account_["acc_alias"] if "acc_alias" in account_ else None
+            zarf_ettn_ = str(uuid.uuid4())
+            shp_date_ = shipment_["shp_date"] if "shp_date" in shipment_ else None
+            issue_date_ = shp_date_.strftime("%Y-%m-%d")
+            issue_time_ = shp_date_.strftime("%H:%M:%S")
+            notes_ = f"{shipment_[shipment_notes_field_]} " if shipment_notes_field_ in shipment_ else ""
 
-                account_filter_ = {}
-                account_filter_[account_no_field_] = shipment_[shipment_account_no_field_]
-                account_ = session_db_[account_collection_].find_one(account_filter_)
-                if not account_:
-                    raise EdoksisError("account not found")
+            despatch_lines_ = ""
+            line_id_ = 0
+            for delivery_ in deliveries_:
+                delivery_qty_ = delivery_[delivery_qty_field_]
+                delivery_no_ = delivery_[delivery_no_field_]
+                delivery_product_no_ = delivery_[delivery_product_no_field_]
+                delivery_product_desc_ = delivery_[delivery_product_desc_field_]
+                item_name_ = f"{delivery_no_} {delivery_product_no_} {delivery_product_desc_}"
+                item_name_ = item_name_[:256]
+                note_ = ""
+                unit_code_ = "NIU"
+                line_id_ += 1
+                notes_ += f"{delivery_no_} "
+                despatch_lines_ += f'<tem:DespatchLine><tem:ID>{line_id_}</tem:ID><tem:DeliveredQuantity>{delivery_qty_}</tem:DeliveredQuantity><tem:DeliveredQuantityUnitCode>{unit_code_}</tem:DeliveredQuantityUnitCode><tem:LineID>{shipment_id_}</tem:LineID><tem:ItemName>{item_name_}</tem:ItemName><tem:Note><tem:string>{note_}</tem:string></tem:Note></tem:DespatchLine>'
 
-                deliverycustomerparty_websiteuri_ = account_["acc_web_address"] if "acc_web_address" in account_ else None
-                deliverycustomerparty_id_ = account_["acc_tax_no"] if "acc_tax_no" in account_ else None
-                deliverycustomerparty_name_ = account_["acc_name"] if "acc_name" in account_ else None
-                deliverycustomerparty_postaladdressid_ = account_["acc_bill_to_address_id"] if "acc_bill_to_address_id" in account_ else None
-                deliverycustomerparty_streetname_ = account_["acc_bill_to_street"] if "acc_bill_to_street" in account_ else None
-                deliverycustomerparty_buildingnumber_ = account_["acc_bill_to_building"] if "acc_bill_to_building" in account_ else None
-                deliverycustomerparty_citysubdivisionname_ = account_["acc_bill_to_province"] if "acc_bill_to_province" in account_ else None
-                deliverycustomerparty_cityname_ = account_["acc_bill_to_city"] if "acc_bill_to_city" in account_ else None
-                deliverycustomerparty_postalzone_ = account_["acc_bill_to_postcode"] if "acc_bill_to_postcode" in account_ else None
-                deliverycustomerparty_countryname_ = account_["acc_bill_to_country"] if "acc_bill_to_country" in account_ else None
-                deliverycustomerparty_taxschemename_ = account_["acc_tax_office"] if "acc_tax_office" in account_ else None
-                deliverycustomerparty_telephone_ = account_["acc_phone"] if "acc_phone" in account_ else None
-                deliverycustomerparty_telefax_ = account_["acc_fax"] if "acc_fax" in account_ else None
-                deliverycustomerparty_electronicmail_ = account_["acc_email"] if "acc_email" in account_ else None
-                shipment_licenseplateid_ = shipment_["shp_vehicle_id"] if "shp_vehicle_id" in shipment_ else None
-                shipment_licenseplateidscheme_ = "PLAKA"
-                shipment_partyidentificationid_ = shipment_["shp_carrier_id"] if "shp_carrier_id" in shipment_ else None
-                shipment_partynamename_ = shipment_["shp_carrier_name"] if "shp_carrier_name" in shipment_ else None
-                shipment_postaladdressid_ = account_["acc_ship_to_address_id"] if "acc_ship_to_address_id" in account_ else None
-                shipment_streetname_ = account_["acc_ship_to_street"] if "acc_ship_to_street" in account_ else None
-                shipment_buildingnumber_ = account_["acc_ship_to_building"] if "acc_ship_to_building" in account_ else None
-                shipment_citysubdivisionname_ = account_["acc_ship_to_province"] if "acc_ship_to_province" in account_ else None
-                shipment_cityname_ = account_["acc_ship_to_city"] if "acc_ship_to_city" in account_ else None
-                shipment_postalzone_ = account_["acc_ship_to_postcode"] if "acc_ship_to_postcode" in account_ else None
-                shipment_countryname_ = account_["acc_ship_to_country"] if "acc_ship_to_country" in account_ else None
-                shipment_actualdespatchdate_ = datetime.now().strftime("%Y-%m-%d")
-                shipment_actualdespatchtime_ = datetime.now().strftime("%H:%M:%S")
-                customer_alias_ = account_["acc_alias"] if "acc_alias" in account_ else None
-                zarf_ettn_ = str(uuid.uuid4())
-                shp_date_ = shipment_["shp_date"] if "shp_date" in shipment_ else None
-                issue_date_ = shp_date_.strftime("%Y-%m-%d")
-                issue_time_ = shp_date_.strftime("%H:%M:%S")
-                notes_ = f"{shipment_[shipment_notes_field_]} " if shipment_notes_field_ in shipment_ else ""
-
-                despatch_lines_ = ""
-                line_id_ = 0
-                for delivery_ in deliveries_:
-                    delivery_qty_ = delivery_[delivery_qty_field_]
-                    delivery_no_ = delivery_[delivery_no_field_]
-                    delivery_product_no_ = delivery_[delivery_product_no_field_]
-                    delivery_product_desc_ = delivery_[delivery_product_desc_field_]
-                    item_name_ = f"{delivery_no_} {delivery_product_no_} {delivery_product_desc_}"
-                    item_name_ = item_name_[:256]
-                    note_ = ""
-                    unit_code_ = "NIU"
-                    line_id_ += 1
-                    notes_ += f"{delivery_no_} "
-                    despatch_lines_ += f'<tem:DespatchLine><tem:ID>{line_id_}</tem:ID><tem:DeliveredQuantity>{delivery_qty_}</tem:DeliveredQuantity><tem:DeliveredQuantityUnitCode>{unit_code_}</tem:DeliveredQuantityUnitCode><tem:LineID>{shipment_id_}</tem:LineID><tem:ItemName>{item_name_}</tem:ItemName><tem:Note><tem:string>{note_}</tem:string></tem:Note></tem:DespatchLine>'
-
-                request_xml_ = f'''
-                <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
-                <soap:Header/>
-                    <soap:Body>
-                        <tem:IrsaliyeZarfGonderYapisal>
-                            <tem:IrsaliyeYapisal>
-                                <tem:Kimlik>
-                                    <tem:Kullanici>{EDOKSIS_USER_}</tem:Kullanici>
-                                    <tem:Sifre>{EDOKSIS_PASSWORD_}</tem:Sifre>
-                                </tem:Kimlik>
-                                <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
-                                <tem:Zarf>
-                                    <tem:ZarfETTN>{zarf_ettn_}</tem:ZarfETTN>
-                                </tem:Zarf>
-                                <tem:Belgeler>
-                                    <tem:IrsaliyeGonderim>
-                                        <tem:despatch>
-                                            <tem:UBLVersionID>{UBL_VERSION_ID_}</tem:UBLVersionID>
-                                            <tem:CustomizationID>{CUSTOMIZATION_ID_}</tem:CustomizationID>
-                                            <tem:ProfileID>{PROFILE_ID_}</tem:ProfileID>
+            request_xml_ = f'''
+            <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
+            <soap:Header/>
+                <soap:Body>
+                    <tem:IrsaliyeZarfGonderYapisal>
+                        <tem:IrsaliyeYapisal>
+                            <tem:Kimlik>
+                                <tem:Kullanici>{EDOKSIS_USER_}</tem:Kullanici>
+                                <tem:Sifre>{EDOKSIS_PASSWORD_}</tem:Sifre>
+                            </tem:Kimlik>
+                            <tem:KimlikNo>{EDOKSIS_VKN_}</tem:KimlikNo>
+                            <tem:Zarf>
+                                <tem:ZarfETTN>{zarf_ettn_}</tem:ZarfETTN>
+                            </tem:Zarf>
+                            <tem:Belgeler>
+                                <tem:IrsaliyeGonderim>
+                                    <tem:despatch>
+                                        <tem:UBLVersionID>{UBL_VERSION_ID_}</tem:UBLVersionID>
+                                        <tem:CustomizationID>{CUSTOMIZATION_ID_}</tem:CustomizationID>
+                                        <tem:ProfileID>{PROFILE_ID_}</tem:ProfileID>
+                                        <tem:ID>{EDOKSIS_VKN_}</tem:ID>
+                                        <tem:CopyIndicator>false</tem:CopyIndicator>
+                                        <tem:UUID>{zarf_ettn_}</tem:UUID>
+                                        <tem:IssueDate>{issue_date_}</tem:IssueDate>
+                                        <tem:IssueTime>{issue_time_}</tem:IssueTime>
+                                        <tem:DespatchAdviceTypeCode>{ADVICE_TYPE_CODE_}</tem:DespatchAdviceTypeCode>
+                                        <tem:LineCountNumeric>{line_count_}</tem:LineCountNumeric>
+                                        <tem:Note><tem:string>{notes_}</tem:string></tem:Note>
+                                        <tem:Signature>
                                             <tem:ID>{EDOKSIS_VKN_}</tem:ID>
-                                            <tem:CopyIndicator>false</tem:CopyIndicator>
-                                            <tem:UUID>{zarf_ettn_}</tem:UUID>
-                                            <tem:IssueDate>{issue_date_}</tem:IssueDate>
-                                            <tem:IssueTime>{issue_time_}</tem:IssueTime>
-                                            <tem:DespatchAdviceTypeCode>{ADVICE_TYPE_CODE_}</tem:DespatchAdviceTypeCode>
-                                            <tem:LineCountNumeric>{line_count_}</tem:LineCountNumeric>
-                                            <tem:Note><tem:string>{notes_}</tem:string></tem:Note>
-                                            <tem:Signature>
-                                                <tem:ID>{EDOKSIS_VKN_}</tem:ID>
-                                                <tem:PartyIdentificationID>{EDOKSIS_VKN_}</tem:PartyIdentificationID>
-                                                <tem:PartyIdentificationScheme>{IDENTIFICATION_SCHEME_}</tem:PartyIdentificationScheme>
-                                                <tem:StreetName>{SUPPLIER_STREET_NAME_}</tem:StreetName>
-                                                <tem:CitySubdivisionName>{SUPPLIER_PROVINCE_NAME_}</tem:CitySubdivisionName>
-                                                <tem:CityName>{SUPPLIER_CITY_NAME_}</tem:CityName>
-                                                <tem:CountryName>{SUPPLIER_COUNTRY_NAME_}</tem:CountryName>
-                                            </tem:Signature>
-                                            <tem:DespatchSupplierParty>
-                                                <tem:WebsiteURI>{SUPPLIER_WEB_ADDRESS_}</tem:WebsiteURI>
-                                                <tem:ID>{EDOKSIS_VKN_}</tem:ID>
-                                                <tem:IDScheme>{IDENTIFICATION_SCHEME_}</tem:IDScheme>
-                                                <tem:Name>{SUPPLIER_NAME_}</tem:Name>
-                                                <tem:PostalAddressID>{SUPPLIER_ADDRESS_ID_}</tem:PostalAddressID>
-                                                <tem:StreetName>{SUPPLIER_STREET_NAME_}</tem:StreetName>
-                                                <tem:BuildingNumber>{SUPPLIER_BUILDING_NUMBER_}</tem:BuildingNumber>
-                                                <tem:CitySubdivisionName>{SUPPLIER_PROVINCE_NAME_}</tem:CitySubdivisionName>
-                                                <tem:CityName>{SUPPLIER_CITY_NAME_}</tem:CityName>
-                                                <tem:PostalZone>{SUPPLIER_POSTAL_CODE_}</tem:PostalZone>
-                                                <tem:CountryName>{SUPPLIER_COUNTRY_NAME_}</tem:CountryName>
-                                                <tem:TaxSchemeName>{SUPPLIER_TAX_OFFICE_}</tem:TaxSchemeName>
-                                                <tem:Telephone>{SUPPLIER_PHONE_}</tem:Telephone>
-                                                <tem:Telefax>{SUPPLIER_FAX_}</tem:Telefax>
-                                                <tem:ElectronicMail>{SUPPLIER_EMAIL_}</tem:ElectronicMail>
-                                            </tem:DespatchSupplierParty>
-                                            <tem:DeliveryCustomerParty>
-                                                <tem:WebsiteURI>{deliverycustomerparty_websiteuri_}</tem:WebsiteURI>
-                                                <tem:ID>{deliverycustomerparty_id_}</tem:ID>
-                                                <tem:IDScheme>{IDENTIFICATION_SCHEME_}</tem:IDScheme>
-                                                <tem:Name>{deliverycustomerparty_name_}</tem:Name>
-                                                <tem:PostalAddressID>{deliverycustomerparty_postaladdressid_}</tem:PostalAddressID>
-                                                <tem:StreetName>{deliverycustomerparty_streetname_}</tem:StreetName>
-                                                <tem:BuildingNumber>{deliverycustomerparty_buildingnumber_}</tem:BuildingNumber>
-                                                <tem:CitySubdivisionName>{deliverycustomerparty_citysubdivisionname_}</tem:CitySubdivisionName>
-                                                <tem:CityName>{deliverycustomerparty_cityname_}</tem:CityName>
-                                                <tem:PostalZone>{deliverycustomerparty_postalzone_}</tem:PostalZone>
-                                                <tem:CountryName>{deliverycustomerparty_countryname_}</tem:CountryName>
-                                                <tem:TaxSchemeName>{deliverycustomerparty_taxschemename_}</tem:TaxSchemeName>
-                                                <tem:Telephone>{deliverycustomerparty_telephone_}</tem:Telephone>
-                                                <tem:Telefax>{deliverycustomerparty_telefax_}</tem:Telefax>
-                                                <tem:ElectronicMail>{deliverycustomerparty_electronicmail_}</tem:ElectronicMail>
-                                            </tem:DeliveryCustomerParty>
-                                            <tem:Shipment>
-                                                <tem:ID>{shipment_id_}</tem:ID>
-                                                <tem:LicensePlateID>{shipment_licenseplateid_}</tem:LicensePlateID>
-                                                <tem:LicensePlateIDScheme>{shipment_licenseplateidscheme_}</tem:LicensePlateIDScheme>
-                                                <tem:PartyIdentificationID>{shipment_partyidentificationid_}</tem:PartyIdentificationID>
-                                                <tem:PartyIdentificationIDScheme>{IDENTIFICATION_SCHEME_}</tem:PartyIdentificationIDScheme>
-                                                <tem:PartyNameName>{shipment_partynamename_}</tem:PartyNameName>
-                                                <tem:PostalAddressID>{shipment_postaladdressid_}</tem:PostalAddressID>
-                                                <tem:StreetName>{shipment_streetname_}</tem:StreetName>
-                                                <tem:BuildingNumber>{shipment_buildingnumber_}</tem:BuildingNumber>
-                                                <tem:CitySubdivisionName>{shipment_citysubdivisionname_}</tem:CitySubdivisionName>
-                                                <tem:CityName>{shipment_cityname_}</tem:CityName>
-                                                <tem:PostalZone>{shipment_postalzone_}</tem:PostalZone>
-                                                <tem:CountryName>{shipment_countryname_}</tem:CountryName>
-                                                <tem:ActualDespatchDate>{shipment_actualdespatchdate_}</tem:ActualDespatchDate>
-                                                <tem:ActualDespatchTime>{shipment_actualdespatchtime_}</tem:ActualDespatchTime>
-                                            </tem:Shipment>
-                                            <tem:DespatchLine>{despatch_lines_}</tem:DespatchLine>
-                                        </tem:despatch>
-                                        <tem:gonderenVkn>{EDOKSIS_VKN_}</tem:gonderenVkn>
-                                        <tem:gonderenAlias>{SUPPLIER_ALIAS_}</tem:gonderenAlias>
-                                        <tem:aliciVkn>{deliverycustomerparty_id_}</tem:aliciVkn>
-                                        <tem:aliciAlias>{customer_alias_}</tem:aliciAlias>
-                                        <tem:erpNo>{shipment_id_}</tem:erpNo>
-                                    </tem:IrsaliyeGonderim>
-                                </tem:Belgeler>
-                            </tem:IrsaliyeYapisal>
-                        </tem:IrsaliyeZarfGonderYapisal>
-                    </soap:Body>
-                </soap:Envelope>
-                '''
+                                            <tem:PartyIdentificationID>{EDOKSIS_VKN_}</tem:PartyIdentificationID>
+                                            <tem:PartyIdentificationScheme>{IDENTIFICATION_SCHEME_}</tem:PartyIdentificationScheme>
+                                            <tem:StreetName>{SUPPLIER_STREET_NAME_}</tem:StreetName>
+                                            <tem:CitySubdivisionName>{SUPPLIER_PROVINCE_NAME_}</tem:CitySubdivisionName>
+                                            <tem:CityName>{SUPPLIER_CITY_NAME_}</tem:CityName>
+                                            <tem:CountryName>{SUPPLIER_COUNTRY_NAME_}</tem:CountryName>
+                                        </tem:Signature>
+                                        <tem:DespatchSupplierParty>
+                                            <tem:WebsiteURI>{SUPPLIER_WEB_ADDRESS_}</tem:WebsiteURI>
+                                            <tem:ID>{EDOKSIS_VKN_}</tem:ID>
+                                            <tem:IDScheme>{IDENTIFICATION_SCHEME_}</tem:IDScheme>
+                                            <tem:Name>{SUPPLIER_NAME_}</tem:Name>
+                                            <tem:PostalAddressID>{SUPPLIER_ADDRESS_ID_}</tem:PostalAddressID>
+                                            <tem:StreetName>{SUPPLIER_STREET_NAME_}</tem:StreetName>
+                                            <tem:BuildingNumber>{SUPPLIER_BUILDING_NUMBER_}</tem:BuildingNumber>
+                                            <tem:CitySubdivisionName>{SUPPLIER_PROVINCE_NAME_}</tem:CitySubdivisionName>
+                                            <tem:CityName>{SUPPLIER_CITY_NAME_}</tem:CityName>
+                                            <tem:PostalZone>{SUPPLIER_POSTAL_CODE_}</tem:PostalZone>
+                                            <tem:CountryName>{SUPPLIER_COUNTRY_NAME_}</tem:CountryName>
+                                            <tem:TaxSchemeName>{SUPPLIER_TAX_OFFICE_}</tem:TaxSchemeName>
+                                            <tem:Telephone>{SUPPLIER_PHONE_}</tem:Telephone>
+                                            <tem:Telefax>{SUPPLIER_FAX_}</tem:Telefax>
+                                            <tem:ElectronicMail>{SUPPLIER_EMAIL_}</tem:ElectronicMail>
+                                        </tem:DespatchSupplierParty>
+                                        <tem:DeliveryCustomerParty>
+                                            <tem:WebsiteURI>{deliverycustomerparty_websiteuri_}</tem:WebsiteURI>
+                                            <tem:ID>{deliverycustomerparty_id_}</tem:ID>
+                                            <tem:IDScheme>{IDENTIFICATION_SCHEME_}</tem:IDScheme>
+                                            <tem:Name>{deliverycustomerparty_name_}</tem:Name>
+                                            <tem:PostalAddressID>{deliverycustomerparty_postaladdressid_}</tem:PostalAddressID>
+                                            <tem:StreetName>{deliverycustomerparty_streetname_}</tem:StreetName>
+                                            <tem:BuildingNumber>{deliverycustomerparty_buildingnumber_}</tem:BuildingNumber>
+                                            <tem:CitySubdivisionName>{deliverycustomerparty_citysubdivisionname_}</tem:CitySubdivisionName>
+                                            <tem:CityName>{deliverycustomerparty_cityname_}</tem:CityName>
+                                            <tem:PostalZone>{deliverycustomerparty_postalzone_}</tem:PostalZone>
+                                            <tem:CountryName>{deliverycustomerparty_countryname_}</tem:CountryName>
+                                            <tem:TaxSchemeName>{deliverycustomerparty_taxschemename_}</tem:TaxSchemeName>
+                                            <tem:Telephone>{deliverycustomerparty_telephone_}</tem:Telephone>
+                                            <tem:Telefax>{deliverycustomerparty_telefax_}</tem:Telefax>
+                                            <tem:ElectronicMail>{deliverycustomerparty_electronicmail_}</tem:ElectronicMail>
+                                        </tem:DeliveryCustomerParty>
+                                        <tem:Shipment>
+                                            <tem:ID>{shipment_id_}</tem:ID>
+                                            <tem:LicensePlateID>{shipment_licenseplateid_}</tem:LicensePlateID>
+                                            <tem:LicensePlateIDScheme>{shipment_licenseplateidscheme_}</tem:LicensePlateIDScheme>
+                                            <tem:PartyIdentificationID>{shipment_partyidentificationid_}</tem:PartyIdentificationID>
+                                            <tem:PartyIdentificationIDScheme>{IDENTIFICATION_SCHEME_}</tem:PartyIdentificationIDScheme>
+                                            <tem:PartyNameName>{shipment_partynamename_}</tem:PartyNameName>
+                                            <tem:PostalAddressID>{shipment_postaladdressid_}</tem:PostalAddressID>
+                                            <tem:StreetName>{shipment_streetname_}</tem:StreetName>
+                                            <tem:BuildingNumber>{shipment_buildingnumber_}</tem:BuildingNumber>
+                                            <tem:CitySubdivisionName>{shipment_citysubdivisionname_}</tem:CitySubdivisionName>
+                                            <tem:CityName>{shipment_cityname_}</tem:CityName>
+                                            <tem:PostalZone>{shipment_postalzone_}</tem:PostalZone>
+                                            <tem:CountryName>{shipment_countryname_}</tem:CountryName>
+                                            <tem:ActualDespatchDate>{shipment_actualdespatchdate_}</tem:ActualDespatchDate>
+                                            <tem:ActualDespatchTime>{shipment_actualdespatchtime_}</tem:ActualDespatchTime>
+                                        </tem:Shipment>
+                                        <tem:DespatchLine>{despatch_lines_}</tem:DespatchLine>
+                                    </tem:despatch>
+                                    <tem:gonderenVkn>{EDOKSIS_VKN_}</tem:gonderenVkn>
+                                    <tem:gonderenAlias>{SUPPLIER_ALIAS_}</tem:gonderenAlias>
+                                    <tem:aliciVkn>{deliverycustomerparty_id_}</tem:aliciVkn>
+                                    <tem:aliciAlias>{customer_alias_}</tem:aliciAlias>
+                                    <tem:erpNo>{shipment_id_}</tem:erpNo>
+                                </tem:IrsaliyeGonderim>
+                            </tem:Belgeler>
+                        </tem:IrsaliyeYapisal>
+                    </tem:IrsaliyeZarfGonderYapisal>
+                </soap:Body>
+            </soap:Envelope>
+            '''
 
-                request_xml_ = re.sub(r"\s+(?=<)", "", request_xml_).encode("utf8")
-                headers_ = {
-                    "Content-Type": "application/soap+xml; charset=utf-8",
-                    "Content-Length": str(len(request_xml_)),
-                    "SOAPAction": "IrsaliyeZarfGonderYapisal"
-                }
+            request_xml_ = request_xml_.strip()
+            if len(request_xml_) > EDOKSIS_XML_SIZE_:
+                raise APIError("multi issue request too long")
 
-                response_ = requests.post(EDOKSIS_URL_, data=request_xml_, headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
-                root_ = ElementTree.fromstring(response_.content)
+            match_ = re.search(r'^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$', request_xml_)
+            if match_:
+                raise APIError("invalid multi issue request")
 
-                for tag in root_.iter(f"{tag_prefix_}Sonuc"):
-                    if not tag.text:
-                        raise EdoksisError("!!! missing sonuc tag")
-                    if tag.text == "1":
-                        for tag in root_.iter(f"{tag_prefix_}IRsaliyeNo"):
+            headers_ = {
+                "Content-Type": "application/soap+xml; charset=utf-8",
+                "Content-Length": str(len(request_xml_)),
+                "SOAPAction": "IrsaliyeZarfGonderYapisal"
+            }
+
+            response_ = requests.post(EDOKSIS_URL_, data=request_xml_.encode("utf-8"), headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
+            root_ = ElementTree.fromstring(response_.content)
+
+            for tag in root_.iter(f"{tag_prefix_}Sonuc"):
+                if not tag.text:
+                    raise APIError("!!! missing sonuc tag")
+                if tag.text == "1":
+                    for tag in root_.iter(f"{tag_prefix_}IRsaliyeNo"):
+                        if not tag.text:
+                            raise APIError("!!! missing irsaliyeno tag")
+                        waybill_no_ = str(tag.text)
+                        for tag in root_.iter(f"{tag_prefix_}IrsaliyeETTN"):
                             if not tag.text:
-                                raise EdoksisError("!!! missing irsaliyeno tag")
-                            waybill_no_ = str(tag.text)
-                            for tag in root_.iter(f"{tag_prefix_}IrsaliyeETTN"):
-                                if not tag.text:
-                                    raise EdoksisError("!!! missing irsaliyeettn tag")
-                                waybill_ettn_ = str(tag.text)
-                    else:
-                        for tag in root_.iter(f"{tag_prefix_}Mesaj"):
-                            if not tag.text:
-                                raise EdoksisError("!!! missing mesaj tag")
-                            raise EdoksisError(str(tag.text))
+                                raise APIError("!!! missing irsaliyeettn tag")
+                            waybill_ettn_ = str(tag.text)
+                else:
+                    for tag in root_.iter(f"{tag_prefix_}Mesaj"):
+                        if not tag.text:
+                            raise APIError("!!! missing mesaj tag")
+                        raise APIError(str(tag.text))
 
-                process_date_ = Misc().get_now_f()
+            process_date_ = Misc().get_now_f()
 
-                set_ = {}
-                set_["shp_id"] = shipment_id_
-                set_["shp_date"] = shp_date_
-                set_["shp_acc_no"] = shipment_account_no_
-                set_["shp_carrier_name"] = shipment_partynamename_
-                set_["shp_carrier_id"] = shipment_partyidentificationid_
-                set_["shp_vehicle_id"] = shipment_licenseplateid_
-                set_["shp_notes"] = notes_
-                set_["shp_wayb_no"] = waybill_no_
-                set_["shp_wayb_date"] = process_date_
-                set_["shp_wayb_ettn"] = waybill_ettn_
-                set_["_modified_at"] = process_date_
-                set_["_modified_by"] = email_
-                session_db_[shipment_collection_].update_one(shipment_filter_, {"$set": set_})
+            set_ = {}
+            set_["shp_id"] = shipment_id_
+            set_["shp_date"] = shp_date_
+            set_["shp_acc_no"] = shipment_account_no_
+            set_["shp_carrier_name"] = shipment_partynamename_
+            set_["shp_carrier_id"] = shipment_partyidentificationid_
+            set_["shp_vehicle_id"] = shipment_licenseplateid_
+            set_["shp_notes"] = notes_
+            set_["shp_wayb_no"] = waybill_no_
+            set_["shp_wayb_date"] = process_date_
+            set_["shp_wayb_ettn"] = waybill_ettn_
+            set_["_modified_at"] = process_date_
+            set_["_modified_by"] = email_
+            Mongo().db_[shipment_collection_].update_one(shipment_filter_, {"$set": set_})
 
-                set_ = {}
-                set_["dnn_wayb_id"] = shipment_id_
-                set_["dnn_wayb_no"] = waybill_no_
-                set_["dnn_wayb_date"] = process_date_
-                set_["dnn_wayb_ettn"] = waybill_ettn_
-                set_["dnn_status"] = delivery_set_status_
-                set_["_modified_at"] = process_date_
-                set_["_modified_by"] = email_
-                deliveries_ = session_db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
-
-                content_ += f"<br />{shipment_id_}: OK"
-                session_.commit_transaction()
-
-            except EdoksisError as exc_:
-                err_ = True
-                content_ += f"<br />{shipment_id_}: {str(exc_)}"
-                session_.abort_transaction()
-
-            except pymongo.errors.PyMongoError as exc_:
-                err_ = True
-                content_ += f"<br />{shipment_id_}: {str(exc_)}"
-                session_.abort_transaction()
-
-            except Exception as exc_:
-                err_ = True
-                content_ += f"<br />{shipment_id_}: {str(exc_)}"
-                session_.abort_transaction()
+            set_ = {}
+            set_["dnn_wayb_id"] = shipment_id_
+            set_["dnn_wayb_no"] = waybill_no_
+            set_["dnn_wayb_date"] = process_date_
+            set_["dnn_wayb_ettn"] = waybill_ettn_
+            set_["dnn_status"] = delivery_set_status_
+            set_["_modified_at"] = process_date_
+            set_["_modified_by"] = email_
+            deliveries_ = Mongo().db_[delivery_collection_].update_many(delivery_filter_, {"$set": set_})
 
         files_ = []
         if not err_:
@@ -1046,38 +991,27 @@ def multi_issue_f():
                 "ids": object_ids_
             })
             if not get_waybill_f_["result"]:
-                raise APIError(get_waybill_f_["msg"])
+                raise APIError(get_waybill_f_["exc"])
             files_ = get_waybill_f_["files"] if "files" in get_waybill_f_ and len(get_waybill_f_["files"]) > 0 else []
 
-        res_ = {"result": True, "content": content_, "files": files_}
+    except pymongo.errors.PyMongoError as exc__:
+        status_code_, exc_ = 500, exc__
 
-        response_ = make_response(res_, 200)
+    except AuthError as exc__:
+        status_code_, exc_ = 401, exc__
 
-    except pymongo.errors.PyMongoError as exc_:
-        content_ += f"<br />Db Error: {str(exc_)}"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(res_, 500)
+    except APIError as exc__:
+        status_code_, exc_ = 400, exc__
 
-    except AuthError as exc_:
-        content_ += f"<br />Auth Error: {str(exc_)}"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(content_, 401)
-
-    except APIError as exc_:
-        content_ += f"<br />API Error: {str(exc_)}"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(content_, 400)
-
-    except Exception as exc_:
-        content_ += f"<br />Exception: {str(exc_)}"
-        res_ = {"result": False, "content": content_}
-        Misc().exception_show_f(exc_)
-        response_ = make_response(content_, 500)
+    except Exception as exc__:
+        status_code_, exc_ = 500, exc__
 
     finally:
+        ok_ = status_code_ == 200
+        if not ok_:
+            Misc().exception_show_f(exc_)
+        res_ = {"result": ok_, "content": "OK" if ok_ else escape(exc_), "files": files_}
+        response_ = make_response(res_, status_code_)
         response_.mimetype = "application/json"
         return response_
 

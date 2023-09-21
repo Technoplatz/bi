@@ -30,7 +30,7 @@
       "title": "Carrier Name",
       "description": "Carrier name or driver name surname",
       "placeholder": "Carrier or driver Name",
-      "minLength": 2,
+      "minLength": 1,
       "maxLength": 32
     },
     "shp_carrier_id": {
@@ -38,18 +38,18 @@
       "title": "Carrier Tax/ID No",
       "description": "Carrier tax no or driver id",
       "placeholder": "Carrier Tax/Id No",
-      "minLength": 10,
-      "maxLength": 12,
-      "pattern": "^[0-9]{10,12}$"
+      "minLength": 1,
+      "maxLength": 16,
+      "pattern": "^[0-9]{1,16}$"
     },
     "shp_vehicle_id": {
       "bsonType": "string",
       "title": "Vehicle Plate",
       "description": "Vehicle plate number",
       "placeholder": "Vehicle plate number",
-      "minLength": 6,
+      "minLength": 1,
       "maxLength": 16,
-      "pattern": "^[A-Za-z0-9 ]{6,16}$",
+      "pattern": "^[A-Za-z0-9 ]{1,16}$",
       "caseType": "uppercase"
     },
     "shp_notes": {

@@ -182,12 +182,9 @@ export class QueryPage implements OnInit {
       this.schemevis = "show";
       this.editor.focus();
     } else {
-      this.refresh_data(0).then(() => {
-        this.aggregated_ ? this.misc.doMessage("changes were discarded", "warning") : null;
-      }).finally(() => {
-        this.schemevis = "hide";
-        this.aggregated_ = null;
-      });
+      this.aggregated_ ? this.misc.doMessage("changes were discarded", "warning") : null;
+      this.schemevis = "hide";
+      this.aggregated_ = null;
     }
   }
 

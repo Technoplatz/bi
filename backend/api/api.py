@@ -3142,12 +3142,12 @@ class Crud:
         """
         docstring is in progress
         """
+        exc_, res_ = None, {}
         try:
             collection_id_ = obj["collection"]
             user_ = obj["userindb"] if "userindb" in obj else None
             match_ = obj["match"] if "match" in obj else None
             actionix_ = obj["actionix"] if "actionix" in obj else None
-
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             if not email_:
                 raise AppException("user is not allowed")
@@ -3228,16 +3228,13 @@ class Crud:
                 if uniques_ and len(uniques_) > 1:
                     raise AppException(f"{(','.join(unique_))} must be unique in selection")
 
-            response_content_ = "Action Result:"
             count_ = 0
-
             if set_:
                 set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
                 update_many_ = Mongo().db_[collection_].update_many(get_filtered_, set_)
                 count_ = update_many_.matched_count if update_many_.matched_count > 0 else 0
                 if count_ == 0:
                     raise PassException("no rows affected due to the match criteria")
-                response_content_ += f"<br />{count_} record(s) were updated."
 
             files_ = []
             for api_ in apis_:
@@ -3281,20 +3278,14 @@ class Crud:
                 json_["email"] = email_
 
                 response_ = requests.post(url_, json=json.loads(JSONEncoder().encode(json_)), headers=headers_, timeout=60)
-                if not response_:
-                    print_(f"!!! action api reponse error: {id_}")
-                    continue
-
                 res_ = json.loads(response_.content)
                 res_content_ = res_["content"] if "content" in res_ else ""
                 res_files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
                 if response_.status_code != 200:
-                    response_content_ += f"{res_content_}"
-                    raise AppException(f"{response_content_}")
+                    raise AppException(f"{res_content_}")
 
                 if res_files_:
                     files_ += res_files_
-                response_content_ += f"{res_content_}"
 
             if notify_:
                 subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
@@ -3317,34 +3308,33 @@ class Crud:
                 "collection": collection_,
                 "op": "action",
                 "user": email_,
-                "document": {"doc": doc_, "match": match_, "content": response_content_}
+                "document": {"doc": doc_, "match": match_}
             })
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            return {"result": True, "count": count_, "content": response_content_}
+            res_ = {"result": True, "count": count_, "content": "OK"}
 
-        except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_id_,
-                "op": "action",
-                "user": email_,
-                "document": str(exc)
-            })
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            exc_ = Misc().mongo_error_f(exc__)
 
-        except AppException as exc:
-            return Misc().app_exception_f(exc)
+        except AppException as exc__:
+            exc_ = Misc().app_exception_f(exc__)
 
-        except PassException as exc:
-            return Misc().pass_exception_f(exc)
+        except PassException as exc__:
+            exc_ = Misc().pass_exception_f(exc__)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc__:
+            exc_ = Misc().api_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc__:
+            exc_ = Misc().exception_f(exc__)
+
+        finally:
+            if exc_:
+                res_ = exc_
+            return res_
+
 
     def insert_f(self, obj):
         """

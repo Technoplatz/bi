@@ -87,12 +87,7 @@
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping type",
-      "enum": [
-        "Air",
-        "Sea",
-        "Truck",
-        "Other"
-      ],
+      "enum": ["Air", "Sea", "Truck", "Other"],
       "minLength": 0,
       "maxLength": 8,
       "pattern": "^[A-Za-z]{0,8}$"
@@ -138,7 +133,8 @@
       "minLength": 7,
       "maxLength": 16,
       "pattern": "^[A-Z0-9-]{7,16}$",
-      "replacement": [{
+      "replacement": [
+        {
           "find": "-",
           "replace": ""
         },
@@ -162,7 +158,40 @@
       "description": "Product Group",
       "minLength": 0,
       "maxLength": 32,
-      "pattern": "^[A-Za-z&/ ]{0,32}$"
+      "pattern": "^[A-Za-z&/ ]{0,32}$",
+      "enum": [
+        "CDT",
+        "CNB",
+        "CSP",
+        "DSK",
+        "DSW",
+        "FOC",
+        "IPH",
+        "IPP",
+        "LEP",
+        "LPT",
+        "MOB",
+        "MON",
+        "OPS",
+        "OPT",
+        "PAD",
+        "PCM",
+        "PNS",
+        "POP",
+        "PSV",
+        "PWS",
+        "SRV",
+        "STR",
+        "WSD",
+        "WSN",
+        "XHC",
+        "XHE",
+        "XHO",
+        "XHR",
+        "XHS",
+        "XSP",
+        "OTH"
+      ]
     },
     "dnn_length": {
       "bsonType": "number",
@@ -288,7 +317,6 @@
     "dnn_status",
     "dnn_ship_type",
     "dnn_prd_no",
-    "dnn_prd_group",
     "dnn_qty",
     "dnn_length",
     "dnn_width",
@@ -298,59 +326,26 @@
     "dnn_amount"
   ],
   "index": [
-    [
-      "dnn_acc_no"
-    ],
-    [
-      "dnn_status"
-    ],
-    [
-      "dnn_status",
-      "dnn_no",
-      "dnn_line_no"
-    ],
-    [
-      "dnn_status",
-      "dnn_date"
-    ],
-    [
-      "dnn_man_no"
-    ],
-    [
-      "dnn_odi_no",
-      "dnn_odi_sub_no"
-    ],
-    [
-      "dnn_order_no",
-      "dnn_prd_no"
-    ],
-    [
-      "dnn_order_no",
-      "dnn_prd_no",
-      "dnn_qty"
-    ],
-    [
-      "dnn_acc_no",
-      "dnn_status"
-    ],
-    [
-      "dnn_ship_type"
-    ]
+    ["dnn_acc_no"],
+    ["dnn_status"],
+    ["dnn_status", "dnn_no", "dnn_line_no"],
+    ["dnn_status", "dnn_date"],
+    ["dnn_man_no"],
+    ["dnn_odi_no", "dnn_odi_sub_no"],
+    ["dnn_order_no", "dnn_prd_no"],
+    ["dnn_order_no", "dnn_prd_no", "dnn_qty"],
+    ["dnn_acc_no", "dnn_status"],
+    ["dnn_ship_type"]
   ],
-  "unique": [
-    [
-      "dnn_no",
-      "dnn_line_no"
-    ]
-  ],
+  "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
-    "dnn_status": 1,
-    "dnn_no": 1,
-    "dnn_line_no": 1
+    "_modified_at": -1
   },
-  "parents": [{
+  "parents": [
+    {
       "collection": "ordino",
-      "match": [{
+      "match": [
+        {
           "key": "dnn_odi_no",
           "value": "odi_no"
         },
@@ -359,36 +354,36 @@
           "value": "odi_sub_no"
         }
       ],
-      "filter": [{
-        "key": "odi_closed",
-        "op": "ne",
-        "value": true
-      }],
-      "get": [
-        "odi_no",
-        "odi_sub_no",
-        "odi_customs"
-      ]
+      "filter": [
+        {
+          "key": "odi_closed",
+          "op": "ne",
+          "value": true
+        }
+      ],
+      "get": ["odi_no", "odi_sub_no", "odi_customs"]
     },
     {
       "collection": "manifest",
-      "match": [{
-        "key": "dnn_man_no",
-        "value": "man_no"
-      }],
-      "filter": [{
-        "key": "man_closed",
-        "op": "eq",
-        "value": false
-      }],
-      "get": [
-        "man_no",
-        "man_opening_date"
-      ]
+      "match": [
+        {
+          "key": "dnn_man_no",
+          "value": "man_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "man_closed",
+          "op": "eq",
+          "value": false
+        }
+      ],
+      "get": ["man_no", "man_opening_date"]
     },
     {
       "collection": "account",
-      "match": [{
+      "match": [
+        {
           "key": "dnn_acc_no",
           "value": "acc_no"
         },
@@ -398,128 +393,141 @@
           "exclude": true
         }
       ],
-      "filter": [{
-        "key": "acc_is_active",
-        "op": "eq",
-        "value": true
-      }],
-      "get": [
-        "acc_no",
-        "acc_name"
-      ]
+      "filter": [
+        {
+          "key": "acc_is_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "get": ["acc_no", "acc_name"]
     }
   ],
-  "actions": [{
+  "actions": [
+    {
       "id": "stby-to-open",
       "title": "Standby to Open",
       "enabled": true,
-      "match": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "00-Standby"
-      }],
-      "set": [{
-        "key": "dnn_status",
-        "value": "00-Open"
-      }],
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Standby"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "00-Open"
+        }
+      ],
       "one_click": true,
       "icon": "megaphone",
       "uniqueness": false,
       "unique": [],
-      "_tags": [
-        "#Managers",
-        "#Administrators"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "New DNs uploaded",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Standby to 00-Open at once.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-        "filter": [{
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "00-Open"
-        }]
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "00-Open"
+          }
+        ]
       }
     },
     {
       "id": "open-to-stby",
       "title": "Open to Standby",
       "enabled": true,
-      "match": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "00-Open"
-      }],
-      "set": [{
-        "key": "dnn_status",
-        "value": "00-Standby"
-      }],
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "00-Standby"
+        }
+      ],
       "one_click": true,
       "icon": "time",
       "uniqueness": false,
       "unique": [],
-      "_tags": [
-        "#Managers",
-        "#Administrators"
-      ],
+      "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
         "subject": "Open DNs returned to Standby",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Open to 00-Standby at once.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-        "filter": [{
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "00-Standby"
-        }]
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "00-Standby"
+          }
+        ]
       }
     },
     {
       "id": "rtd",
       "title": "ReadyToBeDelivered",
       "enabled": true,
-      "match": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "50-OnTheTouchpoint"
-      }],
-      "set": [{
-        "key": "dnn_status",
-        "value": "60-ReadyToBeDelivered"
-      }],
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "50-OnTheTouchpoint"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
       "one_click": false,
       "icon": "flag",
       "uniqueness": false,
       "unique": [],
-      "_tags": [
-        "#Technoplatz"
-      ],
+      "_tags": ["#Technoplatz"],
       "notification": {
         "notify": true,
         "subject": "DNs ready to be delivered",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs is ready to be delivered.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-        "filter": [{
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "60-ReadyToBeDelivered"
-        }]
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "60-ReadyToBeDelivered"
+          }
+        ]
       }
     },
     {
       "id": "shipment",
       "title": "Shipment",
       "enabled": true,
-      "match": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "60-ReadyToBeDelivered"
-      }],
-      "set": [{
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
+      "set": [
+        {
           "key": "dnn_status",
           "value": "70-Delivered"
         },
@@ -552,41 +560,27 @@
           "value": null
         }
       ],
-      "required": [
-        "dnn_status",
-        "dnn_wayb_id",
-        "dnn_wayb_date",
-        "dnn_wayb_cname",
-        "dnn_wayb_cid",
-        "dnn_wayb_vid"
-      ],
-      "readonly": [
-        "dnn_status",
-        "dnn_wayb_id",
-        "dnn_wayb_no",
-        "dnn_wayb_ettn"
-      ],
+      "required": ["dnn_status", "dnn_wayb_id", "dnn_wayb_date", "dnn_wayb_cname", "dnn_wayb_cid", "dnn_wayb_vid"],
+      "readonly": ["dnn_status", "dnn_wayb_id", "dnn_wayb_no", "dnn_wayb_ettn"],
       "one_click": false,
       "icon": "bus",
       "uniqueness": true,
-      "unique": [
-        "dnn_acc_no"
-      ],
-      "_tags": [
-        "#Technoplatz"
-      ],
-      "apis": [{
-        "id": "api-edoksis-issue",
-        "enabled": true,
-        "url": "http://172.18.0.8/issue",
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "method": "post",
-        "map": {
-          "key": "dnn_wayb_id"
+      "unique": ["dnn_acc_no"],
+      "_tags": ["#Technoplatz"],
+      "apis": [
+        {
+          "id": "api-edoksis-issue",
+          "enabled": true,
+          "url": "http://172.18.0.8/issue",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "map": {
+            "key": "dnn_wayb_id"
+          }
         }
-      }],
+      ],
       "notification": {
         "notify": true,
         "subject": "DNs shipped",
@@ -609,47 +603,104 @@
           "dnn_wayb_no",
           "dnn_wayb_ettn"
         ],
-        "filter": [{
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "70-Delivered"
-        }]
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "70-Delivered"
+          }
+        ]
       }
     }
   ],
   "links": [],
-  "triggers": [{
-    "name": "Amounts updater",
-    "enabled": true,
-    "operations": [
-      "update",
-      "insert"
-    ],
-    "changes": [{
-        "key": "dnn_qty",
-        "op": "gte",
-        "value": 0
-      },
-      {
-        "key": "dnn_unit_price",
-        "op": "gte",
-        "value": 0
-      }
-    ],
-    "targets": [{
-      "collection": "delivery",
-      "match": [{
-        "key": "_id",
-        "value": "_id"
-      }],
-      "filter": [],
-      "set": [{
-        "key": "dnn_amount",
-        "value": "dnn_qty * dnn_unit_price"
-      }],
-      "upsert": false
-    }]
-  }],
+  "triggers": [
+    {
+      "name": "Amounts updater",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        {
+          "key": "dnn_qty",
+          "op": "gte",
+          "value": 0
+        },
+        {
+          "key": "dnn_unit_price",
+          "op": "gte",
+          "value": 0
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "_id",
+              "value": "_id"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "dnn_amount",
+              "value": "dnn_qty * dnn_unit_price"
+            }
+          ],
+          "upsert": false
+        }
+      ]
+    },
+    {
+      "name": "Product updater",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        {
+          "key": "dnn_prd_no",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "dnn_prd_description",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "dnn_prd_group",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "product",
+          "match": [
+            {
+              "key": "prd_no",
+              "value": "dnn_prd_no"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "prd_no",
+              "value": "dnn_prd_no"
+            },
+            {
+              "key": "prd_description",
+              "value": "dnn_prd_description"
+            },
+            {
+              "key": "prd_group",
+              "value": "dnn_prd_group"
+            }
+          ],
+          "upsert": true
+        }
+      ]
+    }
+  ],
   "views": {
     "sv-git-master": {
       "title": "GiT Master",
@@ -657,29 +708,25 @@
       "priority": 2010,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "in",
-        "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
-      "data_excluded": [
-        "odi_sub_no",
-        "odi_no",
-        "inv_dnn_no"
+      "data_excluded": ["odi_sub_no", "odi_no", "inv_dnn_no"],
+      "data_index": ["acc_nick_name"],
+      "data_columns": ["dnn_status"],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
       ],
-      "data_index": [
-        "acc_nick_name"
-      ],
-      "data_columns": [
-        "dnn_status"
-      ],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -696,22 +743,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#ea5545",
-        "#f46a9b",
-        "#ef9b20",
-        "#edbf33",
-        "#ede15b",
-        "#bdcf32",
-        "#87bc45",
-        "#27aeef",
-        "#b33dc6"
-      ],
+      "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
       "scheduled": true,
       "scheduled_cron": "30 15 * * mon,tue",
-      "_tags": [
-        "#Technoplatz"
-      ]
+      "_tags": ["#Technoplatz"]
     },
     "sv-git-buid": {
       "title": "Delivery BUId's",
@@ -719,25 +754,25 @@
       "priority": 2020,
       "enabled": false,
       "dashboard": false,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "in",
-        "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_bu_id"
+      "data_index": ["dnn_bu_id"],
+      "data_columns": ["dnn_status"],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
       ],
-      "data_columns": [
-        "dnn_status"
-      ],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -754,24 +789,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#0bb4ff",
-        "#50e991",
-        "#e6d800",
-        "#9b19f5",
-        "#ffa300",
-        "#dc0ab4",
-        "#b3d4ff",
-        "#e60049",
-        "#00bfa0"
-      ],
+      "chart_colors": ["#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#e60049", "#00bfa0"],
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "sv-dn-statuses": {
       "title": "Delivery Statuses",
@@ -779,23 +800,25 @@
       "priority": 2030,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "in",
-        "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "00-Standby,00-Open,10-OnTheWay,20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -812,24 +835,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#fd7f6f",
-        "#7eb0d5",
-        "#bd7ebe",
-        "#b2e061",
-        "#ffb55a",
-        "#ffee65",
-        "#beb9db",
-        "#fdcce5",
-        "#8bd3c7"
-      ],
+      "chart_colors": ["#fd7f6f", "#7eb0d5", "#bd7ebe", "#b2e061", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-00s": {
       "title": "00-Standby",
@@ -837,23 +846,25 @@
       "priority": 1000,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "00-Standby"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Standby"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -870,23 +881,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#bad7fb",
-        "#ffee65",
-        "#fdcce5",
-        "#8bd3c7",
-        "#b2e061",
-        "#ffb55a",
-        "#7eb0d5",
-        "#fd7f6f",
-        "#bd7ebe"
-      ],
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": [
-        "#Managers",
-        "#Administrators"
-      ]
+      "_tags": ["#Managers", "#Administrators"]
     },
     "fc-status-00": {
       "title": "00-Open",
@@ -894,23 +892,25 @@
       "priority": 1001,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "00-Open"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -927,24 +927,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#bad7fb",
-        "#ffee65",
-        "#fdcce5",
-        "#8bd3c7",
-        "#b2e061",
-        "#ffb55a",
-        "#7eb0d5",
-        "#fd7f6f",
-        "#bd7ebe"
-      ],
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-10": {
       "title": "10-OnTheWay",
@@ -952,23 +938,25 @@
       "priority": 1010,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "10-OnTheWay"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "10-OnTheWay"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -985,24 +973,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#bad7fb",
-        "#ffee65",
-        "#fdcce5",
-        "#8bd3c7",
-        "#b2e061",
-        "#ffb55a",
-        "#7eb0d5",
-        "#fd7f6f",
-        "#bd7ebe"
-      ],
+      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-20": {
       "title": "20-OnCustoms",
@@ -1010,23 +984,25 @@
       "priority": 1020,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "in",
-        "value": "20-OnCustoms"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "20-OnCustoms"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -1043,24 +1019,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#b2e061",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#bd7ebe",
-        "#ffb55a",
-        "#ffee65",
-        "#beb9db",
-        "#fdcce5",
-        "#8bd3c7"
-      ],
+      "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics"]
     },
     "fc-status-30": {
       "title": "30-OnCustomsProcess",
@@ -1068,23 +1030,25 @@
       "priority": 1030,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "30-OnCustomsProcess"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "30-OnCustomsProcess"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -1101,25 +1065,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#8bd3c7",
-        "#bd7ebe",
-        "#fdcce5",
-        "#ffee65",
-        "#e4e4e4",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics",
-        "#Touchpoint"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-40": {
       "title": "40-ClearanceCompleted",
@@ -1127,23 +1076,25 @@
       "priority": 1040,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "40-ClearanceCompleted"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "40-ClearanceCompleted"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -1160,25 +1111,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#fdcce5",
-        "#8bd3c7",
-        "#bd7ebe",
-        "#ffee65",
-        "#e4e4e4",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics",
-        "#Touchpoint"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-50": {
       "title": "50-OnTheTouchpoint",
@@ -1186,23 +1122,25 @@
       "priority": 1050,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "50-OnTheTouchpoint"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "50-OnTheTouchpoint"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": true,
       "data_excel": true,
       "data_csv": true,
@@ -1219,25 +1157,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#e4e4e4",
-        "#fdcce5",
-        "#8bd3c7",
-        "#bd7ebe",
-        "#ffee65",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "30 9,17 * 1-5 *",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Logistics",
-        "#Touchpoint"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
     },
     "fc-status-60": {
       "title": "60-ReadyToBeDelivered",
@@ -1245,23 +1168,25 @@
       "priority": 1060,
       "enabled": true,
       "dashboard": true,
-      "data_filter": [{
-        "key": "dnn_status",
-        "op": "eq",
-        "value": "60-ReadyToBeDelivered"
-      }],
+      "data_filter": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "60-ReadyToBeDelivered"
+        }
+      ],
       "data_sort": {
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": [
-        "dnn_status"
-      ],
+      "data_index": ["dnn_status"],
       "data_columns": [],
-      "data_values": [{
-        "key": "dnn_no",
-        "value": "count"
-      }],
+      "data_values": [
+        {
+          "key": "dnn_no",
+          "value": "count"
+        }
+      ],
       "data_json": false,
       "data_excel": true,
       "data_csv": false,
@@ -1278,24 +1203,10 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": [
-        "#d5d5d5",
-        "#fdcce5",
-        "#8bd3c7",
-        "#bd7ebe",
-        "#ffee65",
-        "#fd7f6f",
-        "#7eb0d5",
-        "#b2e061",
-        "#ffb55a"
-      ],
+      "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
-      "_tags": [
-        "#Managers",
-        "#Administrators",
-        "#Touchpoint"
-      ]
+      "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
     }
   },
   "fetchers": [],
