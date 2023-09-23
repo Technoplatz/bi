@@ -39,7 +39,7 @@ https://www.gnu.org/licenses.
         </ion-button>
         <h3>{{ subheader }}</h3>
         <h6>{{ count_ }} records [{{ que_scheduled_cron_ }}]</h6>
-        Shared with <span *ngIf="_tags">{{ _tags.join(",")}}</span><span *ngIf="!_tags">{{ 'nobody' | translate }}</span>
+        {{ query_url_ }}<br />Shared with <span *ngIf="_tags">{{ _tags.join(", ")}}</span><span *ngIf="!_tags">{{ 'nobody' | translate }}</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">

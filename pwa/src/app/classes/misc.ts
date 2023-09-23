@@ -247,8 +247,8 @@ export class Miscellaneous {
   async doMessage(msg: string, type: string) {
     type === "error" ? console.error(msg) : null;
     const typed: any = {
-      message: msg,
-      duration: 10000,
+      message: msg.toLowerCase(),
+      duration: type === "success" ? 3000 : 10000,
       cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
       buttons: [{
         side: "end",

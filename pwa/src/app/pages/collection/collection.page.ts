@@ -644,21 +644,17 @@ export class CollectionPage implements OnInit {
       key: key
     }).then((res: any) => {
       this.misc.copyToClipboard(res.copied).then(() => {
-        this.is_key_copying = false;
         this.is_key_copied = true;
+        this.searched[key].actived = false;
       }).catch((error: any) => {
-        console.error("not copied", key, error);
+        this.misc.doMessage(`${key} not copied: ${error}`, "error");
       }).finally(() => {
         setTimeout(() => {
-          this.is_key_copied = false;
           this.is_key_copying = false;
-          this.searched[key].actived = false;
         }, 1000);
       });
     }).catch((error: any) => {
-      this.is_key_copied = false;
       this.is_key_copying = false;
-      this.searched[key].actived = false;
       this.misc.doMessage(error, "error");
     });
   }

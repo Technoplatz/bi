@@ -30,7 +30,8 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-reorder-group disabled="false" *ngIf="ok; else loading" (ionItemReorder)="doReorder($event, fname)" class="ion-no-padding">
+<ion-reorder-group disabled="false" *ngIf="ok; else loading" (ionItemReorder)="doReorder($event, fname)"
+  class="ion-no-padding">
   <ion-item *ngIf="!field.manualAdd && (!data[fname] || data[fname]?.length == 0)" lines="none"
     class="ion-no-margin ion-no-padding">
     <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
@@ -55,10 +56,27 @@ https://www.gnu.org/licenses.
             </ion-select>
           </ng-template>
         </ion-col>
+        <!-- keyop -->
+        <ion-col *ngIf="type=='keyop'" size="4">
+          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}" mode="md"
+            placeholder="{{ 'Please select' | translate }}">
+            <ion-select-option *ngFor="let item of kovs" [value]="item.key">
+              {{ item.key }}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
+        <ion-col *ngIf="type=='keyop'" size="6.5">
+          <ion-select required="true" [(ngModel)]="data[fname][i].op" [ngModelOptions]="{standalone: true}" mode="md"
+            placeholder="{{ 'Please select' | translate }}">
+            <ion-select-option *ngFor="let item of keyop_" [value]="item.key">
+              {{ item.key }}
+            </ion-select-option>
+          </ion-select>
+        </ion-col>
         <!-- keyvalue -->
         <ion-col *ngIf="type=='keyvalue'" size="4">
-          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}"
-            mode="md" placeholder="{{ 'Please select' | translate }}">
+          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}" mode="md"
+            placeholder="{{ 'Please select' | translate }}">
             <ion-select-option *ngFor="let item of kovs" [value]="item.key">
               {{ item.key }}
             </ion-select-option>
@@ -71,16 +89,16 @@ https://www.gnu.org/licenses.
         </ion-col>
         <!-- keyopvalue -->
         <ion-col *ngIf="type=='keyopvalue'" size="4">
-          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}"
-            mode="md" placeholder="{{ 'Please select' | translate }}">
+          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}" mode="md"
+            placeholder="{{ 'Please select' | translate }}">
             <ion-select-option *ngFor="let item of kovs" [value]="item.key">
               {{ item.key }}
             </ion-select-option>
           </ion-select>
         </ion-col>
         <ion-col *ngIf="type=='keyopvalue'" size="3">
-          <ion-select required="true" [(ngModel)]="data[fname][i].op" [ngModelOptions]="{standalone: true}"
-            mode="md" placeholder="{{ 'operator' | translate }}">
+          <ion-select required="true" [(ngModel)]="data[fname][i].op" [ngModelOptions]="{standalone: true}" mode="md"
+            placeholder="{{ 'operator' | translate }}">
             <ion-select-option *ngFor="let f of filterops" [value]="f.value">
               {{ f.key | translate }}
             </ion-select-option>

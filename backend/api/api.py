@@ -279,7 +279,8 @@ class Misc:
             "decimals",
             "trueText",
             "falseText",
-            "caseType"
+            "caseType",
+            "query"
         ]
 
     def commands_f(self, command_, input_):
@@ -844,8 +845,28 @@ class Crud:
         """
         docstring is in progress
         """
-        fullpath_ = f"/app/_template/{schema_}.json"
-        return json.loads(open(fullpath_, "r", encoding="utf-8").read()) if schema_.startswith("_") and os.path.isfile(fullpath_) else False
+        res_ = None
+        try:
+            base_path_ = '/app/_template'
+            filename_ = f"{schema_}.json"
+            if not filename_.startswith("_"):
+                raise APIError("invalid schema")
+
+            fullpath_ = os.path.normpath(os.path.join(base_path_, filename_))
+            if not os.path.isfile(fullpath_):
+                raise APIError("schema not found")
+
+            if not fullpath_.startswith(base_path_):
+                raise APIError("file not allowed")
+
+            with open(fullpath_, "r", encoding="utf-8") as fopen_:
+                res_ = json.loads(fopen_.read())
+
+        except APIError as exc__:
+            print_("!!!", exc__)
+
+        finally:
+            return res_
 
     def validate_iso8601_f(self, strv):
         """
@@ -3825,7 +3846,7 @@ class Auth:
                 "aut_tfac": None,
                 "_signed_out_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}
             })
-            return {"result": True}
+            return {"result": True, "user": None}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -4009,7 +4030,7 @@ class Auth:
             if not otp_send_["result"]:
                 raise APIError(otp_send_["msg"])
 
-            return {"result": True}
+            return {"result": True, "user": None}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -4058,7 +4079,7 @@ class Auth:
                 "_modified_by": email_,
             }, "$inc": {"_modified_count": 1}})
 
-            return {"result": True}
+            return {"result": True, "user": None}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -4331,7 +4352,7 @@ class Auth:
             if not otp_send_["result"]:
                 raise APIError(otp_send_["msg"])
 
-            return {"result": True, "msg": "user also needs to be validated by OTP"}
+            return {"result": True, "msg": "2FA required", "user": None}
 
         except APIError as exc:
             return Misc().api_error_f(exc)
@@ -4395,7 +4416,7 @@ class Auth:
                 "_modified_by": email_,
             })
 
-            return {"result": True, "qr": qr_}
+            return {"result": True, "qr": qr_, "user": None}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -4434,6 +4455,7 @@ API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 API_WORKFILE_PATH_ = f"/{os.environ.get('API_WORKFILE_PATH')}"
 API_DUMPFILE_PATH_ = f"/{os.environ.get('API_DUMPFILE_PATH')}"
+API_CORS_ORIGINS_ = os.environ.get('API_CORS_ORIGINS').strip().split(",")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -4458,8 +4480,7 @@ STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort",
 PROP_KEYS_ = ["bsonType", "title", "description"]
 
 app = Flask(__name__)
-origins_ = [f"https://{DOMAIN_}", "https://localhost", "capacitor://localhost", "http://localhost:8100", "http://localhost:8101", "http://localhost:8102"]
-app.config["CORS_ORIGINS"] = origins_
+app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_
 app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_
@@ -4670,6 +4691,7 @@ def otp_f():
     """
     docstring is in progress
     """
+    sc__, res_ = 200, {}
     try:
         input_ = request.json
         if not input_:
@@ -4680,6 +4702,7 @@ def otp_f():
         if not request_:
             res_ = {"result": False, "msg": "no request provided"}
             raise APIError(res_)
+
         if "op" not in request_:
             res_ = {"result": False, "msg": "no operation found"}
             raise APIError(res_)
@@ -4691,12 +4714,14 @@ def otp_f():
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
             raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
             raise SessionError({"result": False, "msg": "user session not found"})
         email_ = user_["email"] if "email" in user_ else None
 
         op_ = request_["op"]
+
         if op_ == "reset":
             res_ = OTP().reset_otp_f(email_)
         elif op_ == "show":
@@ -4706,34 +4731,23 @@ def otp_f():
         elif op_ == "validate":
             res_ = OTP().validate_qr_f(email_, request_)
         else:
-            raise APIError(f"operation not supported {op_}")
+            raise APIError(f"invalid operation: {op_}")
 
         if not res_["result"]:
             raise APIError(res_)
 
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 200
-        response_.mimetype = "application/json"
-        return response_
+    except SessionError as exc__:
+        sc__, res_ = 403, ast.literal_eval(str(exc__))
 
-    except SessionError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 403
-        response_.mimetype = "application/json"
-        return response_
+    except APIError as exc__:
+        sc__, res_ = 401, ast.literal_eval(str(exc__))
 
-    except APIError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 401
-        response_.mimetype = "application/json"
-        return response_
+    except Exception as exc__:
+        sc__, res_ = 500, ast.literal_eval(str(exc__))
 
-    except Exception as exc_:
-        res_ = ast.literal_eval(str(exc_))
+    finally:
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = 500
+        response_.status_code = sc__
         response_.mimetype = "application/json"
         return response_
 
@@ -4789,10 +4803,6 @@ def auth_f():
         if not res_["result"]:
             raise AuthError(res_)
 
-        user_ = res_["user"] if res_ and "user" in res_ else None
-        # token_ = user_["token"] if op_ == "tfac" and "token" in user_ and user_["token"] is not None else None
-        res_ = {"result": True, "user": user_}
-
     except APIError as exc__:
         sc__, res_ = 400, ast.literal_eval(str(exc__))
 
@@ -4817,29 +4827,27 @@ def iot_post_f():
     """
     docstring is in progress
     """
-    status_ = 200
-    res_ = {}
-
+    sc__, res_ = 200, {}
     try:
         if not request.headers:
-            raise AuthError("no headers provided")
+            raise AuthError({"result": False, "msg": "no headers provided"})
 
         if not request.json:
-            raise APIError("no data provided")
+            raise APIError({"result": False, "msg": "no data provided"})
 
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
-            raise AuthError(jwt_validate_f_["msg"])
+            raise AuthError({"result": False, "msg": jwt_validate_f_["msg"]})
 
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise AuthError("user session not found")
+            raise AuthError({"result": False, "msg": "user session ended"})
         aut_id_ = user_["email"]
 
         requestj_ = request.json
         process_ = requestj_["process"] if "process" in requestj_ else None
         if not process_:
-            raise APIError("no process provided")
+            raise APIError({"result": False, "msg": "no process provided"})
 
         if process_ == "scan":
             res_ = Iot().barcode_scan_f(aut_id_)
@@ -4848,21 +4856,18 @@ def iot_post_f():
             page_ = requestj_["page"] if "page" in requestj_ else 1
             res_ = Iot().barcode_query_f(searched_, page_)
 
-    except AuthError as exc_:
-        res_ = {"result": False, "payload": None, "msg": str(exc_)}
-        status_ = 401
+    except AuthError as exc__:
+        sc__, res_ = 401, ast.literal_eval(str(exc__))
 
-    except APIError as exc_:
-        res_ = {"result": False, "payload": None, "msg": str(exc_)}
-        status_ = 400
+    except APIError as exc__:
+        sc__, res_ = 400, ast.literal_eval(str(exc__))
 
-    except Exception as exc_:
-        res_ = {"result": False, "payload": None, "msg": str(exc_)}
-        status_ = 500
+    except Exception as exc__:
+        sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = status_
+        response_.status_code = sc__
         response_.mimetype = "application/json"
         return response_
 

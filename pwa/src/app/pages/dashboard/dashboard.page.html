@@ -34,12 +34,16 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
-        <div class="filler-16"></div>
-        <h4>{{ 'DASHBOARD' | translate }}</h4>
+        <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
+          {{ 'WELCOME ABOARD' | translate }}
+        </ion-button>
+        <h3>{{ 'Shared Views' }}</h3>
+        <span *ngIf="flashcards.length > 0">{{ flashcards.length }}</span> {{ 'Flashcards and' }}
+        <span *ngIf="charts.length > 0">{{ charts.length }}</span> {{ 'Charts' }}.
+
+        <!-- flashcards -->
         <div *ngIf="charts.length > 0 || flashcards.length > 0">
           <div class="filler-10"></div>
-
-          <!-- flashcards -->
           <div class="brz-visual-group">
             <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer (click)="doFlashcard(item)">
               <div class="visual-buttons">

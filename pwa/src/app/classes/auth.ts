@@ -170,11 +170,11 @@ export class Auth {
 
   Signout() {
     return new Promise((resolve, reject) => {
+      this.setUserOut();
       this.misc.apiCall("auth", JSON.stringify({
         op: "signout"
       })).then((res: any) => {
         if (res && res.result) {
-          this.setUserOut();
           resolve(true);
         } else {
           reject(res.msg);

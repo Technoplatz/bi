@@ -57,6 +57,7 @@ export class DashboardPage implements OnInit {
   public collections: any = [];
   public status_: any = {};
   public filter_: any = [];
+  public menutoggle: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -101,6 +102,15 @@ export class DashboardPage implements OnInit {
     this.chart_size = this.chart_size === "small" ? "medium" : this.chart_size === "medium" ? "large" : this.chart_size === "large" ? "small" : "small";
     this.storage.set("LSCHARTSIZE", this.chart_size).then(() => {
       this.chart_css = "chart-sq " + this.chart_size;
+    });
+  }
+
+  doMenuToggle() {
+    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
+      this.menutoggle = !LSMENUTOGGLE ? true : false;
+      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
+        this.misc.menutoggle.next(this.menutoggle);
+      });
     });
   }
 

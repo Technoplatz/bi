@@ -286,9 +286,9 @@ https://www.gnu.org/licenses.
               <ng-template #else2>
                 <span *ngIf="item_.value.bsonType=='bool'; else else3">
                   <span *ngIf="record[item_.key] && item_.value.trueText">{{ item_.value.trueText }}</span>
-                  <span *ngIf="record[item_.key] && !item_.value.trueText">{{ 'TRUE' | translate }}</span>
+                  <span *ngIf="record[item_.key] && !item_.value.trueText">{{ 'True' | translate }}</span>
                   <span *ngIf="!record[item_.key] && item_.value.falseText">{{ item_.value.falseText }}</span>
-                  <span *ngIf="!record[item_.key] && !item_.value.falseText">{{ 'FALSE' | translate }}</span>
+                  <span *ngIf="!record[item_.key] && !item_.value.falseText">{{ 'False' | translate }}</span>
                 </span>
               </ng-template>
               <ng-template #else3>

@@ -64,13 +64,20 @@ export class KovComponent implements OnInit {
   private tags_ = [
     { "key": "#Managers" },
     { "key": "#Administrators" }
-  ]
+  ];
   private empty_ = [
     { "key": null }
-  ]
+  ];
   private dual_ = [
     { "key": null, "value": null }
-  ]
+  ];
+  public keyop_ = [
+    { key: "x-axis" },
+    { key: "y-axis" },
+    { key: "group" },
+    { key: "data[count]" },
+    { key: "data[sum]" }
+  ];
 
   constructor() { }
 
@@ -86,12 +93,12 @@ export class KovComponent implements OnInit {
   ngOnChanges() {
     this.ok = false;
     this.fname = this.field.name;
-    if (["keyvalue", "emptyfield"].includes(this.field.subType)) {
+    if (["keyop", "keyvalue", "emptyfield"].includes(this.field.subType)) {
       this.type = this.field.subType;
     } else if (this.field.subType === "filter") {
       this.type = "keyopvalue";
     }
-    if (["keyvalue", "filter", "property"].includes(this.field.subType)) {
+    if (["keyop", "keyvalue", "filter", "property"].includes(this.field.subType)) {
       this.kovs = this.properties;
     } else if (this.field.subType === "hour") {
       this.kovs = this.hours_;
@@ -120,6 +127,11 @@ export class KovComponent implements OnInit {
           key: null,
           op: null,
           value: null
+        });
+      } else if (this.type === "keyop") {
+        this.data[this.fname].push({
+          key: null,
+          op: null
         });
       } else if (this.type === "keyvalue" || this.type === "emptyfield") {
         this.data[this.fname].push({

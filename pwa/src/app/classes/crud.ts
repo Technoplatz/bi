@@ -92,6 +92,7 @@ export class Crud {
         const filter_ = p.filter ? true : false;
         const property_ = p.property ? true : false;
         const kv_ = p.subType === "keyvalue" ? true : false;
+        const ko_ = p.subType === "keyop" ? true : false;
         const permanent_ = p.permanent ? true : false;
         const readonly_ = p.readonly ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].readonly?.indexOf(item) !== -1 ? true : false;
         const dateOnly_ = p.dateOnly ? true : false;
@@ -130,6 +131,7 @@ export class Crud {
           file: file_,
           filter: filter_,
           kv: kv_,
+          ko: ko_,
           permanent: permanent_,
           readonly: readonly_,
           collection: collection_,
