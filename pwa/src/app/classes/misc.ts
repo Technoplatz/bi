@@ -36,10 +36,10 @@ import { Subject, BehaviorSubject } from "rxjs";
 import { Storage } from "@ionic/storage";
 import { TranslateService } from "@ngx-translate/core";
 import { environment } from "../../environments/environment";
-import { ClipboardPluginWeb } from "@capacitor/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { CrudPage } from "../pages/crud/crud.page";
 import { SignPage } from "../pages/sign/sign.page";
+import { ClipboardService } from "ngx-clipboard";
 
 @Injectable({
   providedIn: "root"
@@ -60,7 +60,7 @@ export class Miscellaneous {
     private translate: TranslateService,
     private modal: ModalController,
     private toast: ToastController,
-    private cb: ClipboardPluginWeb,
+    private cb: ClipboardService,
     private http: HttpClient
   ) {
     this.collections.subscribe((res: any) => {
@@ -269,13 +269,8 @@ export class Miscellaneous {
 
   copyToClipboard(s: string) {
     return new Promise((resolve, reject) => {
-      this.cb.write({ string: s }).then(() => {
-        setTimeout(() => {
-          resolve(true);
-        }, 1000);
-      }).catch((error: any) => {
-        reject(error);
-      });
+      this.cb.copy(s)
+      resolve(true);
     });
   }
 

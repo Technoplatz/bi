@@ -1058,7 +1058,7 @@ class Crud:
             distinct_ = ""
             cursora_ = Mongo().db_[f"{collection_}_data"].distinct(key_, get_filtered_)
             if cursora_ and len(cursora_) > 0:
-                distinct_ = "\n".join(map(str, cursora_[:100]))
+                distinct_ = "\n".join(map(str, cursora_[:1024]))
 
             return {"result": True, "copied": distinct_}
 
