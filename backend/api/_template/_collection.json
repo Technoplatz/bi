@@ -2,37 +2,39 @@
   "properties": {
     "col_id": {
       "bsonType": "string",
+      "title": "ID",
+      "description": "Collection ID",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "ID",
-      "description": "Collection ID",
+      "permanent": true,
+      "caseType": "lowercase"
+    },
+    "col_prefix": {
+      "bsonType": "string",
+      "title": "Prefix",
+      "description": "Column Prefix - 3 characters lower case",
+      "minLength": 3,
+      "maxLength": 3,
+      "pattern": "^[a-z]{3,3}$",
+      "permanent": true,
       "caseType": "lowercase"
     },
     "col_title": {
       "bsonType": "string",
-      "minLength": 1,
-      "maxLength": 32,
       "title": "Title",
       "description": "Collection Title",
+      "minLength": 1,
+      "maxLength": 32,
       "caseType": "capitalize"
     },
     "col_description": {
       "bsonType": "string",
-      "minLength": 0,
-      "maxLength": 256,
       "title": "Description",
       "description": "Collection Description",
+      "minLength": 0,
+      "maxLength": 256,
       "caseType": "capitalize"
-    },
-    "col_prefix": {
-      "bsonType": "string",
-      "minLength": 3,
-      "maxLength": 3,
-      "pattern": "^[a-z]{3,3}$",
-      "title": "Prefix",
-      "description": "Column Prefix - 3 characters lower case",
-      "caseType": "lowercase"
     },
     "col_priority": {
       "bsonType": "number",

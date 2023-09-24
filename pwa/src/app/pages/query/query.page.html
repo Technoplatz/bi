@@ -54,7 +54,7 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
               </div>
-              <div (click)="copy_url('view')" class="data-sq-button">
+              <div (click)="copy_url()" class="data-sq-button">
                 <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
                 <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
                 <br />

@@ -83,8 +83,8 @@ export class QueryPage implements OnInit {
   public pages_: number = 1;
   public page_: number = 1;
   public paget_: any = [];
-  public que_scheduled_cron_:string = "";
-  public _tags:any = [];
+  public que_scheduled_cron_: string = "";
+  public _tags: any = [];
   private schema_: any = {};
   private menu: string = "";
   private aggregated_: any = [];
@@ -228,12 +228,16 @@ export class QueryPage implements OnInit {
     }
   }
 
-  copy_url(tocopy_: string) {
-    this.is_url_copied = ["view", "collection"].includes(tocopy_) ? true : false;
-    this.misc.copyToClipboard(this.query_url_).then(() => { }).catch((error: any) => {
+  copy_url() {
+    this.is_url_copied = false;
+    this.misc.copyToClipboard(this.query_url_).then(() => {
+      this.is_url_copied = true;
+    }).catch((error: any) => {
       console.error("*** copy error", error);
     }).finally(() => {
-      this.is_url_copied = false;
+      setTimeout(() => {
+        this.is_url_copied = false;
+      }, 1000);
     });
   }
 

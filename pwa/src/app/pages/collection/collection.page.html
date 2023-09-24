@@ -132,7 +132,8 @@ https://www.gnu.org/licenses.
             <ion-col>
               <span *ngFor="let item of actions; let ac = index">
                 <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button">
-                  <ion-icon *ngIf="item.one_click" [name]="item?.icon ? item.icon : 'play-forward-circle-outline'"></ion-icon>
+                  <ion-icon *ngIf="item.one_click"
+                    [name]="item?.icon ? item.icon : 'play-forward-circle-outline'"></ion-icon>
                   <ion-icon *ngIf="!item.one_click" [name]="item?.icon ? item.icon : 'play-circle-outline'"></ion-icon>
                   {{ item.title }}
                 </ion-button>

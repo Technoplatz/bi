@@ -182,6 +182,7 @@
         "PWS",
         "SRV",
         "STR",
+        "TRA",
         "WSD",
         "WSN",
         "XHC",
@@ -752,8 +753,8 @@
       "title": "Delivery BUId's",
       "description": "Records by dnn_bu_id and dnn_status",
       "priority": 2020,
-      "enabled": false,
-      "dashboard": false,
+      "enabled": true,
+      "dashboard": true,
       "data_filter": [
         {
           "key": "dnn_status",
