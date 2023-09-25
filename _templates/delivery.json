@@ -87,7 +87,12 @@
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping type",
-      "enum": ["Air", "Sea", "Truck", "Other"],
+      "enum": [
+        "Air",
+        "Sea",
+        "Truck",
+        "Other"
+      ],
       "minLength": 0,
       "maxLength": 8,
       "pattern": "^[A-Za-z]{0,8}$"
@@ -245,6 +250,20 @@
       "description": "ETA date",
       "dateOnly": true
     },
+    "dnn_labeled": {
+      "bsonType": "bool",
+      "title": "Labeled",
+      "description": "Labeling process status",
+      "default": false
+    },
+    "dnn_label_info": {
+      "bsonType": "string",
+      "title": "Labeling",
+      "description": "Labeling Information",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Z0-9-,]{0,64}$"
+    },
     "dnn_wayb_id": {
       "bsonType": "string",
       "title": "Waybill ID",
@@ -327,18 +346,51 @@
     "dnn_amount"
   ],
   "index": [
-    ["dnn_acc_no"],
-    ["dnn_status"],
-    ["dnn_status", "dnn_no", "dnn_line_no"],
-    ["dnn_status", "dnn_date"],
-    ["dnn_man_no"],
-    ["dnn_odi_no", "dnn_odi_sub_no"],
-    ["dnn_order_no", "dnn_prd_no"],
-    ["dnn_order_no", "dnn_prd_no", "dnn_qty"],
-    ["dnn_acc_no", "dnn_status"],
-    ["dnn_ship_type"]
+    [
+      "dnn_acc_no"
+    ],
+    [
+      "dnn_status"
+    ],
+    [
+      "dnn_status",
+      "dnn_no",
+      "dnn_line_no"
+    ],
+    [
+      "dnn_status",
+      "dnn_date"
+    ],
+    [
+      "dnn_man_no"
+    ],
+    [
+      "dnn_odi_no",
+      "dnn_odi_sub_no"
+    ],
+    [
+      "dnn_order_no",
+      "dnn_prd_no"
+    ],
+    [
+      "dnn_order_no",
+      "dnn_prd_no",
+      "dnn_qty"
+    ],
+    [
+      "dnn_acc_no",
+      "dnn_status"
+    ],
+    [
+      "dnn_ship_type"
+    ]
   ],
-  "unique": [["dnn_no", "dnn_line_no"]],
+  "unique": [
+    [
+      "dnn_no",
+      "dnn_line_no"
+    ]
+  ],
   "sort": {
     "_modified_at": -1
   },
@@ -362,7 +414,11 @@
           "value": true
         }
       ],
-      "get": ["odi_no", "odi_sub_no", "odi_customs"]
+      "get": [
+        "odi_no",
+        "odi_sub_no",
+        "odi_customs"
+      ]
     },
     {
       "collection": "manifest",
@@ -379,7 +435,10 @@
           "value": false
         }
       ],
-      "get": ["man_no", "man_opening_date"]
+      "get": [
+        "man_no",
+        "man_opening_date"
+      ]
     },
     {
       "collection": "account",
@@ -401,7 +460,10 @@
           "value": true
         }
       ],
-      "get": ["acc_no", "acc_name"]
+      "get": [
+        "acc_no",
+        "acc_name"
+      ]
     }
   ],
   "actions": [
@@ -426,7 +488,10 @@
       "icon": "megaphone",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators"],
+      "_tags": [
+        "#Managers",
+        "#Administrators"
+      ],
       "notification": {
         "notify": true,
         "subject": "New DNs uploaded",
@@ -463,7 +528,10 @@
       "icon": "time",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators"],
+      "_tags": [
+        "#Managers",
+        "#Administrators"
+      ],
       "notification": {
         "notify": true,
         "subject": "Open DNs returned to Standby",
@@ -500,7 +568,9 @@
       "icon": "flag",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Technoplatz"],
+      "_tags": [
+        "#Technoplatz"
+      ],
       "notification": {
         "notify": true,
         "subject": "DNs ready to be delivered",
@@ -561,13 +631,29 @@
           "value": null
         }
       ],
-      "required": ["dnn_status", "dnn_wayb_id", "dnn_wayb_date", "dnn_wayb_cname", "dnn_wayb_cid", "dnn_wayb_vid"],
-      "readonly": ["dnn_status", "dnn_wayb_id", "dnn_wayb_no", "dnn_wayb_ettn"],
+      "required": [
+        "dnn_status",
+        "dnn_wayb_id",
+        "dnn_wayb_date",
+        "dnn_wayb_cname",
+        "dnn_wayb_cid",
+        "dnn_wayb_vid"
+      ],
+      "readonly": [
+        "dnn_status",
+        "dnn_wayb_id",
+        "dnn_wayb_no",
+        "dnn_wayb_ettn"
+      ],
       "one_click": false,
       "icon": "bus",
       "uniqueness": true,
-      "unique": ["dnn_acc_no"],
-      "_tags": ["#Technoplatz"],
+      "unique": [
+        "dnn_acc_no"
+      ],
+      "_tags": [
+        "#Technoplatz"
+      ],
       "apis": [
         {
           "id": "api-edoksis-issue",
@@ -619,7 +705,10 @@
     {
       "name": "Amounts updater",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
           "key": "dnn_qty",
@@ -655,7 +744,10 @@
     {
       "name": "Product updater",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
           "key": "dnn_prd_no",
@@ -719,9 +811,17 @@
       "data_sort": {
         "_modified_at": -1
       },
-      "data_excluded": ["odi_sub_no", "odi_no", "inv_dnn_no"],
-      "data_index": ["acc_nick_name"],
-      "data_columns": ["dnn_status"],
+      "data_excluded": [
+        "odi_sub_no",
+        "odi_no",
+        "inv_dnn_no"
+      ],
+      "data_index": [
+        "acc_nick_name"
+      ],
+      "data_columns": [
+        "dnn_status"
+      ],
       "data_values": [
         {
           "key": "dnn_no",
@@ -744,10 +844,22 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
+      "chart_colors": [
+        "#ea5545",
+        "#f46a9b",
+        "#ef9b20",
+        "#edbf33",
+        "#ede15b",
+        "#bdcf32",
+        "#87bc45",
+        "#27aeef",
+        "#b33dc6"
+      ],
       "scheduled": true,
       "scheduled_cron": "30 15 * * mon,tue",
-      "_tags": ["#Technoplatz"]
+      "_tags": [
+        "#Technoplatz"
+      ]
     },
     "sv-git-buid": {
       "title": "Delivery BUId's",
@@ -766,8 +878,12 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_bu_id"],
-      "data_columns": ["dnn_status"],
+      "data_index": [
+        "dnn_bu_id"
+      ],
+      "data_columns": [
+        "dnn_status"
+      ],
       "data_values": [
         {
           "key": "dnn_no",
@@ -790,10 +906,24 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#e60049", "#00bfa0"],
+      "chart_colors": [
+        "#0bb4ff",
+        "#50e991",
+        "#e6d800",
+        "#9b19f5",
+        "#ffa300",
+        "#dc0ab4",
+        "#b3d4ff",
+        "#e60049",
+        "#00bfa0"
+      ],
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics"
+      ]
     },
     "sv-dn-statuses": {
       "title": "Delivery Statuses",
@@ -812,7 +942,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -836,10 +968,24 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#fd7f6f", "#7eb0d5", "#bd7ebe", "#b2e061", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
+      "chart_colors": [
+        "#fd7f6f",
+        "#7eb0d5",
+        "#bd7ebe",
+        "#b2e061",
+        "#ffb55a",
+        "#ffee65",
+        "#beb9db",
+        "#fdcce5",
+        "#8bd3c7"
+      ],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics"
+      ]
     },
     "fc-status-00s": {
       "title": "00-Standby",
@@ -858,7 +1004,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -882,10 +1030,23 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
+      "chart_colors": [
+        "#bad7fb",
+        "#ffee65",
+        "#fdcce5",
+        "#8bd3c7",
+        "#b2e061",
+        "#ffb55a",
+        "#7eb0d5",
+        "#fd7f6f",
+        "#bd7ebe"
+      ],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": [
+        "#Managers",
+        "#Administrators"
+      ]
     },
     "fc-status-00": {
       "title": "00-Open",
@@ -904,7 +1065,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -928,10 +1091,24 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
+      "chart_colors": [
+        "#bad7fb",
+        "#ffee65",
+        "#fdcce5",
+        "#8bd3c7",
+        "#b2e061",
+        "#ffb55a",
+        "#7eb0d5",
+        "#fd7f6f",
+        "#bd7ebe"
+      ],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics"
+      ]
     },
     "fc-status-10": {
       "title": "10-OnTheWay",
@@ -950,7 +1127,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -974,10 +1153,24 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
+      "chart_colors": [
+        "#bad7fb",
+        "#ffee65",
+        "#fdcce5",
+        "#8bd3c7",
+        "#b2e061",
+        "#ffb55a",
+        "#7eb0d5",
+        "#fd7f6f",
+        "#bd7ebe"
+      ],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics"
+      ]
     },
     "fc-status-20": {
       "title": "20-OnCustoms",
@@ -996,7 +1189,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -1020,10 +1215,24 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
+      "chart_colors": [
+        "#b2e061",
+        "#fd7f6f",
+        "#7eb0d5",
+        "#bd7ebe",
+        "#ffb55a",
+        "#ffee65",
+        "#beb9db",
+        "#fdcce5",
+        "#8bd3c7"
+      ],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics"
+      ]
     },
     "fc-status-30": {
       "title": "30-OnCustomsProcess",
@@ -1042,7 +1251,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -1066,10 +1277,25 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "chart_colors": [
+        "#8bd3c7",
+        "#bd7ebe",
+        "#fdcce5",
+        "#ffee65",
+        "#e4e4e4",
+        "#fd7f6f",
+        "#7eb0d5",
+        "#b2e061",
+        "#ffb55a"
+      ],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics",
+        "#Touchpoint"
+      ]
     },
     "fc-status-40": {
       "title": "40-ClearanceCompleted",
@@ -1088,7 +1314,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -1112,10 +1340,25 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "chart_colors": [
+        "#fdcce5",
+        "#8bd3c7",
+        "#bd7ebe",
+        "#ffee65",
+        "#e4e4e4",
+        "#fd7f6f",
+        "#7eb0d5",
+        "#b2e061",
+        "#ffb55a"
+      ],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics",
+        "#Touchpoint"
+      ]
     },
     "fc-status-50": {
       "title": "50-OnTheTouchpoint",
@@ -1134,7 +1377,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -1158,10 +1403,25 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "chart_colors": [
+        "#e4e4e4",
+        "#fdcce5",
+        "#8bd3c7",
+        "#bd7ebe",
+        "#ffee65",
+        "#fd7f6f",
+        "#7eb0d5",
+        "#b2e061",
+        "#ffb55a"
+      ],
       "scheduled": false,
       "scheduled_cron": "30 9,17 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Logistics",
+        "#Touchpoint"
+      ]
     },
     "fc-status-60": {
       "title": "60-ReadyToBeDelivered",
@@ -1180,7 +1440,9 @@
         "_modified_at": -1
       },
       "data_excluded": [],
-      "data_index": ["dnn_status"],
+      "data_index": [
+        "dnn_status"
+      ],
       "data_columns": [],
       "data_values": [
         {
@@ -1204,10 +1466,24 @@
       "chart_xaxis_label": false,
       "chart_yaxis": true,
       "chart_yaxis_label": false,
-      "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
+      "chart_colors": [
+        "#d5d5d5",
+        "#fdcce5",
+        "#8bd3c7",
+        "#bd7ebe",
+        "#ffee65",
+        "#fd7f6f",
+        "#7eb0d5",
+        "#b2e061",
+        "#ffb55a"
+      ],
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
-      "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
+      "_tags": [
+        "#Managers",
+        "#Administrators",
+        "#Touchpoint"
+      ]
     }
   },
   "fetchers": [],

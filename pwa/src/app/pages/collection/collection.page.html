@@ -295,7 +295,7 @@ https://www.gnu.org/licenses.
               <ng-template #else3>
                 <span
                   *ngIf="['number','decimal','float'].includes(item_.value.bsonType) && ['.'].includes(record[item_.key]?.toString()); else else4">{{
-                  record[item_.key]?.toFixed(2) }}</span>
+                  record[item_.key]?.toFixed(item_.value.decimals ? item_.value.decimals : 0) }}</span>
               </ng-template>
               <ng-template #else4>
                 <span *ngIf="item_.value.bsonType=='object'; else else0">{{ 'Object' | translate }}</span>

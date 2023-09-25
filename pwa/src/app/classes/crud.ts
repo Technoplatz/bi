@@ -102,6 +102,7 @@ export class Crud {
         const hashtag_ = p.hashtag ? true : false;
         const chips_ = p.chips ? true : false;
         const view_ = p.view ? true : false;
+        const decimals_ = p.decimals && p.decimals > 0 ? p.decimals : null;
         const manualAdd_ = p.manualAdd ? true : false;
         const counter_ = p.counter && p.counter === true ? true : false;
         view_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < views.length; v++) { arr_.push(views[v].record.vie_id) } return arr_; })() : null;
@@ -138,6 +139,7 @@ export class Crud {
           view: view_,
           property: property_,
           textarea: textarea_,
+          decimals: decimals_,
           hashtag: hashtag_,
           chips: chips_,
           subType: subType_,

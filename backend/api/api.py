@@ -853,9 +853,6 @@ class Crud:
                 raise APIError("invalid schema")
 
             fullpath_ = os.path.normpath(os.path.join(base_path_, filename_))
-            if not os.path.isfile(fullpath_):
-                raise APIError("schema not found")
-
             if not fullpath_.startswith(base_path_):
                 raise APIError("file not allowed")
 
@@ -3415,15 +3412,17 @@ class Email:
                 fn_ = file_["name"] if "name" in file_ else None
                 if not fn_:
                     raise APIError("file not defined")
+
                 if not fn_.startswith(API_WORKFILE_PATH_):
                     raise APIError("file not allowed")
-                fn_ = file_["name"].replace(f"{API_WORKFILE_PATH_}/", "")
-                fullpath_ = os.path.normpath(os.path.join(API_WORKFILE_PATH_, fn_))
-                with open(f"{fullpath_}", "rb") as attachment_:
+
+                with open(fn_, "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
-                part_.add_header("Content-Disposition", f"attachment; filename= {fn_}")
+
+                attach_fn_ = fn_.replace(f"{API_WORKFILE_PATH_}/", "")
+                part_.add_header("Content-Disposition", f"attachment; filename= {attach_fn_}")
                 message_.attach(part_)
 
             recipients_ = []

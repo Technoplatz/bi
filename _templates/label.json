@@ -1,0 +1,82 @@
+{
+  "properties": {
+    "lab_man_no": {
+      "bsonType": "string",
+      "title": "Manifest No",
+      "description": "Manifest number",
+      "minLength": 1,
+      "maxLength": 32,
+      "caseType": "uppercase"
+    },
+    "lab_no": {
+      "bsonType": "string",
+      "title": "Label No",
+      "description": "Label number",
+      "minLength": 15,
+      "maxLength": 15,
+      "pattern": "^[A-Z0-9-]{15,15}$",
+      "caseType": "uppercase"
+    },
+    "lab_serial_no": {
+      "bsonType": "string",
+      "title": "Serial No",
+      "description": "Serial number",
+      "minLength": 4,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9-?]{4,16}$",
+      "caseType": "uppercase",
+      "permanent": true
+    },
+    "lab_ratio": {
+      "bsonType": "number",
+      "title": "Rate",
+      "description": "Label rate",
+      "default": 0,
+      "decimals": 2,
+      "permanent": true
+    },
+    "lab_amount": {
+      "bsonType": "number",
+      "title": "Amount",
+      "description": "Amount",
+      "default": 0,
+      "decimals": 2,
+      "permanent": true
+    }
+  },
+  "required": ["lab_man_no", "lab_serial_no", "lab_no", "lab_ratio", "lab_amount"],
+  "index": [["lab_man_no"], ["lab_serial_no"]],
+  "unique": [["lab_no"]],
+  "sort": {
+    "lab_man_no": 1,
+    "lab_no": 1
+  },
+  "parents": [
+    {
+      "collection": "manifest",
+      "match": [
+        {
+          "key": "lab_man_no",
+          "value": "man_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "man_closed",
+          "op": "eq",
+          "value": false
+        }
+      ],
+      "get": ["man_no", "man_opening_date"]
+    }
+  ],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {},
+  "fetchers": [],
+  "import": {
+    "purge": false,
+    "ignored": []
+  }
+}
