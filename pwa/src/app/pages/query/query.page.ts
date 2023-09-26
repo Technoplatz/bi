@@ -68,17 +68,20 @@ export class QueryPage implements OnInit {
   public columns_: any;
   public schema_key: any = null;
   public fields_: any = {};
-  public is_saving: boolean = false;
+  public _running: boolean = false;
   public is_deleting: boolean = false;
   public sort: any = {};
   public schemevis: any = "hide";
+  public type_: string = "aggregate";
   public aggregate_: any = [];
+  public aggregates_: any = {};
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public templates: any = [];
   public is_inprogress: boolean = false;
   public menutoggle: boolean = false;
   public is_url_copied: boolean = false;
+  public running_: boolean = false;
   public query_url_: string = "";
   public pages_: number = 1;
   public page_: number = 1;
@@ -125,27 +128,31 @@ export class QueryPage implements OnInit {
   ngOnInit() {
     this.storage.get("LSQUERY").then((LSQUERY_: any) => {
       this.query_ = LSQUERY_;
+      this.type_ = LSQUERY_?.que_type;
       this.misc.getAPIUrl().then((apiHost: any) => {
         this.menu = this.router.url.split("/")[1];
         this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
         this.query_url_ = apiHost + "/get/query/" + this.id;
-        this.refresh_data(0).then(() => {
+        this.refresh_data(0, false).then(() => {
           this.is_initialized = true;
         });
       });
     });
   }
 
-  refresh_data(page_: number) {
+  refresh_data(page_: number, run_: boolean) {
     return new Promise((resolve, reject) => {
       this.is_loaded = false;
       this.page_ = page_ === 0 ? 1 : page_;
-      this.crud.get_query_data(this.id, this.page_, this.limit_).then((res: any) => {
+      this.schemevis = "hide";
+      this.crud.get_query_data(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res && res.query) {
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;
           this.subheader = res.query.que_title;
           this.aggregate_ = res.query.que_aggregate;
+          this.aggregates_ = JSON.stringify(this.aggregate_);
+          this.type_ = res.query.que_type;
           this.fields_ = res.fields;
           this.data_ = res.data;
           this.count_ = res.count;
@@ -163,8 +170,8 @@ export class QueryPage implements OnInit {
           this.misc.doMessage("no data found", "error");
           reject();
         }
-      }).catch((msg: any) => {
-        this.misc.doMessage(msg, "error");
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
       }).finally(() => {
         this.is_loaded = true;
         this.is_initialized = true;
@@ -182,7 +189,6 @@ export class QueryPage implements OnInit {
       this.schemevis = "show";
       this.editor.focus();
     } else {
-      this.aggregated_ ? this.misc.doMessage("changes were discarded", "warning") : null;
       this.schemevis = "hide";
       this.aggregated_ = null;
     }
@@ -199,21 +205,21 @@ export class QueryPage implements OnInit {
 
   save_aggregation() {
     if (this.aggregated_) {
-      this.is_saving = true;
+      this._running = true;
       this.misc.apiCall("/crud", {
         op: "savequery",
         id: this.id,
         aggregate: this.aggregated_
       }).then(() => {
         this.misc.doMessage("query saved successfully", "success");
-        this.refresh_data(0).then(() => {
+        this.refresh_data(0, false).then(() => {
           this.schemevis = "hide"
         });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
       }).finally(() => {
         this.aggregated_ = null;
-        this.is_saving = false;
+        this._running = false;
       });
     } else {
       this.misc.doMessage("no changes detected in query", "warning");
@@ -239,6 +245,15 @@ export class QueryPage implements OnInit {
         this.is_url_copied = false;
       }, 1000);
     });
+  }
+
+  run_query() {
+    if (!this.running_) {
+      this.running_ = true;
+      this.refresh_data(0, true).then(() => { }).finally(() => {
+        this.running_ = false;
+      });
+    }
   }
 
   async edit_query() {
@@ -268,7 +283,7 @@ export class QueryPage implements OnInit {
     modal.onDidDismiss().then((res: any) => {
       if (res.data.modified && res.data.res.result) {
         this.misc.doMessage("query updated successfully", "success");
-        this.refresh_data(0);
+        this.refresh_data(0, false);
       }
     });
     return await modal.present();

@@ -36,7 +36,7 @@
     },
     "vis_scheduled_cron": {
       "bsonType": "string",
-      "title": "Cron",
+      "title": "Crontab",
       "description": "Schedule cron",
       "minLength": 0,
       "maxLength": 64,

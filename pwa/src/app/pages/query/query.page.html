@@ -38,39 +38,51 @@ https://www.gnu.org/licenses.
           {{ header | translate }}
         </ion-button>
         <h3>{{ subheader }}</h3>
-        <h6>{{ count_ }} records [{{ que_scheduled_cron_ }}]</h6>
-        {{ query_url_ }}<br />Shared with <span *ngIf="_tags">{{ _tags.join(", ")}}</span><span *ngIf="!_tags">{{ 'nobody' | translate }}</span>
+        <h6><span *ngIf="type_==='aggregation'">{{ count_ }} records </span>[{{ que_scheduled_cron_ ?
+          que_scheduled_cron_ : " Not scheduled " }}]</h6>
+        <div *ngIf="type_==='aggregation'">
+          {{ query_url_ }}<br />Shared with <span *ngIf="_tags">{{ _tags.join(", ")}}</span><span *ngIf="!_tags">{{
+            'nobody' | translate }}</span>
+        </div>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="is_loaded" (click)="refresh_data(0)" class="data-sq-button">
-                <ion-icon name="sync-circle-outline"></ion-icon>
+              <div *ngIf="type_!=='aggregation'; else aggregate" (click)="run_query()" class="data-sq-button">
+                <ion-icon *ngIf="running_" name="hourglass-outline"></ion-icon>
+                <ion-icon *ngIf="!running_" name="play"></ion-icon>
                 <br />
-                {{ 'Refresh' | translate }}<br />{{ 'Data' | translate }}
+                {{ 'Run' | translate }}<br />{{ 'Query' | translate }}
               </div>
-              <div *ngIf="!is_loaded" class="data-sq-button required">
-                <ion-icon name="hourglass-outline"></ion-icon>
-                <br />
-                {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
-              </div>
-              <div (click)="copy_url()" class="data-sq-button">
-                <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
-                <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
-                <br />
-                <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'URL' | translate }}</span>
-                <span *ngIf="is_url_copied">{{ 'URL' | translate }}<br />{{ 'Copied' | translate }}</span>
-              </div>
+              <ng-template #aggregate>
+                <div *ngIf="is_loaded" (click)="refresh_data(0, false)" class="data-sq-button">
+                  <ion-icon name="sync-circle-outline"></ion-icon>
+                  <br />
+                  {{ 'Refresh' | translate }}<br />{{ 'Data' | translate }}
+                </div>
+                <div *ngIf="!is_loaded" class="data-sq-button required">
+                  <ion-icon name="hourglass-outline"></ion-icon>
+                  <br />
+                  {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
+                </div>
+                <div (click)="copy_url()" class="data-sq-button">
+                  <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
+                  <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
+                  <br />
+                  <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'URL' | translate }}</span>
+                  <span *ngIf="is_url_copied">{{ 'URL' | translate }}<br />{{ 'Copied' | translate }}</span>
+                </div>
+              </ng-template>
               <div (click)="show_aggregation(true)" class="data-sq-button">
                 <div class="ion-no-padding">
-                  <ion-icon name="code-working-outline"></ion-icon><br />
-                  {{ 'Edit' | translate }}<br />{{ 'Aggregate' | translate }}
+                  <ion-icon name="create-outline"></ion-icon><br />
+                  {{ 'Edit' | translate }}<br />{{ 'JSON' | translate }}
                 </div>
               </div>
               <div (click)="edit_query()" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="settings-outline"></ion-icon><br />
-                  {{ 'Edit' | translate }}<br />{{ 'Query' | translate }}
+                  {{ 'Query' | translate }}<br />{{ 'Settings' | translate }}
                 </div>
               </div>
             </ion-col>
@@ -81,12 +93,12 @@ https://www.gnu.org/licenses.
           <ion-row>
             <ion-col size="12">
               <ion-button (click)="save_aggregation()">
-                <span *ngIf="!is_saving">{{ 'Save Aggregation' | translate }}</span>
-                <span *ngIf="is_saving">{{ 'Saving' | translate }}...</span>
+                <span *ngIf="!_running">{{ 'Save Query' | translate }}</span>
+                <span *ngIf="_running">{{ 'Saving' | translate }}...</span>
               </ion-button>
               <ion-button color="light" (click)="show_aggregation(false)">
                 <ion-icon name="close-circle-outline"></ion-icon>
-                {{ 'Close Aggregation' | translate }}
+                {{ 'Close' | translate }}
               </ion-button>
             </ion-col>
           </ion-row>
@@ -114,17 +126,17 @@ https://www.gnu.org/licenses.
           </tr>
           <tr>
             <td [attr.colspan]="fields_?.length+1">
-              <ion-button *ngIf="page_ > 1" size="small" fill="clear" (click)="refresh_data(0)"
+              <ion-button *ngIf="page_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
                 class="ion-no-padding ion-margin-end">
                 <ion-icon name="play-skip-back"></ion-icon>
               </ion-button>
               <span *ngIf="page_ > 10">
-                <ion-button size="small" fill="clear" (click)="refresh_data(page_-1)" class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(page_-1, false)" class="ion-no-padding">
                   <ion-icon name="caret-back"></ion-icon>
                 </ion-button>
               </span>
               <span *ngFor="let in of paget_">
-                <ion-button *ngIf="page_ != in" size="small" fill="clear" (click)="refresh_data(in)"
+                <ion-button *ngIf="page_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
                   class="ion-no-padding">
                   <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
                 </ion-button>
@@ -133,10 +145,10 @@ https://www.gnu.org/licenses.
                 </ion-button>
               </span>
               <span *ngIf="pages_ > 10 && page_ < pages_">
-                <ion-button size="small" fill="clear" (click)="refresh_data(pages_)" class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(pages_, false)" class="ion-no-padding">
                   ...&nbsp;&nbsp;{{ pages_ }}
                 </ion-button>
-                <ion-button size="small" fill="clear" (click)="refresh_data(page_+1)" class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(page_+1, false)" class="ion-no-padding">
                   <ion-icon name="caret-forward"></ion-icon>
                 </ion-button>
               </span>
@@ -144,9 +156,19 @@ https://www.gnu.org/licenses.
           </tr>
         </table>
         <ng-template #nodata>
-          <div class="ion-margin-top">
+          <div *ngIf="type_==='aggregation'; else noagg" class="ion-margin-top">
             <h6>{{ 'No data or aggregation found' | translate }}!</h6>
-            {{ 'Please edit your aggregation' | translate }}.</div>
+            {{ 'Please edit your aggregation' | translate }}.
+          </div>
+          <ng-template #noagg>
+            <div class="ion-margin-top">
+              <h6>{{ count_ }} records affected.</h6>
+              <div class="queryro">
+                {{ 'You can manually run this query' | translate }}.<br /><br />
+                {{ aggregates_ }}
+              </div>
+            </div>
+          </ng-template>
         </ng-template>
       </ion-col>
       <ng-template #dataloading>

@@ -378,6 +378,18 @@ ion-note {
   font-weight: 600 !important;
 }
 
+.queryro {
+  width: 50%;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: medium;
+  line-height: normal;
+}
+
 .data-col-header {
   font-weight: 600;
   background-color: var(--ion-color-dark) !important;
@@ -1857,6 +1869,7 @@ ion-checkbox {
 .data-table td,
 .data-table th {
   padding: 0.5rem;
+  padding-right: 0.7rem !important;
   text-align: left !important;
   border: 1px solid var(--ion-color-light);
   max-width: 270px;

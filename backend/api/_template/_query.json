@@ -2,41 +2,50 @@
   "properties": {
     "que_id": {
       "bsonType": "string",
+      "title": "ID",
+      "description": "Query ID",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "ID",
-      "description": "Query ID",
       "caseType": "lowercase"
     },
     "que_title": {
       "bsonType": "string",
-      "minLength": 1,
-      "maxLength": 32,
       "title": "Title",
       "description": "Query Title",
+      "minLength": 1,
+      "maxLength": 32,
       "caseType": "capitalize"
+    },
+    "que_type": {
+      "bsonType": "string",
+      "title": "Type",
+      "description": "Query type",
+      "minLength": 10,
+      "maxLength": 11,
+      "enum": ["aggregation", "update_one", "update_many"],
+      "pattern": "^[a-z_]{10,11}$",
+      "default": "aggregation"
     },
     "que_collection_id": {
       "bsonType": "string",
+      "title": "Collection ID",
+      "description": "Collection ID",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "Collection ID",
-      "description": "Collection ID",
-      "required": true,
       "collection": true,
       "caseType": "lowercase"
     },
     "que_scheduled": {
       "bsonType": "bool",
       "title": "Scheduled",
-      "default": false,
-      "description": "Scheduled or not"
+      "description": "Scheduled or not",
+      "default": false
     },
     "que_scheduled_cron": {
       "bsonType": "string",
-      "title": "Cron",
+      "title": "Crontab",
       "description": "Schedule cron",
       "minLength": 0,
       "maxLength": 64,
@@ -50,14 +59,23 @@
     },
     "que_message_body": {
       "bsonType": "string",
+      "title": "Email Body",
+      "description": "Query email body",
       "minLength": 0,
       "maxLength": 512,
-      "title": "Body",
-      "description": "Query email body",
       "textarea": true
+    },
+    "que_counter": {
+      "bsonType": "int",
+      "title": "Counter",
+      "description": "Counter",
+      "permanent": true,
+      "default": 0
     },
     "_tags": {
       "bsonType": "array",
+      "title": "Tags",
+      "description": "Enter a tag #...",
       "uniqueItems": false,
       "minItems": 0,
       "maxItems": 256,
@@ -67,12 +85,10 @@
         "maxLength": 64,
         "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
       },
-      "title": "Tags",
-      "description": "Enter a tag #...",
       "manualAdd": true
     }
   },
-  "required": ["que_id", "que_title", "que_collection_id"],
+  "required": ["que_id", "que_title", "que_collection_id", "que_type"],
   "index": [["que_collection_id"]],
   "unique": [["que_id"]],
   "sort": {

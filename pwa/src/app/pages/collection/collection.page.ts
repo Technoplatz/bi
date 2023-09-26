@@ -131,7 +131,7 @@ export class CollectionPage implements OnInit {
   ) {
     this.jeoptions = new JsonEditorOptions();
     this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "tree";
+    this.jeoptions.mode = "code";
     this.jeoptions.statusBar = true;
     this.jeoptions.navigationBar = false;
     this.jeoptions.name = "schema-structure";

@@ -330,7 +330,7 @@ class Misc:
         except Exception as exc_:
             return ({"result": False, "msg": str(exc_), "exc": str(exc_)})
 
-    def post_notification(self, exc_):
+    def post_notification(self, exc__):
         """
         docstring is in progress
         """
@@ -339,58 +339,59 @@ class Misc:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
             line_ = exc_tb_.tb_lineno
-            exception_ = str(exc_)
-            notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
+            notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {str(exc__)}"
             resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
             if resp_.status_code != 200:
-                print_("*** notification error", resp_)
+                print_("!!! slack notification error", resp_)
 
         return True
 
-    def exception_f(self, exc_):
+    def exception_f(self, exc__):
         """
         docstring is in progress
         """
-        res_ = str(exc_)
+        res_ = str(exc__)
         self.post_notification(res_)
         return {"result": False, "msg": res_}
 
-    def api_error_f(self, exc_):
+    def api_error_f(self, exc__):
         """
         docstring is in progress
         """
-        res_ = str(exc_)
+        res_ = str(exc__)
         self.post_notification(res_)
         return {"result": False, "msg": res_}
 
-    def app_exception_f(self, exc_):
+    def app_exception_f(self, exc__):
         """
         docstring is in progress
         """
-        return {"result": False, "msg": str(exc_)}
-
-    def pass_exception_f(self, exc_):
-        """
-        docstring is in progress
-        """
-        return {"result": False, "msg": str(exc_)}
-
-    def auth_error_f(self, exc_):
-        """
-        docstring is in progress
-        """
-        res_ = str(exc_)
+        res_ = str(exc__)
         return {"result": False, "msg": res_}
 
-    def mongo_error_f(self, exc_):
+    def pass_exception_f(self, exc__):
         """
         docstring is in progress
         """
-        splt_ = str(exc_).split(", full error: ")
+        res_ = str(exc__)
+        return {"result": False, "msg": res_}
+
+    def auth_error_f(self, exc__):
+        """
+        docstring is in progress
+        """
+        res_ = str(exc__)
+        return {"result": False, "msg": res_}
+
+    def mongo_error_f(self, exc__):
+        """
+        docstring is in progress
+        """
+        splt_ = str(exc__).split(", full error: ")
         splt0_ = splt_[0] if splt_ and len(splt_) > 0 else None
         splt1_ = splt_[1] if splt_ and len(splt_) > 1 else None
-        jerror_ = splt1_ if splt1_ else splt0_ if splt0_ else str(exc_)
-        self.post_notification(jerror_)
+        jerror_ = splt1_["errmsg"] if splt0_ and splt1_ and "errmsg" in splt1_ else str(exc__)
+        self.post_notification(exc__)
         return {"result": False, "msg": jerror_, "notify": False, "count": 0}
 
     def log_f(self, obj):
@@ -1702,21 +1703,17 @@ class Crud:
                             else:
                                 fres_ = {"$lte": value_}
                         elif mat_["op"] == "true":
-                            fres_ = {"$eq": True}
+                            fres_ = {"$nin": [False, None]}
                         elif mat_["op"] == "false":
-                            fres_ = {"$eq": False}
+                            fres_ = {"$ne": True}
                         elif mat_["op"] == "nnull":
-                            array_ = []
-                            array1_ = {}
-                            array2_ = {}
+                            array_, array1_, array2_ = [], {}, {}
                             array1_[mat_["key"]] = {"$ne": None}
                             array2_[mat_["key"]] = {"$exists": True}
                             array_.append(array1_)
                             array_.append(array2_)
                         elif mat_["op"] == "null":
-                            array_ = []
-                            array1_ = {}
-                            array2_ = {}
+                            array_, array1_, array2_ = [], {}, {}
                             array1_[mat_["key"]] = {"$eq": None}
                             array2_[mat_["key"]] = {"$exists": False}
                             array_.append(array1_)
@@ -2305,20 +2302,27 @@ class Crud:
         """
         docstring is in progress
         """
+        schema_, query_, data_, fields_, count_, permitted_, aggregate_base_ = {}, {}, [], [], 0, False, []
+        init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
         try:
-            user_ = obj_["userindb"]
             que_id_ = obj_["id"]
-            page_ = obj_["page"] if "page" in obj_ and obj_["page"] > 0 else 1
-            limit_ = obj_["limit"] if "limit" in obj_ and obj_["limit"] > 0 else API_QUERY_PAGE_SIZE_
-            query_ = {}
-            data_ = []
-            fields_ = []
-            permitted_ = False
-
             schema_ = self.root_schemas_f("_query")
             if not schema_:
-                raise AuthError(f"no schema found {que_id_}")
+                raise AuthError(f"no schema found for {que_id_}")
 
+            query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
+            if not query_:
+                raise APIError(f"query not found: {que_id_}")
+
+            type_ = query_["que_type"]
+            if type_ not in ["aggregation", "update_one", "update_many"]:
+                raise APIError(f"invalid query type: {type_}")
+
+            que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ else None
+            if not que_collection_id_:
+                raise APIError(f"collection not found {que_id_}")
+
+            user_ = obj_["userindb"]
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             if Misc().permitted_usertag_f(user_):
                 permitted_ = True
@@ -2330,57 +2334,75 @@ class Crud:
             if not permitted_:
                 raise AuthError(f"no query permission for {que_id_}")
 
-            query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
-            if not query_:
-                raise APIError(f"query not found {que_id_}")
-
-            que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ else None
-            if not que_collection_id_:
-                raise APIError(f"collection not found {que_id_}")
-
-            que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and query_["que_aggregate"] is not None else None
+            que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
+            que_counter_ = int(query_["que_counter"]) if "que_counter" in query_ and query_["que_counter"] > 0 else 0
             if not que_aggregate_:
-                return {"result": True, "query": query_, "data": [], "count": 0, "fields": [], "schema": schema_}
-
-            aggregate_base_ = []
+                raise PassException(None)
             for agg_ in que_aggregate_:
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
                 if "$project" in agg_:
-                    fields_ = []
                     for prj_ in agg_["$project"]:
                         fields_.append(prj_)
                 aggregate_base_.append(agg_)
 
-            aggregate_ = aggregate_base_.copy()
-            aggregate_.append({"$skip": limit_ * (page_ - 1)})
-            aggregate_.append({"$limit": limit_})
-            aggregate_base_.append({"$count": "count"})
+            if type_ == "aggregation":
+                aggregate_ = aggregate_base_.copy()
+                page_ = obj_["page"] if "page" in obj_ and obj_["page"] > 0 else 1
+                limit_ = obj_["limit"] if "limit" in obj_ and obj_["limit"] > 0 else API_QUERY_PAGE_SIZE_
+                aggregate_.append({"$skip": limit_ * (page_ - 1)})
+                aggregate_.append({"$limit": limit_})
+                aggregate_base_.append({"$count": "count"})
+                facet_ = [{"$facet": {
+                    "stats": aggregate_base_,
+                    "data": aggregate_
+                }}]
+                cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(facet_)
+                cursore_ = json.loads(JSONEncoder().encode(list(cursor_)))
+                data_ = cursore_[0]["data"] if cursore_ and "data" in cursore_[0] else []
+                stats_ = cursore_[0]["stats"] if cursore_ and "stats" in cursore_[0] else []
+                count_ = stats_[0]["count"] if stats_ else 0
 
-            facet_ = [{"$facet": {
-                "stats": aggregate_base_,
-                "data": aggregate_
-            }}]
-
-            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(facet_)
-            cursore_ = json.loads(JSONEncoder().encode(list(cursor_)))
-            data_ = cursore_[0]["data"] if cursore_ and "data" in cursore_[0] else []
-            stats_ = cursore_[0]["stats"] if cursore_ and "stats" in cursore_[0] else []
-            count_ = stats_[0]["count"] if stats_ else 0
+            run_ = "run" in obj_ and obj_["run"] is True
+            if run_:
+                if type_ == "update_one":
+                    find_ = aggregate_base_[0]
+                    set_ = aggregate_base_[1]
+                    Mongo().db_[f"{que_collection_id_}_data"].update_one(find_, set_)
+                    Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": {"que_counter": que_counter_ + 1}})
+                    count_ = 1
+                elif type_ == "update_many":
+                    find_ = aggregate_base_[0]
+                    set_ = aggregate_base_[1]
+                    update_many_ = Mongo().db_[f"{que_collection_id_}_data"].update_many(find_, set_)
+                    count_ = update_many_.matched_count
+                    Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": {"que_counter": que_counter_ + 1}})
+                if count_ > 0:
+                    Misc().log_f({
+                        "type": "Info",
+                        "collection": que_collection_id_,
+                        "op": type_,
+                        "user": user_["usr_id"] if user_ else None,
+                        "document": {"find": find_, "set": set_}
+                    })
 
             return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
 
-        except AuthError as exc_:
-            return Misc().auth_error_f(exc_)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except APIError as exc_:
-            return Misc().api_error_f(exc_)
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
 
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
+        except pymongo.errors.PyMongoError as exc__:
+            init_res_["query"] = query_
+            return init_res_
 
-        except Exception as exc_:
-            return Misc().exception_f(exc_)
+        except PassException as exc__:
+            return init_res_
+
+        except Exception as exc__:
+            return Misc().exception_f(exc__)
 
     def read_f(self, input_):
         """
@@ -2582,7 +2604,7 @@ class Crud:
                 raise AuthError("user not found")
 
             if not aggregate_:
-                raise APIError("aggregate not found")
+                raise APIError("aggregation not found")
 
             if not que_id_:
                 raise APIError("query not found")
@@ -2598,17 +2620,17 @@ class Crud:
 
             return {"result": True}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except AuthError as exc_:
-            return Misc().auth_error_f(exc_)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc__:
+            return Misc().exception_f(exc__)
 
     def saveschema_f(self, obj):
         """

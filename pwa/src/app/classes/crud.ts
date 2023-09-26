@@ -263,13 +263,14 @@ export class Crud {
     });
   }
 
-  get_query_data(id_: string, page_: number, limit_: number) {
+  get_query_data(id_: string, page_: number, limit_: number, run_: boolean) {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
         id: id_,
         op: "query",
         page: page_,
-        limit: limit_
+        limit: limit_,
+        run: run_
       }).then((res: any) => {
         resolve(res);
       }).catch((err: any) => {
