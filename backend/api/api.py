@@ -382,12 +382,19 @@ class Misc:
         """
         docstring is in progress
         """
-        splt_ = str(exc__).split(", full error: ")
-        splt0_ = splt_[0] if splt_ and len(splt_) > 0 else None
-        splt1_ = splt_[1] if splt_ and len(splt_) > 1 else None
-        jerror_ = splt1_["errmsg"] if splt0_ and splt1_ and "errmsg" in splt1_ else str(exc__)
-        self.post_notification(exc__)
-        return {"result": False, "msg": jerror_, "notify": False, "count": 0}
+        msg_ = None
+        try:
+            self.post_notification(str(exc__))
+            splt_ = str(exc__).split(", full error: ")
+            splt0_ = splt_[0] if splt_ and len(splt_) > 0 else str(exc__)
+            nk_ = splt0_.split(" :: ")
+            msg_ = nk_[2] if nk_ and len(nk_) > 1 else splt0_
+
+        except Exception as exc_:
+            msg_ = str(exc_)
+
+        finally:
+            return {"result": False, "msg": msg_, "notify": False, "count": 0}
 
     def log_f(self, obj):
         """
@@ -2550,7 +2557,6 @@ class Crud:
                     validator_["$jsonSchema"].update({"required": required_})
 
                 Mongo().db_.command({"collMod": collection_, "validator": validator_})
-
                 Mongo().db_[collection_].drop_indexes()
 
                 if "index" in structure_ and len(structure_["index"]) > 0:
@@ -2591,14 +2597,14 @@ class Crud:
 
             return {"result": True}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc__:
+            return Misc().exception_f(exc__)
 
     def nocrudschema_validate_f(self, obj):
         """
@@ -2613,11 +2619,11 @@ class Crud:
 
             return {"result": True}
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc__:
+            return Misc().exception_f(exc__)
 
     def savequery_f(self, obj):
         """
