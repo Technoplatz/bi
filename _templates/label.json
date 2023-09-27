@@ -45,8 +45,8 @@
     }
   },
   "required": ["lab_man_no", "lab_serial_no", "lab_no", "lab_ratio", "lab_amount"],
-  "index": [["lab_man_no"], ["lab_serial_no"]],
-  "unique": [["lab_no"]],
+  "index": [["lab_man_no"]],
+  "unique": [["lab_no"], ["lab_serial_no"]],
   "sort": {
     "lab_man_no": 1,
     "lab_no": 1

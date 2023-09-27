@@ -48,7 +48,8 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="type_!=='aggregation'; else aggregate" (click)="run_query()" class="data-sq-button">
+              <div *ngIf="type_!=='aggregation'; else aggregate" (click)="run_query()"
+                [class]="running_ ? 'data-sq-button required' : 'data-sq-button'">
                 <ion-icon *ngIf="running_" name="hourglass-outline"></ion-icon>
                 <ion-icon *ngIf="!running_" name="play"></ion-icon>
                 <br />
@@ -58,7 +59,7 @@ https://www.gnu.org/licenses.
                 <div *ngIf="is_loaded" (click)="refresh_data(0, false)" class="data-sq-button">
                   <ion-icon name="sync-circle-outline"></ion-icon>
                   <br />
-                  {{ 'Refresh' | translate }}<br />{{ 'Data' | translate }}
+                  {{ 'Refresh' | translate }}<br />{{ 'Query' | translate }}
                 </div>
                 <div *ngIf="!is_loaded" class="data-sq-button required">
                   <ion-icon name="hourglass-outline"></ion-icon>
@@ -162,7 +163,8 @@ https://www.gnu.org/licenses.
           </div>
           <ng-template #noagg>
             <div class="ion-margin-top">
-              <h6>{{ count_ }} records affected.</h6>
+              <h6><span *ngIf="is_loaded">{{ count_ }} {{'records affected' | translate }}</span><span
+                  *ngIf="!is_loaded">{{'Processing' | translate }}..</span>.</h6>
               <div class="queryro">
                 {{ 'You can manually run this query' | translate }}.<br /><br />
                 {{ aggregates_ }}

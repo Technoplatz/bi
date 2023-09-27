@@ -259,7 +259,8 @@ https://www.gnu.org/licenses.
           </tr>
           <tr *ngFor="let record of data; let i = index">
             <td *ngIf="id=='_query'" (click)="go_query(record)">
-              <ion-icon name="play"></ion-icon>
+              <ion-icon *ngIf="record.que_type==='aggregation'" name="play"></ion-icon>
+              <ion-icon *ngIf="record.que_type!=='aggregation'" name="play-outline" color="danger"></ion-icon>
             </td>
             <td>
               <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"

@@ -346,6 +346,8 @@
     ["dnn_acc_no"],
     ["dnn_status"],
     ["dnn_status", "dnn_no", "dnn_line_no"],
+    ["dnn_no", "dnn_line_no", "dnn_prd_group"],
+    ["dnn_no", "dnn_prd_group"],
     ["dnn_status", "dnn_date"],
     ["dnn_man_no"],
     ["dnn_odi_no", "dnn_odi_sub_no"],
@@ -504,6 +506,11 @@
           "key": "dnn_status",
           "op": "eq",
           "value": "50-OnTheTouchpoint"
+        },
+        {
+          "key": "dnn_labeled",
+          "op": "eq",
+          "value": true
         }
       ],
       "set": [

@@ -568,6 +568,19 @@ class Misc:
         finally:
             return setto__
 
+    def clean_f(self, data_):
+        """
+        docstring is in progress
+        """
+        res_ = None
+        try:
+            if isinstance(data_, str):
+                data_ = escape(data_)
+
+            res_ = bleach.clean(data_) if data_ else None
+        finally:
+            return res_
+
 
 class Mongo:
     """
@@ -582,7 +595,7 @@ class Mongo:
         self.mongo_readpref_primary_ = "primary"
         self.mongo_readpref_secondary_ = "secondary"
         auth_source_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
-        replicaset_ = f"&replicaSet={MONGO_RS_}" if MONGO_RS_ and MONGO_RS_ != "" else ""
+        replicaset_ = f"&replicaSet={MONGO_RS_}" if MONGO_RS_ and MONGO_RS_ is not None else ""
         read_preference_primary_ = f"&readPreference={self.mongo_readpref_primary_}" if self.mongo_readpref_primary_ else ""
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
         tls_ = "&tls=true" if MONGO_TLS_ else "&tls=false"
@@ -591,7 +604,8 @@ class Mongo:
         tls_ca_file_ = f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
         retry_writes_ = "&retryWrites=true" if MONGO_RETRY_WRITES_ else "&retryWrites=false"
-        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}"
+        timeout_ms_ = f"&timeoutMS={MONGO_TIMEOUT_MS_}"
+        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}{timeout_ms_}"
         self.client_ = MongoClient(self.connstr)
         self.db_ = self.client_[MONGO_DB_]
 
@@ -846,7 +860,7 @@ class Crud:
         """
         res_ = None
         try:
-            base_path_ = '/app/_template'
+            base_path_ = "/app/_template"
             filename_ = f"{schema_}.json"
             if not filename_.startswith("_"):
                 raise APIError("invalid schema")
@@ -2654,7 +2668,7 @@ class Crud:
             col_id_ = obj["collection"] if "collection" in obj and obj["collection"] is not None else None
             structure_ = obj["structure"] if "structure" in obj and obj["structure"] is not None else None
             schema_key_ = obj["schema_key"] if "schema_key" in obj and obj["schema_key"] in STRUCTURE_KEYS_ else None
-            user_ = obj["user"] if "user" in obj and obj["user"] != "" and obj["user"] is not None else None
+            user_ = obj["user"] if "user" in obj and obj["user"] is not None else None
 
             if not user_:
                 raise APIError("user not found")
@@ -2852,7 +2866,7 @@ class Crud:
             doc_ = {}
             for item in doc:
                 if item[:1] != "_" or item in Misc().get_except_underdashes():
-                    doc_[item] = doc[item] if doc[item] != "" else None
+                    doc_[item] = doc[item] if doc[item] is not None else None
 
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
@@ -3445,19 +3459,17 @@ class Email:
             message_.attach(MIMEText(html_, "html"))
 
             for file_ in files_:
-                fn_ = file_["name"] if "name" in file_ else None
-                if not fn_:
+                filename_ = file_["name"].replace(f"{API_WORKFILE_PATH_}/", "") if "name" in file_ else None
+                if not filename_:
                     raise APIError("file not defined")
-
-                if not fn_.startswith(API_WORKFILE_PATH_):
+                fullpath_ = os.path.normpath(os.path.join(API_WORKFILE_PATH_, filename_))
+                if not fullpath_.startswith(API_WORKFILE_PATH_):
                     raise APIError("file not allowed")
-                with open(fn_, "rb") as attachment_:
+                with open(fullpath_, "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
-
-                attach_fn_ = fn_.replace(f"{API_WORKFILE_PATH_}/", "")
-                part_.add_header("Content-Disposition", f"attachment; filename= {attach_fn_}")
+                part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
                 message_.attach(part_)
 
             recipients_ = []
@@ -3722,7 +3734,7 @@ class Auth:
                 raise AuthError("token not found")
 
             header_ = jwt.get_unverified_header(token_)
-            token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] != "" and header_["finder"] is not None else None
+            token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] is not None else None
             if not token_finder_:
                 raise AuthError("please use an api access token")
 
@@ -4054,7 +4066,7 @@ class Auth:
             if "email" not in input_ or input_["email"] is None:
                 raise APIError("e-mail is missing")
 
-            email_ = bleach.clean(input_["email"])
+            email_ = Misc().clean_f(input_["email"])
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
@@ -4084,10 +4096,9 @@ class Auth:
         """
         try:
             input_ = request.json
-
-            email_ = input_["email"]
-            password_ = input_["password"]
-            tfac_ = input_["tfac"]
+            email_ = escape(input_["email"])
+            password_ = escape(input_["password"])
+            tfac_ = escape(input_["tfac"])
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
@@ -4133,9 +4144,10 @@ class Auth:
         """
         try:
             input_ = request.json
-            email_ = input_["email"]
-            password_ = input_["password"]
-            tfac_ = input_["tfac"]
+            email_ = escape(input_["email"])
+            password_ = escape(input_["password"])
+            tfac_ = escape(input_["tfac"])
+
             user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
@@ -4279,8 +4291,8 @@ class Auth:
         docstring is in progress
         """
         try:
-            user_id_ = bleach.clean(input_["userid"]) if "userid" in input_ else None
-            password_ = bleach.clean(input_["password"]) if "password" in input_ else None
+            user_id_ = Misc().clean_f(input_["userid"]) if "userid" in input_ else None
+            password_ = Misc().clean_f(input_["password"]) if "password" in input_ else None
 
             if not user_id_:
                 raise APIError("email must be provided")
@@ -4338,7 +4350,7 @@ class Auth:
         docstring is in progress
         """
         try:
-            api_key_ = bleach.clean(input_["api_key"]) if "api_key" in input_ else None
+            api_key_ = Misc().clean_f(input_["api_key"]) if "api_key" in input_ else None
             if not api_key_ or api_key_ is None:
                 raise AuthError("api key must be provided")
 
@@ -4375,8 +4387,8 @@ class Auth:
         """
         try:
             input_ = request.json
-            email_ = input_["email"]
-            password_ = input_["password"]
+            email_ = escape(input_["email"])
+            password_ = escape(input_["password"])
 
             user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
@@ -4407,8 +4419,8 @@ class Auth:
                 raise APIError(checkup_["msg"])
 
             input_ = request.json
-            email_ = bleach.clean(input_["email"])
-            password_ = bleach.clean(input_["password"])
+            email_ = Misc().clean_f(input_["email"])
+            password_ = Misc().clean_f(input_["password"])
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if auth_:
@@ -4506,6 +4518,7 @@ MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
+MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get("MONGO_TIMEOUT_MS") and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0 else 10000
 PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get("PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_announcement"]
@@ -4602,7 +4615,7 @@ def crud_f():
         input_ = request.json
         if "op" not in input_:
             raise APIError({"result": False, "msg": "no operation found"})
-        op_ = input_["op"]
+        op_ = escape(input_["op"])
 
         validate_request_f_ = Security().validate_app_request_f()
         if not validate_request_f_["result"]:
@@ -4754,7 +4767,7 @@ def otp_f():
             raise SessionError({"result": False, "msg": "user session not found"})
         email_ = user_["email"] if "email" in user_ else None
 
-        op_ = request_["op"]
+        op_ = escape(request_["op"])
 
         if op_ == "reset":
             res_ = OTP().reset_otp_f(email_)
@@ -4915,22 +4928,22 @@ def post_f():
         if not request.headers:
             raise AuthError("no headers provided")
 
-        content_type_ = request.headers.get("Content-Type", None) if "Content-Type" in request.headers and request.headers["Content-Type"] != "" else None
+        content_type_ = request.headers.get("Content-Type", None) if "Content-Type" in request.headers else None
         if not content_type_:
             raise APIError("no content type provided")
 
-        operation_ = request.headers.get("operation", None).lower() if "operation" in request.headers and request.headers["operation"] != "" else None
+        operation_ = request.headers.get("operation", None).lower() if "operation" in request.headers else None
         if not operation_:
             raise APIError("no operation provided in header")
 
-        rh_collection_ = request.headers.get("collection", None).lower() if "collection" in request.headers and request.headers["collection"] != "" else None
+        rh_collection_ = request.headers.get("collection", None).lower() if "collection" in request.headers else None
         if not rh_collection_:
             raise APIError("no collection provided in header")
 
         if operation_ not in ["read", "insert", "update", "upsert", "delete"]:
             raise APIError("invalid operation")
 
-        x_api_token_ = request.headers["Authorization"] if "Authorization" in request.headers and request.headers["Authorization"] != "" else None
+        x_api_token_ = request.headers["Authorization"] if "Authorization" in request.headers else None
         if not x_api_token_:
             raise AuthError("no authorization provided")
 
@@ -5106,7 +5119,7 @@ def get_dump_f():
             raise AuthError(permission_f_["msg"])
 
         input_ = request.json
-        id_ = bleach.clean(input_["id"])
+        id_ = Misc().clean_f(input_["id"])
         if not id_:
             raise APIError("dump not selected")
 
@@ -5133,12 +5146,12 @@ def get_query_f(id_):
     """
     status_code_ = 200
     res_ = None
-    id_ = bleach.clean(id_)
+    id_ = Misc().clean_f(id_)
     try:
         if not request.headers:
             raise AuthError({"result": False, "msg": "no header provided"})
 
-        x_api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
+        x_api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] is not None else None
         if not x_api_token_:
             raise AuthError({"result": False, "msg": "missing token"})
 
@@ -5196,9 +5209,9 @@ def get_data_f(id_):
     try:
         if not request.headers:
             raise AuthError({"result": False, "msg": "no header provided"})
-        id_ = bleach.clean(id_)
+        id_ = Misc().clean_f(id_)
         user_ = None
-        api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] != "" else None
+        api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] is not None else None
         if api_token_:
             access_validate_by_api_token_f_ = Auth().access_validate_by_api_token_f(api_token_, "read", id_)
             if not access_validate_by_api_token_f_["result"]:
