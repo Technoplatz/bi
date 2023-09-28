@@ -85,6 +85,7 @@ export class QueryPage implements OnInit {
   public query_url_: string = "";
   public pages_: number = 1;
   public page_: number = 1;
+  public pager_: number = 1;
   public paget_: any = [];
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
@@ -147,6 +148,7 @@ export class QueryPage implements OnInit {
       this.schemevis = "hide";
       this.crud.get_query_data(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res && res.query) {
+          this.pager_ = this.page_;
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;
           this.subheader = res.query.que_title;

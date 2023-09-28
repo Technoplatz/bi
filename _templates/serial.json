@@ -76,7 +76,14 @@
     }
   },
   "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
-  "index": [["ser_is_in"], ["ser_dnn_no"], ["ser_dnn_no", "ser_line_no"], ["ser_sscc_no"], ["ser_dnn_no", "ser_sscc_no"]],
+  "index": [
+    ["ser_is_in"],
+    ["ser_dnn_no"],
+    ["ser_dnn_no", "ser_line_no"],
+    ["ser_dnn_no", "ser_line_no", "ser_prd_no"],
+    ["ser_sscc_no"],
+    ["ser_dnn_no", "ser_sscc_no"]
+  ],
   "unique": [["ser_no"]],
   "sort": {
     "_modified_at": -1
