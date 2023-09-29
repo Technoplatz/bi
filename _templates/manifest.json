@@ -57,10 +57,18 @@
       "description": "Manifest closing date",
       "dateOnly": true
     },
+    "man_gov_amount": {
+      "bsonType": "number",
+      "title": "Amount",
+      "description": "Amount",
+      "default": 0,
+      "decimals": 2,
+      "disabled": false
+    },
     "man_gov_purchase_date": {
       "bsonType": "date",
       "title": "Purchase Date",
-      "description": "Purchase date",
+      "description": "Purchasing date",
       "dateOnly": true
     },
     "man_gov_approval_date": {

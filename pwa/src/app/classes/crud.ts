@@ -169,7 +169,7 @@ export class Crud {
     });
   }
 
-  Submit(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any, actionix: any, link_: any, linked_: any) {
+  submit_f(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any, actionix: any, link_: any, linked_: any) {
     return new Promise((resolve, reject) => {
       const properties = structure.properties;
       let doc_: any = {};

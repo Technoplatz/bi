@@ -127,29 +127,29 @@ https://www.gnu.org/licenses.
           </tr>
           <tr>
             <td [attr.colspan]="fields_?.length+1">
-              <ion-button *ngIf="page_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
+              <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
                 class="ion-no-padding ion-margin-end">
                 <ion-icon name="play-skip-back"></ion-icon>
               </ion-button>
-              <span *ngIf="page_ > 10">
-                <ion-button size="small" fill="clear" (click)="refresh_data(page_-1, false)" class="ion-no-padding">
+              <span *ngIf="pager_ > 10">
+                <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1, false)" class="ion-no-padding">
                   <ion-icon name="caret-back"></ion-icon>
                 </ion-button>
               </span>
               <span *ngFor="let in of paget_">
-                <ion-button *ngIf="page_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
+                <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
                   class="ion-no-padding">
                   <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
                 </ion-button>
-                <ion-button *ngIf="page_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
+                <ion-button *ngIf="pager_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
                   <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
                 </ion-button>
               </span>
-              <span *ngIf="pages_ > 10 && page_ < pages_">
+              <span *ngIf="pages_ > 10 && pager_ < pages_">
                 <ion-button size="small" fill="clear" (click)="refresh_data(pages_, false)" class="ion-no-padding">
                   ...&nbsp;&nbsp;{{ pages_ }}
                 </ion-button>
-                <ion-button size="small" fill="clear" (click)="refresh_data(page_+1, false)" class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
                   <ion-icon name="caret-forward"></ion-icon>
                 </ion-button>
               </span>

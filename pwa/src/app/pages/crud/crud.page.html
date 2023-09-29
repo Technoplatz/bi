@@ -43,18 +43,18 @@ https://www.gnu.org/licenses.
                 <ion-button *ngIf="collection=='_backup' && op=='update' && !isInProgress" (click)="doDump('restore')">
                     {{ 'RESTORE' | translate }}
                 </ion-button>
-                <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="doSubmit()">
+                <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">
                     <ion-icon name="barcode-outline"></ion-icon>&nbsp;
                     {{ 'SCAN' | translate }}
                 </ion-button>
                 <ng-template #noscan>
                     <ion-button *ngIf="collection!='_backup' && collection!='_storage' && op!='filter' && !isInProgress"
-                        (click)="doSubmit()">
+                        (click)="submit_f()">
                         <span *ngIf="op=='action'; else noaction"> {{ 'RUN' | translate }} </span>
                         <ng-template #noaction> {{ 'SAVE' | translate }} </ng-template>
                     </ion-button>
                 </ng-template>
-                <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" (click)="doSubmit()">
+                <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" (click)="submit_f()">
                     {{ 'UPLOAD' | translate }}
                 </ion-button>
                 <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium">
@@ -78,7 +78,7 @@ https://www.gnu.org/licenses.
         </ion-row>
         <ion-row *ngIf="tab=='link'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
-                <ion-button (click)="doSubmit()">
+                <ion-button (click)="submit_f()">
                     <ion-spinner *ngIf="isInProgress; else noattachinprocess" name="dots"></ion-spinner>
                     <ng-template #noattachinprocess>
                         {{ 'SAVE' | translate }}

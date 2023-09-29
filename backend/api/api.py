@@ -382,13 +382,18 @@ class Misc:
         """
         docstring is in progress
         """
-        msg_ = None
+        msg_ = ""
         try:
             self.post_notification(str(exc__))
-            splt_ = str(exc__).split(", full error: ")
-            splt0_ = splt_[0] if splt_ and len(splt_) > 0 else str(exc__)
-            nk_ = splt0_.split(" :: ")
-            msg_ = nk_[2] if nk_ and len(nk_) > 1 else splt0_
+            details_ = exc__.details
+            code_ = exc__.code
+            if "writeErrors" in details_:
+                msg_ = details_
+            else:
+                splt_ = str(exc__).split(", full error: ")
+                splt0_ = splt_[0] if splt_ and len(splt_) > 0 else str(exc__)
+                nk_ = splt0_.split(" :: ")
+                msg_ = nk_[2] if nk_ and len(nk_) > 1 else splt0_
 
         except Exception as exc_:
             msg_ = str(exc_)
@@ -1121,15 +1126,14 @@ class Crud:
         """
         docstring is in progress
         """
+        content_, stats_, res_, details_ = "", "", None, {}
         try:
-            # INPUTS
             form_ = obj["form"]
             file_ = obj["file"]
             collection_ = obj["collection"]
             email_ = form_["email"]
             mimetype_ = file_.content_type
 
-            # GETTING COLLECTION PROPERTIES
             collection__ = f"{collection_}_data"
             find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
@@ -1144,7 +1148,6 @@ class Crud:
                 raise APIError(get_properties_["msg"])
             properties_ = get_properties_["properties"]
 
-            # GET DEFAULT VALUES OF THE REQUIRED FIELDS
             defaults_ = {}
             required_ = col_structure_["required"] if "required" in col_structure_ and len(col_structure_["required"]) > 0 else []
             if required_:
@@ -1158,7 +1161,6 @@ class Crud:
             purge_ = import_["purge"] if "purge" in import_ and import_["purge"] is True else False
             ignored_ = import_["ignored"] if "ignored" in import_ and len(import_["ignored"]) > 0 else []
 
-            # CREATE A DATAFRAME
             if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
                 filesize_ = file_.tell()
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
@@ -1166,19 +1168,17 @@ class Crud:
                 file_.seek(0, os.SEEK_END)
                 df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")
             elif mimetype_ == "text/csv":
-                content_ = file_.read().decode("utf-8")
+                decoded_ = file_.read().decode("utf-8")
                 filesize_ = file_.content_length
                 if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                     raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                 if mimetype_ == "text/csv":
-                    df_ = pd.read_csv(io.StringIO(content_), header=0, dtype="object")
+                    df_ = pd.read_csv(io.StringIO(decoded_), header=0, dtype="object")
             else:
                 raise APIError("file type is not supported")
 
-            # MAKING COLUMN NAMES PRETTY
             df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
 
-            # CONVERTING DATASET COLUMNS
             columns_tobe_deleted_ = []
             for column_ in df_.columns:
                 if column_ in properties_:
@@ -1208,78 +1208,75 @@ class Crud:
                     else:
                         df_[column_] = df_[column_].apply(self.frame_convert_objectid_f)
 
-            # SETS DEFAULT VALUES
             if defaults_:
                 for key_, value_ in defaults_.items():
                     if key_ not in df_.columns:
                         df_[key_] = value_
 
-            # SETS IGNORED COLUMNS
             if ignored_:
                 for ignored__ in ignored_:
                     if ignored__ in df_.columns:
                         df_[ignored__] = None
 
-            # REMOVING UNNECESSRY COLUMNS
             if "_structure" in df_.columns:
                 columns_tobe_deleted_.append("_structure")
 
             if len(columns_tobe_deleted_) > 0:
                 df_.drop(columns_tobe_deleted_, axis=1, inplace=True)
 
-            # SUM OF ALL NUMERICS BY COMBINING DUPLICATE ITEMS
-            # ITS OBVIOUS BUT TRUE :)
             df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
-
-            # REMOVING NANS
             df_.replace([np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True)
-
-            # SETTING THE DEFAULTS
             df_["_created_at"] = df_["_modified_at"] = Misc().get_now_f()
             df_["_created_by"] = df_["_modified_by"] = email_
             df_["_modified_count"] = 0
 
-            # BULK INSERT DF INTO DATABASE
             payload_ = df_.to_dict("records")
-
-            session_client_ = MongoClient(Mongo().connstr)
-            session_db_ = session_client_[MONGO_DB_]
-            session_ = session_client_.start_session()
-            session_.start_transaction()
             count_ = 0
 
             if purge_:
-                session_db_[collection__].delete_many({})
+                Mongo().db_[collection__].delete_many({})
 
+            wrote_ = [pymongo.InsertOne(doc_) for doc_ in payload_]
             if "_id" in df_.columns:
-                upserts_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=True) for doc_ in payload_]
-                insert_many_ = session_db_[collection__].bulk_write(upserts_, session=session_)
-            else:
-                insert_many_ = session_db_[collection__].insert_many(payload_, ordered=False, session=session_)
-                count_ = len(insert_many_.inserted_ids)
+                wrote_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=True) for doc_ in payload_]
 
-            session_.commit_transaction()
-            session_client_.close()
+            bulk_write_ = Mongo().db_[collection__].bulk_write(wrote_, ordered=False)
+            details_, content_ = bulk_write_.bulk_api_result, ""
 
-            return {"result": True, "count": count_, "msg": "file was imported successfully"}
+            res_ = {"result": True, "count": count_, "msg": "file was imported successfully"}
 
-        except pymongo.errors.PyMongoError as exc:
-            exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
-            session_.abort_transaction()
-            res_ = Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            res_ = Misc().mongo_error_f(exc__)
+            details_ = res_["msg"]
+            if "writeErrors" in details_:
+                content_ += "<ul>"
+                for werrs_ in details_["writeErrors"]:
+                    if "errmsg" in werrs_:
+                        content_ += f"<li>{str(werrs_['errmsg'])}</li>"
+                content_ += "</ul>"
+                stats_ += f"<br />FAILED: {str(len(details_['writeErrors']))}"
+            res_["msg"] = "please find the error details in the email we've just sent you"
+
+        except APIError as exc__:
+            content_, details_ = str(exc__), {}
+            res_ = Misc().api_error_f(exc__)
+
+        except Exception as exc__:
+            content_, details_ = str(exc__), {}
+            res_ = Misc().exception_f(exc__)
+
+        finally:
+            stats_ += f"<br />INSERTED: {str(details_['nInserted'])}" if "nInserted" in details_ else ""
+            stats_ += f"<br />UPSERTED: {str(details_['nUpserted'])}" if "nUpserted" in details_ else ""
+            stats_ += f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else ""
+            stats_ += f"<br />MODIFIED: {str(details_['nModified'])}" if "nModified" in details_ else ""
+            stats_ += f"<br />REMOVED: {str(details_['nRemoved'])}" if "nRemoved" in details_ else ""
             Email().send_email_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
-                "html": f"Hi,<br /><br />Here's the data upload result about file that you've just uploaded;<br /><br />MIME TYPE: {mimetype_}<br />FILE SIZE: {filesize_} bytes<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br /><br />ERRORS:<br />{str(exc_obj_)}"
+                "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br />{stats_}<br />{content_}"
             })
-            res_["msg"] = "file upload error! we have just sent an email with the error details."
             return res_
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
 
     def query_run_f(self, input_):
         """
@@ -3513,32 +3510,13 @@ class Security:
         """
         docstring is in progress
         """
-        self.origin = request.headers["Origin"].replace("https://", "").replace("http://", "").replace("/", "").split(":")[0] if request.headers and "Origin" in request.headers else None
+        self.base_header_ = {"Content-Type": "application/json; charset=utf-8"}
 
-    def validate_app_request_f(self):
+    def header_f(self):
         """
         docstring is in progress
         """
-        try:
-            if not self.origin:
-                raise APIError("invalid request")
-
-            if self.origin not in [DOMAIN_, "localhost"]:
-                raise APIError(f"invalid request from {self.origin}")
-
-            return {"result": True}
-
-        except APIError as exc:
-            return Misc().api_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
-    def header_simple_f(self):
-        """
-        docstring is in progress
-        """
-        return {"Content-Type": "application/json; charset=utf-8"}
+        return self.base_header_
 
 
 class OTP:
@@ -4552,10 +4530,6 @@ def storage_f():
     docstring is in progress
     """
     try:
-        validate_request_f_ = Security().validate_app_request_f()
-        if not validate_request_f_["result"]:
-            raise APIError(validate_request_f_["msg"] if "msg" in validate_request_f_ else "validation error")
-
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
             raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
@@ -4566,7 +4540,7 @@ def storage_f():
 
         form_ = request.form.to_dict(flat=True)
         if not form_:
-            raise APIError("no form found")
+            raise APIError("form not found")
 
         file_ = request.files["file"]
         if not file_:
@@ -4599,7 +4573,10 @@ def storage_f():
         if not import_f_["result"]:
             raise APIError(import_f_["msg"])
 
-        return json.dumps({"result": import_f_["result"], "count": import_f_["count"] if "count" in import_f_ and import_f_["count"] >= 0 else 0, "msg": import_f_["msg"] if "msg" in import_f_ else None}, default=json_util.default, sort_keys=False), 200, Security().header_simple_f()
+        count_ = import_f_["count"] if "count" in import_f_ and import_f_["count"] > 0 else 0
+        msg_ = import_f_["msg"] if "msg" in import_f_ else None
+
+        return json.dumps({"result": import_f_["result"], "count": count_, "msg": msg_}, default=json_util.default, sort_keys=False), 200, Security().header_f()
 
     except AuthError as exc_:
         return {"msg": str(exc_), "status": 401}
@@ -4622,10 +4599,6 @@ def crud_f():
         if "op" not in input_:
             raise APIError({"result": False, "msg": "no operation found"})
         op_ = escape(input_["op"])
-
-        validate_request_f_ = Security().validate_app_request_f()
-        if not validate_request_f_["result"]:
-            raise SessionError(validate_request_f_)
 
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
@@ -4760,10 +4733,6 @@ def otp_f():
             res_ = {"result": False, "msg": "no operation found"}
             raise APIError(res_)
 
-        validate_request_f_ = Security().validate_app_request_f()
-        if not validate_request_f_["result"]:
-            raise SessionError(validate_request_f_)
-
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
             raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
@@ -4812,10 +4781,6 @@ def auth_f():
     """
     sc__, res_ = 200, {}
     try:
-        validate_ = Security().validate_app_request_f()
-        if not validate_["result"]:
-            raise SessionError(validate_)
-
         input_ = request.json
         if not input_:
             raise APIError({"result": False, "msg": "input missing"})
@@ -5103,10 +5068,6 @@ def get_dump_f():
     docstring is in progress
     """
     try:
-        validate_ = Security().validate_app_request_f()
-        if not validate_["result"]:
-            raise APIError(validate_["msg"] if "msg" in validate_ else "validation error")
-
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
             raise AuthError(jwt_validate_f_["msg"])
@@ -5131,7 +5092,7 @@ def get_dump_f():
 
         file_ = f"{id_}.gz"
         directory_ = "/dump"
-        header_ = Security().header_simple_f()
+        header_ = Security().header_f()
 
         return send_from_directory(directory=directory_, path=file_, as_attachment=True), 200, header_
 

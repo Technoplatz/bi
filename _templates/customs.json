@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "cum_id": {
+      "bsonType": "string",
+      "title": "ID",
+      "description": "Customs ID",
+      "minLength": 3,
+      "maxLength": 16,
+      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{3,16}$"
+    },
+    "cum_name": {
+      "bsonType": "string",
+      "title": "Name",
+      "description": "Customs name",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{1,64}$"
+    }
+  },
+  "required": ["cum_id", "cum_name"],
+  "index": [],
+  "unique": [["cum_id"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {},
+  "fetchers": [],
+  "import": {}
+}

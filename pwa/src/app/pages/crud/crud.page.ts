@@ -119,7 +119,7 @@ export class CrudPage implements OnInit {
         });
       } else {
         this.crudForm.get(event.target.name)?.setValue(this.input_.replace(/NAVIGATEPREVIOUS|NAVIGATENEXT|UNIDENTIFIED|NULL|CUT|COPY|SHIFT|TAB|CAPSLOCK|METAV|ARROWDOWN|ARROWUP|ARROWLEFT|ARROWRIGHT|BACKSPACE/gi, "").toUpperCase());
-        this.doSubmit();
+        this.submit_f();
       }
     } else {
       this.input_ += event.key;
@@ -244,7 +244,7 @@ export class CrudPage implements OnInit {
     });
   }
 
-  doSubmit() {
+  submit_f() {
     if (!this.isInProgress) {
       this.input_ = "";
       this.crudForm.updateValueAndValidity();
@@ -255,7 +255,7 @@ export class CrudPage implements OnInit {
         this.linked_ = this.link_text ? this.link_text.split('\n').filter((e: any) => { return e }) : [];
         this.modified = true;
         this.isInProgress = true;
-        this.crud.Submit(this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix, this.link_, this.linked_).then((res: any) => {
+        this.crud.submit_f(this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix, this.link_, this.linked_).then((res: any) => {
           res && res?.result === true ? this.misc.doMessage(`${this.op} completed successfully`, "success") : null;
           this.crud.modalSubmitListener.next({ result: true });
           if (res && res.token) {
@@ -344,7 +344,7 @@ export class CrudPage implements OnInit {
           text: "OKAY",
           handler: () => {
             this.op = "remove";
-            this.doSubmit();
+            this.submit_f();
           }
         }
       ]

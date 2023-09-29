@@ -1,13 +1,5 @@
 {
   "properties": {
-    "lab_man_no": {
-      "bsonType": "string",
-      "title": "Manifest No",
-      "description": "Manifest number",
-      "minLength": 1,
-      "maxLength": 32,
-      "caseType": "uppercase"
-    },
     "lab_no": {
       "bsonType": "string",
       "title": "Label No",
@@ -27,24 +19,16 @@
       "caseType": "uppercase",
       "permanent": true
     },
-    "lab_ratio": {
-      "bsonType": "number",
-      "title": "Rate",
-      "description": "Label rate",
-      "default": 0,
-      "decimals": 2,
-      "permanent": true
-    },
-    "lab_amount": {
-      "bsonType": "number",
-      "title": "Amount",
-      "description": "Amount",
-      "default": 0,
-      "decimals": 2,
-      "permanent": true
+    "lab_man_no": {
+      "bsonType": "string",
+      "title": "Manifest No",
+      "description": "Manifest number",
+      "minLength": 1,
+      "maxLength": 32,
+      "caseType": "uppercase"
     }
   },
-  "required": ["lab_man_no", "lab_serial_no", "lab_no", "lab_ratio", "lab_amount"],
+  "required": ["lab_no", "lab_serial_no", "lab_man_no"],
   "index": [["lab_man_no"]],
   "unique": [["lab_no"], ["lab_serial_no"]],
   "sort": {

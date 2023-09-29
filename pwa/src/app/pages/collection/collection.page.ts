@@ -601,7 +601,7 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  doSaveSchema() {
+  save_schema_f() {
     if (this.structured_) {
       this.is_saving = true;
       this.misc.apiCall("/crud", {
@@ -626,8 +626,8 @@ export class CollectionPage implements OnInit {
 
   }
 
-  doUploadModal() {
-    this.misc.doUploadModal(this.id).then(() => {
+  upload_modal_f() {
+    this.misc.upload_modal_f(this.id).then(() => { }).finally(() => {
       this.refresh_data(0).then(() => { });
     });
   }
