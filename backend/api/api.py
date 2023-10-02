@@ -1271,6 +1271,8 @@ class Crud:
             stats_ += f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else ""
             stats_ += f"<br />MODIFIED: {str(details_['nModified'])}" if "nModified" in details_ else ""
             stats_ += f"<br />REMOVED: {str(details_['nRemoved'])}" if "nRemoved" in details_ else ""
+            if not file_res_.startswith(API_WORKFILE_PATH_):
+                raise APIError("file not allowed")
             with open(file_res_, "w", encoding="utf-8") as file_:
                 file_.write(stats_.replace("<br />", "\n") + "\n\n-----BEGIN ERROR LIST-----\n" + content_ + "-----END ERROR LIST-----")
             file_.close()

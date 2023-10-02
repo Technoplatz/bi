@@ -44,17 +44,17 @@ export const environment = {
     default_collation: '{"locale": "tr"}',
     default_page: 1,
     default_icon: "medical-outline",
-    limit: 25,
+    limit: 19,
     limits: [20, 50, 100],
     loadingText: "Bitte warten Sie",
     defaultColumnWidth: 140,
     default_delay: 500
   },
   page_limits: [
-    { h: 900, limit: 14 },
-    { h: 1050, limit: 19 },
-    { h: 1080, limit: 20 },
-    { h: 1280, limit: 28 }
+    { h: 900, limit: 13 },
+    { h: 1050, limit: 18 },
+    { h: 1080, limit: 19 },
+    { h: 1280, limit: 26 }
   ],
   import_structure: {
     "properties": {

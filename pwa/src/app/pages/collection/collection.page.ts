@@ -60,16 +60,17 @@ export class CollectionPage implements OnInit {
   public user: any = null;
   public perm: boolean = false;
   public is_crud: boolean = false;
-  public paget: any = [];
+  public paget_: any = [];
   public id: string = "";
   public filter_: any = [];
   public searched: any = null;
   public data: any = [];
   public selected: any = [];
   private views: any = [];
-  public pages: any = [];
+  public pages_: any = [];
   public limit_: number = environment.misc.limit;
-  public page: number = 1;
+  public page_: number = 1;
+  public pager_: number = 1;
   private page_start: number = 1;
   public count: number = 0;
   public is_loaded: boolean = true;
@@ -163,7 +164,7 @@ export class CollectionPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
-    this.header = this.is_crud ? "COLLECTIONS" : ["_collection", "_query"].includes(this.id) ? "STUDIO" : "ADMINISTRATION";
+    this.header = this.is_crud ? "COLLECTIONS" : this.id === "_collection" ? "DATA COLLECTIONS" : this.id === "_query" ? "QUERIES" : this.id === "_visual" ? "VISUALIZATION" : "ADMINISTRATION";
   }
 
   ionViewDidEnter() {
@@ -176,7 +177,7 @@ export class CollectionPage implements OnInit {
           LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
           this.actions = [];
           this.crud.getCollection(this.id).then((res: any) => {
-            this.page_limits_.filter((page_limits_: any) => page_limits_.h === this.screen_size_.h ? res.data?.col_structure?.actions?.length > 0 ? this.limit_ = page_limits_.limit - 4: this.limit_ = page_limits_.limit : this.limit_ = page_limits_.limit_);
+            this.page_limits_.filter((page_limits_: any) => page_limits_.h === this.screen_size_.h ? res.data?.col_structure?.actions?.length > 0 ? this.limit_ = page_limits_.limit - 3 : this.limit_ = page_limits_.limit : this.limit_ = this.limit_);
             this.counters_ = res && res.counters ? res.counters : {};
             this.subheader = res && res.data ? res.data.col_title : this.id;
             this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
@@ -212,16 +213,17 @@ export class CollectionPage implements OnInit {
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
           this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           this.count = 0;
-          this.page = p === 0 ? 1 : p;
+          this.page_ = p === 0 ? 1 : p;
           this.misc.apiCall("crud", {
             op: "read",
             collection: this.id,
             projection: null,
             match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
             sort: this.sort,
-            page: this.page,
+            page: this.page_,
             limit: this.limit_
           }).then((res: any) => {
+            this.pager_ = this.page_;
             this.editor?.setMode(this.jeoptions.mode);
             this.build_schema_f(res.structure);
             this.data = res.data;
@@ -234,14 +236,14 @@ export class CollectionPage implements OnInit {
             this.multicheckbox = false;
             this.multicheckbox ? this.multicheckbox = false : null;
             this.selected = new Array(res.data.length).fill(false);
-            this.pages = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
-            const lmt = this.pages >= 10 ? 10 : this.pages;
-            this.paget = new Array(lmt);
-            this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;
+            this.pages_ = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
+            const lmt = this.pages_ >= 10 ? 10 : this.pages_;
+            this.paget_ = new Array(lmt);
+            this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
             this.page_end = this.page_start + 10;
             this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
-            for (let p = 0; p < this.paget.length; p++) {
-              this.paget[p] = this.page_start + p;
+            for (let p = 0; p < this.paget_.length; p++) {
+              this.paget_[p] = this.page_start + p;
             }
             resolve(true);
           }).catch((error: any) => {

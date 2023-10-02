@@ -127,7 +127,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- ACTION BUTTONS -->
-        <ion-grid *ngIf="is_crud && actions.length > 0" class="ion-no-padding ion-margin-top ion-margin-bottom">
+        <ion-grid *ngIf="is_crud && actions.length > 0" class="actions-grid">
           <ion-row class="ion-no-margin">
             <ion-col>
               <span *ngFor="let item of actions; let ac = index">
@@ -151,6 +151,8 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
+
+        <!-- CRUD GRID SECTION -->
         <table *ngIf="data.length >= 0" class="data-table">
           <tr>
             <th *ngIf="id=='_query'">
@@ -322,39 +324,40 @@ https://www.gnu.org/licenses.
             </td>
           </tr>
         </table>
-        <!-- CRUD GRID SECTION -->
-        <ion-grid *ngIf="data.length >= 0" class="ion-no-padding data-grid">
-          <ion-row *ngIf="count>=0" class="pagination">
-            <ion-col size="12" class="ion-no-padding pages-col">
-              <ion-button *ngIf="page > 1" size="small" fill="clear" (click)="refresh_data(0)"
+
+        <!-- CRUD PAGINATION SECTION -->
+        <table>
+          <tr>
+            <td [attr.colspan]="properties_?.length+1">
+              <ion-button *ngIf="page_ > 1" size="small" fill="clear" (click)="refresh_data(0)"
                 class="ion-no-padding ion-margin-end">
                 <ion-icon name="play-skip-back"></ion-icon>
               </ion-button>
-              <span *ngIf="page > 10">
-                <ion-button size="small" fill="clear" (click)="refresh_data(page-1)" class="ion-no-padding">
+              <span *ngIf="page_ > 10">
+                <ion-button size="small" fill="clear" (click)="refresh_data(page_-1)" class="ion-no-padding">
                   <ion-icon name="caret-back"></ion-icon>
                 </ion-button>
               </span>
-              <span *ngFor="let in of paget; let i = index">
-                <ion-button *ngIf="page != in" size="small" fill="clear" (click)="refresh_data(in)"
+              <span *ngFor="let in of paget_">
+                <ion-button *ngIf="page_ != in" size="small" fill="clear" (click)="refresh_data(in)"
                   class="ion-no-padding">
                   <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
                 </ion-button>
-                <ion-button *ngIf="page == in" size="small" fill="clear" class="ion-no-padding text-underlined">
+                <ion-button *ngIf="page_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
                   <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
                 </ion-button>
               </span>
-              <span *ngIf="pages > 10 && page < pages">
-                <ion-button size="small" fill="clear" (click)="refresh_data(pages)" class="ion-no-padding">
-                  ... {{ pages }}
+              <span *ngIf="pages_ > 10 && page_ < pages_">
+                <ion-button size="small" fill="clear" (click)="refresh_data(pages_)" class="ion-no-padding">
+                  ...&nbsp;&nbsp;{{ pages_ }}
                 </ion-button>
-                <ion-button size="small" fill="clear" (click)="refresh_data(page+1)" class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(page_+1)" class="ion-no-padding">
                   <ion-icon name="caret-forward"></ion-icon>
                 </ion-button>
               </span>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+            </td>
+          </tr>
+        </table>
       </ion-col>
       <ng-template #dataloading>
         <ion-col class="warten-sie">

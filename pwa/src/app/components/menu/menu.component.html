@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
 
-<ion-content>
+<div>
   <ion-header class="ion-no-border">
     <ion-toolbar class="clicked-item" (click)="misc.navi.next('dashboard')">
       <img alt="logo" class="ion-margin-start bi-logo" src="../../../assets/images/logo.png" />
@@ -44,32 +44,29 @@ https://www.gnu.org/licenses.
         </span>
       </ion-label>
     </ion-item>
-    <ion-item lines="none" class="dash-item">
+    <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
-        <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('dashboard')">
-          <ion-icon name="easel-outline"></ion-icon>{{ "Dashboard" | translate }}
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="home-outline"></ion-icon>{{ 'Navigation' | translate }}
         </ion-button>
-      </ion-label>
-    </ion-item>
-    <ion-item *ngIf="perm_" lines="none" class="dash-item">
-      <ion-label class="ion-text-wrap ion-no-margin">
-        <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('admin/_collection')">
-          <ion-icon name="folder-open-outline"></ion-icon>{{ "Collections" | translate }}
-        </ion-button>
-      </ion-label>
-    </ion-item>
-    <ion-item *ngIf="perm_" lines="none" class="dash-item">
-      <ion-label class="ion-text-wrap ion-no-margin">
-        <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('admin/_query')">
-          <ion-icon name="play-outline"></ion-icon>{{ "Queries" | translate }}
-        </ion-button>
-      </ion-label>
-    </ion-item>
-    <ion-item *ngIf="perm_" lines="none" class="dash-item">
-      <ion-label class="ion-text-wrap ion-no-margin">
-        <ion-button size="default" fill="clear" class="dash-button" (click)="misc.navi.next('admin/_visual')">
-          <ion-icon name="stats-chart-sharp"></ion-icon>{{ "Visualization" | translate }} [beta]
-        </ion-button>
+        <div>
+          <p (click)="misc.navi.next('dashboard')"
+            class="clicked-item dark">
+            {{ 'Dashboard' }}
+          </p>
+          <p *ngIf="perm_" (click)="misc.navi.next('admin/_collection')"
+            class="clicked-item dark">
+            {{ 'Collections' }}
+          </p>
+          <p *ngIf="perm_" (click)="misc.navi.next('admin/_query')"
+            class="clicked-item dark">
+            {{ 'Queries' }}
+          </p>
+          <p *ngIf="perm_" (click)="misc.navi.next('admin/_visual')"
+            class="clicked-item dark">
+            {{ 'Visualization' }} [Beta]
+          </p>
+        </div>
       </ion-label>
     </ion-item>
     <ion-item lines="none">
@@ -90,7 +87,7 @@ https://www.gnu.org/licenses.
         </ng-template>
       </ion-label>
     </ion-item>
-    <ion-item lines="none">
+    <!-- <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="eye-outline"></ion-icon>{{ "Shared Views" | translate }}
@@ -106,7 +103,7 @@ https://www.gnu.org/licenses.
           </p>
         </ng-template>
       </ion-label>
-    </ion-item>
+    </ion-item> -->
     <ion-item *ngIf="perm_ && segmentsadm?.length > 0" lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
@@ -128,4 +125,4 @@ https://www.gnu.org/licenses.
       </ion-label>
     </ion-item>
   </ion-list>
-</ion-content>
+</div>

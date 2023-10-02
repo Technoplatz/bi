@@ -631,7 +631,7 @@ form ion-item ion-label {
 
 .dash-button {
   --padding-start: 0px !important;
-  font-weight: bold;
+  font-weight: 500;
   font-size: 14px;
   cursor: pointer !important;
 }
@@ -647,7 +647,7 @@ form ion-item ion-label {
 }
 
 .dash-item {
-  height: 45px !important;
+  height: 40px !important;
   margin-top: -10px;
 }
 
@@ -707,12 +707,17 @@ form ion-item ion-label {
 
 .menu-side {
   padding-left: 16px;
-  overflow-y: scroll !important;
 }
 
 .menu-side p {
   margin-left: 28px;
   font-weight: 500;
+}
+
+.menu-side p:hover {
+  border-left: 4px solid var(--ion-color-primary);
+  padding-left: 6px;
+  margin-left: 18px;
 }
 
 .menu-side p ion-icon {
@@ -943,23 +948,15 @@ ion-label {
 }
 
 app-menu {
-  margin-top: 0px;
-  width: 270px !important;
-  border-right: 1px solid var(--ion-color-light);
+  min-width: 230px;
+  max-width: 230px;
+  height: 100vh;
+  top: 0;
   z-index: 999;
 }
 
-app-menu .toggler {
-  position: absolute !important;
-  background-color: var(--ion-color-primary);
-  width: 20px;
-  height: 40px;
-  right: 0px;
-  top: 14px;
-  cursor: pointer;
-  padding: 0px;
-  padding-left: 4px !important;
-  z-index: 9999;
+app-menu:hover {
+  overflow-y: scroll !important;
 }
 
 .toggler ion-icon {
@@ -1017,7 +1014,7 @@ app-menu .toggler {
 
 .inner-footer a {
   text-decoration: none;
-  color: var(--ion-color-primary);
+  color: var(--ion-color-dark);
 }
 
 .modal-header {
@@ -1347,7 +1344,7 @@ sup {
 .pages-col {
   padding: 0px !important;
   border-bottom: 0px !important;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 
 .object-underline {
@@ -1510,6 +1507,12 @@ sup {
 .segment-selected {
   margin-top: 10px !important;
   margin-right: 0px !important;
+}
+
+.actions-grid {
+  padding: 0px;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .error-grid {
