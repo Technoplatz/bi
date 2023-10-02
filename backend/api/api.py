@@ -635,7 +635,7 @@ class Mongo:
                 raise APIError("dump command error")
             subprocess.call(["mongodump", command_])
 
-            if not fullpath_.startswith(API_DUMPFILE_PATH_):
+            if not fullpath_.startswith(DUMP_PATH_):
                 raise APIError("dump file not allowed")
             size_ = os.path.getsize(fullpath_)
 
@@ -665,7 +665,7 @@ class Mongo:
                 raise APIError("restore command error")
             subprocess.call(["mongorestore", command_])
 
-            if not fullpath_.startswith(API_DUMPFILE_PATH_):
+            if not fullpath_.startswith(DUMP_PATH_):
                 raise APIError("dump file not allowed")
             size_ = os.path.getsize(fullpath_)
 
@@ -1125,8 +1125,7 @@ class Crud:
         """
         docstring is in progress
         """
-        content_, stats_, res_, details_, files_ = "", "", None, {}, []
-        file_res_ = f"{API_WORKFILE_PATH_}/imported-{Misc().get_timestamp_f()}.txt"
+        content_, stats_, res_, details_, files_, filename_ = "", "", None, {}, [], ""
         try:
             form_ = obj["form"]
             file_ = obj["file"]
@@ -1138,8 +1137,6 @@ class Crud:
             find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
-
-            file_res_ = f"{API_WORKFILE_PATH_}/imported-{collection_}-{Misc().get_timestamp_f()}.txt"
 
             col_structure_ = find_one_["col_structure"] if "col_structure" in find_one_ else None
             if not col_structure_:
@@ -1254,7 +1251,7 @@ class Crud:
                 for werrs_ in details_["writeErrors"]:
                     if "errmsg" in werrs_:
                         content_ += f"{str(werrs_['errmsg'])}\n"
-                stats_ += f"<br />FAILED: {str(len(details_['writeErrors']))}"
+                stats_ += f"<br />FAILED: {str(len(details_['writeErrors']))}<br />"
             res_["msg"] = "please find the error details in the email we've just sent you"
 
         except APIError as exc__:
@@ -1266,21 +1263,24 @@ class Crud:
             res_ = Misc().exception_f(exc__)
 
         finally:
+            stats_ += f"<br />ROW COUNT: {str(len(df_))}"
             stats_ += f"<br />INSERTED: {str(details_['nInserted'])}" if "nInserted" in details_ else ""
             stats_ += f"<br />UPSERTED: {str(details_['nUpserted'])}" if "nUpserted" in details_ else ""
             stats_ += f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else ""
             stats_ += f"<br />MODIFIED: {str(details_['nModified'])}" if "nModified" in details_ else ""
             stats_ += f"<br />REMOVED: {str(details_['nRemoved'])}" if "nRemoved" in details_ else ""
-            if not file_res_.startswith(API_WORKFILE_PATH_):
+            filename_ = f"imported-{collection_}-{Misc().get_timestamp_f()}.txt"
+            fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
+            if not fullpath_.startswith(TEMP_PATH_):
                 raise APIError("file not allowed")
-            with open(file_res_, "w", encoding="utf-8") as file_:
+            with open(fullpath_, "w", encoding="utf-8") as file_:
                 file_.write(stats_.replace("<br />", "\n") + "\n\n-----BEGIN ERROR LIST-----\n" + content_ + "-----END ERROR LIST-----")
             file_.close()
-            files_.append({"name": file_res_, "type": "txt"})
+            files_.append({"name": fullpath_, "type": "txt"})
             Email().send_email_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
-                "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br />{stats_}",
+                "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}<br />{stats_}",
                 "files": files_
             })
             return res_
@@ -1337,7 +1337,7 @@ class Crud:
                     aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
                 aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
                 df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(aggregated_)))).fillna("")
-                file_excel_ = f"{API_WORKFILE_PATH_}/query-{que_id_}-{get_timestamp_f_}.xlsx"
+                file_excel_ = f"{API_TEMPFILE_PATH_}/query-{que_id_}-{get_timestamp_f_}.xlsx"
                 df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
                 files_.append({"name": file_excel_, "type": "xlsx"})
                 count_ = len(df_raw_.index)
@@ -1429,22 +1429,22 @@ class Crud:
 
             files_ = []
             if data_json_:
-                file_json_ = f"{API_WORKFILE_PATH_}/{id_}.json"
-                file_json_raw_ = f"{API_WORKFILE_PATH_}/{id_}-detail.json"
+                file_json_ = f"{API_TEMPFILE_PATH_}/{id_}.json"
+                file_json_raw_ = f"{API_TEMPFILE_PATH_}/{id_}-detail.json"
                 df_.to_json(f"{file_json_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=False)
                 df_raw_.to_json(f"{file_json_raw_}", orient="records", date_format="iso", force_ascii=False, date_unit="s", default_handler=None, lines=False, compression=None, index=False)
                 files_.append({"name": file_json_, "type": "json"})
                 files_.append({"name": file_json_raw_, "type": "json"})
             if data_csv_:
-                file_csv_ = f"{API_WORKFILE_PATH_}/{id_}.csv"
-                file_csv_raw_ = f"{API_WORKFILE_PATH_}/{id_}-detail.csv"
+                file_csv_ = f"{API_TEMPFILE_PATH_}/{id_}.csv"
+                file_csv_raw_ = f"{API_TEMPFILE_PATH_}/{id_}-detail.csv"
                 df_.to_csv(f"{file_csv_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
                 df_raw_.to_csv(f"{file_csv_raw_}", sep=";", encoding="utf-8", header=True, decimal=".", index=False)
                 files_.append({"name": file_csv_, "type": "csv"})
                 files_.append({"name": file_csv_raw_, "type": "csv"})
             if data_excel_:
-                file_excel_ = f"{API_WORKFILE_PATH_}/{id_}.xlsx"
-                file_excel_raw_ = f"{API_WORKFILE_PATH_}/{id_}-detail.xlsx"
+                file_excel_ = f"{API_TEMPFILE_PATH_}/{id_}.xlsx"
+                file_excel_raw_ = f"{API_TEMPFILE_PATH_}/{id_}-detail.xlsx"
                 df_.to_excel(f"{file_excel_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
                 df_raw_.to_excel(f"{file_excel_raw_}", sheet_name=col_id_, engine="xlsxwriter", header=True, index=False)
                 files_.append({"name": file_excel_, "type": "xlsx"})
@@ -1618,7 +1618,7 @@ class Crud:
                     if not fields_:
                         raise AppException("no fields field found in link")
                     type_ = "csv"
-                    file_ = f"{API_WORKFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
+                    file_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
 
                     command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
@@ -3199,7 +3199,7 @@ class Crud:
                     notification_["fields"]) > 0 else notification_["fields"].replace(" ", "") if notification_ and "fields" in notification_ else None
                 if get_notification_filtered_ and fields_ and attachment_:
                     type_ = "csv"
-                    file_ = f"{API_WORKFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
+                    file_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
 
                     command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
@@ -3426,11 +3426,11 @@ class Email:
             message_.attach(MIMEText(html_, "html"))
 
             for file_ in files_:
-                filename_ = file_["name"].replace(f"{API_WORKFILE_PATH_}/", "") if "name" in file_ else None
+                filename_ = file_["name"].replace(f"{API_TEMPFILE_PATH_}/", "") if "name" in file_ else None
                 if not filename_:
                     raise APIError("file not defined")
-                fullpath_ = os.path.normpath(os.path.join(API_WORKFILE_PATH_, filename_))
-                if not fullpath_.startswith(API_WORKFILE_PATH_):
+                fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
+                if not fullpath_.startswith(TEMP_PATH_):
                     raise APIError("file not allowed")
                 with open(fullpath_, "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
@@ -4447,8 +4447,8 @@ API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
 API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
-API_WORKFILE_PATH_ = f"/{os.environ.get('API_WORKFILE_PATH')}"
-API_DUMPFILE_PATH_ = f"/{os.environ.get('API_DUMPFILE_PATH')}"
+API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
+API_DUMPFILE_PATH_ = os.environ.get('API_DUMPFILE_PATH')
 API_CORS_ORIGINS_ = os.environ.get('API_CORS_ORIGINS').strip().split(",")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
@@ -4473,6 +4473,8 @@ PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers", "import"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
+TEMP_PATH_ = "/temp"
+DUMP_PATH_ = "/dump"
 
 app = Flask(__name__)
 app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_

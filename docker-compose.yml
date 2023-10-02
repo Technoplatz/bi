@@ -284,7 +284,7 @@ services:
       - com.centurylinklabs.watchtower.enable=false
     volumes:
       - bi-cert-volume:/cert
-      - bi-storage-volume:/docs
+      - bi-storage-volume:${API_TEMPFILE_PATH}
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -311,6 +311,7 @@ services:
       - FROM_EMAIL=${FROM_EMAIL}
       - COMPANY_NAME=${COMPANY_NAME}
       - NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_SLACK_HOOK_URL}
+      - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
     links:
       - replicaset
     extra_hosts:
@@ -344,8 +345,8 @@ services:
       - com.centurylinklabs.watchtower.enable=false
     volumes:
       - bi-storage-volume:/cron
-      - bi-storage-volume:/docs
-      - bi-storage-volume:/dump
+      - bi-storage-volume:${API_TEMPFILE_PATH}
+      - bi-storage-volume:${API_DUMPFILE_PATH}
       - bi-storage-volume:/vault
       - bi-cert-volume:/cert
       - /etc/timezone:/etc/timezone:ro
@@ -378,7 +379,7 @@ services:
       - API_MAX_CONTENT_LENGTH=${API_MAX_CONTENT_LENGTH}
       - API_DEFAULT_AGGREGATION_LIMIT=${API_DEFAULT_AGGREGATION_LIMIT}
       - API_QUERY_PAGE_SIZE=${API_QUERY_PAGE_SIZE}
-      - API_WORKFILE_PATH=${API_WORKFILE_PATH}
+      - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
       - API_DUMPFILE_PATH=${API_DUMPFILE_PATH}
       - API_CORS_ORIGINS=${API_CORS_ORIGINS}
       - NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_SLACK_HOOK_URL}

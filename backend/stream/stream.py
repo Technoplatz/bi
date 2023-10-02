@@ -473,7 +473,7 @@ class Trigger():
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
-                filename_ = filename_.replace("/docs/", "").replace("/cron/", "")
+                filename_ = filename_.replace(f"{API_TEMPFILE_PATH_}/", "").replace("/cron/", "")
                 part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
                 message_.attach(part_)
 
@@ -853,7 +853,7 @@ class Trigger():
                             "properties": nproperties_,
                             "data": full_document_
                         }))
-                        file_ = f"/docs/stream-{self.get_timestamp_f()}.{type_}"
+                        file_ = f"{API_TEMPFILE_PATH_}/stream-{self.get_timestamp_f()}.{type_}"
                         ncollection_ += "_data"
                         command_ = f"mongoexport --quiet --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}'"
 
@@ -996,6 +996,7 @@ mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
 mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 notification_slack_hook_url_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
+API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
 
 if __name__ == "__main__":
     print_ = partial(print, flush=True)
