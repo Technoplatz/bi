@@ -125,6 +125,8 @@ https://www.gnu.org/licenses.
               {{ record[item_]?.toString() }}
             </td>
           </tr>
+        </table>
+        <table>
           <tr>
             <td [attr.colspan]="fields_?.length+1">
               <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"

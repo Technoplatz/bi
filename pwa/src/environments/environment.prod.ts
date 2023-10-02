@@ -50,6 +50,12 @@ export const environment = {
     defaultColumnWidth: 140,
     default_delay: 500
   },
+  page_limits: [
+    { h: 900, limit: 14 },
+    { h: 1050, limit: 19 },
+    { h: 1080, limit: 20 },
+    { h: 1280, limit: 28 }
+  ],
   import_structure: {
     "properties": {
       "sto_id": {

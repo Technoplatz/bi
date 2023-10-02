@@ -52,6 +52,7 @@ export class Miscellaneous {
   public menutoggle = new BehaviorSubject<boolean>(false);
   public version = new BehaviorSubject<any>(null);
   public saas = new BehaviorSubject<any>(null);
+  public screen_size = new BehaviorSubject<any>(null);
   public toggle: boolean = true;
   private collections_: any;
 

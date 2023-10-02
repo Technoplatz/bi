@@ -1125,7 +1125,8 @@ class Crud:
         """
         docstring is in progress
         """
-        content_, stats_, res_, details_ = "", "", None, {}
+        content_, stats_, res_, details_, files_ = "", "", None, {}, []
+        file_res_ = f"{API_WORKFILE_PATH_}/imported-{Misc().get_timestamp_f()}.txt"
         try:
             form_ = obj["form"]
             file_ = obj["file"]
@@ -1137,6 +1138,8 @@ class Crud:
             find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
+
+            file_res_ = f"{API_WORKFILE_PATH_}/imported-{collection_}-{Misc().get_timestamp_f()}.txt"
 
             col_structure_ = find_one_["col_structure"] if "col_structure" in find_one_ else None
             if not col_structure_:
@@ -1248,11 +1251,9 @@ class Crud:
             res_ = Misc().mongo_error_f(exc__)
             details_ = res_["msg"]
             if "writeErrors" in details_:
-                content_ += "<ul>"
                 for werrs_ in details_["writeErrors"]:
                     if "errmsg" in werrs_:
-                        content_ += f"<li>{str(werrs_['errmsg'])}</li>"
-                content_ += "</ul>"
+                        content_ += f"{str(werrs_['errmsg'])}\n"
                 stats_ += f"<br />FAILED: {str(len(details_['writeErrors']))}"
             res_["msg"] = "please find the error details in the email we've just sent you"
 
@@ -1270,10 +1271,15 @@ class Crud:
             stats_ += f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else ""
             stats_ += f"<br />MODIFIED: {str(details_['nModified'])}" if "nModified" in details_ else ""
             stats_ += f"<br />REMOVED: {str(details_['nRemoved'])}" if "nRemoved" in details_ else ""
+            with open(file_res_, "w", encoding="utf-8") as file_:
+                file_.write(stats_.replace("<br />", "\n") + "\n\n-----BEGIN ERROR LIST-----\n" + content_ + "-----END ERROR LIST-----")
+            file_.close()
+            files_.append({"name": file_res_, "type": "txt"})
             Email().send_email_f({
                 "personalizations": {"to": [{"email": email_, "name": None}]},
                 "op": "importerr",
-                "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br />{stats_}<br />{content_}"
+                "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />COLLECTION: {collection_}<br />ROW COUNT: {len(df_)}<br />{stats_}",
+                "files": files_
             })
             return res_
 
@@ -1328,8 +1334,8 @@ class Crud:
                 if not limit_found_:
                     aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
                 aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
-                file_excel_ = f"{API_WORKFILE_PATH_}/query-{que_id_}-{get_timestamp_f_}.xlsx"
                 df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(aggregated_)))).fillna("")
+                file_excel_ = f"{API_WORKFILE_PATH_}/query-{que_id_}-{get_timestamp_f_}.xlsx"
                 df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
                 files_.append({"name": file_excel_, "type": "xlsx"})
                 count_ = len(df_raw_.index)

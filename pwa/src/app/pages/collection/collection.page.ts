@@ -68,7 +68,7 @@ export class CollectionPage implements OnInit {
   public selected: any = [];
   private views: any = [];
   public pages: any = [];
-  public limit: number = environment.misc.limit;
+  public limit_: number = environment.misc.limit;
   public page: number = 1;
   private page_start: number = 1;
   public count: number = 0;
@@ -91,6 +91,9 @@ export class CollectionPage implements OnInit {
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
+  private screen_size_: any = {};
+  private page_limits_: any = environment.page_limits;
+  private segmentsadm_: any = environment.segmentsadm;
   public schema_key: any = null;
   public properties_: any = {};
   public is_saving: boolean = false;
@@ -102,7 +105,6 @@ export class CollectionPage implements OnInit {
   private structured_: any = null;
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
-  private segmentsadm_: any = environment.segmentsadm;
   public is_inprogress: boolean = false;
   public flashcards_: any = [];
   public menutoggle: boolean = false;
@@ -144,6 +146,9 @@ export class CollectionPage implements OnInit {
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.user = res;
     });
+    this.misc.screen_size.subscribe((res: any) => {
+      this.screen_size_ = res;
+    });
   }
 
   ngOnDestroy() {
@@ -159,13 +164,6 @@ export class CollectionPage implements OnInit {
     this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
     this.header = this.is_crud ? "COLLECTIONS" : ["_collection", "_query"].includes(this.id) ? "STUDIO" : "ADMINISTRATION";
-    this.crud.getCollection(this.id).then((res: any) => {
-      this.counters_ = res && res.counters ? res.counters : {};
-      this.subheader = res && res.data ? res.data.col_title : this.id;
-      this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
-    }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
-    });
   }
 
   ionViewDidEnter() {
@@ -177,17 +175,25 @@ export class CollectionPage implements OnInit {
           this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
           this.actions = [];
-          this.refresh_data(0).then(() => { }).catch((error: any) => {
+          this.crud.getCollection(this.id).then((res: any) => {
+            this.page_limits_.filter((page_limits_: any) => page_limits_.h === this.screen_size_.h ? res.data?.col_structure?.actions?.length > 0 ? this.limit_ = page_limits_.limit - 4: this.limit_ = page_limits_.limit : this.limit_ = page_limits_.limit_);
+            this.counters_ = res && res.counters ? res.counters : {};
+            this.subheader = res && res.data ? res.data.col_title : this.id;
+            this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
+            this.refresh_data(0).then(() => { }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+            }).finally(() => {
+              this.is_initialized = true;
+            });
+          }).catch((error: any) => {
             this.misc.doMessage(error, "error");
-          }).finally(() => {
-            this.is_initialized = true;
           });
         });
       });
     });
   }
 
-  doBuildSchema(prop_: any) {
+  build_schema_f(prop_: any) {
     for (let p_ in prop_) {
       if (this.schema_[p_]) {
         this.schema_[p_].count = ["properties", "sort", "views"].includes(p_) ? Object.keys(prop_[p_]).length : prop_[p_].length;
@@ -214,10 +220,10 @@ export class CollectionPage implements OnInit {
             match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
             sort: this.sort,
             page: this.page,
-            limit: this.limit
+            limit: this.limit_
           }).then((res: any) => {
             this.editor?.setMode(this.jeoptions.mode);
-            this.doBuildSchema(res.structure);
+            this.build_schema_f(res.structure);
             this.data = res.data;
             this.structure_ori_ = res.structure;
             this.structure = res.structure;
@@ -228,7 +234,7 @@ export class CollectionPage implements OnInit {
             this.multicheckbox = false;
             this.multicheckbox ? this.multicheckbox = false : null;
             this.selected = new Array(res.data.length).fill(false);
-            this.pages = this.count > 0 ? Math.ceil(this.count / this.limit) : environment.misc.default_page;
+            this.pages = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
             const lmt = this.pages >= 10 ? 10 : this.pages;
             this.paget = new Array(lmt);
             this.page_start = this.page > 10 ? this.page - 10 + 1 : 1;

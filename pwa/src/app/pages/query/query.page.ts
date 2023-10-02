@@ -97,6 +97,8 @@ export class QueryPage implements OnInit {
   private submenu: string = "";
   private query_: any = {};
   private collections_: any = [];
+  private screen_size_: any = {};
+  private page_limits_: any = environment.page_limits;
 
   constructor(
     public misc: Miscellaneous,
@@ -119,6 +121,9 @@ export class QueryPage implements OnInit {
     });
     this.crud.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
+    });
+    this.misc.screen_size.subscribe((res: any) => {
+      this.screen_size_ = res;
     });
   }
 
@@ -146,6 +151,7 @@ export class QueryPage implements OnInit {
       this.is_loaded = false;
       this.page_ = page_ === 0 ? 1 : page_;
       this.schemevis = "hide";
+      this.page_limits_.filter((res: any) => res.h === this.screen_size_.h ? this.limit_ = res.limit : this.limit_ = this.limit_);
       this.crud.get_query_data(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res && res.query) {
           this.pager_ = this.page_;
