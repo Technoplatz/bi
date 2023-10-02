@@ -455,7 +455,7 @@ export class CrudPage implements OnInit {
         match: [{
           key: "col_id",
           op: "eq",
-          value: coll_ === "_collection" ? this.data_["col_id"] : coll_ === "_token" ? this.data_["tkn_collection_id"] : coll_ === "_permission" ? this.data_["per_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_ === "_action" ? this.data_["act_collection_id"] : coll_
+          value: coll_ === "_collection" ? this.data_["col_id"] : coll_ === "_visual" ? this.data_["vis_collection_id"] : coll_ === "_token" ? this.data_["tkn_collection_id"] : coll_ === "_permission" ? this.data_["per_collection_id"] : coll_
         }],
         sort: null,
         page: 1,
@@ -549,6 +549,7 @@ export class CrudPage implements OnInit {
     this.relact = true;
     this.tab = "relation";
     let filter_ = this.parent.filter ? this.parent.filter : [];
+    this.parent.filter.forEach((f: any) => f.value?.toString().substr(0, 1) === "$" ? f.value = this.data_[f.value?.toString().substr(1)] : Object.keys(this.properties_).includes(f.value) ? f.value = this.data_[f.value] : null);
     let matchkeys_: any = [];
     this.parent.match.forEach((m: any) => matchkeys_.push(m.key));
     if (this.parent.get && this.parent.get.length > 0) {

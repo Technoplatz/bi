@@ -49,14 +49,16 @@
       "description": "Account No",
       "minLength": 9,
       "maxLength": 16,
-      "pattern": "^[A-Z0-9-]{9,16}$"
+      "pattern": "^[A-Z0-9-]{9,16}$",
+      "permanent": true
     },
     "dnn_acc_name": {
       "bsonType": "string",
       "title": "Account Name",
       "description": "Account Name",
       "minLength": 1,
-      "maxLength": 128
+      "maxLength": 128,
+      "permanent": true
     },
     "dnn_odi_no": {
       "bsonType": "string",
@@ -65,7 +67,8 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "permanent": true
     },
     "dnn_odi_sub_no": {
       "bsonType": "string",
@@ -74,14 +77,16 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "permanent": true
     },
     "dnn_man_no": {
       "bsonType": "string",
       "title": "Manifest No",
       "description": "Manifest number",
       "minLength": 1,
-      "maxLength": 32
+      "maxLength": 32,
+      "permanent": true
     },
     "dnn_ship_type": {
       "bsonType": "string",
@@ -227,14 +232,14 @@
     "dnn_unit_price": {
       "bsonType": "number",
       "title": "Price",
-      "description": "Unit Price",
+      "description": "Unit price",
       "default": 0,
       "decimals": 2
     },
     "dnn_amount": {
       "bsonType": "number",
       "title": "Amount",
-      "description": "Line Amount",
+      "description": "Line amount",
       "default": 0,
       "decimals": 2,
       "disabled": false
@@ -392,9 +397,14 @@
       ],
       "filter": [
         {
-          "key": "man_closed",
+          "key": "man_odi_no",
           "op": "eq",
-          "value": false
+          "value": "dnn_odi_no"
+        },
+        {
+          "key": "man_odi_sub_no",
+          "op": "eq",
+          "value": "dnn_odi_sub_no"
         }
       ],
       "get": ["man_no", "man_opening_date"]

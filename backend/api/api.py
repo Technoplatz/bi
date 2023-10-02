@@ -386,7 +386,6 @@ class Misc:
         try:
             self.post_notification(str(exc__))
             details_ = exc__.details
-            code_ = exc__.code
             if "writeErrors" in details_:
                 msg_ = details_
             else:
@@ -2496,13 +2495,6 @@ class Crud:
             return Misc().auth_error_f(exc_)
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_,
-                "op": "read",
-                "user": user_["email"] if user_ else None,
-                "document": str(exc)
-            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -2822,14 +2814,6 @@ class Crud:
             return {"result": True, "id": view_id_}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": col_id_,
-                "op": "saveview",
-                "user": email_,
-                "document": str(exc)
-            })
-
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -2900,13 +2884,6 @@ class Crud:
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_id_,
-                "op": "update",
-                "user": user_["email"] if user_ else None,
-                "document": str(exc)
-            })
             return Misc().mongo_error_f(exc)
 
         except AppException as exc:
@@ -2959,13 +2936,6 @@ class Crud:
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_id_,
-                "op": "remove",
-                "user": user_["email"] if user_ else None,
-                "document": str(exc)
-            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -3057,13 +3027,6 @@ class Crud:
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_id_,
-                "op": f"multiple {op_}",
-                "user": user_["email"] if user_ else None,
-                "document": str(exc)
-            })
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
@@ -3198,7 +3161,7 @@ class Crud:
                     continue
 
                 json_ = {}
-                for key_, value_ in map_.items():
+                for _, value_ in map_.items():
                     if value_ in doc_:
                         json_["key"] = value_
                         json_["value"] = doc_[value_]
@@ -3382,13 +3345,6 @@ class Crud:
             return {"result": True, "token": inserted_}
 
         except pymongo.errors.PyMongoError as exc:
-            Misc().log_f({
-                "type": "Error",
-                "collection": collection_id_,
-                "op": "insert",
-                "user": user_["email"] if user_ else None,
-                "document": str(exc)
-            })
             return Misc().mongo_error_f(exc)
 
         except AuthError as exc_:

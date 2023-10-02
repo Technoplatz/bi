@@ -57,7 +57,7 @@ https://www.gnu.org/licenses.
           </ng-template>
         </ion-col>
         <!-- keyop -->
-        <ion-col *ngIf="type=='keyop'" size="4">
+        <ion-col *ngIf="type=='keyop'" size="5">
           <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}" mode="md"
             placeholder="{{ 'Please select' | translate }}">
             <ion-select-option *ngFor="let item of kovs" [value]="item.key">
@@ -65,7 +65,7 @@ https://www.gnu.org/licenses.
             </ion-select-option>
           </ion-select>
         </ion-col>
-        <ion-col *ngIf="type=='keyop'" size="6.5">
+        <ion-col *ngIf="type=='keyop'" size="5">
           <ion-select required="true" [(ngModel)]="data[fname][i].op" [ngModelOptions]="{standalone: true}" mode="md"
             placeholder="{{ 'Please select' | translate }}">
             <ion-select-option *ngFor="let item of keyop_" [value]="item.key">

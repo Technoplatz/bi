@@ -277,7 +277,7 @@ https://www.gnu.org/licenses.
               <ng-template #else1>
                 <span *ngIf="item_.value.bsonType=='array'; else else2">
                   <span *ngIf="item_.value.items?.bsonType=='object'; else noarrayobject">
-                    {{ record[item_.key]?.length }} {{ 'item' | translate }}<span
+                    {{ record[item_.key] ? record[item_.key].length : '0' }} {{ 'item' | translate }}<span
                       *ngIf="record[item_.key]?.length > 1">{{ 's' }}</span>
                   </span>
                   <ng-template #noarrayobject>

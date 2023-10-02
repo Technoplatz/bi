@@ -17,16 +17,92 @@
       "description": "Visual Title",
       "caseType": "capitalize"
     },
-    "vis_query_id": {
+    "vis_collection_id": {
       "bsonType": "string",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "Query ID",
-      "description": "Query ID",
-      "required": true,
-      "query": true,
-      "caseType": "lowercase"
+      "title": "Collection",
+      "description": "Collection ID",
+      "collection": true,
+      "permanent": true
+    },
+    "vis_match": {
+      "bsonType": "array",
+      "minItems": 0,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "additionalProperties": false,
+      "filter": true,
+      "items": {
+        "bsonType": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "bsonType": "string",
+            "title": "key",
+            "description": "Key",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z_]{1,64}$"
+          },
+          "op": {
+            "bsonType": "string",
+            "title": "op",
+            "description": "Operator",
+            "minLength": 1,
+            "maxLength": 8,
+            "pattern": "^[a-z]{1,8}$",
+            "enum": ["eq", "ne", "contains", "nc", "in", "nin", "gt", "gte", "lt", "lte", "null", "nnull", "true", "false"]
+          },
+          "value": {
+            "bsonType": "string",
+            "title": "value",
+            "description": "Value",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        },
+        "required": ["key", "op", "value"]
+      },
+      "title": "Match",
+      "description": "Match filter",
+      "subType": "filter"
+    },
+    "vis_pivot": {
+      "bsonType": "array",
+      "minItems": 0,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "additionalProperties": false,
+      "filter": true,
+      "items": {
+        "bsonType": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "bsonType": "string",
+            "title": "key",
+            "description": "Key",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z_]{1,64}$"
+          },
+          "op": {
+            "bsonType": "string",
+            "title": "op",
+            "description": "Type",
+            "minLength": 5,
+            "maxLength": 16,
+            "pattern": "^[a-z\\[\\]-]{5,16}$",
+            "enum": ["x-axis", "y-axis", "group", "data[sum]", "data[count]"]
+          }
+        },
+        "required": ["key", "op"]
+      },
+      "title": "Pivot",
+      "description": "Visual pivot",
+      "subType": "keyop"
     },
     "vis_scheduled": {
       "bsonType": "bool",
@@ -42,41 +118,6 @@
       "maxLength": 64,
       "pattern": "^[a-z0-9*\\-,/ ]{0,64}$",
       "caseType": "lowercase"
-    },
-    "vis_pivot": {
-      "bsonType": "array",
-      "minItems": 0,
-      "maxItems": 4,
-      "uniqueItems": true,
-      "additionalProperties": false,
-      "filter": true,
-      "items": {
-        "bsonType": "object",
-        "additionalProperties": false,
-        "properties": {
-          "key": {
-            "bsonType": "string",
-            "minLength": 1,
-            "maxLength": 64,
-            "pattern": "^[a-z_]{1,64}$",
-            "title": "key",
-            "description": "Key"
-          },
-          "op": {
-            "bsonType": "string",
-            "minLength": 5,
-            "maxLength": 16,
-            "pattern": "^[a-z\\[\\]-]{5,16}$",
-            "enum": ["x-axis", "y-axis", "group", "data[sum]", "data[count]"],
-            "title": "op",
-            "description": "Type"
-          }
-        },
-        "required": ["key", "op"]
-      },
-      "title": "Pivot",
-      "description": "Visual pivot",
-      "subType": "keyop"
     },
     "_tags": {
       "bsonType": "array",
@@ -94,8 +135,8 @@
       "manualAdd": true
     }
   },
-  "required": ["vis_id", "vis_title", "vis_query_id"],
-  "index": [["vis_query_id"]],
+  "required": ["vis_id", "vis_title", "vis_collection_id"],
+  "index": [["vis_collection_id"]],
   "unique": [["vis_id"]],
   "sort": {
     "_modified_at": -1
