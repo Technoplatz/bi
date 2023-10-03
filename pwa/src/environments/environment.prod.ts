@@ -60,37 +60,48 @@ export const environment = {
     "properties": {
       "sto_id": {
         "bsonType": "string",
+        "title": "ID",
+        "description": "Upload ID",
         "minLength": 3,
         "maxLength": 32,
         "pattern": "^[a-z0-9-]{3,32}$",
-        "title": "ID",
-        "description": "Upload ID",
         "permanent": true,
         "required": true
       },
       "sto_collection_id": {
         "bsonType": "string",
+        "title": "Collection",
+        "description": "ID of the target Collection",
         "minLength": 3,
         "maxLength": 32,
         "pattern": "^[a-z0-9-_]{3,32}$",
-        "title": "Collection",
-        "description": "ID of the target Collection",
         "collection": true,
         "permanent": true,
         "required": true
       },
+      "sto_process": {
+        "bsonType": "string",
+        "title": "Process",
+        "description": "Process",
+        "enum": [
+          "insert",
+          "update"
+        ],
+        "default": "insert"
+      },
       "sto_file": {
         "bsonType": "string",
+        "title": "File",
+        "description": "Excel, CSV or JSON File",
         "minLength": 0,
         "maxLength": 64,
-        "file": true,
-        "title": "File",
-        "description": "Excel, CSV or JSON File"
+        "file": true
       }
     },
     "required": [
       "sto_id",
       "sto_collection_id",
+      "sto_process",
       "sto_file"
     ]
   },

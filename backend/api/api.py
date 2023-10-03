@@ -1125,11 +1125,12 @@ class Crud:
         """
         docstring is in progress
         """
-        content_, stats_, res_, details_, files_, filename_ = "", "", None, {}, [], ""
+        content_, stats_, res_, details_, files_, filename_, upsertable_ = "", "", None, {}, [], "", False
         try:
             form_ = obj["form"]
             file_ = obj["file"]
             collection_ = obj["collection"]
+            upserted_ = "process" in obj and obj["process"] == "update"
             email_ = form_["email"]
             mimetype_ = file_.content_type
 
@@ -1156,9 +1157,11 @@ class Crud:
 
             import_ = col_structure_["import"] if "import" in col_structure_ else None
             if not import_:
-                raise APIError(f"no import instruction provided {collection_}")
-            purge_ = import_["purge"] if "purge" in import_ and import_["purge"] is True else False
+                raise APIError(f"no import rules defined for {collection_}")
+            purge_ = "purge" in import_ and import_["purge"] is True
             ignored_ = import_["ignored"] if "ignored" in import_ and len(import_["ignored"]) > 0 else []
+            upsertable_ = "upsertable" in import_ and import_["upsertable"] is True
+            upsertables_ = import_["upsertables"] if "upsertables" in import_ and len(import_["upsertables"]) > 0 else []
 
             if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
                 filesize_ = file_.tell()
@@ -1223,6 +1226,17 @@ class Crud:
             if len(columns_tobe_deleted_) > 0:
                 df_.drop(columns_tobe_deleted_, axis=1, inplace=True)
 
+            uniques_ = []
+            unique_ = col_structure_["unique"] if "unique" in col_structure_ and len(col_structure_["unique"]) > 0 else []
+            for uq_ in unique_:
+                uql_, uqlz_ = len(uq_), 0
+                for uq__ in uq_:
+                    if uq__ in df_.columns:
+                        uqlz_ += 1
+                        uniques_.append(uq__)
+                if uql_ == uqlz_:
+                    break
+
             df_ = df_.groupby(list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns), as_index=False, dropna=False).sum()
             df_.replace([np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True)
             df_["_created_at"] = df_["_modified_at"] = Misc().get_now_f()
@@ -1235,9 +1249,21 @@ class Crud:
             if purge_:
                 Mongo().db_[collection__].delete_many({})
 
-            wrote_ = [pymongo.InsertOne(doc_) for doc_ in payload_]
+            wrote_ = []
             if "_id" in df_.columns:
                 wrote_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=True) for doc_ in payload_]
+            elif upserted_ and upsertable_ and uniques_:
+                for doc_ in payload_:
+                    filter_, set_ = {}, {}
+                    for uniques__ in uniques_:
+                        filter_[uniques__] = doc_[uniques__]
+                    for upsertables__ in upsertables_:
+                        set_[upsertables__] = doc_[upsertables__]
+                    set_["_modified_at"] = Misc().get_now_f()
+                    set_["_modified_by"] = email_
+                    wrote_.append(pymongo.UpdateOne(filter_, {"$set": set_}, upsert=True))
+            else:
+                wrote_ = [pymongo.InsertOne(doc_) for doc_ in payload_]
 
             bulk_write_ = Mongo().db_[collection__].bulk_write(wrote_, ordered=False)
             details_, content_ = bulk_write_.bulk_api_result, ""
@@ -1249,8 +1275,12 @@ class Crud:
             details_ = res_["msg"]
             if "writeErrors" in details_:
                 for werrs_ in details_["writeErrors"]:
+                    content_ += ">>> "
                     if "errmsg" in werrs_:
-                        content_ += f"{str(werrs_['errmsg'])}\n"
+                        content_ += f"{str(werrs_['errmsg'])}. "
+                    if "errInfo" in werrs_:
+                        content_ += f"{str(werrs_['errInfo'])}"
+                    content_ += "\n"
                 stats_ += f"<br />FAILED: {str(len(details_['writeErrors']))}<br />"
             res_["msg"] = "please find the error details in the email we've just sent you"
 
@@ -4512,6 +4542,7 @@ def storage_f():
         if not file_:
             raise APIError("no file received")
 
+        process_ = form_["process"] if "process" in form_ and form_["process"] in ["insert","update"] else "insert"
         collection_ = form_["collection"]
         col_check_ = Crud().inner_collection_f(collection_)
         if not col_check_["result"]:
@@ -4521,7 +4552,7 @@ def storage_f():
             "user": jwt_validate_f_["user"],
             "auth": jwt_validate_f_["auth"],
             "collection": collection_,
-            "op": "import"
+            "op": process_
         })
         if not permission_f_["result"]:
             raise AuthError(permission_f_["msg"])
@@ -4532,6 +4563,7 @@ def storage_f():
             "form": form_,
             "file": file_,
             "collection": collection_,
+            "process": process_,
             "user": user_,
             "prefix": prefix_,
         })

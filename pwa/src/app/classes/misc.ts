@@ -140,6 +140,7 @@ export class Miscellaneous {
               data: {
                 "sto_id": "data-import",
                 "sto_collection_id": id,
+                "sto_process": "insert",
                 "sto_file": null
               },
               structure: environment.import_structure,

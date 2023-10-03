@@ -1885,10 +1885,6 @@ ion-checkbox {
   cursor: pointer;
 }
 
-.data-table tr:last-child:hover {
-  background-color: unset !important;
-}
-
 .data-table tr:first-child {
   border-bottom: 2px solid var(--ion-color-dark);
   cursor: pointer;
@@ -1932,17 +1928,8 @@ ion-checkbox {
   border-bottom: 2px solid var(--ion-color-dark);
 }
 
-.data-grid ion-row:last-child ion-col {
-  border: none !important;
-}
-
-.data-grid ion-row:first-child:hover,
-.data-grid ion-row:last-child:hover {
+.data-grid ion-row:first-child:hover {
   background: none;
-}
-
-.data-grid .hoverr:hover>ion-col {
-  background-color: #eee;
 }
 
 .dash-colls {

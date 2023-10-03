@@ -181,8 +181,10 @@ export class Crud {
           if (file) {
             let posted_: FormData = new FormData();
             const sto_collection_id_ = doc_["sto_collection_id"];
+            const sto_process_ = doc_["sto_process"];
             posted_.append("file", file, file.name);
             posted_.append("collection", sto_collection_id_);
+            posted_.append("process", sto_process_);
             this.misc.apiFileCall("import", posted_).then((res: any) => {
               res.cid = sto_collection_id_;
               resolve(res);

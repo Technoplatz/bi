@@ -73,6 +73,15 @@
       "bsonType": "date",
       "title": "Out Date",
       "description": "Touchpoint outgoing date"
+    },
+    "ser_label_no": {
+      "bsonType": "string",
+      "title": "Label No",
+      "description": "Label number",
+      "minLength": 15,
+      "maxLength": 15,
+      "pattern": "^[A-Z0-9-]{15,15}$",
+      "caseType": "uppercase"
     }
   },
   "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
@@ -82,7 +91,8 @@
     ["ser_dnn_no", "ser_line_no"],
     ["ser_dnn_no", "ser_line_no", "ser_prd_no"],
     ["ser_sscc_no"],
-    ["ser_dnn_no", "ser_sscc_no"]
+    ["ser_dnn_no", "ser_sscc_no"],
+    ["ser_label_no"]
   ],
   "unique": [["ser_no"]],
   "sort": {
@@ -218,5 +228,8 @@
   ],
   "views": {},
   "fetchers": [],
-  "import": {}
+  "import": {
+    "upsertable": true,
+    "upsertables": ["ser_label_no", "ser_sscc_no"]
+  }
 }
