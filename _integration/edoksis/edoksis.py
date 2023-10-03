@@ -100,7 +100,7 @@ MONGO_TLS_ = str(os.environ.get("MONGO_TLS")).lower() == "true"
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
-API_WORKFILE_PATH_ = f"/{os.environ.get('API_WORKFILE_PATH')}"
+API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
 EDOKSIS_USER_ = os.environ.get("EDOKSIS_USER")
 EDOKSIS_PASSWORD_ = os.environ.get("EDOKSIS_PASSWORD")
 EDOKSIS_VKN_ = os.environ.get("EDOKSIS_VKN")
@@ -248,7 +248,7 @@ class Edoksis:
                                 raise APIError("!!! missing icerik tag")
                             document_ = base64.b64decode(tag.text)
                             fn_ = f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}"
-                            fullpath_ = os.path.normpath(os.path.join(API_WORKFILE_PATH_, fn_))
+                            fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, fn_))
                             os.makedirs(os.path.dirname(fullpath_), exist_ok=True)
                             with open(fullpath_, "wb") as file_:
                                 file_.write(document_)

@@ -290,7 +290,7 @@ class Misc:
         loc_ = input_["loc"] if "loc" in input_ else None
 
         commands_ = {
-            "mongoexport": f"mongoexport --quiet --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --db={MONGO_DB_} --type={type_} --fields={fields_} --query={query_}",
+            "mongoexport": f"mongoexport --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --quiet --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --db={MONGO_DB_} --type={type_} --fields='{fields_}' --query={query_}",
             "mongorestore": f"mongorestore --host '{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}' --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password '{MONGO_PASSWORD_}' --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude={MONGO_DB_}._backup --nsExclude={MONGO_DB_}._auth --nsExclude={MONGO_DB_}._user --nsExclude={MONGO_DB_}._log --drop --quiet",
             "mongodump": f"mongodump --host '{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}' --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password '{MONGO_PASSWORD_}' --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
         }
@@ -636,7 +636,8 @@ class Mongo:
             subprocess.call(["mongodump", command_])
 
             if not fullpath_.startswith(DUMP_PATH_):
-                raise APIError("dump file not allowed")
+                print_("!!! [dump] fullpath_", fullpath_)
+                raise APIError("file not allowed [dump]")
             size_ = os.path.getsize(fullpath_)
 
             return {"result": True, "id": id_, "type": type_, "size": size_}
@@ -666,7 +667,8 @@ class Mongo:
             subprocess.call(["mongorestore", command_])
 
             if not fullpath_.startswith(DUMP_PATH_):
-                raise APIError("dump file not allowed")
+                print_("!!! [dump] fullpath_", fullpath_)
+                raise APIError("file not allowed [restore]")
             size_ = os.path.getsize(fullpath_)
 
             return {"result": True, "id": id_, "type": type_, "size": size_}
@@ -874,11 +876,12 @@ class Crud:
             base_path_ = "/app/_template"
             filename_ = f"{schema_}.json"
             if not filename_.startswith("_"):
-                raise APIError("invalid schema")
+                raise APIError("invalid schema file")
 
             fullpath_ = os.path.normpath(os.path.join(base_path_, filename_))
             if not fullpath_.startswith(base_path_):
-                raise APIError("file not allowed")
+                print_("!!! [schema] fullpath_", fullpath_)
+                raise APIError("file not allowed [schema]")
 
             with open(fullpath_, "r", encoding="utf-8") as fopen_:
                 res_ = json.loads(fopen_.read())
@@ -1302,7 +1305,8 @@ class Crud:
             filename_ = f"imported-{collection_}-{Misc().get_timestamp_f()}.txt"
             fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
             if not fullpath_.startswith(TEMP_PATH_):
-                raise APIError("file not allowed")
+                print_("!!! [import] fullpath_", fullpath_)
+                raise APIError("file not allowed [import]")
             with open(fullpath_, "w", encoding="utf-8") as file_:
                 file_.write(stats_.replace("<br />", "\n") + "\n\n-----BEGIN ERROR LIST-----\n" + content_ + "-----END ERROR LIST-----")
             file_.close()
@@ -3231,12 +3235,10 @@ class Crud:
                     type_ = "csv"
                     file_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
-
                     command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     if not command_:
                         raise APIError("export command error")
                     subprocess.call(["mongoexport", command_])
-
                     files_ += [{"name": file_, "type": type_}]
 
                 email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
@@ -3461,7 +3463,8 @@ class Email:
                     raise APIError("file not defined")
                 fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
                 if not fullpath_.startswith(TEMP_PATH_):
-                    raise APIError("file not allowed")
+                    print_("!!! [email] fullpath_", fullpath_)
+                    raise APIError("file not allowed [email]")
                 with open(fullpath_, "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
@@ -4542,7 +4545,7 @@ def storage_f():
         if not file_:
             raise APIError("no file received")
 
-        process_ = form_["process"] if "process" in form_ and form_["process"] in ["insert","update"] else "insert"
+        process_ = form_["process"] if "process" in form_ and form_["process"] in ["insert", "update"] else "insert"
         collection_ = form_["collection"]
         col_check_ = Crud().inner_collection_f(collection_)
         if not col_check_["result"]:

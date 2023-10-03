@@ -42,7 +42,7 @@ services:
     restart: always
     volumes:
       - bi-cert-volume:/cert
-      - bi-storage-volume:/docs
+      - bi-storage-volume:${API_TEMPFILE_PATH}
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
@@ -62,7 +62,7 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
-      - API_WORKFILE_PATH=${API_WORKFILE_PATH}
+      - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
       - EDOKSIS_USER=${EDOKSIS_USER}
       - EDOKSIS_PASSWORD=${EDOKSIS_PASSWORD}
       - EDOKSIS_VKN=${EDOKSIS_VKN}

@@ -351,9 +351,10 @@
     ["dnn_acc_no"],
     ["dnn_status"],
     ["dnn_status", "dnn_no", "dnn_line_no"],
+    ["dnn_status", "dnn_date"],
+    ["dnn_status", "dnn_prd_group"],
     ["dnn_no", "dnn_line_no", "dnn_prd_group"],
     ["dnn_no", "dnn_prd_group"],
-    ["dnn_status", "dnn_date"],
     ["dnn_man_no"],
     ["dnn_odi_no", "dnn_odi_sub_no"],
     ["dnn_order_no", "dnn_prd_no"],
@@ -616,10 +617,10 @@
         }
       ],
       "notification": {
-        "notify": true,
+        "notify": false,
         "subject": "DNs shipped",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was shipped.",
-        "attachment": true,
+        "attachment": false,
         "fields": [
           "dnn_no",
           "dnn_line_no",
@@ -641,7 +642,7 @@
           {
             "key": "dnn_status",
             "op": "eq",
-            "value": "70-Delivered"
+            "value": "60-ReadyToBeDelivered"
           }
         ]
       }
@@ -1244,5 +1245,8 @@
     }
   },
   "fetchers": [],
-  "import": {}
+  "import": {
+    "upsertable": false,
+    "upsertables": []
+  }
 }
