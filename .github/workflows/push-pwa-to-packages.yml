@@ -44,6 +44,8 @@ env:
   DOCKERFILE: Dockerfile
   VERSION: latest
   GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 jobs:
   push-to-packages:
     runs-on: ubuntu-latest
@@ -70,3 +72,11 @@ jobs:
           echo "$GHCR_TOKEN" | docker login ghcr.io -u $ --password-stdin
           docker push $IMAGE_ID
           docker logout ghcr.io
+      - name: push-image-dockerhub
+        id: push-image-dockerhub
+        run: |
+          IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
+          docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
+          echo "$DOCKERHUB_TOKEN" | docker login -u $DOCKERHUB_USERNAME --password-stdin
+          docker push $IMAGE_ID
+          docker logout

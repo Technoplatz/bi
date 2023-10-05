@@ -185,17 +185,13 @@ class Schedular:
                 day_of_week_ = str(separated_[4].lower().strip())
 
                 args_ = [{
-                    "que_id": query_["que_id"],
-                    "que_title": query_["que_title"] if "que_title" in query_ else query_["que_id"],
-                    "que_collection_id": query_["que_collection_id"],
-                    "que_aggregate": query_["que_aggregate"],
-                    "que_type": query_["que_type"],
-                    "que_message_body": query_["que_message_body"] if "que_message_body" in query_ else "HTML",
-                    "_tags": query_["_tags"] if "_tags" in query_ and len(query_["_tags"]) > 0 else ["#Administrators"]
+                    "id": query_["que_id"],
+                    "sched": True,
+                    "key": SMTP_PASSWORD_
                 }]
 
-                sched_.add_job(Crud().query_run_f, trigger="cron", minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, id=id__, replace_existing=True, args=args_)
-                print_(f">>> scheduled job query {id__} {scheduled_cron_}")
+                sched_.add_job(Crud().query_f, trigger="cron", minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, id=id__, replace_existing=True, args=args_)
+                print_(f">>> scheduled job query {id__} {scheduled_cron_} [now {Misc().get_timestamp_f()}]")
 
             return {"result": True}
 
@@ -212,8 +208,8 @@ class Schedular:
         try:
             sched_ = BackgroundScheduler(daemon=True)
             sched_.remove_all_jobs()
-            sched_.add_job(Crud().dump_f, trigger="cron", day_of_week="*", hour=f"{API_DUMP_HOURS_}", minute="0", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cron"}, "op": "dump"}])
-            sched_.add_job(self.schedule_queries_f, trigger="cron", day_of_week="*", hour="*", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", id="schedule_queries", replace_existing=True, args=[sched_])
+            sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{API_DUMP_HOURS_}", day="*", month="*", day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cron"}, "op": "dump"}])
+            sched_.add_job(self.schedule_queries_f, trigger="cron", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", hour="*", day="*", month="*", day_of_week="*", id="schedule_queries", replace_existing=True, args=[sched_])
             sched_.start()
             return True
 
@@ -1319,95 +1315,6 @@ class Crud:
             })
             return res_
 
-    def query_run_f(self, input_):
-        """
-        docstring is in progress
-        """
-        files_, personalizations_to_, to_, count_ = [], [], [], 0
-        try:
-            que_id_ = input_["que_id"]
-            que_title_ = input_["que_title"] if "que_title" in input_ else que_id_
-            que_collection_id_ = input_["que_collection_id"]
-            que_aggregate_ = input_["que_aggregate"]
-            que_type_ = input_["que_type"]
-            que_message_body_ = input_["que_message_body"] if "que_message_body" in input_ and input_["que_message_body"] is not None else ""
-            _tags = input_["_tags"] if "_tags" in input_ and len(input_["_tags"]) > 0 else ["#Administrators"]
-            get_timestamp_f_ = Misc().get_timestamp_f()
-
-            print_(">>> query runs", get_timestamp_f_, que_id_)
-
-            users_ = Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": _tags}}})
-            if users_:
-                for member_ in users_:
-                    if member_["usr_id"] not in to_:
-                        to_.append(member_["usr_id"])
-                        personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
-
-            if not personalizations_to_:
-                print_(f">>> no query subscribers found {que_id_}")
-                return {"result": True}
-
-            personalizations_ = {"to": personalizations_to_}
-
-            aggregate_ = []
-            limit_found_ = False
-            for agg_ in que_aggregate_:
-                if "$skip" in agg_:
-                    continue
-                if "$limit" in agg_:
-                    limit_found_ = True
-                    agg_["$limit"] = API_DEFAULT_AGGREGATION_LIMIT_
-                aggregate_.append(agg_)
-
-            if que_type_ in ["update_one", "update_many"]:
-                find_ = aggregate_[0]
-                set_ = aggregate_[1]
-                if not find_ or not set_:
-                    print_(f">>> no update dictionaries found: {que_id_}")
-                    return {"result": True}
-
-            if que_type_ == "aggregation":
-                if not limit_found_:
-                    aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
-                aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
-                df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(aggregated_)))).fillna("")
-                file_excel_ = f"{API_TEMPFILE_PATH_}/query-{que_id_}-{get_timestamp_f_}.xlsx"
-                df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
-                files_.append({"name": file_excel_, "type": "xlsx"})
-                count_ = len(df_raw_.index)
-            elif que_type_ == "update_one":
-                aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].update_one(find_, set_)
-                Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$inc": {"que_counter": 1}})
-                count_ = 1
-            elif que_type_ == "update_many":
-                update_many_ = aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].update_many(find_, set_)
-                count_ = update_many_.matched_count
-                Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$inc": {"que_counter": 1}})
-                que_message_body_ += f"<p>Affected number of documents: {str(count_)}</p>"
-
-            if count_ > 0:
-                email_sent_ = Email().send_email_f({
-                    "personalizations": personalizations_,
-                    "html": que_message_body_,
-                    "subject": f"Query: {que_title_}",
-                    "files": files_
-                })
-                if not email_sent_["result"]:
-                    raise APIError(email_sent_["msg"])
-
-            print_(">>> query ended", que_id_, get_timestamp_f_)
-
-            return {"result": True}
-
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
-
-        except APIError as exc_:
-            return Misc().api_error_f(exc_)
-
-        except Exception as exc_:
-            return Misc().exception_f(exc_)
-
     def announce_f(self, input_):
         """
         docstring is in progress
@@ -2372,45 +2279,62 @@ class Crud:
         except Exception as exc_:
             return Misc().exception_f(exc_)
 
-    def query_internal_f(self, obj_):
+    def query_f(self, obj_):
         """
         docstring is in progress
         """
         schema_, query_, data_, fields_, count_, permitted_, aggregate_base_ = {}, {}, [], [], 0, False, []
+        files_, personalizations_to_, to_, res_, orig_ = [], [], [], {}, None
         init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
         try:
-            que_id_ = obj_["id"]
+            que_id_ = obj_["id"] if "id" in obj_ else None
+            if not que_id_:
+                raise APIError("no query id defined")
+
+            sched_ = "sched" in obj_ and obj_["sched"] is True
+            key_ = obj_["key"] if "key" in obj_ and obj_["key"] is not None else None
+
+            if not request:
+                if key_ and key_ == SMTP_PASSWORD_:
+                    orig_ = "sched"
+                else:
+                    raise APIError("no request detected")
+            else:
+                orig_ = request.base_url.replace(request.host_url, "")
+                if orig_ not in ["crud", f"get/query/{que_id_}"]:
+                    raise AuthError("not authenticated")
+
             schema_ = self.root_schemas_f("_query")
             if not schema_:
                 raise AuthError(f"no schema found for {que_id_}")
 
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
-                raise APIError(f"query not found: {que_id_}")
+                raise APIError(f"no query found for {que_id_}")
 
-            type_ = query_["que_type"]
-            if type_ not in ["aggregation", "update_one", "update_many"]:
-                raise APIError(f"invalid query type: {type_}")
+            if orig_ == "crud":
+                user_ = obj_["userindb"] if "userindb" in obj_ else None
+                if not user_:
+                    raise APIError(f"no user defined for {que_id_}")
+                usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+                if Misc().permitted_usertag_f(user_):
+                    permitted_ = True
+                else:
+                    for usr_tag_ in usr_tags_:
+                        if usr_tag_ in query_["_tags"]:
+                            permitted_ = True
+                            break
+                if not permitted_:
+                    raise AuthError(f"user is not a subscriber of {que_id_}")
 
             que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ else None
             if not que_collection_id_:
                 raise APIError(f"collection not found {que_id_}")
 
-            user_ = obj_["userindb"]
-            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-            if Misc().permitted_usertag_f(user_):
-                permitted_ = True
-            else:
-                for usr_tag_ in usr_tags_:
-                    if usr_tag_ in query_["_tags"]:
-                        permitted_ = True
-                        break
-            if not permitted_:
-                raise AuthError(f"no query permission for {que_id_}")
-
             que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
             if not que_aggregate_:
                 raise PassException(None)
+
             for agg_ in que_aggregate_:
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
@@ -2419,63 +2343,73 @@ class Crud:
                         fields_.append(prj_)
                 aggregate_base_.append(agg_)
 
-            if type_ == "aggregation":
-                aggregate_ = aggregate_base_.copy()
+            aggregate_ = aggregate_base_.copy()
+            aggregate_base_.append({"$count": "count"})
+
+            if orig_ == "crud":
                 page_ = obj_["page"] if "page" in obj_ and obj_["page"] > 0 else 1
                 limit_ = obj_["limit"] if "limit" in obj_ and obj_["limit"] > 0 else API_QUERY_PAGE_SIZE_
                 aggregate_.append({"$skip": limit_ * (page_ - 1)})
                 aggregate_.append({"$limit": limit_})
-                aggregate_base_.append({"$count": "count"})
-                facet_ = [{"$facet": {
-                    "stats": aggregate_base_,
-                    "data": aggregate_
-                }}]
-                cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(facet_)
-                cursore_ = json.loads(JSONEncoder().encode(list(cursor_)))
-                data_ = cursore_[0]["data"] if cursore_ and "data" in cursore_[0] else []
-                stats_ = cursore_[0]["stats"] if cursore_ and "stats" in cursore_[0] else []
-                count_ = stats_[0]["count"] if stats_ else 0
 
-            run_ = "run" in obj_ and obj_["run"] is True
-            if run_:
-                if type_ == "update_one":
-                    find_ = aggregate_base_[0]
-                    set_ = aggregate_base_[1]
-                    Mongo().db_[f"{que_collection_id_}_data"].update_one(find_, set_)
-                    Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$inc": {"que_counter": 1}})
-                    count_ = 1
-                elif type_ == "update_many":
-                    find_ = aggregate_base_[0]
-                    set_ = aggregate_base_[1]
-                    update_many_ = Mongo().db_[f"{que_collection_id_}_data"].update_many(find_, set_)
-                    count_ = update_many_.matched_count
-                    Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$inc": {"que_counter": 1}})
+            facet_ = [{"$facet": {
+                "stats": aggregate_base_,
+                "data": aggregate_
+            }}]
+
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(facet_)
+            cursore_ = json.loads(JSONEncoder().encode(list(cursor_)))
+            data_ = cursore_[0]["data"] if cursore_ and "data" in cursore_[0] else []
+            stats_ = cursore_[0]["stats"] if cursore_ and "stats" in cursore_[0] else []
+            count_ = stats_[0]["count"] if stats_ else 0
+
+            res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
+
+            if sched_ and orig_ == "sched":
+                _tags = query_["_tags"] if "_tags" in query_ and len(query_["_tags"]) > 0 else PERMISSIVE_TAGS_
+                que_title_ = query_["que_title"] if "que_title" in query_ else que_id_
+                que_message_body_ = query_["que_message_body"] if "que_message_body" in query_ and query_["que_message_body"] is not None else ""
+                users_ = Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": _tags}}})
+                for member_ in users_:
+                    if member_["usr_id"] not in to_:
+                        to_.append(member_["usr_id"])
+                        personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
+                personalizations_ = {"to": personalizations_to_}
+                df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(data_)))).fillna("")
+                file_excel_ = f"{API_TEMPFILE_PATH_}/query-{que_id_}-{Misc().get_timestamp_f()}.xlsx"
+                df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
+                files_.append({"name": file_excel_, "type": "xlsx"})
+                count_ = len(df_raw_.index)
                 if count_ > 0:
-                    Misc().log_f({
-                        "type": "Info",
-                        "collection": que_collection_id_,
-                        "op": type_,
-                        "user": user_["usr_id"] if user_ else None,
-                        "document": {"find": find_, "set": set_}
+                    email_sent_ = Email().send_email_f({
+                        "personalizations": personalizations_,
+                        "html": que_message_body_,
+                        "subject": f"Query: {que_title_}",
+                        "files": files_
                     })
+                    if not email_sent_["result"]:
+                        raise APIError(email_sent_["msg"])
 
-            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
+                res_ = {"result": True}
 
         except AuthError as exc__:
-            return Misc().auth_error_f(exc__)
+            res_ = Misc().auth_error_f(exc__)
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            res_ = Misc().api_error_f(exc__)
 
         except pymongo.errors.PyMongoError as exc__:
             init_res_["query"] = query_
-            return init_res_
+            res_ = init_res_
 
         except PassException as exc__:
-            return init_res_
+            res_ = init_res_
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            res_ = Misc().exception_f(exc__)
+
+        finally:
+            return res_
 
     def read_f(self, input_):
         """
@@ -4677,7 +4611,7 @@ def crud_f():
         elif op_ == "collection":
             res_ = Crud().collection_f(input_)
         elif op_ == "query":
-            res_ = Crud().query_internal_f(input_)
+            res_ = Crud().query_f(input_)
         elif op_ == "link":
             res_ = Crud().link_f(input_)
         elif op_ in ["backup", "restore"]:
@@ -5127,26 +5061,15 @@ def get_query_f(id_):
         if not func_["result"]:
             raise AuthError(func_)
 
-        query_ = Mongo().db_["_query"].find_one({"que_id": id_})
-        if not query_:
-            raise AuthError({"result": False, "msg": "query not found"})
+        query_f_ = Crud().query_f({
+            "id": id_
+        })
+        if not query_f_["result"]:
+            raise APIError(query_f_)
 
-        que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
-        if not que_aggregate_:
-            raise AuthError({"result": False, "msg": "invalid query aggregation"})
-
-        que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ else None
-        if not que_collection_id_:
-            raise AuthError({"result": False, "msg": "invalid query collection"})
-
-        aggregate_ = []
-        for agg_ in que_aggregate_:
-            if "$limit" in agg_ or "$skip" in agg_:
-                continue
-            aggregate_.append(agg_)
-
-        aggregated_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
-        res_ = json.loads(JSONEncoder().encode(list(aggregated_)))
+        res_ = query_f_["data"] if "data" in query_f_ else None
+        if not res_:
+            raise APIError("no data found")
 
     except AuthError as exc_:
         res_ = ast.literal_eval(str(exc_))

@@ -17,16 +17,6 @@
       "maxLength": 32,
       "caseType": "capitalize"
     },
-    "que_type": {
-      "bsonType": "string",
-      "title": "Type",
-      "description": "Query type",
-      "minLength": 10,
-      "maxLength": 11,
-      "enum": ["aggregation", "update_one", "update_many"],
-      "pattern": "^[a-z_]{10,11}$",
-      "default": "aggregation"
-    },
     "que_collection_id": {
       "bsonType": "string",
       "title": "Collection ID",
@@ -88,7 +78,7 @@
       "manualAdd": true
     }
   },
-  "required": ["que_id", "que_title", "que_collection_id", "que_type"],
+  "required": ["que_id", "que_title", "que_collection_id"],
   "index": [["que_collection_id"]],
   "unique": [["que_id"]],
   "sort": {
