@@ -66,6 +66,7 @@ jobs:
           echo "OBRANCH=$BRANCH" >> $GITHUB_OUTPUT
       - name: push-image-ghcr
         id: push-image-ghcr
+        if: steps.build-image.outputs.OBRANCH != 'main'
         run: |
           IMAGE_ID=ghcr.io/technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
           docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID
@@ -74,6 +75,7 @@ jobs:
           docker logout ghcr.io
       - name: push-image-dockerhub
         id: push-image-dockerhub
+        if: steps.build-image.outputs.OBRANCH == 'main'
         run: |
           IMAGE_ID=technoplatz/${{ steps.build-image.outputs.OIMAGE_NAME }}
           docker tag ${{ steps.build-image.outputs.OIMAGE_NAME }} $IMAGE_ID

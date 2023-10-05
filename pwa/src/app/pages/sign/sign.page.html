@@ -114,7 +114,8 @@ https://www.gnu.org/licenses.
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-padding-top">
             <ion-icon name="newspaper-outline"></ion-icon>&nbsp;
-            <ion-text class="smalli">{{ 'By creating an account, you accept the terms and conditions' | translate }}.</ion-text>
+            <ion-text class="smalli">{{ 'By creating an account, you accept the terms and conditions' | translate
+                }}.</ion-text>
         </ion-item>
     </form>
     <form [formGroup]="signinForm" *ngIf="formtype=='signin'">
@@ -127,7 +128,7 @@ https://www.gnu.org/licenses.
                 </sup>
             </ion-label>
             <ion-input #emailfocussignin class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required [value]="email">
+                autocorrect="off" required [value]="email" placeholder="{{ 'Business E-mail' | translate}}">
             </ion-input>
         </ion-item>
         <ion-item lines="full">
@@ -135,7 +136,7 @@ https://www.gnu.org/licenses.
                     <ion-icon name="star"></ion-icon>
                 </sup>
             </ion-label>
-            <ion-input #passwordfocus formControlName="password" type="password" required>
+            <ion-input #passwordfocus formControlName="password" type="password" required placeholder="{{ 'User Password' | translate}}">
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
