@@ -36,7 +36,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/technoplatz/bi-intg-edoksis:latest
+    image: technoplatz/bi-intg-edoksis:latest
     container_name: edoksis
     hostname: edoksis
     restart: always

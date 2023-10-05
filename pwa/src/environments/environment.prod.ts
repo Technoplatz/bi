@@ -46,7 +46,7 @@ export const environment = {
     default_icon: "medical-outline",
     limit: 19,
     limits: [20, 50, 100],
-    loadingText: "Bitte warten Sie",
+    loadingText: "Please wait",
     defaultColumnWidth: 140,
     default_delay: 500
   },
@@ -138,16 +138,16 @@ export const environment = {
     { "id": "_token", "title": "API Tokens", "description": "Access tokens of built-in API functions." },
     { "id": "_backup", "title": "Backups", "description": "Database backup and restore." },
     { "id": "_log", "title": "Logs", "description": "Transaction logs in detail" },
-    { "id": "_kv", "title": "KV", "description": "Basic environment variables defined as KEY:VALUE pairs." }
+    { "id": "_kv", "title": "Key-Value", "description": "Basic environment variables defined as KEY:VALUE pairs." }
   ],
   themes: [
+    { "name": "Rot", "color": "#AA0000" },
     { "name": "Dark", "color": "#111111" },
     { "name": "Cobalt", "color": "#0047AB" },
     { "name": "Grün", "color": "#008000" },
     { "name": "Glaucous", "color": "#6082B6" },
     { "name": "Marine", "color": "#3A62FA" },
     { "name": "Iris", "color": "#5D3FD3" },
-    { "name": "Sunshine", "color": "#FF5733" },
-    { "name": "Rot", "color": "#AA0000" }
+    { "name": "Sunshine", "color": "#FF5733" }
   ]
 }

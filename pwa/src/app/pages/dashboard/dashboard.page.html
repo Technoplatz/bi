@@ -37,7 +37,7 @@ https://www.gnu.org/licenses.
         <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
           {{ 'DASHBOARD' | translate }}
         </ion-button>
-        <h3>{{ 'Welcome Aboard' }}</h3>
+        <h3>{{ 'Welcome Aboard' | translate }}</h3>
         <span *ngIf="flashcards.length > 0">{{ flashcards.length }}</span> {{ 'Flashcards and' }}
         <span *ngIf="charts.length > 0">{{ charts.length }}</span> {{ 'Charts' }}.
 
@@ -45,7 +45,8 @@ https://www.gnu.org/licenses.
         <div *ngIf="charts.length > 0 || flashcards.length > 0">
           <div class="filler-10"></div>
           <div class="brz-visual-group">
-            <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer (click)="doFlashcard(item)">
+            <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer
+              (click)="doFlashcard(item)">
               <div class="visual-buttons">
                 <h2>{{ item.count }}</h2>
               </div>

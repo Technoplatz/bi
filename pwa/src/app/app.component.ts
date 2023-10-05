@@ -68,7 +68,7 @@ export class AppComponent implements OnInit {
     this.inner_height = window.screen.height ? window.screen.height : 1080;
     this.inner_width = window.screen.width ? window.screen.width : 1920;
     this.misc.screen_size.next({ w: this.inner_width, h: this.inner_height });
-    console.log("*** wxh", this.inner_width, this.inner_height);
+    console.log(`RES ${this.inner_width}x${this.inner_height}`);
     if (this.sw_update.isEnabled) {
       console.log("*** sw_update enabled");
       setInterval(() => {

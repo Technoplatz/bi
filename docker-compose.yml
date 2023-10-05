@@ -66,7 +66,7 @@ services:
     build:
       context: ./init
       dockerfile: Dockerfile
-    image: ghcr.io/technoplatz/bi-init:latest
+    image: technoplatz/bi-init${REF}:${VERSION}
     container_name: init
     hostname: init
     labels:
@@ -227,7 +227,7 @@ services:
     build:
       context: ./replicaset
       dockerfile: Dockerfile
-    image: ghcr.io/technoplatz/bi-replicaset:latest
+    image: technoplatz/bi-replicaset${REF}:${VERSION}
     container_name: replicaset
     hostname: replicaset
     depends_on:
@@ -280,7 +280,7 @@ services:
     build:
       context: ./backend/stream
       dockerfile: Dockerfile
-    image: ghcr.io/technoplatz/bi-stream:latest
+    image: technoplatz/bi-stream${REF}:${VERSION}
     container_name: stream
     depends_on:
       replicaset:
@@ -338,7 +338,7 @@ services:
     build:
       context: ./backend/api
       dockerfile: Dockerfile
-    image: ghcr.io/technoplatz/bi-api:latest
+    image: technoplatz/bi-api${REF}:${VERSION}
     container_name: api
     depends_on:
       stream:
@@ -416,7 +416,7 @@ services:
     build:
       context: ./pwa
       dockerfile: Dockerfile
-    image: ghcr.io/technoplatz/bi-pwa:latest
+    image: technoplatz/bi-pwa${REF}:${VERSION}
     container_name: pwa
     depends_on:
       api:

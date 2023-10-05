@@ -45,54 +45,54 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="upload_modal_f()" class="data-sq-button">
                 <ion-icon name="download-outline"></ion-icon><br />
-                {{ 'Import' | translate }}<br />{{ 'File' | translate }}
+                {{ 'Import File' | translate }}
               </div>
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-outline"></ion-icon><br />
-                {{ 'Scan' | translate }}<br />{{ 'Barcode' | translate }}
+                {{ 'Scan Barcode' | translate }}
               </div>
               <ng-template #newrecord>
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  {{ 'New' | translate }}<br />{{ 'Record' | translate }}
+                  {{ 'New Record' | translate }}
                 </div>
               </ng-template>
               <div *ngIf="is_loaded" (click)="refresh_data(0)" class="data-sq-button">
                 <ion-icon name="sync-circle-outline"></ion-icon>
                 <br />
-                {{ 'Refresh' | translate }}<br />{{ 'All' | translate }}
+                {{ 'Refresh All' | translate }}
               </div>
               <div *ngIf="!is_loaded" class="data-sq-button required">
                 <ion-icon name="hourglass-outline"></ion-icon>
                 <br />
-                {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
+                {{ 'Please Wait' | translate }}...
               </div>
               <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 <br />
-                <span>{{ 'Clear' | translate }}<br />{{ 'Filter' | translate }}</span>
+                <span>{{ 'Clear Filter' | translate }}</span>
               </div>
               <div (click)="MultiCrud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
-                {{ 'Clone' | translate }}<br />{{ 'Record' | translate }}
+                {{ 'Clone Record' | translate }}
               </div>
               <div *ngIf="is_deleting" class="data-sq-button required">
                 <ion-icon name="hourglass-outline"></ion-icon><br />
-                {{ 'Deleting' | translate }}<br />{{ 'Records' | translate }}...
+                {{ 'Deleting Records' | translate }}...
               </div>
               <div *ngIf="!is_deleting" (click)="MultiCrud('delete')" class="data-sq-button">
                 <ion-icon name="trash-outline"></ion-icon><br />
-                {{ 'Delete' | translate }}<br />{{ 'Record' | translate }}
+                {{ 'Delete Record' | translate }}
               </div>
-              <div *ngIf="is_crud && filter_.length==0" (click)="doSaveView()" class="data-sq-button">
+              <!-- <div *ngIf="is_crud && filter_.length==0" (click)="doSaveView()" class="data-sq-button">
                 <ion-icon name="save-outline"></ion-icon><br />
-                {{ 'SaveAs' | translate }}<br />{{ 'View' | translate }}
-              </div>
+                {{ 'SaveAs View' | translate }}
+              </div> -->
               <div *ngIf="is_crud" (click)="doShowSchema(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
-                  {{ 'Edit' | translate }}<br />{{ 'Schema' | translate }}
+                  {{ 'Edit Schema' | translate }}
                 </div>
               </div>
             </ion-col>

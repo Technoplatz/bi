@@ -47,7 +47,7 @@ import { Router } from "@angular/router";
 export class AccountPage implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
-  public header: string = "Account";
+  public header: string = "ACCOUNT";
   public subheader: string = "";
   public user: any = null;
   public is_initialized: boolean = false;
@@ -69,6 +69,15 @@ export class AccountPage implements OnInit {
   public qr_show: boolean = false;
   public otp_qr: string = "";
   public saas: any = null;
+  public langcss: string = "lang-passive";
+  public lang: string = "de";
+  public langs_: any = [];
+  public lang_proc_ = false;
+  public langsoriginal: any = [
+    { id: "en", name: "EN", class: "lang-passive" },
+    { id: "de", name: "DE", class: "lang-passive" },
+    { id: "tr", name: "TR", class: "lang-passive" },
+  ];
 
   constructor(
     private storage: Storage,
@@ -76,7 +85,13 @@ export class AccountPage implements OnInit {
     private router: Router,
     private alert: AlertController,
     public misc: Miscellaneous
-  ) {}
+  ) {
+    this.langs_ = this.langsoriginal;
+    this.misc.getLanguage().then((LSLANG) => {
+      const index = this.langs_.findIndex((obj: any) => obj["id"] === LSLANG);
+      this.langs_[index].class = "lang-active";
+    });
+  }
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
@@ -246,6 +261,22 @@ export class AccountPage implements OnInit {
         }
       }
     });
+  }
+
+  set_language(i: number, lang_: string) {
+    this.lang_proc_ = true;
+    for (let j = 0; j < this.langsoriginal.length; j++) {
+      this.langs_[j].class = "lang-passive";
+      const setLang =
+        j === this.langsoriginal.length - 1
+          ? this.misc.setLanguage(lang_).then(() => {
+            this.langs_[i].class = "lang-active";
+            setTimeout(() => {
+              this.lang_proc_ = false;
+            }, 500);
+          })
+          : null;
+    }
   }
 
 }

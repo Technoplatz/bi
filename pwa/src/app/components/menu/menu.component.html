@@ -47,17 +47,17 @@ https://www.gnu.org/licenses.
     <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="home-outline"></ion-icon>{{ 'Navigation' | translate }}
+          <ion-icon name="compass-outline"></ion-icon>{{ 'Navigation' | translate }}
         </ion-button>
         <div>
           <p (click)="misc.navi.next('dashboard')" class="clicked-item dark">
-            {{ 'Dashboard' | translate}}
+            {{ 'Dashboard' | translate }}
           </p>
           <p *ngIf="perm_" (click)="misc.navi.next('admin/_collection')" class="clicked-item dark">
             {{ 'Data Collections' | translate }}
           </p>
           <p *ngIf="perm_" (click)="misc.navi.next('admin/_query')" class="clicked-item dark">
-            {{ 'My Queries' | translate}}
+            {{ 'My Queries' | translate }}
           </p>
           <p *ngIf="perm_" (click)="misc.navi.next('admin/_visual')" class="clicked-item dark">
             {{ 'Visualization' | translate }} [Beta]
@@ -106,7 +106,7 @@ https://www.gnu.org/licenses.
           <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
         </ion-button>
         <p *ngFor="let item of segmentsadm" (click)="misc.navi.next('admin/' + item.id)" class="clicked-item dark">
-          {{ item.title }}
+          {{ item.title | translate }}
         </p>
       </ion-label>
     </ion-item>
