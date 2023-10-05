@@ -44,12 +44,27 @@ import { SignPage } from "../sign/sign.page";
 
 export class HomePage implements OnInit {
   public user: any;
+  public langcss: string = "lang-passive";
+  public lang: string = "de";
+  public langs_: any = [];
+  public lang_proc_ = false;
+  public langsoriginal: any = [
+    { id: "en", name: "EN", class: "lang-passive" },
+    { id: "de", name: "DE", class: "lang-passive" },
+    { id: "tr", name: "TR", class: "lang-passive" },
+  ];
 
   constructor(
     private modal: ModalController,
     public misc: Miscellaneous,
     private storage: Storage
-  ) { }
+  ) {
+    this.langs_ = this.langsoriginal;
+    this.misc.getLanguage().then((LSLANG) => {
+      const index = this.langs_.findIndex((obj: any) => obj["id"] === LSLANG);
+      this.langs_[index].class = "lang-active";
+    });
+  }
 
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
@@ -68,6 +83,22 @@ export class HomePage implements OnInit {
       }
     });
     return await modal.present();
+  }
+
+  set_language(i: number, lang_: string) {
+    this.lang_proc_ = true;
+    for (let j = 0; j < this.langsoriginal.length; j++) {
+      this.langs_[j].class = "lang-passive";
+      const setLang =
+        j === this.langsoriginal.length - 1
+          ? this.misc.setLanguage(lang_).then(() => {
+            this.langs_[i].class = "lang-active";
+            setTimeout(() => {
+              this.lang_proc_ = false;
+            }, 500);
+          })
+          : null;
+    }
   }
 
 }

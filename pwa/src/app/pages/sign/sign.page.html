@@ -59,7 +59,7 @@ https://www.gnu.org/licenses.
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Two-Factor Access Code' | translate }}
+            <ion-label position="stacked">{{ 'One Time Password' | translate }}:
             </ion-label>
             <ion-input #tfacfocus class="ion-no-padding ion-margin-top token" formControlName="tfac" type="text"
                 required minlength="6" maxlength="6" size="8" autofocus="true" required="true" autocomplete="off">
@@ -161,7 +161,7 @@ https://www.gnu.org/licenses.
             <h2>{{ '2F Authentication' | translate }}</h2>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'One Time Password' | translate }}
+            <ion-label position="stacked">{{ 'One Time Password' | translate }}:
             </ion-label>
             <ion-input #tfacfocus class="ion-no-padding token" formControlName="tfac" type="text" required minlength="6"
                 maxlength="6" size="8" autofocus="true" required="true">
@@ -180,7 +180,7 @@ https://www.gnu.org/licenses.
             <ion-button fill="clear" (click)="doSetOp('signin')" size="small"
                 class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="mail-outline"></ion-icon>
-                <span>{{ 'Your OTP has been sent by e-mail' | translate }}.</span>
+                <span>{{ 'Your OTP has been sent by E-mail' | translate }}.</span>
             </ion-button>
         </ion-item>
     </form>
@@ -223,7 +223,7 @@ https://www.gnu.org/licenses.
             <ion-button fill="clear" (click)="doSetOp('signin')" size="small"
                 class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="log-in-outline"></ion-icon>
-                <span>{{ 'Please click the button above to get signed in' | translate }}.</span>
+                <span>{{ 'Click the button above to get Signed in' | translate }}.</span>
             </ion-button>
         </ion-item>
     </form>
