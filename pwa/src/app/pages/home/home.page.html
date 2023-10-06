@@ -76,15 +76,13 @@ https://www.gnu.org/licenses.
           <a href="#" (click)="doSignup()">{{ 'Sign up' | translate }}</a>.
         </ion-col>
       </ion-row>
-      <ion-row class="ion-margin-top">
-        <ion-col size="1"></ion-col>
-        <ion-col size="11" class="flex-container">
-          <div *ngFor="let item of langs_; let i=index" [class]="item.class" (click)="set_language(i, item.id)">{{
-            item.name }}
-          </div>
-        </ion-col>
-      </ion-row>
     </ng-template>
+    <ion-row class="ion-margin-top">
+      <ion-col size="1"></ion-col>
+      <ion-col size="11">
+        <app-lang></app-lang>
+      </ion-col>
+    </ion-row>
   </ion-grid>
 </ion-content>
 <app-footer></app-footer>

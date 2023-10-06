@@ -34,13 +34,13 @@ https://www.gnu.org/licenses.
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
                 <ion-button *ngIf="isInProgress"> {{ 'PROCESSING' | translate }}... </ion-button>
-                <ion-button *ngIf="collection=='_backup' && op=='insert' && !isInProgress" (click)="doDump('backup')">
-                    {{ 'BACKUP' | translate }}
+                <ion-button *ngIf="collection=='_dump' && op=='insert' && !isInProgress" (click)="do_dump('dump')">
+                    {{ 'DUMP' | translate }}
                 </ion-button>
-                <ion-button *ngIf="collection=='_backup' && op=='update' && !isInProgress" (click)="doDownload()">
+                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="doDownload()">
                     {{ 'DOWNLOAD' | translate }}
                 </ion-button>
-                <ion-button *ngIf="collection=='_backup' && op=='update' && !isInProgress" (click)="doDump('restore')">
+                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('restore')">
                     {{ 'RESTORE' | translate }}
                 </ion-button>
                 <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">
@@ -48,7 +48,7 @@ https://www.gnu.org/licenses.
                     {{ 'SCAN' | translate }}
                 </ion-button>
                 <ng-template #noscan>
-                    <ion-button *ngIf="collection!='_backup' && collection!='_storage' && op!='filter' && !isInProgress"
+                    <ion-button *ngIf="collection!='_dump' && collection!='_storage' && op!='filter' && !isInProgress"
                         (click)="submit_f()">
                         <span *ngIf="op=='action'; else noaction"> {{ 'RUN' | translate }} </span>
                         <ng-template #noaction> {{ 'SAVE' | translate }} </ng-template>

@@ -208,7 +208,7 @@ class Schedular:
         try:
             sched_ = BackgroundScheduler(daemon=True)
             sched_.remove_all_jobs()
-            sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{API_DUMP_HOURS_}", day="*", month="*", day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cron"}, "op": "dump"}])
+            sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{MONGO_DUMP_HOURS_}", day="*", month="*", day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cron"}, "op": "dump"}])
             sched_.add_job(self.schedule_queries_f, trigger="cron", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", hour="*", day="*", month="*", day_of_week="*", id="schedule_queries", replace_existing=True, args=[sched_])
             sched_.start()
             return True
@@ -284,13 +284,57 @@ class Misc:
         fields_ = input_["fields"] if "fields" in input_ else None
         query_ = input_["query"] if "query" in input_ else None
         loc_ = input_["loc"] if "loc" in input_ else None
+        connstr_ = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}"
 
         commands_ = {
-            "mongoexport": f"mongoexport --uri='mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?authSource={MONGO_AUTH_DB_}' --quiet --ssl --collection={collection_} --out={file_} --tlsInsecure --sslCAFile={MONGO_TLS_CA_KEYFILE_} --sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_} --sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_} --db={MONGO_DB_} --type={type_} --fields='{fields_}' --query={query_}",
-            "mongorestore": f"mongorestore --host '{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}' --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password '{MONGO_PASSWORD_}' --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_} --nsExclude={MONGO_DB_}._backup --nsExclude={MONGO_DB_}._auth --nsExclude={MONGO_DB_}._user --nsExclude={MONGO_DB_}._log --drop --quiet",
-            "mongodump": f"mongodump --host '{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}' --db {MONGO_DB_} --authenticationDatabase {MONGO_AUTH_DB_} --username {MONGO_USERNAME_} --password '{MONGO_PASSWORD_}' --ssl --sslPEMKeyFile {MONGO_TLS_CERT_KEYFILE_} --sslCAFile {MONGO_TLS_CA_KEYFILE_} --sslPEMKeyPassword {MONGO_TLS_CERT_KEYFILE_PASSWORD_} --tlsInsecure --{type_} --archive={loc_}"
+            "mongoexport": [
+                "mongoexport",
+                "--uri", connstr_,
+                "--db", f"{MONGO_DB_}",
+                "--authenticationDatabase", f"{MONGO_AUTH_DB_}",
+                "--ssl",
+                f"--collection={collection_}",
+                "--sslPEMKeyFile", f"{MONGO_TLS_CERT_KEYFILE_}",
+                "--sslCAFile", f"{MONGO_TLS_CA_KEYFILE_}",
+                "--sslPEMKeyPassword", f"{MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
+                "--tlsInsecure",
+                f"--type={type_}",
+                f"--fields='{fields_}'",
+                f"--query={query_}",
+                f"--out={file_}",
+                "--quiet"
+            ],
+            "mongorestore": [
+                "mongorestore",
+                "--uri", connstr_,
+                "--db", f"{MONGO_DB_}",
+                "--authenticationDatabase", f"{MONGO_AUTH_DB_}",
+                "--ssl",
+                "--sslPEMKeyFile", f"{MONGO_TLS_CERT_KEYFILE_}",
+                "--sslCAFile", f"{MONGO_TLS_CA_KEYFILE_}",
+                "--sslPEMKeyPassword", f"{MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
+                "--tlsInsecure",
+                f"--{type_}",
+                f"--archive={loc_}",
+                "--drop",
+                "--quiet"
+            ],
+            "mongodump": [
+                "mongodump",
+                "--uri", connstr_,
+                "--db", f"{MONGO_DB_}",
+                "--authenticationDatabase", f"{MONGO_AUTH_DB_}",
+                "--ssl",
+                "--sslPEMKeyFile", f"{MONGO_TLS_CERT_KEYFILE_}",
+                "--sslCAFile", f"{MONGO_TLS_CA_KEYFILE_}",
+                "--sslPEMKeyPassword", f"{MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
+                "--tlsInsecure",
+                f"--{type_}",
+                f"--archive={loc_}",
+                "--quiet"
+            ]
         }
-        return commands_[command_] if command_ in commands_ else False
+        return commands_[command_] if command_ in commands_ else []
 
     def jwt_proc_f(self, endecode_, token_, jwt_secret_, payload_, header_):
         """
@@ -616,24 +660,24 @@ class Mongo:
         self.client_ = MongoClient(self.connstr)
         self.db_ = self.client_[MONGO_DB_]
 
-    def backup_f(self):
+    def dump_f(self):
         """
         docstring is in progress
         """
         try:
             id_ = f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}"
             fn_ = f"{id_}.gz"
-            fullpath_ = os.path.normpath(os.path.join(API_DUMPFILE_PATH_, fn_))
+            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
+            if not fullpath_.startswith(DUMP_PATH_):
+                print_("!!! [dump] fullpath_", fullpath_)
+                raise APIError("file not allowed [dump]")
             type_ = "gzip"
 
             command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
             if not command_:
                 raise APIError("dump command error")
-            subprocess.call(["mongodump", command_])
 
-            if not fullpath_.startswith(DUMP_PATH_):
-                print_("!!! [dump] fullpath_", fullpath_)
-                raise APIError("file not allowed [dump]")
+            subprocess.call(command_)
             size_ = os.path.getsize(fullpath_)
 
             return {"result": True, "id": id_, "type": type_, "size": size_}
@@ -654,17 +698,16 @@ class Mongo:
         try:
             id_ = obj["id"]
             fn_ = f"{id_}.gz"
-            fullpath_ = os.path.normpath(os.path.join(API_DUMPFILE_PATH_, fn_))
+            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
+            if not fullpath_.startswith(DUMP_PATH_):
+                print_("!!! [dump] fullpath_", fullpath_)
+                raise APIError("file not allowed [restore]")
             type_ = "gzip"
 
             command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
             if not command_:
                 raise APIError("restore command error")
-            subprocess.call(["mongorestore", command_])
-
-            if not fullpath_.startswith(DUMP_PATH_):
-                print_("!!! [dump] fullpath_", fullpath_)
-                raise APIError("file not allowed [restore]")
+            subprocess.call(command_)
             size_ = os.path.getsize(fullpath_)
 
             return {"result": True, "id": id_, "type": type_, "size": size_}
@@ -1435,7 +1478,7 @@ class Crud:
         try:
             op_ = obj["op"] if "op" in obj else None
 
-            dump_f_ = Mongo().backup_f() if op_ in ["backup", "dump"] else Mongo().restore_f(obj)
+            dump_f_ = Mongo().dump_f() if op_ == "dump" else Mongo().restore_f(obj)
             if not dump_f_["result"]:
                 raise APIError(dump_f_["msg"])
 
@@ -1444,21 +1487,21 @@ class Crud:
             size_ = dump_f_["size"]
             op_ = obj["op"] if "op" in obj else None
             email_ = obj["user"]["email"] if obj and obj["user"] else "cronjob"
-            description_ = "On-Demand" if op_ == "backup" else "Automatic"
+            description_ = "On-Demand" if op_ == "dump" else "Automatic"
 
             doc_ = {
-                "bak_id": id_,
-                "bak_type": type_,
-                "bak_size": size_,
-                "bak_description": description_,
-                "bak_process": op_,
+                "dmp_id": id_,
+                "dmp_type": type_,
+                "dmp_size": size_,
+                "dmp_description": description_,
+                "dmp_process": op_,
                 "_created_at": Misc().get_now_f(),
                 "_created_by": email_,
                 "_modified_at": Misc().get_now_f(),
                 "_modified_by": email_,
             }
 
-            Mongo().db_["_backup"].insert_one(doc_)
+            Mongo().db_["_dump"].insert_one(doc_)
 
             return {"result": True}
 
@@ -1565,7 +1608,7 @@ class Crud:
                     command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     if not command_:
                         raise APIError("export command error")
-                    subprocess.call(["mongoexport", command_])
+                    subprocess.call(command_)
 
                     files_ = [{"name": file_, "type": type_}] if attachment_ else []
 
@@ -3172,7 +3215,7 @@ class Crud:
                     command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     if not command_:
                         raise APIError("export command error")
-                    subprocess.call(["mongoexport", command_])
+                    subprocess.call(command_)
                     files_ += [{"name": file_, "type": type_}]
 
                 email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
@@ -3825,7 +3868,7 @@ class Auth:
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             collection_id_ = input_["collection"] if "collection" in input_ and input_["collection"] is not None else None
             op_ = input_["op"] if "op" in input_ else None
-            administratives_ = ["dump", "backup", "restore"]
+            administratives_ = ["dump", "restore"]
             permissive_ops_ = ["view", "views", "charts", "collections", "announcements", "template"]
             is_not_crud_ = collection_id_ and collection_id_[:1] == "_"
             allowmatch_ = []
@@ -4408,14 +4451,14 @@ EMAIL_SIGNIN_SUBJECT_ = "New Sign-in"
 EMAIL_UPLOADERR_SUBJECT_ = "File Upload Result"
 EMAIL_DEFAULT_SUBJECT_ = "Hello"
 API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
-API_DUMP_HOURS_ = os.environ.get("API_DUMP_HOURS") if os.environ.get("API_DUMP_HOURS") else "23"
+MONGO_DUMP_HOURS_ = os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
 API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
 API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
-API_DUMPFILE_PATH_ = os.environ.get('API_DUMPFILE_PATH')
+API_MONGODUMP_PATH_ = os.environ.get('API_MONGODUMP_PATH')
 API_CORS_ORIGINS_ = os.environ.get('API_CORS_ORIGINS').strip().split(",")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
@@ -4436,12 +4479,12 @@ MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "Tr
 MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get("MONGO_TIMEOUT_MS") and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0 else 10000
 PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get("PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
 PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
-PROTECTED_COLLS_ = ["_log", "_backup", "_event", "_announcement"]
+PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers", "import"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
 TEMP_PATH_ = "/temp"
-DUMP_PATH_ = "/dump"
+DUMP_PATH_ = "/mongodump"
 
 app = Flask(__name__)
 app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_
@@ -4449,7 +4492,7 @@ app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requ
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_
 app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
-app.config["UPLOAD_FOLDER"] = "/vault/"
+app.config["UPLOAD_FOLDER"] = API_TEMPFILE_PATH_
 app.json_encoder = JSONEncoder
 CORS(app)
 
@@ -4614,7 +4657,7 @@ def crud_f():
             res_ = Crud().query_f(input_)
         elif op_ == "link":
             res_ = Crud().link_f(input_)
-        elif op_ in ["backup", "restore"]:
+        elif op_ in ["dump", "restore"]:
             res_ = Crud().dump_f(input_)
         elif op_ == "saveschema":
             res_ = Crud().saveschema_f(input_)
@@ -5014,7 +5057,7 @@ def get_dump_f():
         permission_f_ = Auth().permission_f({
             "user": jwt_validate_f_["user"],
             "auth": jwt_validate_f_["auth"],
-            "collection": "_backup",
+            "collection": "_dump",
             "op": "dump"
         })
         if not permission_f_["result"]:
@@ -5026,10 +5069,9 @@ def get_dump_f():
             raise APIError("dump not selected")
 
         file_ = f"{id_}.gz"
-        directory_ = "/dump"
         header_ = Security().header_f()
 
-        return send_from_directory(directory=directory_, path=file_, as_attachment=True), 200, header_
+        return send_from_directory(directory=API_MONGODUMP_PATH_, path=file_, as_attachment=True), 200, header_
 
     except AuthError as exc_:
         return {"msg": str(exc_), "status": 401}

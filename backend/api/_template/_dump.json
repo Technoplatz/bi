@@ -1,48 +1,47 @@
 {
   "properties": {
-    "bak_id": {
+    "dmp_id": {
       "bsonType": "string",
+      "title": "ID",
+      "description": "Dump ID",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-]{3,64}$",
-      "title": "ID",
-      "description": "Backup ID",
       "permanent": true,
       "default": "database-dump"
     },
-    "bak_description": {
+    "dmp_description": {
       "bsonType": "string",
-      "minLength": 0,
-      "maxLength": 128,
-      "pattern": "^[a-zA-Z0-9ÜĞİŞÖÇüğışçöß.,;?*_/()! -]{0,128}$",
       "title": "Description",
       "description": "Description",
-      "textarea": true
+      "minLength": 0,
+      "maxLength": 128,
+      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{0,128}$"
     },
-    "bak_process": {
+    "dmp_process": {
       "bsonType": "string",
       "title": "Process",
-      "description": "Backup Type",
-      "enum": ["backup", "restore"],
-      "default": "backup",
+      "description": "Process Type",
+      "enum": ["dump", "restore"],
+      "default": "dump",
       "permanent": true
     },
-    "bak_type": {
+    "dmp_type": {
       "bsonType": "string",
-      "title": "Backup Type",
-      "description": "Backup Type",
+      "title": "File Type",
+      "description": "File Type",
       "enum": ["gzip"],
       "default": "gzip"
     },
-    "bak_size": {
+    "dmp_size": {
       "bsonType": "number",
       "title": "Size",
       "description": "File Size",
       "permanent": true
     }
   },
-  "required": ["bak_id", "bak_type"],
-  "unique": [["bak_id"], ["bak_file"]],
+  "required": ["dmp_id", "dmp_type"],
+  "unique": [["dmp_id"], ["dmp_file"]],
   "sort": {
     "_created_at": -1
   }

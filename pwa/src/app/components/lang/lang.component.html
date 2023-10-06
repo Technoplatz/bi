@@ -1,4 +1,4 @@
-/*
+<!--
 Technoplatz BI
 
 Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
@@ -28,46 +28,10 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
-*/
+-->
 
-import { Component, OnInit } from "@angular/core";
-import { ModalController } from "@ionic/angular";
-import { Storage } from "@ionic/storage";
-import { Miscellaneous } from "../../classes/misc";
-import { SignPage } from "../sign/sign.page";
-
-@Component({
-  selector: "app-home",
-  templateUrl: "./home.page.html",
-  styleUrls: ["./home.page.scss"]
-})
-
-export class HomePage implements OnInit {
-  public user: any;
-
-  constructor(
-    private modal: ModalController,
-    public misc: Miscellaneous,
-    private storage: Storage
-  ) {}
-
-  ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA ? LSUSERMETA : null;
-    });
-  }
-
-  async doSignup() {
-    const modal = await this.modal.create({
-      component: SignPage,
-      backdropDismiss: false,
-      cssClass: "signup-modal",
-      componentProps: {
-        op: "signup",
-        user: this.user
-      }
-    });
-    return await modal.present();
-  }
-
-}
+<div class="flex-container">
+  <div *ngFor="let item of langs_; let i=index" [class]="item.class" (click)="set_language(i, item.id)">{{
+    item.name }}
+  </div>
+</div>

@@ -110,7 +110,7 @@ function startBI() {
     if [[ ! -f .mongo/mongo_initdb_root_password ]]; then
         openssl rand -hex 10 >.mongo/mongo_initdb_root_password
     fi
-    env docker compose --project-name technoplatz-bi --env-file $DOTENV -f $DCYML up --detach --remove-orphans --no-build
+    env docker compose --project-name technoplatz-bi --env-file $DOTENV -f $DCYML up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
         docker cp init:/cert/mongo0.pem .mongo/mongo0.pem

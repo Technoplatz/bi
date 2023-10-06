@@ -352,10 +352,9 @@ services:
       - traefik.http.services.api.loadbalancer.server.port=80
       - com.centurylinklabs.watchtower.enable=false
     volumes:
-      - bi-storage-volume:/cron
       - bi-storage-volume:${API_TEMPFILE_PATH}
-      - bi-storage-volume:${API_DUMPFILE_PATH}
-      - bi-storage-volume:/vault
+      - bi-storage-volume:${API_MONGODUMP_PATH}
+      - bi-storage-volume:/cron
       - bi-cert-volume:/cert
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -381,7 +380,7 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAIL_DISCLAIMER_HTML=${EMAIL_DISCLAIMER_HTML}
       - API_SCHEDULE_INTERVAL_MIN=${API_SCHEDULE_INTERVAL_MIN}
-      - API_DUMP_HOURS=${API_DUMP_HOURS}
+      - MONGO_DUMP_HOURS=${MONGO_DUMP_HOURS}
       - API_SESSION_EXP_MINUTES=${API_SESSION_EXP_MINUTES}
       - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
       - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
@@ -389,7 +388,7 @@ services:
       - API_DEFAULT_AGGREGATION_LIMIT=${API_DEFAULT_AGGREGATION_LIMIT}
       - API_QUERY_PAGE_SIZE=${API_QUERY_PAGE_SIZE}
       - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
-      - API_DUMPFILE_PATH=${API_DUMPFILE_PATH}
+      - API_MONGODUMP_PATH=${API_MONGODUMP_PATH}
       - API_CORS_ORIGINS=${API_CORS_ORIGINS}
       - NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_SLACK_HOOK_URL}
       - MONGO_TLS=${MONGO_TLS}

@@ -31,43 +31,54 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { ModalController } from "@ionic/angular";
-import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "../../classes/misc";
-import { SignPage } from "../sign/sign.page";
+import { environment } from "../../../environments/environment";
 
 @Component({
-  selector: "app-home",
-  templateUrl: "./home.page.html",
-  styleUrls: ["./home.page.scss"]
+  selector: "app-lang",
+  templateUrl: "./lang.component.html",
+  styleUrls: ["./lang.component.scss"],
 })
-
-export class HomePage implements OnInit {
-  public user: any;
+export class LangComponent implements OnInit {
+  public version_ = environment.appVersion;
+  public langcss: string = "lang-passive";
+  public lang: string = "de";
+  public langs_: any = [];
+  public lang_proc_ = false;
+  public langsoriginal: any = [
+    { id: "en", name: "EN", class: "lang-passive" },
+    { id: "de", name: "DE", class: "lang-passive" },
+    { id: "tr", name: "TR", class: "lang-passive" },
+  ];
 
   constructor(
-    private modal: ModalController,
-    public misc: Miscellaneous,
-    private storage: Storage
-  ) {}
-
-  ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA ? LSUSERMETA : null;
+    private misc: Miscellaneous,
+  ) {
+    this.langs_ = this.langsoriginal;
+    this.misc.getLanguage().then((LSLANG) => {
+      const index = this.langs_.findIndex((obj: any) => obj["id"] === LSLANG);
+      this.langs_[index].class = "lang-active";
     });
   }
 
-  async doSignup() {
-    const modal = await this.modal.create({
-      component: SignPage,
-      backdropDismiss: false,
-      cssClass: "signup-modal",
-      componentProps: {
-        op: "signup",
-        user: this.user
-      }
-    });
-    return await modal.present();
+  ngOnInit() { }
+
+  set_language(i: number, lang_: string) {
+    this.lang_proc_ = true;
+    for (let j = 0; j < this.langsoriginal.length; j++) {
+      this.langs_[j].class = "lang-passive";
+      const setLang =
+        j === this.langsoriginal.length - 1
+          ? this.misc.setLanguage(lang_).then(() => {
+            this.langs_[i].class = "lang-active";
+            setTimeout(() => {
+              this.lang_proc_ = false;
+            }, 500);
+          })
+          : null;
+    }
   }
+
+
 
 }

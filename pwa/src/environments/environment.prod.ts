@@ -136,7 +136,7 @@ export const environment = {
     { "id": "_permission", "title": "Permissions", "description": "Database collection permissions." },
     { "id": "_firewall", "title": "Firewall", "description": "IP Firewall" },
     { "id": "_token", "title": "API Tokens", "description": "Access tokens of built-in API functions." },
-    { "id": "_backup", "title": "Backups", "description": "Database backup and restore." },
+    { "id": "_dump", "title": "DB Dumps", "description": "Backup and Restore." },
     { "id": "_log", "title": "Logs", "description": "Transaction logs in detail" },
     { "id": "_kv", "title": "Key-Value", "description": "Basic environment variables defined as KEY:VALUE pairs." }
   ],

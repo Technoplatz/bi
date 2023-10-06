@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 20219-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see https://www.gnu.org/licenses.
+along with this program. If not, see https://www.gnu.org/licenses.
 
 If your software can interact with users remotely through a computer
 network, you should also make sure that it provides a way for users to
@@ -30,44 +30,3 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit } from "@angular/core";
-import { ModalController } from "@ionic/angular";
-import { Storage } from "@ionic/storage";
-import { Miscellaneous } from "../../classes/misc";
-import { SignPage } from "../sign/sign.page";
-
-@Component({
-  selector: "app-home",
-  templateUrl: "./home.page.html",
-  styleUrls: ["./home.page.scss"]
-})
-
-export class HomePage implements OnInit {
-  public user: any;
-
-  constructor(
-    private modal: ModalController,
-    public misc: Miscellaneous,
-    private storage: Storage
-  ) {}
-
-  ngOnInit() {
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA ? LSUSERMETA : null;
-    });
-  }
-
-  async doSignup() {
-    const modal = await this.modal.create({
-      component: SignPage,
-      backdropDismiss: false,
-      cssClass: "signup-modal",
-      componentProps: {
-        op: "signup",
-        user: this.user
-      }
-    });
-    return await modal.present();
-  }
-
-}

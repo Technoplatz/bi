@@ -298,7 +298,7 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doDump(op_: string) {
+  do_dump(op_: string) {
     this.modified = true;
     this.isInProgress = true;
     this.misc.apiCall("crud", {
