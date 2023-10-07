@@ -50,6 +50,8 @@ from functools import partial
 from random import randint
 from datetime import datetime, timedelta
 from pymongo import MongoClient
+from boto3 import session
+from botocore.client import Config
 import pymongo
 import bson
 from bson import json_util
@@ -208,7 +210,7 @@ class Schedular:
         try:
             sched_ = BackgroundScheduler(daemon=True)
             sched_.remove_all_jobs()
-            sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{MONGO_DUMP_HOURS_}", day="*", month="*", day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cron"}, "op": "dump"}])
+            sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{MONGO_DUMP_HOURS_}", day="*", month="*", day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cronjob"}}])
             sched_.add_job(self.schedule_queries_f, trigger="cron", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", hour="*", day="*", month="*", day_of_week="*", id="schedule_queries", replace_existing=True, args=[sched_])
             sched_.start()
             return True
@@ -273,6 +275,36 @@ class Misc:
             "caseType",
             "query"
         ]
+
+    def boto_s3_f(self, input_):
+        """
+        docstring is in progress
+        """
+        res_ = {}
+        try:
+            origin_ = input_["origin"]
+            bucket_ = input_["bucket"]
+            object_ = input_["object"]
+            extra_args_ = {
+                "ServerSideEncryption": "AES256"
+            }
+
+            boto_client_ = session.Session().client(
+                "s3",
+                region_name=API_S3_REGION_,
+                endpoint_url=API_S3_ENDPOINT_URL_,
+                aws_access_key_id=API_S3_ACCESS_ID_,
+                aws_secret_access_key=API_S3_SECRET_KEY_
+            )
+
+            boto_client_.upload_file(origin_, bucket_, object_, ExtraArgs=extra_args_)
+            res_ = {"result": True}
+
+        except Exception as exc_:
+            res_ = {"result": False, "msg": str(exc_)}
+
+        finally:
+            return res_
 
     def commands_f(self, command_, input_):
         """
@@ -659,67 +691,6 @@ class Mongo:
         self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}{timeout_ms_}"
         self.client_ = MongoClient(self.connstr)
         self.db_ = self.client_[MONGO_DB_]
-
-    def dump_f(self):
-        """
-        docstring is in progress
-        """
-        try:
-            id_ = f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}"
-            fn_ = f"{id_}.gz"
-            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
-            if not fullpath_.startswith(DUMP_PATH_):
-                print_("!!! [dump] fullpath_", fullpath_)
-                raise APIError("file not allowed [dump]")
-            type_ = "gzip"
-
-            command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
-            if not command_:
-                raise APIError("dump command error")
-
-            subprocess.call(command_)
-            size_ = os.path.getsize(fullpath_)
-
-            return {"result": True, "id": id_, "type": type_, "size": size_}
-
-        except pymongo.errors.PyMongoError as exc__:
-            return Misc().mongo_error_f(exc__)
-
-        except APIError as exc__:
-            return Misc().api_error_f(exc__)
-
-        except Exception as exc__:
-            return Misc().exception_f(exc__)
-
-    def restore_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            id_ = obj["id"]
-            fn_ = f"{id_}.gz"
-            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
-            if not fullpath_.startswith(DUMP_PATH_):
-                print_("!!! [dump] fullpath_", fullpath_)
-                raise APIError("file not allowed [restore]")
-            type_ = "gzip"
-
-            command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
-            if not command_:
-                raise APIError("restore command error")
-            subprocess.call(command_)
-            size_ = os.path.getsize(fullpath_)
-
-            return {"result": True, "id": id_, "type": type_, "size": size_}
-
-        except pymongo.errors.PyMongoError as exc__:
-            return Misc().mongo_error_f(exc__)
-
-        except APIError as exc__:
-            return Misc().api_error_f(exc__)
-
-        except Exception as exc__:
-            return Misc().exception_f(exc__)
 
 
 class Iot:
@@ -1471,45 +1442,97 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
+
+    def restore_f(self, obj):
+        """
+        docstring is in progress
+        """
+        res_ = {}
+        try:
+            id_ = obj["id"]
+            fn_ = f"{id_}.gz"
+            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
+            if not fullpath_.startswith(DUMP_PATH_):
+                print_("!!! [dump] fullpath_", fullpath_)
+                raise APIError("file not allowed [restore]")
+            type_ = "gzip"
+
+            command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
+            if not command_:
+                raise APIError("restore command error")
+
+            subprocess.call(command_)
+            size_ = os.path.getsize(fullpath_)
+            res_ = {"result": True, "id": id_, "type": type_, "size": size_}
+
+        except pymongo.errors.PyMongoError as exc__:
+            res_ = Misc().mongo_error_f(exc__)
+
+        except APIError as exc__:
+            res_ = Misc().api_error_f(exc__)
+
+        except Exception as exc__:
+            res_ = Misc().exception_f(exc__)
+        
+        finally:
+            return res_
+
     def dump_f(self, obj):
         """
         docstring is in progress
         """
+        res_ = {}
         try:
-            op_ = obj["op"] if "op" in obj else None
+            type_ = "gzip"
+            dmp_id_ = f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}"
+            fn_ = f"{dmp_id_}.gz"
 
-            dump_f_ = Mongo().dump_f() if op_ == "dump" else Mongo().restore_f(obj)
-            if not dump_f_["result"]:
-                raise APIError(dump_f_["msg"])
+            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
+            if not fullpath_.startswith(DUMP_PATH_):
+                print_("!!! [dump] fullpath_", fullpath_)
+                raise APIError("file not allowed [dump]")
 
-            id_ = dump_f_["id"]
-            type_ = dump_f_["type"]
-            size_ = dump_f_["size"]
-            op_ = obj["op"] if "op" in obj else None
+            command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
+            if not command_:
+                raise APIError("dump command error")
+
+            subprocess.call(command_)
+            size_ = os.path.getsize(fullpath_)
+
             email_ = obj["user"]["email"] if obj and obj["user"] else "cronjob"
-            description_ = "On-Demand" if op_ == "dump" else "Automatic"
+            description_ = "On-Demand" if email_ != "cronjob" else "Automatic"
 
             doc_ = {
-                "dmp_id": id_,
+                "dmp_id": dmp_id_,
                 "dmp_type": type_,
                 "dmp_size": size_,
                 "dmp_description": description_,
-                "dmp_process": op_,
+                "dmp_process": "dump",
                 "_created_at": Misc().get_now_f(),
                 "_created_by": email_,
                 "_modified_at": Misc().get_now_f(),
                 "_modified_by": email_,
             }
+            insert_one_ = Mongo().db_["_dump"].insert_one(doc_)
 
-            Mongo().db_["_dump"].insert_one(doc_)
+            boto_s3_f_ = Misc().boto_s3_f({
+                "origin": fullpath_,
+                "bucket": API_S3_BUCKET_NAME_,
+                "object": fn_
+            })
+            if not boto_s3_f_["result"]:
+                raise APIError(boto_s3_f_["msg"])
 
-            return {"result": True}
+            res_ = {"result": True, "id": dmp_id_, "type": type_, "size": size_}
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc__:
+            res_ = Misc().api_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc__:
+            res_ = Misc().exception_f(exc__)
+
+        finally:
+            return res_
 
     def link_f(self, obj_):
         """
@@ -4460,6 +4483,11 @@ API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
 API_MONGODUMP_PATH_ = os.environ.get('API_MONGODUMP_PATH')
 API_CORS_ORIGINS_ = os.environ.get('API_CORS_ORIGINS').strip().split(",")
+API_S3_REGION_ = os.environ.get("API_S3_REGION")
+API_S3_ENDPOINT_URL_ = os.environ.get("API_S3_ENDPOINT_URL")
+API_S3_ACCESS_ID_ = os.environ.get("API_S3_ACCESS_ID")
+API_S3_SECRET_KEY_ = os.environ.get("API_S3_SECRET_KEY")
+API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -4657,8 +4685,10 @@ def crud_f():
             res_ = Crud().query_f(input_)
         elif op_ == "link":
             res_ = Crud().link_f(input_)
-        elif op_ in ["dump", "restore"]:
+        elif op_ == "dump":
             res_ = Crud().dump_f(input_)
+        elif op_ == "restore":
+            res_ = Crud().restore_f(input_)
         elif op_ == "saveschema":
             res_ = Crud().saveschema_f(input_)
         elif op_ == "savequery":
