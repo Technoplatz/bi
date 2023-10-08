@@ -10,22 +10,6 @@
       "permanent": true,
       "default": "database-dump"
     },
-    "dmp_description": {
-      "bsonType": "string",
-      "title": "Description",
-      "description": "Description",
-      "minLength": 0,
-      "maxLength": 128,
-      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{0,128}$"
-    },
-    "dmp_process": {
-      "bsonType": "string",
-      "title": "Process",
-      "description": "Process Type",
-      "enum": ["dump", "restore"],
-      "default": "dump",
-      "permanent": true
-    },
     "dmp_type": {
       "bsonType": "string",
       "title": "File Type",

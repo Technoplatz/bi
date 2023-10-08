@@ -216,28 +216,6 @@ export class Crud {
     });
   }
 
-  Download(obj: any) {
-    return new Promise((resolve, reject) => {
-      this.misc.apiCall("get/dump", {
-        type: obj.type,
-        id: obj.id,
-        responseType: "blob" as "json"
-      }).then((res: any) => {
-        const fn_ = obj.id + ".gz";
-        let binaryData = [];
-        binaryData.push(res);
-        let downloadLink = document.createElement("a");
-        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
-        downloadLink.setAttribute("download", fn_);
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        resolve(true);
-      }).catch((err: any) => {
-        reject(err);
-      });
-    });
-  }
-
   getCollections() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {

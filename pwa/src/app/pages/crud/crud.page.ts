@@ -303,26 +303,24 @@ export class CrudPage implements OnInit {
     this.isInProgress = true;
     this.misc.apiCall("crud", {
       op: op_,
-      id: this.data_.bak_id,
-      type: this.data_.bak_type
-    }).then(() => {
+      dumpid: this.data_.dmp_id,
+      type: this.data_.dmp_type,
+      responseType: "blob" as "json"
+    }).then((res: any) => {
       this.misc.doMessage(`${op_} completed successfully`, "success");
-      this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
-    }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
-    }).finally(() => {
-      this.isInProgress = false;
-    });
-  }
-
-  doDownload() {
-    this.modified = true;
-    this.isInProgress = true;
-    this.crud.Download({
-      id: this.data_.bak_id,
-      type: this.data_.bak_type
-    }).then(() => {
-      this.doDismissModal({ op: this.op, modified: this.modified, filter: [] });
+      if(op_ === "dumpd") {
+        const fn_ = this.data_.dmp_id + ".gz";
+        let binaryData = [];
+        binaryData.push(res);
+        let downloadLink = document.createElement("a");
+        downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
+        downloadLink.setAttribute("download", fn_);
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        this.doDismissModal({ op: op_, modified: true, filter: [] });
+      } else {
+        this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
+      }
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     }).finally(() => {

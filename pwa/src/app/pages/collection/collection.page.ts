@@ -53,7 +53,6 @@ export class CollectionPage implements OnInit {
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
-  public description: string = "";
   public loadingText: string = environment.misc.loadingText;
   private submenu: string = "";
   private segment = "data";
@@ -179,8 +178,7 @@ export class CollectionPage implements OnInit {
           this.crud.getCollection(this.id).then((res: any) => {
             this.page_limits_.filter((page_limits_: any) => page_limits_.h <= this.screen_size_.h ? res.data?.col_structure?.actions?.length > 0 ? this.limit_ = page_limits_.limit - 3 : this.limit_ = page_limits_.limit : this.limit_ = this.limit_);
             this.counters_ = res && res.counters ? res.counters : {};
-            this.subheader = res && res.data ? res.data.col_title : this.id;
-            this.description = res && res.data ? res.data.col_description : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.description;
+            this.subheader = res && res.data ? res.data.col_title : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.title;
             this.refresh_data(0).then(() => { }).catch((error: any) => {
               this.misc.doMessage(error, "error");
             }).finally(() => {

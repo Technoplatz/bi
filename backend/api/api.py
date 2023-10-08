@@ -51,7 +51,7 @@ from random import randint
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 from boto3 import session
-from botocore.client import Config
+import botocore
 import pymongo
 import bson
 from bson import json_util
@@ -158,26 +158,21 @@ class Schedular:
         docstring is in progress
         """
         try:
-            print_(">>> scheduled queries started")
             queries_ = Mongo().db_["_query"].find({"que_scheduled": True})
             if not queries_:
-                print_("!!! no queries found to schedule")
                 return {"result": True}
 
             for query_ in queries_:
                 id__ = query_["que_id"] if "que_id" in query_ else None
                 if not id__:
-                    print_(f"!!! invalid query id {query_}")
                     continue
 
                 scheduled_cron_ = query_["que_scheduled_cron"] if "que_scheduled_cron" in query_ else None
                 if not croniter.is_valid(scheduled_cron_):
-                    print_(f"!!! invalid cron {id__}")
                     continue
 
                 separated_ = re.split(" ", scheduled_cron_)
                 if not (separated_ and len(separated_) == 5):
-                    print_(f"!!! invalid cron separation {id__}, {separated_}")
                     continue
 
                 minute_ = str(separated_[0].strip())
@@ -193,7 +188,6 @@ class Schedular:
                 }]
 
                 sched_.add_job(Crud().query_f, trigger="cron", minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, id=id__, replace_existing=True, args=args_)
-                print_(f">>> scheduled job query {id__} {scheduled_cron_} [now {Misc().get_timestamp_f()}]")
 
             return {"result": True}
 
@@ -210,7 +204,7 @@ class Schedular:
         try:
             sched_ = BackgroundScheduler(daemon=True)
             sched_.remove_all_jobs()
-            sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{MONGO_DUMP_HOURS_}", day="*", month="*", day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cronjob"}}])
+            sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{MONGO_DUMP_HOURS_}", day="*", month="*", day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cronjob"}, "op": "dumpu"}])
             sched_.add_job(self.schedule_queries_f, trigger="cron", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", hour="*", day="*", month="*", day_of_week="*", id="schedule_queries", replace_existing=True, args=[sched_])
             sched_.start()
             return True
@@ -280,11 +274,12 @@ class Misc:
         """
         docstring is in progress
         """
-        res_ = {}
         try:
+            op_ = input_["op"]
             origin_ = input_["origin"]
             bucket_ = input_["bucket"]
             object_ = input_["object"]
+
             extra_args_ = {
                 "ServerSideEncryption": "AES256"
             }
@@ -297,14 +292,27 @@ class Misc:
                 aws_secret_access_key=API_S3_SECRET_KEY_
             )
 
-            boto_client_.upload_file(origin_, bucket_, object_, ExtraArgs=extra_args_)
-            res_ = {"result": True}
+            if op_ in ["dumpr", "dumpd"]:
+                try:
+                    boto_client_.download_file(bucket_, object_, origin_)
+                except botocore.exceptions.ClientError as exc__:
+                    msg_ = str(exc__)
+                    if exc__.response["Error"]["Code"] == "404":
+                        msg_ = "object does not exist"
+                    return {"result": False, "msg": msg_}
+            else:
+                boto_client_.upload_file(origin_, bucket_, object_, ExtraArgs=extra_args_)
 
-        except Exception as exc_:
-            res_ = {"result": False, "msg": str(exc_)}
+            return {"result": True}
+
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
+
+        except Exception as exc__:
+            return {"result": False, "msg": str(exc__)}
 
         finally:
-            return res_
+            boto_client_.close()
 
     def commands_f(self, command_, input_):
         """
@@ -397,19 +405,21 @@ class Misc:
         except Exception as exc_:
             return ({"result": False, "msg": str(exc_), "exc": str(exc_)})
 
-    def post_notification(self, exc__):
+    def post_notification_f(self, notification_):
         """
         docstring is in progress
         """
-        if NOTIFICATION_SLACK_HOOK_URL_:
-            ip_ = self.get_client_ip_f()
-            exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
-            file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
-            line_ = exc_tb_.tb_lineno
-            notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {str(exc__)}"
-            resp_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
-            if resp_.status_code != 200:
-                print_("!!! slack notification error", resp_)
+        if not NOTIFICATION_SLACK_HOOK_URL_:
+            return True
+
+        ip_ = self.get_client_ip_f()
+        exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
+        file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
+        line_ = exc_tb_.tb_lineno
+        notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {notification_}"
+        response_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
+        if response_.status_code != 200:
+            PRINT_("!!! Notification Error", response_.content)
 
         return True
 
@@ -417,60 +427,48 @@ class Misc:
         """
         docstring is in progress
         """
-        res_ = str(exc__)
-        self.post_notification(res_)
-        return {"result": False, "msg": res_}
+        self.post_notification_f(str(exc__))
+        return {"result": False, "msg": str(exc__)}
 
     def api_error_f(self, exc__):
         """
         docstring is in progress
         """
-        res_ = str(exc__)
-        self.post_notification(res_)
-        return {"result": False, "msg": res_}
+        self.post_notification_f(str(exc__))
+        return {"result": False, "msg": str(exc__)}
 
     def app_exception_f(self, exc__):
         """
         docstring is in progress
         """
-        res_ = str(exc__)
-        return {"result": False, "msg": res_}
+        return {"result": False, "msg": str(exc__)}
 
     def pass_exception_f(self, exc__):
         """
         docstring is in progress
         """
-        res_ = str(exc__)
-        return {"result": False, "msg": res_}
+        return {"result": False, "msg": str(exc__)}
 
     def auth_error_f(self, exc__):
         """
         docstring is in progress
         """
-        res_ = str(exc__)
-        return {"result": False, "msg": res_}
+        return {"result": False, "msg": str(exc__)}
 
     def mongo_error_f(self, exc__):
         """
         docstring is in progress
         """
-        msg_ = ""
-        try:
-            self.post_notification(str(exc__))
-            details_ = exc__.details
-            if "writeErrors" in details_:
-                msg_ = details_
-            else:
-                splt_ = str(exc__).split(", full error: ")
-                splt0_ = splt_[0] if splt_ and len(splt_) > 0 else str(exc__)
-                nk_ = splt0_.split(" :: ")
-                msg_ = nk_[2] if nk_ and len(nk_) > 1 else splt0_
+        details_, msg_ = exc__.details, ""
+        if "writeErrors" in details_:
+            msg_ = details_
+        else:
+            splt_ = str(exc__).split(", full error: ")
+            splt0_ = splt_[0] if splt_ and len(splt_) > 0 else str(exc__)
+            nk_ = splt0_.split(" :: ")
+            msg_ = nk_[2] if nk_ and len(nk_) > 1 else splt0_
 
-        except Exception as exc_:
-            msg_ = str(exc_)
-
-        finally:
-            return {"result": False, "msg": msg_, "notify": False, "count": 0}
+        return {"result": False, "msg": msg_, "notify": False, "count": 0}
 
     def log_f(self, obj):
         """
@@ -529,10 +527,7 @@ class Misc:
         """
         docstring is in progress
         """
-        if request:
-            return request.headers["cf-connecting-ip"] if "cf-connecting-ip" in request.headers else request.access_route[-1]
-
-        return "0.0.0.0"
+        return "0.0.0.0" if not request else request.headers["cf-connecting-ip"] if "cf-connecting-ip" in request.headers else request.access_route[-1]
 
     def get_except_underdashes(self):
         """
@@ -639,6 +634,8 @@ class Misc:
             else:
                 setto__ = setto_
 
+            return setto__
+
         except pymongo.errors.PyMongoError as exc_:
             return Misc().mongo_error_f(exc_)
 
@@ -648,21 +645,12 @@ class Misc:
         except Exception as exc_:
             return Misc().exception_f(exc_)
 
-        finally:
-            return setto__
-
     def clean_f(self, data_):
         """
         docstring is in progress
         """
-        res_ = None
-        try:
-            if isinstance(data_, str):
-                data_ = escape(data_)
-
-            res_ = bleach.clean(data_) if data_ else None
-        finally:
-            return res_
+        data_ = escape(data_) if isinstance(data_, str) else data_
+        return bleach.clean(data_) if data_ else None
 
 
 class Mongo:
@@ -709,7 +697,6 @@ class Iot:
         """
         docstring is in progress
         """
-        res_ = {}
         try:
             aggregate_ = []
             limitn_ = 50
@@ -761,22 +748,18 @@ class Iot:
             cursor_ = Mongo().db_["serial_data"].aggregate(aggregate_)
             docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
 
-            res_ = {"result": True, "payload": docs_, "msg": None, "status": 200}
+            return {"result": True, "payload": docs_, "msg": None, "status": 200}
 
         except APIError as exc_:
-            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 400}
+            return {"result": False, "payload": None, "msg": str(exc_), "status": 400}
 
         except Exception as exc_:
-            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 500}
-
-        finally:
-            return res_
+            return {"result": False, "payload": None, "msg": str(exc_), "status": 500}
 
     def barcode_scan_f(self, aut_id_):
         """
         docstring is in progress
         """
-        res_ = {}
         try:
             data_ = request.json
             bar_operation_ = data_["bar_operation"] if "bar_operation" in data_ and data_["bar_operation"] is not None else None
@@ -853,16 +836,13 @@ class Iot:
             data_["total_in"] = total_in_
             data_["total_out"] = total_out_
 
-            res_ = {"result": True, "data": data_, "msg": f"{bar_input_} OK", "status": 200}
+            return {"result": True, "data": data_, "msg": f"{bar_input_} OK", "status": 200}
 
         except APIError as exc_:
-            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 400}
+            return {"result": False, "payload": None, "msg": str(exc_), "status": 400}
 
         except Exception as exc_:
-            res_ = {"result": False, "payload": None, "msg": str(exc_), "status": 500}
-
-        finally:
-            return res_
+            return {"result": False, "payload": None, "msg": str(exc_), "status": 500}
 
 
 class Crud:
@@ -881,7 +861,6 @@ class Crud:
         """
         docstring is in progress
         """
-        res_ = None
         try:
             base_path_ = "/app/_template"
             filename_ = f"{schema_}.json"
@@ -890,17 +869,16 @@ class Crud:
 
             fullpath_ = os.path.normpath(os.path.join(base_path_, filename_))
             if not fullpath_.startswith(base_path_):
-                print_("!!! [schema] fullpath_", fullpath_)
+                PRINT_("!!! [schema] fullpath_", fullpath_)
                 raise APIError("file not allowed [schema]")
 
             with open(fullpath_, "r", encoding="utf-8") as fopen_:
                 res_ = json.loads(fopen_.read())
 
-        except APIError as exc__:
-            print_("!!!", exc__)
-
-        finally:
             return res_
+
+        except APIError as exc__:
+            PRINT_("!!!", exc__)
 
     def validate_iso8601_f(self, strv):
         """
@@ -1315,7 +1293,7 @@ class Crud:
             filename_ = f"imported-{collection_}-{Misc().get_timestamp_f()}.txt"
             fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
             if not fullpath_.startswith(TEMP_PATH_):
-                print_("!!! [import] fullpath_", fullpath_)
+                PRINT_("!!! [import] fullpath_", fullpath_)
                 raise APIError("file not allowed [import]")
             with open(fullpath_, "w", encoding="utf-8") as file_:
                 file_.write(stats_.replace("<br />", "\n") + "\n\n-----BEGIN ERROR LIST-----\n" + content_ + "-----END ERROR LIST-----")
@@ -1442,18 +1420,16 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-
-    def restore_f(self, obj):
+    def dump_restore_f(self, obj):
         """
         docstring is in progress
         """
-        res_ = {}
         try:
             id_ = obj["id"]
             fn_ = f"{id_}.gz"
             fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
             if not fullpath_.startswith(DUMP_PATH_):
-                print_("!!! [dump] fullpath_", fullpath_)
+                PRINT_("!!! [dump] fullpath_", fullpath_)
                 raise APIError("file not allowed [restore]")
             type_ = "gzip"
 
@@ -1463,59 +1439,43 @@ class Crud:
 
             subprocess.call(command_)
             size_ = os.path.getsize(fullpath_)
-            res_ = {"result": True, "id": id_, "type": type_, "size": size_}
+            return {"result": True, "id": id_, "type": type_, "size": size_}
 
         except pymongo.errors.PyMongoError as exc__:
-            res_ = Misc().mongo_error_f(exc__)
+            return Misc().mongo_error_f(exc__)
 
         except APIError as exc__:
-            res_ = Misc().api_error_f(exc__)
+            return Misc().api_error_f(exc__)
 
         except Exception as exc__:
-            res_ = Misc().exception_f(exc__)
-        
-        finally:
-            return res_
+            return Misc().exception_f(exc__)
 
-    def dump_f(self, obj):
+    def dump_f(self, obj_):
         """
         docstring is in progress
         """
-        res_ = {}
         try:
-            type_ = "gzip"
-            dmp_id_ = f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}"
-            fn_ = f"{dmp_id_}.gz"
+            op_ = obj_["op"]
+            email_ = obj_["user"]["email"] if obj_ and obj_["user"] else "cronjob"
 
+            dmp_id_ = f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}" if op_ == "dumpu" else Misc().clean_f(obj_["dumpid"])
+            fn_ = f"{dmp_id_}.gz"
+            type_ = "gzip"
             fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
             if not fullpath_.startswith(DUMP_PATH_):
-                print_("!!! [dump] fullpath_", fullpath_)
-                raise APIError("file not allowed [dump]")
+                PRINT_("!!! [dump] fullpath_", fullpath_)
+                raise APIError("file not allowed [restore]")
 
-            command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
-            if not command_:
-                raise APIError("dump command error")
-
-            subprocess.call(command_)
-            size_ = os.path.getsize(fullpath_)
-
-            email_ = obj["user"]["email"] if obj and obj["user"] else "cronjob"
-            description_ = "On-Demand" if email_ != "cronjob" else "Automatic"
-
-            doc_ = {
-                "dmp_id": dmp_id_,
-                "dmp_type": type_,
-                "dmp_size": size_,
-                "dmp_description": description_,
-                "dmp_process": "dump",
-                "_created_at": Misc().get_now_f(),
-                "_created_by": email_,
-                "_modified_at": Misc().get_now_f(),
-                "_modified_by": email_,
-            }
-            insert_one_ = Mongo().db_["_dump"].insert_one(doc_)
+            if op_ == "dumpu":
+                command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
+                subprocess.call(command_)
+                size_ = os.path.getsize(fullpath_)
+                Mongo().db_["_dump"].insert_one({
+                    "dmp_id": dmp_id_, "dmp_type": type_, "dmp_size": size_, "_created_at": Misc().get_now_f(), "_created_by": email_, "_modified_at": Misc().get_now_f(), "_modified_by": email_
+                })
 
             boto_s3_f_ = Misc().boto_s3_f({
+                "op": op_,
                 "origin": fullpath_,
                 "bucket": API_S3_BUCKET_NAME_,
                 "object": fn_
@@ -1523,16 +1483,22 @@ class Crud:
             if not boto_s3_f_["result"]:
                 raise APIError(boto_s3_f_["msg"])
 
-            res_ = {"result": True, "id": dmp_id_, "type": type_, "size": size_}
+            size_ = os.path.getsize(fullpath_)
+
+            if op_ == "dumpu" and os.path.exists(fullpath_):
+                os.remove(fullpath_)
+
+            if op_ == "dumpr":
+                command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
+                subprocess.call(command_)
+
+            return {"result": True, "id": dmp_id_, "file": fn_, "type": type_, "size": size_}
 
         except APIError as exc__:
-            res_ = Misc().api_error_f(exc__)
+            return Misc().api_error_f(exc__)
 
         except Exception as exc__:
-            res_ = Misc().exception_f(exc__)
-
-        finally:
-            return res_
+            return Misc().exception_f(exc__)
 
     def link_f(self, obj_):
         """
@@ -1781,7 +1747,7 @@ class Crud:
             return filtered_
 
         except Exception as exc_:
-            print_("!!! get filtered exception", exc_)
+            PRINT_("!!! get filtered exception", exc_)
             return None
 
     def get_view_data_f(self, user_, view_id_, scope_):
@@ -2350,7 +2316,7 @@ class Crud:
         docstring is in progress
         """
         schema_, query_, data_, fields_, count_, permitted_, aggregate_base_ = {}, {}, [], [], 0, False, []
-        files_, personalizations_to_, to_, res_, orig_ = [], [], [], {}, None
+        files_, personalizations_to_, to_, orig_ = [], [], [], None
         init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
         try:
             que_id_ = obj_["id"] if "id" in obj_ else None
@@ -2429,8 +2395,6 @@ class Crud:
             stats_ = cursore_[0]["stats"] if cursore_ and "stats" in cursore_[0] else []
             count_ = stats_[0]["count"] if stats_ else 0
 
-            res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
-
             if sched_ and orig_ == "sched":
                 _tags = query_["_tags"] if "_tags" in query_ and len(query_["_tags"]) > 0 else PERMISSIVE_TAGS_
                 que_title_ = query_["que_title"] if "que_title" in query_ else que_id_
@@ -2456,26 +2420,23 @@ class Crud:
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
-                res_ = {"result": True}
+            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
 
         except AuthError as exc__:
-            res_ = Misc().auth_error_f(exc__)
+            return Misc().auth_error_f(exc__)
 
         except APIError as exc__:
-            res_ = Misc().api_error_f(exc__)
+            return Misc().api_error_f(exc__)
 
         except pymongo.errors.PyMongoError as exc__:
             init_res_["query"] = query_
-            res_ = init_res_
+            return init_res_
 
         except PassException as exc__:
-            res_ = init_res_
+            return init_res_
 
         except Exception as exc__:
-            res_ = Misc().exception_f(exc__)
-
-        finally:
-            return res_
+            return Misc().exception_f(exc__)
 
     def read_f(self, input_):
         """
@@ -3081,7 +3042,6 @@ class Crud:
         """
         docstring is in progress
         """
-        exc_, res_ = None, {}
         try:
             collection_id_ = obj["collection"]
             user_ = obj["userindb"] if "userindb" in obj else None
@@ -3179,27 +3139,27 @@ class Crud:
             for api_ in apis_:
                 id_ = api_["id"] if "id" in api_ and api_["id"] is not None else None
                 if not id_:
-                    print_("!!! no action api id found")
+                    PRINT_("!!! no action api id found")
                     continue
                 enabled_ = "enabled" in api_ and api_["enabled"] is True
                 if not enabled_:
-                    print_(f"!!! action api not enabled: {id_}")
+                    PRINT_(f"!!! action api not enabled: {id_}")
                     continue
                 url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
                 if not url_:
-                    print_(f"!!! invalid url in action api: {id_}")
+                    PRINT_(f"!!! invalid url in action api: {id_}")
                     continue
                 headers_ = api_["headers"] if "headers" in api_ else None
                 if not headers_:
-                    print_(f"!!! invalid headers in action api: {id_}")
+                    PRINT_(f"!!! invalid headers in action api: {id_}")
                     continue
                 method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
                 if not method_:
-                    print_(f"!!! invalid method in action api: {id_}")
+                    PRINT_(f"!!! invalid method in action api: {id_}")
                     continue
                 map_ = api_["map"] if "map" in api_ else None
                 if not map_:
-                    print_(f"!!! no map found: {id_}")
+                    PRINT_(f"!!! no map found: {id_}")
                     continue
 
                 json_ = {}
@@ -3208,7 +3168,7 @@ class Crud:
                         json_["key"] = value_
                         json_["value"] = doc_[value_]
                 if not json_:
-                    print_(f"!!! no mapping values found: {id_}")
+                    PRINT_(f"!!! no mapping values found: {id_}")
                     continue
                 json_["ids"] = []
                 if ids_ and len(ids_) > 0:
@@ -3255,27 +3215,22 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            res_ = {"result": True, "count": count_, "content": "OK"}
+            return {"result": True, "count": count_, "content": "OK"}
 
         except pymongo.errors.PyMongoError as exc__:
-            exc_ = Misc().mongo_error_f(exc__)
+            return Misc().mongo_error_f(exc__)
 
         except AppException as exc__:
-            exc_ = Misc().app_exception_f(exc__)
+            return Misc().app_exception_f(exc__)
 
         except PassException as exc__:
-            exc_ = Misc().pass_exception_f(exc__)
+            return Misc().pass_exception_f(exc__)
 
         except APIError as exc__:
-            exc_ = Misc().api_error_f(exc__)
+            return Misc().api_error_f(exc__)
 
         except Exception as exc__:
-            exc_ = Misc().exception_f(exc__)
-
-        finally:
-            if exc_:
-                res_ = exc_
-            return res_
+            return Misc().exception_f(exc__)
 
     def insert_f(self, obj):
         """
@@ -3463,7 +3418,7 @@ class Email:
                     raise APIError("file not defined")
                 fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
                 if not fullpath_.startswith(TEMP_PATH_):
-                    print_("!!! [email] fullpath_", fullpath_)
+                    PRINT_("!!! [email] fullpath_", fullpath_)
                     raise APIError("file not allowed [email]")
                 with open(fullpath_, "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
@@ -3496,24 +3451,6 @@ class Email:
 
         except Exception as exc_:
             return Misc().exception_f(exc_)
-
-
-class Security:
-    """
-    docstring is in progress
-    """
-
-    def __init__(self):
-        """
-        docstring is in progress
-        """
-        self.base_header_ = {"Content-Type": "application/json; charset=utf-8"}
-
-    def header_f(self):
-        """
-        docstring is in progress
-        """
-        return self.base_header_
 
 
 class OTP:
@@ -4513,6 +4450,7 @@ STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort",
 PROP_KEYS_ = ["bsonType", "title", "description"]
 TEMP_PATH_ = "/temp"
 DUMP_PATH_ = "/mongodump"
+PRINT_ = partial(print, flush=True)
 
 app = Flask(__name__)
 app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_
@@ -4582,7 +4520,8 @@ def storage_f():
         count_ = import_f_["count"] if "count" in import_f_ and import_f_["count"] > 0 else 0
         msg_ = import_f_["msg"] if "msg" in import_f_ else None
 
-        return json.dumps({"result": import_f_["result"], "count": count_, "msg": msg_}, default=json_util.default, sort_keys=False), 200, Security().header_f()
+        hdr_ = {"Content-Type": "application/json; charset=utf-8"}
+        return json.dumps({"result": import_f_["result"], "count": count_, "msg": msg_}, default=json_util.default, sort_keys=False), 200, hdr_
 
     except AuthError as exc_:
         return {"msg": str(exc_), "status": 401}
@@ -4594,7 +4533,7 @@ def storage_f():
         return {"msg": str(exc_), "status": 500}
 
 
-@ app.route("/crud", methods=["POST"], endpoint="crud")
+@ app.route("/crud", methods=["POST"])
 def crud_f():
     """
     docstring is in progress
@@ -4685,10 +4624,8 @@ def crud_f():
             res_ = Crud().query_f(input_)
         elif op_ == "link":
             res_ = Crud().link_f(input_)
-        elif op_ == "dump":
+        elif op_ in ["dumpu", "dumpd", "dumpr"]:
             res_ = Crud().dump_f(input_)
-        elif op_ == "restore":
-            res_ = Crud().restore_f(input_)
         elif op_ == "saveschema":
             res_ = Crud().saveschema_f(input_)
         elif op_ == "savequery":
@@ -4714,6 +4651,10 @@ def crud_f():
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
+        if res_["result"] and op_ == "dumpd":
+            hdr_ = {"Content-Type": "application/json; charset=utf-8"}
+            return send_from_directory(directory=API_MONGODUMP_PATH_, path=res_["file"], as_attachment=True), 200, hdr_
+
         response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
         response_.status_code = sc__
         response_.mimetype = "application/json"
@@ -5070,49 +5011,6 @@ def post_f():
         return response_
 
 
-@ app.route("/get/dump", methods=["POST"])
-def get_dump_f():
-    """
-    docstring is in progress
-    """
-    try:
-        jwt_validate_f_ = Auth().jwt_validate_f()
-        if not jwt_validate_f_["result"]:
-            raise AuthError(jwt_validate_f_["msg"])
-
-        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
-        if not user_:
-            raise AuthError("user session not found")
-
-        permission_f_ = Auth().permission_f({
-            "user": jwt_validate_f_["user"],
-            "auth": jwt_validate_f_["auth"],
-            "collection": "_dump",
-            "op": "dump"
-        })
-        if not permission_f_["result"]:
-            raise AuthError(permission_f_["msg"])
-
-        input_ = request.json
-        id_ = Misc().clean_f(input_["id"])
-        if not id_:
-            raise APIError("dump not selected")
-
-        file_ = f"{id_}.gz"
-        header_ = Security().header_f()
-
-        return send_from_directory(directory=API_MONGODUMP_PATH_, path=file_, as_attachment=True), 200, header_
-
-    except AuthError as exc_:
-        return {"msg": str(exc_), "status": 401}
-
-    except APIError as exc_:
-        return {"msg": str(exc_), "status": 400}
-
-    except Exception as exc_:
-        return {"msg": str(exc_), "status": 500}
-
-
 @ app.route("/get/query/<string:id_>", methods=["GET"])
 def get_query_f(id_):
     """
@@ -5180,7 +5078,7 @@ def get_data_f(id_):
             if not access_validate_by_api_token_f_["result"]:
                 raise AuthError(access_validate_by_api_token_f_)
         else:
-            print_("!!! missing token", id_)
+            PRINT_("!!! missing token", id_)
             raise AuthError({"result": False, "msg": "missing token"})
 
         generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")
@@ -5209,6 +5107,5 @@ def get_data_f(id_):
 
 
 if __name__ == "__main__":
-    print_ = partial(print, flush=True)
     Schedular().main_f()
     app.run(host="0.0.0.0", port=80, debug=False)

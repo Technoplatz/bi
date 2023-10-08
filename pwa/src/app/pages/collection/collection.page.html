@@ -37,7 +37,7 @@ https://www.gnu.org/licenses.
         <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
           {{ header | translate }}
         </ion-button>
-        <h3>{{ subheader }}</h3>
+        <h3>{{ subheader | translate }}</h3>
         <span *ngIf="is_loaded">{{ count }} records were filtered.</span><span *ngIf="!is_loaded">...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">

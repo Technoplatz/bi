@@ -33,29 +33,32 @@ https://www.gnu.org/licenses.
     <ion-grid class="ion-no-padding">
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
-                <ion-button *ngIf="isInProgress"> {{ 'PROCESSING' | translate }}... </ion-button>
-                <ion-button *ngIf="collection=='_dump' && op=='insert' && !isInProgress" (click)="do_dump('dump')">
-                    {{ 'DUMP' | translate }}
+                <ion-button *ngIf="isInProgress">
+                    <ion-spinner name="dots"></ion-spinner>
+                    &nbsp;{{ 'In Progress' | translate }}</ion-button>
+                <ion-button *ngIf="collection=='_dump' && op=='insert' && !isInProgress" (click)="do_dump('dumpu')">
+                    {{ 'Make Dump' | translate }}
                 </ion-button>
-                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="doDownload()">
-                    {{ 'DOWNLOAD' | translate }}
+                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpd')">
+                    <ion-icon name="arrow-down-circle-outline"></ion-icon> 
+                    {{ 'Download' | translate }}
                 </ion-button>
-                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('restore')">
-                    {{ 'RESTORE' | translate }}
+                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpr')">
+                    {{ 'Restore' | translate }}
                 </ion-button>
                 <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">
                     <ion-icon name="barcode-outline"></ion-icon>&nbsp;
-                    {{ 'SCAN' | translate }}
+                    {{ 'Scan' | translate }}
                 </ion-button>
                 <ng-template #noscan>
                     <ion-button *ngIf="collection!='_dump' && collection!='_storage' && op!='filter' && !isInProgress"
                         (click)="submit_f()">
-                        <span *ngIf="op=='action'; else noaction"> {{ 'RUN' | translate }} </span>
-                        <ng-template #noaction> {{ 'SAVE' | translate }} </ng-template>
+                        <span *ngIf="op=='action'; else noaction"> {{ 'Run' | translate }} </span>
+                        <ng-template #noaction> {{ 'Save' | translate }} </ng-template>
                     </ion-button>
                 </ng-template>
                 <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" (click)="submit_f()">
-                    {{ 'UPLOAD' | translate }}
+                    {{ 'Upload' | translate }}
                 </ion-button>
                 <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium">
                     <ion-icon name="close-circle-outline"></ion-icon>
@@ -81,7 +84,7 @@ https://www.gnu.org/licenses.
                 <ion-button (click)="submit_f()">
                     <ion-spinner *ngIf="isInProgress; else noattachinprocess" name="dots"></ion-spinner>
                     <ng-template #noattachinprocess>
-                        {{ 'SAVE' | translate }}
+                        {{ 'Save' | translate }}
                     </ng-template>
                 </ion-button>
                 <ion-button (click)="goTab('data')" color="medium">

@@ -250,7 +250,7 @@ export class Miscellaneous {
     type === "error" ? console.error("*** err msg", msg) : null;
     if (msg) {
       const typed: any = {
-        message: msg.toLowerCase(),
+        message: msg?.toLowerCase(),
         duration: type === "success" ? 3000 : 10000,
         cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
         buttons: [{
