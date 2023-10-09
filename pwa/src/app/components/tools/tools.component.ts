@@ -70,14 +70,14 @@ export class ToolsComponent implements OnInit {
     });
   }
 
-  doSetVersion() {
+  set_version() {
     this.storage.set("LSVERSION", this.new_version_).then(() => {
       window.location.replace("/dashboard");
     });
   }
 
-  doSignout() {
-    this.auth.Signout().then(() => { }).catch((error: any) => {
+  sign_out() {
+    this.auth.sign_out().then(() => { }).catch((error: any) => {
       console.error("signout error", error.msg);
     });
   }

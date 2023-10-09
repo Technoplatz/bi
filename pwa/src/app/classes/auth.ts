@@ -60,7 +60,7 @@ export class Auth {
     });
   }
 
-  Signin(creds: any) {
+  sign_in(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "signin";
       this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
@@ -168,7 +168,7 @@ export class Auth {
     });
   }
 
-  Signout() {
+  sign_out() {
     return new Promise((resolve, reject) => {
       this.setUserOut();
       this.misc.apiCall("auth", JSON.stringify({
@@ -199,7 +199,7 @@ export class Auth {
     });
   }
 
-  Signup(creds: any) {
+  sign_up(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "signup";
       this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {

@@ -97,7 +97,6 @@ export class QueryPage implements OnInit {
   private submenu: string = "";
   private query_: any = {};
   private collections_: any = [];
-  private screen_size_: any = {};
 
   constructor(
     public misc: Miscellaneous,
@@ -120,9 +119,6 @@ export class QueryPage implements OnInit {
     });
     this.crud.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
-    });
-    this.misc.screen_size.subscribe((res: any) => {
-      this.screen_size_ = res;
     });
   }
 

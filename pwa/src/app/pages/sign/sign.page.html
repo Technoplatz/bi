@@ -104,7 +104,7 @@ https://www.gnu.org/licenses.
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
-            <ion-button (click)="Signup()" size="default" class="no-hover ion-margin-end">
+            <ion-button (click)="sign_up()" size="default" class="no-hover ion-margin-end">
                 <span *ngIf="!isInProgress">{{ 'Continue' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
@@ -140,7 +140,7 @@ https://www.gnu.org/licenses.
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button (click)="Signin()" size="default" class="ion-margin-end" class="sign-button">
+            <ion-button (click)="sign_in()" size="default" class="ion-margin-end" class="sign-button">
                 <span *ngIf="!isInProgress">{{ 'Continue' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>

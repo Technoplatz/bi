@@ -91,7 +91,6 @@ export class CollectionPage implements OnInit {
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
-  private screen_size_: any = {};
   private segmentsadm_: any = environment.segmentsadm;
   public schema_key: any = null;
   public properties_: any = {};
@@ -145,9 +144,6 @@ export class CollectionPage implements OnInit {
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.perm_ = res && res.perm;
       this.user = res;
-    });
-    this.misc.screen_size.subscribe((res: any) => {
-      this.screen_size_ = res;
     });
   }
 

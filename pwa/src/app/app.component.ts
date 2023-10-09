@@ -53,8 +53,6 @@ export class AppComponent implements OnInit {
   public user_: any = null;
   public net_: boolean = true;
   public menutoggle: boolean = false;
-  private inner_width: number = 1920;
-  private inner_height: number = 1080;
   private paginations_ = environment.paginations;
 
   constructor(
@@ -66,10 +64,6 @@ export class AppComponent implements OnInit {
     private storage: Storage,
     private readonly sw_update: SwUpdate
   ) {
-    this.inner_height = window.screen.height ? window.screen.height : 1080;
-    this.inner_width = window.screen.width ? window.screen.width : 1920;
-    this.misc.screen_size.next({ w: this.inner_width, h: this.inner_height });
-    console.log(`RES ${this.inner_width}x${this.inner_height}`);
     if (this.sw_update.isEnabled) {
       console.log("*** sw_update enabled");
       setInterval(() => {

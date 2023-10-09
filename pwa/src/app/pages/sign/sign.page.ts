@@ -83,11 +83,11 @@ export class SignPage implements OnInit {
         this.formtype === "success"
           ? this.doAfterSuccess()
           : this.formtype === "signup"
-            ? this.Signup()
+            ? this.sign_up()
             : this.formtype === "forgot"
               ? this.doForgot()
               : this.formtype === "signin"
-                ? this.Signin()
+                ? this.sign_in()
                 : this.formtype === "tfac"
                   ? this.TFAC()
                   : null;
@@ -300,7 +300,7 @@ export class SignPage implements OnInit {
     });
   }
 
-  Signin() {
+  sign_in() {
     this.isInProgress = true;
     this.error = "";
     this.success_str = "";
@@ -310,7 +310,7 @@ export class SignPage implements OnInit {
       })
       : this.storage.remove("LSREMEMBERME").then(() => { });
     if (this.signinForm?.get("email")?.valid && this.signinForm?.get("password")?.valid) {
-      this.auth.Signin({
+      this.auth.sign_in({
         email: this.signinForm.get("email")?.value,
         password: this.signinForm.get("password")?.value
       }).then(() => {
@@ -398,11 +398,11 @@ export class SignPage implements OnInit {
     }
   }
 
-  Signup() {
+  sign_up() {
     if (this.signupForm.get("email")?.valid && this.signupForm.get("name")?.valid && this.signupForm.get("password")?.valid) {
       this.isInProgress = true;
       this.success_str = "";
-      this.auth.Signup({
+      this.auth.sign_up({
         name: this.signupForm.get("name")?.value,
         email: this.signupForm.get("email")?.value,
         password: this.signupForm.get("password")?.value

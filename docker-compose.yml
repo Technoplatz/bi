@@ -75,6 +75,7 @@ services:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
       - bi-mongo0-volume:/data/configdb
+      - bi-storage-volume:${API_TEMPFILE_PATH}
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
@@ -92,6 +93,7 @@ services:
       - MONGO_CERTS_REPLACE=${MONGO_CERTS_REPLACE}
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
+      - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
     networks:
       network0:
         ipv4_address: ${SUBNET_INIT_IPV4}

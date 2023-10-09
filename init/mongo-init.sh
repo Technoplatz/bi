@@ -34,8 +34,14 @@
 
 echo $(date '+%Y%m%d%H%M%S')
 
+apitempfilepath=$API_TEMPFILE_PATH
 selfsigned=$MONGO_SELF_SIGNED_CERTS
 selfsignedreplace=$MONGO_CERTS_REPLACE
+
+echo "step 0: Clearing the $apitempfilepath directory..."
+rm -rf $apitempfilepath/*
+echo "step 0: $apitempfilepath is empty."
+
 mongotlscertkeyfilepassword=$(</run/secrets/mongo_tls_keyfile_password)
 
 if [[ ! $selfsigned = true ]]; then

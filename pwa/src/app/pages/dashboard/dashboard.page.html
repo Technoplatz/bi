@@ -38,10 +38,11 @@ https://www.gnu.org/licenses.
           {{ 'DASHBOARD' | translate }}
         </ion-button>
         <h3>{{ 'Welcome Aboard' | translate }}.</h3>
-        <span *ngIf="flashcards.length > 0">{{ flashcards.length }} {{ 'Flashcards' }} {{ 'and' | translate }}</span>
-        <span *ngIf="charts.length > 0">{{ charts.length }} {{ 'Chart' | translate }}<span
-            *ngIf="charts.length > 1">s</span>.</span>
-
+        <span *ngIf="flashcards.length == 1">{{ flashcards.length }} {{ 'Flashcard' | translate }}</span>
+        <span *ngIf="flashcards.length > 1">{{ flashcards.length }} {{ 'Flashcards' | translate }}</span>
+        <span *ngIf="flashcards.length > 0 && charts.length > 0">&nbsp;{{ 'and' | translate }}&nbsp;</span>
+        <span *ngIf="charts.length == 1">{{ charts.length }} {{ 'Chart' | translate }}</span>
+        <span *ngIf="charts.length > 1">{{ charts.length }} {{ 'Charts' | translate }}</span>.
         <!-- flashcards -->
         <div *ngIf="charts.length > 0 || flashcards.length > 0">
           <div class="filler-10"></div>
@@ -51,7 +52,7 @@ https://www.gnu.org/licenses.
               <div class="visual-buttons">
                 <h2>{{ item.count }}</h2>
               </div>
-              <h5>{{ item.view.title }}</h5>
+              <h5>{{ item.view.title | translate }}</h5>
               {{ item.collection }} | {{ item.view.data_values[0]?.value }}
             </div>
           </div>
@@ -69,7 +70,7 @@ https://www.gnu.org/licenses.
                   <ion-icon name="list-outline"></ion-icon>
                 </ion-button>
               </div>
-              <h6>{{ item.view.title }}</h6>
+              <h6>{{ item.view.title | translate }}</h6>
               <div class="full-width">
                 {{ item.view.description }}<br />
                 {{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}
