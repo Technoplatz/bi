@@ -56,7 +56,7 @@ https://www.gnu.org/licenses.
           <p *ngIf="perm_" (click)="misc.navi.next('admin/_collection')" class="clicked-item dark">
             {{ 'Data Collections' | translate }}
           </p>
-          <p *ngIf="perm_" (click)="misc.navi.next('admin/_query')" class="clicked-item dark">
+          <p (click)="misc.navi.next('admin/_query')" class="clicked-item dark">
             {{ 'My Queries' | translate }}
           </p>
           <p *ngIf="perm_" (click)="misc.navi.next('admin/_visual')" class="clicked-item dark">

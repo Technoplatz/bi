@@ -220,6 +220,7 @@ export class Crud {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
         op: "collections",
+        collection: "_collection"
       }).then((res: any) => {
         this.misc.collections.next(res);
         this.collections.next(res)
@@ -248,6 +249,7 @@ export class Crud {
       this.misc.apiCall("crud", {
         id: id_,
         op: "query",
+        collection: "_query",
         page: page_,
         limit: limit_,
         run: run_
@@ -263,6 +265,7 @@ export class Crud {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
         op: "charts",
+        collection: "_query",
         source: "internal",
         dashboard: false
       }).then((res: any) => {
@@ -276,7 +279,8 @@ export class Crud {
   getViews() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
-        op: "views"
+        op: "views",
+        collection: "_query"
       }).then((res: any) => {
         resolve(this.views.next(res.views));
       }).catch((err: any) => {
@@ -288,7 +292,8 @@ export class Crud {
   getQueries() {
     return new Promise((resolve, reject) => {
       this.misc.apiCall("crud", {
-        op: "queries"
+        op: "queries",
+        collection: "_query"
       }).then((res: any) => {
         resolve(this.queries.next(res && res.result ? res.data : []));
       }).catch((err: any) => {

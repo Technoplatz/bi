@@ -325,10 +325,8 @@ class Misc:
         query_ = input_["query"] if "query" in input_ else None
         loc_ = input_["loc"] if "loc" in input_ else None
         connstr_ = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}"
-
         commands_ = {
             "mongoexport": [
-                "mongoexport",
                 "--uri", connstr_,
                 "--db", f"{MONGO_DB_}",
                 "--authenticationDatabase", f"{MONGO_AUTH_DB_}",
@@ -345,7 +343,6 @@ class Misc:
                 "--quiet"
             ],
             "mongorestore": [
-                "mongorestore",
                 "--uri", connstr_,
                 "--db", f"{MONGO_DB_}",
                 "--authenticationDatabase", f"{MONGO_AUTH_DB_}",
@@ -360,7 +357,6 @@ class Misc:
                 "--quiet"
             ],
             "mongodump": [
-                "mongodump",
                 "--uri", connstr_,
                 "--db", f"{MONGO_DB_}",
                 "--authenticationDatabase", f"{MONGO_AUTH_DB_}",
@@ -535,12 +531,19 @@ class Misc:
         """
         return ["_tags"]
 
-    def permitted_usertag_f(self, user_):
+    def is_permitted_usertags_f(self, user_):
         """
         docstring is in progress
         """
         tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-        return any(i in tags_ for i in PERMISSIVE_TAGS_)
+        return any(i in tags_ for i in API_PERMISSIVE_TAGS_)
+
+    def is_admintags_f(self, user_):
+        """
+        docstring is in progress
+        """
+        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+        return any(i in tags_ for i in API_ADMIN_TAGS_)
 
     def properties_cleaner_f(self, properties):
         """
@@ -985,6 +988,7 @@ class Crud:
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
             collection__ = col_check_["collection"] if "collection" in col_check_ else None
+
             structure_ = collection__["col_structure"] if is_crud_ else collection__
             if "properties" not in structure_:
                 raise APIError("properties not found in the structure")
@@ -1420,36 +1424,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def dump_restore_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            id_ = obj["id"]
-            fn_ = f"{id_}.gz"
-            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
-            if not fullpath_.startswith(DUMP_PATH_):
-                PRINT_("!!! [dump] fullpath_", fullpath_)
-                raise APIError("file not allowed [restore]")
-            type_ = "gzip"
-
-            command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
-            if not command_:
-                raise APIError("restore command error")
-
-            subprocess.call(command_)
-            size_ = os.path.getsize(fullpath_)
-            return {"result": True, "id": id_, "type": type_, "size": size_}
-
-        except pymongo.errors.PyMongoError as exc__:
-            return Misc().mongo_error_f(exc__)
-
-        except APIError as exc__:
-            return Misc().api_error_f(exc__)
-
-        except Exception as exc__:
-            return Misc().exception_f(exc__)
-
     def dump_f(self, obj_):
         """
         docstring is in progress
@@ -1467,8 +1441,7 @@ class Crud:
                 raise APIError("file not allowed [restore]")
 
             if op_ == "dumpu":
-                command_ = Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
-                subprocess.call(command_)
+                subprocess.call(["mongodump"] + Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_}))
                 size_ = os.path.getsize(fullpath_)
                 Mongo().db_["_dump"].insert_one({
                     "dmp_id": dmp_id_, "dmp_type": type_, "dmp_size": size_, "_created_at": Misc().get_now_f(), "_created_by": email_, "_modified_at": Misc().get_now_f(), "_modified_by": email_
@@ -1489,8 +1462,7 @@ class Crud:
                 os.remove(fullpath_)
 
             if op_ == "dumpr":
-                command_ = Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_})
-                subprocess.call(command_)
+                subprocess.call(["mongorestore"] + Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_}))
 
             return {"result": True, "id": dmp_id_, "file": fn_, "type": type_, "size": size_}
 
@@ -1593,12 +1565,7 @@ class Crud:
                     type_ = "csv"
                     file_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
-
-                    command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
-                    if not command_:
-                        raise APIError("export command error")
-                    subprocess.call(command_)
-
+                    subprocess.call(["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_}))
                     files_ = [{"name": file_, "type": type_}] if attachment_ else []
 
                 email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
@@ -2233,7 +2200,7 @@ class Crud:
             data_ = []
             structure_ = self.root_schemas_f("_collection")
 
-            if Misc().permitted_usertag_f(user_):
+            if Misc().is_permitted_usertags_f(user_):
                 data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
             else:
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
@@ -2273,7 +2240,7 @@ class Crud:
             data_ = {}
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            if Misc().permitted_usertag_f(user_):
+            if col_id_ == "_query" or Misc().is_permitted_usertags_f(user_):
                 permitted_ = True
             else:
                 permitted_ = False
@@ -2286,6 +2253,7 @@ class Crud:
                             {"per_read": True},
                             {"per_update": True},
                             {"per_delete": True},
+                            {"per_action": True}
                         ],
                     })
                     if permissions_:
@@ -2349,7 +2317,7 @@ class Crud:
                 if not user_:
                     raise APIError(f"no user defined for {que_id_}")
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-                if Misc().permitted_usertag_f(user_):
+                if Misc().is_permitted_usertags_f(user_):
                     permitted_ = True
                 else:
                     for usr_tag_ in usr_tags_:
@@ -2396,7 +2364,7 @@ class Crud:
             count_ = stats_[0]["count"] if stats_ else 0
 
             if sched_ and orig_ == "sched":
-                _tags = query_["_tags"] if "_tags" in query_ and len(query_["_tags"]) > 0 else PERMISSIVE_TAGS_
+                _tags = query_["_tags"] if "_tags" in query_ and len(query_["_tags"]) > 0 else API_PERMISSIVE_TAGS_
                 que_title_ = query_["que_title"] if "que_title" in query_ else que_id_
                 que_message_body_ = query_["que_message_body"] if "que_message_body" in query_ and query_["que_message_body"] is not None else ""
                 users_ = Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": _tags}}})
@@ -2451,10 +2419,10 @@ class Crud:
             group_ = "group" in input_ and input_["group"] is True
             skip_ = limit_ * (page_ - 1)
             match_ = input_["match"] if "match" in input_ and len(input_["match"]) > 0 else []
-            allowed_cols_ = ["_collection"]
+            allowed_cols_ = ["_collection", "_query"]
             is_crud_ = collection_id_[:1] != "_"
 
-            if collection_id_ not in allowed_cols_ and not Misc().permitted_usertag_f(user_) and not is_crud_:
+            if collection_id_ not in allowed_cols_ and not Misc().is_permitted_usertags_f(user_) and not is_crud_:
                 raise AuthError(f"collection is not allowed to read: {collection_id_}")
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
@@ -2466,6 +2434,10 @@ class Crud:
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True else False
             get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
+
+            if collection_id_ == "_query" and not Misc().is_permitted_usertags_f(user_):
+                get_filtered_["_tags"] = user_["_tags"]
+
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
             if group_:
@@ -2635,7 +2607,7 @@ class Crud:
             if not que_id_:
                 raise APIError("query not found")
 
-            if not Misc().permitted_usertag_f(user_):
+            if not Misc().is_permitted_usertags_f(user_):
                 raise AuthError("no permission")
 
             Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": {
@@ -2750,15 +2722,6 @@ class Crud:
             view_id_ = title_.lower().replace(" ", "-")
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             _tags = user_["_tags"]
-
-            if not Misc().permitted_usertag_f(user_):
-                permission_ = Mongo().db_["_permission"].find_one({
-                    "per_collection_id": col_id_,
-                    "per_tag": {"$in": _tags},
-                    "per_schema": True
-                })
-                if not permission_:
-                    raise APIError("no permission")
 
             doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
             if not doc_:
@@ -3195,10 +3158,7 @@ class Crud:
                     type_ = "csv"
                     file_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
                     query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
-                    command_ = Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
-                    if not command_:
-                        raise APIError("export command error")
-                    subprocess.call(command_)
+                    subprocess.call(["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_}))
                     files_ += [{"name": file_, "type": type_}]
 
                 email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
@@ -3828,61 +3788,70 @@ class Auth:
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             collection_id_ = input_["collection"] if "collection" in input_ and input_["collection"] is not None else None
             op_ = input_["op"] if "op" in input_ else None
-            administratives_ = ["dump", "restore"]
-            permissive_ops_ = ["view", "views", "charts", "collections", "announcements", "template"]
-            is_not_crud_ = collection_id_ and collection_id_[:1] == "_"
+            adminops_ = ["dumpu", "dumpr", "dumpd"]
+            read_permissive_colls_ = ["_collection", "_query"]
+            read_permissive_ops_ = ["collection", "collections", "read", "query", "queries", "charts", "views"]
+            insert_permissive_ops_ = ["clone"]
+            is_crud_ = collection_id_ and collection_id_[:1] != "_"
             allowmatch_ = []
 
+            if not op_:
+                raise APIError("no operation provided")
+
             if not user_id_:
-                raise APIError(f"user not found {user_id_}")
+                raise APIError(f"no user defined: {user_id_}")
 
-            if Misc().permitted_usertag_f(user_):
-                return {"result": True, "allowmatch": allowmatch_}
+            if Misc().is_admintags_f(user_):
+                return {"result": True, "admin": True}
 
-            if op_ in administratives_:
-                raise AuthError(f"no permission for {op_}")
+            if op_ in adminops_:
+                raise AuthError(f"operation is not permitted: {op_}")
+
+            if Misc().is_permitted_usertags_f(user_):
+                return {"result": True, "manager": True}
 
             if not collection_id_:
-                return {"result": True, "allowmatch": allowmatch_} if op_ in permissive_ops_ else {"result": False, "allowmatch": allowmatch_}
+                raise AuthError(f"no collection provided: {op_}")
 
-            op_ = "read" if op_ in ["collection"] else input_["op"]
-            if not op_:
-                raise APIError(f"operation is missing {op_}")
+            if op_ in read_permissive_ops_:
+                op_ = "read"
 
-            if is_not_crud_ and op_ == "read":
-                return {"result": True, "allowmatch": allowmatch_}
+            if op_ in insert_permissive_ops_:
+                op_ = "insert"
 
-            collection_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_})
-            if not collection_:
-                raise APIError(f"no collection found {collection_id_}/{op_}")
+            if op_ in read_permissive_ops_ and collection_id_ in read_permissive_colls_:
+                return {"result": True}
 
-            permission_ = False
-            for ix_, usr_tag_ in enumerate(usr_tags_):
-                permission_check_ = Mongo().db_["_permission"].find_one({"per_tag": usr_tag_, "per_collection_id": collection_id_})
-                if permission_check_:
-                    per_insert_ = "per_insert" in permission_check_ and permission_check_["per_insert"] is True
-                    per_read_ = "per_read" in permission_check_ and permission_check_["per_read"] is True
-                    per_update_ = "per_update" in permission_check_ and permission_check_["per_update"] is True
-                    per_delete_ = "per_delete" in permission_check_ and permission_check_["per_delete"] is True
-                    per_share_ = "per_share" in permission_check_ and permission_check_["per_share"] is True
-                    per_schema_ = "per_schema" in permission_check_ and permission_check_["per_schema"] is True
-                    if ((op_ in ["saveschema", "savequery"] and per_schema_) or
-                        (op_ == "announce" and per_share_) or
-                        (op_ == "read" and per_read_) or
-                        (op_ in ["insert", "import"] and per_insert_) or
-                        (op_ == "upsert" and per_insert_ and per_update_) or
-                        (op_ in ["update", "action"] and per_read_ and per_update_) or
-                        (op_ == "clone" and per_read_ and per_insert_) or
-                            (op_ == "delete" and per_read_ and per_delete_)):
-                        if ix_ == 0:
-                            allowmatch_ = permission_check_["per_match"] if "per_match" in permission_check_ and len(permission_check_["per_match"]) > 0 else []
-                        permission_ = True
+            if not is_crud_:
+                raise AuthError(f"{collection_id_} not allowed to {op_}")
+
+            permit_ = False
+            for usr_tag_ in usr_tags_:
+                permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": collection_id_, "per_tag": usr_tag_})
+                if permission_:
+                    per_insert_ = "per_insert" in permission_ and permission_["per_insert"] is True
+                    per_read_ = "per_read" in permission_ and permission_["per_read"] is True
+                    per_update_ = "per_update" in permission_ and permission_["per_update"] is True
+                    per_delete_ = "per_delete" in permission_ and permission_["per_delete"] is True
+                    per_action_ = "per_action" in permission_ and permission_["per_action"] is True
+                    if (op_ == "read" and per_read_) or \
+                        (op_ == "insert" and per_insert_ and per_read_) or \
+                        (op_ == "import" and per_insert_ and per_read_) or \
+                        (op_ == "upsert" and per_insert_ and per_update_ and per_read_) or \
+                        (op_ == "update" and per_update_ and per_read_) or \
+                        (op_ == "action" and per_action_ and per_read_) or \
+                        (op_ == "clone" and per_insert_ and per_read_) or \
+                            (op_ == "delete" and per_read_ and per_delete_):
+                        permit_ = True
+                        per_match_ = permission_["per_match"] if "per_match" in permission_ and len(permission_["per_match"]) > 0 else None
+                        if per_match_:
+                            allowmatch_ = per_match_
                         break
 
-            if permission_ is False:
-                raise AuthError(f"no {op_} permission for {collection_id_}")
+            if not permit_:
+                raise AuthError(f"user is not allowed to {op_} {collection_id_}")
 
-            return {"result": permission_, "allowmatch": allowmatch_}
+            return {"result": True, "allowmatch": allowmatch_}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -4077,7 +4046,7 @@ class Auth:
                 raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
-            perm_ = Misc().permitted_usertag_f(user_)
+            perm_ = Misc().is_permitted_usertags_f(user_)
             payload_ = {
                 "iss": "Technoplatz",
                 "aud": "api",
@@ -4425,6 +4394,8 @@ API_S3_ENDPOINT_URL_ = os.environ.get("API_S3_ENDPOINT_URL")
 API_S3_ACCESS_ID_ = os.environ.get("API_S3_ACCESS_ID")
 API_S3_SECRET_KEY_ = os.environ.get("API_S3_SECRET_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
+API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
+API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -4443,7 +4414,6 @@ MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get("MONGO_TIMEOUT_MS") and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0 else 10000
 PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get("PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
-PERMISSIVE_TAGS_ = ["#Managers", "#Administrators"]
 PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers", "import"]
@@ -4451,6 +4421,7 @@ PROP_KEYS_ = ["bsonType", "title", "description"]
 TEMP_PATH_ = "/temp"
 DUMP_PATH_ = "/mongodump"
 PRINT_ = partial(print, flush=True)
+TFAC_OPS_ = ["announce"]
 
 app = Flask(__name__)
 app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_
@@ -4571,7 +4542,7 @@ def crud_f():
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ += allowmatch_
-        input_["match"] = match_
+            input_["match"] = match_
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
@@ -4585,10 +4556,10 @@ def crud_f():
             if not col_check_["result"]:
                 raise APIError(col_check_)
 
-        if op_ in ["announce"]:
+        if op_ in TFAC_OPS_:
             tfac_ = input_["tfac"]
             email_ = user_["usr_id"] if "usr_id" in user_ else None
-            verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "announce")
+            verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, op_)
             if not verify_otp_f_["result"]:
                 raise APIError(verify_otp_f_)
 
@@ -4622,8 +4593,6 @@ def crud_f():
             res_ = Crud().collection_f(input_)
         elif op_ == "query":
             res_ = Crud().query_f(input_)
-        elif op_ == "link":
-            res_ = Crud().link_f(input_)
         elif op_ in ["dumpu", "dumpd", "dumpr"]:
             res_ = Crud().dump_f(input_)
         elif op_ == "saveschema":

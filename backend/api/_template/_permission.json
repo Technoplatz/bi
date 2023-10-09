@@ -1,14 +1,5 @@
 {
   "properties": {
-    "per_id": {
-      "bsonType": "string",
-      "minLength": 3,
-      "maxLength": 64,
-      "pattern": "^[a-z0-9-]{3,64}$",
-      "title": "ID",
-      "description": "Permission ID",
-      "required": true
-    },
     "per_tag": {
       "bsonType": "string",
       "minLength": 3,
@@ -60,18 +51,10 @@
       "trueText": "Yes",
       "falseText": "No"
     },
-    "per_share": {
+    "per_action": {
       "bsonType": "bool",
-      "title": "Share",
-      "description": "Sharing Permission",
-      "default": false,
-      "trueText": "Yes",
-      "falseText": "No"
-    },
-    "per_schema": {
-      "bsonType": "bool",
-      "title": "Scheme Update",
-      "description": "Scheme Permission",
+      "title": "Action",
+      "description": "Action Run Permission",
       "default": false,
       "trueText": "Yes",
       "falseText": "No"
@@ -119,8 +102,8 @@
       "subType": "filter"
     }
   },
-  "required": ["per_id", "per_tag", "per_collection_id"],
-  "unique": [["per_id"], ["per_tag", "per_collection_id"]],
+  "required": ["per_tag", "per_collection_id"],
+  "unique": [["per_collection_id", "per_tag"]],
   "index": [["per_tag"], ["per_collection_id"]],
   "sort": {
     "_modified_at": -1

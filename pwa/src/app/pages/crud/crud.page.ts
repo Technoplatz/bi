@@ -303,6 +303,7 @@ export class CrudPage implements OnInit {
     this.isInProgress = true;
     this.misc.apiCall("crud", {
       op: op_,
+      collection: "_dump",
       dumpid: this.data_.dmp_id,
       type: this.data_.dmp_type,
       responseType: "blob" as "json"
@@ -393,37 +394,6 @@ export class CrudPage implements OnInit {
       if (k === this.related.length - 1) {
         this.crudForm.get(this.field_parents.match[0].key)?.setValue(this.data_[this.field_parents.match[0].key]);
       }
-    }
-  }
-
-  doSubmitLink() {
-    if (this.link_text) {
-      this.linked_ = this.link_text.split('\n').filter((e: any) => { return e });
-      if (this.linked_.length > 0) {
-        this.isInProgress = true;
-        this.modified = false;
-        this.misc.apiCall("crud", {
-          op: "link",
-          link: this.link_,
-          linked: this.linked_,
-          data: this.data_
-        }).then((res: any) => {
-          if (res && res.result) {
-            this.modified = true;
-            const count_ = res.count && res.count > 0 ? res.count : 0;
-            count_ > 0 ? this.misc.doMessage(`${count_} records were linked successfully`, "success") : this.misc.doMessage("no records were matched to get linked", "error");
-            this.doDismissModal({ op: "link", modified: this.modified, filter: [] });
-          }
-        }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-        }).finally(() => {
-          this.isInProgress = false;
-        });
-      } else {
-        this.misc.doMessage("please enter data with lines", "error");
-      }
-    } else {
-      this.misc.doMessage("please enter data", "error");
     }
   }
 
