@@ -69,6 +69,7 @@ export class SettingsPage implements OnInit {
   public qr_show: boolean = false;
   public otp_qr: string = "";
   public saas: any = null;
+  public pagination_: string = "25";
 
   constructor(
     private storage: Storage,
@@ -76,7 +77,7 @@ export class SettingsPage implements OnInit {
     private router: Router,
     private alert: AlertController,
     public misc: Miscellaneous
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
@@ -245,6 +246,14 @@ export class SettingsPage implements OnInit {
           });
         }
       }
+    });
+  }
+
+  set_pagination(event: any) {
+    console.log(event.target.value);
+    const val_ = event.target.value;
+    this.storage.set("LSPAGINATION", val_).then(() => {
+      this.pagination_ = val_;
     });
   }
 

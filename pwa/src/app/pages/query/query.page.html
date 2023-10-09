@@ -155,6 +155,11 @@ https://www.gnu.org/licenses.
                   <ion-icon name="caret-forward"></ion-icon>
                 </ion-button>
               </span>
+              <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
+                class="ion-no-padding">
+                <ion-icon name="list-outline"></ion-icon>
+                {{ 'Pagination' | translate }} [{{ limit_ }}]
+              </ion-button>
             </td>
           </tr>
         </table>

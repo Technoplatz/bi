@@ -43,6 +43,7 @@ import { InnerFooterComponent } from "./inner-footer/inner-footer.component";
 import { ModalFooterComponent } from "./modal-footer/modal-footer.component";
 import { ChartComponent } from "./chart/chart.component";
 import { LangComponent } from "./lang/lang.component";
+import { PaginationComponent } from "./pagination/pagination.component";
 import { IonicModule } from "@ionic/angular";
 import { NgxChartsModule } from "@swimlane/ngx-charts";
 
@@ -55,7 +56,8 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
         InnerFooterComponent,
         ModalFooterComponent,
         ChartComponent,
-        LangComponent
+        LangComponent,
+        PaginationComponent
     ],
     imports: [
         RouterModule,
@@ -74,7 +76,8 @@ import { NgxChartsModule } from "@swimlane/ngx-charts";
         InnerFooterComponent,
         ModalFooterComponent,
         ChartComponent,
-        LangComponent
+        LangComponent,
+        PaginationComponent
     ]
 })
 

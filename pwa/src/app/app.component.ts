@@ -55,6 +55,7 @@ export class AppComponent implements OnInit {
   public menutoggle: boolean = false;
   private inner_width: number = 1920;
   private inner_height: number = 1080;
+  private paginations_ = environment.paginations;
 
   constructor(
     private translate: TranslateService,
@@ -111,6 +112,9 @@ export class AppComponent implements OnInit {
           this.menutoggle = false;
         }
       }
+    });
+    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
+      !LSPAGINATION ? this.storage.set("LSPAGINATION", this.paginations_[0]).then(() => { }) : null;
     });
   }
 

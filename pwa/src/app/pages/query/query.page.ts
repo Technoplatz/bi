@@ -98,7 +98,6 @@ export class QueryPage implements OnInit {
   private query_: any = {};
   private collections_: any = [];
   private screen_size_: any = {};
-  private page_limits_: any = environment.page_limits;
 
   constructor(
     public misc: Miscellaneous,
@@ -131,16 +130,21 @@ export class QueryPage implements OnInit {
     this.auth.user.unsubscribe;
   }
 
-  ngOnInit() {
-    this.storage.get("LSQUERY").then((LSQUERY_: any) => {
-      this.query_ = LSQUERY_;
-      this.type_ = LSQUERY_?.que_type;
-      this.misc.getAPIUrl().then((apiHost: any) => {
-        this.menu = this.router.url.split("/")[1];
-        this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
-        this.query_url_ = apiHost + "/get/query/" + this.id;
-        this.refresh_data(0, false).then(() => {
-          this.is_initialized = true;
+  ngOnInit() { }
+
+  ionViewDidEnter() {
+    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
+      this.limit_ = LSPAGINATION * 1;
+      this.storage.get("LSQUERY").then((LSQUERY_: any) => {
+        this.query_ = LSQUERY_;
+        this.type_ = LSQUERY_?.que_type;
+        this.misc.getAPIUrl().then((apiHost: any) => {
+          this.menu = this.router.url.split("/")[1];
+          this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
+          this.query_url_ = apiHost + "/get/query/" + this.id;
+          this.refresh_data(0, false).then(() => {
+            this.is_initialized = true;
+          });
         });
       });
     });
@@ -151,7 +155,6 @@ export class QueryPage implements OnInit {
       this.is_loaded = false;
       this.page_ = page_ === 0 ? 1 : page_;
       this.schemevis = "hide";
-      this.page_limits_.filter((res: any) => res.h === this.screen_size_.h ? this.limit_ = res.limit : this.limit_ = this.limit_);
       this.crud.get_query_data(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res && res.query) {
           this.pager_ = this.page_;

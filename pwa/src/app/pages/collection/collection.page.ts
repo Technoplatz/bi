@@ -92,7 +92,6 @@ export class CollectionPage implements OnInit {
   private collections_: any;
   private user_: any;
   private screen_size_: any = {};
-  private page_limits_: any = environment.page_limits;
   private segmentsadm_: any = environment.segmentsadm;
   public schema_key: any = null;
   public properties_: any = {};
@@ -169,24 +168,26 @@ export class CollectionPage implements OnInit {
 
   ionViewDidEnter() {
     this.is_initialized = false;
-    this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-      this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-        this.storage.get("LSSTATUS_" + this.id).then((LSSTATUS: any) => {
-          this.status_ = LSSTATUS;
-          this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-          LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-          this.actions = [];
-          this.crud.getCollection(this.id).then((res: any) => {
-            this.page_limits_.filter((page_limits_: any) => page_limits_.h <= this.screen_size_.h ? res.data?.col_structure?.actions?.length > 0 ? this.limit_ = page_limits_.limit - 3 : this.limit_ = page_limits_.limit : this.limit_ = this.limit_);
-            this.counters_ = res && res.counters ? res.counters : {};
-            this.subheader = res && res.data ? res.data.col_title : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.title;
-            this.refresh_data(0).then(() => { }).catch((error: any) => {
+    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
+      this.limit_ = LSPAGINATION * 1;
+      this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+        this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
+          this.storage.get("LSSTATUS_" + this.id).then((LSSTATUS: any) => {
+            this.status_ = LSSTATUS;
+            this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+            LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+            this.actions = [];
+            this.crud.getCollection(this.id).then((res: any) => {
+              this.counters_ = res && res.counters ? res.counters : {};
+              this.subheader = res && res.data ? res.data.col_title : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.title;
+              this.refresh_data(0).then(() => { }).catch((error: any) => {
+                this.misc.doMessage(error, "error");
+              }).finally(() => {
+                this.is_initialized = true;
+              });
+            }).catch((error: any) => {
               this.misc.doMessage(error, "error");
-            }).finally(() => {
-              this.is_initialized = true;
             });
-          }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
           });
         });
       });

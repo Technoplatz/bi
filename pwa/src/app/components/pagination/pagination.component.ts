@@ -32,53 +32,53 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { Miscellaneous } from "../../classes/misc";
+import { Storage } from "@ionic/storage";
 import { environment } from "../../../environments/environment";
 
 @Component({
-  selector: "app-lang",
-  templateUrl: "./lang.component.html",
-  styleUrls: ["./lang.component.scss"],
+  selector: "app-pagination",
+  templateUrl: "./pagination.component.html",
+  styleUrls: ["./pagination.component.scss"],
 })
-export class LangComponent implements OnInit {
+export class PaginationComponent implements OnInit {
   public version_ = environment.appVersion;
-  public langcss: string = "selection-passive";
-  public lang: string = "de";
-  public langs_: any = [];
-  public lang_proc_ = false;
-  public langsoriginal: any = [
-    { id: "en", name: "EN", class: "selection-passive" },
-    { id: "de", name: "DE", class: "selection-passive" },
-    { id: "tr", name: "TR", class: "selection-passive" },
+  public css_: string = "selection-passive";
+  public default_: number = 25;
+  public selections_: any = [];
+  public set_proc_ = false;
+  public selectionsoriginal_: any = [
+    { id: 25, class: "selection-passive" },
+    { id: 50, class: "selection-passive" },
+    { id: 100, class: "selection-passive" },
   ];
 
   constructor(
     private misc: Miscellaneous,
+    private storage: Storage
   ) {
-    this.langs_ = this.langsoriginal;
-    this.misc.getLanguage().then((LSLANG) => {
-      const index = this.langs_.findIndex((obj: any) => obj["id"] === LSLANG);
-      this.langs_[index].class = "selection-active";
+    this.selections_ = this.selectionsoriginal_;
+    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
+      LSPAGINATION ? this.default_ = LSPAGINATION : null;
+      const index = this.selections_.findIndex((obj: any) => obj["id"] === this.default_);
+      this.selections_[index].class = "selection-active";
     });
   }
 
   ngOnInit() { }
 
-  set_language(i: number, lang_: string) {
-    this.lang_proc_ = true;
-    for (let j = 0; j < this.langsoriginal.length; j++) {
-      this.langs_[j].class = "selection-passive";
+  set_pagination(i: number, limit_: number) {
+    this.set_proc_ = true;
+    for (let j = 0; j < this.selectionsoriginal_.length; j++) {
+      this.selections_[j].class = "selection-passive";
       const setLang =
-        j === this.langsoriginal.length - 1
-          ? this.misc.setLanguage(lang_).then(() => {
-            this.langs_[i].class = "selection-active";
+        j === this.selectionsoriginal_.length - 1
+          ? this.storage.set("LSPAGINATION", limit_).then(() => {
+            this.selections_[i].class = "selection-active";
             setTimeout(() => {
-              this.lang_proc_ = false;
+              this.set_proc_ = false;
             }, 500);
           })
           : null;
     }
   }
-
-
-
 }

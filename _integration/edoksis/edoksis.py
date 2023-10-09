@@ -127,6 +127,7 @@ SUPPLIER_FAX_ = os.environ.get("SUPPLIER_FAX")
 SUPPLIER_EMAIL_ = os.environ.get("SUPPLIER_EMAIL")
 SUPPLIER_TAX_OFFICE_ = os.environ.get("SUPPLIER_TAX_OFFICE")
 SUPPLIER_TAX_NO_ = os.environ.get("SUPPLIER_TAX_NO")
+PRINT_ = partial(print, flush=True)
 
 
 class Mongo:
@@ -172,7 +173,7 @@ class Misc:
         """
         line_no_ = exc_.__traceback__.tb_lineno if hasattr(exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
         name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
-        print_(f"!!! {name_} at line {line_no_}:", str(exc_))
+        PRINT_(f"!!! {name_} at line {line_no_}:", str(exc_))
         return True
 
 
@@ -349,8 +350,6 @@ def issue_f():
         filter_[key_] = value_
         shipment_id_ = value_
         email_ = json_["email"] if "email" in json_ else "shipment"
-        # ids_ = json_["ids"] if "ids" in json_ else None
-        # filter_ = {"_id": {"$in": [ObjectId(i) for i in ids_]}}
 
         deliveries_ = list(Mongo().db_["delivery_data"].find(filter_))
         if not deliveries_:
@@ -1014,5 +1013,4 @@ def multi_issue_f():
 
 
 if __name__ == "__main__":
-    print_ = partial(print, flush=True)
     app.run(host="0.0.0.0", port=80, debug=False)

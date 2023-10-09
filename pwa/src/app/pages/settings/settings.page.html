@@ -126,7 +126,12 @@ https://www.gnu.org/licenses.
         </ion-item>
       </ion-list>
       <ion-list *ngIf="submenu=='profile-settings'" class="ion-padding-end">
-        <ion-list-header>{{ 'Profile Settings' | translate }}</ion-list-header>
+        <ion-list-header>{{ 'Theme' | translate }}</ion-list-header>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Pagination' | translate }}
+          </ion-label>
+          <app-pagination></app-pagination>
+        </ion-item>
         <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'Theme Color' | translate }}
           </ion-label>
