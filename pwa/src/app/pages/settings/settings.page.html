@@ -36,33 +36,18 @@ https://www.gnu.org/licenses.
       {{ header | translate }}
     </ion-button>
     <h3>{{ subheader | translate }}</h3>
-    <div *ngIf="submenu=='profile-settings'" class="profile-settings">
-      <ion-list class="ion-padding-end">
-        <ion-list-header>{{ 'PERSONAL' | translate }}</ion-list-header>
+    <div class="profile-settings">
+      <ion-list *ngIf="submenu=='account'" class="ion-padding-end">
+        <ion-list-header>{{ 'Security' | translate }}</ion-list-header>
         <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'E-mail' | translate }}
           </ion-label>
           {{ user.email }}
         </ion-item>
         <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Theme Color' | translate }}
-          </ion-label>
-          <div class="flex-container">
-            <div *ngFor="let item of themes" size="default" [style.background-color]="item.color" class="theme-button"
-              (click)="doTheme(item)">
-            </div>
-          </div>
-        </ion-item>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Language' | translate }}
-          </ion-label>
-          <app-lang></app-lang>
-        </ion-item>
-        <ion-list-header>{{ 'SECURITY' | translate }}</ion-list-header>
-        <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'Password' | translate }}
           </ion-label>
-          --- HIDDEN ---
+          ************************
           <ion-button (click)="misc.doSign('forgot')" size="small" slot="end">
             {{ 'Reset' | translate }}
           </ion-button>
@@ -74,7 +59,7 @@ https://www.gnu.org/licenses.
             {{ accountf_api_key }}
           </span>
           <ng-template #apihidden>
-            --- HIDDEN ---
+            ************************
           </ng-template>
           <ion-button (click)="doApiKeyEnabled()" size="small" slot="end">
             <div *ngIf="!is_api_key_enabled; else notenabled">
@@ -133,11 +118,28 @@ https://www.gnu.org/licenses.
             <ion-label>{{ 'Validate' | translate }}</ion-label>
           </ion-button>
         </ion-item>
-        <ion-list-header>{{ 'SYSTEM' | translate }}</ion-list-header>
+        <ion-list-header>{{ 'System' | translate }}</ion-list-header>
         <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'Version' | translate }}
           </ion-label>
           v{{ version }} ({{ release }})
+        </ion-item>
+      </ion-list>
+      <ion-list *ngIf="submenu=='profile-settings'" class="ion-padding-end">
+        <ion-list-header>{{ 'Profile Settings' | translate }}</ion-list-header>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Theme Color' | translate }}
+          </ion-label>
+          <div class="flex-container">
+            <div *ngFor="let item of themes" size="default" [style.background-color]="item.color" class="theme-button"
+              (click)="doTheme(item)">
+            </div>
+          </div>
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Language' | translate }}
+          </ion-label>
+          <app-lang></app-lang>
         </ion-item>
       </ion-list>
     </div>

@@ -70,7 +70,7 @@ class Trigger():
         """
         docstring is in progress
         """
-        print_(">>> init started")
+        PRINT_(">>> init started")
         self.operations_ = ["insert", "update", "replace", "delete"]
         self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
@@ -93,7 +93,7 @@ class Trigger():
         if not refresh_fetchers_f_["result"]:
             raise AppException(refresh_fetchers_f_["exc"])
 
-        print_(">>> init ended")
+        PRINT_(">>> init ended")
 
     def exception_passed_f(self):
         """
@@ -107,7 +107,7 @@ class Trigger():
         """
         line_no_ = exc_.__traceback__.tb_lineno if hasattr(exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
         name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
-        print_(f"!!! worker exception type: {name_}, line: {line_no_}:", str(exc_))
+        PRINT_(f"!!! worker exception type: {name_}, line: {line_no_}:", str(exc_))
         return True
 
     def exception_reported_f(self, exc_):
@@ -116,7 +116,7 @@ class Trigger():
         """
         line_no_ = exc_.__traceback__.tb_lineno if hasattr(exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
         name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
-        print_(f"!!! worker error type: {name_}, line: {line_no_}:", str(exc_))
+        PRINT_(f"!!! worker error type: {name_}, line: {line_no_}:", str(exc_))
         if notification_slack_hook_url_:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
@@ -125,7 +125,7 @@ class Trigger():
             notification_str_ = f"TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
             resp_ = requests.post(notification_slack_hook_url_, json.dumps({"text": str(notification_str_)}), timeout=10)
             if resp_.status_code != 200:
-                print_("*** notification error", resp_)
+                PRINT_("*** notification error", resp_)
 
         return True
 
@@ -152,7 +152,7 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print_(">>> getting collections structure...")
+            PRINT_(">>> getting collections structure...")
             self.properties_ = {}
             cursor_ = self.db_["_collection"].aggregate([{
                 "$match": {"$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]}
@@ -160,20 +160,20 @@ class Trigger():
             for item_ in cursor_:
                 self.properties_[item_["col_id"]] = item_["col_structure"]["properties"] if "properties" in item_["col_structure"] else None
 
-            print_(">>> structure refreshed")
+            PRINT_(">>> structure refreshed")
 
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc_:
-            print_("!!! refresher mongo error")
+            PRINT_("!!! refresher mongo error")
             return {"result": False, "msg": str(exc_)}
 
         except AppException as exc_:
-            print_("!!! refresher app exception")
+            PRINT_("!!! refresher app exception")
             return {"result": False, "msg": str(exc_)}
 
         except Exception as exc_:
-            print_("!!! refresher exception")
+            PRINT_("!!! refresher exception")
             return {"result": False, "msg": str(exc_)}
 
     def refresh_triggers_f(self):
@@ -181,7 +181,7 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print_(">>> getting triggers...")
+            PRINT_(">>> getting triggers...")
             self.triggers_ = []
             cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.triggers": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
@@ -206,7 +206,7 @@ class Trigger():
             if not self.triggers_:
                 raise PassException("!!! no trigger found - passed")
 
-            print_(">>> triggers refreshed")
+            PRINT_(">>> triggers refreshed")
 
             return {"result": True}
 
@@ -227,7 +227,7 @@ class Trigger():
         docstring is in progress
         """
         try:
-            print_(">>> getting fetchers...")
+            PRINT_(">>> getting fetchers...")
             self.fetchers_ = []
             cursor_ = self.db_["_collection"].aggregate([{"$match": {"col_structure.fetchers": {"$elemMatch": {"enabled": True}}}}])
             for item_ in cursor_:
@@ -249,7 +249,7 @@ class Trigger():
             if not self.fetchers_:
                 raise PassException("!!! no fetcher found - passed")
 
-            print_(">>> fetchers refreshed", self.fetchers_)
+            PRINT_(">>> fetchers refreshed", self.fetchers_)
             return {"result": True}
 
         except PassException as exc_:
@@ -531,17 +531,17 @@ class Trigger():
 
                 document_ = self.db_["_collection"].find_one({"col_id": fetcher_col_id_})
                 if not document_:
-                    print_(f"!!! no fetcher document found: {fetcher_col_id_}")
+                    PRINT_(f"!!! no fetcher document found: {fetcher_col_id_}")
                     continue
 
                 structure_ = document_["col_structure"] if "col_structure" in document_ else None
                 if not structure_:
-                    print_(f"!!! no fetcher structure found: {fetcher_col_id_}")
+                    PRINT_(f"!!! no fetcher structure found: {fetcher_col_id_}")
                     continue
 
                 properties_ = structure_["properties"] if "properties" in structure_ else None
                 if not properties_:
-                    print_(f"!!! no fetcher properties found: {fetcher_col_id_}")
+                    PRINT_(f"!!! no fetcher properties found: {fetcher_col_id_}")
                     continue
 
                 match_new_ = []
@@ -559,12 +559,12 @@ class Trigger():
 
                 fetcher_document_ = self.db_[f"{fetcher_col_id_}_data"].find_one(get_filtered_f_)
                 if not fetcher_document_:
-                    print_(f"!!! not target document found for {fetcher_col_id_}: {get_filtered_f_}")
+                    PRINT_(f"!!! not target document found for {fetcher_col_id_}: {get_filtered_f_}")
                     continue
 
                 get_val_ = fetcher_document_[fetcher_get_] if fetcher_get_ in fetcher_document_ else None
                 if not get_val_:
-                    print_(f"!!! no target value found for {fetcher_col_id_}: {get_filtered_f_}")
+                    PRINT_(f"!!! no target value found for {fetcher_col_id_}: {get_filtered_f_}")
                     continue
 
                 set_ = {}
@@ -603,7 +603,7 @@ class Trigger():
             self.counter_ += 1
             self.repeater_ += 1
             if self.repeater_ == 100:
-                print_("counter_", self.counter_, source_collection_)
+                PRINT_("counter_", self.counter_, source_collection_)
                 self.repeater_ = 0
 
             source_collection_id_ = source_collection_.replace("_data", "")
@@ -627,20 +627,20 @@ class Trigger():
             if trigger_targets_ == []:
                 raise PassException("!!! no trigger target found")
 
-            print_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
+            PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
 
             for target_ in trigger_targets_:
                 target_collection_id_ = target_["target"].lower()
                 target_collection_ = f"{target_collection_id_}_data"
                 target_properties_ = self.properties_[target_collection_id_] if target_collection_id_ in self.properties_ else None
 
-                print_(">>> target found", target_collection_id_)
+                PRINT_(">>> target found", target_collection_id_)
                 if target_properties_ is None:
                     raise AppException(f"no target properties found {target_collection_id_}")
 
                 target_changes_ = target_["changes"] if "changes" in target_ and len(target_["changes"]) > 0 else None
                 if not target_changes_:
-                    print_(f"no target changes defined {target_collection_id_}")
+                    PRINT_(f"no target changes defined {target_collection_id_}")
                     raise AppException(f"no target changes defined {target_collection_id_}")
 
                 match_ = {"_id": _id}
@@ -652,7 +652,7 @@ class Trigger():
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
-                    print_(f"full document not found ({source_collection_}): {match_}")
+                    PRINT_(f"full document not found ({source_collection_}): {match_}")
                     continue
 
                 match_ = {}
@@ -675,7 +675,7 @@ class Trigger():
                         continue
 
                 if not match_:
-                    print_(f"!!! no data found with the target {target_collection_id_}", match_)
+                    PRINT_(f"!!! no data found with the target {target_collection_id_}", match_)
                     continue
 
                 on_changes_all_ = target_["on_changes_all"]
@@ -721,7 +721,7 @@ class Trigger():
                             count1_ = doc_["count"] if "count" in doc_ else 0
 
                     if count0_ != count1_:
-                        print_("!!! on changes all not completed", changes_filter0_)
+                        PRINT_("!!! on changes all not completed", changes_filter0_)
                         continue
 
                 filter_ = {}
@@ -808,7 +808,7 @@ class Trigger():
                 set_["_resume_token"] = token_
                 update_many_ = self.db_[target_collection_].update_many(match_, {"$set": set_}, upsert=upsert_)
                 count_ = update_many_.matched_count
-                print_(">>> updated :)", {"coll": target_collection_, "match": match_, "set": set_, "count": count_})
+                PRINT_(">>> updated :)", {"coll": target_collection_, "match": match_, "set": set_, "count": count_})
 
                 notification_ = target_["notification"] if "notification" in target_ else None
                 if notification_:
@@ -826,11 +826,11 @@ class Trigger():
                     keyf_ = full_document_[nkey_]
                     get_users_from_tags_f_ = self.get_users_from_tags_f(tags_)
                     if not get_users_from_tags_f_["result"]:
-                        print_("!!! error get_users_from_tags_f_:", get_users_from_tags_f_["msg"])
+                        PRINT_("!!! error get_users_from_tags_f_:", get_users_from_tags_f_["msg"])
                         continue
                     to_ = get_users_from_tags_f_["to"] if "to" in get_users_from_tags_f_ and len(get_users_from_tags_f_["to"]) > 0 else None
                     if not to_:
-                        print_("!!! _tags to not found")
+                        PRINT_("!!! _tags to not found")
                         continue
 
                     personalizations_ = {"to": get_users_from_tags_f_["to"]}
@@ -840,7 +840,7 @@ class Trigger():
 
                     ndocument_ = self.db_["_collection"].find_one({"col_id": ncollection_})
                     if not ndocument_:
-                        print_("!!! notification collection not found", ncollection_)
+                        PRINT_("!!! notification collection not found", ncollection_)
                         continue
 
                     nproperties_ = ndocument_["col_structure"]["properties"] if "col_structure" in ndocument_ and "properties" in ndocument_["col_structure"] else None
@@ -905,7 +905,7 @@ class Trigger():
         creates a pipeline to run async works in a loop
         """
         try:
-            print_(">>> change stream started")
+            PRINT_(">>> change stream started")
             resume_token_ = None
 
             with self.db_.watch(self.pipeline_) as changes_stream_:
@@ -913,24 +913,24 @@ class Trigger():
 
                     source_collection_ = event_["ns"]["coll"] if "ns" in event_ and "coll" in event_["ns"] else None
                     if source_collection_ is None:
-                        print_("!!! no collection provided")
+                        PRINT_("!!! no collection provided")
                         continue
                     source_collection_id_ = source_collection_.replace("_data", "")
 
                     if source_collection_ == "_collection":
                         refresh_properties_f_ = self.refresh_properties_f()
                         if not refresh_properties_f_["result"]:
-                            print_(">>> properties refresh error", refresh_properties_f_["exc"])
+                            PRINT_(">>> properties refresh error", refresh_properties_f_["exc"])
                             continue
                         refresh_triggers_f_ = self.refresh_triggers_f()
                         if not refresh_triggers_f_["result"]:
-                            print_(">>> triggers refresh error", refresh_triggers_f_["exc"])
+                            PRINT_(">>> triggers refresh error", refresh_triggers_f_["exc"])
                             continue
                         refresh_fetchers_f_ = self.refresh_fetchers_f()
                         if not refresh_fetchers_f_["result"]:
-                            print_(">>> fetchers refresh error", refresh_fetchers_f_["exc"])
+                            PRINT_(">>> fetchers refresh error", refresh_fetchers_f_["exc"])
                             continue
-                        print_(">>> _collection updated and refreshed")
+                        PRINT_(">>> _collection updated and refreshed")
 
                     source_properties_ = self.properties_[source_collection_id_] if source_collection_id_ in self.properties_ else None
                     if source_properties_ is None:
@@ -938,18 +938,18 @@ class Trigger():
 
                     op_ = event_["operationType"] if "operationType" in event_ and event_["operationType"] in self.operations_ else None
                     if op_ is None:
-                        print_("!!! no operation provided")
+                        PRINT_("!!! no operation provided")
                         continue
 
                     changed_ = event_["updateDescription"]["updatedFields"] if "updateDescription" in event_ and "updatedFields" in event_["updateDescription"] and op_ in ["update", "replace"] else None
                     if changed_ is None:
                         changed_ = event_["fullDocument"] if "fullDocument" in event_ and op_ == "insert" else None
                         if changed_ is None:
-                            print_("!!! no changed fields provided")
+                            PRINT_("!!! no changed fields provided")
                             continue
 
                     if source_collection_[:1] == "_":
-                        print_(f">>> system collection passed {source_collection_}")
+                        PRINT_(f">>> system collection passed {source_collection_}")
                         continue
 
                     resume_token_ = changes_stream_.resume_token
@@ -997,7 +997,7 @@ mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 notification_slack_hook_url_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
+PRINT_ = partial(print, flush=True)
 
 if __name__ == "__main__":
-    print_ = partial(print, flush=True)
     asyncio.run(Trigger().changes_stream_f())

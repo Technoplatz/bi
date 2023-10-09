@@ -113,9 +113,12 @@ https://www.gnu.org/licenses.
     <ion-item lines="none">
       <ion-label class="ion-text-wrap">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="business-outline"></ion-icon>{{ 'Account' | translate }}
+          <ion-icon name="settings-outline"></ion-icon>{{ 'Settings' | translate }}
         </ion-button>
-        <p (click)="misc.navi.next('account/profile-settings')" class="clicked-item dark">
+        <p (click)="misc.navi.next('settings/account')" class="clicked-item dark">
+          {{ 'Account' | translate }}
+        </p>
+        <p (click)="misc.navi.next('settings/profile-settings')" class="clicked-item dark">
           {{ 'Profile Settings' | translate }}
         </p>
       </ion-label>

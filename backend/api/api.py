@@ -3789,9 +3789,10 @@ class Auth:
             collection_id_ = input_["collection"] if "collection" in input_ and input_["collection"] is not None else None
             op_ = input_["op"] if "op" in input_ else None
             adminops_ = ["dumpu", "dumpr", "dumpd"]
-            read_permissive_colls_ = ["_collection", "_query"]
-            read_permissive_ops_ = ["collection", "collections", "read", "query", "queries", "charts", "views"]
+            read_permissive_colls_ = ["_collection", "_query", "_announcement"]
+            read_permissive_ops_ = ["read", "query", "queries", "charts", "views", "collection", "collections", "announcements"]
             insert_permissive_ops_ = ["clone"]
+            update_permissive_ops_ = ["savequery"]
             is_crud_ = collection_id_ and collection_id_[:1] != "_"
             allowmatch_ = []
 
@@ -3805,7 +3806,7 @@ class Auth:
                 return {"result": True, "admin": True}
 
             if op_ in adminops_:
-                raise AuthError(f"operation is not permitted: {op_}")
+                raise AuthError(f"{op_} is not allowed")
 
             if Misc().is_permitted_usertags_f(user_):
                 return {"result": True, "manager": True}
@@ -3819,11 +3820,14 @@ class Auth:
             if op_ in insert_permissive_ops_:
                 op_ = "insert"
 
+            if op_ in update_permissive_ops_:
+                op_ = "update"
+
             if op_ in read_permissive_ops_ and collection_id_ in read_permissive_colls_:
                 return {"result": True}
 
             if not is_crud_:
-                raise AuthError(f"{collection_id_} not allowed to {op_}")
+                raise AuthError(f"{collection_id_} is not allowed to {op_}")
 
             permit_ = False
             for usr_tag_ in usr_tags_:

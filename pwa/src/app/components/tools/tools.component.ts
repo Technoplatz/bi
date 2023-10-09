@@ -77,9 +77,7 @@ export class ToolsComponent implements OnInit {
   }
 
   doSignout() {
-    this.auth.Signout().then(() => {
-      this.auth.setUserOut();
-    }).catch((error: any) => {
+    this.auth.Signout().then(() => { }).catch((error: any) => {
       console.error("signout error", error.msg);
     });
   }

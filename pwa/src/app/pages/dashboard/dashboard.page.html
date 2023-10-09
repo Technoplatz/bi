@@ -37,9 +37,10 @@ https://www.gnu.org/licenses.
         <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
           {{ 'DASHBOARD' | translate }}
         </ion-button>
-        <h3>{{ 'Welcome Aboard' | translate }}</h3>
-        <span *ngIf="flashcards.length > 0">{{ flashcards.length }}</span> {{ 'Flashcards and' }}
-        <span *ngIf="charts.length > 0">{{ charts.length }}</span> {{ 'Charts' }}.
+        <h3>{{ 'Welcome Aboard' | translate }}.</h3>
+        <span *ngIf="flashcards.length > 0">{{ flashcards.length }} {{ 'Flashcards' }} {{ 'and' | translate }}</span>
+        <span *ngIf="charts.length > 0">{{ charts.length }} {{ 'Chart' | translate }}<span
+            *ngIf="charts.length > 1">s</span>.</span>
 
         <!-- flashcards -->
         <div *ngIf="charts.length > 0 || flashcards.length > 0">

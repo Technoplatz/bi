@@ -56,7 +56,7 @@ export class UserResolver implements Resolve<any> {
   resolve() {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA) => {
-        resolve(LSUSERMETA);
+        resolve(LSUSERMETA ? true : false);
       }).catch((error: any) => {
         reject({ message: error.msg });
       });
@@ -97,9 +97,18 @@ const routes: Routes = [
     }
   },
   {
-    path: "account/profile-settings",
+    path: "settings/account",
     canActivate: [SessionGuard],
-    loadChildren: () => import("./pages/account/account.module").then((m) => m.AccountPageModule),
+    loadChildren: () => import("./pages/settings/settings.module").then((m) => m.SettingsPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
+    path: "settings/profile-settings",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/settings/settings.module").then((m) => m.SettingsPageModule),
     data: { preload: true },
     resolve: {
       user: UserResolver,

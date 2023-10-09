@@ -31,33 +31,19 @@ https://www.gnu.org/licenses.
 */
 
 import { NgModule } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { TranslateModule } from "@ngx-translate/core";
-import { IonicModule } from "@ionic/angular";
-import { AccountPageRoutingModule } from "./account-routing.module";
-import { AccountPage } from "./account.page";
-import { PageComponentsModule } from "../../components/page-components.module";
-import { QRCodeModule } from 'angularx-qrcode';
-import { NgJsonEditorModule } from "ang-jsoneditor";
+import { Routes, RouterModule } from "@angular/router";
+import { SettingsPage } from "./settings.page";
+
+const routes: Routes = [
+  {
+    path: "",
+    component: SettingsPage
+  }
+];
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    IonicModule,
-    AccountPageRoutingModule,
-    TranslateModule.forChild(),
-    PageComponentsModule,
-    QRCodeModule,
-    NgJsonEditorModule
-  ],
-  declarations: [
-    AccountPage
-  ],
-  exports: [
-    AccountPage
-  ]
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
 })
-export class AccountPageModule { }
+
+export class SettingsPageRoutingModule { }

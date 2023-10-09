@@ -39,15 +39,15 @@ import { environment } from "../../../environments/environment";
 import { Router } from "@angular/router";
 
 @Component({
-  selector: "app-account",
-  templateUrl: "./account.page.html",
-  styleUrls: ["./account.page.scss"]
+  selector: "app-settings",
+  templateUrl: "./settings.page.html",
+  styleUrls: ["./settings.page.scss"]
 })
 
-export class AccountPage implements OnInit {
+export class SettingsPage implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
-  public header: string = "ACCOUNT";
+  public header: string = "SETTINGS";
   public subheader: string = "";
   public user: any = null;
   public is_initialized: boolean = false;
@@ -81,7 +81,7 @@ export class AccountPage implements OnInit {
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
     this.submenu = this.router.url.split("/")[2];
-    this.subheader = this.submenu === "profile-settings" ? "Profile Settings" : this.submenu === "signout" ? "Sign Out" : this.submenu;
+    this.subheader = this.submenu === "account" ? "Account" : this.submenu === "profile-settings" ? "Profile Settings" : this.submenu;
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA;
       this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
