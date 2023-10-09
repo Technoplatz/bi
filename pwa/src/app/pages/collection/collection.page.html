@@ -38,7 +38,7 @@ https://www.gnu.org/licenses.
           {{ header | translate }}
         </ion-button>
         <h3>{{ subheader | translate }}</h3>
-        <span *ngIf="is_loaded">{{ count }} records were filtered.</span><span *ngIf="!is_loaded">...</span>
+        <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span *ngIf="!is_loaded">...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -66,7 +66,7 @@ https://www.gnu.org/licenses.
               <div *ngIf="!is_loaded" class="data-sq-button required">
                 <ion-icon name="hourglass-outline"></ion-icon>
                 <br />
-                {{ 'Please Wait' | translate }}...
+                {{ 'Please Wait' | translate }}
               </div>
               <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
@@ -135,7 +135,7 @@ https://www.gnu.org/licenses.
                   <ion-icon *ngIf="item.one_click"
                     [name]="item?.icon ? item.icon : 'play-forward-circle-outline'"></ion-icon>
                   <ion-icon *ngIf="!item.one_click" [name]="item?.icon ? item.icon : 'play-circle-outline'"></ion-icon>
-                  {{ item.title }}
+                  {{ item.title | translate }}
                 </ion-button>
                 <ng-template #actionhide></ng-template>
               </span>
@@ -147,7 +147,7 @@ https://www.gnu.org/licenses.
           <ion-row>
             <ion-col size="12" class="schema-flashcard-container">
               <div *ngFor="let item of flashcards_" (click)="doFlashcard(item)">{{
-                item.view.title }}<br /><span>{{ item.count }}</span></div>
+                item.view.title | translate }}<br /><span>{{ item.count }}</span></div>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -279,8 +279,9 @@ https://www.gnu.org/licenses.
               <ng-template #else1>
                 <span *ngIf="item_.value.bsonType=='array'; else else2">
                   <span *ngIf="item_.value.items?.bsonType=='object'; else noarrayobject">
-                    {{ record[item_.key] ? record[item_.key].length : '0' }} {{ 'item' | translate }}<span
-                      *ngIf="record[item_.key]?.length > 1">{{ 's' }}</span>
+                    {{ record[item_.key] ? record[item_.key].length : '0' }} 
+                    <span *ngIf="record[item_.key]?.length === 1">{{ 'Item' | translate }}</span>
+                    <span *ngIf="record[item_.key]?.length > 1">{{ 'Items' | translate }}</span>
                   </span>
                   <ng-template #noarrayobject>
                     <span *ngIf="record[item_.key]?.length > 0">{{ record[item_.key].join(', ') }}</span>
@@ -304,7 +305,7 @@ https://www.gnu.org/licenses.
                 <span *ngIf="item_.value.bsonType=='object'; else else0">{{ 'Object' | translate }}</span>
               </ng-template>
               <ng-template #else0>
-                {{ record[item_.key]?.toString() }}
+                {{ record[item_.key]?.toString() | translate }}
               </ng-template>
             </td>
             <td>
@@ -356,7 +357,7 @@ https://www.gnu.org/licenses.
                 </ion-button>
               </span>
               <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
-                class="ion-no-padding">
+                class="ion-no-padding ion-margin-start">
                 <ion-icon name="list-outline"></ion-icon>
                 {{ 'Pagination' | translate }} [{{ limit_ }}]
               </ion-button>

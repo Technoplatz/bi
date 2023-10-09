@@ -45,7 +45,7 @@ export const environment = {
     default_page: 1,
     default_icon: "medical-outline",
     limit: 19,
-    loadingText: "Please wait",
+    loadingText: "Please Wait",
     defaultColumnWidth: 140,
     default_delay: 500
   },

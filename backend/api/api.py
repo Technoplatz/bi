@@ -531,14 +531,14 @@ class Misc:
         """
         return ["_tags"]
 
-    def is_permitted_usertags_f(self, user_):
+    def in_permitted_tags_f(self, user_):
         """
         docstring is in progress
         """
         tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
         return any(i in tags_ for i in API_PERMISSIVE_TAGS_)
 
-    def is_admintags_f(self, user_):
+    def in_admin_tags_f(self, user_):
         """
         docstring is in progress
         """
@@ -2200,7 +2200,7 @@ class Crud:
             data_ = []
             structure_ = self.root_schemas_f("_collection")
 
-            if Misc().is_permitted_usertags_f(user_):
+            if Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_):
                 data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
             else:
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
@@ -2240,7 +2240,7 @@ class Crud:
             data_ = {}
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            if col_id_ == "_query" or Misc().is_permitted_usertags_f(user_):
+            if col_id_ == "_query" or Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_):
                 permitted_ = True
             else:
                 permitted_ = False
@@ -2317,7 +2317,7 @@ class Crud:
                 if not user_:
                     raise APIError(f"no user defined for {que_id_}")
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-                if Misc().is_permitted_usertags_f(user_):
+                if Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_):
                     permitted_ = True
                 else:
                     for usr_tag_ in usr_tags_:
@@ -2422,7 +2422,7 @@ class Crud:
             allowed_cols_ = ["_collection", "_query"]
             is_crud_ = collection_id_[:1] != "_"
 
-            if collection_id_ not in allowed_cols_ and not Misc().is_permitted_usertags_f(user_) and not is_crud_:
+            if collection_id_ not in allowed_cols_ and not Misc().in_permitted_tags_f(user_) and not Misc().in_admin_tags_f(user_) and not is_crud_:
                 raise AuthError(f"collection is not allowed to read: {collection_id_}")
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
@@ -2435,7 +2435,7 @@ class Crud:
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True else False
             get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
 
-            if collection_id_ == "_query" and not Misc().is_permitted_usertags_f(user_):
+            if collection_id_ == "_query" and not Misc().in_permitted_tags_f(user_) and not Misc().in_admin_tags_f(user_):
                 get_filtered_["_tags"] = user_["_tags"]
 
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
@@ -2607,7 +2607,7 @@ class Crud:
             if not que_id_:
                 raise APIError("query not found")
 
-            if not Misc().is_permitted_usertags_f(user_):
+            if not Misc().in_permitted_tags_f(user_) and not Misc().in_admin_tags_f(user_):
                 raise AuthError("no permission")
 
             Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": {
@@ -3802,14 +3802,14 @@ class Auth:
             if not user_id_:
                 raise APIError(f"no user defined: {user_id_}")
 
-            if Misc().is_admintags_f(user_):
-                return {"result": True, "admin": True}
+            if Misc().in_admin_tags_f(user_):
+                return {"result": True}
 
             if op_ in adminops_:
                 raise AuthError(f"{op_} is not allowed")
 
-            if Misc().is_permitted_usertags_f(user_):
-                return {"result": True, "manager": True}
+            if Misc().in_permitted_tags_f(user_):
+                return {"result": True}
 
             if not collection_id_:
                 raise AuthError(f"no collection provided: {op_}")
@@ -4050,7 +4050,7 @@ class Auth:
                 raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
-            perm_ = Misc().is_permitted_usertags_f(user_)
+            perm_ = Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_)
             payload_ = {
                 "iss": "Technoplatz",
                 "aud": "api",

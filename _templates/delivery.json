@@ -436,7 +436,7 @@
   "actions": [
     {
       "id": "stby-to-open",
-      "title": "Standby to Open",
+      "title": "Standby To Open",
       "enabled": true,
       "match": [
         {
@@ -473,7 +473,7 @@
     },
     {
       "id": "open-to-stby",
-      "title": "Open to Standby",
+      "title": "Open To Standby",
       "enabled": true,
       "match": [
         {
@@ -510,7 +510,7 @@
     },
     {
       "id": "rtd",
-      "title": "ReadyToBeDelivered",
+      "title": "Ready To Be Delivered",
       "enabled": true,
       "match": [
         {

@@ -114,7 +114,7 @@ export class AppComponent implements OnInit {
       }
     });
     this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
-      !LSPAGINATION ? this.storage.set("LSPAGINATION", this.paginations_[0]).then(() => { }) : null;
+      !LSPAGINATION ? this.storage.set("LSPAGINATION", this.paginations_[1]).then(() => { }) : null;
     });
   }
 
