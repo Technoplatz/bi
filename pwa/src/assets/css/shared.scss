@@ -403,12 +403,13 @@ ion-note {
   padding-top: 14px;
   padding-right: 8px;
   padding-left: 8px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
+  border: 1px solid #ccc;
   background-color: var(--ion-color-light);
   color: var(--ion-color-dark);
-  min-width: 76px;
-  max-width: 76px;
+  min-width: 88px;
+  max-width: 88px;
   word-spacing: 32px;
   overflow: hidden;
   white-space: pre-line !important;

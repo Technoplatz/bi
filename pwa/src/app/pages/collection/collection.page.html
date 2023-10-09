@@ -38,7 +38,8 @@ https://www.gnu.org/licenses.
           {{ header | translate }}
         </ion-button>
         <h3>{{ subheader | translate }}</h3>
-        <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span *ngIf="!is_loaded">...</span>
+        <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span
+          *ngIf="!is_loaded">...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -98,13 +99,15 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
-
         <ion-grid *ngIf="is_crud && perm_" [class]="schemevis">
           <ion-row>
             <ion-col size="12">
-              <ion-button (click)="save_schema_f()">
-                <span *ngIf="!is_saving">{{ 'Save Schema' | translate }}</span>
-                <span *ngIf="is_saving">{{ 'Saving' | translate }}...</span>
+              <ion-button *ngIf="!is_saving" (click)="save_schema_f()">
+                <span>{{ 'Save Schema' | translate }}</span>
+              </ion-button>
+              <ion-button *ngIf="is_saving">
+                <ion-spinner name="dots"></ion-spinner>&nbsp;
+                <span>{{ 'Saving' | translate }}</span>
               </ion-button>
               <ion-button color="light" (click)="doShowSchema(false)">
                 <ion-icon name="close-circle-outline"></ion-icon>
@@ -279,7 +282,7 @@ https://www.gnu.org/licenses.
               <ng-template #else1>
                 <span *ngIf="item_.value.bsonType=='array'; else else2">
                   <span *ngIf="item_.value.items?.bsonType=='object'; else noarrayobject">
-                    {{ record[item_.key] ? record[item_.key].length : '0' }} 
+                    {{ record[item_.key] ? record[item_.key].length : '0' }}
                     <span *ngIf="record[item_.key]?.length === 1">{{ 'Item' | translate }}</span>
                     <span *ngIf="record[item_.key]?.length > 1">{{ 'Items' | translate }}</span>
                   </span>
