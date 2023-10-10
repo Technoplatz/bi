@@ -681,4 +681,8 @@ export class CollectionPage implements OnInit {
     });
   }
 
+  tdc(event: any) {
+    event.stopPropagation();
+  }
+
 }

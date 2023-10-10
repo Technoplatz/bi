@@ -32,7 +32,9 @@
     "usr_enabled": {
       "bsonType": "bool",
       "title": "Enabled",
-      "description": "Enabled or not"
+      "description": "Enabled or not",
+      "truetext": "Enabled",
+      "falsetext": "Disabled"
     },
     "_tags": {
       "bsonType": "array",
