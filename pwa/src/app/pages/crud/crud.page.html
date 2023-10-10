@@ -40,7 +40,7 @@ https://www.gnu.org/licenses.
                     {{ 'Make Dump' | translate }}
                 </ion-button>
                 <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpd')">
-                    <ion-icon name="arrow-down-circle-outline"></ion-icon> 
+                    <ion-icon name="arrow-down-circle-outline"></ion-icon>
                     {{ 'Download' | translate }}
                 </ion-button>
                 <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpr')">
@@ -165,6 +165,19 @@ https://www.gnu.org/licenses.
                 <h5>{{ 'This action is non-interactive' | translate }}.</h5>
                 {{ 'Please click RUN button directly' | translate }}.
             </div>
+            <ul *ngIf="!crudForm.valid" class="ion-no-padding ion-margin-top danger">
+                <div *ngFor="let field of fieldsupd; let f=index">
+                    <li *ngIf="f===0" class="ion-margin-start bold"> {{ 'Please enter the required fields' | translate }}
+                        <sup>
+                            <ion-icon name="star" color="danger"></ion-icon>
+                        </sup>
+                    </li>
+                    <li *ngIf="!crudForm.controls[field.name].valid && (crudForm.controls[field.name].dirty || (op === 'update' && !data_[field.name]))"
+                        class="ion-margin-start">
+                        {{ field.title | translate }} [{{ field.name }}]
+                    </li>
+                </div>
+            </ul>
             <form [formGroup]="crudForm" enctype="multipart/form-data">
                 <ion-list *ngIf="fieldsupd && fieldsupd.length > 0"
                     class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
@@ -186,9 +199,12 @@ https://www.gnu.org/licenses.
                         <ion-label position="stacked">
                             {{ field.title | translate }}
                             <sup *ngIf="field.required">
-                                <ion-icon name="star"></ion-icon>
-                                <ion-icon *ngIf="field.readonly" name="star"></ion-icon>
+                                <ion-icon name="star" color="danger"></ion-icon>
                             </sup>
+                            <span *ngIf="!crudForm.controls[field.name].valid">
+                                <span *ngIf="crudForm.controls[field.name].dirty" class="danger">&nbsp;[{{ 'INVALID' |
+                                    translate }}]</span>
+                            </span>
                         </ion-label>
                         <div *ngIf="field.bsonType=='string'" class="full-width">
                             <div *ngIf="!field.file; else isfile">
@@ -200,15 +216,14 @@ https://www.gnu.org/licenses.
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="false"
-                                        [disabled]="field.disabled"
-                                        [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly"
-                                        [name]="field.name" (ionChange)="doTextManipulate($event, field)">
+                                        [disabled]="field.disabled" [readonly]="field.readonly" [name]="field.name"
+                                        (ionChange)="doTextManipulate($event, field)">
                                     </ion-input>
                                     <ng-template #istextarea>
                                         <ion-textarea class="ion-no-padding" cols="64" [(ngModel)]="data_[field.name]"
-                                            [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly"
-                                            [disabled]="field.disabled" auto-grow="true" [maxlength]="field.maxLength"
-                                            [minlength]="field.minLength" autocorrect="off"
+                                            [disabled]="field.disabled" [readonly]="field.readonly" auto-grow="true"
+                                            [maxlength]="field.maxLength" [minlength]="field.minLength"
+                                            autocorrect="off"
                                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                             [formControlName]="field.name" [required]="field.required"
                                             spellcheck="false" debounce="500">
@@ -226,7 +241,7 @@ https://www.gnu.org/licenses.
                                     <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
-                                        [disabled]="field.disabled || field.readonly" [(ngModel)]="data_[field.name]"
+                                        [disabled]="field.disabled" [(ngModel)]="data_[field.name]"
                                         [value]="data_[field.name]"
                                         (ionChange)="doChangeEnum(field, $event.target.value)">
                                         <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
@@ -236,7 +251,7 @@ https://www.gnu.org/licenses.
                                 <ng-template #checkproperty>
                                     <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
-                                        [(ngModel)]="data_[field.name]">
+                                        [(ngModel)]="data_[field.name]" [disabled]="field.disabled">
                                         <ion-select-option *ngFor="let item of properties_" [value]="item"> {{ item }}
                                         </ion-select-option>
                                     </ion-select>
@@ -264,13 +279,12 @@ https://www.gnu.org/licenses.
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
                                             [firstDayOfWeek]="1" [showDefaultButtons]="true"
                                             displayFormat="field.dateOnly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm'"
-                                            [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly"
-                                            [disabled]="field.disabled">
+                                            [disabled]="field.disabled" [readonly]="field.readonly">
                                             <span slot="title">{{ field.title }}</span>
                                         </ion-datetime>
                                     </ng-template>
                                 </ion-modal>
-                                <ion-button *ngIf="!field.readonly && !field.disabled"
+                                <ion-button *ngIf="op=='insert' || (!field.readonly && !field.disabled)"
                                     (click)="doCancelDate(field.name)" fill="clear"
                                     class="ion-no-padding datetime-clear-button" size="default">
                                     <ion-icon name="close-outline"></ion-icon>
@@ -287,11 +301,10 @@ https://www.gnu.org/licenses.
                             class="ion-no-padding" [formControlName]="field.name" type="number"
                             [required]="field.required" [(ngModel)]="data_[field.name]"
                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                            [disabled]="field.disabled"
-                            [readonly]="op=='update' && field?.permanent ? 'true' : field.readonly">
+                            [disabled]="field.disabled" [readonly]="field.readonly">
                         </ion-input>
                         <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
-                            [(ngModel)]="data_[field.name]">
+                            [(ngModel)]="data_[field.name]" [disabled]="field.disabled">
                         </ion-checkbox>
                         <div *ngIf="field.bsonType=='object'" class="full-width">
                             <ion-input value="object is protected" [readonly]="true"></ion-input>

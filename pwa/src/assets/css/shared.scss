@@ -59,6 +59,13 @@ h2 {
   letter-spacing: -0.02rem !important;
 }
 
+.checkbox-disabled,
+.native-input[disabled],
+ion-label {
+  opacity: 1 !important;
+  --opacity: 1 !important;
+}
+
 ion-reorder {
   margin-top: 4px !important;
   margin-inline-end: 8px !important;
@@ -118,10 +125,18 @@ ion-note {
   font-size: 11px !important;
 }
 
+.bold {
+  font-weight: 600 !important;
+}
+
 .new-version {
   margin-right: 32px !important;
   --padding-start: 10px !important;
   --padding-end: 10px !important;
+}
+
+.margin-bottom {
+  margin-bottom: 4px !important;
 }
 
 .api-key-item ion-button {
@@ -827,10 +842,6 @@ ion-select {
   min-height: 38px !important;
   max-width: 100% !important;
   width: auto !important;
-}
-
-ion-select.select-disabled {
-  opacity: 1 !important;
 }
 
 .tabs-row {

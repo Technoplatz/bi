@@ -7,7 +7,8 @@
       "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "permanent": true
     },
     "odi_sub_no": {
       "bsonType": "string",
@@ -16,7 +17,8 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "permanent": true
     },
     "odi_date": {
       "bsonType": "date",
@@ -56,43 +58,7 @@
     "_modified_at": -1
   },
   "parents": [],
-  "links": [
-    {
-      "collection": "delivery",
-      "get": "dnn_no",
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "00-Open"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_odi_no",
-          "value": "odi_no"
-        },
-        {
-          "key": "dnn_odi_sub_no",
-          "value": "odi_sub_no"
-        },
-        {
-          "key": "dnn_status",
-          "value": "10-OnTheWay"
-        }
-      ],
-      "autofill": true,
-      "btntext": "Deliveries",
-      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs Linked to Ordino",
-        "body": "Hi,<br /><br />We would like to let you know that attached DNs has been linked to ordino.",
-        "attachment": true,
-        "fields": "dnn_odi_no,dnn_odi_sub_no,dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty"
-      }
-    }
-  ],
+  "links": [],
   "actions": [],
   "triggers": [
     {
