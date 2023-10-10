@@ -52,6 +52,7 @@ export class Miscellaneous {
   public menutoggle = new BehaviorSubject<boolean>(false);
   public version = new BehaviorSubject<any>(null);
   public saas = new BehaviorSubject<any>(null);
+  public localization = new BehaviorSubject<any>(null);
   public toggle: boolean = true;
   private collections_: any;
 
@@ -203,12 +204,13 @@ export class Miscellaneous {
     });
   }
 
-  setLanguage(l: string) {
+  setLanguage(l_: string) {
     return new Promise((resolve, reject) => {
-      if (l) {
-        this.storage.set("LSLANG", l).then(() => {
-          this.translate.setDefaultLang(l);
-          this.translate.use(l);
+      if (l_) {
+        this.storage.set("LSLANG", l_).then(() => {
+          this.translate.setDefaultLang(l_);
+          this.translate.use(l_);
+          this.localization.next(l_ === "tr" ? "tr-TR" : l_ === "de" ? "de-DE" : "en-US");
           resolve(true);
         }).catch((error: any) => {
           reject("storage lang set error");
@@ -221,8 +223,9 @@ export class Miscellaneous {
 
   getLanguage() {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSLANG").then((LSLANG: any) => {
-        resolve(LSLANG ? LSLANG : "en");
+      this.storage.get("LSLANG").then((l_: any) => {
+        this.localization.next(l_ === "tr" ? "tr-TR" : l_ === "de" ? "de-DE" : "en-US");
+        resolve(l_ ? l_ : "en");
       }).catch(() => {
         resolve("en");
       });

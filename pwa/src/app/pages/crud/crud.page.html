@@ -167,7 +167,8 @@ https://www.gnu.org/licenses.
             </div>
             <ul *ngIf="!crudForm.valid" class="ion-no-padding ion-margin-top danger">
                 <div *ngFor="let field of fieldsupd; let f=index">
-                    <li *ngIf="f===0" class="ion-margin-start bold"> {{ 'Please enter the required fields' | translate }}
+                    <li *ngIf="f===0" class="ion-margin-start bold"> {{ 'Please enter the required fields' | translate
+                        }}
                         <sup>
                             <ion-icon name="star" color="danger"></ion-icon>
                         </sup>
@@ -277,9 +278,8 @@ https://www.gnu.org/licenses.
                                             [presentation]="field.dateOnly ? 'date' : 'date-time'" [multiple]="false"
                                             [value]="data_[field.name]?.substring(0, 19).replace(' ', 'T') + 'Z'"
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
-                                            [firstDayOfWeek]="1" [showDefaultButtons]="true"
-                                            displayFormat="field.dateOnly ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm'"
-                                            [disabled]="field.disabled" [readonly]="field.readonly">
+                                            [firstDayOfWeek]="1" [showDefaultButtons]="true" [disabled]="field.disabled"
+                                            [readonly]="field.readonly" [locale]="locale_">
                                             <span slot="title">{{ field.title }}</span>
                                         </ion-datetime>
                                     </ng-template>
@@ -292,7 +292,7 @@ https://www.gnu.org/licenses.
                             </div>
                             <ng-template #nodatevalue>
                                 <ion-button (click)="doInitDate(field.name)" fill="clear"
-                                    class="ion-no-padding datetime-button">
+                                    class="ion-no-padding datetime-button-nov">
                                     <ion-icon name="calendar-outline"></ion-icon>
                                 </ion-button>
                             </ng-template>

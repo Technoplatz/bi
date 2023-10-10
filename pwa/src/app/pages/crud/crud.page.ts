@@ -97,6 +97,7 @@ export class CrudPage implements OnInit {
   public link_: any = {};
   public linked_: any = [];
   public date_format: string = "DD.MM.YYYY HH:mm";
+  public locale_: string = "en-US";
   private counters: any = {};
   private filter: any = [];
   private actions: any = [];
@@ -134,6 +135,9 @@ export class CrudPage implements OnInit {
     private alert: AlertController
   ) {
     this.crudForm = this.formBuilder.group({}, {});
+    this.misc.localization.subscribe((l_: any) => {
+      this.locale_ = l_;
+    });
   }
 
   customCounterFormatter(inputLength: number, maxLength: number) {
@@ -309,7 +313,7 @@ export class CrudPage implements OnInit {
       responseType: "blob" as "json"
     }).then((res: any) => {
       this.misc.doMessage(`${op_} completed successfully`, "success");
-      if(op_ === "dumpd") {
+      if (op_ === "dumpd") {
         const fn_ = this.data_.dmp_id + ".gz";
         let binaryData = [];
         binaryData.push(res);

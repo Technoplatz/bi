@@ -420,7 +420,6 @@ ion-note {
   padding-left: 8px;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid #ccc;
   background-color: var(--ion-color-light);
   color: var(--ion-color-dark);
   min-width: 88px;
@@ -538,8 +537,7 @@ ion-note {
 }
 
 form ion-item ion-label {
-  margin-bottom: 8px !important;
-  font-weight: bold;
+  color: var(--ion-color-primary) !important;
 }
 
 .saas-company {
@@ -897,21 +895,29 @@ ion-select {
 }
 
 .datetime-class {
-  margin-left: 0px !important;
-  margin-bottom: 8px !important;
-  height: 32px !important;
+  margin-left: -2px !important;
+  margin-top: 4px !important;
+  margin-bottom: 6px !important;
+  height: 28px;
 }
 
-.datetime-button,
-ion-datetime-button {
-  margin-left: 0px;
-  margin-top: 4px !important;
+.datetime-button-nov {
+  margin: 2px;
+}
+
+ion-datetime-button::part(native) {
+  background: #FFF;
+  padding: 0px !important;
+  margin: 0px;
+  margin-top: 8px;
+  margin-left: 2px;
+  padding-inline: 0px !important;
 }
 
 .datetime-clear-button {
   position: absolute;
   right: 8px !important;
-  top: 24px !important;
+  top: 12px !important;
 }
 
 ion-datetime {
