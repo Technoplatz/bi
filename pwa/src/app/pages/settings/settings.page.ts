@@ -58,6 +58,7 @@ export class SettingsPage implements OnInit {
   public accountf_api_key: string = "";
   public is_api_key_copied: boolean = false;
   public is_api_key_enabled: boolean = false;
+  public is_api_gen_enabled: boolean = false;
   public accountf_api_key_date: any = null;
   public is_processing_account: boolean = false;
   public is_url_copied: boolean = false;
@@ -97,15 +98,17 @@ export class SettingsPage implements OnInit {
     });
   }
 
-  doCopy(w: string) {
+  copy(w: string) {
     const s = w === "api_key" ? this.accountf_api_key : w === "view" ? this.viewurl_ : "";
     this.is_api_key_copied = w === "api_key" ? true : false;
     this.is_url_copied = w === "view" || w === "collection" ? true : false;
-    this.misc.copyToClipboard(s).then(() => { }).catch((error: any) => {
+    this.misc.copy_to_clipboard(s).then(() => { }).catch((error: any) => {
       console.error("not copied", error);
     }).finally(() => {
-      this.is_api_key_copied = false;
-      this.is_url_copied = false;
+      setTimeout(() => {
+        this.is_api_key_copied = false;
+        this.is_url_copied = false;
+      }, 1000);
     });
   }
 
@@ -125,7 +128,9 @@ export class SettingsPage implements OnInit {
         this.qr_exists = false;
         this.misc.doMessage(error, "error");
       }).finally(() => {
-        this.is_processing_account = false;
+        setTimeout(() => {
+          this.is_processing_account = false;
+        }, 1000);
       });
     });
   }

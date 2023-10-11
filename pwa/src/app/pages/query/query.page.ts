@@ -247,7 +247,7 @@ export class QueryPage implements OnInit {
 
   copy_url() {
     this.is_url_copied = false;
-    this.misc.copyToClipboard(this.query_url_).then(() => {
+    this.misc.copy_to_clipboard(this.query_url_).then(() => {
       this.is_url_copied = true;
     }).catch((error: any) => {
       console.error("*** copy error", error);

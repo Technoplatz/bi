@@ -269,7 +269,7 @@ export class CrudPage implements OnInit {
               buttons: [{
                 text: "COPY",
                 handler: () => {
-                  this.misc.copyToClipboard(`Bearer ${res.token}`).then(() => { }).catch((error: any) => {
+                  this.misc.copy_to_clipboard(`Bearer ${res.token}`).then(() => { }).catch((error: any) => {
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
                     this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });

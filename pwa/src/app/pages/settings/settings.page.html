@@ -66,10 +66,10 @@ https://www.gnu.org/licenses.
               <ion-label>{{ 'Show' | translate }}</ion-label>
             </div>
             <ng-template #notenabled>
-              <ion-spinner *ngIf="is_api_key_enabled; notenabled" name="dots"></ion-spinner>
+              <ion-spinner name="dots"></ion-spinner>
             </ng-template>
           </ion-button>
-          <ion-button (click)="doCopy('api_key')" size="small" slot="end">
+          <ion-button (click)="copy('api_key')" size="small" slot="end">
             <div *ngIf="!is_api_key_copied; else copied">
               <ion-label>{{ 'Copy' | translate }}</ion-label>
             </div>
@@ -80,11 +80,11 @@ https://www.gnu.org/licenses.
           <ion-button (click)="doAccount('apikeygen')" size="small" slot="end">
             <ion-spinner *ngIf="is_processing_account; else noprocessing" name="dots"></ion-spinner>
             <ng-template #noprocessing>
-              <div *ngIf="!is_api_key_enabled; else notenabled">
+              <div *ngIf="!is_processing_account; else notenabled">
                 <ion-label>{{ 'Generate' | translate }}</ion-label>
               </div>
               <ng-template #notenabled>
-                <ion-spinner *ngIf="is_api_key_enabled; notenabled" name="dots"></ion-spinner>
+                <ion-spinner name="dots"></ion-spinner>
               </ng-template>
             </ng-template>
           </ion-button>

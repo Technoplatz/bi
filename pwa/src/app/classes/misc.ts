@@ -268,7 +268,7 @@ export class Miscellaneous {
     return date_.substring(0, 19) + "Z";
   }
 
-  copyToClipboard(s: string) {
+  copy_to_clipboard(s: string) {
     return new Promise((resolve, reject) => {
       this.cb.copy(s)
       resolve(true);

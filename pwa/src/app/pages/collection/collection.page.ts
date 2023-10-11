@@ -649,7 +649,7 @@ export class CollectionPage implements OnInit {
       sweeped: this.sweeped[this.segment],
       key: key
     }).then((res: any) => {
-      this.misc.copyToClipboard(res.copied).then(() => {
+      this.misc.copy_to_clipboard(res.copied).then(() => {
         this.is_key_copied = true;
         this.searched[key].actived = false;
         this.misc.doMessage(`${res.copied?.split("\n")?.length} items copied`, "success")
