@@ -73,14 +73,14 @@ export class Miscellaneous {
     return new Promise((resolve) => {
       const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
       const domain_ = window.location.host.split(":")[0];
-      resolve(window.location.protocol + "//" + (ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : "api." + domain_));
+      resolve(`${window.location.protocol}//${ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : domain_}/api`);
     });
   }
 
-  apiCall(url: string, posted: any) {
+  api_call(qstr_: string, posted: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.getAPIUrl().then((apiHost) => {
+        this.getAPIUrl().then((host_) => {
           const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
           const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
           let hdr_: any = {
@@ -94,7 +94,7 @@ export class Miscellaneous {
           if (posted.responseType) {
             hdr_.responseType = posted.responseType;
           }
-          this.http.post<any>(apiHost + "/" + url, posted, hdr_).subscribe((res: any) => {
+          this.http.post<any>(`${host_}/${qstr_}`, posted, hdr_).subscribe((res: any) => {
             const res_ = res.body;
             if (posted.responseType) {
               resolve(res_);
@@ -102,7 +102,6 @@ export class Miscellaneous {
               if (res_?.result) {
                 resolve(res_);
               } else {
-                console.error("*** api negative", res_);
                 reject(res_ && res_.msg ? res_.msg : res_);
               }
             }
@@ -166,14 +165,14 @@ export class Miscellaneous {
     });
   }
 
-  apiFileCall(url: string, posted: any) {
+  api_call_file(qstr_: string, posted: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
         const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
         posted.append("email", LSUSERMETA.email);
-        this.getAPIUrl().then((apiHost) => {
-          this.http.post<any>(apiHost + "/" + url, posted, {
+        this.getAPIUrl().then((host_) => {
+          this.http.post<any>(`${host_}/${qstr_}`, posted, {
             headers: new HttpHeaders({
               "Authorization": "Bearer " + token_,
               "X-Api-Key": api_key_

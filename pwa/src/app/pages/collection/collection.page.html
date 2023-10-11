@@ -263,7 +263,7 @@ https://www.gnu.org/licenses.
           </tr>
           <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
             <td>{{ ((page_ - 1) * limit_) + i + 1}}</td>
-            <td *ngIf="id=='_query'" (click)="go_query(record)">
+            <td *ngIf="id=='_query'" (click)="go_query(record, $event)">
               <ion-icon *ngIf="record.que_type==='aggregation'" name="play"></ion-icon>
               <ion-icon *ngIf="record.que_type!=='aggregation'" name="play-outline" color="danger"></ion-icon>
             </td>

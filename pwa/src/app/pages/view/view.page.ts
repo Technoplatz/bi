@@ -218,7 +218,7 @@ export class ViewPage implements OnInit {
             }, {
               text: "CONFIRM",
               handler: (announceData: any) => {
-                this.misc.apiCall("crud", {
+                this.misc.api_call("crud", {
                   op: "announce",
                   collection: this.view.collection,
                   id: this.view.id,
@@ -262,7 +262,7 @@ export class ViewPage implements OnInit {
 
   doSaveView() {
     this.is_saving = true;
-    this.misc.apiCall("/crud", {
+    this.misc.api_call("/crud", {
       op: "saveview",
       id: this.id,
       view: this.view_,

@@ -63,7 +63,7 @@ export class Auth {
   sign_in(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "signin";
-      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
+      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           resolve(true);
         } else {
@@ -80,7 +80,7 @@ export class Auth {
   Forgot(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "forgot";
-      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
+      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           resolve(true);
         } else {
@@ -96,7 +96,7 @@ export class Auth {
   TFAC(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "tfac";
-      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
+      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           this.user.next(res.user);
           this.storage.set("LSUSERMETA", res.user).then(() => {
@@ -121,7 +121,7 @@ export class Auth {
   Reset(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "reset";
-      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
+      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           resolve(true);
         } else {
@@ -136,7 +136,7 @@ export class Auth {
 
   Account(op: any) {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("auth", JSON.stringify({
+      this.misc.api_call("auth", JSON.stringify({
         op: op
       })).then((res: any) => {
         if (res && res.result) {
@@ -153,7 +153,7 @@ export class Auth {
 
   OTP(obj: any) {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("otp", JSON.stringify({
+      this.misc.api_call("otp", JSON.stringify({
         request: obj
       })).then((res: any) => {
         if (res && res.result) {
@@ -171,7 +171,7 @@ export class Auth {
   sign_out() {
     return new Promise((resolve, reject) => {
       this.setUserOut();
-      this.misc.apiCall("auth", JSON.stringify({
+      this.misc.api_call("auth", JSON.stringify({
         op: "signout"
       })).then((res: any) => {
         if (res && res.result) {
@@ -202,7 +202,7 @@ export class Auth {
   sign_up(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "signup";
-      this.misc.apiCall("auth", JSON.stringify(creds)).then((res: any) => {
+      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           resolve(true);
         } else {
@@ -218,7 +218,7 @@ export class Auth {
   forgotPassword(creds: any) {
     return new Promise((resolve, reject) => {
       creds.op = "forgot";
-      this.misc.apiCall("otp", JSON.stringify(creds)).then((res: any) => {
+      this.misc.api_call("otp", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
           this.setUserOut();
           resolve(true);

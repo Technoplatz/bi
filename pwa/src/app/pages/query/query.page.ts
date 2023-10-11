@@ -213,7 +213,7 @@ export class QueryPage implements OnInit {
   save_aggregation() {
     if (this.aggregated_) {
       this._running = true;
-      this.misc.apiCall("/crud", {
+      this.misc.api_call("/crud", {
         op: "savequery",
         collection: "_query",
         id: this.id,

@@ -165,8 +165,8 @@ https://www.gnu.org/licenses.
         </table>
         <ng-template #nodata>
           <div *ngIf="type_==='aggregation'; else noagg" class="ion-margin-top">
-            <h6>{{ 'No data or aggregation found' | translate }}!</h6>
-            {{ 'Please edit your aggregation' | translate }}.
+            <h6>{{ 'No data found' | translate }}!</h6>
+            {{ 'Please edit your query' | translate }}.
           </div>
           <ng-template #noagg>
             <div class="ion-margin-top">

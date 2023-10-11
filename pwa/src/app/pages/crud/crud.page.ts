@@ -305,7 +305,7 @@ export class CrudPage implements OnInit {
   do_dump(op_: string) {
     this.modified = true;
     this.isInProgress = true;
-    this.misc.apiCall("crud", {
+    this.misc.api_call("crud", {
       op: op_,
       collection: "_dump",
       dumpid: this.data_.dmp_id,
@@ -420,7 +420,7 @@ export class CrudPage implements OnInit {
 
   doGetSubProperties(coll_: string) {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         op: "read",
         collection: "_collection",
         projection: null,
@@ -486,7 +486,7 @@ export class CrudPage implements OnInit {
           value: this.properties_[match_[l].value] ? this.data_[match_[l].value] !== "" ? this.data_[match_[l].value] : null : match_[l].value
         })
         if (l === match_.length - 1) {
-          this.misc.apiCall("crud", {
+          this.misc.api_call("crud", {
             op: "read",
             collection: collection_,
             projection: this.link_projection_,
@@ -530,7 +530,7 @@ export class CrudPage implements OnInit {
         projection_[this.parent.get[p]] = 1;
         if (p === this.parent.get.length - 1) {
           this.related = [];
-          this.misc.apiCall("crud", {
+          this.misc.api_call("crud", {
             op: "read",
             collection: this.parent.collection,
             projection: projection_,

@@ -185,14 +185,14 @@ export class Crud {
             posted_.append("file", file, file.name);
             posted_.append("collection", sto_collection_id_);
             posted_.append("process", sto_process_);
-            this.misc.apiFileCall("import", posted_).then((res: any) => {
+            this.misc.api_call_file("import", posted_).then((res: any) => {
               res.cid = sto_collection_id_;
               resolve(res);
             }).catch((err: any) => {
               reject(err);
             });
           } else {
-            this.misc.apiCall("crud", {
+            this.misc.api_call("crud", {
               op: op,
               collection: collection,
               doc: doc_,
@@ -218,7 +218,7 @@ export class Crud {
 
   getCollections() {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         op: "collections",
         collection: "_collection"
       }).then((res: any) => {
@@ -233,7 +233,7 @@ export class Crud {
 
   getCollection(id: string) {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         collection: id,
         op: "collection",
       }).then((res: any) => {
@@ -246,7 +246,7 @@ export class Crud {
 
   get_query_data(id_: string, page_: number, limit_: number, run_: boolean) {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         id: id_,
         op: "query",
         collection: "_query",
@@ -263,7 +263,7 @@ export class Crud {
 
   getCharts() {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         op: "charts",
         collection: "_query",
         source: "internal",
@@ -278,7 +278,7 @@ export class Crud {
 
   getViews() {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         op: "views",
         collection: "_query"
       }).then((res: any) => {
@@ -291,7 +291,7 @@ export class Crud {
 
   getQueries() {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         op: "queries",
         collection: "_query"
       }).then((res: any) => {
@@ -304,7 +304,7 @@ export class Crud {
 
   getAnnouncements() {
     return new Promise((resolve, reject) => {
-      this.misc.apiCall("crud", {
+      this.misc.api_call("crud", {
         op: "announcements",
         collection: "_announcement"
       }).then((res: any) => {

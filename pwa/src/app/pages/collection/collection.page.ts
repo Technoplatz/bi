@@ -210,7 +210,7 @@ export class CollectionPage implements OnInit {
           this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           this.count = 0;
           this.page_ = p === 0 ? 1 : p;
-          this.misc.apiCall("crud", {
+          this.misc.api_call("crud", {
             op: "read",
             collection: this.id,
             projection: null,
@@ -285,7 +285,7 @@ export class CollectionPage implements OnInit {
             handler: () => {
               this.is_deleting = true;
               this.is_loaded = this.is_selected = false;
-              this.misc.apiCall("crud", {
+              this.misc.api_call("crud", {
                 op: op_,
                 collection: this.id,
                 match: this.sweeped[this.segment],
@@ -585,7 +585,7 @@ export class CollectionPage implements OnInit {
         }, {
           text: "SAVE VIEW",
           handler: (data: any) => {
-            this.misc.apiCall("/crud", {
+            this.misc.api_call("/crud", {
               op: "saveview",
               collection: this.id,
               filter: this.filter_,
@@ -610,7 +610,7 @@ export class CollectionPage implements OnInit {
   save_schema_f() {
     if (this.structured_) {
       this.is_saving = true;
-      this.misc.apiCall("/crud", {
+      this.misc.api_call("/crud", {
         op: "saveschema",
         collection: this.id,
         schema_key: this.schema_key,
@@ -641,7 +641,7 @@ export class CollectionPage implements OnInit {
   setCopy(key: any) {
     this.is_key_copying = true;
     this.is_key_copied = false;
-    this.misc.apiCall("crud", {
+    this.misc.api_call("crud", {
       op: "copykey",
       collection: this.id,
       properties: this.structure.properties,
@@ -675,7 +675,8 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  go_query(record_: any) {
+  go_query(record_: any, event: any) {
+    event.stopPropagation();
     this.storage.set("LSQUERY", record_).then(() => {
       this.misc.navi.next("/query/" + record_.que_id);
     });

@@ -350,7 +350,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
-      - traefik.http.routers.api.rule=Host(`api.${DOMAIN}`)
+      - traefik.http.routers.api.rule=Host(`${DOMAIN}/api`)
       - traefik.http.services.api.loadbalancer.server.port=80
       - com.centurylinklabs.watchtower.enable=false
     volumes:

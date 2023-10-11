@@ -2301,8 +2301,8 @@ class Crud:
                     raise APIError("no request detected")
             else:
                 orig_ = request.base_url.replace(request.host_url, "")
-                if orig_ not in ["crud", f"get/query/{que_id_}"]:
-                    raise AuthError("not authenticated")
+                if orig_ not in ["api/crud", f"api/get/query/{que_id_}"]:
+                    raise AuthError("request is not authenticated")
 
             schema_ = self.root_schemas_f("_query")
             if not schema_:
@@ -2312,7 +2312,7 @@ class Crud:
             if not query_:
                 raise APIError(f"no query found for {que_id_}")
 
-            if orig_ == "crud":
+            if orig_ == "api/crud":
                 user_ = obj_["userindb"] if "userindb" in obj_ else None
                 if not user_:
                     raise APIError(f"no user defined for {que_id_}")
@@ -4247,7 +4247,7 @@ class Auth:
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": api_key_})
             if not auth_:
-                raise AuthError("not authenticated")
+                raise AuthError("user is not authenticated")
             user_id_ = auth_["aut_id"]
 
             user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
@@ -4441,7 +4441,7 @@ log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
-@ app.route("/import", methods=["POST"], endpoint="import")
+@ app.route("/api/import", methods=["POST"], endpoint="import")
 def storage_f():
     """
     docstring is in progress
@@ -4508,7 +4508,7 @@ def storage_f():
         return {"msg": str(exc_), "status": 500}
 
 
-@ app.route("/crud", methods=["POST"])
+@ app.route("/api/crud", methods=["POST"])
 def crud_f():
     """
     docstring is in progress
@@ -4634,7 +4634,7 @@ def crud_f():
         return response_
 
 
-@ app.route("/otp", methods=["POST"])
+@ app.route("/api/otp", methods=["POST"])
 def otp_f():
     """
     docstring is in progress
@@ -4696,7 +4696,7 @@ def otp_f():
         return response_
 
 
-@ app.route("/auth", methods=["POST"], endpoint="auth")
+@ app.route("/api/auth", methods=["POST"], endpoint="auth")
 def auth_f():
     """
     docstring is in progress
@@ -4762,7 +4762,7 @@ def auth_f():
         return response_
 
 
-@ app.route("/iot", methods=["POST"])
+@ app.route("/api/iot", methods=["POST"])
 def iot_post_f():
     """
     docstring is in progress
@@ -4812,7 +4812,7 @@ def iot_post_f():
         return response_
 
 
-@ app.route("/post", methods=["POST"])
+@ app.route("/api/post", methods=["POST"])
 def post_f():
     """
     docstring is in progress
@@ -4984,7 +4984,7 @@ def post_f():
         return response_
 
 
-@ app.route("/get/query/<string:id_>", methods=["GET"])
+@ app.route("/api/get/query/<string:id_>", methods=["GET"])
 def get_query_f(id_):
     """
     docstring is in progress
@@ -5033,7 +5033,7 @@ def get_query_f(id_):
         return response_
 
 
-@ app.route("/get/view/<string:id_>", methods=["GET"])
+@ app.route("/api/get/view/<string:id_>", methods=["GET"])
 def get_data_f(id_):
     """
     docstring is in progress
