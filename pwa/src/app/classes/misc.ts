@@ -53,8 +53,10 @@ export class Miscellaneous {
   public version = new BehaviorSubject<any>(null);
   public saas = new BehaviorSubject<any>(null);
   public localization = new BehaviorSubject<any>(null);
+  public api = new BehaviorSubject<any>(null);
   public toggle: boolean = true;
   private collections_: any;
+  private uri_: string = "";
 
   constructor(
     private storage: Storage,
@@ -67,56 +69,52 @@ export class Miscellaneous {
     this.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
     });
-  }
-
-  getAPIUrl() {
-    return new Promise((resolve) => {
-      const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
-      const domain_ = window.location.host.split(":")[0];
-      resolve(`${window.location.protocol}//${ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : domain_}/api`);
-    });
+    const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
+    const domain_ = window.location.host.split(":")[0];
+    this.uri_ = `${window.location.protocol}//${ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : domain_}/api`;
+    console.log("*** api", this.uri_);
+    this.api.next({ uri: this.uri_ });
   }
 
   api_call(qstr_: string, posted: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.getAPIUrl().then((host_) => {
-          const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
-          const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
-          let hdr_: any = {
-            headers: new HttpHeaders({
-              "Content-Type": "application/json",
-              "Authorization": "Bearer " + token_,
-              "X-Api-Key": api_key_
-            }),
-            observe: "response"
-          }
+        const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
+        const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
+        let hdr_: any = {
+          headers: new HttpHeaders({
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token_,
+            "X-Api-Key": api_key_
+          }),
+          observe: "response"
+        }
+        if (posted.responseType) {
+          hdr_.responseType = posted.responseType;
+        }
+        const uri_ = `${this.uri_}/${qstr_}`;
+        this.http.post<any>(uri_, posted, hdr_).subscribe((res: any) => {
+          const res_ = res.body;
           if (posted.responseType) {
-            hdr_.responseType = posted.responseType;
-          }
-          this.http.post<any>(`${host_}/${qstr_}`, posted, hdr_).subscribe((res: any) => {
-            const res_ = res.body;
-            if (posted.responseType) {
+            resolve(res_);
+          } else {
+            if (res_?.result) {
               resolve(res_);
             } else {
-              if (res_?.result) {
-                resolve(res_);
-              } else {
-                reject(res_ && res_.msg ? res_.msg : res_);
-              }
+              reject(res_ && res_.msg ? res_.msg : res_);
             }
-          }, (res: any) => {
-            const res_ = res;
-            if (res_.error && res_.status) {
-              if (res_.status === 403) {
-                this.session_.next("ended");
-                this.doMessage(res_.error.msg, "error");
-              }
-              reject(res_.error.msg ? res_.error.msg : res_.error);
-            } else {
-              reject(res_);
+          }
+        }, (res: any) => {
+          const res_ = res;
+          if (res_.error && res_.status) {
+            if (res_.status === 403) {
+              this.session_.next("ended");
+              this.doMessage(res_.error.msg, "error");
             }
-          });
+            reject(res_.error.msg ? res_.error.msg : res_.error);
+          } else {
+            reject(res_);
+          }
         });
       });
     });
@@ -171,33 +169,31 @@ export class Miscellaneous {
         const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
         const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
         posted.append("email", LSUSERMETA.email);
-        this.getAPIUrl().then((host_) => {
-          this.http.post<any>(`${host_}/${qstr_}`, posted, {
-            headers: new HttpHeaders({
-              "Authorization": "Bearer " + token_,
-              "X-Api-Key": api_key_
-            }),
-            observe: "response" as "response"
-          }).subscribe((res: any) => {
-            const res_ = res.body;
-            if (res_ && res_.result) {
-              resolve(res_);
-            } else {
-              console.error("*** file api negative", res_);
-              reject(res_ && res_.msg ? res_.msg : res_);
+        const uri_ = `${this.uri_}/${qstr_}`;
+        this.http.post<any>(uri_, posted, {
+          headers: new HttpHeaders({
+            "Authorization": "Bearer " + token_,
+            "X-Api-Key": api_key_
+          }),
+          observe: "response" as "response"
+        }).subscribe((res: any) => {
+          const res_ = res.body;
+          if (res_ && res_.result) {
+            resolve(res_);
+          } else {
+            reject(res_ && res_.msg ? res_.msg : res_);
+          }
+        }, (res: any) => {
+          const res_ = res;
+          if (res_.error && res_.status) {
+            if (res_.status === 403) {
+              this.session_.next("ended");
+              this.doMessage(res_.error.msg, "error");
             }
-          }, (res: any) => {
-            const res_ = res;
-            if (res_.error && res_.status) {
-              if (res_.status === 403) {
-                this.session_.next("ended");
-                this.doMessage(res_.error.msg, "error");
-              }
-              reject(res_.error.msg ? res_.error.msg : res_.error);
-            } else {
-              reject(res_);
-            }
-          });
+            reject(res_.error.msg ? res_.error.msg : res_.error);
+          } else {
+            reject(res_);
+          }
         });
       });
     });

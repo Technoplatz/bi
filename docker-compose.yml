@@ -40,8 +40,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
-      - traefik.http.routers.bi-traefik.rule=Host(`traefik.${DOMAIN}`)
-      - traefik.http.routers.bi-traefik.service=api@internal
+      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
+      - traefik.http.routers.traefik.service=api@internal
       - com.centurylinklabs.watchtower.enable=true
     command:
       - --log.level=INFO
@@ -350,7 +350,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
-      - traefik.http.routers.api.rule=Host(`${DOMAIN}/api`)
+      - traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)
+      - traefik.http.routers.api.priority=1
       - traefik.http.services.api.loadbalancer.server.port=80
       - com.centurylinklabs.watchtower.enable=false
     volumes:
@@ -434,7 +435,8 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
-      - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`) && !PathPrefix(`/api`)
+      - traefik.http.routers.pwa.priority=0
       - traefik.http.services.pwa.loadbalancer.server.port=80
       - com.centurylinklabs.watchtower.enable=false
     volumes:

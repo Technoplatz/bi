@@ -97,6 +97,7 @@ export class QueryPage implements OnInit {
   private submenu: string = "";
   private query_: any = {};
   private collections_: any = [];
+  private uri_: string = "";
 
   constructor(
     public misc: Miscellaneous,
@@ -120,10 +121,14 @@ export class QueryPage implements OnInit {
     this.crud.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
     });
+    this.misc.api.subscribe((api_: any) => {
+      this.uri_ = api_.uri;
+    });
   }
 
   ngOnDestroy() {
     this.auth.user.unsubscribe;
+    this.misc.api.unsubscribe;
   }
 
   ngOnInit() { }
@@ -134,13 +139,11 @@ export class QueryPage implements OnInit {
       this.storage.get("LSQUERY").then((LSQUERY_: any) => {
         this.query_ = LSQUERY_;
         this.type_ = LSQUERY_?.que_type;
-        this.misc.getAPIUrl().then((apiHost: any) => {
-          this.menu = this.router.url.split("/")[1];
-          this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
-          this.query_url_ = apiHost + "/get/query/" + this.id;
-          this.refresh_data(0, false).then(() => {
-            this.is_initialized = true;
-          });
+        this.menu = this.router.url.split("/")[1];
+        this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
+        this.query_url_ = `${this.uri_}/get/query/${this.id}`;
+        this.refresh_data(0, false).then(() => {
+          this.is_initialized = true;
         });
       });
     });
@@ -151,7 +154,7 @@ export class QueryPage implements OnInit {
       this.is_loaded = false;
       this.page_ = page_ === 0 ? 1 : page_;
       this.schemevis = "hide";
-      this.crud.get_query_data(this.id, this.page_, this.limit_, run_).then((res: any) => {
+      this.crud.get_query(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res && res.query) {
           this.pager_ = this.page_;
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;

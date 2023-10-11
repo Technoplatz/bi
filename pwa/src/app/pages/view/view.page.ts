@@ -76,7 +76,6 @@ export class ViewPage implements OnInit {
   private views: any = [];
   private submenu: string = "";
   private collections: any = [];
-  private apiHost: string = "";
   private sweeped: any = [];
   private view_structure: any;
   private menu: string = "";
@@ -92,6 +91,7 @@ export class ViewPage implements OnInit {
   public view_: any = {};
   public cron_: string = "";
   public menutoggle: boolean = false;
+  private uri_: string = "";
 
   constructor(
     private crud: Crud,
@@ -101,13 +101,14 @@ export class ViewPage implements OnInit {
     public misc: Miscellaneous,
     private storage: Storage
   ) {
-    this.misc.getAPIUrl().then((apiHost: any) => {
-      this.apiHost = apiHost;
+    this.misc.api.subscribe((api_: any) => {
+      this.uri_ = api_.uri;
     });
   }
 
   ngOnDestroy() {
     this.auth.user.unsubscribe;
+    this.misc.api.unsubscribe;
   }
 
   ngOnInit() { }
@@ -132,7 +133,7 @@ export class ViewPage implements OnInit {
           this.view_count = this.data && this.data.length > 0 ? this.data.length : 0;
           this.col_id = this.view.collection;
           this.pivot_ = this.view && this.view.pivot ? this.view.pivot : null;
-          this.viewurl_ = this.apiHost + "/get/view/" + this.view.id;
+          this.viewurl_ = `${this.uri_}/get/view/${this.view.id}`;
         }
       } else {
         console.log("*** no charts found");

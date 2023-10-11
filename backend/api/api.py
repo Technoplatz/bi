@@ -2346,11 +2346,13 @@ class Crud:
             aggregate_ = aggregate_base_.copy()
             aggregate_base_.append({"$count": "count"})
 
-            if orig_ == "crud":
+            if orig_ == "api/crud":
                 page_ = obj_["page"] if "page" in obj_ and obj_["page"] > 0 else 1
                 limit_ = obj_["limit"] if "limit" in obj_ and obj_["limit"] > 0 else API_QUERY_PAGE_SIZE_
                 aggregate_.append({"$skip": limit_ * (page_ - 1)})
                 aggregate_.append({"$limit": limit_})
+            else:
+                aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
             facet_ = [{"$facet": {
                 "stats": aggregate_base_,
@@ -5004,9 +5006,7 @@ def get_query_f(id_):
         if not func_["result"]:
             raise AuthError(func_)
 
-        query_f_ = Crud().query_f({
-            "id": id_
-        })
+        query_f_ = Crud().query_f({ "id": id_ })
         if not query_f_["result"]:
             raise APIError(query_f_)
 
