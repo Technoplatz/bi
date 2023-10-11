@@ -58,7 +58,7 @@ export class Crud {
     private misc: Miscellaneous
   ) { }
 
-  initForm(op: string, structure: any, form: any, data: any, collections: any, views: any, counters: any, actionix_: number) {
+  init_form(op: string, structure: any, form: any, data: any, collections: any, views: any, counters: any, actionix_: number) {
     return new Promise((resolve, reject) => {
       let i = 0;
       let init: any = {};
@@ -216,7 +216,7 @@ export class Crud {
     });
   }
 
-  getCollections() {
+  get_collections() {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         op: "collections",
@@ -231,7 +231,7 @@ export class Crud {
     });
   }
 
-  getCollection(id: string) {
+  get_collection(id: string) {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         collection: id,
@@ -261,7 +261,7 @@ export class Crud {
     });
   }
 
-  getCharts() {
+  get_charts() {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         op: "charts",
@@ -276,7 +276,7 @@ export class Crud {
     });
   }
 
-  getViews() {
+  get_views() {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         op: "views",
@@ -289,7 +289,7 @@ export class Crud {
     });
   }
 
-  getQueries() {
+  get_queries() {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         op: "queries",
@@ -302,7 +302,7 @@ export class Crud {
     });
   }
 
-  getAnnouncements() {
+  get_announcements() {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         op: "announcements",
@@ -315,24 +315,24 @@ export class Crud {
     });
   }
 
-  getAll() {
+  get_all() {
     return new Promise((resolve, reject) => {
-      this.getCharts().then(() => { }).catch((error: any) => {
+      this.get_charts().then(() => { }).catch((error: any) => {
         console.error("*** charts error", error);
       }).finally(() => {
         resolve(true);
       });
-      this.getViews().then(() => { }).catch((error: any) => {
+      this.get_views().then(() => { }).catch((error: any) => {
         console.error("*** views error", error);
       }).finally(() => {
         resolve(true);
       });
-      this.getQueries().then(() => { }).catch((error: any) => {
-        console.error("*** queries error", error);
-      }).finally(() => {
-        resolve(true);
-      });
-      this.getCollections().then(() => { }).catch((error: any) => {
+      // this.get_queries().then(() => { }).catch((error: any) => {
+      //   console.error("*** queries error", error);
+      // }).finally(() => {
+      //   resolve(true);
+      // });
+      this.get_collections().then(() => { }).catch((error: any) => {
         console.error("*** collections error", error);
       }).finally(() => {
         resolve(true);

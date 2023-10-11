@@ -172,7 +172,7 @@ export class CrudPage implements OnInit {
       this.scanned_ = LSSCANNED ? LSSCANNED : [];
       this.doGetAllAktions(this.op).then((res: any) => {
         this.aktions = res;
-        this.crud.initForm(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views, this.counters, this.actionix).then((res: any) => {
+        this.crud.init_form(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views, this.counters, this.actionix).then((res: any) => {
           this.tab = "data";
           this.crudForm = res.form;
           this.fields = res.fields;

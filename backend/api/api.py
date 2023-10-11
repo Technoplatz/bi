@@ -2197,27 +2197,29 @@ class Crud:
         """
         try:
             user_ = obj["userindb"]
-            data_ = []
             structure_ = self.root_schemas_f("_collection")
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            if Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_):
-                data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
-            else:
-                usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-                for usr_tag_ in usr_tags_:
-                    filter_ = {
-                        "per_tag": usr_tag_,
-                        "$or": [
-                            {"per_insert": True},
-                            {"per_read": True},
-                            {"per_update": True},
-                            {"per_delete": True},
-                        ]
-                    }
-                    permissions_ = Mongo().db_["_permission"].find(filter=filter_, sort=[("per_collection_id", 1)])
-                    for permission_ in permissions_:
-                        collection_ = Mongo().db_["_collection"].find_one({"col_id": permission_["per_collection_id"]})
-                        data_.append(collection_)
+            data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
+            if not (Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_)):
+                data__ = []
+                for coll_ in data_:
+                    for usr_tag_ in usr_tags_:
+                        filter_ = {
+                            "per_collection_id": coll_["col_id"],
+                            "per_tag": usr_tag_,
+                            "$or": [
+                                {"per_read": True},
+                                {"per_insert": True},
+                                {"per_update": True},
+                                {"per_delete": True},
+                            ]
+                        }
+                        permission_ = Mongo().db_["_permission"].find_one(filter_)
+                        if permission_:
+                            data__.append(coll_)
+                            break
+                data_ = data__
 
             return {"result": True, "data": json.loads(JSONEncoder().encode(data_)), "structure": structure_}
 

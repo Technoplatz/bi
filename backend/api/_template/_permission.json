@@ -104,7 +104,7 @@
   },
   "required": ["per_tag", "per_collection_id"],
   "unique": [["per_collection_id", "per_tag"]],
-  "index": [["per_tag"], ["per_collection_id"]],
+  "index": [["per_tag"], ["per_collection_id"], ["per_collection_id", "per_tag", "per_read", "per_insert", "per_update", "per_delete"]],
   "sort": {
     "_modified_at": -1
   }

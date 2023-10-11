@@ -604,7 +604,7 @@
       "_tags": ["#Technoplatz"],
       "apis": [
         {
-          "id": "api-edoksis-issue",
+          "id": "waybill-issue",
           "enabled": true,
           "url": "http://172.18.0.8/issue",
           "headers": {
@@ -919,7 +919,7 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators"]
+      "_tags": ["#Managers", "#Technoplatz", "#Logistics", "#Administrators"]
     },
     "fc-status-00": {
       "title": "00-Open",
@@ -965,7 +965,7 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": ["#Managers", "#Logistics", "#Administrators", "#Technoplatz"]
     },
     "fc-status-10": {
       "title": "10-OnTheWay",
@@ -1011,7 +1011,7 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Technoplatz"]
     },
     "fc-status-20": {
       "title": "20-OnCustoms",
@@ -1057,7 +1057,7 @@
       "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Technoplatz"]
     },
     "fc-status-30": {
       "title": "30-OnCustomsProcess",
@@ -1103,7 +1103,7 @@
       "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
+      "_tags": ["#Managers", "#Administrators", "#Technoplatz", "#Logistics", "#Touchpoint"]
     },
     "fc-status-40": {
       "title": "40-ClearanceCompleted",
@@ -1149,7 +1149,7 @@
       "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Logistics", "#Technoplatz"]
     },
     "fc-status-50": {
       "title": "50-OnTheTouchpoint",
@@ -1195,7 +1195,7 @@
       "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "30 9,17 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Touchpoint"]
+      "_tags": ["#Managers", "#Administrators", "#Technoplatz", "#Logistics", "#Touchpoint"]
     },
     "fc-status-60": {
       "title": "60-ReadyToBeDelivered",
@@ -1241,7 +1241,7 @@
       "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
-      "_tags": ["#Managers", "#Administrators", "#Touchpoint"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Technoplatz", "#Touchpoint"]
     }
   },
   "fetchers": [],

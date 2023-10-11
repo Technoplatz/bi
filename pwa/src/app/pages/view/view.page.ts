@@ -263,7 +263,7 @@ export class ViewPage implements OnInit {
 
   doSaveView() {
     this.is_saving = true;
-    this.misc.api_call("/crud", {
+    this.misc.api_call("crud", {
       op: "saveview",
       id: this.id,
       view: this.view_,

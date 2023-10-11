@@ -173,7 +173,7 @@ export class CollectionPage implements OnInit {
             this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
             LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
             this.actions = [];
-            this.crud.getCollection(this.id).then((res: any) => {
+            this.crud.get_collection(this.id).then((res: any) => {
               this.counters_ = res && res.counters ? res.counters : {};
               this.subheader = res && res.data ? res.data.col_title : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.title;
               this.refresh_data(0).then(() => { }).catch((error: any) => {
@@ -247,7 +247,7 @@ export class CollectionPage implements OnInit {
             reject(error);
           }).finally(() => {
             this.is_loaded = true;
-            this.crud.getAll().then(() => { });
+            this.crud.get_all().then(() => { });
           });
         });
       });
@@ -585,14 +585,14 @@ export class CollectionPage implements OnInit {
         }, {
           text: "SAVE VIEW",
           handler: (data: any) => {
-            this.misc.api_call("/crud", {
+            this.misc.api_call("crud", {
               op: "saveview",
               collection: this.id,
               filter: this.filter_,
               title: data.title
             }).then((res: any) => {
               this.misc.doMessage("view saved successfully", "success");
-              this.crud.getAll().then(() => { });
+              this.crud.get_all().then(() => { });
               this.misc.navi.next("view/" + res.id);
             }).catch((error: any) => {
               this.misc.doMessage(error, "error");
@@ -610,7 +610,7 @@ export class CollectionPage implements OnInit {
   save_schema_f() {
     if (this.structured_) {
       this.is_saving = true;
-      this.misc.api_call("/crud", {
+      this.misc.api_call("crud", {
         op: "saveschema",
         collection: this.id,
         schema_key: this.schema_key,

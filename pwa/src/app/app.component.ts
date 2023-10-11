@@ -118,7 +118,7 @@ export class AppComponent implements OnInit {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.auth.user.next(LSUSERMETA);
         if (LSUSERMETA) {
-          this.crud.getAll().then(() => { }).catch((error: any) => {
+          this.crud.get_all().then(() => { }).catch((error: any) => {
             this.misc.doMessage(error, "error");
           });
         }
