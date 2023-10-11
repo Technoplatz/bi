@@ -203,9 +203,7 @@ https://www.gnu.org/licenses.
                                 <ion-icon name="star" color="danger"></ion-icon>
                             </sup>
                             <span *ngIf="!crudForm.controls[field.name].valid">
-                                <div *ngIf="crudForm.controls[field.name].dirty" class="danger">&nbsp;<strong>[{{
-                                        'INVALID' |
-                                        translate }} <ion-spinner name="dots" style="margin-top: 8px;"></ion-spinner>]</strong></div>
+                                <span *ngIf="crudForm.controls[field.name].dirty" class="danger">&nbsp;<strong>[{{ 'INVALID' | translate }}]</strong></span>
                             </span>
                         </ion-label>
                         <div *ngIf="field.bsonType=='string'" class="full-width">

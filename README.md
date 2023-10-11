@@ -235,6 +235,23 @@ Enumerates are certain type of string properties with predefined values which al
 }
 ```
 
+#### Boolean Properties
+
+Sample boolean  field;
+
+```json
+{
+  "usr_enabled": {
+    "bsonType": "bool",
+    "title": "Enabled",
+    "description": "User enabled or not",
+    "default": false,
+    "trueText": "Enabled",
+    "falseText": "Disabled"
+  }
+}
+```
+
 ### Actions
 
 ```json
