@@ -7,8 +7,7 @@
       "minLength": 1,
       "maxLength": 32,
       "pattern": "^[A-Z0-9-]{1,32}$",
-      "caseType": "uppercase",
-      "permanent": true
+      "caseType": "uppercase"
     },
     "man_odi_no": {
       "bsonType": "string",
@@ -120,8 +119,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "eq",
-          "value": "20-OnCustoms"
+          "op": "in",
+          "value": "20-OnCustoms,30-OnCustomsProcess"
         },
         {
           "key": "dnn_odi_no",
@@ -132,11 +131,6 @@
           "key": "dnn_odi_sub_no",
           "op": "eq",
           "value": "man_odi_sub_no"
-        },
-        {
-          "key": "dnn_man_no",
-          "op": "null",
-          "value": null
         }
       ],
       "set": [
@@ -150,14 +144,14 @@
         }
       ],
       "autofill": true,
-      "btntext": "Deliveries",
-      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
+      "btntext": "Attached DNs",
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "Manifest Created",
-        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to manifest.",
+        "subject": "Manifest [DNs Attached]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been attached to manifest.",
         "attachment": true,
-        "fields": "dnn_no,dnn_line_no,dnn_man_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name"
+        "fields": "dnn_no,dnn_line_no,dnn_man_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty"
       }
     }
   ],
@@ -169,8 +163,8 @@
       "match": [
         {
           "key": "man_closed",
-          "op": "eq",
-          "value": false
+          "op": "ne",
+          "value": true
         }
       ],
       "set": [
@@ -187,21 +181,7 @@
       "icon": "flag",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Technoplatz"],
-      "notification": {
-        "notify": false,
-        "subject": "DNs ready to be delivered",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs is ready to be delivered.",
-        "attachment": false,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "60-ReadyToBeDelivered"
-          }
-        ]
-      }
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
     }
   ],
   "triggers": [
@@ -292,7 +272,7 @@
               }
             ],
             "attachment": true,
-            "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint"]
+            "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
           }
         }
       ]

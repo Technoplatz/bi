@@ -68,7 +68,7 @@
       "minLength": 1,
       "maxLength": 20,
       "caseType": "uppercase",
-      "readonly": true
+      "permanent": true
     },
     "dnn_odi_sub_no": {
       "bsonType": "string",
@@ -78,7 +78,7 @@
       "minLength": 1,
       "maxLength": 20,
       "caseType": "uppercase",
-      "readonly": true
+      "permanent": true
     },
     "dnn_man_no": {
       "bsonType": "string",

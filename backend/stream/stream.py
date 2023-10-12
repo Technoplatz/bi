@@ -518,7 +518,6 @@ class Trigger():
                 match_ = {**match_, **conditions_filter_}
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
-                full_document_["_id"] = str(full_document_["_id"])
                 if not full_document_:
                     PRINT_(f"full document not found ({source_collection_}): {match_}")
                     continue
@@ -538,7 +537,9 @@ class Trigger():
                         else None
 
                     if key__ and value__:
-                        match_[key__] = match_for_aggregate_[value__] = full_document_[value__]
+                        match_[key__] = match_for_aggregate_[value__] = str(full_document_["_id"]) \
+                            if item_["value"] == "_id" and source_collection_id_ != target_collection_id_ \
+                            else full_document_[value__]
                     else:
                         continue
 
@@ -572,7 +573,9 @@ class Trigger():
                             else None
 
                         if key__ and value__:
-                            match1_[key__] = full_document_[value__]
+                            match1_[key__] = str(full_document_["_id"]) \
+                                if item_["value"] == "_id" and source_collection_id_ != target_collection_id_ \
+                                else full_document_[value__]
                         else:
                             continue
 
