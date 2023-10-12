@@ -17,7 +17,8 @@
       "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
       "minLength": 1,
       "maxLength": 20,
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "permanent": true
     },
     "odi_date": {
       "bsonType": "date",
