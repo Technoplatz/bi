@@ -327,20 +327,19 @@ class Misc:
         connstr_ = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}"
         commands_ = {
             "mongoexport": [
-                "--uri", connstr_,
-                "--db", f"{MONGO_DB_}",
-                "--authenticationDatabase", f"{MONGO_AUTH_DB_}",
+                f"--uri={connstr_}",
+                f"--db={MONGO_DB_}",
+                f"--authenticationDatabase={MONGO_AUTH_DB_}",
                 "--ssl",
                 f"--collection={collection_}",
-                "--sslPEMKeyFile", f"{MONGO_TLS_CERT_KEYFILE_}",
-                "--sslCAFile", f"{MONGO_TLS_CA_KEYFILE_}",
-                "--sslPEMKeyPassword", f"{MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
+                f"--sslPEMKeyFile={MONGO_TLS_CERT_KEYFILE_}",
+                f"--sslCAFile={MONGO_TLS_CA_KEYFILE_}",
+                f"--sslPEMKeyPassword={MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
                 "--tlsInsecure",
                 f"--type={type_}",
-                f"--fields='{fields_}'",
+                f"--fields={fields_}",
                 f"--query={query_}",
-                f"--out={file_}",
-                "--quiet"
+                f"--out={file_}"
             ],
             "mongorestore": [
                 "--uri", connstr_,
@@ -1559,18 +1558,18 @@ class Crud:
                 subject_ = notification_["subject"] if "subject" in notification_ else "Link Completed"
                 body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
                 if attachment_:
-                    fields_ = notification_["fields"].replace(" ", "") if "fields" in notification_ else None
+                    fields_ = str(notification_["fields"].replace(" ", "")) if "fields" in notification_ else None
                     if not fields_:
                         raise AppException("no fields field found in link")
                     type_ = "csv"
                     file_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
-                    query_ = "'" + json.dumps(filter0_, default=json_util.default, sort_keys=False) + "'"
-                    subprocess.call(["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_}))
+                    query_ = json.dumps(filter0_, default=json_util.default, sort_keys=False)
+                    cmd_ = ["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
+                    subprocess.call(cmd_)
                     files_ = [{"name": file_, "type": type_}] if attachment_ else []
-
-                email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
-                if not email_sent_["result"]:
-                    raise APIError(email_sent_["msg"])
+                    email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                    if not email_sent_["result"]:
+                        raise APIError(email_sent_["msg"])
 
             return {"result": True, "data": setc_, "count": count_}
 
@@ -2452,9 +2451,10 @@ class Crud:
                     group__["_id"][item_] = f"${item_}"
                     project__[item_] = f"$_id.{item_}"
                     sort__[item_] = 1
+                sort__ = input_["sort"] if "sort" in input_ else {"_modified_at": -1}
                 group__["count"] = {"$sum": 1}
                 project__["count"] = "$count"
-                cursor_ = Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": group__}, {"$project": project__}, {"$sort": sort__}, {"$limit": limit_}])
+                cursor_ = Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$sort": sort__}, {"$limit": limit_}, {"$group": group__}, {"$project": project__}])
             else:
                 sort__ = {"_modified_at": -1}
                 cursor_ = Mongo().db_[collection_].find(filter=get_filtered_, projection=projection_, sort=sort_, collation=collation_).skip(skip_).limit(limit_)
@@ -3068,11 +3068,10 @@ class Crud:
             notification_ = action_["notification"] if "notification" in action_ else None
             notify_ = notification_ and notification_["notify"] is True
             filter_ = notification_["filter"] if notification_ and "filter" in notification_ and len(notification_["filter"]) > 0 else None
-            attachment_ = notification_ and "attachment" in notification_ and notification_["attachment"] is True
             get_notification_filtered_ = None
 
             if notify_ and filter_:
-                get_notification_filtered_ = self.get_filtered_f({"match": filter_, "properties": properties_})
+                get_notification_filtered_ = self.get_filtered_f({"match": filter_, "properties": properties_, "data": doc_})
 
             match_ = action_["match"] if "match" in action_ and len(action_["match"]) > 0 else {}
             get_filtered_ = self.get_filtered_f({"match": match_, "properties": properties_})
@@ -3154,15 +3153,24 @@ class Crud:
                     files_ += res_files_
 
             if notify_:
+                notify_collection_ = f"{notification_['collection']}_data" if "collection" in notification_ else collection_
+                if notify_collection_ != collection_:
+                    get_properties_ = self.get_properties_f(notification_["collection"])
+                    if not get_properties_["result"]:
+                        raise AppException(get_properties_["msg"])
+                    properties_ = get_properties_["properties"]
+                    get_notification_filtered_ = self.get_filtered_f({"match": filter_, "properties": properties_, "data": doc_})
+                attachment_ = "attachment" in notification_ and notification_["attachment"] is True
                 subject_ = notification_["subject"] if "subject" in notification_ else "Action Completed"
                 body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Action completed successfully.</p><p><h1></h1></p>"
-                fields_ = ",".join(notification_["fields"]) if "fields" in notification_ and str(type(notification_["fields"])) == "<class 'list'>" and len(
+                fields_ = str(",".join(notification_["fields"])) if "fields" in notification_ and str(type(notification_["fields"])) == "<class 'list'>" and len(
                     notification_["fields"]) > 0 else notification_["fields"].replace(" ", "") if notification_ and "fields" in notification_ else None
+
                 if get_notification_filtered_ and fields_ and attachment_:
                     type_ = "csv"
                     file_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
-                    query_ = "'" + json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False) + "'"
-                    subprocess.call(["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_}))
+                    query_ = json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False)
+                    subprocess.call(["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": notify_collection_}))
                     files_ += [{"name": file_, "type": type_}]
 
                 email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
@@ -4333,9 +4341,7 @@ class Auth:
             key_ = hash_f_["key"]
 
             aut_otp_secret_ = pyotp.random_base32()
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
-                name=email_, issuer_name="Technoplatz-BI"
-            )
+            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
             api_key_ = secrets.token_hex(16)
 
             Mongo().db_["_auth"].insert_one({
@@ -5008,7 +5014,7 @@ def get_query_f(id_):
         if not func_["result"]:
             raise AuthError(func_)
 
-        query_f_ = Crud().query_f({ "id": id_ })
+        query_f_ = Crud().query_f({"id": id_})
         if not query_f_["result"]:
             raise APIError(query_f_)
 

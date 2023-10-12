@@ -823,7 +823,7 @@ class Trigger():
                     tags_ = notification_["_tags"] if "_tags" in notification_ and len(notification_["_tags"]) > 0 else None
                     if not (notify_ and subject_ and body_ and ncollection_ and fields_ and nfilter_ and nkey_ and tags_):
                         continue
-                    keyf_ = full_document_[nkey_]
+                    keyf_ = full_document_[nkey_] if nkey_ else None
                     get_users_from_tags_f_ = self.get_users_from_tags_f(tags_)
                     if not get_users_from_tags_f_["result"]:
                         PRINT_("!!! error get_users_from_tags_f_:", get_users_from_tags_f_["msg"])
@@ -835,7 +835,7 @@ class Trigger():
 
                     personalizations_ = {"to": get_users_from_tags_f_["to"]}
                     files_ = []
-                    subject_ += f" - {keyf_}"
+                    subject_ += f" - {keyf_}" if keyf_ else ""
                     type_ = "csv"
 
                     ndocument_ = self.db_["_collection"].find_one({"col_id": ncollection_})
