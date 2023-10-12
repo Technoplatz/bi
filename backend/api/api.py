@@ -1476,6 +1476,9 @@ class Crud:
         docstring is in progress
         """
         try:
+            PRINT_("*** link obj_", obj_)
+            source_ = obj_["source"] if "source" in obj_ else None
+            _id = obj_["_id"] if "_id" in obj_ else None
             link_ = obj_["link"] if "link" in obj_ else None
             data_ = obj_["data"] if "data" in obj_ else None
             linked_ = obj_["linked"] if "linked" in obj_ and len(obj_["linked"]) > 0 else None
@@ -1486,6 +1489,12 @@ class Crud:
             match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
             usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
             tags_ = link_["_tags"] if "_tags" in link_ and len(link_["_tags"]) > 0 else None
+
+            if not source_:
+                raise APIError("source collection is missing")
+
+            if not _id:
+                raise APIError("source document id is missing")
 
             if link_ is None:
                 raise APIError("link info is missing")
@@ -1503,7 +1512,7 @@ class Crud:
                 raise AppException("no link tags found")
 
             if col_id_ is None:
-                raise APIError("link collection is missing")
+                raise APIError("linked collection is missing")
 
             if get_ is None:
                 raise APIError("link get is missing")
@@ -1523,7 +1532,9 @@ class Crud:
             target_properties_ = get_properties_["properties"]
 
             collection_ = f"{col_id_}_data"
+            source_id_ = f"_{source_}_id"
             setc_ = {}
+            setc_[source_id_] = _id
 
             for set__ in set_:
                 if "key" in set__ and "value" in set__:
@@ -1765,7 +1776,6 @@ class Crud:
             unset_.append("_structure")
             unset_.append("_tags")
             unset_.append("_id")
-            # unset_.append("_ID")
 
             for properties_master__ in properties_master_:
                 if (properties_master__[:1] == "_" and properties_master__ not in Misc().get_except_underdashes()):
@@ -2833,6 +2843,8 @@ class Crud:
 
             if is_crud_ and link_ and linked_:
                 link_f_ = self.link_f({
+                    "source": collection_id_,
+                    "_id": str(_id),
                     "link": link_,
                     "linked": linked_,
                     "data": doc_,
@@ -3261,7 +3273,8 @@ class Crud:
 
             doc_ = Misc().set_strip_doc_f(doc_)
 
-            Mongo().db_[collection_].insert_one(doc_)
+            insert_one_ = Mongo().db_[collection_].insert_one(doc_)
+            _id = insert_one_.inserted_id
 
             if collection_id_ == "_collection":
                 col_id_ = doc_["col_id"] if "col_id" in doc_ else None
@@ -3291,6 +3304,8 @@ class Crud:
 
                 if link_ and linked_:
                     link_f_ = self.link_f({
+                        "source": collection_id_,
+                        "_id": str(_id),
                         "link": link_,
                         "linked": linked_,
                         "data": doc_,

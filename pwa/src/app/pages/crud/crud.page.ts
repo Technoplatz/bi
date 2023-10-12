@@ -515,7 +515,7 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doParent(parent_: any) {
+  get_parent(parent_: any) {
     this.parent = parent_;
     let projection_: any = {};
     this.relact = true;
@@ -523,6 +523,7 @@ export class CrudPage implements OnInit {
     let filter_ = this.parent.filter ? this.parent.filter : [];
     this.parent.filter.forEach((f: any) => f.value?.toString().substr(0, 1) === "$" ? f.value = this.data_[f.value?.toString().substr(1)] : Object.keys(this.properties_).includes(f.value) ? f.value = this.data_[f.value] : null);
     let matchkeys_: any = [];
+    const group_ = this.parent.group ? this.parent.group : false;
     this.parent.match.forEach((m: any) => matchkeys_.push(m.key));
     if (this.parent.get && this.parent.get.length > 0) {
       this.reloading = true;
@@ -536,7 +537,7 @@ export class CrudPage implements OnInit {
             projection: projection_,
             match: filter_,
             sort: { "_modified_at": -1 },
-            group: true,
+            group: group_,
             page: 1,
             limit: 1000
           }).then((res: any) => {
@@ -571,7 +572,7 @@ export class CrudPage implements OnInit {
         op: "eq",
         value: e
       }] : [];
-      this.doParent(this.parent);
+      this.get_parent(this.parent);
     }
   }
 

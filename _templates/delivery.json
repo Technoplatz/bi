@@ -68,7 +68,7 @@
       "minLength": 1,
       "maxLength": 20,
       "caseType": "uppercase",
-      "permanent": true
+      "readonly": true
     },
     "dnn_odi_sub_no": {
       "bsonType": "string",
@@ -78,7 +78,7 @@
       "minLength": 1,
       "maxLength": 20,
       "caseType": "uppercase",
-      "permanent": true
+      "readonly": true
     },
     "dnn_man_no": {
       "bsonType": "string",
@@ -386,7 +386,8 @@
           "value": true
         }
       ],
-      "get": ["odi_no", "odi_sub_no", "odi_customs"]
+      "get": ["odi_no", "odi_sub_no", "odi_customs"],
+      "group": false
     },
     {
       "collection": "manifest",
@@ -408,7 +409,8 @@
           "value": "dnn_odi_sub_no"
         }
       ],
-      "get": ["man_no", "man_opening_date"]
+      "get": ["man_no", "man_opening_date"],
+      "group": false
     },
     {
       "collection": "account",
@@ -430,7 +432,8 @@
           "value": true
         }
       ],
-      "get": ["acc_no", "acc_name"]
+      "get": ["acc_no", "acc_name"],
+      "group": false
     }
   ],
   "actions": [
@@ -458,7 +461,7 @@
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
-        "subject": "New DNs uploaded",
+        "subject": "Delivery [00-Open]",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Standby to 00-Open at once.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
@@ -495,7 +498,7 @@
       "_tags": ["#Managers", "#Administrators"],
       "notification": {
         "notify": true,
-        "subject": "Open DNs returned to Standby",
+        "subject": "Delivery [00-Standby]",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Open to 00-Standby at once.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
@@ -537,7 +540,7 @@
       "_tags": ["#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "DNs ready to be delivered",
+        "subject": "Delivery [60-ReadyToBeDelivered]",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs is ready to be delivered.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
@@ -618,7 +621,7 @@
       ],
       "notification": {
         "notify": false,
-        "subject": "DNs shipped",
+        "subject": "Delivery [70-Delivered]",
         "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was shipped.",
         "attachment": false,
         "fields": [

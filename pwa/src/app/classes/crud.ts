@@ -327,11 +327,6 @@ export class Crud {
       }).finally(() => {
         resolve(true);
       });
-      // this.get_queries().then(() => { }).catch((error: any) => {
-      //   console.error("*** queries error", error);
-      // }).finally(() => {
-      //   resolve(true);
-      // });
       this.get_collections().then(() => { }).catch((error: any) => {
         console.error("*** collections error", error);
       }).finally(() => {
