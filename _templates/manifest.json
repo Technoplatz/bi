@@ -105,9 +105,14 @@
       "get": ["odi_no", "odi_sub_no"],
       "filter": [
         {
-          "key": "odi_status",
-          "op": "in",
-          "value": "10-OnTheWay,20-OnCustoms"
+          "key": "odi_arrived_date",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "odi_closed",
+          "op": "ne",
+          "value": true
         }
       ]
     }

@@ -67,7 +67,7 @@ https://www.gnu.org/licenses.
                 <ion-button *ngIf="op=='update' && collection!='_query'" color="danger" (click)="doRemove()"
                     class="end-item">
                     <ion-icon name="trash-bin-outline"></ion-icon>
-                    {{ 'Delete' | translate }}&nbsp;
+                    {{ 'DELETE' | translate }}&nbsp;
                 </ion-button>
             </ion-col>
         </ion-row>
@@ -148,7 +148,7 @@ https://www.gnu.org/licenses.
                     <ion-button color="dark" size="default" (click)="doGetLinked()">
                         <ion-icon name="search-outline"></ion-icon>
                         <span *ngIf="reloading">{{ 'Running' | translate }}...</span>
-                        <span *ngIf="!reloading">{{ 'Find' | translate }} {{ link_?.get }}</span>
+                        <span *ngIf="!reloading">{{ link_?.get }}</span>
                     </ion-button>
                 </div>
                 <ion-label position="stacked">
@@ -156,7 +156,7 @@ https://www.gnu.org/licenses.
                 </ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
                     spellcheck="false" class="link-data" counter="true" maxlength="512" clearOnEdit="true"
-                    autofocus="true" placeholder="{{ 'Paste or enter your data here' | translate }}" maxlength="512"
+                    autofocus="true" placeholder="{{ 'Paste or enter your data as a list' | translate }}" maxlength="512"
                     counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
                 </ion-textarea>
             </ion-item>
@@ -164,8 +164,7 @@ https://www.gnu.org/licenses.
         </div>
         <ng-template #nolink>
             <div *ngIf="isnoninteractive_" class="ion-margin-top">
-                <h5>{{ 'This action is non-interactive' | translate }}.</h5>
-                {{ 'Please click RUN button directly' | translate }}.
+                <h5>{{ 'Please click RUN button' | translate }}.</h5>
             </div>
             <ul *ngIf="!crudForm.valid" class="ion-no-padding ion-margin-top danger">
                 <div *ngFor="let field of fieldsupd; let f=index">
@@ -189,7 +188,7 @@ https://www.gnu.org/licenses.
                             <ion-button *ngFor="let item of links" (click)="doGoLink(item)" color="dark" size="default"
                                 slot="end">
                                 <ion-icon name="link-outline"></ion-icon> {{ item.btntext ? item.btntext :
-                                item.collection }}
+                                item.collection | translate }}
                             </ion-button>
                         </div>
                     </ion-item>
@@ -197,7 +196,7 @@ https://www.gnu.org/licenses.
                         class="ion-no-margin full-width">
                         <ion-button slot="end" *ngIf="field.parents && field.bsonType!='array'" size="small"
                             (click)="get_parent(field.parents)" class="parent-link-button">{{
-                            field.parents.collection }}
+                            field.parents.collection | translate }}
                         </ion-button>
                         <ion-label position="stacked">
                             {{ field.title | translate }}

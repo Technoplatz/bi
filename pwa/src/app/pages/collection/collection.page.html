@@ -262,7 +262,7 @@ https://www.gnu.org/licenses.
             </th>
           </tr>
           <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
-            <td>{{ ((page_ - 1) * limit_) + i + 1}}</td>
+            <td class="primary aligned-right">{{ ((page_ - 1) * limit_) + i + 1}}</td>
             <td *ngIf="id=='_query'" (click)="go_query(record, $event)">
               <ion-icon *ngIf="record.que_type==='aggregation'" name="play"></ion-icon>
               <ion-icon *ngIf="record.que_type!=='aggregation'" name="play-outline" color="danger"></ion-icon>
@@ -293,9 +293,10 @@ https://www.gnu.org/licenses.
               </ng-template>
               <ng-template #else2>
                 <span *ngIf="item_.value.bsonType=='bool'; else else3">
-                  <span *ngIf="record[item_.key] && item_.value.trueText">{{ item_.value.trueText }}</span>
+                  <span *ngIf="record[item_.key] && item_.value.trueText">{{ item_.value.trueText | translate }}</span>
                   <span *ngIf="record[item_.key] && !item_.value.trueText">{{ 'Yes' | translate }}</span>
-                  <span *ngIf="!record[item_.key] && item_.value.falseText">{{ item_.value.falseText }}</span>
+                  <span *ngIf="!record[item_.key] && item_.value.falseText">{{ item_.value.falseText | translate
+                    }}</span>
                   <span *ngIf="!record[item_.key] && !item_.value.falseText">{{ 'No' | translate }}</span>
                 </span>
               </ng-template>

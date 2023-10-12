@@ -1137,8 +1137,8 @@ sup {
 }
 
 .danger {
-  color: var(--ion-color-danger) !important;
-  --color: var(--ion-color-danger) !important;
+  color: #c00 !important;
+  --color: #c00 !important;
 }
 
 .light {
@@ -1161,6 +1161,14 @@ sup {
 
 .dark {
   color: var(--ion-color-dark) !important;
+}
+
+.primary {
+  color: var(--ion-color-primary) !important;
+}
+
+.aligned-right {
+  text-align: right !important;
 }
 
 .separated-menu {
@@ -1222,7 +1230,7 @@ sup {
 
 .toast-class-error {
   --white-space: 0px;
-  --background: var(--ion-color-danger);
+  --background: var(--ion-color-danger) !important;
   --border-radius: 0px;
   --border-width: 0px;
   --box-shadow: none;
