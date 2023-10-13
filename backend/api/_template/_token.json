@@ -98,7 +98,7 @@
       "manualAdd": true
     }
   },
-  "required": ["tkn_name"],
+  "required": ["tkn_name", "tkn_collection_id", "tkn_lifetime"],
   "index": [["tkn_collection_id"]],
   "unique": [["tkn_name"]],
   "sort": {

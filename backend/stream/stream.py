@@ -121,7 +121,7 @@ class Trigger():
             notification_str_ = f"TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
             resp_ = requests.post(notification_slack_hook_url_, json.dumps({"text": str(notification_str_)}), timeout=10)
             if resp_.status_code != 200:
-                PRINT_("*** notification error", resp_)
+                PRINT_("!!! notification error", resp_)
 
         return True
 
@@ -228,104 +228,126 @@ class Trigger():
             data_ = obj["data"] if "data" in obj else None
             fand_ = []
             filtered_ = {}
-            if properties_:
-                for mat_ in match_:
-                    if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
-                        fres_ = None
-                        typ = properties_[mat_["key"]]["bsonType"] if mat_["key"] in properties_ else "string"
-
-                        value_ = mat_["value"]
-                        if data_ and value_ in data_ and data_[value_] is not None:
-                            value_ = data_[value_]
-
-                        if mat_["op"] in ["eq", "contains"]:
-                            if typ in ["number", "int", "decimal"]:
-                                fres_ = float(value_)
-                            elif typ == "bool":
-                                fres_ = bool(value_)
-                            elif typ == "date":
-                                fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
-                            else:
-                                fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
-                        elif mat_["op"] in ["ne", "nc"]:
-                            if typ in ["number", "decimal"]:
-                                fres_ = {"$not": {"$eq": float(value_)}}
-                            elif typ == "bool":
-                                fres_ = {"$not": {"$eq": bool(value_)}}
-                            elif typ == "date":
-                                fres_ = {"$not": {"$eq": datetime.strptime(value_[:10], "%Y-%m-%d")}}
-                            else:
-                                fres_ = {"$not": {"$regex": value_, "$options": "i"}} if value_ else {"$not": {"$regex": "", "$options": "i"}}
-                        elif mat_["op"] in ["in", "nin"]:
-                            separated_ = re.split(",", value_)
-                            list_ = [s.strip() for s in separated_] if mat_["key"] != "_id" else [ObjectId(s.strip()) for s in separated_]
-                            if mat_["op"] == "in":
-                                fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
-                            else:
-                                fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
-                        elif mat_["op"] == "gt":
-                            if typ in ["number", "decimal"]:
-                                fres_ = {"$gt": float(value_)}
-                            elif typ == "date":
-                                fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$gt": value_}
-                        elif mat_["op"] == "gte":
-                            if typ in ["number", "decimal"]:
-                                fres_ = {"$gte": float(value_)}
-                            elif typ == "date":
-                                fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$gte": value_}
-                        elif mat_["op"] == "lt":
-                            if typ in ["number", "decimal"]:
-                                fres_ = {"$lt": float(value_)}
-                            elif typ == "date":
-                                fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$lt": value_}
-                        elif mat_["op"] == "lte":
-                            if typ in ["number", "decimal"]:
-                                fres_ = {"$lte": float(value_)}
-                            elif typ == "date":
-                                fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$lte": value_}
-                        elif mat_["op"] == "true":
-                            fres_ = {"$eq": True}
-                        elif mat_["op"] == "false":
-                            fres_ = {"$eq": False}
-                        elif mat_["op"] == "nnull":
-                            array_ = []
-                            array1_ = {}
-                            array2_ = {}
-                            array1_[mat_["key"]] = {"$ne": None}
-                            array2_[mat_["key"]] = {"$exists": True}
-                            array_.append(array1_)
-                            array_.append(array2_)
-                        elif mat_["op"] == "null":
-                            array_ = []
-                            array1_ = {}
-                            array2_ = {}
-                            array1_[mat_["key"]] = {"$eq": None}
-                            array2_[mat_["key"]] = {"$exists": False}
-                            array_.append(array1_)
-                            array_.append(array2_)
-
-                        fpart_ = {}
-                        if mat_["op"] in ["null", "nnull"]:
-                            fpart_["$or"] = array_
+            for mat_ in match_:
+                key_ = mat_["key"]
+                op_ = mat_["op"]
+                value_ = mat_["value"]
+                if key_ and op_ and key_ in properties_:
+                    fres_ = None
+                    typ = properties_[key_]["bsonType"] if key_ in properties_ else "string"
+                    if data_ and value_ in data_ and data_[value_] is not None:
+                        value_ = data_[value_]
+                    if op_ == "null" or (op_ == "eq" and value_ is None):
+                        op_ = "null"
+                        array_, array1_, array2_ = [], {}, {}
+                        array1_[key_] = {"$eq": None}
+                        array2_[key_] = {"$exists": False}
+                        array_.append(array1_)
+                        array_.append(array2_)
+                    elif op_ == "nnull" or (op_ == "ne" and value_ is None):
+                        op_ = "nnull"
+                        array_, array1_, array2_ = [], {}, {}
+                        array1_[key_] = {"$ne": None}
+                        array2_[key_] = {"$exists": True}
+                        array_.append(array1_)
+                        array_.append(array2_)
+                    elif op_ == "contains":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = float(value_)
+                        elif typ == "int":
+                            fres_ = int(value_)
+                        elif typ == "bool":
+                            fres_ = bool(value_)
+                        elif typ == "date":
+                            fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
                         else:
-                            fpart_[mat_["key"]] = fres_
+                            fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
+                    elif op_ == "eq":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = float(value_)
+                        elif typ == "int":
+                            fres_ = int(value_)
+                        elif typ == "bool":
+                            fres_ = bool(value_)
+                        elif typ == "date":
+                            fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
+                        else:
+                            fres_ = {"$eq": value_}
+                    elif op_ in ["ne", "nc"]:
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$not": {"$eq": float(value_)}}
+                        elif typ == "int":
+                            fres_ = {"$not": {"$eq": int(value_)}}
+                        elif typ == "bool":
+                            fres_ = {"$not": {"$eq": bool(value_)}}
+                        elif typ == "date":
+                            fres_ = {"$not": {"$eq": datetime.strptime(value_[:10], "%Y-%m-%d")}}
+                        else:
+                            fres_ = {"$not": {"$regex": value_, "$options": "i"}} if value_ else {"$not": {"$regex": "", "$options": "i"}}
+                    elif op_ in ["in", "nin"]:
+                        separated_ = re.split(",", value_)
+                        list_ = [s.strip() for s in separated_] if key_ != "_id" else [ObjectId(s.strip()) for s in separated_]
+                        if op_ == "in":
+                            fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
+                        else:
+                            fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
+                    elif op_ == "gt":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$gt": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$gt": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$gt": value_}
+                    elif op_ == "gte":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$gte": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$gte": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$gte": value_}
+                    elif op_ == "lt":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$lt": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$lt": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$lt": value_}
+                    elif op_ == "lte":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$lte": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$lte": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$lte": value_}
+                    elif op_ == "true":
+                        fres_ = {"$nin": [False, None]}
+                    elif op_ == "false":
+                        fres_ = {"$ne": True}
 
-                        fand_.append(fpart_)
+                    fpart_ = {}
+                    if op_ == "null":
+                        fpart_["$or"] = array_
+                    if op_ == "nnull":
+                        fpart_["$and"] = array_
+                    else:
+                        fpart_[key_] = fres_
+
+                    fand_.append(fpart_)
 
                 filtered_ = {"$and": fand_} if fand_ and len(fand_) > 0 else {}
 
             return filtered_
 
         except Exception as exc_:
-            self.exception_printed_f(exc_)
+            PRINT_("!!! get filtered exception", exc_)
             return None
 
     def aggregater_sum_f(self, coll_, filter_, field_):
@@ -726,10 +748,18 @@ class Trigger():
                         }))
                         file_ = f"{API_TEMPFILE_PATH_}/stream-{self.get_timestamp_f()}.{type_}"
                         ncollection_ += "_data"
-                        command_ = f"mongoexport --quiet --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}'"
-
+                        command_ = f"mongoexport --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}' --quiet"
                         call(command_, shell=True)
-                        files_ = [{"filename": file_, "filetype": type_}]
+                        if not os.path.exists(file_):
+                            raise PassException("no attachment generated")
+                        with open(file_, "r", encoding="utf-8") as output_:
+                            if not output_:
+                                raise PassException("no output generated")
+                            lines_ = len(output_.readlines())
+                            if lines_ and lines_ > 1:
+                                files_ = [{"filename": file_, "filetype": type_}]
+                            else:
+                                raise PassException("no data records exported")
 
                     msg_ = {
                         "files": files_,
@@ -743,21 +773,21 @@ class Trigger():
 
             return {"result": True}
 
-        except PassException as exc_:
+        except PassException as exc__:
             self.exception_passed_f()
-            return {"result": True, "msg": str(exc_)}
+            return {"result": True, "msg": str(exc__)}
 
-        except pymongo.errors.PyMongoError as exc_:
-            self.exception_reported_f(exc_)
-            return {"result": False, "msg": str(exc_)}
+        except pymongo.errors.PyMongoError as exc__:
+            self.exception_reported_f(exc__)
+            return {"result": False, "msg": str(exc__)}
 
-        except AppException as exc_:
-            self.exception_reported_f(exc_)
-            return {"result": False, "msg": str(exc_)}
+        except AppException as exc__:
+            self.exception_reported_f(exc__)
+            return {"result": False, "msg": str(exc__)}
 
-        except Exception as exc_:
-            self.exception_printed_f(exc_)
-            return {"result": False, "msg": str(exc_)}
+        except Exception as exc__:
+            self.exception_printed_f(exc__)
+            return {"result": False, "msg": str(exc__)}
 
     async def starter_changes_f(self, params_):
         """

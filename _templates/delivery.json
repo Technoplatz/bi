@@ -458,11 +458,11 @@
       "icon": "megaphone",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators"],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"],
       "notification": {
         "notify": true,
         "subject": "Delivery [00-Open]",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Standby to 00-Open at once.",
+        "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs were changed from 00-Standby to 00-Open.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": [
@@ -495,11 +495,11 @@
       "icon": "time",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators"],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "Delivery [00-Standby]",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was changed from 00-Open to 00-Standby at once.",
+        "subject": "Delivery [Returned to 00-Standby]",
+        "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs were changed from 00-Open to 00-Standby.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": [
@@ -537,11 +537,11 @@
       "icon": "flag",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Technoplatz"],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"],
       "notification": {
         "notify": true,
         "subject": "Delivery [60-ReadyToBeDelivered]",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs is ready to be delivered.",
+        "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs are now 60-ReadyToBeDelivered.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": [
@@ -604,7 +604,7 @@
       "icon": "bus",
       "uniqueness": true,
       "unique": ["dnn_acc_no"],
-      "_tags": ["#Technoplatz"],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"],
       "apis": [
         {
           "id": "waybill-issue",
@@ -622,7 +622,7 @@
       "notification": {
         "notify": false,
         "subject": "Delivery [70-Delivered]",
-        "body": "Hi,<br /><br />We would like to let you know that status of the attached DNs was shipped.",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs were shipped.",
         "attachment": false,
         "fields": [
           "dnn_no",
@@ -696,17 +696,17 @@
       "changes": [
         {
           "key": "dnn_prd_no",
-          "op": "nnull",
+          "op": "ne",
           "value": null
         },
         {
           "key": "dnn_prd_description",
-          "op": "nnull",
+          "op": "ne",
           "value": null
         },
         {
           "key": "dnn_prd_group",
-          "op": "nnull",
+          "op": "ne",
           "value": null
         }
       ],
@@ -784,7 +784,7 @@
       "chart_colors": ["#ea5545", "#f46a9b", "#ef9b20", "#edbf33", "#ede15b", "#bdcf32", "#87bc45", "#27aeef", "#b33dc6"],
       "scheduled": true,
       "scheduled_cron": "30 15 * * mon,tue",
-      "_tags": ["#Technoplatz"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
     },
     "sv-git-buid": {
       "title": "Delivery BUId's",
@@ -830,7 +830,7 @@
       "chart_colors": ["#0bb4ff", "#50e991", "#e6d800", "#9b19f5", "#ffa300", "#dc0ab4", "#b3d4ff", "#e60049", "#00bfa0"],
       "scheduled": false,
       "scheduled_cron": "* 4 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
     },
     "sv-dn-statuses": {
       "title": "Delivery Statuses",
@@ -922,7 +922,7 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Technoplatz", "#Logistics", "#Administrators"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
     },
     "fc-status-00": {
       "title": "00-Open",
@@ -968,7 +968,7 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Logistics", "#Administrators", "#Technoplatz"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
     },
     "fc-status-10": {
       "title": "10-OnTheWay",
@@ -1014,7 +1014,7 @@
       "chart_colors": ["#bad7fb", "#ffee65", "#fdcce5", "#8bd3c7", "#b2e061", "#ffb55a", "#7eb0d5", "#fd7f6f", "#bd7ebe"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Technoplatz"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
     },
     "fc-status-20": {
       "title": "20-OnCustoms",
@@ -1060,7 +1060,7 @@
       "chart_colors": ["#b2e061", "#fd7f6f", "#7eb0d5", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"],
       "scheduled": false,
       "scheduled_cron": "0 10 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Technoplatz"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
     },
     "fc-status-30": {
       "title": "30-OnCustomsProcess",
@@ -1106,7 +1106,7 @@
       "chart_colors": ["#8bd3c7", "#bd7ebe", "#fdcce5", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Technoplatz", "#Logistics", "#Touchpoint"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
     },
     "fc-status-40": {
       "title": "40-ClearanceCompleted",
@@ -1152,7 +1152,7 @@
       "chart_colors": ["#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#e4e4e4", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 2 * * *",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Logistics", "#Technoplatz"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
     },
     "fc-status-50": {
       "title": "50-OnTheTouchpoint",
@@ -1198,7 +1198,7 @@
       "chart_colors": ["#e4e4e4", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "30 9,17 * 1-5 *",
-      "_tags": ["#Managers", "#Administrators", "#Technoplatz", "#Logistics", "#Touchpoint"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
     },
     "fc-status-60": {
       "title": "60-ReadyToBeDelivered",
@@ -1244,7 +1244,7 @@
       "chart_colors": ["#d5d5d5", "#fdcce5", "#8bd3c7", "#bd7ebe", "#ffee65", "#fd7f6f", "#7eb0d5", "#b2e061", "#ffb55a"],
       "scheduled": false,
       "scheduled_cron": "* 23 * * sun",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Technoplatz", "#Touchpoint"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
     }
   },
   "fetchers": [],

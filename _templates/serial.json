@@ -90,6 +90,7 @@
     ["ser_dnn_no"],
     ["ser_dnn_no", "ser_line_no"],
     ["ser_dnn_no", "ser_line_no", "ser_prd_no"],
+    ["ser_dnn_no", "ser_line_no", "ser_is_in"],
     ["ser_sscc_no"],
     ["ser_dnn_no", "ser_sscc_no"],
     ["ser_label_no"]
@@ -142,90 +143,7 @@
       }
     }
   ],
-  "triggers": [
-    {
-      "name": "Barcode Readin",
-      "enabled": true,
-      "operations": ["update"],
-      "changes": [
-        {
-          "key": "ser_is_in",
-          "op": "eq",
-          "value": true
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_no",
-              "value": "ser_dnn_no"
-            },
-            {
-              "key": "dnn_line_no",
-              "value": "ser_line_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "eq",
-              "value": "40-ClearanceCompleted"
-            }
-          ],
-          "set": [
-            {
-              "key": "dnn_status",
-              "value": "50-OnTheTouchpoint"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    },
-    {
-      "name": "Barcode Readin Cancel",
-      "enabled": true,
-      "operations": ["update"],
-      "changes": [
-        {
-          "key": "ser_is_in",
-          "op": "eq",
-          "value": false
-        }
-      ],
-      "targets": [
-        {
-          "collection": "delivery",
-          "match": [
-            {
-              "key": "dnn_no",
-              "value": "ser_dnn_no"
-            },
-            {
-              "key": "dnn_line_no",
-              "value": "ser_line_no"
-            }
-          ],
-          "filter": [
-            {
-              "key": "dnn_status",
-              "op": "eq",
-              "value": "50-OnTheTouchpoint"
-            }
-          ],
-          "set": [
-            {
-              "key": "dnn_status",
-              "value": "40-ClearanceCompleted"
-            }
-          ],
-          "upsert": false
-        }
-      ]
-    }
-  ],
+  "triggers": [],
   "views": {},
   "fetchers": [],
   "import": {

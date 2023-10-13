@@ -1476,7 +1476,6 @@ class Crud:
         docstring is in progress
         """
         try:
-            PRINT_("*** link obj_", obj_)
             source_ = obj_["source"] if "source" in obj_ else None
             _id = obj_["_id"] if "_id" in obj_ else None
             link_ = obj_["link"] if "link" in obj_ else None
@@ -1606,118 +1605,119 @@ class Crud:
             data_ = obj["data"] if "data" in obj else None
             fand_ = []
             filtered_ = {}
-            if properties_:
-                for mat_ in match_:
-                    if mat_["key"] and mat_["op"] and mat_["key"] in properties_:
-                        fres_ = None
-                        typ = properties_[mat_["key"]]["bsonType"] if mat_["key"] in properties_ else "string"
-
-                        value_ = mat_["value"]
-                        if data_ and value_ in data_ and data_[value_] is not None:
-                            value_ = data_[value_]
-
-                        if mat_["op"] == "contains":
-                            if typ in ["number", "decimal", "float"]:
-                                fres_ = float(value_)
-                            elif typ == "int":
-                                fres_ = int(value_)
-                            elif typ == "bool":
-                                fres_ = bool(value_)
-                            elif typ == "date":
-                                fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
-                            else:
-                                fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
-                        elif mat_["op"] == "eq":
-                            if typ in ["number", "decimal", "float"]:
-                                fres_ = float(value_)
-                            elif typ == "int":
-                                fres_ = int(value_)
-                            elif typ == "bool":
-                                fres_ = bool(value_)
-                            elif typ == "date":
-                                fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
-                            else:
-                                fres_ = {"$eq": value_}
-                        elif mat_["op"] in ["ne", "nc"]:
-                            if typ in ["number", "decimal", "float"]:
-                                fres_ = {"$not": {"$eq": float(value_)}}
-                            elif typ == "int":
-                                fres_ = {"$not": {"$eq": int(value_)}}
-                            elif typ == "bool":
-                                fres_ = {"$not": {"$eq": bool(value_)}}
-                            elif typ == "date":
-                                fres_ = {"$not": {"$eq": datetime.strptime(value_[:10], "%Y-%m-%d")}}
-                            else:
-                                fres_ = {"$not": {"$regex": value_, "$options": "i"}} if value_ else {"$not": {"$regex": "", "$options": "i"}}
-                        elif mat_["op"] in ["in", "nin"]:
-                            separated_ = re.split(",", value_)
-                            list_ = [s.strip() for s in separated_] if mat_["key"] != "_id" else [ObjectId(s.strip()) for s in separated_]
-                            if mat_["op"] == "in":
-                                fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
-                            else:
-                                fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
-                        elif mat_["op"] == "gt":
-                            if typ in ["number", "decimal", "float"]:
-                                fres_ = {"$gt": float(value_)}
-                            elif typ == "int":
-                                fres_ = {"$gt": int(value_)}
-                            elif typ == "date":
-                                fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$gt": value_}
-                        elif mat_["op"] == "gte":
-                            if typ in ["number", "decimal", "float"]:
-                                fres_ = {"$gte": float(value_)}
-                            elif typ == "int":
-                                fres_ = {"$gte": int(value_)}
-                            elif typ == "date":
-                                fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$gte": value_}
-                        elif mat_["op"] == "lt":
-                            if typ in ["number", "decimal", "float"]:
-                                fres_ = {"$lt": float(value_)}
-                            elif typ == "int":
-                                fres_ = {"$lt": int(value_)}
-                            elif typ == "date":
-                                fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$lt": value_}
-                        elif mat_["op"] == "lte":
-                            if typ in ["number", "decimal", "float"]:
-                                fres_ = {"$lte": float(value_)}
-                            elif typ == "int":
-                                fres_ = {"$lte": int(value_)}
-                            elif typ == "date":
-                                fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
-                            else:
-                                fres_ = {"$lte": value_}
-                        elif mat_["op"] == "true":
-                            fres_ = {"$nin": [False, None]}
-                        elif mat_["op"] == "false":
-                            fres_ = {"$ne": True}
-                        elif mat_["op"] == "nnull":
-                            array_, array1_, array2_ = [], {}, {}
-                            array1_[mat_["key"]] = {"$ne": None}
-                            array2_[mat_["key"]] = {"$exists": True}
-                            array_.append(array1_)
-                            array_.append(array2_)
-                        elif mat_["op"] == "null":
-                            array_, array1_, array2_ = [], {}, {}
-                            array1_[mat_["key"]] = {"$eq": None}
-                            array2_[mat_["key"]] = {"$exists": False}
-                            array_.append(array1_)
-                            array_.append(array2_)
-
-                        fpart_ = {}
-                        if mat_["op"] == "null":
-                            fpart_["$or"] = array_
-                        if mat_["op"] == "nnull":
-                            fpart_["$and"] = array_
+            for mat_ in match_:
+                key_ = mat_["key"]
+                op_ = mat_["op"]
+                value_ = mat_["value"]
+                if key_ and op_ and key_ in properties_:
+                    fres_ = None
+                    typ = properties_[key_]["bsonType"] if key_ in properties_ else "string"
+                    if data_ and value_ in data_ and data_[value_] is not None:
+                        value_ = data_[value_]
+                    if op_ == "null" or (op_ == "eq" and value_ is None):
+                        op_ = "null"
+                        array_, array1_, array2_ = [], {}, {}
+                        array1_[key_] = {"$eq": None}
+                        array2_[key_] = {"$exists": False}
+                        array_.append(array1_)
+                        array_.append(array2_)
+                    elif op_ == "nnull" or (op_ == "ne" and value_ is None):
+                        op_ = "nnull"
+                        array_, array1_, array2_ = [], {}, {}
+                        array1_[key_] = {"$ne": None}
+                        array2_[key_] = {"$exists": True}
+                        array_.append(array1_)
+                        array_.append(array2_)
+                    elif op_ == "contains":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = float(value_)
+                        elif typ == "int":
+                            fres_ = int(value_)
+                        elif typ == "bool":
+                            fres_ = bool(value_)
+                        elif typ == "date":
+                            fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
                         else:
-                            fpart_[mat_["key"]] = fres_
+                            fres_ = {"$regex": value_, "$options": "i"} if value_ else {"$regex": "", "$options": "i"}
+                    elif op_ == "eq":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = float(value_)
+                        elif typ == "int":
+                            fres_ = int(value_)
+                        elif typ == "bool":
+                            fres_ = bool(value_)
+                        elif typ == "date":
+                            fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
+                        else:
+                            fres_ = {"$eq": value_}
+                    elif op_ in ["ne", "nc"]:
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$not": {"$eq": float(value_)}}
+                        elif typ == "int":
+                            fres_ = {"$not": {"$eq": int(value_)}}
+                        elif typ == "bool":
+                            fres_ = {"$not": {"$eq": bool(value_)}}
+                        elif typ == "date":
+                            fres_ = {"$not": {"$eq": datetime.strptime(value_[:10], "%Y-%m-%d")}}
+                        else:
+                            fres_ = {"$not": {"$regex": value_, "$options": "i"}} if value_ else {"$not": {"$regex": "", "$options": "i"}}
+                    elif op_ in ["in", "nin"]:
+                        separated_ = re.split(",", value_)
+                        list_ = [s.strip() for s in separated_] if key_ != "_id" else [ObjectId(s.strip()) for s in separated_]
+                        if op_ == "in":
+                            fres_ = {"$in": list_ if typ != "number" else list(map(float, list_))}
+                        else:
+                            fres_ = {"$nin": list_ if typ != "number" else list(map(float, list_))}
+                    elif op_ == "gt":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$gt": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$gt": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$gt": value_}
+                    elif op_ == "gte":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$gte": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$gte": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$gte": value_}
+                    elif op_ == "lt":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$lt": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$lt": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$lt": value_}
+                    elif op_ == "lte":
+                        if typ in ["number", "decimal", "float"]:
+                            fres_ = {"$lte": float(value_)}
+                        elif typ == "int":
+                            fres_ = {"$lte": int(value_)}
+                        elif typ == "date":
+                            fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                        else:
+                            fres_ = {"$lte": value_}
+                    elif op_ == "true":
+                        fres_ = {"$nin": [False, None]}
+                    elif op_ == "false":
+                        fres_ = {"$ne": True}
 
-                        fand_.append(fpart_)
+                    fpart_ = {}
+                    if op_ == "null":
+                        fpart_["$or"] = array_
+                    if op_ == "nnull":
+                        fpart_["$and"] = array_
+                    else:
+                        fpart_[key_] = fres_
+
+                    fand_.append(fpart_)
 
                 filtered_ = {"$and": fand_} if fand_ and len(fand_) > 0 else {}
 
