@@ -2294,9 +2294,9 @@ class Crud:
         """
         docstring is in progress
         """
-        schema_, query_, data_, fields_, count_, permitted_, aggregate_base_ = {}, {}, [], [], 0, False, []
+        schema_, query_, data_, fields_, count_, permitted_, aggregate_base_, err_ = {}, {}, [], [], 0, False, [], None
         files_, personalizations_to_, to_, orig_ = [], [], [], None
-        init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
+        init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_, "err": err_}
         try:
             que_id_ = obj_["id"] if "id" in obj_ else None
             if not que_id_:
@@ -2344,17 +2344,46 @@ class Crud:
 
             que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
             if not que_aggregate_:
-                raise PassException(None)
+                raise APIError(f"no aggregation found in {que_id_}")
 
-            for agg_ in que_aggregate_:
+            que_type_ = query_["que_type"] if "que_type" in query_ else "aggregation"
+
+            id_exists_ = False
+            set_exists_, match_exists_ = False, False
+            set_ix_ = 0
+            for ix_, agg_ in enumerate(que_aggregate_):
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
+                if "$set" in agg_:
+                    set_exists_ = True
+                    set_ix_ = ix_
+                if "$match" in agg_:
+                    match_exists_ = True
                 if "$project" in agg_:
                     for prj_ in agg_["$project"]:
                         fields_.append(prj_)
+                        if prj_ == "_id":
+                            id_exists_ = True
                 aggregate_base_.append(agg_)
 
             aggregate_ = aggregate_base_.copy()
+
+            if que_type_ == "update":
+                if not set_exists_:
+                    err_ = "no set found in update query"
+                    raise PassException(err_)
+                if not match_exists_:
+                    err_ = "no match found in update query"
+                    raise PassException(err_)
+                PRINT_("*** aggregate_base0_", aggregate_base_)
+                PRINT_("*** set_ix_", set_ix_)
+                aggregate_base_.pop(set_ix_)
+                PRINT_("*** aggregate_base1_", aggregate_base_)
+                cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_base_)
+                data_ = json.loads(JSONEncoder().encode(list(cursor_)))
+                count_ = len(data_)
+                return {"result": True, "query": query_, "data": [], "count": count_, "fields": [], "schema": {}, "err": err_}
+
             aggregate_base_.append({"$count": "count"})
 
             if orig_ == "api/crud":
@@ -2401,7 +2430,7 @@ class Crud:
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
-            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_}
+            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_, "err": err_}
 
         except AuthError as exc__:
             return Misc().auth_error_f(exc__)
@@ -2411,9 +2440,12 @@ class Crud:
 
         except pymongo.errors.PyMongoError as exc__:
             init_res_["query"] = query_
+            init_res_["err"] = str(exc__)
             return init_res_
 
         except PassException as exc__:
+            init_res_["query"] = query_
+            init_res_["err"] = str(exc__)
             return init_res_
 
         except Exception as exc__:

@@ -38,7 +38,8 @@ https://www.gnu.org/licenses.
           {{ header | translate }}
         </ion-button>
         <h3>{{ subheader }}</h3>
-        <h6><span *ngIf="type_==='aggregation'">{{ count_ }} records </span>[{{ que_scheduled_cron_ ?
+        <h6><span *ngIf="type_==='aggregation'">{{ count_ }} {{ 'records found' | translate }} </span>[{{
+          que_scheduled_cron_ ?
           que_scheduled_cron_ : " Not scheduled " }}]</h6>
         <div *ngIf="type_==='aggregation'">
           {{ query_url_ }}<br />Shared with <span *ngIf="_tags">{{ _tags.join(", ")}}</span><span *ngIf="!_tags">{{
@@ -112,72 +113,70 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
-        <table *ngIf="data_.length > 0; else nodata" class="data-table">
-          <tr>
-            <th>#</th>
-            <th *ngFor="let item_ of fields_">
-              {{ item_ }}
-            </th>
-          </tr>
-          <tr *ngFor="let record of data_; let i = index">
-            <td>{{ ((pager_ - 1) * limit_) + i + 1}}</td>
-            <td *ngFor="let item_ of fields_">
-              {{ record[item_]?.toString() }}
-            </td>
-          </tr>
-        </table>
-        <table>
-          <tr>
-            <td [attr.colspan]="fields_?.length+1">
-              <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
-                class="ion-no-padding ion-margin-end">
-                <ion-icon name="play-skip-back"></ion-icon>
-              </ion-button>
-              <span *ngIf="pager_ > 10">
-                <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1, false)" class="ion-no-padding">
-                  <ion-icon name="caret-back"></ion-icon>
+        <div *ngIf="type_==='aggregation'; else update">
+          <table *ngIf="data_.length > 0; else nodata" class="data-table">
+            <tr>
+              <th>#</th>
+              <th *ngFor="let item_ of fields_">
+                {{ item_ }}
+              </th>
+            </tr>
+            <tr *ngFor="let record of data_; let i = index">
+              <td>{{ ((pager_ - 1) * limit_) + i + 1}}</td>
+              <td *ngFor="let item_ of fields_">
+                {{ record[item_]?.toString() }}
+              </td>
+            </tr>
+            <tr>
+              <td [attr.colspan]="fields_?.length+1">
+                <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
+                  class="ion-no-padding ion-margin-end">
+                  <ion-icon name="play-skip-back"></ion-icon>
                 </ion-button>
-              </span>
-              <span *ngFor="let in of paget_">
-                <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
-                  class="ion-no-padding">
-                  <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
+                <span *ngIf="pager_ > 10">
+                  <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1, false)" class="ion-no-padding">
+                    <ion-icon name="caret-back"></ion-icon>
+                  </ion-button>
+                </span>
+                <span *ngFor="let in of paget_">
+                  <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
+                    class="ion-no-padding">
+                    <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
+                  </ion-button>
+                  <ion-button *ngIf="pager_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
+                    <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
+                  </ion-button>
+                </span>
+                <span *ngIf="pages_ > 10 && pager_ < pages_">
+                  <ion-button size="small" fill="clear" (click)="refresh_data(pages_, false)" class="ion-no-padding">
+                    ...&nbsp;&nbsp;{{ pages_ }}
+                  </ion-button>
+                  <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
+                    <ion-icon name="caret-forward"></ion-icon>
+                  </ion-button>
+                </span>
+                <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
+                  class="ion-no-padding ion-margin-start">
+                  <ion-icon name="list-outline"></ion-icon>
+                  {{ 'Pagination' | translate }} [{{ limit_ }}]
                 </ion-button>
-                <ion-button *ngIf="pager_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
-                  <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-                </ion-button>
-              </span>
-              <span *ngIf="pages_ > 10 && pager_ < pages_">
-                <ion-button size="small" fill="clear" (click)="refresh_data(pages_, false)" class="ion-no-padding">
-                  ...&nbsp;&nbsp;{{ pages_ }}
-                </ion-button>
-                <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
-                  <ion-icon name="caret-forward"></ion-icon>
-                </ion-button>
-              </span>
-              <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
-                class="ion-no-padding ion-margin-start">
-                <ion-icon name="list-outline"></ion-icon>
-                {{ 'Pagination' | translate }} [{{ limit_ }}]
-              </ion-button>
-            </td>
-          </tr>
-        </table>
-        <ng-template #nodata>
-          <div *ngIf="type_==='aggregation'; else noagg" class="ion-margin-top">
-            <h6>{{ 'No data found' | translate }}!</h6>
-            {{ 'Please edit your query' | translate }}.
-          </div>
-          <ng-template #noagg>
+              </td>
+            </tr>
+          </table>
+          <ng-template #nodata>
             <div class="ion-margin-top">
-              <h6><span *ngIf="is_loaded">{{ count_ }} {{'records affected' | translate }}</span><span
-                  *ngIf="!is_loaded">{{'Processing' | translate }}..</span>.</h6>
-              <div class="queryro">
-                {{ 'You can manually run this query' | translate }}.<br /><br />
-                {{ aggregates_ }}
-              </div>
+              <h6>{{ 'No data found' | translate }}!</h6>
+              {{ 'Please edit your query' | translate }}.
             </div>
           </ng-template>
+        </div>
+        <ng-template #update>
+          <div class="ion-margin-top">
+            <h6><span *ngIf="is_loaded">{{ count_ }} {{'records affected' | translate }}</span>
+              <span *ngIf="!is_loaded">{{'Processing' | translate }}..</span>.
+            </h6>
+            {{ 'You can manually run this query' | translate }}.
+          </div>
         </ng-template>
       </ion-col>
       <ng-template #dataloading>

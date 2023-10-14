@@ -13,16 +13,14 @@
     },
     "usr_name": {
       "bsonType": "string",
-      "minLength": 3,
-      "maxLength": 64,
       "title": "Name",
       "description": "Full Name",
+      "minLength": 3,
+      "maxLength": 64,
       "required": true
     },
     "usr_scope": {
       "bsonType": "string",
-      "minLength": 7,
-      "maxLength": 13,
       "title": "Scope",
       "description": "User Scope",
       "enum": ["Internal", "External", "Administrator"],
@@ -38,6 +36,8 @@
     },
     "_tags": {
       "bsonType": "array",
+      "title": "Tags",
+      "description": "Enter a tag #...",
       "uniqueItems": true,
       "minItems": 0,
       "maxItems": 256,
@@ -47,8 +47,6 @@
         "maxLength": 64,
         "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
       },
-      "title": "Tags",
-      "description": "Enter a tag #...",
       "subType": "tag",
       "manualAdd": true
     }

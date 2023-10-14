@@ -143,7 +143,7 @@ https://www.gnu.org/licenses.
     <ng-template #norelation>
         <div *ngIf="tab=='link'; else nolink" class="ion-padding-bottom ion-margin-top">
             <h5>{{ 'Link to' | translate }} {{ link_?.collection }} {{ 'collection' | translate }}</h5>
-            <ion-item lines="full" class="ion-no-margin ion-margin-bottom full-width">
+            <ion-item class="ion-no-margin ion-margin-bottom full-width">
                 <div class="ion-margin-top ion-margin-bottom">
                     <ion-button color="dark" size="default" (click)="doGetLinked()">
                         <ion-icon name="search-outline"></ion-icon>
@@ -155,9 +155,9 @@ https://www.gnu.org/licenses.
                     {{ 'Items to be linked' | translate }}:
                 </ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
-                    spellcheck="false" class="link-data" counter="true" maxlength="512" clearOnEdit="true"
-                    autofocus="true" placeholder="{{ 'Paste or enter your data as a list' | translate }}" maxlength="512"
-                    counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
+                    spellcheck="false" class="linked-data" counter="true" maxlength="512" clearOnEdit="true"
+                    autofocus="true" placeholder="{{ 'Paste or enter your data as a list' | translate }}"
+                    maxlength="512" counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
                 </ion-textarea>
             </ion-item>
             {{ 'The maximum number of' | translate }} {{ link_?.get }} {{ 'allowed is 100' }}.
@@ -219,7 +219,7 @@ https://www.gnu.org/licenses.
                                         [formControlName]="field.name" type="text" spellcheck="false" autocorrect="off"
                                         [required]="field.required" [(ngModel)]="data_[field.name]" auto-grow="false"
                                         [disabled]="field.disabled" [readonly]="field.readonly" [name]="field.name"
-                                        (ionChange)="doTextManipulate($event, field)">
+                                        [id]="field.name" (ionChange)="doTextManipulate($event, field)">
                                     </ion-input>
                                     <ng-template #istextarea>
                                         <ion-textarea class="ion-no-padding" cols="64" [(ngModel)]="data_[field.name]"
@@ -227,8 +227,8 @@ https://www.gnu.org/licenses.
                                             [maxlength]="field.maxLength" [minlength]="field.minLength"
                                             autocorrect="off"
                                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                                            [formControlName]="field.name" [required]="field.required"
-                                            spellcheck="false" debounce="500">
+                                            [formControlName]="field.name" [name]="field.name" [id]="field.name"
+                                            [required]="field.required" spellcheck="false" debounce="500">
                                         </ion-textarea>
                                     </ng-template>
                                 </div>
@@ -236,7 +236,7 @@ https://www.gnu.org/licenses.
                                     <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
                                         [formControlName]="field.name" type="password" spellcheck="false"
                                         autocorrect="off" [required]="field.required" [(ngModel)]="data_[field.name]"
-                                        auto-grow="true">
+                                        auto-grow="true" [id]="field.name">
                                     </ion-input>
                                 </ng-template>
                                 <ng-template #checkenum>
@@ -245,7 +245,7 @@ https://www.gnu.org/licenses.
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
                                         [disabled]="field.disabled" [(ngModel)]="data_[field.name]"
                                         [value]="data_[field.name]"
-                                        (ionChange)="doChangeEnum(field, $event.target.value)">
+                                        (ionChange)="doChangeEnum(field, $event.target.value)" [id]="field.name">
                                         <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
                                         </ion-select-option>
                                     </ion-select>
@@ -254,7 +254,8 @@ https://www.gnu.org/licenses.
                                     <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
                                         [(ngModel)]="data_[field.name]" [disabled]="field.disabled">
-                                        <ion-select-option *ngFor="let item of properties_" [value]="item"> {{ item }}
+                                        <ion-select-option *ngFor="let item of properties_" [value]="item"
+                                            [id]="field.name"> {{ item }}
                                         </ion-select-option>
                                     </ion-select>
                                 </ng-template>
@@ -302,10 +303,10 @@ https://www.gnu.org/licenses.
                             class="ion-no-padding" [formControlName]="field.name" type="number"
                             [required]="field.required" [(ngModel)]="data_[field.name]"
                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                            [disabled]="field.disabled" [readonly]="field.readonly">
+                            [disabled]="field.disabled" [readonly]="field.readonly" [id]="field.name">
                         </ion-input>
                         <ion-checkbox *ngIf="field.bsonType=='bool'" [formControlName]="field.name"
-                            [(ngModel)]="data_[field.name]" [disabled]="field.disabled">
+                            [(ngModel)]="data_[field.name]" [disabled]="field.disabled" [id]="field.name">
                         </ion-checkbox>
                         <div *ngIf="field.bsonType=='object'" class="full-width">
                             <ion-input value="object is protected" [readonly]="true"></ion-input>
@@ -315,9 +316,10 @@ https://www.gnu.org/licenses.
                                 [type]="field.items.bsonType=='string' ? 'text' : 'number'" [required]="field.required"
                                 auto-grow="true" [(ngModel)]="arrayitem[field.name]"
                                 [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : ''"
-                                [ngModelOptions]="{standalone: true}" class="add-and-enter"></ion-input>
-                            <ion-input [formControlName]="field.name" [(ngModel)]="data_[field.name]"
-                                class="hide"></ion-input>
+                                [ngModelOptions]="{standalone: true}" class="add-and-enter"
+                                [id]="field.name"></ion-input>
+                            <ion-input [formControlName]="field.name" [(ngModel)]="data_[field.name]" class="hide"
+                                [id]="field.name"></ion-input>
                             <app-kov [data]="data_" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
                         </div>
                     </ion-item>
@@ -334,30 +336,33 @@ https://www.gnu.org/licenses.
                 <ion-list *ngIf="op=='update'" class="ion-no-padding crud-form-list">
                     <ion-item *ngIf="data_['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'ID' }}</ion-label>
-                        <ion-input class="ion-no-padding" type="text" [value]="data_['_id']" disabled> </ion-input>
+                        <ion-input class="ion-no-padding" type="text" [value]="data_['_id']" id="_id" disabled>
+                        </ion-input>
                     </ion-item>
                     <ion-item *ngIf="data_['_created_at']" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'Created At' }}</ion-label>
                         <ion-input class="ion-no-margin"
                             [value]="data_['_created_at'] && data_['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
-                            disabled>
+                            disabled id="_created_at">
                         </ion-input>
                     </ion-item>
                     <ion-item *ngIf="data_['_created_by']" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'Created By' | translate }}</ion-label>
-                        <ion-input class="ion-no-padding" type="text" [value]="data_['_created_by']" disabled>
+                        <ion-input class="ion-no-padding" type="text" [value]="data_['_created_by']" id="_created_by"
+                            disabled>
                         </ion-input>
                     </ion-item>
                     <ion-item *ngIf="data_['_modified_at']" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'Modified At' }}</ion-label>
                         <ion-input class="ion-no-margin"
                             [value]="data_['_modified_at'] && data_['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
-                            disabled>
+                            id="_modified_at" disabled>
                         </ion-input>
                     </ion-item>
                     <ion-item *ngIf="data_['_modified_by']" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'Modified By' | translate }}</ion-label>
-                        <ion-input class="ion-no-padding" type="text" [value]="data_['_modified_by']" disabled>
+                        <ion-input class="ion-no-padding" type="text" [value]="data_['_modified_by']" id="_modified_by"
+                            disabled>
                         </ion-input>
                     </ion-item>
                 </ion-list>

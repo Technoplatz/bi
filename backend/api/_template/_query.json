@@ -17,6 +17,13 @@
       "maxLength": 32,
       "caseType": "capitalize"
     },
+    "que_type": {
+      "bsonType": "string",
+      "title": "Type",
+      "description": "Query type",
+      "enum": ["aggregation", "update"],
+      "default": "query"
+    },
     "que_collection_id": {
       "bsonType": "string",
       "title": "Collection ID",
@@ -78,7 +85,7 @@
       "manualAdd": true
     }
   },
-  "required": ["que_id", "que_title", "que_collection_id"],
+  "required": ["que_id", "que_title", "que_collection_id", "que_type"],
   "index": [["que_collection_id"]],
   "unique": [["que_id"]],
   "sort": {

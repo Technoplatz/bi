@@ -155,7 +155,7 @@ export class QueryPage implements OnInit {
       this.page_ = page_ === 0 ? 1 : page_;
       this.schemevis = "hide";
       this.crud.get_query(this.id, this.page_, this.limit_, run_).then((res: any) => {
-        if (res && res.query) {
+        if (res.query && res.data) {
           this.pager_ = this.page_;
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;
@@ -179,6 +179,11 @@ export class QueryPage implements OnInit {
         } else {
           this.misc.doMessage("no data found", "error");
           reject();
+        }
+        if (res.err) {
+          this.misc.doMessage(res.err, "error");
+        } else {
+          this.misc.doMessage(`query run successfully for ${res.count} records.`, "success");
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");

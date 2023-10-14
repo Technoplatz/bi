@@ -2,33 +2,35 @@
   "properties": {
     "vis_id": {
       "bsonType": "string",
+      "title": "ID",
+      "description": "Visual ID",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "ID",
-      "description": "Visual ID",
       "caseType": "lowercase"
     },
     "vis_title": {
       "bsonType": "string",
-      "minLength": 1,
-      "maxLength": 32,
       "title": "Title",
       "description": "Visual Title",
+      "minLength": 1,
+      "maxLength": 32,
       "caseType": "capitalize"
     },
     "vis_collection_id": {
       "bsonType": "string",
+      "title": "Collection",
+      "description": "Collection ID",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "Collection",
-      "description": "Collection ID",
       "collection": true,
       "permanent": true
     },
     "vis_match": {
       "bsonType": "array",
+      "title": "Match",
+      "description": "Match filter",
       "minItems": 0,
       "maxItems": 8,
       "uniqueItems": true,
@@ -36,6 +38,8 @@
       "filter": true,
       "items": {
         "bsonType": "object",
+        "title": "Items",
+        "description": "Match Items",
         "additionalProperties": false,
         "properties": {
           "key": {
@@ -50,9 +54,6 @@
             "bsonType": "string",
             "title": "op",
             "description": "Operator",
-            "minLength": 1,
-            "maxLength": 8,
-            "pattern": "^[a-z]{1,8}$",
             "enum": ["eq", "ne", "contains", "nc", "in", "nin", "gt", "gte", "lt", "lte", "null", "nnull", "true", "false"]
           },
           "value": {
@@ -65,12 +66,12 @@
         },
         "required": ["key", "op", "value"]
       },
-      "title": "Match",
-      "description": "Match filter",
       "subType": "filter"
     },
     "vis_pivot": {
       "bsonType": "array",
+      "title": "Pivot",
+      "description": "Visual pivot",
       "minItems": 0,
       "maxItems": 4,
       "uniqueItems": true,
@@ -92,23 +93,18 @@
             "bsonType": "string",
             "title": "op",
             "description": "Type",
-            "minLength": 5,
-            "maxLength": 16,
-            "pattern": "^[a-z\\[\\]-]{5,16}$",
             "enum": ["x-axis", "y-axis", "group", "data[sum]", "data[count]"]
           }
         },
         "required": ["key", "op"]
       },
-      "title": "Pivot",
-      "description": "Visual pivot",
       "subType": "keyop"
     },
     "vis_scheduled": {
       "bsonType": "bool",
       "title": "Scheduled",
-      "default": false,
-      "description": "Scheduled or not"
+      "description": "Scheduled or not",
+      "default": false
     },
     "vis_scheduled_cron": {
       "bsonType": "string",
@@ -121,6 +117,8 @@
     },
     "_tags": {
       "bsonType": "array",
+      "title": "Tags",
+      "description": "Enter a tag #...",
       "uniqueItems": false,
       "minItems": 0,
       "maxItems": 256,
@@ -130,8 +128,6 @@
         "maxLength": 64,
         "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
       },
-      "title": "Tags",
-      "description": "Enter a tag #...",
       "manualAdd": true
     }
   },

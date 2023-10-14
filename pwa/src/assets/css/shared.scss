@@ -489,10 +489,11 @@ ion-note {
   font-family: monospace;
 }
 
-.link-data {
+.linked-data {
   margin-top: 16px;
   font-family: consolas, monospace, menlo, monaco, Ubuntu Mono;
-  font-size: medium;
+  font-size: 14px;
+  border-top: 1px solid var(--ion-color-light);
 }
 
 .data-ext-columns {
@@ -1225,7 +1226,7 @@ sup {
   --button-color: var(--ion-color-white) !important;
   font-weight: 600 !important;
   padding: 0px !important;
-  top: -31px !important;
+  top: -21px !important;
 }
 
 .toast-class-error {
@@ -1238,7 +1239,7 @@ sup {
   --button-color: var(--ion-color-white) !important;
   font-weight: 600 !important;
   padding: 0px !important;
-  top: -31px !important;
+  top: -21px !important;
 }
 
 .toast-class-warning {
