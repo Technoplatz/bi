@@ -54,43 +54,36 @@ https://www.gnu.org/licenses.
                 <ion-icon *ngIf="running_" name="hourglass-outline"></ion-icon>
                 <ion-icon *ngIf="!running_" name="play"></ion-icon>
                 <br />
-                {{ 'Run' | translate }}<br />{{ 'Query' | translate }}
+                {{ 'Run Query' | translate }}
               </div>
               <ng-template #aggregate>
                 <div *ngIf="is_loaded" (click)="refresh_data(0, false)" class="data-sq-button">
                   <ion-icon name="sync-circle-outline"></ion-icon>
                   <br />
-                  {{ 'Refresh' | translate }}<br />{{ 'Query' | translate }}
+                  {{ 'Refresh Query' | translate }}
                 </div>
                 <div *ngIf="!is_loaded" class="data-sq-button required">
                   <ion-icon name="hourglass-outline"></ion-icon>
                   <br />
-                  {{ 'Please' | translate }}<br />{{ 'Wait' | translate }}...
+                  {{ 'Please Wait' | translate }}...
                 </div>
                 <div (click)="copy_url()" class="data-sq-button">
                   <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
                   <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
                   <br />
-                  <span *ngIf="!is_url_copied">{{ 'Copy' | translate }}<br />{{ 'URL' | translate }}</span>
-                  <span *ngIf="is_url_copied">{{ 'URL' | translate }}<br />{{ 'Copied' | translate }}</span>
+                  <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
+                  <span *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</span>
                 </div>
               </ng-template>
               <div (click)="show_aggregation(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
-                  {{ 'Edit' | translate }}<br />{{ 'JSON' | translate }}
-                </div>
-              </div>
-              <div (click)="edit_query()" class="data-sq-button">
-                <div class="ion-no-padding">
-                  <ion-icon name="settings-outline"></ion-icon><br />
-                  {{ 'Query' | translate }}<br />{{ 'Settings' | translate }}
+                  {{ 'Edit JSON' | translate }}
                 </div>
               </div>
             </ion-col>
           </ion-row>
         </ion-grid>
-
         <ion-grid [class]="schemevis">
           <ion-row>
             <ion-col size="12">

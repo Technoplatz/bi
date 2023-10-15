@@ -66,7 +66,6 @@ export class QueryPage implements OnInit {
   public is_initialized: boolean = false;
   public status_: any = {};
   public columns_: any;
-  public schema_key: any = null;
   public fields_: any = {};
   public _running: boolean = false;
   public is_deleting: boolean = false;
@@ -89,14 +88,12 @@ export class QueryPage implements OnInit {
   public paget_: any = [];
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
-  private schema_: any = {};
   private menu: string = "";
   private aggregated_: any = [];
   private page_start_: number = 1;
   private page_end_: number = 1;
   private submenu: string = "";
   private query_: any = {};
-  private collections_: any = [];
   private uri_: string = "";
 
   constructor(
@@ -117,9 +114,6 @@ export class QueryPage implements OnInit {
     this.jeoptions.name = "aggregate";
     this.auth.user.subscribe((res: any) => {
       this.user = res;
-    });
-    this.crud.collections.subscribe((res: any) => {
-      this.collections_ = res && res.data ? res.data : [];
     });
     this.misc.api.subscribe((api_: any) => {
       this.uri_ = api_.uri;
@@ -166,7 +160,6 @@ export class QueryPage implements OnInit {
           this.fields_ = res.fields;
           this.data_ = res.data;
           this.count_ = res.count;
-          this.schema_ = res.schema;
           this.pages_ = this.count_ > 0 ? Math.ceil(this.count_ / this.limit_) : environment.misc.default_page;
           const lmt = this.pages_ >= 10 ? 10 : this.pages_;
           this.paget_ = new Array(lmt);
@@ -183,13 +176,14 @@ export class QueryPage implements OnInit {
         if (res.err) {
           this.misc.doMessage(res.err, "error");
         } else {
-          this.misc.doMessage(`query run successfully for ${res.count} records.`, "success");
+          this.misc.doMessage(`query run successfully, ${res.count > 0 ? res.count : 'no'} records affected.`, "success");
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
       }).finally(() => {
         this.is_loaded = true;
         this.is_initialized = true;
+        this.running_ = false;
       });
     });
   }
@@ -270,39 +264,6 @@ export class QueryPage implements OnInit {
         this.running_ = false;
       });
     }
-  }
-
-  async edit_query() {
-    const modal = await this.modal.create({
-      component: CrudPage,
-      backdropDismiss: true,
-      cssClass: "crud-modal",
-      componentProps: {
-        shuttle: {
-          op: "update",
-          collection: "_query",
-          collections: this.collections_,
-          views: [],
-          user: this.user,
-          data: this.query_,
-          counters: null,
-          structure: this.schema_,
-          sweeped: [],
-          filter: null,
-          actions: [],
-          actionix: -1,
-          view: null,
-          scan: null
-        }
-      }
-    });
-    modal.onDidDismiss().then((res: any) => {
-      if (res.data.modified && res.data.res.result) {
-        this.misc.doMessage("query updated successfully", "success");
-        this.refresh_data(0, false);
-      }
-    });
-    return await modal.present();
   }
 
 }

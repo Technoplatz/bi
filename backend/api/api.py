@@ -2294,9 +2294,9 @@ class Crud:
         """
         docstring is in progress
         """
-        schema_, query_, data_, fields_, count_, permitted_, aggregate_base_, err_ = {}, {}, [], [], 0, False, [], None
+        query_, data_, fields_, count_, permitted_, aggregate_base_, err_ = {}, [], [], 0, False, [], None
         files_, personalizations_to_, to_, orig_ = [], [], [], None
-        init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_, "err": err_}
+        init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "err": err_}
         try:
             que_id_ = obj_["id"] if "id" in obj_ else None
             if not que_id_:
@@ -2315,13 +2315,14 @@ class Crud:
                 if orig_ not in ["api/crud", f"api/get/query/{que_id_}"]:
                     raise AuthError("request is not authenticated")
 
-            schema_ = self.root_schemas_f("_query")
-            if not schema_:
-                raise AuthError(f"no schema found for {que_id_}")
-
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
-                raise APIError(f"no query found for {que_id_}")
+                raise APIError(f"no query found: {que_id_}")
+
+            approved_ = "_approved" in query_ and query_["_approved"] is True
+            if not approved_:
+                err_ = "query is not approved by the administrators"
+                raise PassException(err_)
 
             if orig_ == "api/crud":
                 user_ = obj_["userindb"] if "userindb" in obj_ else None
@@ -2342,47 +2343,71 @@ class Crud:
             if not que_collection_id_:
                 raise APIError(f"collection not found {que_id_}")
 
+            collection_ = Mongo().db_["_collection"].find_one({"col_id": que_collection_id_})
+            if not collection_:
+                raise APIError(f"collection not found for {que_id_}")
+            
+            structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+            if not structure_:
+                raise APIError(f"structure not found for {que_id_}")
+
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise APIError(f"properties not found for {que_id_}")
+
             que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
             if not que_aggregate_:
                 raise APIError(f"no aggregation found in {que_id_}")
 
             que_type_ = query_["que_type"] if "que_type" in query_ else "aggregation"
 
-            id_exists_ = False
-            set_exists_, match_exists_ = False, False
-            set_ix_ = 0
-            for ix_, agg_ in enumerate(que_aggregate_):
+            match_exists_, set_ = False, None
+            for agg_ in que_aggregate_:
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
-                if "$set" in agg_:
-                    set_exists_ = True
-                    set_ix_ = ix_
                 if "$match" in agg_:
                     match_exists_ = True
+                if "$set" in agg_:
+                    set_ = agg_["$set"]
                 if "$project" in agg_:
                     for prj_ in agg_["$project"]:
                         fields_.append(prj_)
-                        if prj_ == "_id":
-                            id_exists_ = True
                 aggregate_base_.append(agg_)
 
             aggregate_ = aggregate_base_.copy()
 
             if que_type_ == "update":
-                if not set_exists_:
-                    err_ = "no set found in update query"
-                    raise PassException(err_)
                 if not match_exists_:
                     err_ = "no match found in update query"
                     raise PassException(err_)
-                PRINT_("*** aggregate_base0_", aggregate_base_)
-                PRINT_("*** set_ix_", set_ix_)
-                aggregate_base_.pop(set_ix_)
-                PRINT_("*** aggregate_base1_", aggregate_base_)
-                cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_base_)
+                if not set_:
+                    err_ = "no set found in update query"
+                    raise PassException(err_)
+                set__ = {}
+                for item_ in set_:
+                    if item_ not in properties_:
+                        continue
+                    set__[item_] = set_[item_]
+                if not set__:
+                    err_ = "no valid set field found in update query"
+                    raise PassException(err_)
+                aggregate_update_ = []
+                for agg_ in que_aggregate_:
+                    if "$project" in agg_ or "$set" in agg_ or "$unset" in agg_:
+                        continue
+                    aggregate_update_.append(agg_)
+                aggregate_update_.append({"$project": {"_id": "$_id"}})
+                cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_update_)
+                if not cursor_:
+                    err_ = "no record found to update"
+                    raise PassException(err_)
                 data_ = json.loads(JSONEncoder().encode(list(cursor_)))
-                count_ = len(data_)
-                return {"result": True, "query": query_, "data": [], "count": count_, "fields": [], "schema": {}, "err": err_}
+                ids_ = [ObjectId(doc_["_id"]) for doc_ in data_]
+                if ids_:
+                    set__["_modified_at"] = Misc().get_now_f()
+                    update_many_ = Mongo().db_[f"{que_collection_id_}_data"].update_many({"_id": {"$in": ids_}}, {"$set": set__})
+                    count_ = update_many_.matched_count
+                return {"result": True, "query": query_, "data": [], "count": count_, "fields": [], "err": err_}
 
             aggregate_base_.append({"$count": "count"})
 
@@ -2430,7 +2455,7 @@ class Crud:
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
-            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_, "err": err_}
+            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "err": err_}
 
         except AuthError as exc__:
             return Misc().auth_error_f(exc__)
@@ -2449,7 +2474,9 @@ class Crud:
             return init_res_
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            init_res_["query"] = query_
+            init_res_["err"] = str(exc__)
+            return init_res_
 
     def read_f(self, input_):
         """
@@ -2659,7 +2686,8 @@ class Crud:
             Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": {
                 "que_aggregate": aggregate_,
                 "_modified_at": Misc().get_now_f(),
-                "_modified_by": user_["usr_id"]
+                "_modified_by": user_["usr_id"],
+                "_approved": False
             }, "$inc": {"_modified_count": 1}})
 
             return {"result": True}
@@ -2870,6 +2898,8 @@ class Crud:
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
+            if collection_id_ == "_query":
+                doc_["_approved"] = False
 
             Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
 

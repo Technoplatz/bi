@@ -62,13 +62,6 @@
       "maxLength": 512,
       "textarea": true
     },
-    "que_counter": {
-      "bsonType": "int",
-      "title": "Counter",
-      "description": "Counter",
-      "permanent": true,
-      "default": 0
-    },
     "_tags": {
       "bsonType": "array",
       "title": "Tags",
