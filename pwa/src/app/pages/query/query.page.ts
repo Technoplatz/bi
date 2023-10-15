@@ -67,13 +67,12 @@ export class QueryPage implements OnInit {
   public status_: any = {};
   public columns_: any;
   public fields_: any = {};
-  public _running: boolean = false;
+  public _saving: boolean = false;
   public is_deleting: boolean = false;
   public sort: any = {};
   public schemevis: any = "hide";
   public type_: string = "aggregate";
   public aggregate_: any = [];
-  public aggregates_: any = {};
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public templates: any = [];
@@ -95,6 +94,8 @@ export class QueryPage implements OnInit {
   private submenu: string = "";
   private query_: any = {};
   private uri_: string = "";
+  public perm_: boolean = false;
+  public perma_: boolean = false;
 
   constructor(
     public misc: Miscellaneous,
@@ -117,6 +118,10 @@ export class QueryPage implements OnInit {
     });
     this.misc.api.subscribe((api_: any) => {
       this.uri_ = api_.uri;
+    });
+    this.auth.user.subscribe((res: any) => {
+      this.perm_ = res && res.perm;
+      this.perma_ = res && res.perma;
     });
   }
 
@@ -154,8 +159,7 @@ export class QueryPage implements OnInit {
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;
           this.subheader = res.query.que_title;
-          this.aggregate_ = res.query.que_aggregate;
-          this.aggregates_ = JSON.stringify(this.aggregate_);
+          this.aggregate_ = this.aggregated_ = res.query.que_aggregate;
           this.type_ = res.query.que_type;
           this.fields_ = res.fields;
           this.data_ = res.data;
@@ -176,7 +180,7 @@ export class QueryPage implements OnInit {
         if (res.err) {
           this.misc.doMessage(res.err, "error");
         } else {
-          this.misc.doMessage(`query run successfully, ${res.count > 0 ? res.count : 'no'} records affected.`, "success");
+          this.misc.doMessage(`query run successfully, ${res.count > 0 ? res.count : 'no'} records affected`, "success");
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
@@ -199,7 +203,6 @@ export class QueryPage implements OnInit {
       this.editor.focus();
     } else {
       this.schemevis = "hide";
-      this.aggregated_ = null;
     }
   }
 
@@ -212,28 +215,24 @@ export class QueryPage implements OnInit {
     });
   }
 
-  save_aggregation() {
-    if (this.aggregated_) {
-      this._running = true;
-      this.misc.api_call("crud", {
-        op: "savequery",
-        collection: "_query",
-        id: this.id,
-        aggregate: this.aggregated_
-      }).then(() => {
-        this.misc.doMessage("query saved successfully", "success");
-        this.refresh_data(0, false).then(() => {
-          this.schemevis = "hide"
-        });
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.aggregated_ = null;
-        this._running = false;
+  save_aggregation(approved_: boolean) {
+    this._saving = true;
+    this.misc.api_call("crud", {
+      op: "savequery",
+      collection: "_query",
+      id: this.id,
+      aggregate: this.aggregated_,
+      approved: approved_
+    }).then(() => {
+      this.misc.doMessage("query saved successfully", "success");
+      this.refresh_data(0, false).then(() => {
+        this.schemevis = "hide"
       });
-    } else {
-      this.misc.doMessage("no changes detected in query", "warning");
-    }
+    }).catch((error: any) => {
+      this.misc.doMessage(error, "error");
+    }).finally(() => {
+      this._saving = false;
+    });
   }
 
   aggregate_changed(ev: any) {

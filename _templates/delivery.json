@@ -264,7 +264,7 @@
       "maxLength": 16,
       "pattern": "^[A-Za-z-]{0,16}$",
       "permanent": true,
-      "enum": ["OK", "OK-Passed", "OK-Skipped"]
+      "enum": ["OK", "OK-Labeled", "OK-Skipped"]
     },
     "dnn_wayb_id": {
       "bsonType": "string",
@@ -1251,5 +1251,10 @@
   "import": {
     "upsertable": false,
     "upsertables": []
+  },
+  "queries": {
+    "query": true,
+    "update": true,
+    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status"]
   }
 }

@@ -311,5 +311,10 @@
   ],
   "views": {},
   "fetchers": [],
-  "import": {}
+  "import": {},
+  "queries": {
+    "query": true,
+    "update": false,
+    "updatables": []
+  }
 }

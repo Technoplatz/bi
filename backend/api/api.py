@@ -530,19 +530,12 @@ class Misc:
         """
         return ["_tags"]
 
-    def in_permitted_tags_f(self, user_):
+    def in_admin_ips_f(self):
         """
         docstring is in progress
         """
-        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-        return any(i in tags_ for i in API_PERMISSIVE_TAGS_)
-
-    def in_admin_tags_f(self, user_):
-        """
-        docstring is in progress
-        """
-        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-        return any(i in tags_ for i in API_ADMIN_TAGS_)
+        ip_ = Misc().get_client_ip_f()
+        return ip_ in API_ADMIN_IPS_
 
     def properties_cleaner_f(self, properties):
         """
@@ -1152,7 +1145,6 @@ class Crud:
             import_ = col_structure_["import"] if "import" in col_structure_ else None
             if not import_:
                 raise APIError(f"no import rules defined for {collection_}")
-            purge_ = "purge" in import_ and import_["purge"] is True
             ignored_ = import_["ignored"] if "ignored" in import_ and len(import_["ignored"]) > 0 else []
             upsertable_ = "upsertable" in import_ and import_["upsertable"] is True
             upsertables_ = import_["upsertables"] if "upsertables" in import_ and len(import_["upsertables"]) > 0 else []
@@ -1236,26 +1228,26 @@ class Crud:
             df_["_created_at"] = df_["_modified_at"] = Misc().get_now_f()
             df_["_created_by"] = df_["_modified_by"] = email_
             df_["_modified_count"] = 0
-
             payload_ = df_.to_dict("records")
-            count_ = 0
 
-            if purge_:
-                Mongo().db_[collection__].delete_many({})
-
-            wrote_ = []
+            wrote_, count_ = [], 0
             if "_id" in df_.columns:
                 wrote_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=True) for doc_ in payload_]
             elif upserted_ and upsertable_ and uniques_:
+                fieldsgiven_ = False
                 for doc_ in payload_:
                     filter_, set_ = {}, {}
                     for uniques__ in uniques_:
                         filter_[uniques__] = doc_[uniques__]
                     for upsertables__ in upsertables_:
-                        set_[upsertables__] = doc_[upsertables__]
+                        if upsertables__ in doc_:
+                            fieldsgiven_ = True
+                            set_[upsertables__] = doc_[upsertables__]
                     set_["_modified_at"] = Misc().get_now_f()
                     set_["_modified_by"] = email_
                     wrote_.append(pymongo.UpdateOne(filter_, {"$set": set_}, upsert=True))
+                if not fieldsgiven_:
+                    raise APIError("no upsertable fields provided")
             else:
                 wrote_ = [pymongo.InsertOne(doc_) for doc_ in payload_]
 
@@ -1287,7 +1279,7 @@ class Crud:
             res_ = Misc().exception_f(exc__)
 
         finally:
-            stats_ += f"<br />ROW COUNT: {str(len(df_))}"
+            stats_ += f"<br />ROW COUNT: {str(len(df_))}<br />"
             stats_ += f"<br />INSERTED: {str(details_['nInserted'])}" if "nInserted" in details_ else ""
             stats_ += f"<br />UPSERTED: {str(details_['nUpserted'])}" if "nUpserted" in details_ else ""
             stats_ += f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else ""
@@ -2210,7 +2202,7 @@ class Crud:
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
             data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
-            if not (Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_)):
+            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
                 data__ = []
                 for coll_ in data_:
                     for usr_tag_ in usr_tags_:
@@ -2251,7 +2243,7 @@ class Crud:
             data_ = {}
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            if col_id_ == "_query" or Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_):
+            if col_id_ == "_query" or Auth().is_manager_f(user_) or Auth().is_admin_f(user_):
                 permitted_ = True
             else:
                 permitted_ = False
@@ -2321,7 +2313,7 @@ class Crud:
 
             approved_ = "_approved" in query_ and query_["_approved"] is True
             if not approved_:
-                err_ = "query is not approved by the administrators"
+                err_ = "query needs to be approved by the administrators"
                 raise PassException(err_)
 
             if orig_ == "api/crud":
@@ -2329,7 +2321,7 @@ class Crud:
                 if not user_:
                     raise APIError(f"no user defined for {que_id_}")
                 usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-                if Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_):
+                if Auth().is_manager_f(user_) or Auth().is_admin_f(user_):
                     permitted_ = True
                 else:
                     for usr_tag_ in usr_tags_:
@@ -2346,18 +2338,31 @@ class Crud:
             collection_ = Mongo().db_["_collection"].find_one({"col_id": que_collection_id_})
             if not collection_:
                 raise APIError(f"collection not found for {que_id_}")
-            
+
             structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
             if not structure_:
-                raise APIError(f"structure not found for {que_id_}")
+                raise APIError("collection structure not found")
 
             properties_ = structure_["properties"] if "properties" in structure_ else None
             if not properties_:
-                raise APIError(f"properties not found for {que_id_}")
+                raise APIError("properties not found in structure")
 
             que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
             if not que_aggregate_:
                 raise APIError(f"no aggregation found in {que_id_}")
+
+            queries_ = structure_["queries"] if "queries" in structure_ else None
+            if not queries_:
+                err_ = "queries not defined in the structure"
+                raise PassException(err_)
+
+            query_allowed_ = "query" in queries_ and queries_["query"] is True
+            if not query_allowed_:
+                err_ = "query not allowed for the collection"
+                raise PassException(err_)
+
+            update_allowed_ = "update" in queries_ and queries_["update"] is True
+            updatables_ = queries_["updatables"] if "updatables" in queries_ and len(queries_["updatables"]) > 0 else None
 
             que_type_ = query_["que_type"] if "que_type" in query_ else "aggregation"
 
@@ -2377,19 +2382,30 @@ class Crud:
             aggregate_ = aggregate_base_.copy()
 
             if que_type_ == "update":
+                if not update_allowed_:
+                    err_ = "update queries not allowed for the collection"
+                    raise PassException(err_)
+                if not updatables_:
+                    err_ = "no updatable fields defined in the collection structure"
+                    raise PassException(err_)
                 if not match_exists_:
-                    err_ = "no match found in update query"
+                    err_ = "no match found in the update query"
                     raise PassException(err_)
                 if not set_:
-                    err_ = "no set found in update query"
+                    err_ = "no set found in the update query"
                     raise PassException(err_)
                 set__ = {}
                 for item_ in set_:
                     if item_ not in properties_:
                         continue
-                    set__[item_] = set_[item_]
+                    if item_ not in updatables_:
+                        continue
+                    value_ = set_[item_]
+                    if str(value_).lower() == "$current_date":
+                        value_ = Misc().get_now_f()
+                    set__[item_] = value_
                 if not set__:
-                    err_ = "no valid set field found in update query"
+                    err_ = "no valid set fields found in the update query"
                     raise PassException(err_)
                 aggregate_update_ = []
                 for agg_ in que_aggregate_:
@@ -2494,7 +2510,7 @@ class Crud:
             allowed_cols_ = ["_collection", "_query"]
             is_crud_ = collection_id_[:1] != "_"
 
-            if collection_id_ not in allowed_cols_ and not Misc().in_permitted_tags_f(user_) and not Misc().in_admin_tags_f(user_) and not is_crud_:
+            if collection_id_ not in allowed_cols_ and not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_) and not is_crud_:
                 raise AuthError(f"collection is not allowed to read: {collection_id_}")
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
@@ -2507,7 +2523,7 @@ class Crud:
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True else False
             get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
 
-            if collection_id_ == "_query" and not Misc().in_permitted_tags_f(user_) and not Misc().in_admin_tags_f(user_):
+            if collection_id_ == "_query" and not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
                 get_filtered_["_tags"] = user_["_tags"]
 
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
@@ -2669,26 +2685,36 @@ class Crud:
         try:
             que_id_ = obj["id"] if "id" in obj and obj["id"] is not None else None
             aggregate_ = obj["aggregate"] if "aggregate" in obj and obj["aggregate"] is not None else None
+            approved_ = "approved" in obj and obj["approved"] is True
             user_ = obj["userindb"] if "userindb" in obj and obj["userindb"] is not None else None
 
             if not user_:
                 raise AuthError("user not found")
 
             if not aggregate_:
-                raise APIError("aggregation not found")
+                raise APIError("no aggregation provided")
 
             if not que_id_:
                 raise APIError("query not found")
 
-            if not Misc().in_permitted_tags_f(user_) and not Misc().in_admin_tags_f(user_):
-                raise AuthError("no permission")
+            if not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
+                raise AuthError("no permission to save")
 
-            Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": {
+            doc_ = {
                 "que_aggregate": aggregate_,
                 "_modified_at": Misc().get_now_f(),
                 "_modified_by": user_["usr_id"],
                 "_approved": False
-            }, "$inc": {"_modified_count": 1}})
+            }
+
+            if approved_:
+                if not Auth().is_admin_f(user_):
+                    raise AuthError("no permission to approve")
+                doc_["_approved"] = True
+                doc_["_approved_at"] = Misc().get_now_f()
+                doc_["_approved_by"] = user_["usr_id"]
+
+            Mongo().db_["_query"].update_one({"que_id": que_id_}, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
             return {"result": True}
 
@@ -2717,6 +2743,9 @@ class Crud:
             if not user_:
                 raise APIError("user not found")
 
+            if not Auth().is_admin_f(user_):
+                raise APIError("user not permitted to update schema")
+
             if not structure_:
                 raise APIError("structure not found")
 
@@ -2736,7 +2765,7 @@ class Crud:
             if not properties_:
                 raise APIError("no properties found")
 
-            arr_ = [str_ for str_ in structure_ if str_ not in STRUCTURE_KEYS_]
+            arr_ = [str_ for str_ in structure_ if str_ not in STRUCTURE_KEYS_ and str_ not in STRUCTURE_KEYS_OPTIN_]
             if len(arr_) > 0:
                 raise APIError(f"some structure keys are invalid: {','.join(arr_)}")
 
@@ -3689,6 +3718,24 @@ class Auth:
     docstring is in progress
     """
 
+    def is_admin_f(self, user_):
+        """
+        docstring is in progress
+        """
+        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+        in_admin_tags_ = any(tag_ in tags_ for tag_ in API_ADMIN_TAGS_)
+        in_admin_ips_ = Misc().in_admin_ips_f()
+        return in_admin_tags_ and in_admin_ips_
+
+    def is_manager_f(self, user_):
+        """
+        docstring is in progress
+        """
+        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+        in_permissive_tags_ = any(tag_ in tags_ for tag_ in API_PERMISSIVE_TAGS_)
+        in_admin_ips_ = Misc().in_admin_ips_f()
+        return in_permissive_tags_ and in_admin_ips_
+
     def access_validate_by_api_token_f(self, bearer_, operation_, qid_):
         """
         docstring is in progress
@@ -3891,13 +3938,13 @@ class Auth:
             if not user_id_:
                 raise APIError(f"no user defined: {user_id_}")
 
-            if Misc().in_admin_tags_f(user_):
+            if Auth().is_admin_f(user_):
                 return {"result": True}
 
             if op_ in adminops_:
                 raise AuthError(f"{op_} is not allowed")
 
-            if Misc().in_permitted_tags_f(user_):
+            if Auth().is_manager_f(user_):
                 return {"result": True}
 
             if not collection_id_:
@@ -4139,7 +4186,8 @@ class Auth:
                 raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
-            perm_ = Misc().in_permitted_tags_f(user_) or Misc().in_admin_tags_f(user_)
+            perm_ = Auth().is_manager_f(user_) or Auth().is_admin_f(user_)
+            perma_ = Auth().is_admin_f(user_)
             payload_ = {
                 "iss": "Technoplatz",
                 "aud": "api",
@@ -4148,7 +4196,8 @@ class Auth:
                 "iat": Misc().get_now_f(),
                 "id": email_,
                 "name": usr_name_,
-                "perm": perm_
+                "perm": perm_,
+                "perma": perma_
             }
             secret_ = pyotp.random_base32()
             jwt_proc_f_ = Misc().jwt_proc_f("encode", None, secret_, payload_, None)
@@ -4170,8 +4219,8 @@ class Auth:
                 "$inc": {"_modified_count": 1}
             })
 
-            user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_, "api_key": api_key_}
             ip_ = Misc().get_client_ip_f()
+            user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_, "perma": perma_, "api_key": api_key_, "ip": ip_}
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -4487,6 +4536,7 @@ API_S3_SECRET_KEY_ = os.environ.get("API_S3_SECRET_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
+API_ADMIN_IPS_ = get_docker_secret("admin_ips", default="").replace(" ", "").split(",")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -4508,6 +4558,7 @@ PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get("PREVIEW_R
 PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required", "sort", "parents", "links", "actions", "triggers", "fetchers", "import"]
+STRUCTURE_KEYS_OPTIN_ = ["queries"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
 TEMP_PATH_ = "/temp"
 DUMP_PATH_ = "/mongodump"

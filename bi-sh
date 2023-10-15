@@ -95,26 +95,26 @@ function pruneBI() {
 function startBI() {
     echo -e "\nStarting containers..."
     mkdir -p .mongo
-    if [[ ! -f .mongo/mongo_tls_keyfile_password ]]; then
-        openssl rand -hex 10 >.mongo/mongo_tls_keyfile_password
+    if [[ ! -f .secret/.mongo_tls_keyfile_password ]]; then
+        openssl rand -hex 10 >.secret/.mongo_tls_keyfile_password
     fi
-    if [[ ! -f .mongo/mongo_username ]]; then
-        echo "root" >.mongo/mongo_username
+    if [[ ! -f .secret/.mongo_username ]]; then
+        echo "root" >.secret/.mongo_username
     fi
-    if [[ ! -f .mongo/mongo_password ]]; then
-        openssl rand -hex 10 >.mongo/mongo_password
+    if [[ ! -f .secret/.mongo_password ]]; then
+        openssl rand -hex 10 >.secret/.mongo_password
     fi
-    if [[ ! -f .mongo/mongo_initdb_root_username ]]; then
-        echo "root" >.mongo/mongo_initdb_root_username
+    if [[ ! -f .secret/.mongo_initdb_root_username ]]; then
+        echo "root" >.secret/.mongo_initdb_root_username
     fi
-    if [[ ! -f .mongo/mongo_initdb_root_password ]]; then
-        openssl rand -hex 10 >.mongo/mongo_initdb_root_password
+    if [[ ! -f .secret/.mongo_initdb_root_password ]]; then
+        openssl rand -hex 10 >.secret/.mongo_initdb_root_password
     fi
     env docker compose --project-name technoplatz-bi --env-file $DOTENV -f $DCYML up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
-        docker cp init:/cert/mongo0.pem .mongo/mongo0.pem
-        docker cp init:/cert/mongo-ca.pem .mongo/mongo-ca.pem
+        docker cp init:/cert/mongo0.pem .secret/mongo0.pem
+        docker cp init:/cert/mongo-ca.pem .secret/mongo-ca.pem
         echo -e "\n✔ Platform is up and running."
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."

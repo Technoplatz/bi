@@ -78,7 +78,7 @@ https://www.gnu.org/licenses.
               <div (click)="show_aggregation(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
-                  {{ 'Edit JSON' | translate }}
+                  {{ 'Edit Aggregation' | translate }}
                 </div>
               </div>
             </ion-col>
@@ -87,9 +87,14 @@ https://www.gnu.org/licenses.
         <ion-grid [class]="schemevis">
           <ion-row>
             <ion-col size="12">
-              <ion-button (click)="save_aggregation()">
-                <span *ngIf="!_running">{{ 'Save Query' | translate }}</span>
-                <span *ngIf="_running">{{ 'Saving' | translate }}...</span>
+              <ion-button *ngIf="perm_" (click)="save_aggregation(false)">
+                <span *ngIf="!_saving">{{ 'Save Aggregation' | translate }} [{{ 'Requires Approval' | translate
+                  }}]</span>
+                <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
+              </ion-button>
+              <ion-button *ngIf="perma_" (click)="save_aggregation(true)">
+                <span *ngIf="!_saving">{{ 'Approve' | translate }}</span>
+                <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button color="light" (click)="show_aggregation(false)">
                 <ion-icon name="close-circle-outline"></ion-icon>

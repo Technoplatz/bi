@@ -491,7 +491,7 @@ class Trigger():
             _id = params_["id"]
             self.counter_ += 1
             self.repeater_ += 1
-            if self.repeater_ == 100:
+            if self.repeater_ == REPEATER_LIMIT_:
                 PRINT_("counter_", self.counter_, source_collection_)
                 self.repeater_ = 0
 
@@ -887,6 +887,7 @@ mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 notification_slack_hook_url_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
+REPEATER_LIMIT_ = 1000
 PRINT_ = partial(print, flush=True)
 
 if __name__ == "__main__":
