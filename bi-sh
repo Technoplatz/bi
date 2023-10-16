@@ -95,20 +95,23 @@ function pruneBI() {
 function startBI() {
     echo -e "\nStarting containers..."
     mkdir -p .secret
+     if [[ ! -f .secret/.admin_ips ]]; then
+        echo -n "0.0.0.0" >.secret/.admin_ips
+    fi
     if [[ ! -f .secret/.mongo_tls_keyfile_password ]]; then
-        openssl rand -hex 10 >.secret/.mongo_tls_keyfile_password
+        echo -n $(openssl rand -hex 10) >.secret/.mongo_tls_keyfile_password
     fi
     if [[ ! -f .secret/.mongo_username ]]; then
-        echo "root" >.secret/.mongo_username
+        echo -n "root" >.secret/.mongo_username
     fi
     if [[ ! -f .secret/.mongo_password ]]; then
-        openssl rand -hex 10 >.secret/.mongo_password
+        echo -n $(openssl rand -hex 10) >.secret/.mongo_password
     fi
     if [[ ! -f .secret/.mongo_initdb_root_username ]]; then
-        echo "root" >.secret/.mongo_initdb_root_username
+        echo -n "root" >.secret/.mongo_initdb_root_username
     fi
     if [[ ! -f .secret/.mongo_initdb_root_password ]]; then
-        openssl rand -hex 10 >.secret/.mongo_initdb_root_password
+        echo -n $(openssl rand -hex 10) >.secret/.mongo_initdb_root_password
     fi
     env docker compose --project-name technoplatz-bi --env-file $DOTENV -f $DCYML up --detach --no-build
     if [ $? -eq 0 ]; then

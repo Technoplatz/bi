@@ -157,7 +157,7 @@ ion-note {
 .top-tools {
   position: fixed;
   display: flex;
-  right: 40px;
+  right: 16px !important;
   top: 14px;
   z-index: 99;
   background-color: var(--ion-color-white);
@@ -167,6 +167,10 @@ ion-note {
   align-content: flex-end;
   margin: auto;
   cursor: pointer !important;
+}
+
+.top-tools ion-icon {
+  font-size: 24px;
 }
 
 .top-tools ion-button {
@@ -661,13 +665,23 @@ form ion-item ion-label {
   pointer-events: none !important;
 }
 
+.out-button {
+  --padding-start: 0px !important;
+  --padding-end: 64px !important;
+  border-top: 1px dotted var(--ion-color-primary);
+  font-size: 14px;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
 .dash-item {
   height: 40px !important;
   margin-top: -10px;
 }
 
 .menu-button ion-icon,
-.dash-button ion-icon {
+.dash-button ion-icon,
+.out-button ion-icon {
   margin-top: -2px;
 }
 
@@ -817,11 +831,6 @@ ion-spinner {
   font-size: 15px !important;
 }
 
-.section-header span {
-  margin-top: -2px;
-  font-weight: 600;
-}
-
 .small-button {
   min-width: 100px;
   margin-right: 8px;
@@ -968,8 +977,8 @@ ion-label {
 }
 
 app-menu {
-  min-width: 230px;
-  max-width: 230px;
+  min-width: 210px;
+  max-width: 210px;
   height: 100vh;
   top: 0;
   z-index: 999;
@@ -1005,7 +1014,8 @@ app-menu:hover {
   position: fixed;
   bottom: 0px;
   padding-top: 32px;
-  padding-bottom: 32px;
+  padding-bottom: 8px;
+  font-size: 10px;
 }
 
 .app-footer ion-icon {
@@ -1294,7 +1304,7 @@ sup {
 }
 
 .sign-section {
-  margin-top: 16vh;
+  margin-top: 14vh;
 }
 
 .sign-section a {
@@ -1339,14 +1349,14 @@ sup {
 }
 
 .index-logo {
-  font-size: 180px !important;
+  font-size: 120px !important;
   color: var(--ion-color-primary);
   margin-left: -16px;
 }
 
 .bi-logo {
   margin-top: 16px;
-  height: 36px;
+  height: 32px;
   width: auto;
 }
 

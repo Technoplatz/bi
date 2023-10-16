@@ -2089,21 +2089,6 @@ class Crud:
         except Exception as exc:
             return Misc().exception_f(exc)
 
-    def queries_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = input_["userindb"]
-            aggregate_ = list(Mongo().db_["_query"].aggregate([{"$match": {"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}}, {"$sort": {"_modified_at": -1}}]))
-            return {"result": True, "data": json.loads(JSONEncoder().encode(aggregate_))}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except Exception as exc:
-            return Misc().exception_f(exc)
-
     def announcements_f(self, input_):
         """
         docstring is in progress
@@ -2200,11 +2185,13 @@ class Crud:
             user_ = obj["userindb"]
             structure_ = self.root_schemas_f("_collection")
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+            collections_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
 
-            data_ = list(Mongo().db_["_collection"].find(filter={}, sort=[("col_priority", 1), ("col_title", 1)]))
-            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
+            if Auth().is_manager_f(user_) or Auth().is_admin_f(user_):
+                data_ = collections_
+            else:
                 data__ = []
-                for coll_ in data_:
+                for coll_ in collections_:
                     for usr_tag_ in usr_tags_:
                         filter_ = {
                             "per_collection_id": coll_["col_id"],
@@ -2213,7 +2200,7 @@ class Crud:
                                 {"per_read": True},
                                 {"per_insert": True},
                                 {"per_update": True},
-                                {"per_delete": True},
+                                {"per_delete": True}
                             ]
                         }
                         permission_ = Mongo().db_["_permission"].find_one(filter_)
@@ -2530,8 +2517,8 @@ class Crud:
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True else False
             get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
 
-            if collection_id_ == "_query" and not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
-                get_filtered_["_tags"] = user_["_tags"]
+            if collection_id_ == "_query" and not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
+                get_filtered_["_tags"] = { "$elemMatch": { "$in": user_["_tags"] }}
 
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
@@ -3700,14 +3687,14 @@ class OTP:
 
             return {"result": True}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc__:
+            return Misc().api_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc__:
+            return Misc().exception_f(exc__)
 
 
 class Auth:
@@ -4722,8 +4709,6 @@ def crud_f():
             res_ = Crud().copykey_f(input_)
         elif op_ == "charts":
             res_ = Crud().charts_f(input_)
-        elif op_ == "queries":
-            res_ = Crud().queries_f(input_)
         elif op_ == "views":
             res_ = Crud().views_f(input_)
         elif op_ == "announcements":

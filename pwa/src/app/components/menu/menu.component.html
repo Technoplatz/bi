@@ -70,17 +70,10 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="server-outline"></ion-icon>{{ 'Database' | translate }}
         </ion-button>
-        <div *ngIf="collections?.length > 0; else nocollectionsfound">
-          <p *ngFor="let item of collections" (click)="misc.navi.next('collection/'+ item.col_id)"
-            class="clicked-item dark">
-            {{ item?.col_title | translate }}
-          </p>
-        </div>
-        <ng-template #nocollectionsfound>
-          <p>
-            {{ 'No collections found' | translate }}
-          </p>
-        </ng-template>
+        <p *ngFor="let item of collections_" (click)="misc.navi.next('collection/'+ item?.col_id)"
+          class="clicked-item dark">
+          {{ item?.col_title | translate }}
+        </p>
       </ion-label>
     </ion-item>
     <!-- <ion-item lines="none">
@@ -105,12 +98,12 @@ https://www.gnu.org/licenses.
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
         </ion-button>
-        <p *ngFor="let item of segmentsadm" (click)="misc.navi.next('admin/' + item.id)" class="clicked-item dark">
+        <p *ngFor="let item of segmentsadm" (click)="misc.navi.next('admin/' + item?.id)" class="clicked-item dark">
           {{ item.title | translate }}
         </p>
       </ion-label>
     </ion-item>
-    <ion-item lines="none">
+    <ion-item>
       <ion-label class="ion-text-wrap">
         <ion-button size="default" fill="clear" class="menu-button">
           <ion-icon name="settings-outline"></ion-icon>{{ 'Settings' | translate }}
@@ -121,6 +114,14 @@ https://www.gnu.org/licenses.
         <p (click)="misc.navi.next('settings/profile-settings')" class="clicked-item dark">
           {{ 'Profile Settings' | translate }}
         </p>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label class="ion-text-wrap">
+        <ion-button size="default" fill="clear" class="out-button" (click)="sign_out()">
+          <ion-icon name="power-outline"></ion-icon>
+          {{ 'Sign out' | translate }}
+        </ion-button>
       </ion-label>
     </ion-item>
   </ion-list>

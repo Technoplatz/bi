@@ -33,13 +33,10 @@ https://www.gnu.org/licenses.
 <div class="top-tools">
   <ion-button *ngIf="is_new_version" color="danger" (click)="set_version()" size="small" class="new-version">
     <ion-icon name="arrow-up-circle-outline"></ion-icon>&nbsp;
-    {{ 'Upgrade' | translate }}
-  </ion-button>
-  <ion-button fill="clear" (click)="sign_out()">
-    <ion-icon name="log-out-outline"></ion-icon>
+    {{ 'Upgrade now' | translate }}
   </ion-button>
   <ion-button fill="clear" (click)="misc.navi.next('settings/account')">
-    <ion-icon name="person-outline"></ion-icon>
-    <ion-label>&nbsp;{{ name }}</ion-label>
+    <ion-label>{{ name }}&nbsp;</ion-label>
+    <ion-icon name="person-circle-outline"></ion-icon>
   </ion-button>
 </div>

@@ -50,7 +50,7 @@ export class MenuComponent implements OnInit {
   public user_: any;
   public perm_: boolean = false;
   public views: any = [];
-  public collections: any = [];
+  public collections_: any = [];
   public menutoggle: boolean = false;
 
   constructor(
@@ -69,7 +69,7 @@ export class MenuComponent implements OnInit {
 
   ngOnInit() {
     this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
+      this.collections_ = res && res.data ? res.data : [];
     });
     this.crud.views.subscribe((res: any) => {
       this.views = res ? res : [];
@@ -87,6 +87,12 @@ export class MenuComponent implements OnInit {
       this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
         this.misc.menutoggle.next(this.menutoggle);
       });
+    });
+  }
+
+  sign_out() {
+    this.auth.sign_out().then(() => { }).catch((error: any) => {
+      console.error("signout error", error.msg);
     });
   }
 

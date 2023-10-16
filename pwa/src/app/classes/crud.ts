@@ -289,19 +289,6 @@ export class Crud {
     });
   }
 
-  get_queries() {
-    return new Promise((resolve, reject) => {
-      this.misc.api_call("crud", {
-        op: "queries",
-        collection: "_query"
-      }).then((res: any) => {
-        resolve(this.queries.next(res && res.result ? res.data : []));
-      }).catch((err: any) => {
-        reject(err);
-      });
-    });
-  }
-
   get_announcements() {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
@@ -317,11 +304,11 @@ export class Crud {
 
   get_all() {
     return new Promise((resolve, reject) => {
-      this.get_charts().then(() => { }).catch((error: any) => {
-        console.error("*** charts error", error);
-      }).finally(() => {
-        resolve(true);
-      });
+      // this.get_charts().then(() => { }).catch((error: any) => {
+      //   console.error("*** charts error", error);
+      // }).finally(() => {
+      //   resolve(true);
+      // });
       this.get_views().then(() => { }).catch((error: any) => {
         console.error("*** views error", error);
       }).finally(() => {

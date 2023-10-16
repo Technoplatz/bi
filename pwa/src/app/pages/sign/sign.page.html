@@ -46,8 +46,8 @@ https://www.gnu.org/licenses.
         </ion-row>
     </ion-grid>
     <form [formGroup]="resetForm" *ngIf="formtype=='reset'">
-        <ion-item class="section-header" lines="none">
-            <h2>{{ 'Reset Password' | translate }}</h2>
+        <ion-item lines="none">
+            <h3>{{ 'Reset Password' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'Password' | translate }} <sup>
@@ -76,8 +76,8 @@ https://www.gnu.org/licenses.
         </ion-item>
     </form>
     <form [formGroup]="signupForm" *ngIf="formtype=='signup'">
-        <ion-item class="section-header" lines="none">
-            <h1>{{ 'Sign up' | translate }}</h1>
+        <ion-item lines="none">
+            <h3>{{ 'Sign up' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'E-mail' | translate }} [{{ 'User ID' | translate }}] <sup>
@@ -119,8 +119,8 @@ https://www.gnu.org/licenses.
         </ion-item>
     </form>
     <form [formGroup]="signinForm" *ngIf="formtype=='signin'">
-        <ion-item class="section-header" lines="none">
-            <h2>{{ 'Sign in' | translate }}</h2>
+        <ion-item lines="none">
+            <h3>{{ 'Sign in' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'E-mail' | translate }} <sup>
@@ -157,8 +157,8 @@ https://www.gnu.org/licenses.
         </ion-item>
     </form>
     <form [formGroup]="TFACForm" *ngIf="formtype=='tfac'">
-        <ion-item class="section-header" lines="none">
-            <h2>{{ '2F Authentication' | translate }}</h2>
+        <ion-item lines="none">
+            <h3>{{ '2F Authentication' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'One Time Password' | translate }}:
@@ -169,7 +169,7 @@ https://www.gnu.org/licenses.
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="TFAC()" size="default" class="ion-margin-end" class="sign-button">
-                <span *ngIf="!isInProgress">{{ 'Verify' | translate }}</span>
+                <span *ngIf="!isInProgress">{{ 'Sign in' | translate }}</span>
                 <ion-spinner *ngIf="isInProgress" name="dots"></ion-spinner>
             </ion-button>
             <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
@@ -185,8 +185,8 @@ https://www.gnu.org/licenses.
         </ion-item>
     </form>
     <form [formGroup]="forgotForm" *ngIf="formtype=='forgot'">
-        <ion-item class="section-header" lines="none">
-            <h2>{{ 'Reset Password' | translate }}</h2>
+        <ion-item lines="none">
+            <h3>{{ 'Reset Password' | translate }}</h3>
         </ion-item>
         <ion-item lines="full" class="ion-margin-top">
             <ion-label position="stacked">{{ 'E-mail' | translate }}
@@ -206,8 +206,8 @@ https://www.gnu.org/licenses.
         </ion-item>
     </form>
     <form [formGroup]="successForm" *ngIf="formtype=='success'">
-        <ion-item class="section-header" lines="none">
-            <h1>{{ 'Thank you' | translate }}!</h1>
+        <ion-item lines="none">
+            <h2>{{ 'Thank you' | translate }}!</h2>
         </ion-item>
         <ion-item lines="none">
             <ion-label>
