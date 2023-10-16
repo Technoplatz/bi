@@ -88,7 +88,7 @@ export class QueryPage implements OnInit {
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
   private menu: string = "";
-  private aggregated_: any = [];
+  private json_content_: any = [];
   private page_start_: number = 1;
   private page_end_: number = 1;
   private submenu: string = "";
@@ -96,6 +96,8 @@ export class QueryPage implements OnInit {
   private uri_: string = "";
   public perm_: boolean = false;
   public perma_: boolean = false;
+  private collections_: any = [];
+  private schema_: any = {};
 
   constructor(
     public misc: Miscellaneous,
@@ -122,6 +124,9 @@ export class QueryPage implements OnInit {
     this.auth.user.subscribe((res: any) => {
       this.perm_ = res && res.perm;
       this.perma_ = res && res.perma;
+    });
+    this.crud.collections.subscribe((res: any) => {
+      this.collections_ = res && res.data ? res.data : [];
     });
   }
 
@@ -155,11 +160,12 @@ export class QueryPage implements OnInit {
       this.schemevis = "hide";
       this.crud.get_query(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res.query && res.data) {
+          this.schema_ = res.schema;
           this.pager_ = this.page_;
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;
           this.subheader = res.query.que_title;
-          this.aggregate_ = this.aggregated_ = res.query.que_aggregate;
+          this.aggregate_ = this.json_content_ = res.query.que_aggregate;
           this.type_ = res.query.que_type;
           this.fields_ = res.fields;
           this.data_ = res.data;
@@ -180,7 +186,7 @@ export class QueryPage implements OnInit {
         if (res.err) {
           this.misc.doMessage(res.err, "error");
         } else {
-          this.misc.doMessage(`query run successfully, ${res.count > 0 ? res.count : 'no'} records affected`, "success");
+          this.misc.doMessage(`query executed successfully, ${res.count > 0 ? res.count : 'no'} records affected`, "success");
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
@@ -197,13 +203,7 @@ export class QueryPage implements OnInit {
   }
 
   show_aggregation(shw: boolean) {
-    if (shw) {
-      this.editor.setMode(this.jeoptions.mode);
-      this.schemevis = "show";
-      this.editor.focus();
-    } else {
-      this.schemevis = "hide";
-    }
+    this.schemevis = shw ? "show" : "hide";
   }
 
   doMenuToggle() {
@@ -215,13 +215,13 @@ export class QueryPage implements OnInit {
     });
   }
 
-  save_aggregation(approved_: boolean) {
+  save_json_f(approved_: boolean) {
     this._saving = true;
     this.misc.api_call("crud", {
       op: "savequery",
       collection: "_query",
       id: this.id,
-      aggregate: this.aggregated_,
+      aggregate: this.json_content_,
       approved: approved_
     }).then(() => {
       this.misc.doMessage("query saved successfully", "success");
@@ -235,9 +235,9 @@ export class QueryPage implements OnInit {
     });
   }
 
-  aggregate_changed(ev: any) {
+  json_changed(ev: any) {
     if (!ev.isTrusted) {
-      this.aggregated_ = ev;
+      this.json_content_ = ev;
     } else {
       console.error("*** event", ev);
     }
@@ -263,6 +263,40 @@ export class QueryPage implements OnInit {
         this.running_ = false;
       });
     }
+  }
+
+  edit_query() {
+    this.modal.create({
+      component: CrudPage,
+      backdropDismiss: true,
+      cssClass: "crud-modal",
+      componentProps: {
+        shuttle: {
+          op: "update",
+          collection: "_query",
+          collections: this.collections_,
+          views: [],
+          user: this.user,
+          data: this.query_,
+          counters: null,
+          structure: this.schema_,
+          sweeped: [],
+          filter: null,
+          actions: [],
+          actionix: -1,
+          view: null,
+          scan: null
+        }
+      }
+    }).then((modal_: any) => {
+      modal_.present();
+      modal_.onDidDismiss().then((res: any) => {
+        if (res.data.modified && res.data.res.result) {
+          this.misc.doMessage("query updated successfully", "success");
+          this.refresh_data(0, false);
+        }
+      });
+    });
   }
 
 }

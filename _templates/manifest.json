@@ -314,7 +314,7 @@
   "import": {},
   "queries": {
     "query": true,
-    "update": false,
+    "cronjob": false,
     "updatables": []
   }
 }

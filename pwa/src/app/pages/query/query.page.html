@@ -78,21 +78,29 @@ https://www.gnu.org/licenses.
               <div (click)="show_aggregation(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
-                  {{ 'Edit Aggregation' | translate }}
+                  {{ 'Edit Query' | translate }}
+                </div>
+              </div>
+              <div (click)="edit_query()" class="data-sq-button">
+                <div class="ion-no-padding">
+                  <ion-icon name="settings-outline"></ion-icon><br />
+                  {{ 'Query Settings' | translate }}
                 </div>
               </div>
             </ion-col>
           </ion-row>
         </ion-grid>
-        <ion-grid [class]="schemevis">
+
+        <!-- SCHEMA -->
+        <ion-grid *ngIf="schemevis=='show'" class="actions-grid">
           <ion-row>
             <ion-col size="12">
-              <ion-button *ngIf="perm_" (click)="save_aggregation(false)">
+              <ion-button *ngIf="perm_" (click)="save_json_f(false)">
                 <span *ngIf="!_saving">{{ 'Save Aggregation' | translate }} [{{ 'Requires Approval' | translate
                   }}]</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
-              <ion-button *ngIf="perma_" (click)="save_aggregation(true)">
+              <ion-button *ngIf="perma_" (click)="save_json_f(true)">
                 <span *ngIf="!_saving">{{ 'Approve' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
@@ -105,13 +113,13 @@ https://www.gnu.org/licenses.
           <ion-row>
             <ion-col size="12" class="jeditor">
               <json-editor id="aggregate" [options]="jeoptions" [data]="aggregate_ ? aggregate_ : []"
-                (change)="aggregate_changed($event)" #editor></json-editor>
+                (change)="json_changed($event)" #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
-        <div *ngIf="type_==='aggregation'; else update">
+        <div *ngIf="type_==='query'; else cronjob">
           <table *ngIf="data_.length > 0; else nodata" class="data-table">
             <tr>
               <th>#</th>
@@ -163,12 +171,12 @@ https://www.gnu.org/licenses.
           </table>
           <ng-template #nodata>
             <div class="ion-margin-top">
-              <h6>{{ 'No data found' | translate }}!</h6>
-              {{ 'Please edit your query' | translate }}.
+              <h6>{{ 'No data found' | translate }}.</h6>
+              {{ 'You can edit the query or get help from the Administrators' | translate }}.
             </div>
           </ng-template>
         </div>
-        <ng-template #update>
+        <ng-template #cronjob>
           <div class="ion-margin-top">
             <h6><span *ngIf="is_loaded">{{ count_ }} {{'records affected' | translate }}</span>
               <span *ngIf="!is_loaded">{{'Processing' | translate }}..</span>.

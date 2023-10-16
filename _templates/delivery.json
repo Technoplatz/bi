@@ -1254,7 +1254,7 @@
   },
   "queries": {
     "query": true,
-    "update": true,
+    "cronjob": true,
     "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status"]
   }
 }

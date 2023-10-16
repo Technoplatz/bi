@@ -21,7 +21,7 @@
       "bsonType": "string",
       "title": "Type",
       "description": "Query type",
-      "enum": ["aggregation", "update"],
+      "enum": ["query", "cronjob"],
       "default": "query"
     },
     "que_collection_id": {

@@ -86,11 +86,7 @@ https://www.gnu.org/licenses.
                 <ion-icon name="trash-outline"></ion-icon><br />
                 {{ 'Delete Record' | translate }}
               </div>
-              <!-- <div *ngIf="is_crud && filter_.length==0" (click)="doSaveView()" class="data-sq-button">
-                <ion-icon name="save-outline"></ion-icon><br />
-                {{ 'SaveAs View' | translate }}
-              </div> -->
-              <div *ngIf="is_crud && perm_" (click)="doShowSchema(true)" class="data-sq-button">
+              <div *ngIf="is_crud && perm_" (click)="show_hide_schema(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
                   {{ 'Edit Schema' | translate }}
@@ -99,42 +95,38 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
-        <ion-grid *ngIf="is_crud && perm_" [class]="schemevis">
+
+        <!-- SCHEMA -->
+        <ion-grid *ngIf="is_crud && perm_ && schemevis=='show'" class="actions-grid">
           <ion-row>
             <ion-col size="12">
-              <ion-button *ngIf="!is_saving" (click)="save_schema_f()">
+              <ion-button *ngIf="!is_saving" (click)="save_json_f()">
                 <span>{{ 'Save Schema' | translate }}</span>
               </ion-button>
               <ion-button *ngIf="is_saving">
                 <ion-spinner name="dots"></ion-spinner>&nbsp;
                 <span>{{ 'Saving' | translate }}</span>
               </ion-button>
-              <ion-button color="light" (click)="doShowSchema(false)">
+              <ion-button color="light" (click)="show_hide_schema(false)">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
             </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col size="12" class="schema-card-container">
-              <span *ngFor="let item of schema_ | keyvalue" (click)="doShowSchemaKey(item.key)">{{ item.value.title }}
-                [{{ item.value.count }}]</span>
-            </ion-col>
-          </ion-row>
-          <ion-row>
             <ion-col size="12" class="jeditor">
               <json-editor id="struc" [options]="jeoptions" [data]="structure ? structure : {}"
-                (change)="doChangeSchema($event)" #editor></json-editor>
+                (change)="json_changed($event)" #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
 
         <!-- ACTION BUTTONS -->
         <ion-grid *ngIf="is_crud && actions.length > 0" class="actions-grid">
-          <ion-row class="ion-no-margin">
-            <ion-col>
+          <ion-row>
+            <ion-col size="12">
               <span *ngFor="let item of actions; let ac = index">
-                <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)" class="action-button">
+                <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)">
                   <ion-icon *ngIf="item.one_click"
                     [name]="item?.icon ? item.icon : 'play-forward-circle-outline'"></ion-icon>
                   <ion-icon *ngIf="!item.one_click" [name]="item?.icon ? item.icon : 'play-circle-outline'"></ion-icon>
@@ -159,7 +151,6 @@ https://www.gnu.org/licenses.
         <table *ngIf="data.length >= 0" class="data-table">
           <tr>
             <th>&nbsp;</th>
-            <th *ngIf="id=='_query'">&nbsp;</th>
             <th>
               <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)" mode="md">
               </ion-checkbox>
@@ -261,13 +252,10 @@ https://www.gnu.org/licenses.
               {{ '_id' }}
             </th>
           </tr>
-          <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
+          <tr *ngFor="let record of data; let i = index"
+            (click)="id=='_query' ? go_query(record, $event) : go_crud(record, 'update')">
             <td class="primary aligned-right">{{ ((page_ - 1) * limit_) + i + 1}}</td>
-            <td *ngIf="id=='_query'" (click)="go_query(record, $event)">
-              <ion-icon *ngIf="record.que_type==='aggregation'" name="play"></ion-icon>
-              <ion-icon *ngIf="record.que_type!=='aggregation'" name="play-outline" color="danger"></ion-icon>
-            </td>
-            <td (click)="tdc($event)">
+            <td>
               <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                 (ionChange)="SetSelectData(i,$event)" mode="md">
               </ion-checkbox>

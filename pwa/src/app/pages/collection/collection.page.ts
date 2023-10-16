@@ -92,15 +92,13 @@ export class CollectionPage implements OnInit {
   private collections_: any;
   private user_: any;
   private segmentsadm_: any = environment.segmentsadm;
-  public schema_key: any = null;
   public properties_: any = {};
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
   public sort: any = {};
   public structure: any = {};
   public schemevis: any = "hide";
-  private structure_ori_: any = null;
-  private structured_: any = null;
+  private json_content_: any = null;
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public is_inprogress: boolean = false;
@@ -201,9 +199,7 @@ export class CollectionPage implements OnInit {
   refresh_data(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
-      this.doSetSchemaKey(null);
       this.schemevis = "hide";
-      this.structured_ = null;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -220,11 +216,9 @@ export class CollectionPage implements OnInit {
             limit: this.limit_
           }).then((res: any) => {
             this.pager_ = this.page_;
-            this.editor?.setMode(this.jeoptions.mode);
             this.build_schema_f(res.structure);
             this.data = res.data;
-            this.structure_ori_ = res.structure;
-            this.structure = res.structure;
+            this.structure = this.json_content_ = res.structure;
             this.actions = this.structure.actions;
             this.properties_ = res.structure.properties;
             this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
@@ -499,47 +493,20 @@ export class CollectionPage implements OnInit {
     this.searched[k].op = op;
   }
 
-  doShowSchema(shw: boolean) {
-    if (shw) {
-      this.editor?.setMode(this.jeoptions.mode);
-      this.schemevis = "show";
-      this.editor.focus();
-    } else {
-      this.refresh_data(0).then(() => {
-        this.schemevis = "hide";
-        this.structured_ ? this.misc.doMessage("changes were discarded", "warning") : null;
-        this.structured_ = null;
-      });
-    }
-  }
-
-  doSetSchemaKey(key: any) {
-    this.schema_key = key ? key : "schema-structure";
-    this.editor?.setName(key ? key : "schema-structure");
-  }
-
-  doShowSchemaKey(key: string) {
-    this.structured_ ? this.misc.doMessage("the latest change was discarded", "warning") : null;
-    this.doSetSchemaKey(key);
-    this.structured_ = null;
-    this.structure = this.structure_ori_[key];
-    this.editor?.setMode(this.jeoptions.mode);
-    this.schemevis = "show";
-    this.editor.focus();
+  show_hide_schema(shw: boolean) {
+    this.schemevis = shw ? "show" : "hide";
   }
 
   doFlashcard(item_: any) {
-    if (item_ !== "") {
-      this.status_ = item_;
-      this.filter_ = item_.view.data_filter;
-      this.storage.set("LSSTATUS_" + this.id, this.status_).then(() => {
-        this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-          this.refresh_data(0).then(() => { }).catch((res: any) => {
-            this.misc.doMessage(res, "error");
-          });
+    this.status_ = item_;
+    this.filter_ = item_.view.data_filter;
+    this.storage.set("LSSTATUS_" + this.id, this.status_).then(() => {
+      this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
+        this.refresh_data(0).then(() => { }).catch((res: any) => {
+          this.misc.doMessage(res, "error");
         });
       });
-    }
+    });
   }
 
   doMenuToggle() {
@@ -560,76 +527,22 @@ export class CollectionPage implements OnInit {
     this.action_ = null;
   }
 
-  doSaveView() {
-    this.alert.create({
-      cssClass: "my-custom-class",
-      subHeader: "Save Filter as View",
-      message: "Please enter a view name to save the current filter.",
-      inputs: [
-        {
-          name: "title",
-          id: "title",
-          value: null,
-          type: "text",
-          placeholder: "Enter a title for the new view"
-        }
-      ],
-      buttons: [
-        {
-          text: "Cancel",
-          role: "cancel",
-          cssClass: "primary",
-          handler: () => {
-            console.warn("Confirm cancel");
-          }
-        }, {
-          text: "SAVE VIEW",
-          handler: (data: any) => {
-            this.misc.api_call("crud", {
-              op: "saveview",
-              collection: this.id,
-              filter: this.filter_,
-              title: data.title
-            }).then((res: any) => {
-              this.misc.doMessage("view saved successfully", "success");
-              this.crud.get_all().then(() => { });
-              this.misc.navi.next("view/" + res.id);
-            }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            });
-          }
-        }
-      ]
-    }).then((alert: any) => {
-      alert.present();
-      const viewfocus: HTMLElement = document.getElementById("title")!;
-      setTimeout(() => viewfocus.focus(), 600);
-    });
-  }
-
-  save_schema_f() {
-    if (this.structured_) {
-      this.is_saving = true;
-      this.misc.api_call("crud", {
-        op: "saveschema",
-        collection: this.id,
-        schema_key: this.schema_key,
-        structure: this.structured_
-      }).then(() => {
-        this.misc.doMessage("schema saved successfully", "success");
-        this.refresh_data(0).then(() => {
-          this.schemevis = "hide"
-        });
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this.structured_ = null;
-        this.is_saving = false;
+  save_json_f() {
+    this.is_saving = true;
+    this.misc.api_call("crud", {
+      op: "saveschema",
+      collection: this.id,
+      structure: this.json_content_
+    }).then(() => {
+      this.misc.doMessage("schema saved successfully", "success");
+      this.refresh_data(0).then(() => {
+        this.schemevis = "hide"
       });
-    } else {
-      this.misc.doMessage("no changes detected in the schema", "warning");
-    }
-
+    }).catch((error: any) => {
+      this.misc.doMessage(error, "error");
+    }).finally(() => {
+      this.is_saving = false;
+    });
   }
 
   upload_modal_f() {
@@ -667,9 +580,9 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  doChangeSchema(ev: any) {
+  json_changed(ev: any) {
     if (!ev.isTrusted) {
-      this.structured_ = ev;
+      this.json_content_ = ev;
     } else {
       console.error("*** event", ev);
     }
@@ -680,10 +593,6 @@ export class CollectionPage implements OnInit {
     this.storage.set("LSQUERY", record_).then(() => {
       this.misc.navi.next("/query/" + record_.que_id);
     });
-  }
-
-  tdc(event: any) {
-    event.stopPropagation();
   }
 
 }

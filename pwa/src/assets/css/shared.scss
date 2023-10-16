@@ -990,15 +990,14 @@ app-menu:hover {
   width: 100%;
 }
 
-.action-button {
-  max-width: 240px;
+.actions-grid ion-button {
+  max-width: 300px;
   overflow: hidden !important;
-  font-size: 13px;
   font-weight: 600;
   --background: var(--ion-color-primary);
 }
 
-.action-button ion-icon {
+.actions-grid ion-button ion-icon {
   font-size: 24px;
 }
 
@@ -1815,6 +1814,7 @@ ion-checkbox {
 
 .show {
   display: initial;
+  margin-top: 16px !important;
 }
 
 .hide-scrollbar::-webkit-scrollbar {

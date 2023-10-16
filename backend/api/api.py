@@ -2286,13 +2286,17 @@ class Crud:
         """
         docstring is in progress
         """
-        query_, data_, fields_, count_, permitted_, aggregate_base_, err_ = {}, [], [], 0, False, [], None
+        schema_, query_, data_, fields_, count_, permitted_, aggregate_base_, err_ = {}, {}, [], [], 0, False, [], None
         files_, personalizations_to_, to_, orig_ = [], [], [], None
         init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "err": err_}
         try:
             que_id_ = obj_["id"] if "id" in obj_ else None
             if not que_id_:
                 raise APIError("no query id defined")
+
+            schema_ = self.root_schemas_f("_query")
+            if not schema_:
+                raise APIError("query schema not found")
 
             sched_ = "sched" in obj_ and obj_["sched"] is True
             key_ = obj_["key"] if "key" in obj_ and obj_["key"] is not None else None
@@ -2309,7 +2313,7 @@ class Crud:
 
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
-                raise APIError(f"no query found: {que_id_}")
+                raise APIError("query not found")
 
             approved_ = "_approved" in query_ and query_["_approved"] is True
             if not approved_:
@@ -2329,15 +2333,15 @@ class Crud:
                             permitted_ = True
                             break
                 if not permitted_:
-                    raise AuthError(f"user is not a subscriber of {que_id_}")
+                    raise AuthError("user is not a subscriber")
 
             que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ else None
             if not que_collection_id_:
-                raise APIError(f"collection not found {que_id_}")
+                raise APIError("query collection not defined")
 
             collection_ = Mongo().db_["_collection"].find_one({"col_id": que_collection_id_})
             if not collection_:
-                raise APIError(f"collection not found for {que_id_}")
+                raise APIError("query collection not found")
 
             structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
             if not structure_:
@@ -2349,7 +2353,7 @@ class Crud:
 
             que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
             if not que_aggregate_:
-                raise APIError(f"no aggregation found in {que_id_}")
+                raise APIError("aggregation not found")
 
             queries_ = structure_["queries"] if "queries" in structure_ else None
             if not queries_:
@@ -2361,10 +2365,10 @@ class Crud:
                 err_ = "query not allowed for the collection"
                 raise PassException(err_)
 
-            update_allowed_ = "update" in queries_ and queries_["update"] is True
+            update_allowed_ = "cronjob" in queries_ and queries_["cronjob"] is True
             updatables_ = queries_["updatables"] if "updatables" in queries_ and len(queries_["updatables"]) > 0 else None
 
-            que_type_ = query_["que_type"] if "que_type" in query_ else "aggregation"
+            que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
             match_exists_, set_ = False, None
             for agg_ in que_aggregate_:
@@ -2381,7 +2385,7 @@ class Crud:
 
             aggregate_ = aggregate_base_.copy()
 
-            if que_type_ == "update":
+            if que_type_ == "cronjob":
                 if not update_allowed_:
                     err_ = "update queries not allowed for the collection"
                     raise PassException(err_)
@@ -2423,7 +2427,7 @@ class Crud:
                     set__["_modified_at"] = Misc().get_now_f()
                     update_many_ = Mongo().db_[f"{que_collection_id_}_data"].update_many({"_id": {"$in": ids_}}, {"$set": set__})
                     count_ = update_many_.matched_count
-                return {"result": True, "query": query_, "data": [], "count": count_, "fields": [], "err": err_}
+                return {"result": True, "query": query_, "data": [], "count": count_, "fields": [], "schema": schema_, "err": err_}
 
             aggregate_base_.append({"$count": "count"})
 
@@ -2471,7 +2475,7 @@ class Crud:
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
-            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "err": err_}
+            return {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "schema": schema_, "err": err_}
 
         except AuthError as exc__:
             return Misc().auth_error_f(exc__)
@@ -2480,16 +2484,19 @@ class Crud:
             return Misc().api_error_f(exc__)
 
         except pymongo.errors.PyMongoError as exc__:
+            init_res_["schema"] = schema_
             init_res_["query"] = query_
             init_res_["err"] = str(exc__)
             return init_res_
 
         except PassException as exc__:
+            init_res_["schema"] = schema_
             init_res_["query"] = query_
             init_res_["err"] = str(exc__)
             return init_res_
 
         except Exception as exc__:
+            init_res_["schema"] = schema_
             init_res_["query"] = query_
             init_res_["err"] = str(exc__)
             return init_res_
@@ -2737,7 +2744,6 @@ class Crud:
         try:
             col_id_ = obj["collection"] if "collection" in obj and obj["collection"] is not None else None
             structure_ = obj["structure"] if "structure" in obj and obj["structure"] is not None else None
-            schema_key_ = obj["schema_key"] if "schema_key" in obj and obj["schema_key"] in STRUCTURE_KEYS_ else None
             user_ = obj["user"] if "user" in obj and obj["user"] is not None else None
 
             if not user_:
@@ -2751,15 +2757,6 @@ class Crud:
 
             if not col_id_:
                 raise APIError("collection not found")
-
-            if schema_key_ is not None:
-                doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
-                if not doc_:
-                    raise APIError("collection not found")
-                col_structure_ = doc_["col_structure"] if "col_structure" in doc_ and doc_["col_structure"] is not None else None
-                if col_structure_:
-                    col_structure_[schema_key_] = structure_
-                    structure_ = col_structure_
 
             properties_ = structure_["properties"] if "properties" in structure_ else None
             if not properties_:
@@ -3685,7 +3682,7 @@ class OTP:
         docstring is in progress
         """
         try:
-            user_ = Mongo().db_["_user"].find_one({"usr_id": email_, "usr_enabled": True})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": email_, "usr_enabled": True, "usr_scope": {"$in": ["Internal", "Administrator"]}})
             if not user_ or user_ is None:
                 raise APIError("user not found")
 
@@ -4297,7 +4294,7 @@ class Auth:
             if usr_id_ != aut_id_:
                 raise PassException("invalid user validation")
 
-            user_ = Mongo().db_["_user"].find_one({"usr_id": aut_id_})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": aut_id_, "usr_enabled": True, "usr_scope": {"$in": ["Internal", "Administrator"]}})
             if not user_:
                 raise AuthError("user not found")
 
@@ -4339,7 +4336,7 @@ class Auth:
             if "aut_key" not in auth_ or auth_["aut_key"] is None:
                 raise AuthError("you need to set a new password")
 
-            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True, "usr_scope": {"$in": ["Internal", "Administrator"]}})
             if not user_:
                 raise AuthError("user not found for validate")
             user_["aut_api_key"] = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
@@ -4388,7 +4385,7 @@ class Auth:
                 raise AuthError("user is not authenticated")
             user_id_ = auth_["aut_id"]
 
-            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True})
+            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True, "usr_scope": {"$in": ["Internal", "Administrator"]}})
             if not user_:
                 raise APIError("user not found to validate")
 
@@ -4448,16 +4445,20 @@ class Auth:
                 raise APIError(checkup_["msg"])
 
             input_ = request.json
-            email_ = Misc().clean_f(input_["email"])
+            user_id_ = Misc().clean_f(input_["email"])
             password_ = Misc().clean_f(input_["password"])
 
-            auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
             if auth_:
-                raise AuthError("account already exist")
+                raise AuthError("account already exists")
 
-            user_ = Mongo().db_["_user"].find_one({"usr_id": email_, "usr_enabled": True})
-            if not user_ or user_ is None:
+            user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True, "usr_scope": {"$in": ["Internal", "Administrator"]}})
+            if not user_:
                 raise AuthError("user not found")
+
+            usr_scope_ = user_["usr_scope"] if "usr_scope" in user_ else None
+            if not usr_scope_ or usr_scope_ not in ["Internal", "Administrator"]:
+                raise AuthError("invalid signup request")
 
             hash_f_ = self.password_hash_f(password_, None)
             if not hash_f_["result"]:
@@ -4467,11 +4468,11 @@ class Auth:
             key_ = hash_f_["key"]
 
             aut_otp_secret_ = pyotp.random_base32()
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
+            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=user_id_, issuer_name="Technoplatz-BI")
             api_key_ = secrets.token_hex(16)
 
             Mongo().db_["_auth"].insert_one({
-                "aut_id": email_,
+                "aut_id": user_id_,
                 "aut_salt": salt_,
                 "aut_key": key_,
                 "aut_api_key": api_key_,
@@ -4480,13 +4481,13 @@ class Auth:
                 "aut_otp_secret": aut_otp_secret_,
                 "aut_otp_validated": False,
                 "_qr_modified_at": Misc().get_now_f(),
-                "_qr_modified_by": email_,
+                "_qr_modified_by": user_id_,
                 "_qr_modified_count": 0,
                 "_created_at": Misc().get_now_f(),
-                "_created_by": email_,
+                "_created_by": user_id_,
                 "_created_ip": Misc().get_client_ip_f(),
                 "_modified_at": Misc().get_now_f(),
-                "_modified_by": email_,
+                "_modified_by": user_id_,
             })
 
             return {"result": True, "qr": qr_, "user": None}
