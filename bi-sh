@@ -94,7 +94,7 @@ function pruneBI() {
 
 function startBI() {
     echo -e "\nStarting containers..."
-    mkdir -p .mongo
+    mkdir -p .secret
     if [[ ! -f .secret/.mongo_tls_keyfile_password ]]; then
         openssl rand -hex 10 >.secret/.mongo_tls_keyfile_password
     fi

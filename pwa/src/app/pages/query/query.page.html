@@ -37,11 +37,11 @@ https://www.gnu.org/licenses.
         <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
           {{ header | translate }}
         </ion-button>
-        <h3>{{ subheader }}</h3>
-        <h6><span *ngIf="type_==='aggregation'">{{ count_ }} {{ 'records found' | translate }} </span>[{{
+        <h3>{{ subheader }} [{{ col_ }}]</h3>
+        <h6><span *ngIf="type_==='query'">{{ count_ }} {{ 'records found' | translate }} </span>[{{
           que_scheduled_cron_ ?
           que_scheduled_cron_ : " Not scheduled " }}]</h6>
-        <div *ngIf="type_==='aggregation'">
+        <div *ngIf="type_==='query'">
           {{ query_url_ }}<br />Shared with <span *ngIf="_tags">{{ _tags.join(", ")}}</span><span *ngIf="!_tags">{{
             'nobody' | translate }}</span>
         </div>
@@ -49,7 +49,7 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="type_!=='aggregation'; else aggregate" (click)="run_query()"
+              <div *ngIf="type_!=='query'; else aggregate" (click)="run_query()"
                 [class]="running_ ? 'data-sq-button required' : 'data-sq-button'">
                 <ion-icon *ngIf="running_" name="hourglass-outline"></ion-icon>
                 <ion-icon *ngIf="!running_" name="play"></ion-icon>
@@ -96,7 +96,7 @@ https://www.gnu.org/licenses.
           <ion-row>
             <ion-col size="12">
               <ion-button *ngIf="perm_" (click)="save_json_f(false)">
-                <span *ngIf="!_saving">{{ 'Save Aggregation' | translate }} [{{ 'Requires Approval' | translate
+                <span *ngIf="!_saving">{{ 'Save Query' | translate }} [{{ 'Requires Approval' | translate
                   }}]</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>

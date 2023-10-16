@@ -98,6 +98,7 @@ export class QueryPage implements OnInit {
   private collections_: any = [];
   private schema_: any = {};
   public json_content_: any = [];
+  public col_: string = "";
 
   constructor(
     public misc: Miscellaneous,
@@ -114,16 +115,14 @@ export class QueryPage implements OnInit {
     this.jeoptions.enableSort = false;
     this.jeoptions.expandAll = false;
     this.jeoptions.navigationBar = true;
-    this.jeoptions.name = "aggregate";
-    this.auth.user.subscribe((res: any) => {
-      this.user = res;
-    });
+    this.jeoptions.name = "query";
     this.misc.api.subscribe((api_: any) => {
       this.uri_ = api_.uri;
     });
     this.auth.user.subscribe((res: any) => {
-      this.perm_ = res && res.perm;
-      this.perma_ = res && res.perma;
+      this.user = res;
+      this.perm_ = res.perm;
+      this.perma_ = res.perma;
     });
     this.crud.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
@@ -133,6 +132,7 @@ export class QueryPage implements OnInit {
   ngOnDestroy() {
     this.auth.user.unsubscribe;
     this.misc.api.unsubscribe;
+    this.crud.collections.unsubscribe;
   }
 
   ngOnInit() { }
@@ -141,6 +141,7 @@ export class QueryPage implements OnInit {
     this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
       this.limit_ = LSPAGINATION * 1;
       this.storage.get("LSQUERY").then((LSQUERY_: any) => {
+        this.col_ = LSQUERY_?.que_collection_id;
         this.query_ = LSQUERY_;
         this.type_ = LSQUERY_?.que_type;
         this.menu = this.router.url.split("/")[1];
