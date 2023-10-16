@@ -88,7 +88,6 @@ export class QueryPage implements OnInit {
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
   private menu: string = "";
-  private json_content_: any = [];
   private page_start_: number = 1;
   private page_end_: number = 1;
   private submenu: string = "";
@@ -98,6 +97,7 @@ export class QueryPage implements OnInit {
   public perma_: boolean = false;
   private collections_: any = [];
   private schema_: any = {};
+  public json_content_: any = [];
 
   constructor(
     public misc: Miscellaneous,
@@ -216,30 +216,37 @@ export class QueryPage implements OnInit {
   }
 
   save_json_f(approved_: boolean) {
-    this._saving = true;
-    this.misc.api_call("crud", {
-      op: "savequery",
-      collection: "_query",
-      id: this.id,
-      aggregate: this.json_content_,
-      approved: approved_
-    }).then(() => {
-      this.misc.doMessage("query saved successfully", "success");
-      this.refresh_data(0, false).then(() => {
-        this.schemevis = "hide"
+    if (this.json_content_) {
+      this._saving = true;
+      this.aggregate_ = this.json_content_;
+      this.misc.api_call("crud", {
+        op: "savequery",
+        collection: "_query",
+        id: this.id,
+        aggregate: this.aggregate_,
+        approved: approved_
+      }).then(() => {
+        this.misc.doMessage("query saved successfully", "success");
+        this.refresh_data(0, false).then(() => {
+          this.schemevis = "hide"
+        });
+      }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this._saving = false;
       });
-    }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
-    }).finally(() => {
-      this._saving = false;
-    });
+    } else {
+      this.misc.doMessage("invalid structure", "error");
+    }
   }
 
   json_changed(ev: any) {
-    if (!ev.isTrusted) {
-      this.json_content_ = ev;
-    } else {
+    if (ev.isTrusted === false) {
       console.error("*** event", ev);
+    } else {
+      setTimeout(() => {
+        this.json_content_ = ev;
+      }, 500);
     }
   }
 

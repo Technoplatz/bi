@@ -96,7 +96,7 @@ export class CollectionPage implements OnInit {
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
   public sort: any = {};
-  public structure: any = {};
+  public structure_: any = {};
   public schemevis: any = "hide";
   private json_content_: any = null;
   public is_key_copied: boolean = false;
@@ -218,8 +218,8 @@ export class CollectionPage implements OnInit {
             this.pager_ = this.page_;
             this.build_schema_f(res.structure);
             this.data = res.data;
-            this.structure = this.json_content_ = res.structure;
-            this.actions = this.structure.actions;
+            this.structure_ = this.json_content_ = res.structure;
+            this.actions = this.structure_.actions;
             this.properties_ = res.structure.properties;
             this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
             this.count = res.count;
@@ -260,7 +260,7 @@ export class CollectionPage implements OnInit {
   MultiCrud(op_: string) {
     if (this.data.length > 0 && this.is_selected) {
       if (op_ === "action") {
-        if (this.structure && this.structure.actions && this.structure.actions.length > 0) {
+        if (this.structure_ && this.structure_.actions && this.structure_.actions.length > 0) {
           this.go_crud(null, op_);
         } else {
           this.misc.doMessage("no action defined for the collection", "error");
@@ -320,7 +320,7 @@ export class CollectionPage implements OnInit {
             user: this.user,
             data: rec,
             counters: this.counters_,
-            structure: this.editor ? this.editor.get() : this.structure,
+            structure: this.editor ? this.editor.get() : this.structure_,
             sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
             filter: op === "action" ? this.filter_ : null,
             actions: this.actions && this.actions.length > 0 ? this.actions : [],
@@ -377,7 +377,7 @@ export class CollectionPage implements OnInit {
   doSetSearch(k: string) {
     this.searched[k].setmode = false;
     let i = 0;
-    for (let key_ in this.structure.properties) {
+    for (let key_ in this.structure_.properties) {
       k !== key_ ? this.searched[key_].actived = false : this.searched[key_].actived = !this.searched[key_].actived;
     }
   }
@@ -385,7 +385,7 @@ export class CollectionPage implements OnInit {
   doResetSearch(full: boolean) {
     full ? this.searched = {} : null;
     this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-      for (let key_ in this.structure.properties) {
+      for (let key_ in this.structure_.properties) {
         if (this.searched) {
           this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains", setmode: false } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_].setmode ? this.searched[key_].setmode : null };
         }
@@ -528,21 +528,26 @@ export class CollectionPage implements OnInit {
   }
 
   save_json_f() {
-    this.is_saving = true;
-    this.misc.api_call("crud", {
-      op: "saveschema",
-      collection: this.id,
-      structure: this.json_content_
-    }).then(() => {
-      this.misc.doMessage("schema saved successfully", "success");
-      this.refresh_data(0).then(() => {
-        this.schemevis = "hide"
+    if (this.json_content_) {
+      this.is_saving = true;
+      this.structure_ = this.json_content_;
+      this.misc.api_call("crud", {
+        op: "saveschema",
+        collection: this.id,
+        structure: this.json_content_
+      }).then(() => {
+        this.misc.doMessage("schema saved successfully", "success");
+        this.refresh_data(0).then(() => {
+          this.schemevis = "hide"
+        });
+      }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+      }).finally(() => {
+        this.is_saving = false;
       });
-    }).catch((error: any) => {
-      this.misc.doMessage(error, "error");
-    }).finally(() => {
-      this.is_saving = false;
-    });
+    } else {
+      this.misc.doMessage("invalid structure", "error");
+    }
   }
 
   upload_modal_f() {
@@ -557,7 +562,7 @@ export class CollectionPage implements OnInit {
     this.misc.api_call("crud", {
       op: "copykey",
       collection: this.id,
-      properties: this.structure.properties,
+      properties: this.structure_.properties,
       match: this.filter_,
       sweeped: this.sweeped[this.segment],
       key: key
@@ -581,10 +586,12 @@ export class CollectionPage implements OnInit {
   }
 
   json_changed(ev: any) {
-    if (!ev.isTrusted) {
-      this.json_content_ = ev;
-    } else {
+    if (ev.isTrusted === false) {
       console.error("*** event", ev);
+    } else {
+      setTimeout(() => {
+        this.json_content_ = ev;
+      }, 500);
     }
   }
 
