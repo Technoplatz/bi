@@ -36,13 +36,9 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}</p>
         <h3>{{ subheader }} [{{ col_ }}]</h3>
-        <h6><span *ngIf="type_==='query'">{{ count_ }} {{ 'records found' | translate }} </span>[{{
+        <span *ngIf="type_==='query'">{{ count_ }} {{ 'records found' | translate }} </span>[{{
           que_scheduled_cron_ ?
-          que_scheduled_cron_ : " Not scheduled " }}]</h6>
-        <div *ngIf="type_==='query'">
-          {{ query_url_ }}<br />Shared with <span *ngIf="_tags">{{ _tags.join(", ")}}</span><span *ngIf="!_tags">{{
-            'nobody' | translate }}</span>
-        </div>
+          que_scheduled_cron_ : " Not scheduled " }}]
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">

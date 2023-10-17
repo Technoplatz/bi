@@ -146,7 +146,7 @@ export class CollectionPage implements OnInit {
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
-    this.id = this.submenu = this.router.url.split("/")[2];
+    this.subheader = this.id = this.submenu = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
     this.header = this.is_crud ? "COLLECTIONS" : this.id === "_collection" ? "DATA COLLECTIONS" : this.id === "_query" ? "QUERIES" : this.id === "_visual" ? "VISUALIZATION" : "ADMINISTRATION";
   }
@@ -164,7 +164,6 @@ export class CollectionPage implements OnInit {
             this.actions = [];
             this.crud.get_collection(this.id).then((res: any) => {
               this.counters_ = res && res.counters ? res.counters : {};
-              this.subheader = res && res.data ? res.data.col_title : this.segmentsadm_.find((obj: any) => obj.id === this.id)?.title;
               this.refresh_data(0).then(() => { }).catch((error: any) => {
                 this.misc.doMessage(error, "error");
               }).finally(() => {
