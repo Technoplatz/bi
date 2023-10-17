@@ -275,9 +275,11 @@ class Misc:
         docstring is in progress
         """
         try:
+            if not API_S3_ACTIVE_:
+                return {"result": True}
+
             op_ = input_["op"]
             origin_ = input_["origin"]
-            bucket_ = input_["bucket"]
             object_ = input_["object"]
 
             extra_args_ = {
@@ -294,14 +296,14 @@ class Misc:
 
             if op_ in ["dumpr", "dumpd"]:
                 try:
-                    boto_client_.download_file(bucket_, object_, origin_)
+                    boto_client_.download_file(API_S3_BUCKET_NAME_, object_, origin_)
                 except botocore.exceptions.ClientError as exc__:
                     msg_ = str(exc__)
                     if exc__.response["Error"]["Code"] == "404":
                         msg_ = "object does not exist"
                     return {"result": False, "msg": msg_}
             else:
-                boto_client_.upload_file(origin_, bucket_, object_, ExtraArgs=extra_args_)
+                boto_client_.upload_file(origin_, API_S3_BUCKET_NAME_, object_, ExtraArgs=extra_args_)
 
             return {"result": True}
 
@@ -1441,7 +1443,6 @@ class Crud:
             boto_s3_f_ = Misc().boto_s3_f({
                 "op": op_,
                 "origin": fullpath_,
-                "bucket": API_S3_BUCKET_NAME_,
                 "object": fn_
             })
             if not boto_s3_f_["result"]:
@@ -4517,6 +4518,7 @@ API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
 API_MONGODUMP_PATH_ = os.environ.get('API_MONGODUMP_PATH')
 API_CORS_ORIGINS_ = os.environ.get('API_CORS_ORIGINS').strip().split(",")
+API_S3_ACTIVE_ = os.environ.get("API_S3_ACTIVE") in [True, "true", "True", "TRUE"]
 API_S3_REGION_ = os.environ.get("API_S3_REGION")
 API_S3_ENDPOINT_URL_ = os.environ.get("API_S3_ENDPOINT_URL")
 API_S3_ACCESS_ID_ = os.environ.get("API_S3_ACCESS_ID")
