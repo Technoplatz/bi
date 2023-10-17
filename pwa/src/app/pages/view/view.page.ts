@@ -90,7 +90,6 @@ export class ViewPage implements OnInit {
   public view: any = null;
   public view_: any = {};
   public cron_: string = "";
-  public menutoggle: boolean = false;
   private uri_: string = "";
 
   constructor(
@@ -249,15 +248,6 @@ export class ViewPage implements OnInit {
       console.error("*** copy error", error);
     }).finally(() => {
       this.is_url_copied = false;
-    });
-  }
-
-  doMenuToggle() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = !LSMENUTOGGLE ? true : false;
-      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
-        this.misc.menutoggle.next(this.menutoggle);
-      });
     });
   }
 

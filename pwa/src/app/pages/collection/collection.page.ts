@@ -48,8 +48,7 @@ import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 })
 
 export class CollectionPage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false }) editor: JsonEditorComponent = new JsonEditorComponent;
-  public jeoptions: JsonEditorOptions;
+  public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
@@ -83,7 +82,6 @@ export class CollectionPage implements OnInit {
   public action_: any = {};
   private view: any = null;
   public actions: any = [];
-  public columns_: any;
   private sweeped: any = [];
   private actionix: number = -1;
   private menu: string = "";
@@ -97,13 +95,12 @@ export class CollectionPage implements OnInit {
   public is_deleting: boolean = false;
   public sort: any = {};
   public structure_: any = {};
-  public schemevis: any = "hide";
+  public schemavis_: boolean = false;
   private json_content_: any = null;
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public is_inprogress: boolean = false;
   public flashcards_: any = [];
-  public menutoggle: boolean = false;
   public schema_: any = {
     "properties": { "title": "Properties", "count": 0 },
     "required": { "title": "Required", "count": 0 },
@@ -127,12 +124,6 @@ export class CollectionPage implements OnInit {
     private router: Router,
     public misc: Miscellaneous
   ) {
-    this.jeoptions = new JsonEditorOptions();
-    this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "code";
-    this.jeoptions.statusBar = true;
-    this.jeoptions.navigationBar = false;
-    this.jeoptions.name = "schema-structure";
     this.crud.views.subscribe((res: any) => {
       this.flashcards_ = res ? res.filter((obj: any) => obj.collection === this.id && obj.view.flashcard === true) : [];
     });
@@ -199,7 +190,7 @@ export class CollectionPage implements OnInit {
   refresh_data(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
-      this.schemevis = "hide";
+      this.schemavis_ = false;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
@@ -321,7 +312,7 @@ export class CollectionPage implements OnInit {
             user: this.user,
             data: rec,
             counters: this.counters_,
-            structure: this.editor ? this.editor.get() : this.structure_,
+            structure: this.structure_,
             sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
             filter: op === "action" ? this.filter_ : null,
             actions: this.actions && this.actions.length > 0 ? this.actions : [],
@@ -494,8 +485,20 @@ export class CollectionPage implements OnInit {
     this.searched[k].op = op;
   }
 
-  show_hide_schema(shw: boolean) {
-    this.schemevis = shw ? "show" : "hide";
+  json_editor_init() {
+    return new Promise((resolve, reject) => {
+      this.jeoptions = new JsonEditorOptions();
+      this.jeoptions.modes = ["tree", "code", "text"]
+      this.jeoptions.mode = "code";
+      this.jeoptions.statusBar = this.jeoptions.navigationBar = true;
+      this.jeoptions.enableSort = this.jeoptions.expandAll = false;
+      resolve(true);
+    });
+  }
+
+  set_editor(set_: boolean) {
+    this.schemavis_ = set_;
+    set_ ? this.json_editor_init().then(() => { }) : null;
   }
 
   doFlashcard(item_: any) {
@@ -506,15 +509,6 @@ export class CollectionPage implements OnInit {
         this.refresh_data(0).then(() => { }).catch((res: any) => {
           this.misc.doMessage(res, "error");
         });
-      });
-    });
-  }
-
-  doMenuToggle() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = !LSMENUTOGGLE ? true : false;
-      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
-        this.misc.menutoggle.next(this.menutoggle);
       });
     });
   }
@@ -539,7 +533,7 @@ export class CollectionPage implements OnInit {
       }).then(() => {
         this.misc.doMessage("schema saved successfully", "success");
         this.refresh_data(0).then(() => {
-          this.schemevis = "hide"
+          this.schemavis_ = false;
         });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");

@@ -34,9 +34,7 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row *ngIf="is_initialized; else dataloading">
       <ion-col class="console-right">
-        <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
-          {{ header | translate }}
-        </ion-button>
+        <p class="hdr">{{ header | translate }}</p>
         <h2>{{ subheader }}</h2>
         <ion-grid class="ion-no-padding ion-margin-top">
           <ion-row class="sub-menu-row sq-menu-row">

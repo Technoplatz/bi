@@ -52,7 +52,6 @@ const { Network } = Plugins;
 export class AppComponent implements OnInit {
   public user_: any = null;
   public net_: boolean = true;
-  public menutoggle: boolean = false;
   private paginations_ = environment.paginations;
 
   constructor(
@@ -85,9 +84,6 @@ export class AppComponent implements OnInit {
         }
       });
     }
-    this.misc.menutoggle.subscribe((res: any) => {
-      this.menutoggle = res;
-    });
     this.auth.user.subscribe((user: any) => {
       this.user_ = user;
     });
@@ -102,9 +98,6 @@ export class AppComponent implements OnInit {
       } else if (event instanceof NavigationStart) {
       } else if (event instanceof NavigationEnd) {
         const urlpart1_ = event.url.split("/")[1];
-        if (!urlpart1_) {
-          this.menutoggle = false;
-        }
       }
     });
     this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
@@ -113,42 +106,39 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = LSMENUTOGGLE;
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        this.auth.user.next(LSUSERMETA);
-        if (LSUSERMETA) {
-          this.crud.get_all().then(() => { }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
+    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.auth.user.next(LSUSERMETA);
+      if (LSUSERMETA) {
+        this.crud.get_all().then(() => { }).catch((error: any) => {
+          this.misc.doMessage(error, "error");
+        });
+      }
+      this.storage.get("LSTHEME").then((LSTHEME: any) => {
+        if (LSTHEME) {
+          document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
+        } else {
+          this.storage.set("LSTHEME", environment.themes[0]).then(() => {
+            document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
           });
         }
-        this.storage.get("LSTHEME").then((LSTHEME: any) => {
-          if (LSTHEME) {
-            document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
-          } else {
-            this.storage.set("LSTHEME", environment.themes[0]).then(() => {
-              document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
-            });
-          }
-        });
-        Network.addListener("networkStatusChange", (status: any) => {
-          if (!status.connected) {
-            this.net_ = false;
-            console.error("*** internet connection is lost");
-          } else {
-            setTimeout(() => {
-              console.log("*** internet connection is back again");
-              this.net_ = true;
-              location.reload();
-            }, 3000);
-          }
-        });
-        this.misc.getLanguage().then((res: any) => {
-          this.translate.setDefaultLang(res ? res : "en");
-          this.translate.use(res ? res : "en");
-        }).catch((error: any) => {
-          console.error(error);
-        });
+      });
+      Network.addListener("networkStatusChange", (status: any) => {
+        if (!status.connected) {
+          this.net_ = false;
+          console.error("*** internet connection is lost");
+        } else {
+          setTimeout(() => {
+            console.log("*** internet connection is back again");
+            this.net_ = true;
+            location.reload();
+          }, 3000);
+        }
+      });
+      this.misc.getLanguage().then((res: any) => {
+        this.translate.setDefaultLang(res ? res : "en");
+        this.translate.use(res ? res : "en");
+      }).catch((error: any) => {
+        console.error(error);
       });
     });
   }

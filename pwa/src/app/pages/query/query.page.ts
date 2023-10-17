@@ -49,8 +49,7 @@ import { CrudPage } from "../crud/crud.page";
 })
 
 export class QueryPage implements OnInit {
-  @ViewChild(JsonEditorComponent, { static: false }) editor: JsonEditorComponent = new JsonEditorComponent;
-  public jeoptions: JsonEditorOptions;
+  public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "QUERIES";
   public subheader: string = "";
@@ -62,22 +61,19 @@ export class QueryPage implements OnInit {
   public pages: any = [];
   public limit_: number = environment.misc.limit;
   public count_: number = 0;
-  public is_loaded: boolean = true;
-  public is_initialized: boolean = false;
   public status_: any = {};
   public columns_: any;
   public fields_: any = {};
   public _saving: boolean = false;
   public is_deleting: boolean = false;
   public sort: any = {};
-  public schemevis: any = "hide";
+  public schemevis_: boolean = false;
   public type_: string = "aggregate";
   public aggregate_: any = [];
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public templates: any = [];
   public is_inprogress: boolean = false;
-  public menutoggle: boolean = false;
   public is_url_copied: boolean = false;
   public running_: boolean = false;
   public query_url_: string = "";
@@ -108,14 +104,6 @@ export class QueryPage implements OnInit {
     private router: Router,
     private modal: ModalController
   ) {
-    this.jeoptions = new JsonEditorOptions();
-    this.jeoptions.modes = ["tree", "code", "text"]
-    this.jeoptions.mode = "code";
-    this.jeoptions.statusBar = true;
-    this.jeoptions.enableSort = false;
-    this.jeoptions.expandAll = false;
-    this.jeoptions.navigationBar = true;
-    this.jeoptions.name = "query";
     this.misc.api.subscribe((api_: any) => {
       this.uri_ = api_.uri;
     });
@@ -147,18 +135,16 @@ export class QueryPage implements OnInit {
         this.menu = this.router.url.split("/")[1];
         this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
         this.query_url_ = `${this.uri_}/get/query/${this.id}`;
-        this.refresh_data(0, false).then(() => {
-          this.is_initialized = true;
-        });
+        this.refresh_data(0, false).then(() => { });
       });
     });
   }
 
   refresh_data(page_: number, run_: boolean) {
     return new Promise((resolve, reject) => {
-      this.is_loaded = false;
+      this.running_ = true;
       this.page_ = page_ === 0 ? 1 : page_;
-      this.schemevis = "hide";
+      this.schemevis_ = false;
       this.crud.get_query(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res.query && res.data) {
           this.schema_ = res.schema;
@@ -193,8 +179,6 @@ export class QueryPage implements OnInit {
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
       }).finally(() => {
-        this.is_loaded = true;
-        this.is_initialized = true;
         this.running_ = false;
       });
     });
@@ -204,17 +188,20 @@ export class QueryPage implements OnInit {
     return a.value.index < b.value.index ? -1 : (b.value.index > a.value.index ? 1 : 0);
   }
 
-  show_aggregation(shw: boolean) {
-    this.schemevis = shw ? "show" : "hide";
+  json_editor_init() {
+    return new Promise((resolve, reject) => {
+      this.jeoptions = new JsonEditorOptions();
+      this.jeoptions.modes = ["tree", "code", "text"]
+      this.jeoptions.mode = "code";
+      this.jeoptions.statusBar = this.jeoptions.navigationBar = true;
+      this.jeoptions.enableSort = this.jeoptions.expandAll = false;
+      resolve(true);
+    });
   }
 
-  doMenuToggle() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = !LSMENUTOGGLE ? true : false;
-      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
-        this.misc.menutoggle.next(this.menutoggle);
-      });
-    });
+  set_editor(set_: boolean) {
+    this.schemevis_ = set_;
+    set_ ? this.json_editor_init().then(() => { }) : null;
   }
 
   save_json_f(approved_: boolean) {
@@ -230,7 +217,7 @@ export class QueryPage implements OnInit {
       }).then(() => {
         this.misc.doMessage("query saved successfully", "success");
         this.refresh_data(0, false).then(() => {
-          this.schemevis = "hide"
+          this.schemevis_ = false;
         });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");

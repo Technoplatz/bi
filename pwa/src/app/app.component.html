@@ -33,7 +33,7 @@ https://www.gnu.org/licenses.
 <ion-app>
   <app-tools *ngIf="user_"></app-tools>
   <ion-split-pane when="xs" *ngIf="user_; else nouser" contentId="main-content">
-    <app-menu [style]="menutoggle ? 'margin-left: -211px !important;' : 'margin-left: 0px !important;'"></app-menu>
+    <app-menu></app-menu>
     <ion-router-outlet id="main-content"></ion-router-outlet>
   </ion-split-pane>
   <ng-template #nouser>

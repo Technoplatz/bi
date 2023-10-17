@@ -51,7 +51,6 @@ export class MenuComponent implements OnInit {
   public perm_: boolean = false;
   public views: any = [];
   public collections_: any = [];
-  public menutoggle: boolean = false;
 
   constructor(
     public misc: Miscellaneous,
@@ -78,15 +77,6 @@ export class MenuComponent implements OnInit {
       this.user_ = res;
       this.perm_ = res && res.perm;
       this.segmentsadm = res && res.perm ? environment.segmentsadm : [];
-    });
-  }
-
-  doMenuToggle() {
-    this.storage.get("LSMENUTOGGLE").then((LSMENUTOGGLE: boolean) => {
-      this.menutoggle = !LSMENUTOGGLE ? true : false;
-      this.storage.set("LSMENUTOGGLE", this.menutoggle).then(() => {
-        this.misc.menutoggle.next(this.menutoggle);
-      });
     });
   }
 

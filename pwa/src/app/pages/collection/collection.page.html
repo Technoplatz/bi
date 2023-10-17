@@ -33,13 +33,11 @@ https://www.gnu.org/licenses.
 <ion-content class="ion-no-padding">
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
-      <ion-col *ngIf="is_initialized; else dataloading" class="console-right">
-        <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
-          {{ header | translate }}
-        </ion-button>
-        <h3>{{ subheader | translate }}</h3>
-        <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span
-          *ngIf="!is_loaded">...</span>
+      <ion-col class="console-right">
+        <p class="hdr">{{ header | translate }}&nbsp;</p>
+        <h3>{{ subheader | translate }}&nbsp;</h3>
+        <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span *ngIf="!is_loaded">{{
+          'Records are on the way' | translate }}...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -86,7 +84,7 @@ https://www.gnu.org/licenses.
                 <ion-icon name="trash-outline"></ion-icon><br />
                 {{ 'Delete Record' | translate }}
               </div>
-              <div *ngIf="is_crud && perm_" (click)="show_hide_schema(true)" class="data-sq-button">
+              <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
                   {{ 'Edit Schema' | translate }}
@@ -97,7 +95,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- SCHEMA -->
-        <ion-grid *ngIf="is_crud && perm_ && schemevis=='show'" class="actions-grid">
+        <ion-grid *ngIf="is_crud && perm_ && schemavis_" class="actions-grid">
           <ion-row>
             <ion-col size="12">
               <ion-button *ngIf="!is_saving" (click)="save_json_f()">
@@ -107,7 +105,7 @@ https://www.gnu.org/licenses.
                 <ion-spinner name="dots"></ion-spinner>&nbsp;
                 <span>{{ 'Saving' | translate }}</span>
               </ion-button>
-              <ion-button color="light" (click)="show_hide_schema(false)">
+              <ion-button color="light" (click)="set_editor(false)">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
@@ -115,8 +113,8 @@ https://www.gnu.org/licenses.
           </ion-row>
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <json-editor id="struc" [options]="jeoptions" [data]="structure_"
-                (change)="json_changed($event)" #editor></json-editor>
+              <json-editor id="struc" [options]="jeoptions" [data]="structure_" (change)="json_changed($event)"
+                #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -148,7 +146,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
-        <table *ngIf="data.length >= 0" class="data-table">
+        <table *ngIf="is_initialized && data.length > 0" class="data-table">
           <tr>
             <th>&nbsp;</th>
             <th>
@@ -254,7 +252,7 @@ https://www.gnu.org/licenses.
           </tr>
           <tr *ngFor="let record of data; let i = index"
             (click)="id=='_query' ? go_query(record, $event) : go_crud(record, 'update')">
-            <td class="primary aligned-right">{{ ((page_ - 1) * limit_) + i + 1}}</td>
+            <td class="primary aligned-right">{{ ((pager_ - 1) * limit_) + i + 1}}</td>
             <td (click)="tdc($event)">
               <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                 (ionChange)="SetSelectData(i,$event)" mode="md">
@@ -317,54 +315,39 @@ https://www.gnu.org/licenses.
             </td>
           </tr>
         </table>
-
-        <!-- CRUD PAGINATION SECTION -->
-        <table>
-          <tr>
-            <td [attr.colspan]="properties_?.length+1">
-              <ion-button *ngIf="page_ > 1" size="small" fill="clear" (click)="refresh_data(0)"
-                class="ion-no-padding ion-margin-end">
-                <ion-icon name="play-skip-back"></ion-icon>
-              </ion-button>
-              <span *ngIf="page_ > 10">
-                <ion-button size="small" fill="clear" (click)="refresh_data(page_-1)" class="ion-no-padding">
-                  <ion-icon name="caret-back"></ion-icon>
-                </ion-button>
-              </span>
-              <span *ngFor="let in of paget_">
-                <ion-button *ngIf="page_ != in" size="small" fill="clear" (click)="refresh_data(in)"
-                  class="ion-no-padding">
-                  <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-                </ion-button>
-                <ion-button *ngIf="page_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
-                  <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-                </ion-button>
-              </span>
-              <span *ngIf="pages_ > 10 && page_ < pages_">
-                <ion-button size="small" fill="clear" (click)="refresh_data(pages_)" class="ion-no-padding">
-                  ...&nbsp;&nbsp;{{ pages_ }}
-                </ion-button>
-                <ion-button size="small" fill="clear" (click)="refresh_data(page_+1)" class="ion-no-padding">
-                  <ion-icon name="caret-forward"></ion-icon>
-                </ion-button>
-              </span>
-              <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
-                class="ion-no-padding ion-margin-start">
-                <ion-icon name="list-outline"></ion-icon>
-                {{ 'Pagination' | translate }} [{{ limit_ }}]
-              </ion-button>
-            </td>
-          </tr>
-        </table>
+        <div>
+          <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0)"
+            class="ion-no-padding ion-margin-end">
+            <ion-icon name="play-skip-back"></ion-icon>
+          </ion-button>
+          <span *ngIf="pager_ > 10">
+            <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1)" class="ion-no-padding">
+              <ion-icon name="caret-back"></ion-icon>
+            </ion-button>
+          </span>
+          <span *ngFor="let in of paget_">
+            <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in)" class="ion-no-padding">
+              <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
+            </ion-button>
+            <ion-button *ngIf="pager_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
+              <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
+            </ion-button>
+          </span>
+          <span *ngIf="pages_ > 10 && pager_ < pages_">
+            <ion-button size="small" fill="clear" (click)="refresh_data(pages_)" class="ion-no-padding">
+              ...&nbsp;&nbsp;{{ pages_ }}
+            </ion-button>
+            <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1)" class="ion-no-padding">
+              <ion-icon name="caret-forward"></ion-icon>
+            </ion-button>
+          </span>
+          <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
+            class="ion-no-padding ion-margin-start">
+            <ion-icon name="list-outline"></ion-icon>
+            {{ 'Pagination' | translate }} [{{ limit_ }}]
+          </ion-button>
+        </div>
       </ion-col>
-      <ng-template #dataloading>
-        <ion-col class="warten-sie">
-          <ion-item lines="none">
-            <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-            <ion-label>{{ loadingText | translate }}</ion-label>
-          </ion-item>
-        </ion-col>
-      </ng-template>
     </ion-row>
   </ion-grid>
 </ion-content>

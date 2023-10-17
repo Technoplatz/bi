@@ -34,9 +34,7 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
-        <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
-          {{ 'DASHBOARD' | translate }}
-        </ion-button>
+        <p class="hdr">{{ 'DASHBOARD' | translate }}</p>
         <h3>{{ 'Welcome Aboard' | translate }}.</h3>
         <span *ngIf="flashcards.length == 1">{{ flashcards.length }} {{ 'Flashcard' | translate }}</span>
         <span *ngIf="flashcards.length > 1">{{ flashcards.length }} {{ 'Flashcards' | translate }}</span>

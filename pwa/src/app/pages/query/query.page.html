@@ -33,10 +33,8 @@ https://www.gnu.org/licenses.
 <ion-content class="ion-no-padding">
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
-      <ion-col *ngIf="is_initialized; else dataloading" class="console-right">
-        <ion-button (click)="doMenuToggle()" fill="clear" class="ion-no-padding ion-no-margin">
-          {{ header | translate }}
-        </ion-button>
+      <ion-col class="console-right">
+        <p class="hdr">{{ header | translate }}</p>
         <h3>{{ subheader }} [{{ col_ }}]</h3>
         <h6><span *ngIf="type_==='query'">{{ count_ }} {{ 'records found' | translate }} </span>[{{
           que_scheduled_cron_ ?
@@ -49,33 +47,21 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="type_!=='query'; else aggregate" (click)="run_query()"
+              <div (click)="type_!=='query' ? run_query() : refresh_data(0, false)"
                 [class]="running_ ? 'data-sq-button required' : 'data-sq-button'">
                 <ion-icon *ngIf="running_" name="hourglass-outline"></ion-icon>
                 <ion-icon *ngIf="!running_" name="play"></ion-icon>
                 <br />
                 {{ 'Run Query' | translate }}
               </div>
-              <ng-template #aggregate>
-                <div *ngIf="is_loaded" (click)="refresh_data(0, false)" class="data-sq-button">
-                  <ion-icon name="sync-circle-outline"></ion-icon>
-                  <br />
-                  {{ 'Refresh Query' | translate }}
-                </div>
-                <div *ngIf="!is_loaded" class="data-sq-button required">
-                  <ion-icon name="hourglass-outline"></ion-icon>
-                  <br />
-                  {{ 'Please Wait' | translate }}...
-                </div>
-                <div (click)="copy_url()" class="data-sq-button">
-                  <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
-                  <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
-                  <br />
-                  <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
-                  <span *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</span>
-                </div>
-              </ng-template>
-              <div (click)="show_aggregation(true)" class="data-sq-button">
+              <div (click)="copy_url()" class="data-sq-button">
+                <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
+                <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
+                <br />
+                <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
+                <span *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</span>
+              </div>
+              <div (click)="set_editor(true)" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
                   {{ 'Edit Query' | translate }}
@@ -92,19 +78,18 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- SCHEMA -->
-        <ion-grid *ngIf="schemevis=='show'" class="actions-grid">
+        <ion-grid *ngIf="schemevis_" class="actions-grid">
           <ion-row>
             <ion-col size="12">
               <ion-button *ngIf="perm_" (click)="save_json_f(false)">
-                <span *ngIf="!_saving">{{ 'Save Query' | translate }} [{{ 'Requires Approval' | translate
-                  }}]</span>
+                <span *ngIf="!_saving">{{ 'Save Query' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button *ngIf="perma_" (click)="save_json_f(true)">
-                <span *ngIf="!_saving">{{ 'Approve' | translate }}</span>
+                <span *ngIf="!_saving">{{ 'Approve' | translate }} & {{ 'Save' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
-              <ion-button color="light" (click)="show_aggregation(false)">
+              <ion-button color="light" (click)="set_editor(false)">
                 <ion-icon name="close-circle-outline"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
@@ -112,8 +97,8 @@ https://www.gnu.org/licenses.
           </ion-row>
           <ion-row>
             <ion-col size="12" class="jeditor">
-              <json-editor id="aggregate" [options]="jeoptions" [data]="aggregate_"
-                (change)="json_changed($event)" #editor></json-editor>
+              <json-editor id="aggregate" [options]="jeoptions" [data]="aggregate_" (change)="json_changed($event)"
+                #editor></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -178,21 +163,13 @@ https://www.gnu.org/licenses.
         </div>
         <ng-template #cronjob>
           <div class="ion-margin-top">
-            <h6><span *ngIf="is_loaded">{{ count_ }} {{'records affected' | translate }}</span>
-              <span *ngIf="!is_loaded">{{'Processing' | translate }}..</span>.
+            <h6><span *ngIf="!running_">{{ count_ }} {{'records affected' | translate }}</span>
+              <span *ngIf="running_">{{'Processing' | translate }}..</span>.
             </h6>
             {{ 'You can manually run this query' | translate }}.
           </div>
         </ng-template>
       </ion-col>
-      <ng-template #dataloading>
-        <ion-col class="warten-sie">
-          <ion-item lines="none">
-            <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-            <ion-label>{{ loadingText | translate }}</ion-label>
-          </ion-item>
-        </ion-col>
-      </ng-template>
     </ion-row>
   </ion-grid>
 </ion-content>

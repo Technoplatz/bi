@@ -49,12 +49,10 @@ export class Miscellaneous {
   public collections = new BehaviorSubject<any>([]);
   public session_ = new BehaviorSubject<any>([]);
   public navi = new Subject<any>();
-  public menutoggle = new BehaviorSubject<boolean>(false);
   public version = new BehaviorSubject<any>(null);
   public saas = new BehaviorSubject<any>(null);
   public localization = new BehaviorSubject<any>(null);
   public api = new BehaviorSubject<any>(null);
-  public toggle: boolean = true;
   private collections_: any;
   private uri_: string = "";
 
