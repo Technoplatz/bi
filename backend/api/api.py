@@ -2673,24 +2673,24 @@ class Crud:
         except Exception as exc__:
             return Misc().exception_f(exc__)
 
-    def savequery_f(self, obj):
+    def savequery_f(self, obj_):
         """
         docstring is in progress
         """
         try:
-            que_id_ = obj["id"] if "id" in obj and obj["id"] is not None else None
-            aggregate_ = obj["aggregate"] if "aggregate" in obj and obj["aggregate"] is not None else None
-            approved_ = "approved" in obj and obj["approved"] is True
-            user_ = obj["userindb"] if "userindb" in obj and obj["userindb"] is not None else None
+            que_id_ = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
+            aggregate_ = obj_["aggregate"] if "aggregate" in obj_ and obj_["aggregate"] is not None else None
+            approved_ = "approved" in obj_ and obj_["approved"] is True
+            user_ = obj_["userindb"] if "userindb" in obj_ and obj_["userindb"] is not None else None
 
             if not user_:
-                raise AuthError("user not found")
+                raise AuthError("user not found", obj_)
 
             if not aggregate_:
-                raise APIError("no aggregation provided")
+                raise APIError("no aggregation provided", obj_)
 
             if not que_id_:
-                raise APIError("query not found")
+                raise APIError("query not found", obj_)
 
             if not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
                 raise AuthError("no permission to save")

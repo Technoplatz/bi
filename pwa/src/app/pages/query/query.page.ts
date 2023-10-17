@@ -97,7 +97,7 @@ export class QueryPage implements OnInit {
   public perma_: boolean = false;
   private collections_: any = [];
   private schema_: any = {};
-  public json_content_: any = [];
+  public json_content_: any = null;
   public col_: string = "";
 
   constructor(
@@ -166,7 +166,8 @@ export class QueryPage implements OnInit {
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;
           this.subheader = res.query.que_title;
-          this.aggregate_ = this.json_content_ = res.query.que_aggregate;
+          this.json_content_ = res.query.que_aggregate;
+          this.aggregate_ = res.query.que_aggregate;
           this.type_ = res.query.que_type;
           this.fields_ = res.fields;
           this.data_ = res.data;
@@ -217,7 +218,7 @@ export class QueryPage implements OnInit {
   }
 
   save_json_f(approved_: boolean) {
-    if (this.json_content_) {
+    if (this.json_content_ && this.json_content_.length > 0) {
       this._saving = true;
       this.aggregate_ = this.json_content_;
       this.misc.api_call("crud", {
@@ -237,17 +238,15 @@ export class QueryPage implements OnInit {
         this._saving = false;
       });
     } else {
-      this.misc.doMessage("invalid structure", "error");
+      this.misc.doMessage("invalid aggregation", "error");
     }
   }
 
-  json_changed(ev: any) {
-    if (ev.isTrusted === false) {
-      console.error("*** event", ev);
+  json_changed(event_: any) {
+    if (!event_.isTrusted) {
+      this.json_content_ = event_;
     } else {
-      setTimeout(() => {
-        this.json_content_ = ev;
-      }, 500);
+      console.error("*** event", event_);
     }
   }
 

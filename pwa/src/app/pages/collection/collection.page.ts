@@ -218,7 +218,8 @@ export class CollectionPage implements OnInit {
             this.pager_ = this.page_;
             this.build_schema_f(res.structure);
             this.data = res.data;
-            this.structure_ = this.json_content_ = res.structure;
+            this.structure_ = res.structure;
+            this.json_content_ = res.structure;
             this.actions = this.structure_.actions;
             this.properties_ = res.structure.properties;
             this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
@@ -585,13 +586,11 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  json_changed(ev: any) {
-    if (ev.isTrusted === false) {
-      console.error("*** event", ev);
+  json_changed(event_: any) {
+    if (!event_.isTrusted) {
+      this.json_content_ = event_;
     } else {
-      setTimeout(() => {
-        this.json_content_ = ev;
-      }, 500);
+      console.error("*** event", event_);
     }
   }
 
