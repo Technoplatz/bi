@@ -151,7 +151,7 @@ class Schedular:
             return Misc().pass_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
     def schedule_queries_f(self, sched_):
         """
@@ -192,10 +192,10 @@ class Schedular:
             return {"result": True}
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def main_f(self):
         """
@@ -210,10 +210,10 @@ class Schedular:
             return True
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
 
 class Misc:
@@ -308,7 +308,7 @@ class Misc:
             return {"result": True}
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
             return {"result": False, "msg": str(exc__)}
@@ -420,14 +420,7 @@ class Misc:
 
         return True
 
-    def exception_f(self, exc__):
-        """
-        docstring is in progress
-        """
-        self.post_notification_f(str(exc__))
-        return {"result": False, "msg": str(exc__)}
-
-    def api_error_f(self, exc__):
+    def notify_exception_f(self, exc__):
         """
         docstring is in progress
         """
@@ -487,11 +480,11 @@ class Misc:
             Mongo().db_["_log"].insert_one(doc_)
             return {"result": True}
 
-        except APIError as exc:
-            return Misc().api_error_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc:
-            return Misc().exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def get_timestamp_f(self):
         """
@@ -582,7 +575,7 @@ class Misc:
             return {"result": True, "to": personalizations_}
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def set_value_f(self, key_, setto_, properties_, data_):
         """
@@ -637,10 +630,10 @@ class Misc:
             return Misc().mongo_error_f(exc_)
 
         except APIError as exc_:
-            return Misc().api_error_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
     def clean_f(self, data_):
         """
@@ -690,7 +683,7 @@ class Iot:
         self.props_ = Misc().props_
         self.xtra_props_ = Misc().xtra_props_
 
-    def barcode_query_f(self, searched_, page_):
+    def iot_query_f(self, searched_, page_):
         """
         docstring is in progress
         """
@@ -904,10 +897,10 @@ class Crud:
             return {"result": True, "properties": properties_}
 
         except APIError as exc_:
-            return Misc().api_error_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
     def inner_collection_f(self, cid_):
         """
@@ -925,10 +918,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def decode_crud_doc_f(self, doc_, properties_):
         """
@@ -967,7 +960,7 @@ class Crud:
             return {"result": True, "doc": document_}
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def decode_crud_input_f(self, input_):
         """
@@ -998,10 +991,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def frame_convert_bool_f(self, data_):
         """
@@ -1076,10 +1069,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def convert_column_name_f(self, str_):
         """
@@ -1274,11 +1267,11 @@ class Crud:
 
         except APIError as exc__:
             content_, details_ = str(exc__), {}
-            res_ = Misc().api_error_f(exc__)
+            res_ = Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
             content_, details_ = str(exc__), {}
-            res_ = Misc().exception_f(exc__)
+            res_ = Misc().notify_exception_f(exc__)
 
         finally:
             stats_ += f"<br />ROW COUNT: {str(len(df_))}<br />"
@@ -1412,10 +1405,10 @@ class Crud:
             return {"result": True}
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def dump_f(self, obj_):
         """
@@ -1459,10 +1452,10 @@ class Crud:
             return {"result": True, "id": dmp_id_, "file": fn_, "type": type_, "size": size_}
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
     def link_f(self, obj_):
         """
@@ -1583,10 +1576,10 @@ class Crud:
             return Misc().app_exception_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def get_filtered_f(self, obj):
         """
@@ -2004,10 +1997,10 @@ class Crud:
             return Misc().mongo_error_f(exc_)
 
         except APIError as exc_:
-            return Misc().api_error_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
     def charts_f(self, input_):
         """
@@ -2085,10 +2078,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def announcements_f(self, input_):
         """
@@ -2105,7 +2098,7 @@ class Crud:
             return Misc().mongo_error_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
     def views_f(self, input_):
         """
@@ -2173,10 +2166,10 @@ class Crud:
             return Misc().mongo_error_f(exc_)
 
         except APIError as exc_:
-            return Misc().api_error_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
     def collections_f(self, obj):
         """
@@ -2216,10 +2209,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def collection_f(self, obj):
         """
@@ -2265,10 +2258,10 @@ class Crud:
             return Misc().mongo_error_f(exc_)
 
         except APIError as exc_:
-            return Misc().api_error_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
     def query_f(self, obj_):
         """
@@ -2427,16 +2420,9 @@ class Crud:
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
-            facet_ = [{"$facet": {
-                "stats": aggregate_base_,
-                "data": aggregate_
-            }}]
-
-            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(facet_)
-            cursore_ = json.loads(JSONEncoder().encode(list(cursor_)))
-            data_ = cursore_[0]["data"] if cursore_ and "data" in cursore_[0] else []
-            stats_ = cursore_[0]["stats"] if cursore_ and "stats" in cursore_[0] else []
-            count_ = stats_[0]["count"] if stats_ else 0
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
+            data_ = json.loads(JSONEncoder().encode(list(cursor_)))
+            count_ = len(data_)
 
             if sched_ and orig_ == "sched":
                 _tags = query_["_tags"] if "_tags" in query_ and len(query_["_tags"]) > 0 else API_PERMISSIVE_TAGS_
@@ -2448,7 +2434,7 @@ class Crud:
                         to_.append(member_["usr_id"])
                         personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
                 personalizations_ = {"to": personalizations_to_}
-                df_raw_ = pd.DataFrame(json.loads(JSONEncoder().encode(list(data_)))).fillna("")
+                df_raw_ = pd.DataFrame(data_).fillna("")
                 file_excel_ = f"{API_TEMPFILE_PATH_}/query-{que_id_}-{Misc().get_timestamp_f()}.xlsx"
                 df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
                 files_.append({"name": file_excel_, "type": "xlsx"})
@@ -2469,11 +2455,12 @@ class Crud:
             return Misc().auth_error_f(exc__)
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except pymongo.errors.PyMongoError as exc__:
-            init_res_["schema"] = schema_
-            init_res_["query"] = query_
+            init_res_["result"] = False
+            init_res_["schema"] = {}
+            init_res_["query"], init_res_["fields"] = [], []
             init_res_["err"] = str(exc__)
             return init_res_
 
@@ -2484,7 +2471,8 @@ class Crud:
             return init_res_
 
         except Exception as exc__:
-            init_res_["schema"] = schema_
+            init_res_["result"] = False
+            init_res_["schema"] = {}
             init_res_["query"] = query_
             init_res_["err"] = str(exc__)
             return init_res_
@@ -2557,10 +2545,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def crudschema_validate_f(self, obj):
         """
@@ -2649,10 +2637,10 @@ class Crud:
             return Misc().mongo_error_f(exc__)
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
     def nocrudschema_validate_f(self, obj):
         """
@@ -2668,10 +2656,10 @@ class Crud:
             return {"result": True}
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
     def savequery_f(self, obj_):
         """
@@ -2720,10 +2708,10 @@ class Crud:
             return Misc().auth_error_f(exc__)
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
     def saveschema_f(self, obj):
         """
@@ -2793,10 +2781,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def saveview_f(self, obj):
         """
@@ -2871,10 +2859,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def upsert_f(self, obj):
         """
@@ -2948,10 +2936,10 @@ class Crud:
             return Misc().app_exception_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def remove_f(self, obj):
         """
@@ -2997,10 +2985,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def multiple_f(self, obj):
         """
@@ -3088,10 +3076,10 @@ class Crud:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def action_f(self, obj):
         """
@@ -3287,10 +3275,10 @@ class Crud:
             return Misc().pass_exception_f(exc__)
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
     def insert_f(self, obj):
         """
@@ -3409,10 +3397,10 @@ class Crud:
             return Misc().auth_error_f(exc_)
 
         except APIError as exc_:
-            return Misc().api_error_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
 
 class Email:
@@ -3504,16 +3492,16 @@ class Email:
             return {"result": True}
 
         except smtplib.SMTPResponseException as exc_:
-            return Misc().api_error_f(f"smtp error: {exc_.smtp_error}")
+            return Misc().notify_exception_f(f"smtp error: {exc_.smtp_error}")
 
         except smtplib.SMTPServerDisconnected as exc_:
             return {"result": True, "exc": str(exc_)}
 
         except APIError as exc_:
-            return Misc().api_error_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
-            return Misc().exception_f(exc_)
+            return Misc().notify_exception_f(exc_)
 
 
 class OTP:
@@ -3549,13 +3537,13 @@ class OTP:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def validate_qr_f(self, email_, request_):
         """
@@ -3619,13 +3607,13 @@ class OTP:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def show_otp_f(self, email_):
         """
@@ -3657,13 +3645,13 @@ class OTP:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def request_otp_f(self, email_):
         """
@@ -3692,10 +3680,10 @@ class OTP:
             return Misc().mongo_error_f(exc__)
 
         except APIError as exc__:
-            return Misc().api_error_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            return Misc().exception_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
 
 class Auth:
@@ -3816,7 +3804,7 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             Misc().log_f({
@@ -3835,7 +3823,7 @@ class Auth:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def checkup_f(self):
         """
@@ -3856,10 +3844,10 @@ class Auth:
             return {"result": True}
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def password_hash_f(self, password_, salted_):
         """
@@ -3874,10 +3862,10 @@ class Auth:
             return {"result": True, "salt": salt_, "key": key_}
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def signout_f(self, auth_):
         """
@@ -3897,7 +3885,7 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def permission_f(self, input_):
         """
@@ -3982,13 +3970,13 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def firewall_f(self, user_):
         """
@@ -4009,7 +3997,7 @@ class Auth:
             return {"result": True}
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             Misc().log_f({
@@ -4027,7 +4015,7 @@ class Auth:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def account_f(self, input_):
         """
@@ -4064,10 +4052,10 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def forgot_f(self):
         """
@@ -4094,13 +4082,13 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def reset_f(self):
         """
@@ -4145,10 +4133,10 @@ class Auth:
             return Misc().auth_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def tfac_f(self):
         """
@@ -4235,10 +4223,10 @@ class Auth:
             return Misc().auth_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def jwt_validate_f(self):
         """
@@ -4354,10 +4342,10 @@ class Auth:
             return Misc().auth_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def user_validate_by_api_key_f(self, input_):
         """
@@ -4387,13 +4375,13 @@ class Auth:
             return Misc().mongo_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def signin_f(self):
         """
@@ -4415,13 +4403,13 @@ class Auth:
             return {"result": True, "msg": "2FA required", "user": None}
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
     def signup_f(self):
         """
@@ -4487,10 +4475,10 @@ class Auth:
             return Misc().auth_error_f(exc)
 
         except APIError as exc:
-            return Misc().api_error_f(exc)
+            return Misc().notify_exception_f(exc)
 
         except Exception as exc:
-            return Misc().exception_f(exc)
+            return Misc().notify_exception_f(exc)
 
 
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
@@ -4511,7 +4499,7 @@ EMAIL_DEFAULT_SUBJECT_ = "Hello"
 API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 MONGO_DUMP_HOURS_ = os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
-API_MAX_CONTENT_LENGTH_ = int(os.environ.get("API_MAX_CONTENT_LENGTH"))
+API_MAX_CONTENT_LENGTH_MB_ = int(os.environ.get("API_MAX_CONTENT_LENGTH_MB"))
 API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
 API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
@@ -4559,7 +4547,7 @@ app = Flask(__name__)
 app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_
 app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "x-auth"]
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
-app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_
+app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_MB_ * 1024 * 1024
 app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 app.config["UPLOAD_FOLDER"] = API_TEMPFILE_PATH_
 app.json_encoder = JSONEncoder
@@ -4920,7 +4908,7 @@ def iot_post_f():
         elif process_ == "query":
             searched_ = requestj_["searched"] if "searched" in requestj_ else None
             page_ = requestj_["page"] if "page" in requestj_ else 1
-            res_ = Iot().barcode_query_f(searched_, page_)
+            res_ = Iot().iot_query_f(searched_, page_)
 
     except AuthError as exc__:
         sc__, res_ = 401, ast.literal_eval(str(exc__))
@@ -5111,7 +5099,7 @@ def post_f():
 
 
 @ app.route("/api/get/query/<string:id_>", methods=["GET"])
-def get_query_f(id_):
+def api_get_query(id_):
     """
     docstring is in progress
     """
@@ -5134,20 +5122,23 @@ def get_query_f(id_):
         if not query_f_["result"]:
             raise APIError(query_f_)
 
-        res_ = query_f_["data"] if "data" in query_f_ else None
+        res_ = query_f_["data"] if "data" in query_f_ else []
         if not res_:
-            raise APIError("no data found")
+            raise APIError(f"no data generated at /api/get/query/{id_}")
 
-    except AuthError as exc_:
-        res_ = ast.literal_eval(str(exc_))
+    except AuthError as exc__:
+        Misc().notify_exception_f(exc__)
+        res_ = ast.literal_eval(str(exc__))
         status_code_ = 401
 
-    except APIError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        status_code_ = 400
+    except APIError as exc__:
+        Misc().notify_exception_f(exc__)
+        res_ = ast.literal_eval(str(exc__))
+        status_code_ = 500
 
-    except Exception as exc_:
-        res_ = ast.literal_eval(str(exc_))
+    except Exception as exc__:
+        Misc().notify_exception_f(exc__)
+        res_ = ast.literal_eval(str(exc__))
         status_code_ = 500
 
     finally:
@@ -5190,7 +5181,7 @@ def get_data_f(id_):
 
     except APIError as exc_:
         res_ = ast.literal_eval(str(exc_))
-        status_code_ = 400
+        status_code_ = 500
 
     except Exception as exc_:
         res_ = ast.literal_eval(str(exc_))

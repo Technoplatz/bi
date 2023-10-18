@@ -36,19 +36,24 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}</p>
         <h3>{{ subheader }} [{{ col_ }}]</h3>
-        <span *ngIf="type_==='query'">{{ count_ }} {{ 'records found' | translate }} </span>[{{
-          que_scheduled_cron_ ?
-          que_scheduled_cron_ : " Not scheduled " }}]
+        <span *ngIf="type_==='query'">{{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
+          }}. </span>[{{
+        que_scheduled_cron_ ?
+        que_scheduled_cron_ : " Not scheduled " }}]
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div (click)="type_!=='query' ? run_query() : refresh_data(0, false)"
-                [class]="running_ ? 'data-sq-button required' : 'data-sq-button'">
-                <ion-icon *ngIf="running_" name="hourglass-outline"></ion-icon>
-                <ion-icon *ngIf="!running_" name="play"></ion-icon>
-                <br />
-                {{ 'Run Query' | translate }}
+                [class]="running_ ? 'data-sq-button required blink_await' : 'data-sq-button'">
+                <span *ngIf="!running_">
+                  <ion-icon name="play"></ion-icon><br />
+                  {{ 'Run Query' | translate }}
+                </span>
+                <span *ngIf="running_">
+                  <ion-icon name="hourglass-outline"></ion-icon><br />
+                  {{ 'Please Wait' | translate }}...
+                </span>
               </div>
               <div (click)="copy_url()" class="data-sq-button">
                 <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
@@ -82,7 +87,7 @@ https://www.gnu.org/licenses.
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button *ngIf="perma_" (click)="save_json_f(true)">
-                <span *ngIf="!_saving">{{ 'Approve' | translate }} & {{ 'Save' | translate }}</span>
+                <span *ngIf="!_saving">{{ 'Save' | translate }} & {{ 'Approve' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button color="light" (click)="set_editor(false)">
@@ -116,36 +121,15 @@ https://www.gnu.org/licenses.
             </tr>
             <tr>
               <td [attr.colspan]="fields_?.length+1">
-                <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
-                  class="ion-no-padding ion-margin-end">
-                  <ion-icon name="play-skip-back"></ion-icon>
+                <ion-button size="small" fill="clear"
+                  (click)="pager_ > 1 ? refresh_data(pager_-1, false) : refresh_data(1, false)"
+                  class="ion-no-padding">
+                  <ion-icon name="caret-back"></ion-icon>
                 </ion-button>
-                <span *ngIf="pager_ > 10">
-                  <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1, false)" class="ion-no-padding">
-                    <ion-icon name="caret-back"></ion-icon>
-                  </ion-button>
-                </span>
-                <span *ngFor="let in of paget_">
-                  <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
-                    class="ion-no-padding">
-                    <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-                  </ion-button>
-                  <ion-button *ngIf="pager_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
-                    <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-                  </ion-button>
-                </span>
-                <span *ngIf="pages_ > 10 && pager_ < pages_">
-                  <ion-button size="small" fill="clear" (click)="refresh_data(pages_, false)" class="ion-no-padding">
-                    ...&nbsp;&nbsp;{{ pages_ }}
-                  </ion-button>
-                  <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
-                    <ion-icon name="caret-forward"></ion-icon>
-                  </ion-button>
-                </span>
-                <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
-                  class="ion-no-padding ion-margin-start">
-                  <ion-icon name="list-outline"></ion-icon>
-                  {{ 'Pagination' | translate }} [{{ limit_ }}]
+                <ion-button size="small" fill="clear" class="ion-no-padding">{{ pager_ }}</ion-button>
+                <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)"
+                  class="ion-no-padding">
+                  <ion-icon name="caret-forward"></ion-icon>
                 </ion-button>
               </td>
             </tr>

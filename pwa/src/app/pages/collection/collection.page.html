@@ -62,10 +62,10 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Refresh All' | translate }}
               </div>
-              <div *ngIf="!is_loaded" class="data-sq-button required">
+              <div *ngIf="!is_loaded" class="data-sq-button required blink_await">
                 <ion-icon name="hourglass-outline"></ion-icon>
                 <br />
-                {{ 'Please Wait' | translate }}
+                {{ 'Please Wait' | translate }}...
               </div>
               <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
@@ -76,7 +76,7 @@ https://www.gnu.org/licenses.
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone Record' | translate }}
               </div>
-              <div *ngIf="is_deleting" class="data-sq-button required">
+              <div *ngIf="is_deleting" class="data-sq-button required blink_await">
                 <ion-icon name="hourglass-outline"></ion-icon><br />
                 {{ 'Deleting Records' | translate }}...
               </div>
@@ -119,10 +119,12 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
+
+
         <!-- CRUD GRID SECTION -->
-        <div *ngIf="is_initialized && data.length > 0; else notinit">
+        <div *ngIf="is_initialized; else notinit">
           <!-- ACTION BUTTONS -->
-          <ion-grid *ngIf="is_crud && actions.length > 0" class="actions-grid">
+          <ion-grid *ngIf="is_crud && actions?.length > 0" class="actions-grid">
             <ion-row>
               <ion-col size="12">
                 <span *ngFor="let item of actions; let ac = index">
@@ -138,6 +140,7 @@ https://www.gnu.org/licenses.
               </ion-col>
             </ion-row>
           </ion-grid>
+
           <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
             <ion-row>
               <ion-col size="12" class="schema-flashcard-container">
@@ -146,7 +149,7 @@ https://www.gnu.org/licenses.
               </ion-col>
             </ion-row>
           </ion-grid>
-          <table class="data-table">
+          <table *ngIf="data.length > 0" class="data-table">
             <tr>
               <th>&nbsp;</th>
               <th>

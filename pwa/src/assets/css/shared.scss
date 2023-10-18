@@ -154,6 +154,21 @@ ion-note {
   --padding-bottom: 24px;
 }
 
+.blink_await {
+  animation: blinker 0.3s linear infinite;
+}
+
+@keyframes blinker {
+  0%,
+  50% {
+    opacity: 0.85;
+  }
+  51%,
+  100% {
+    opacity: 1;
+  }
+}
+
 .top-tools {
   position: fixed;
   display: flex;
@@ -2233,7 +2248,7 @@ app-chart {
   color: var(--ion-color-primary);
 }
 
-.hdr{
+.hdr {
   font-weight: 600;
   color: var(--ion-color-primary);
 }
