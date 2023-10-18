@@ -155,13 +155,13 @@ ion-note {
 }
 
 .blink_await {
-  animation: blinker 0.3s linear infinite;
+  animation: blinker 0.2s linear infinite;
 }
 
 @keyframes blinker {
   0%,
   50% {
-    opacity: 0.85;
+    opacity: 1;
   }
   51%,
   100% {
@@ -798,8 +798,8 @@ form ion-item ion-label {
 }
 
 ion-spinner {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
 }
 
 .signin-modal {
@@ -1364,7 +1364,7 @@ sup {
 }
 
 .index-logo {
-  font-size: 120px !important;
+  font-size: 160px !important;
   color: var(--ion-color-primary);
   margin-left: -16px;
 }

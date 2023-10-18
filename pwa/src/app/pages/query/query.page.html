@@ -37,9 +37,9 @@ https://www.gnu.org/licenses.
         <p class="hdr">{{ header | translate }}</p>
         <h3>{{ subheader }} [{{ col_ }}]</h3>
         <span *ngIf="type_==='query'">{{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
-          }}. </span>[{{
+          }}. </span>[ {{
         que_scheduled_cron_ ?
-        que_scheduled_cron_ : " Not scheduled " }}]
+        que_scheduled_cron_ : 'Not scheduled' | translate }} ]
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -51,8 +51,8 @@ https://www.gnu.org/licenses.
                   {{ 'Run Query' | translate }}
                 </span>
                 <span *ngIf="running_">
-                  <ion-icon name="hourglass-outline"></ion-icon><br />
-                  {{ 'Please Wait' | translate }}...
+                  <ion-spinner name="crescent"></ion-spinner><br />
+                  {{ 'Please Wait' | translate }}
                 </span>
               </div>
               <div (click)="copy_url()" class="data-sq-button">
@@ -105,7 +105,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
-        <div *ngIf="type_==='query'; else cronjob">
+        <div *ngIf="type_==='query'; else job">
           <table *ngIf="data_.length > 0; else nodata" class="data-table">
             <tr>
               <th>#</th>
@@ -135,13 +135,19 @@ https://www.gnu.org/licenses.
             </tr>
           </table>
           <ng-template #nodata>
-            <div class="ion-margin-top">
+            <div *ngIf="!running_; else ontheway" class="ion-margin-top">
               <h6>{{ 'No data found' | translate }}.</h6>
               {{ 'You can edit the query or get help from the Administrators' | translate }}.
             </div>
+            <ng-template #ontheway>
+              <div class="ion-margin-top">
+                <h6>{{ 'Data is on the way' | translate }}...</h6>
+                {{ 'Please wait while the data is retrieved' | translate }}.
+              </div>
+            </ng-template>
           </ng-template>
         </div>
-        <ng-template #cronjob>
+        <ng-template #job>
           <div class="ion-margin-top">
             <h6><span *ngIf="!running_">{{ count_ }} {{'records affected' | translate }}</span>
               <span *ngIf="running_">{{'Processing' | translate }}..</span>.

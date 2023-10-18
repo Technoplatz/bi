@@ -1,5 +1,12 @@
 {
   "properties": {
+    "que_type": {
+      "bsonType": "string",
+      "title": "Type",
+      "description": "Query type",
+      "enum": ["query", "job"],
+      "default": "query"
+    },
     "que_id": {
       "bsonType": "string",
       "title": "ID",
@@ -16,13 +23,6 @@
       "minLength": 1,
       "maxLength": 32,
       "caseType": "capitalize"
-    },
-    "que_type": {
-      "bsonType": "string",
-      "title": "Type",
-      "description": "Query type",
-      "enum": ["query", "cronjob"],
-      "default": "query"
     },
     "que_collection_id": {
       "bsonType": "string",

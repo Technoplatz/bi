@@ -37,7 +37,7 @@ https://www.gnu.org/licenses.
         <p class="hdr">{{ header | translate }}&nbsp;</p>
         <h3>{{ subheader | titlecase | translate }}&nbsp;</h3>
         <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span *ngIf="!is_loaded">{{
-          'Records are on the way' | translate }}...</span>
+          'Please wait while the data is retrieved' | translate }}...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -63,9 +63,9 @@ https://www.gnu.org/licenses.
                 {{ 'Refresh All' | translate }}
               </div>
               <div *ngIf="!is_loaded" class="data-sq-button required blink_await">
-                <ion-icon name="hourglass-outline"></ion-icon>
+                <ion-spinner name="crescent"></ion-spinner>
                 <br />
-                {{ 'Please Wait' | translate }}...
+                {{ 'Please Wait' | translate }}
               </div>
               <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
                 <ion-icon name="close-circle-outline"></ion-icon>
@@ -77,8 +77,8 @@ https://www.gnu.org/licenses.
                 {{ 'Clone Record' | translate }}
               </div>
               <div *ngIf="is_deleting" class="data-sq-button required blink_await">
-                <ion-icon name="hourglass-outline"></ion-icon><br />
-                {{ 'Deleting Records' | translate }}...
+                <ion-spinner name="crescent"></ion-spinner><br />
+                {{ 'Deleting Records' | translate }}
               </div>
               <div *ngIf="!is_deleting" (click)="MultiCrud('delete')" class="data-sq-button">
                 <ion-icon name="trash-outline"></ion-icon><br />
@@ -175,7 +175,7 @@ https://www.gnu.org/licenses.
                   <ion-button color="light" size="small" (click)="setCopy(item.key)">
                     <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-outline"></ion-icon>
                     <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
-                    <ion-icon *ngIf="is_key_copying" name="hourglass-outline"></ion-icon>
+                    <ion-spinner name="crescent"></ion-spinner>
                   </ion-button>
                   <br />
                   <div *ngIf="item.value.bsonType!='bool'" class="search-ops">

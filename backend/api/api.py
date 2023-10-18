@@ -2295,9 +2295,10 @@ class Crud:
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
                 raise APIError("query not found")
+            que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
             approved_ = "_approved" in query_ and query_["_approved"] is True
-            if not approved_:
+            if que_type_ != "query" and not approved_:
                 err_ = "query needs to be approved by the administrators"
                 raise PassException(err_)
 
@@ -2366,7 +2367,7 @@ class Crud:
 
             aggregate_ = aggregate_base_.copy()
 
-            if que_type_ == "cronjob":
+            if que_type_ == "job":
                 if not update_allowed_:
                     err_ = "update queries not allowed for the collection"
                     raise PassException(err_)
@@ -2681,7 +2682,7 @@ class Crud:
                 raise APIError("query not found", obj_)
 
             if not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
-                raise AuthError("no permission to save")
+                raise AuthError("query is locked to get modified")
 
             doc_ = {
                 "que_aggregate": aggregate_,
@@ -2726,7 +2727,7 @@ class Crud:
                 raise APIError("user not found")
 
             if not Auth().is_admin_f(user_):
-                raise APIError("user not permitted to update schema")
+                raise APIError("no permission to modify this schema")
 
             if not structure_:
                 raise APIError("structure not found")
