@@ -44,10 +44,16 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
+              <div (click)="misc.navi.next('admin/_query')" class="data-sq-button">
+                <div class="ion-no-padding">
+                  <ion-icon name="arrow-back-outline"></ion-icon><br />
+                  {{ 'Back-To List' | translate }}
+                </div>
+              </div>
               <div (click)="type_!=='query' ? run_query() : refresh_data(0, false)"
                 [class]="running_ ? 'data-sq-button required blink_await' : 'data-sq-button'">
                 <span *ngIf="!running_">
-                  <ion-icon name="play"></ion-icon><br />
+                  <ion-icon name="play-sharp"></ion-icon><br />
                   {{ 'Run Query' | translate }}
                 </span>
                 <span *ngIf="running_">
@@ -122,13 +128,11 @@ https://www.gnu.org/licenses.
             <tr>
               <td [attr.colspan]="fields_?.length+1">
                 <ion-button size="small" fill="clear"
-                  (click)="pager_ > 1 ? refresh_data(pager_-1, false) : refresh_data(1, false)"
-                  class="ion-no-padding">
+                  (click)="pager_ > 1 ? refresh_data(pager_-1, false) : refresh_data(1, false)" class="ion-no-padding">
                   <ion-icon name="caret-back"></ion-icon>
                 </ion-button>
                 <ion-button size="small" fill="clear" class="ion-no-padding">{{ pager_ }}</ion-button>
-                <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)"
-                  class="ion-no-padding">
+                <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
                   <ion-icon name="caret-forward"></ion-icon>
                 </ion-button>
               </td>

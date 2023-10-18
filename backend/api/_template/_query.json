@@ -14,14 +14,15 @@
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "caseType": "lowercase"
+      "caseType": "lowercase",
+      "readonly": true
     },
     "que_title": {
       "bsonType": "string",
       "title": "Title",
       "description": "Query Title",
       "minLength": 1,
-      "maxLength": 32,
+      "maxLength": 64,
       "caseType": "capitalize"
     },
     "que_collection_id": {
