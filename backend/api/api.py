@@ -3037,9 +3037,11 @@ class Crud:
             for index, doc in enumerate(cursor, start=1):
                 col_id_ = doc["col_id"] if "col_id" in doc else None
                 if op_ == "clone":
-                    doc["_created_at"] = doc["_modified_at"] = Misc().get_now_f()
-                    doc["_created_by"] = doc["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
-                    doc["_modified_count"] = 0
+                    doc["_created_at"] = Misc().get_now_f()
+                    doc["_created_by"] = user_["email"] if user_ and "email" in user_ else None
+                    doc["_modified_at"] = None
+                    doc["_modified_by"] = None
+                    doc["_modified_count"] = -1
                     doc.pop("_id", None)
                     if unique:
                         for uq_ in unique:

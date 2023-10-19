@@ -119,8 +119,6 @@ https://www.gnu.org/licenses.
           </ion-row>
         </ion-grid>
 
-
-
         <!-- CRUD GRID SECTION -->
         <div *ngIf="is_initialized; else notinit">
           <!-- ACTION BUTTONS -->
@@ -129,10 +127,7 @@ https://www.gnu.org/licenses.
               <ion-col size="12">
                 <span *ngFor="let item of actions; let ac = index">
                   <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)">
-                    <ion-icon *ngIf="item.one_click"
-                      [name]="item?.icon ? item.icon : 'play-forward-circle-outline'"></ion-icon>
-                    <ion-icon *ngIf="!item.one_click"
-                      [name]="item?.icon ? item.icon : 'play-circle-outline'"></ion-icon>
+                    <ion-icon [name]="item?.icon" class="action-icon"></ion-icon>
                     {{ item.title | translate }}
                   </ion-button>
                   <ng-template #actionhide></ng-template>

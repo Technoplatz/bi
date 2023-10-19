@@ -50,7 +50,7 @@
       "minLength": 9,
       "maxLength": 16,
       "pattern": "^[A-Z0-9-]{9,16}$",
-      "permanent": true
+      "readonly": true
     },
     "dnn_acc_name": {
       "bsonType": "string",
@@ -129,7 +129,8 @@
     "dnn_bu_id": {
       "bsonType": "number",
       "title": "BU ID",
-      "description": "Business Unit Id"
+      "description": "Business Unit Id",
+      "readonly": true
     },
     "dnn_prd_no": {
       "bsonType": "string",
@@ -156,6 +157,27 @@
       "description": "Product Description",
       "minLength": 1,
       "maxLength": 256
+    },
+    "dnn_qty": {
+      "bsonType": "number",
+      "title": "Quantity",
+      "description": "Quantity",
+      "default": 1
+    },
+    "dnn_unit_price": {
+      "bsonType": "number",
+      "title": "Price",
+      "description": "Unit price",
+      "default": 0,
+      "decimals": 2
+    },
+    "dnn_amount": {
+      "bsonType": "number",
+      "title": "Amount",
+      "description": "Line amount",
+      "default": 0,
+      "decimals": 2,
+      "disabled": false
     },
     "dnn_prd_group": {
       "bsonType": "string",
@@ -222,27 +244,6 @@
       "title": "Gross Weight",
       "description": "Gross Weight",
       "default": 0
-    },
-    "dnn_qty": {
-      "bsonType": "number",
-      "title": "Quantity",
-      "description": "Quantity",
-      "default": 1
-    },
-    "dnn_unit_price": {
-      "bsonType": "number",
-      "title": "Price",
-      "description": "Unit price",
-      "default": 0,
-      "decimals": 2
-    },
-    "dnn_amount": {
-      "bsonType": "number",
-      "title": "Amount",
-      "description": "Line amount",
-      "default": 0,
-      "decimals": 2,
-      "disabled": false
     },
     "dnn_eta_date": {
       "bsonType": "date",
@@ -367,6 +368,24 @@
     "_modified_at": -1
   },
   "parents": [
+    {
+      "collection": "business",
+      "match": [
+        {
+          "key": "dnn_bu_id",
+          "value": "bun_id"
+        }
+      ],
+      "filter": [
+        {
+          "key": "bun_id",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "get": ["bun_id", "bun_name"],
+      "group": false
+    },
     {
       "collection": "ordino",
       "match": [
@@ -554,6 +573,29 @@
       }
     },
     {
+      "id": "shiptype",
+      "title": "Shipment Type",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_ship_type",
+          "op": "eq",
+          "value": null
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_ship_type",
+          "value": null
+        }
+      ],
+      "one_click": true,
+      "icon": "boat-outline",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
+    },
+    {
       "id": "shipment",
       "title": "Shipment",
       "enabled": true,
@@ -620,7 +662,7 @@
         }
       ],
       "notification": {
-        "notify": false,
+        "notify": true,
         "subject": "Delivery [70-Delivered]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs were shipped.",
         "attachment": false,

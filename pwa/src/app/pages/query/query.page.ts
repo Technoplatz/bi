@@ -67,7 +67,7 @@ export class QueryPage implements OnInit {
   public _saving: boolean = false;
   public is_deleting: boolean = false;
   public sort: any = {};
-  public schemevis_: boolean = false;
+  public schemavis_: boolean = false;
   public type_: string = "aggregate";
   public aggregate_: any = [];
   public is_key_copied: boolean = false;
@@ -144,7 +144,7 @@ export class QueryPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.running_ = true;
       this.page_ = page_ === 0 ? 1 : page_;
-      this.schemevis_ = false;
+      this.schemavis_ = false;
       this.crud.get_query(this.id, this.page_, this.limit_, run_).then((res: any) => {
         if (res.query && res.data) {
           this.schema_ = res.schema;
@@ -200,7 +200,7 @@ export class QueryPage implements OnInit {
   }
 
   set_editor(set_: boolean) {
-    this.schemevis_ = set_;
+    this.schemavis_ = !this.schemavis_ && set_ && !this.running_;
     set_ ? this.json_editor_init().then(() => { }) : null;
   }
 
@@ -217,7 +217,7 @@ export class QueryPage implements OnInit {
       }).then(() => {
         this.misc.doMessage("query saved successfully", "success");
         this.refresh_data(0, false).then(() => {
-          this.schemevis_ = false;
+          this.schemavis_ = false;
         });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");

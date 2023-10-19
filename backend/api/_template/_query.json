@@ -15,7 +15,7 @@
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
       "caseType": "lowercase",
-      "readonly": true
+      "permanent": true
     },
     "que_title": {
       "bsonType": "string",

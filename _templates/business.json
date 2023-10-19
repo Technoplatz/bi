@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "bun_id": {
+      "bsonType": "number",
+      "title": "Bu ID",
+      "description": "Business Unit ID",
+      "readonly": true
+    },
+    "bun_name": {
+      "bsonType": "string",
+      "title": "Buisness Name",
+      "description": "Business Unit Name",
+      "minLength": 1,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z]{1,16}$"
+    }
+  },
+  "required": ["bun_id", "bun_name"],
+  "index": [],
+  "unique": [["bun_id"]],
+  "sort": {
+    "bun_id": 1
+  },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {},
+  "fetchers": [],
+  "import": {}
+}

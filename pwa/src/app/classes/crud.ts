@@ -93,8 +93,8 @@ export class Crud {
         const property_ = p.property ? true : false;
         const kv_ = p.subType === "keyvalue" ? true : false;
         const ko_ = p.subType === "keyop" ? true : false;
-        const permanent_ = p.permanent && op == "update" && data && data[item] ? true : false;
-        const readonly_ = p.readonly ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].readonly?.indexOf(item) !== -1 ? true : false;
+        const permanent_ = p.permanent && op == "update" && data && data[item] > 0 ? true : false;
+        const readonly_ = p.readonly && data?._modified_count >= 0 ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].readonly?.indexOf(item) !== -1 ? true : false;
         const dateOnly_ = p.dateOnly ? true : false;
         const collection_ = p.collection ? true : false;
         const textarea_ = p.textarea ? true : false;

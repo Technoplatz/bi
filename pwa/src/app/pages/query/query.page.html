@@ -70,13 +70,13 @@ https://www.gnu.org/licenses.
                 <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
                 <span *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</span>
               </div>
-              <div (click)="set_editor(true)" class="data-sq-button">
+              <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-outline"></ion-icon><br />
                   {{ 'Edit Query' | translate }}
                 </div>
               </div>
-              <div (click)="edit_query()" class="data-sq-button">
+              <div (click)="!running_ ? edit_query() : null" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="settings-outline"></ion-icon><br />
                   {{ 'Query Settings' | translate }}
@@ -87,7 +87,7 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- SCHEMA -->
-        <ion-grid *ngIf="schemevis_" class="actions-grid">
+        <ion-grid *ngIf="schemavis_" class="actions-grid">
           <ion-row>
             <ion-col size="12">
               <ion-button *ngIf="perm_" (click)="save_json_f(false)">

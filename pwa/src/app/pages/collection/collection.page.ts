@@ -496,7 +496,7 @@ export class CollectionPage implements OnInit {
   }
 
   set_editor(set_: boolean) {
-    this.schemavis_ = set_;
+    this.schemavis_ = !this.schemavis_ && set_ && this.is_loaded;
     set_ ? this.json_editor_init().then(() => { }) : null;
   }
 
