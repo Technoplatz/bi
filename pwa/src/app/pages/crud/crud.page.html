@@ -40,14 +40,14 @@ https://www.gnu.org/licenses.
                     {{ 'Make Dump' | translate }}
                 </ion-button>
                 <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpd')">
-                    <ion-icon name="arrow-down-circle-outline"></ion-icon>
+                    <ion-icon name="arrow-down-circle-sharp"></ion-icon>
                     {{ 'Download' | translate }}
                 </ion-button>
                 <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpr')">
                     {{ 'Restore' | translate }}
                 </ion-button>
                 <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">
-                    <ion-icon name="barcode-outline"></ion-icon>&nbsp;
+                    <ion-icon name="barcode-sharp"></ion-icon>&nbsp;
                     {{ 'Scan' | translate }}
                 </ion-button>
                 <ng-template #noscan>
@@ -61,12 +61,12 @@ https://www.gnu.org/licenses.
                     {{ 'Upload' | translate }}
                 </ion-button>
                 <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium">
-                    <ion-icon name="close-circle-outline"></ion-icon>
+                    <ion-icon name="close-circle-sharp"></ion-icon>
                     {{ 'Cancel' |
                     translate }} </ion-button>
                 <ion-button *ngIf="op=='update' && collection!='_query'" color="danger" (click)="doRemove()"
                     class="end-item">
-                    <ion-icon name="trash-bin-outline"></ion-icon>
+                    <ion-icon name="trash-bin-sharp"></ion-icon>
                     {{ 'DELETE' | translate }}&nbsp;
                 </ion-button>
             </ion-col>
@@ -75,7 +75,7 @@ https://www.gnu.org/licenses.
             <ion-col size="12">
                 <ion-button> {{ 'Confirm' | translate }} </ion-button>
                 <ion-button (click)="goTab('data')" color="medium">
-                    <ion-icon name="arrow-back-circle-outline"></ion-icon>
+                    <ion-icon name="arrow-back-circle-sharp"></ion-icon>
                     {{ 'Back' | translate }} </ion-button>
             </ion-col>
         </ion-row>
@@ -88,7 +88,7 @@ https://www.gnu.org/licenses.
                     </ng-template>
                 </ion-button>
                 <ion-button (click)="goTab('data')" color="medium">
-                    <ion-icon name="arrow-back-circle-outline"></ion-icon>
+                    <ion-icon name="arrow-back-circle-sharp"></ion-icon>
                     {{ 'Back' | translate }} </ion-button>
             </ion-col>
         </ion-row>
@@ -146,7 +146,7 @@ https://www.gnu.org/licenses.
             <ion-item class="ion-no-margin ion-margin-bottom full-width">
                 <div class="ion-margin-top ion-margin-bottom">
                     <ion-button color="dark" size="default" (click)="doGetLinked()">
-                        <ion-icon name="search-outline"></ion-icon>
+                        <ion-icon name="search-sharp"></ion-icon>
                         <span *ngIf="reloading">{{ 'Running' | translate }}...</span>
                         <span *ngIf="!reloading">{{ link_?.get }}</span>
                     </ion-button>
@@ -187,7 +187,7 @@ https://www.gnu.org/licenses.
                         <div class="ion-margin-top full-flex ion-margin-bottom">
                             <ion-button *ngFor="let item of links" (click)="doGoLink(item)" color="dark" size="default"
                                 slot="end">
-                                <ion-icon name="link-outline"></ion-icon> {{ item.btntext ? item.btntext :
+                                <ion-icon name="link-sharp"></ion-icon> {{ item.btntext ? item.btntext :
                                 item.collection | translate }}
                             </ion-button>
                         </div>
@@ -289,13 +289,13 @@ https://www.gnu.org/licenses.
                                 <ion-button *ngIf="op=='insert' || (!field.readonly && !field.disabled)"
                                     (click)="doCancelDate(field.name)" fill="clear"
                                     class="ion-no-padding datetime-clear-button" size="default">
-                                    <ion-icon name="close-outline"></ion-icon>
+                                    <ion-icon name="close-sharp"></ion-icon>
                                 </ion-button>
                             </div>
                             <ng-template #nodatevalue>
                                 <ion-button (click)="doInitDate(field.name)" fill="clear"
                                     class="ion-no-padding datetime-button-nov">
-                                    <ion-icon name="calendar-outline"></ion-icon>
+                                    <ion-icon name="calendar-sharp"></ion-icon>
                                 </ion-button>
                             </ng-template>
                         </div>

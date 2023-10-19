@@ -68,7 +68,7 @@ https://www.gnu.org/licenses.
     <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="server-outline"></ion-icon>{{ 'Database' | translate }}
+          <ion-icon name="server-sharp"></ion-icon>{{ 'Database' | translate }}
         </ion-button>
         <p *ngFor="let item of collections_" (click)="misc.navi.next('collection/'+ item?.col_id)"
           class="clicked-item dark">
@@ -79,7 +79,7 @@ https://www.gnu.org/licenses.
     <!-- <ion-item lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="eye-outline"></ion-icon>{{ "Shared Views" | translate }}
+          <ion-icon name="eye-sharp"></ion-icon>{{ "Shared Views" | translate }}
         </ion-button>
         <div *ngIf="views?.length > 0; else noviewsfound">
           <p *ngFor="let item of views" (click)="misc.navi.next('view/' + item.id)" class="clicked-item dark">
@@ -96,7 +96,7 @@ https://www.gnu.org/licenses.
     <ion-item *ngIf="perm_ && segmentsadm?.length > 0" lines="none">
       <ion-label class="ion-text-wrap ion-no-margin">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="hammer-outline"></ion-icon>{{ 'Administration' | translate }}
+          <ion-icon name="hammer-sharp"></ion-icon>{{ 'Administration' | translate }}
         </ion-button>
         <p *ngFor="let item of segmentsadm" (click)="misc.navi.next('admin/' + item?.id)" class="clicked-item dark">
           {{ item.title | translate }}
@@ -106,7 +106,7 @@ https://www.gnu.org/licenses.
     <ion-item>
       <ion-label class="ion-text-wrap">
         <ion-button size="default" fill="clear" class="menu-button">
-          <ion-icon name="settings-outline"></ion-icon>{{ 'Settings' | translate }}
+          <ion-icon name="settings-sharp"></ion-icon>{{ 'Settings' | translate }}
         </ion-button>
         <p (click)="misc.navi.next('settings/account')" class="clicked-item dark">
           {{ 'Account' | translate }}
@@ -119,7 +119,7 @@ https://www.gnu.org/licenses.
     <ion-item>
       <ion-label class="ion-text-wrap">
         <ion-button size="default" fill="clear" class="out-button" (click)="sign_out()">
-          <ion-icon name="power-outline"></ion-icon>
+          <ion-icon name="power-sharp"></ion-icon>
           {{ 'Sign out' | translate }}
         </ion-button>
       </ion-label>

@@ -43,50 +43,50 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div *ngIf="is_crud" (click)="upload_modal_f()" class="data-sq-button">
-                <ion-icon name="download-outline"></ion-icon><br />
+                <ion-icon name="download-sharp"></ion-icon><br />
                 {{ 'Import File' | translate }}
               </div>
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
-                <ion-icon name="qr-code-outline"></ion-icon><br />
+                <ion-icon name="qr-code-sharp"></ion-icon><br />
                 {{ 'Scan Barcode' | translate }}
               </div>
               <ng-template #newrecord>
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
-                  <ion-icon name="add-circle-outline"></ion-icon><br />
+                  <ion-icon name="add-circle-sharp"></ion-icon><br />
                   {{ 'New Record' | translate }}
                 </div>
               </ng-template>
               <div *ngIf="is_loaded" (click)="refresh_data(0)" class="data-sq-button">
-                <ion-icon name="sync-circle-outline"></ion-icon>
+                <ion-icon name="sync-circle-sharp"></ion-icon>
                 <br />
                 {{ 'Refresh List' | translate }}
               </div>
-              <div *ngIf="!is_loaded" class="data-sq-button required">
-                <ion-spinner name="crescent"></ion-spinner>
+              <div *ngIf="!is_loaded" class="data-sq-button">
+                <ion-spinner name="lines-sharp"></ion-spinner>
                 <br />
                 {{ 'Please Wait' | translate }}
               </div>
               <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
-                <ion-icon name="close-circle-outline"></ion-icon>
+                <ion-icon name="close-circle-sharp"></ion-icon>
                 <br />
                 <span>{{ 'Clear Filter' | translate }}</span>
               </div>
               <div (click)="MultiCrud('clone')" class="data-sq-button">
-                <ion-icon name="duplicate-outline"></ion-icon><br />
+                <ion-icon name="duplicate-sharp"></ion-icon><br />
                 {{ 'Clone Record' | translate }}
               </div>
-              <div *ngIf="is_deleting" class="data-sq-button required">
-                <ion-spinner name="crescent"></ion-spinner><br />
+              <div *ngIf="is_deleting" class="data-sq-button">
+                <ion-spinner name="lines-sharp"></ion-spinner><br />
                 {{ 'Deleting Records' | translate }}
               </div>
               <div *ngIf="!is_deleting" (click)="MultiCrud('delete')" class="data-sq-button">
-                <ion-icon name="trash-outline"></ion-icon><br />
+                <ion-icon name="trash-sharp"></ion-icon><br />
                 {{ 'Delete Record' | translate }}
               </div>
               <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">
                 <div class="ion-no-padding">
-                  <ion-icon name="create-outline"></ion-icon><br />
+                  <ion-icon name="create-sharp"></ion-icon><br />
                   {{ 'Edit Schema' | translate }}
                 </div>
               </div>
@@ -106,7 +106,7 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Saving' | translate }}</span>
               </ion-button>
               <ion-button color="light" (click)="set_editor(false)">
-                <ion-icon name="close-circle-outline"></ion-icon>
+                <ion-icon name="close-circle-sharp"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
             </ion-col>
@@ -168,7 +168,7 @@ https://www.gnu.org/licenses.
                     <ion-icon name="arrow-up"></ion-icon>
                   </ion-button>
                   <ion-button color="light" size="small" (click)="setCopy(item.key)">
-                    <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-outline"></ion-icon>
+                    <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-sharp"></ion-icon>
                     <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
                     <ion-spinner name="crescent"></ion-spinner>
                   </ion-button>
@@ -352,7 +352,7 @@ https://www.gnu.org/licenses.
             </span>
             <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
               class="ion-no-padding ion-margin-start">
-              <ion-icon name="list-outline"></ion-icon>
+              <ion-icon name="list-sharp"></ion-icon>
               {{ 'Pagination' | translate }} [{{ limit_ }}]
             </ion-button>
           </div>

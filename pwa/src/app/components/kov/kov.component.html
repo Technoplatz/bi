@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
   <ion-item *ngIf="!field.manualAdd && (!data[fname] || data[fname]?.length == 0)" lines="none"
     class="ion-no-margin ion-no-padding">
     <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
-      <ion-icon name="add-circle-outline"></ion-icon>
+      <ion-icon name="add-circle-sharp"></ion-icon>
       {{ 'Add' | translate }}
     </ion-button>
   </ion-item>
@@ -124,10 +124,10 @@ https://www.gnu.org/licenses.
         <ion-col size="1.5" class="ion-no-padding ion-text-right">
           <ion-button *ngIf="!field.manualAdd && i == data[fname].length - 1" fill="clear" size="default"
             (click)="doLineAdd(i)" class="ion-no-padding ion-no-margin">
-            <ion-icon name="add-circle-outline"></ion-icon>
+            <ion-icon name="add-circle-sharp"></ion-icon>
           </ion-button>
           <ion-button fill="clear" size="default" (click)="doLineRemove(i)" class="ion-no-padding ion-no-margin">
-            <ion-icon name="remove-circle-outline"></ion-icon>
+            <ion-icon name="remove-circle-sharp"></ion-icon>
           </ion-button>
         </ion-col>
       </ion-row>

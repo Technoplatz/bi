@@ -35,11 +35,12 @@ https://www.gnu.org/licenses.
     <ion-row>
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}</p>
-        <h3>{{ subheader }} [{{ col_ }}]</h3>
+        <h3>{{ subheader }}</h3>
         <span *ngIf="type_==='query'">{{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
           }}. </span>[ {{
         que_scheduled_cron_ ?
-        que_scheduled_cron_ : 'Not scheduled' | translate }} ]
+        que_scheduled_cron_ : 'Not scheduled' | translate }} ]<br />
+        <strong>_collection: {{ col_ }}</strong>
         <div class="filler-10"></div>
 
         <!-- BUTTONS -->
@@ -48,37 +49,37 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="data-sq-container">
               <div (click)="misc.navi.next('admin/_query')" class="data-sq-button">
                 <div class="ion-no-padding">
-                  <ion-icon name="arrow-back-outline"></ion-icon><br />
+                  <ion-icon name="arrow-back-sharp"></ion-icon><br />
                   {{ 'Back-To List' | translate }}
                 </div>
               </div>
               <div (click)="type_!=='query' ? run_query() : refresh_data(0, false)"
-                [class]="running_ ? 'data-sq-button required' : 'data-sq-button'">
+                [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
                 <span *ngIf="!running_">
                   <ion-icon name="play-sharp"></ion-icon><br />
                   {{ 'Run Query' | translate }}
                 </span>
                 <span *ngIf="running_">
-                  <ion-spinner name="crescent"></ion-spinner><br />
+                  <ion-spinner name="lines-sharp"></ion-spinner><br />
                   {{ 'Please Wait' | translate }}
                 </span>
               </div>
               <div (click)="copy_url()" class="data-sq-button">
-                <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
-                <ion-icon *ngIf="is_url_copied" name="checkmark-outline"></ion-icon>
+                <ion-icon *ngIf="!is_url_copied" name="globe-sharp"></ion-icon>
+                <ion-icon *ngIf="is_url_copied" name="checkmark-sharp"></ion-icon>
                 <br />
                 <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
                 <span *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</span>
               </div>
               <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
                 <div class="ion-no-padding">
-                  <ion-icon name="create-outline"></ion-icon><br />
+                  <ion-icon name="create-sharp"></ion-icon><br />
                   {{ 'Edit Query' | translate }}
                 </div>
               </div>
               <div (click)="!running_ ? edit_query() : null" class="data-sq-button">
                 <div class="ion-no-padding">
-                  <ion-icon name="settings-outline"></ion-icon><br />
+                  <ion-icon name="settings-sharp"></ion-icon><br />
                   {{ 'Query Settings' | translate }}
                 </div>
               </div>
@@ -99,7 +100,7 @@ https://www.gnu.org/licenses.
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button color="light" (click)="set_editor(false)">
-                <ion-icon name="close-circle-outline"></ion-icon>
+                <ion-icon name="close-circle-sharp"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
             </ion-col>

@@ -313,6 +313,9 @@ ion-note {
 
 .action-icon {
   font-size: 17px !important;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  margin-right: 8px;
 }
 
 .action-sq {
@@ -448,7 +451,7 @@ ion-note {
   padding-left: 8px;
   font-weight: 500;
   cursor: pointer;
-  background-color: var(--ion-color-light);
+  background-color: #ddd;
   color: var(--ion-color-dark);
   min-width: 88px;
   max-width: 88px;
@@ -463,10 +466,12 @@ ion-note {
   color: var(--ion-color-dark) !important;
 }
 
-.data-sq-button ion-icon {
+.data-sq-button ion-icon,
+.data-sq-button ion-spinner {
   width: 24px !important;
   height: 24px !important;
   margin-bottom: 4px !important;
+  color: var(--ion-color-primary);
 }
 
 .data-sq-button ion-img {
@@ -741,11 +746,6 @@ form ion-item ion-label {
 
 .pane-list a {
   color: var(--ion-color-primary);
-}
-
-.action-icon {
-  margin-top: 6px;
-  margin-bottom: 6px;
 }
 
 .console-right {
@@ -1027,6 +1027,7 @@ app-menu:hover {
   max-width: 300px;
   overflow: hidden !important;
   font-weight: 600;
+  font-size: 13px !important;
   --background: var(--ion-color-primary);
 }
 

@@ -2953,6 +2953,9 @@ class Crud:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
 
+            if not API_DELETE_ALLOWED_:
+                raise APIError("delete operation is not allowed")
+
             if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
                 if collection_id_ in PROTECTED_COLLS_:
                     raise APIError("collection is protected to delete")
@@ -3003,6 +3006,9 @@ class Crud:
             op_ = obj["op"]
             if op_ not in ["clone", "delete"]:
                 raise APIError("operation not supported")
+
+            if op_ == "delete" and not API_DELETE_ALLOWED_:
+                raise APIError("delete operation is not allowed")
 
             if op_ != "delete" or collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
                 if collection_id_ in PROTECTED_COLLS_:
@@ -4518,6 +4524,7 @@ API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
 API_ADMIN_IPS_ = get_docker_secret("admin_ips", default="").replace(" ", "").split(",")
+API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [True, "true", "True", "TRUE"]
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -4945,6 +4952,9 @@ def post_f():
         operation_ = request.headers.get("operation", None).lower() if "operation" in request.headers else None
         if not operation_:
             raise APIError("no operation provided in header")
+
+        if operation_ == "delete" and not API_DELETE_ALLOWED_:
+            raise APIError("delete operation is not allowed")
 
         rh_collection_ = request.headers.get("collection", None).lower() if "collection" in request.headers else None
         if not rh_collection_:
