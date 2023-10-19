@@ -32,16 +32,13 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { TranslateService } from "@ngx-translate/core";
-import { SwUpdate } from '@angular/service-worker';
-import { Router, Event, NavigationError, NavigationEnd, NavigationStart } from "@angular/router";
+import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./classes/misc";
 import { Auth } from "./classes/auth";
 import { Crud } from "./classes/crud";
-import { Plugins } from "@capacitor/core";
+import { Su } from "./classes/su";
 import { environment } from "../environments/environment";
-
-const { Network } = Plugins;
 
 @Component({
   selector: "app-root",
@@ -61,47 +58,27 @@ export class AppComponent implements OnInit {
     private crud: Crud,
     private misc: Miscellaneous,
     private storage: Storage,
-    private readonly sw_update: SwUpdate
+    private su: Su
   ) {
-    if (this.sw_update.isEnabled) {
-      console.log("*** sw_update enabled");
-      setInterval(() => {
-        this.sw_update.checkForUpdate().then(() => { });
-      }, 60 * 1000 * 10);
-      this.sw_update.versionUpdates.subscribe(evt => {
-        switch (evt.type) {
-          case "VERSION_DETECTED":
-            break;
-          case "VERSION_READY":
-            this.storage.get("LSVERSION").then((LSVERSION: any) => {
-              this.misc.version.next({ is_new_version: evt.latestVersion.hash !== LSVERSION, version: evt.latestVersion.hash });
-            });
-            break;
-          case "VERSION_INSTALLATION_FAILED":
-            break;
-          case 'NO_NEW_VERSION_DETECTED':
-            break;
-        }
-      });
-    }
+    // auth
     this.auth.user.subscribe((user: any) => {
       this.user_ = user;
     });
+    // version check
+    this.su.checkForUpdates();
+    // pagination
+    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
+      !LSPAGINATION ? this.storage.set("LSPAGINATION", this.paginations_[1]).then(() => { }) : null;
+    });
+    // navi
     this.misc.navi.subscribe((path: any) => {
       this.router.navigateByUrl(path).then(() => { }).catch((error: any) => {
         console.error(error);
       });
     });
-    this.router.events.subscribe((event: Event) => {
-      if (event instanceof NavigationError) {
-        console.error("*** navigation error", event.url, event.error);
-      } else if (event instanceof NavigationStart) {
-      } else if (event instanceof NavigationEnd) {
-        const urlpart1_ = event.url.split("/")[1];
-      }
-    });
-    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
-      !LSPAGINATION ? this.storage.set("LSPAGINATION", this.paginations_[1]).then(() => { }) : null;
+    // theme
+    this.storage.get("LSTHEME").then((LSTHEME: any) => {
+      document.documentElement.style.setProperty("--ion-color-primary", LSTHEME ? LSTHEME.color : environment.themes[0].color);
     });
   }
 
@@ -113,27 +90,6 @@ export class AppComponent implements OnInit {
           this.misc.doMessage(error, "error");
         });
       }
-      this.storage.get("LSTHEME").then((LSTHEME: any) => {
-        if (LSTHEME) {
-          document.documentElement.style.setProperty("--ion-color-primary", LSTHEME.color);
-        } else {
-          this.storage.set("LSTHEME", environment.themes[0]).then(() => {
-            document.documentElement.style.setProperty("--ion-color-primary", environment.themes[0].color);
-          });
-        }
-      });
-      Network.addListener("networkStatusChange", (status: any) => {
-        if (!status.connected) {
-          this.net_ = false;
-          console.error("*** internet connection is lost");
-        } else {
-          setTimeout(() => {
-            console.log("*** internet connection is back again");
-            this.net_ = true;
-            location.reload();
-          }, 3000);
-        }
-      });
       this.misc.getLanguage().then((res: any) => {
         this.translate.setDefaultLang(res ? res : "en");
         this.translate.use(res ? res : "en");

@@ -32,7 +32,6 @@ https://www.gnu.org/licenses.
 
 import { Component, OnInit } from "@angular/core";
 import { Miscellaneous } from "../../classes/misc";
-import { Storage } from "@ionic/storage";
 import { Auth } from "../../classes/auth";
 
 @Component({
@@ -42,38 +41,32 @@ import { Auth } from "../../classes/auth";
 })
 
 export class ToolsComponent implements OnInit {
-  public name: string = "";
-  public is_new_version: boolean = false;
-  public new_version_: string = "";
+  public user_: any = null;
+  public new_version_: boolean = false;
 
   constructor(
     private auth: Auth,
-    public misc: Miscellaneous,
-    private storage: Storage
+    public misc: Miscellaneous
   ) {
     this.misc.version.subscribe((version_: any) => {
-      if (version_ && version_.is_new_version) {
-        this.is_new_version = true;
-        this.new_version_ = version_.version;
+      if (version_.upgrade) {
+        this.new_version_ = true;
       }
     });
   }
 
   ngOnDestroy() {
-    this.misc.version.unsubscribe;
     this.auth.user.unsubscribe;
   }
 
   ngOnInit() {
-    this.auth.user.subscribe((user: any) => {
-      this.name = user ? user.name : "";
+    this.auth.user.subscribe((user_: any) => {
+      this.user_ = user_;
     });
   }
 
-  set_version() {
-    this.storage.set("LSVERSION", this.new_version_).then(() => {
-      window.location.replace("/dashboard");
-    });
+  reload_app() {
+    window.location.reload();
   }
 
 }

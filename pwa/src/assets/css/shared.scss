@@ -133,6 +133,20 @@ ion-note {
   margin-right: 32px !important;
   --padding-start: 10px !important;
   --padding-end: 10px !important;
+  animation: blink 2s linear infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  80% {
+    opacity: 1;
+  }
+
+  81%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .margin-bottom {
@@ -152,23 +166,6 @@ ion-note {
   --padding-end: 32px;
   --padding-top: 24px;
   --padding-bottom: 24px;
-}
-
-.blink_await {
-  animation: blinker 0.2s linear infinite;
-}
-
-@keyframes blinker {
-
-  0%,
-  50% {
-    opacity: 1;
-  }
-
-  51%,
-  100% {
-    opacity: 1;
-  }
 }
 
 .top-tools {

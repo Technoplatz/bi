@@ -62,7 +62,7 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Refresh List' | translate }}
               </div>
-              <div *ngIf="!is_loaded" class="data-sq-button required blink_await">
+              <div *ngIf="!is_loaded" class="data-sq-button required">
                 <ion-spinner name="crescent"></ion-spinner>
                 <br />
                 {{ 'Please Wait' | translate }}
@@ -76,7 +76,7 @@ https://www.gnu.org/licenses.
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 {{ 'Clone Record' | translate }}
               </div>
-              <div *ngIf="is_deleting" class="data-sq-button required blink_await">
+              <div *ngIf="is_deleting" class="data-sq-button required">
                 <ion-spinner name="crescent"></ion-spinner><br />
                 {{ 'Deleting Records' | translate }}
               </div>

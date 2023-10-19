@@ -53,7 +53,7 @@ https://www.gnu.org/licenses.
                 </div>
               </div>
               <div (click)="type_!=='query' ? run_query() : refresh_data(0, false)"
-                [class]="running_ ? 'data-sq-button required blink_await' : 'data-sq-button'">
+                [class]="running_ ? 'data-sq-button required' : 'data-sq-button'">
                 <span *ngIf="!running_">
                   <ion-icon name="play-sharp"></ion-icon><br />
                   {{ 'Run Query' | translate }}

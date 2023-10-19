@@ -49,7 +49,7 @@ export class Miscellaneous {
   public collections = new BehaviorSubject<any>([]);
   public session_ = new BehaviorSubject<any>([]);
   public navi = new Subject<any>();
-  public version = new BehaviorSubject<any>(null);
+  public version = new BehaviorSubject<any>({});
   public saas = new BehaviorSubject<any>(null);
   public localization = new BehaviorSubject<any>(null);
   public api = new BehaviorSubject<any>(null);
@@ -70,7 +70,6 @@ export class Miscellaneous {
     const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
     const domain_ = window.location.host.split(":")[0];
     this.uri_ = `${window.location.protocol}//${ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : domain_}/api`;
-    console.log("*** api", this.uri_);
     this.api.next({ uri: this.uri_ });
   }
 

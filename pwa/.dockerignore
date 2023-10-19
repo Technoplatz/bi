@@ -13,4 +13,5 @@ docker-compose.yml
 Dockerfile
 .dockerignore
 *.env
+*.env-dev
 package-lock.json
