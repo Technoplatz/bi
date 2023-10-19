@@ -41,6 +41,8 @@ https://www.gnu.org/licenses.
         que_scheduled_cron_ ?
         que_scheduled_cron_ : 'Not scheduled' | translate }} ]
         <div class="filler-10"></div>
+
+        <!-- BUTTONS -->
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
@@ -125,19 +127,9 @@ https://www.gnu.org/licenses.
                 {{ record[item_]?.toString() }}
               </td>
             </tr>
-            <tr>
-              <td [attr.colspan]="fields_?.length+1">
-                <ion-button size="small" fill="clear"
-                  (click)="pager_ > 1 ? refresh_data(pager_-1, false) : refresh_data(1, false)" class="ion-no-padding">
-                  <ion-icon name="caret-back"></ion-icon>
-                </ion-button>
-                <ion-button size="small" fill="clear" class="ion-no-padding">{{ pager_ }}</ion-button>
-                <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
-                  <ion-icon name="caret-forward"></ion-icon>
-                </ion-button>
-              </td>
-            </tr>
           </table>
+
+          <!-- NO DATA FOUND FOR QUERY -->
           <ng-template #nodata>
             <div *ngIf="!running_; else ontheway" class="ion-margin-top">
               <h6>{{ 'No data found' | translate }}.</h6>
@@ -151,6 +143,8 @@ https://www.gnu.org/licenses.
             </ng-template>
           </ng-template>
         </div>
+
+        <!-- RESULT FOR A JOB -->
         <ng-template #job>
           <div class="ion-margin-top">
             <h6><span *ngIf="!running_">{{ count_ }} {{'records affected' | translate }}</span>

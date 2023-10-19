@@ -60,7 +60,7 @@ https://www.gnu.org/licenses.
               <div *ngIf="is_loaded" (click)="refresh_data(0)" class="data-sq-button">
                 <ion-icon name="sync-circle-outline"></ion-icon>
                 <br />
-                {{ 'Refresh All' | translate }}
+                {{ 'Refresh List' | translate }}
               </div>
               <div *ngIf="!is_loaded" class="data-sq-button required blink_await">
                 <ion-spinner name="crescent"></ion-spinner>
@@ -233,25 +233,29 @@ https://www.gnu.org/licenses.
                   </ion-button>
                 </div>
               </th>
+              <th *ngIf="id==='_query'">
+                {{ 'Approved' | translate }}<br />
+                <ion-text color="primary">{{ '_approved' }}</ion-text>
+              </th>
               <th>
                 {{ 'Created At' | translate }}<br />
-                {{ '_created_at' }}
+                <ion-text color="primary">{{ '_created_at' }}</ion-text>
               </th>
               <th>
                 {{ 'Created By' | translate }}<br />
-                {{ '_created_by' }}
+                <ion-text color="primary">{{ '_created_by' }}</ion-text>
               </th>
               <th>
                 {{ 'Modified At' | translate }}<br />
-                {{ '_modified_at' }}
+                <ion-text color="primary">{{ '_modified_at' }}</ion-text>
               </th>
               <th>
                 {{ 'Modified By' | translate }}<br />
-                {{ '_modified_by' }}
+                <ion-text color="primary">{{ '_modified_by' }}</ion-text>
               </th>
               <th>
-                {{ 'Record ID' | translate }}<br />
-                {{ '_id' }}
+                {{ 'ID' | translate }}<br />
+                <ion-text color="primary">{{ '_id' }}</ion-text>
               </th>
             </tr>
             <tr *ngFor="let record of data; let i = index"
@@ -303,6 +307,9 @@ https://www.gnu.org/licenses.
                 <ng-template #else0>
                   {{ record[item_.key]?.toString() | translate }}
                 </ng-template>
+              </td>
+              <td *ngIf="id==='_query'">
+                {{ record?._approved }}
               </td>
               <td>
                 {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}

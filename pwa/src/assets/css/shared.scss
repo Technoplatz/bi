@@ -159,10 +159,12 @@ ion-note {
 }
 
 @keyframes blinker {
+
   0%,
   50% {
     opacity: 1;
   }
+
   51%,
   100% {
     opacity: 1;
@@ -213,6 +215,12 @@ ion-note {
 .filler-4 {
   height: 4px;
   width: 100%;
+}
+
+.lang-inner {
+  margin-top: 6px;
+  right: 16px;
+  position: absolute;
 }
 
 .flex-container {

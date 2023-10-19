@@ -2444,7 +2444,7 @@ class Crud:
                     email_sent_ = Email().send_email_f({
                         "personalizations": personalizations_,
                         "html": que_message_body_,
-                        "subject": f"Query: {que_title_}",
+                        "subject": que_title_,
                         "files": files_
                     })
                     if not email_sent_["result"]:
@@ -2508,7 +2508,7 @@ class Crud:
             get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
 
             if collection_id_ == "_query" and not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
-                get_filtered_["_tags"] = { "$elemMatch": { "$in": user_["_tags"] }}
+                get_filtered_["_tags"] = {"$elemMatch": {"$in": user_["_tags"]}}
 
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
