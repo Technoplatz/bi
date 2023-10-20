@@ -30,14 +30,16 @@
 # https://www.gnu.org/licenses.
 # 
 
-FROM node:current-alpine as build
+FROM node:20-alpine as build
 WORKDIR /app
+RUN npm cache clean --force
 RUN npm install -g npm
 RUN npm install -g @ionic/cli
 COPY package.json /app/
 RUN npm install
 COPY . /app/
 RUN ionic build --prod
+
 FROM nginx:mainline-alpine
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
