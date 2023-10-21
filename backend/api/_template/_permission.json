@@ -59,6 +59,14 @@
       "trueText": "Yes",
       "falseText": "No"
     },
+    "per_query": {
+      "bsonType": "bool",
+      "title": "Query",
+      "description": "Query Run Permission",
+      "default": false,
+      "trueText": "Yes",
+      "falseText": "No"
+    },
     "per_match": {
       "bsonType": "array",
       "minItems": 0,
@@ -101,7 +109,12 @@
   },
   "required": ["per_tag", "per_collection_id"],
   "unique": [["per_collection_id", "per_tag"]],
-  "index": [["per_tag"], ["per_collection_id"], ["per_collection_id", "per_tag", "per_read", "per_insert", "per_update", "per_delete"]],
+  "index": [
+    ["per_tag"],
+    ["per_collection_id"],
+    ["per_collection_id", "per_tag", "per_query"],
+    ["per_collection_id", "per_tag", "per_read", "per_insert", "per_update", "per_delete", "per_query"]
+  ],
   "sort": {
     "_modified_at": -1
   }

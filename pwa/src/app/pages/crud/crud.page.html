@@ -64,10 +64,10 @@ https://www.gnu.org/licenses.
                     <ion-icon name="close-circle-sharp"></ion-icon>
                     {{ 'Cancel' |
                     translate }} </ion-button>
-                <ion-button *ngIf="op=='update' && collection!='_query'" color="danger" (click)="doRemove()"
+                <ion-button *ngIf="op=='update' && user?.perma" color="danger" (click)="doRemove()"
                     class="end-item">
                     <ion-icon name="trash-bin-sharp"></ion-icon>
-                    {{ 'DELETE' | translate }}&nbsp;
+                    {{ 'Delete' | translate }}&nbsp;
                 </ion-button>
             </ion-col>
         </ion-row>

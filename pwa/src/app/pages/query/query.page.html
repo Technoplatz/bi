@@ -91,12 +91,12 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="schemavis_" class="actions-grid">
           <ion-row>
             <ion-col size="12">
-              <ion-button *ngIf="perm_" (click)="save_json_f(false)">
+              <ion-button (click)="save_json_f(false)">
                 <span *ngIf="!_saving">{{ 'Save Query' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button *ngIf="perma_" (click)="save_json_f(true)">
-                <span *ngIf="!_saving">{{ 'Save' | translate }} & {{ 'Approve' | translate }}</span>
+                <span *ngIf="!_saving">{{ 'Approve' | translate }} & {{ 'Save' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button color="light" (click)="set_editor(false)">

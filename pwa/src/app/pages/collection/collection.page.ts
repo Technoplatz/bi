@@ -189,6 +189,7 @@ export class CollectionPage implements OnInit {
   refresh_data(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
+      this.data = [];
       this.schemavis_ = false;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
@@ -226,12 +227,13 @@ export class CollectionPage implements OnInit {
             for (let p = 0; p < this.paget_.length; p++) {
               this.paget_[p] = this.page_start + p;
             }
+            this.is_loaded = true;
             resolve(true);
           }).catch((error: any) => {
             this.misc.doMessage(error, "error");
             reject(error);
           }).finally(() => {
-            this.is_loaded = true;
+            
             this.crud.get_all().then(() => { });
           });
         });
@@ -365,11 +367,11 @@ export class CollectionPage implements OnInit {
     this.refresh_data(0);
   }
 
-  doSetSearch(k: string) {
+  set_search(k: string) {
     this.searched[k].setmode = false;
     let i = 0;
     for (let key_ in this.structure_.properties) {
-      k !== key_ ? this.searched[key_].actived = false : this.searched[key_].actived = !this.searched[key_].actived;
+      this.searched[key_].actived = k === key_ ? true : false;
     }
   }
 
@@ -480,7 +482,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  doSetSearchItemOp(k: string, op: string) {
+  set_searchItemOp(k: string, op: string) {
     this.searched[k].op = op;
   }
 

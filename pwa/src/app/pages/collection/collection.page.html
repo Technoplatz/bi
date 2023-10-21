@@ -67,7 +67,7 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Please Wait' | translate }}
               </div>
-              <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button required">
+              <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button">
                 <ion-icon name="close-circle-sharp"></ion-icon>
                 <br />
                 <span>{{ 'Clear Filter' | translate }}</span>
@@ -136,6 +136,7 @@ https://www.gnu.org/licenses.
             </ion-row>
           </ion-grid>
 
+          <!-- FLASHCARDS -->
           <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
             <ion-row>
               <ion-col size="12" class="schema-flashcard-container">
@@ -144,7 +145,8 @@ https://www.gnu.org/licenses.
               </ion-col>
             </ion-row>
           </ion-grid>
-          <table *ngIf="data.length > 0" class="data-table">
+
+          <table class="data-table">
             <tr>
               <th>&nbsp;</th>
               <th>
@@ -152,14 +154,18 @@ https://www.gnu.org/licenses.
                   mode="md">
                 </ion-checkbox>
               </th>
+
+              <!-- DATA LIST HEADER -->
               <th *ngFor="let item of properties_ | keyvalue : orderByIndex">
-                <div (click)="doSetSearch(item.key)">
+                <div>
                   {{ item.value.title }}
-                  <span *ngIf="searched && searched[item.key] && searched[item.key].f" class="danger">[F]</span>
-                  <br />
-                  <ion-text color="primary">{{ item.key }}</ion-text>
+                  <span *ngIf="searched && searched[item.key]?.f" class="danger">[F]</span><br />
+                  <ion-button size="small" fill="clear" class="ion-no-padding" (click)="set_search(item.key)">{{
+                    item.key }}<ion-icon name="filter-sharp" class="filter-icon"></ion-icon></ion-button>
                 </div>
-                <div *ngIf="searched && searched[item.key]?.actived && !searched[item.key].setmode" class="search-box">
+
+                <!-- SEARCH BOX -->
+                <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
                   <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
                   <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
                     <ion-icon name="arrow-down"></ion-icon>
@@ -170,46 +176,46 @@ https://www.gnu.org/licenses.
                   <ion-button color="light" size="small" (click)="setCopy(item.key)">
                     <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-sharp"></ion-icon>
                     <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
-                    <ion-spinner name="crescent"></ion-spinner>
+                    <ion-icon *ngIf="is_key_copying" name="stopwatch-"></ion-icon>
                   </ion-button>
                   <br />
                   <div *ngIf="item.value.bsonType!='bool'" class="search-ops">
                     <ion-button [color]="searched[item.key].op == 'contains' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'contains')">
+                      (click)="set_searchItemOp(item.key, 'contains')">
                       in
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'eq')">
+                      (click)="set_searchItemOp(item.key, 'eq')">
                       =
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'ne')">
+                      (click)="set_searchItemOp(item.key, 'ne')">
                       &ne;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'gte')">
+                      (click)="set_searchItemOp(item.key, 'gte')">
                       &ge;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'lte')">
+                      (click)="set_searchItemOp(item.key, 'lte')">
                       &le;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'null')">
+                      (click)="set_searchItemOp(item.key, 'null')">
                       &#9723;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'nnull')">
+                      (click)="set_searchItemOp(item.key, 'nnull')">
                       &#9724;
                     </ion-button>
                   </div>
                   <div *ngIf="item.value.bsonType=='bool'">
                     <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'true')">
+                      (click)="set_searchItemOp(item.key, 'true')">
                       {{ 'True' | translate }}
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
-                      (click)="doSetSearchItemOp(item.key, 'false')">
+                      (click)="set_searchItemOp(item.key, 'false')">
                       {{ 'False' | translate }}
                     </ion-button>
                   </div>
@@ -323,7 +329,7 @@ https://www.gnu.org/licenses.
               </td>
             </tr>
           </table>
-          <div>
+          <div *ngIf="data.length > 0; else norecs">
             <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0)"
               class="ion-no-padding ion-margin-end">
               <ion-icon name="play-skip-back"></ion-icon>
@@ -356,6 +362,11 @@ https://www.gnu.org/licenses.
               {{ 'Pagination' | translate }} [{{ limit_ }}]
             </ion-button>
           </div>
+          <ng-template #norecs>
+            <div *ngIf="is_loaded" class="ion-margin-top">
+              {{ 'NO RECORDS FOUND' | translate }}
+            </div>
+          </ng-template>
         </div>
         <ng-template #notinit>
           <div class="ion-margin-top">

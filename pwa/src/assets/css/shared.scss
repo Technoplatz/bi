@@ -1171,6 +1171,11 @@ sup {
   font-size: 9px;
 }
 
+.filter-icon {
+  font-size: 12px;
+  margin-left: 8px;
+}
+
 .danger {
   color: #c00 !important;
   --color: #c00 !important;
@@ -1779,7 +1784,7 @@ ion-checkbox {
   width: 240px;
   height: auto;
   margin-left: -7px;
-  margin-top: 8px;
+  margin-top: 1px;
   border: 1px solid var(--ion-color-dark);
   z-index: 999999 !important;
   background-color: #fff;
@@ -1941,6 +1946,10 @@ ion-checkbox {
   max-width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.data-table th {
+  padding-bottom: 0rem !important;
 }
 
 .data-table tr:not(:first-child):hover {

@@ -304,11 +304,6 @@ export class Crud {
 
   get_all() {
     return new Promise((resolve, reject) => {
-      // this.get_charts().then(() => { }).catch((error: any) => {
-      //   console.error("*** charts error", error);
-      // }).finally(() => {
-      //   resolve(true);
-      // });
       this.get_views().then(() => { }).catch((error: any) => {
         console.error("*** views error", error);
       }).finally(() => {

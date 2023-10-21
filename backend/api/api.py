@@ -2668,21 +2668,29 @@ class Crud:
         """
         try:
             que_id_ = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
-            aggregate_ = obj_["aggregate"] if "aggregate" in obj_ and obj_["aggregate"] is not None else None
-            approved_ = "approved" in obj_ and obj_["approved"] is True
-            user_ = obj_["userindb"] if "userindb" in obj_ and obj_["userindb"] is not None else None
-
-            if not user_:
-                raise AuthError("user not found", obj_)
-
-            if not aggregate_:
-                raise APIError("no aggregation provided", obj_)
-
             if not que_id_:
-                raise APIError("query not found", obj_)
+                raise APIError("query not found")
 
-            if not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
-                raise AuthError("query is locked to get modified")
+            query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
+            if not query_:
+                raise APIError("query not found")
+
+            que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ and query_["que_collection_id"] is not None else None
+            if not que_collection_id_:
+                raise APIError("no collection provided")
+
+            aggregate_ = obj_["aggregate"] if "aggregate" in obj_ and obj_["aggregate"] else None
+            if not aggregate_:
+                raise APIError("no aggregation provided")
+
+            user_ = obj_["userindb"] if "userindb" in obj_ and obj_["userindb"] else None
+            if not user_:
+                raise AuthError("user not found")
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+
+            permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": que_collection_id_, "per_tag": {"$in": usr_tags_}, "per_query": True})
+            if not permission_:
+                raise AuthError("no permission to save query")
 
             doc_ = {
                 "que_aggregate": aggregate_,
@@ -2691,6 +2699,7 @@ class Crud:
                 "_approved": False
             }
 
+            approved_ = "approved" in obj_ and obj_["approved"] is True
             if approved_:
                 if not Auth().is_admin_f(user_):
                     raise AuthError("no permission to approve")
@@ -3908,9 +3917,8 @@ class Auth:
             op_ = input_["op"] if "op" in input_ else None
             adminops_ = ["dumpu", "dumpr", "dumpd"]
             read_permissive_colls_ = ["_collection", "_query", "_announcement"]
-            read_permissive_ops_ = ["read", "query", "queries", "charts", "views", "collection", "collections", "announcements"]
+            read_permissive_ops_ = ["read", "query", "savequery", "queries", "charts", "views", "collection", "collections", "announcements"]
             insert_permissive_ops_ = ["clone"]
-            update_permissive_ops_ = ["savequery"]
             is_crud_ = collection_id_ and collection_id_[:1] != "_"
             allowmatch_ = []
 
@@ -3919,6 +3927,9 @@ class Auth:
 
             if not user_id_:
                 raise APIError(f"no user defined: {user_id_}")
+
+            if not collection_id_:
+                raise AuthError("no collection provided")
 
             if Auth().is_admin_f(user_):
                 return {"result": True}
@@ -3929,23 +3940,17 @@ class Auth:
             if Auth().is_manager_f(user_):
                 return {"result": True}
 
-            if not collection_id_:
-                raise AuthError(f"no collection provided: {op_}")
+            if op_ in read_permissive_ops_ and collection_id_ in read_permissive_colls_:
+                return {"result": True}
+
+            if not is_crud_ and collection_id_ != "_query":
+                raise AuthError(f"collection is not allowed to {op_}")
 
             if op_ in read_permissive_ops_:
                 op_ = "read"
 
             if op_ in insert_permissive_ops_:
                 op_ = "insert"
-
-            if op_ in update_permissive_ops_:
-                op_ = "update"
-
-            if op_ in read_permissive_ops_ and collection_id_ in read_permissive_colls_:
-                return {"result": True}
-
-            if not is_crud_:
-                raise AuthError(f"{collection_id_} is not allowed to {op_}")
 
             permit_ = False
             for usr_tag_ in usr_tags_:
@@ -3956,7 +3961,9 @@ class Auth:
                     per_update_ = "per_update" in permission_ and permission_["per_update"] is True
                     per_delete_ = "per_delete" in permission_ and permission_["per_delete"] is True
                     per_action_ = "per_action" in permission_ and permission_["per_action"] is True
+                    per_query_ = "per_query" in permission_ and permission_["per_query"] is True
                     if (op_ == "read" and per_read_) or \
+                        (op_ == "savequery" and per_query_) or \
                         (op_ == "insert" and per_insert_ and per_read_) or \
                         (op_ == "import" and per_insert_ and per_read_) or \
                         (op_ == "upsert" and per_insert_ and per_update_ and per_read_) or \
@@ -4635,7 +4642,7 @@ def storage_f():
 
 
 @ app.route("/api/crud", methods=["POST"])
-def crud_f():
+def api_crud_f():
     """
     docstring is in progress
     """
