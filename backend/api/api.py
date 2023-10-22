@@ -2187,8 +2187,9 @@ class Crud:
                 data__ = []
                 for coll_ in collections_:
                     for usr_tag_ in usr_tags_:
-                        filter_ = {
+                        permission_ = Mongo().db_["_permission"].find_one({
                             "per_collection_id": coll_["col_id"],
+                            "per_is_active": True,
                             "per_tag": usr_tag_,
                             "$or": [
                                 {"per_read": True},
@@ -2196,8 +2197,7 @@ class Crud:
                                 {"per_update": True},
                                 {"per_delete": True}
                             ]
-                        }
-                        permission_ = Mongo().db_["_permission"].find_one(filter_)
+                        })
                         if permission_:
                             data__.append(coll_)
                             break
@@ -2231,6 +2231,7 @@ class Crud:
                 for usr_tag_ in usr_tags_:
                     permissions_ = Mongo().db_["_permission"].find_one({
                         "per_collection_id": col_id_,
+                        "per_is_active": True,
                         "per_tag": usr_tag_,
                         "$or": [
                             {"per_insert": True},
@@ -2688,9 +2689,10 @@ class Crud:
                 raise AuthError("user not found")
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": que_collection_id_, "per_tag": {"$in": usr_tags_}, "per_query": True})
-            if not permission_:
-                raise AuthError("no permission to save query")
+            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
+                permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": que_collection_id_, "per_is_active": True, "per_tag": {"$in": usr_tags_}, "per_query": True})
+                if not permission_:
+                    raise AuthError("no permission to save query")
 
             doc_ = {
                 "que_aggregate": aggregate_,
@@ -3762,8 +3764,11 @@ class Auth:
                 if qid_ not in find_["tkn_allowed_queries"]:
                     raise AuthError(f"token is not allowed to read {qid_}")
 
-            if not ("tkn_allowed_ips" in find_ and len(find_["tkn_allowed_ips"]) > 0 and
-                    (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"])):
+            if not (
+                "tkn_allowed_ips" in find_ and
+                len(find_["tkn_allowed_ips"]) > 0 and
+                (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"])
+            ):
                 raise AuthError(f"IP is not allowed to do {operation_}")
 
             return {"result": True}
@@ -3954,7 +3959,7 @@ class Auth:
 
             permit_ = False
             for usr_tag_ in usr_tags_:
-                permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": collection_id_, "per_tag": usr_tag_})
+                permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": collection_id_, "per_is_active": True, "per_is_active": True, "per_tag": usr_tag_})
                 if permission_:
                     per_insert_ = "per_insert" in permission_ and permission_["per_insert"] is True
                     per_read_ = "per_read" in permission_ and permission_["per_read"] is True

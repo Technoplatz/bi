@@ -19,10 +19,18 @@
       "required": true,
       "collection": true
     },
+    "per_is_active": {
+      "bsonType": "bool",
+      "title": "Is Active",
+      "description": "Permission is active",
+      "default": true,
+      "trueText": "Yes",
+      "falseText": "No"
+    },
     "per_read": {
       "bsonType": "bool",
       "title": "Read",
-      "description": "Read Permission",
+      "description": "Read permission",
       "default": false,
       "trueText": "Yes",
       "falseText": "No"
@@ -30,7 +38,7 @@
     "per_insert": {
       "bsonType": "bool",
       "title": "Insert",
-      "description": "Insert Permission",
+      "description": "Insert permission",
       "default": false,
       "trueText": "Yes",
       "falseText": "No"
@@ -38,7 +46,7 @@
     "per_update": {
       "bsonType": "bool",
       "title": "Update",
-      "description": "Update Permission",
+      "description": "Update permission",
       "default": false,
       "trueText": "Yes",
       "falseText": "No"
@@ -46,7 +54,7 @@
     "per_delete": {
       "bsonType": "bool",
       "title": "Delete",
-      "description": "Delete Permission",
+      "description": "Delete permission",
       "default": false,
       "trueText": "Yes",
       "falseText": "No"
@@ -54,7 +62,7 @@
     "per_action": {
       "bsonType": "bool",
       "title": "Action",
-      "description": "Action Run Permission",
+      "description": "Action run permission",
       "default": false,
       "trueText": "Yes",
       "falseText": "No"
@@ -62,7 +70,7 @@
     "per_query": {
       "bsonType": "bool",
       "title": "Query",
-      "description": "Query Run Permission",
+      "description": "Query run permission",
       "default": false,
       "trueText": "Yes",
       "falseText": "No"
@@ -112,8 +120,8 @@
   "index": [
     ["per_tag"],
     ["per_collection_id"],
-    ["per_collection_id", "per_tag", "per_query"],
-    ["per_collection_id", "per_tag", "per_read", "per_insert", "per_update", "per_delete", "per_query"]
+    ["per_collection_id", "per_is_active", "per_tag", "per_query"],
+    ["per_collection_id", "per_is_active", "per_tag", "per_read", "per_insert", "per_update", "per_delete", "per_query"]
   ],
   "sort": {
     "_modified_at": -1

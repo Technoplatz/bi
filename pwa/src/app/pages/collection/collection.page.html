@@ -154,16 +154,15 @@ https://www.gnu.org/licenses.
                   mode="md">
                 </ion-checkbox>
               </th>
-
               <!-- DATA LIST HEADER -->
               <th *ngFor="let item of properties_ | keyvalue : orderByIndex">
                 <div>
-                  {{ item.value.title }}
-                  <span *ngIf="searched && searched[item.key]?.f" class="danger">[F]</span><br />
-                  <ion-button size="small" fill="clear" class="ion-no-padding" (click)="set_search(item.key)">{{
-                    item.key }}<ion-icon name="filter-sharp" class="filter-icon"></ion-icon></ion-button>
+                  {{ item.value.title }}<br />
+                  <ion-button size="small"
+                    [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'"
+                    (click)="set_search(item.key)">{{
+                    item.key }}<ion-icon name="filter-sharp"></ion-icon></ion-button>
                 </div>
-
                 <!-- SEARCH BOX -->
                 <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
                   <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
@@ -182,7 +181,7 @@ https://www.gnu.org/licenses.
                   <div *ngIf="item.value.bsonType!='bool'" class="search-ops">
                     <ion-button [color]="searched[item.key].op == 'contains' ? 'primary' : 'light'" size="small"
                       (click)="set_searchItemOp(item.key, 'contains')">
-                      in
+                      {{ 'in' | translate }}
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
                       (click)="set_searchItemOp(item.key, 'eq')">
@@ -227,9 +226,11 @@ https://www.gnu.org/licenses.
                     </ion-input>
                   </div>
                   <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
+                    <ion-icon name="search"></ion-icon>
                     {{ 'Search' | translate }}
                   </ion-button>
                   <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
+                    <ion-icon name="close"></ion-icon>
                     {{ 'Cancel' | translate }}
                   </ion-button>
                 </div>

@@ -189,7 +189,7 @@ export class CollectionPage implements OnInit {
   refresh_data(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
-      this.data = [];
+      // this.data = [];
       this.schemavis_ = false;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;

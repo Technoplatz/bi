@@ -31,38 +31,42 @@
     "tkn_is_active": {
       "bsonType": "bool",
       "title": "Is Active",
-      "description": "Token Accesibility",
-      "default": true
+      "description": "Token accesibility",
+      "default": true,
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "tkn_grant_read": {
       "bsonType": "bool",
       "title": "Grant Read",
-      "description": "Grant Read",
-      "default": false
+      "description": "Grant for reading",
+      "default": false,
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "tkn_grant_insert": {
       "bsonType": "bool",
       "title": "Grant Insert",
-      "description": "Grant Insert",
-      "default": false
+      "description": "Grant for inserting",
+      "default": false,
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "tkn_grant_update": {
       "bsonType": "bool",
       "title": "Grant Update",
-      "description": "Grant Update",
-      "default": false
-    },
-    "tkn_grant_upsert": {
-      "bsonType": "bool",
-      "title": "Grant Upsert",
-      "description": "Grant Upsert",
-      "default": false
+      "description": "Grant for updating",
+      "default": false,
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "tkn_grant_delete": {
       "bsonType": "bool",
       "title": "Grant Delete",
-      "description": "Grant Delete",
-      "default": false
+      "description": "Grant for deleting",
+      "default": false,
+      "trueText": "Yes",
+      "falseText": "No"
     },
     "tkn_allowed_ips": {
       "bsonType": "array",
