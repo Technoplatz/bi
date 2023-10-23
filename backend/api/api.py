@@ -2675,6 +2675,7 @@ class Crud:
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
                 raise APIError("query not found")
+            que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
             que_collection_id_ = query_["que_collection_id"] if "que_collection_id" in query_ and query_["que_collection_id"] is not None else None
             if not que_collection_id_:
@@ -2689,7 +2690,10 @@ class Crud:
                 raise AuthError("user not found")
             usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
 
-            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
+            if not Auth().is_admin_f(user_) and que_type_ != "query":
+                raise AuthError("no permission to save job")
+
+            if not Auth().is_manager_f(user_):
                 permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": que_collection_id_, "per_is_active": True, "per_tag": {"$in": usr_tags_}, "per_query": True})
                 if not permission_:
                     raise AuthError("no permission to save query")

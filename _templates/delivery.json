@@ -58,7 +58,7 @@
       "description": "Account Name",
       "minLength": 1,
       "maxLength": 128,
-      "permanent": true
+      "readonly": true
     },
     "dnn_odi_no": {
       "bsonType": "string",
@@ -68,7 +68,7 @@
       "minLength": 1,
       "maxLength": 20,
       "caseType": "uppercase",
-      "permanent": true
+      "readonly": true
     },
     "dnn_odi_sub_no": {
       "bsonType": "string",
@@ -78,7 +78,7 @@
       "minLength": 1,
       "maxLength": 20,
       "caseType": "uppercase",
-      "permanent": true
+      "readonly": true
     },
     "dnn_man_no": {
       "bsonType": "string",
@@ -86,7 +86,7 @@
       "description": "Manifest number",
       "minLength": 1,
       "maxLength": 32,
-      "permanent": true
+      "readonly": true
     },
     "dnn_ship_type": {
       "bsonType": "string",
@@ -264,7 +264,7 @@
       "minLength": 0,
       "maxLength": 16,
       "pattern": "^[A-Za-z-]{0,16}$",
-      "permanent": true,
+      "readonly": true,
       "enum": ["OK", "OK-Labeled", "OK-Skipped"]
     },
     "dnn_wayb_id": {
@@ -420,12 +420,12 @@
         {
           "key": "man_odi_no",
           "op": "eq",
-          "value": "dnn_odi_no"
+          "value": "176-89477080"
         },
         {
           "key": "man_odi_sub_no",
           "op": "eq",
-          "value": "dnn_odi_sub_no"
+          "value": "B293242"
         }
       ],
       "get": ["man_no", "man_opening_date"],
@@ -574,7 +574,7 @@
     },
     {
       "id": "shiptype",
-      "title": "Shipment Type",
+      "title": "Ship Type",
       "enabled": true,
       "match": [
         {
@@ -590,7 +590,7 @@
         }
       ],
       "one_click": true,
-      "icon": "boat-outline",
+      "icon": "boat",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]

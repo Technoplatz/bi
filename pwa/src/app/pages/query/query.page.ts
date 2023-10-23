@@ -171,11 +171,11 @@ export class QueryPage implements OnInit {
         }
         if (res.err) {
           this.misc.doMessage(res.err, "error");
-        } else {
-          this.type_ !== "query" ? this.misc.doMessage(`${res.count > 0 ? res.count : 'no'} records affected`, "success") : null;
+          reject();
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
+        reject();
       }).finally(() => {
         this.running_ = false;
       });

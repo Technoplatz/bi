@@ -61,7 +61,7 @@ https://www.gnu.org/licenses.
                     {{ 'Upload' | translate }}
                 </ion-button>
                 <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium">
-                    <ion-icon name="close-circle-sharp"></ion-icon>
+                    <ion-icon name="close"></ion-icon>
                     {{ 'Cancel' |
                     translate }} </ion-button>
                 <ion-button *ngIf="op=='update' && user?.perma" color="danger" (click)="doRemove()"
@@ -75,7 +75,7 @@ https://www.gnu.org/licenses.
             <ion-col size="12">
                 <ion-button> {{ 'Confirm' | translate }} </ion-button>
                 <ion-button (click)="goTab('data')" color="medium">
-                    <ion-icon name="arrow-back-circle-sharp"></ion-icon>
+                    <ion-icon name="arrow-back"></ion-icon>
                     {{ 'Back' | translate }} </ion-button>
             </ion-col>
         </ion-row>
@@ -88,7 +88,7 @@ https://www.gnu.org/licenses.
                     </ng-template>
                 </ion-button>
                 <ion-button (click)="goTab('data')" color="medium">
-                    <ion-icon name="arrow-back-circle-sharp"></ion-icon>
+                    <ion-icon name="arrow-back"></ion-icon>
                     {{ 'Back' | translate }} </ion-button>
             </ion-col>
         </ion-row>
@@ -187,7 +187,7 @@ https://www.gnu.org/licenses.
                         <div class="ion-margin-top full-flex ion-margin-bottom">
                             <ion-button *ngFor="let item of links" (click)="doGoLink(item)" color="dark" size="default"
                                 slot="end">
-                                <ion-icon name="link-sharp"></ion-icon> {{ item.btntext ? item.btntext :
+                                <ion-icon name="attach-sharp"></ion-icon> {{ item.btntext ? item.btntext :
                                 item.collection | translate }}
                             </ion-button>
                         </div>
@@ -288,8 +288,8 @@ https://www.gnu.org/licenses.
                                 </ion-modal>
                                 <ion-button *ngIf="op=='insert' || (!field.readonly && !field.disabled)"
                                     (click)="doCancelDate(field.name)" fill="clear"
-                                    class="ion-no-padding datetime-clear-button" size="default">
-                                    <ion-icon name="close-sharp"></ion-icon>
+                                    class="ion-no-padding datetime-clear-button" size="default" color="medium">
+                                    <ion-icon name="close"></ion-icon>
                                 </ion-button>
                             </div>
                             <ng-template #nodatevalue>

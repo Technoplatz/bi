@@ -68,7 +68,7 @@ https://www.gnu.org/licenses.
                 {{ 'Please Wait' | translate }}
               </div>
               <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button">
-                <ion-icon name="close-circle-sharp"></ion-icon>
+                <ion-icon name="close"></ion-icon>
                 <br />
                 <span>{{ 'Clear Filter' | translate }}</span>
               </div>
@@ -99,14 +99,15 @@ https://www.gnu.org/licenses.
           <ion-row>
             <ion-col size="12">
               <ion-button *ngIf="!is_saving" (click)="save_json_f()">
-                <span>{{ 'Save Schema' | translate }}</span>
+                <ion-icon name="save-outline"></ion-icon>
+                <span>{{ 'Save' | translate }}</span>
               </ion-button>
               <ion-button *ngIf="is_saving">
                 <ion-spinner name="dots"></ion-spinner>&nbsp;
                 <span>{{ 'Saving' | translate }}</span>
               </ion-button>
-              <ion-button color="light" (click)="set_editor(false)">
-                <ion-icon name="close-circle-sharp"></ion-icon>
+              <ion-button (click)="set_editor(false)" color="medium">
+                <ion-icon name="close"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
             </ion-col>
@@ -229,7 +230,7 @@ https://www.gnu.org/licenses.
                     <ion-icon name="search"></ion-icon>
                     {{ 'Search' | translate }}
                   </ion-button>
-                  <ion-button color="light" size="small" (click)="doResetSearchItem(item.key)">
+                  <ion-button size="small" (click)="doResetSearchItem(item.key)" color="medium">
                     <ion-icon name="close"></ion-icon>
                     {{ 'Cancel' | translate }}
                   </ion-button>
