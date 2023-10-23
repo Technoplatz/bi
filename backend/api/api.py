@@ -137,7 +137,7 @@ class Schedular:
 
             separated_ = re.split(" ", scheduled_cron_)
             if not (separated_ and len(separated_) == 5):
-                return {"result": False, "msg": "invalid cron separation"}
+                return {"result": False, "msg": "invalid cron format"}
 
             minute_ = separated_[0].strip()
             hour_ = separated_[1].strip()
@@ -4595,7 +4595,7 @@ def storage_f():
 
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise SessionError({"result": False, "msg": "user session not found"})
+            raise SessionError({"result": False, "msg": "invalid user session"})
 
         form_ = request.form.to_dict(flat=True)
         if not form_:
@@ -4845,7 +4845,7 @@ def auth_f():
     try:
         input_ = request.json
         if not input_:
-            raise APIError({"result": False, "msg": "input missing"})
+            raise APIError({"result": False, "msg": "input is missing"})
         if "op" not in input_:
             raise APIError({"result": False, "msg": "no operation found"})
         op_ = input_["op"]
@@ -4878,7 +4878,7 @@ def auth_f():
             input_["auth"] = auth_
             res_ = Auth().account_f(input_)
         else:
-            raise APIError({"result": False, "msg": f"operation not supported: {op_}"})
+            raise APIError({"result": False, "msg": "operation not supported"})
 
         if not res_["result"]:
             raise AuthError(res_)
@@ -5137,7 +5137,7 @@ def api_get_query(id_):
     id_ = Misc().clean_f(id_)
     try:
         if not request.headers:
-            raise AuthError({"result": False, "msg": "no header provided"})
+            raise AuthError({"result": False, "msg": "no headers provided"})
 
         x_api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] is not None else None
         if not x_api_token_:
@@ -5186,7 +5186,7 @@ def get_data_f(id_):
     res_ = None
     try:
         if not request.headers:
-            raise AuthError({"result": False, "msg": "no header provided"})
+            raise AuthError({"result": False, "msg": "no headers provided"})
         id_ = Misc().clean_f(id_)
         user_ = None
         api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] is not None else None
