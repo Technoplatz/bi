@@ -719,6 +719,7 @@ def multi_issue_f():
         ok_ = status_code_ == 200
         if not ok_:
             Misc().exception_show_f(exc_)
+
         res_ = {"result": ok_, "content": "OK" if ok_ else escape(exc_), "files": files_}
 
         response_ = make_response(res_, status_code_)

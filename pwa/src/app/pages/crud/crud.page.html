@@ -240,7 +240,8 @@ https://www.gnu.org/licenses.
                                         [disabled]="field.disabled" [(ngModel)]="data_[field.name]"
                                         [value]="data_[field.name]"
                                         (ionChange)="doChangeEnum(field, $event.target.value)" [id]="field.name">
-                                        <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item }}
+                                        <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item |
+                                            translate }}
                                         </ion-select-option>
                                     </ion-select>
                                 </ng-template>
@@ -249,7 +250,7 @@ https://www.gnu.org/licenses.
                                         [required]="field.required" class="ion-no-padding ion-no-margin"
                                         [(ngModel)]="data_[field.name]" [disabled]="field.disabled">
                                         <ion-select-option *ngFor="let item of properties_" [value]="item"
-                                            [id]="field.name"> {{ item }}
+                                            [id]="field.name"> {{ item | translate }}
                                         </ion-select-option>
                                     </ion-select>
                                 </ng-template>

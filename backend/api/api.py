@@ -3162,7 +3162,7 @@ class Crud:
             res_ = json.loads(response_.content)
             res_content_ = res_["content"] if "content" in res_ else ""
             if response_.status_code != 200:
-                raise PassException(res_content_)
+                raise APIError(res_content_)
 
             files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
 
@@ -3173,6 +3173,9 @@ class Crud:
 
         except PassException as exc__:
             res_ = {"result": True, "files": files_, "msg": str(exc__)}
+
+        except APIError as exc__:
+            res_ = {"result": False, "files": files_, "msg": str(exc__)}
 
         except Exception as exc__:
             res_ = {"result": True, "files": files_, "msg": str(exc__)}
@@ -3233,10 +3236,10 @@ class Crud:
                 raise AppException("no tags found in action")
 
             apis_ = action_["apis"] if "apis" in action_ and len(action_["apis"]) > 0 else []
-            set_ = action_["set"] if "set" in action_ else None
             uniqueness_ = "uniqueness" in action_ and action_["uniqueness"] is True
             unique_ = action_["unique"] if "unique" in action_ and len(action_["unique"]) > 0 else None
 
+            set_ = action_["set"] if "set" in action_ else None
             if not set_ and not apis_:
                 raise AppException("no set or apis provided in action")
 
@@ -3274,7 +3277,7 @@ class Crud:
                 update_many_ = Mongo().db_[collection_].update_many(get_filtered_, set_)
                 count_ = update_many_.matched_count if update_many_.matched_count > 0 else 0
                 if count_ == 0:
-                    raise PassException("no rows affected due to the match criteria")
+                    raise PassException("no rows affected due to match criteria")
 
             files_ = []
 

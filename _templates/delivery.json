@@ -269,6 +269,13 @@
       "readonly": true,
       "enum": ["OK", "OK-Labeled", "OK-Skipped"]
     },
+    "dnn_rtd_date": {
+      "bsonType": "date",
+      "title": "RTD Date",
+      "description": "Ready to be delivered date",
+      "dateOnly": false,
+      "readonly": true
+    },
     "dnn_wayb_id": {
       "bsonType": "string",
       "title": "Waybill ID",
@@ -278,13 +285,6 @@
       "maxLength": 14,
       "pattern": "^[0-9]{14,14}$",
       "timestamp": true,
-      "permanent": true
-    },
-    "dnn_wayb_date": {
-      "bsonType": "date",
-      "title": "Waybill Date",
-      "description": "Waybill generated date",
-      "dateOnly": false,
       "permanent": true
     },
     "dnn_wayb_cname": {
@@ -313,6 +313,13 @@
       "minLength": 1,
       "maxLength": 16,
       "caseType": "uppercase",
+      "permanent": true
+    },
+    "dnn_wayb_date": {
+      "bsonType": "date",
+      "title": "Waybill Date",
+      "description": "Waybill generated date",
+      "dateOnly": false,
       "permanent": true
     },
     "dnn_wayb_no": {
@@ -554,6 +561,10 @@
         {
           "key": "dnn_status",
           "value": "60-ReadyToBeDelivered"
+        },
+        {
+          "key": "dnn_rtd_date",
+          "value": "$CURRENT_DATE"
         }
       ],
       "one_click": false,
@@ -566,7 +577,7 @@
         "subject": "Delivery [60-ReadyToBeDelivered]",
         "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs are now 60-ReadyToBeDelivered.",
         "attachment": true,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_rtd_date",
         "filter": [
           {
             "key": "dnn_status",
