@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
 import { ModalController, AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
@@ -39,7 +39,7 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
-import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
+import { JsonEditorOptions } from "ang-jsoneditor";
 
 @Component({
   selector: "app-collection",
@@ -48,6 +48,7 @@ import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 })
 
 export class CollectionPage implements OnInit {
+  @ViewChild("searchfocus", { static: false }) searchfocus: any = [];
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
@@ -123,7 +124,8 @@ export class CollectionPage implements OnInit {
     private modal: ModalController,
     private alert: AlertController,
     private router: Router,
-    public misc: Miscellaneous
+    public misc: Miscellaneous,
+    private cd: ChangeDetectorRef
   ) {
     this.crud.views.subscribe((res: any) => {
       this.flashcards_ = res ? res.filter((obj: any) => obj.collection === this.id && obj.view.flashcard === true) : [];
@@ -369,11 +371,13 @@ export class CollectionPage implements OnInit {
     this.refresh_data(0);
   }
 
-  set_search(k: string) {
-    this.searched[k].setmode = false;
-    let i = 0;
+  set_search(k_: string) {
+    setTimeout(() => {
+      this.searchfocus?.setFocus();
+    }, 1000);
+    this.searched[k_].setmode = false;
     for (let key_ in this.structure_.properties) {
-      this.searched[key_].actived = k === key_ ? true : false;
+      this.searched[key_].actived = k_ === key_ ? true : false;
     }
   }
 
@@ -484,8 +488,8 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  set_searchItemOp(k: string, op: string) {
-    this.searched[k].op = op;
+  set_search_item(key_: string, op: string) {
+    this.searched[key_].op = op;
   }
 
   json_editor_init() {

@@ -33,6 +33,7 @@ https://www.gnu.org/licenses.
 import { Component, OnInit, HostListener, Input, ViewChild } from "@angular/core";
 import { UntypedFormBuilder, UntypedFormGroup } from "@angular/forms";
 import { AlertController } from "@ionic/angular";
+import { TranslateService } from "@ngx-translate/core";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "../../classes/misc";
 import { Crud } from "./../../classes/crud";
@@ -98,6 +99,7 @@ export class CrudPage implements OnInit {
   public linked_: any = [];
   public date_format: string = "DD.MM.YYYY HH:mm";
   public locale_: string = "en-US";
+  public link_limit_: number = 100;
   private counters: any = {};
   private filter: any = [];
   private actions: any = [];
@@ -132,7 +134,8 @@ export class CrudPage implements OnInit {
     public misc: Miscellaneous,
     private storage: Storage,
     private crud: Crud,
-    private alert: AlertController
+    private alert: AlertController,
+    public translate: TranslateService
   ) {
     this.crudForm = this.formBuilder.group({}, {});
     this.misc.localization.subscribe((l_: any) => {
@@ -494,7 +497,7 @@ export class CrudPage implements OnInit {
             sort: this.link_projection_,
             group: true,
             page: 1,
-            limit: 100
+            limit: this.link_limit_
           }).then((res: any) => {
             const data_ = res.data;
             if (data_) {

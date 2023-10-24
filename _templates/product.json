@@ -67,6 +67,14 @@
         "XSP",
         "OTH"
       ]
+    },
+    "prd_cpu": {
+      "bsonType": "string",
+      "title": "CPU",
+      "description": "CPU",
+      "minLength": 0,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9]{0,16}$"
     }
   },
   "required": ["prd_no", "prd_description", "prd_group"],
@@ -76,10 +84,32 @@
     "_modified_at": -1
   },
   "parents": [],
-  "actions": [],
+  "actions": [
+    {
+      "id": "cpu",
+      "title": "CPU Assign",
+      "enabled": true,
+      "match": [],
+      "set": [
+        {
+          "key": "prd_cpu",
+          "value": null
+        }
+      ],
+      "one_click": true,
+      "icon": "hardware-chip-sharp",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Administrators", "#Technoplatz"]
+    }
+  ],
   "links": [],
   "triggers": [],
   "views": {},
   "fetchers": [],
-  "import": {}
+  "import": {
+    "enabled": true,
+    "upsertable": true,
+    "upsertables": ["prd_cpu"]
+  }
 }

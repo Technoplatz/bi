@@ -181,46 +181,46 @@ https://www.gnu.org/licenses.
                   <br />
                   <div *ngIf="item.value.bsonType!='bool'" class="search-ops">
                     <ion-button [color]="searched[item.key].op == 'contains' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'contains')">
+                      (click)="set_search_item(item.key, 'contains')">
                       {{ 'in' | translate }}
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'eq' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'eq')">
+                      (click)="set_search_item(item.key, 'eq')">
                       =
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'ne' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'ne')">
+                      (click)="set_search_item(item.key, 'ne')">
                       &ne;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'gte' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'gte')">
+                      (click)="set_search_item(item.key, 'gte')">
                       &ge;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'lte' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'lte')">
+                      (click)="set_search_item(item.key, 'lte')">
                       &le;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'null' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'null')">
+                      (click)="set_search_item(item.key, 'null')">
                       &#9723;
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'nnull' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'nnull')">
+                      (click)="set_search_item(item.key, 'nnull')">
                       &#9724;
                     </ion-button>
                   </div>
                   <div *ngIf="item.value.bsonType=='bool'">
                     <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'true')">
+                      (click)="set_search_item(item.key, 'true')">
                       {{ 'True' | translate }}
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
-                      (click)="set_searchItemOp(item.key, 'false')">
+                      (click)="set_search_item(item.key, 'false')">
                       {{ 'False' | translate }}
                     </ion-button>
                   </div>
                   <div>
-                    <ion-input *ngIf="item.value.bsonType!='bool'"
+                    <ion-input #searchfocus *ngIf="item.value.bsonType!='bool'"
                       [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
                       [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
                       class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
@@ -238,27 +238,27 @@ https://www.gnu.org/licenses.
               </th>
               <th *ngIf="id==='_query'">
                 {{ 'Approved' | translate }}<br />
-                <ion-text color="primary">{{ '_approved' }}</ion-text>
+                <ion-button size="small" class="unfiltered-btn">{{'_approved'}}</ion-button>
               </th>
               <th>
                 {{ 'Created At' | translate }}<br />
-                <ion-text color="primary">{{ '_created_at' }}</ion-text>
+                <ion-button size="small" class="unfiltered-btn">{{'_created_at'}}</ion-button>
               </th>
               <th>
                 {{ 'Created By' | translate }}<br />
-                <ion-text color="primary">{{ '_created_by' }}</ion-text>
+                <ion-button size="small" class="unfiltered-btn">{{'_created_by'}}</ion-button>
               </th>
               <th>
                 {{ 'Modified At' | translate }}<br />
-                <ion-text color="primary">{{ '_modified_at' }}</ion-text>
+                <ion-button size="small" class="unfiltered-btn">{{'_modified_at'}}</ion-button>
               </th>
               <th>
                 {{ 'Modified By' | translate }}<br />
-                <ion-text color="primary">{{ '_modified_by' }}</ion-text>
+                <ion-button size="small" class="unfiltered-btn">{{'_modified_by'}}</ion-button>
               </th>
               <th>
                 {{ 'Record ID' | translate }}<br />
-                <ion-text color="primary">{{ '_id' }}</ion-text>
+                <ion-button size="small" class="unfiltered-btn">{{'_id'}}</ion-button>
               </th>
             </tr>
             <tr *ngFor="let record of data; let i = index"

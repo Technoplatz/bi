@@ -15,6 +15,7 @@
       "bsonType": "string",
       "title": "Account No",
       "description": "Account No",
+      "placeholder": "Please select an account",
       "minLength": 10,
       "maxLength": 11,
       "pattern": "^[A-Z0-9-]{10,11}$",
@@ -23,22 +24,21 @@
     "shp_date": {
       "bsonType": "date",
       "title": "Ship Date",
-      "description": "Shipment Date",
+      "description": "Shipment date",
       "dateOnly": false
     },
     "shp_carrier_name": {
       "bsonType": "string",
       "title": "Carrier Name",
       "description": "Carrier name or driver name surname",
-      "placeholder": "Carrier or driver Name",
+      "placeholder": "Carrier company or driver name",
       "minLength": 2,
       "maxLength": 32
     },
     "shp_carrier_id": {
       "bsonType": "string",
       "title": "Carrier Tax/ID No",
-      "description": "Carrier tax no or driver id",
-      "placeholder": "Carrier Tax/Id No",
+      "description": "Carrier tax no or driver ID",
       "minLength": 10,
       "maxLength": 12,
       "pattern": "^[0-9]{10,12}$"
@@ -47,7 +47,6 @@
       "bsonType": "string",
       "title": "Vehicle Plate",
       "description": "Vehicle plate number",
-      "placeholder": "Vehicle plate number",
       "minLength": 6,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
@@ -56,8 +55,7 @@
     "shp_notes": {
       "bsonType": "string",
       "title": "Shipment Notes",
-      "description": "Shipment notes to carrier or customer",
-      "placeholder": "Shipment Notes",
+      "description": "Shipment notes",
       "minLength": 0,
       "maxLength": 512
     },
@@ -65,7 +63,7 @@
       "bsonType": "string",
       "title": "Waybill No",
       "description": "Waybill serial number",
-      "placeholder": "Waybill No",
+      "placeholder": "Automatically assigned",
       "pattern": "^[A-Z0-9-]{16,18}$",
       "minLength": 0,
       "maxLength": 18,
@@ -74,14 +72,15 @@
     "shp_wayb_date": {
       "bsonType": "date",
       "title": "Waybill Date",
-      "description": "Waybill generated date",
+      "description": "Waybill issue date",
+      "placeholder": "Automatically assigned",
       "readonly": true
     },
     "shp_wayb_ettn": {
       "bsonType": "string",
       "title": "Waybill ETTN",
       "description": "Waybill ETTN",
-      "placeholder": "ETTN",
+      "placeholder": "Automatically assigned",
       "pattern": "^[a-z0-9-]{32,40}$",
       "minLength": 32,
       "maxLength": 40,
