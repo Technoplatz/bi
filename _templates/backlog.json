@@ -23,7 +23,7 @@
     "blo_sub_region": {
       "bsonType": "string",
       "title": "Sub Region",
-      "description": "Sub Region"
+      "description": "Sub region"
     },
     "blo_country": {
       "bsonType": "string",
@@ -38,7 +38,7 @@
     "blo_sub_brand": {
       "bsonType": "string",
       "title": "Sub Brand",
-      "description": "Sub Brand"
+      "description": "Sub brand"
     },
     "blo_prd_group": {
       "bsonType": "string",
@@ -390,7 +390,7 @@
     "blo_status"
   ],
   "index": [["blo_status"]],
-  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item"]],
+  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_dnn_no", "blo_dnn_item"]],
   "sort": {
     "_modified_at": -1
   },
@@ -481,6 +481,7 @@
   "links": [],
   "fetchers": [],
   "import": {
+    "enabled": true,
     "purge": true,
     "ignored": ["blo_dnn_item"]
   }

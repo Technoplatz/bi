@@ -96,6 +96,7 @@ export class CollectionPage implements OnInit {
   public sort: any = {};
   public structure_: any = {};
   public schemavis_: boolean = false;
+  public importvis_: boolean = false;
   private json_content_: any = null;
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
@@ -213,6 +214,7 @@ export class CollectionPage implements OnInit {
             this.json_content_ = res.structure;
             this.actions = this.structure_.actions;
             this.properties_ = res.structure.properties;
+            this.importvis_ = res.structure.import?.enabled;
             this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
             this.count = res.count;
             this.multicheckbox = false;
@@ -233,7 +235,7 @@ export class CollectionPage implements OnInit {
             this.misc.doMessage(error, "error");
             reject(error);
           }).finally(() => {
-            
+
             this.crud.get_all().then(() => { });
           });
         });
@@ -582,11 +584,7 @@ export class CollectionPage implements OnInit {
   }
 
   json_changed(event_: any) {
-    if (!event_.isTrusted) {
-      this.json_content_ = event_;
-    } else {
-      console.error("*** event", event_);
-    }
+    !event_.isTrusted ? this.json_content_ = event_ : null;
   }
 
   go_query(record_: any, event: any) {

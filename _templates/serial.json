@@ -78,9 +78,9 @@
       "bsonType": "string",
       "title": "Label No",
       "description": "Label number",
-      "minLength": 15,
+      "minLength": 0,
       "maxLength": 15,
-      "pattern": "^[A-Z0-9-]{15,15}$",
+      "pattern": "^[A-Z0-9-]{0,15}$",
       "caseType": "uppercase"
     }
   },
@@ -90,6 +90,7 @@
     ["ser_dnn_no"],
     ["ser_dnn_no", "ser_line_no"],
     ["ser_dnn_no", "ser_line_no", "ser_prd_no"],
+    ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_label_no"],
     ["ser_dnn_no", "ser_line_no", "ser_is_in"],
     ["ser_sscc_no"],
     ["ser_dnn_no", "ser_sscc_no"],
@@ -101,52 +102,12 @@
   },
   "parents": [],
   "links": [],
-  "actions": [
-    {
-      "id": "act-assign-dn-und-spc",
-      "title": "DN Update",
-      "enabled": true,
-      "match": [
-        {
-          "key": "ser_is_in",
-          "op": "eq",
-          "value": false
-        }
-      ],
-      "set": [
-        {
-          "key": "ser_dnn_no",
-          "value": null
-        },
-        {
-          "key": "ser_prd_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Technoplatz", "#Operation"],
-      "notification": {
-        "notify": false,
-        "subject": "Serials DN updated",
-        "body": "Hi,<br /><br />We would like to let you know that dn info was updated.",
-        "fields": "ser_no,ser_dnn_no,ser_prd_no,ser_sscc_no",
-        "attachment": false,
-        "filter": [
-          {
-            "key": "ser_is_in",
-            "op": "eq",
-            "value": false
-          }
-        ]
-      }
-    }
-  ],
+  "actions": [],
   "triggers": [],
   "views": {},
   "fetchers": [],
   "import": {
+    "enabled": true,
     "upsertable": true,
     "upsertables": ["ser_label_no", "ser_sscc_no"]
   }

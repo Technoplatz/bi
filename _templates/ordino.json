@@ -30,13 +30,19 @@
       "bsonType": "string",
       "title": "From",
       "description": "Country where the goods were loaded",
-      "enum": ["China", "Hungary", "Netherlands"]
+      "minLength": 3,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z-]{3,16}$",
+      "readonly": true
     },
     "odi_customs": {
       "bsonType": "string",
       "title": "Customs",
       "description": "Customs location",
-      "enum": ["IGA", "Halkalı", "Ambarlı", "AHL"]
+      "minLength": 3,
+      "maxLength": 16,
+      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{3,16}$",
+      "readonly": true
     },
     "odi_arrived_date": {
       "bsonType": "date",
@@ -57,9 +63,46 @@
   "index": [["odi_no"], ["odi_sub_no"], ["odi_from"], ["odi_customs"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
-    "_modified_at": -1
+    "_created_at": -1
   },
-  "parents": [],
+  "parents": [
+    {
+      "collection": "customs",
+      "match": [
+        {
+          "key": "odi_customs",
+          "value": "cum_id"
+        }
+      ],
+      "filter": [
+        {
+          "key": "cum_is_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "get": ["cum_id"],
+      "group": false
+    },
+    {
+      "collection": "factory",
+      "match": [
+        {
+          "key": "odi_from",
+          "value": "fac_country"
+        }
+      ],
+      "filter": [
+        {
+          "key": "fac_is_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "get": ["fac_country", "fac_id"],
+      "group": false
+    }
+  ],
   "links": [
     {
       "collection": "delivery",

@@ -228,11 +228,7 @@ export class QueryPage implements OnInit {
   }
 
   json_changed(event_: any) {
-    if (!event_.isTrusted) {
-      this.json_content_ = event_;
-    } else {
-      console.error("*** event", event_);
-    }
+    !event_.isTrusted ? this.json_content_ = event_ : null;
   }
 
   copy_url() {

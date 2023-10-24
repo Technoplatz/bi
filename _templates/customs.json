@@ -6,7 +6,8 @@
       "description": "Customs ID",
       "minLength": 3,
       "maxLength": 16,
-      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{3,16}$"
+      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{3,16}$",
+      "permanent": true
     },
     "cum_name": {
       "bsonType": "string",
@@ -15,13 +16,19 @@
       "minLength": 1,
       "maxLength": 64,
       "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{1,64}$"
+    },
+    "cum_is_active": {
+      "bsonType": "bool",
+      "title": "Active",
+      "default": true,
+      "description": "Active or not"
     }
   },
   "required": ["cum_id", "cum_name"],
-  "index": [],
+  "index": [["cum_name"], ["cum_is_active"]],
   "unique": [["cum_id"]],
   "sort": {
-    "_modified_at": -1
+    "cum_id": 1
   },
   "parents": [],
   "links": [],
@@ -29,5 +36,7 @@
   "triggers": [],
   "views": {},
   "fetchers": [],
-  "import": {}
+  "import": {
+    "enabled": false
+  }
 }

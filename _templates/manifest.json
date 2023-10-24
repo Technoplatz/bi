@@ -7,7 +7,8 @@
       "minLength": 1,
       "maxLength": 32,
       "pattern": "^[A-Z0-9-]{1,32}$",
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "permanent": true
     },
     "man_odi_no": {
       "bsonType": "string",
@@ -80,7 +81,7 @@
   "index": [["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_odi_sub_no"], ["man_file_no"]],
   "unique": [["man_no"]],
   "sort": {
-    "_modified_at": -1
+    "_created_at": -1
   },
   "parents": [
     {
@@ -118,7 +119,7 @@
         {
           "key": "dnn_status",
           "op": "in",
-          "value": "20-OnCustoms,30-OnCustomsProcess"
+          "value": "20-OnCustoms"
         },
         {
           "key": "dnn_odi_no",
@@ -311,7 +312,9 @@
   ],
   "views": {},
   "fetchers": [],
-  "import": {},
+  "import": {
+    "enabled": false
+  },
   "queries": {
     "query": true,
     "cronjob": false,

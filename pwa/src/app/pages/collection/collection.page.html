@@ -42,7 +42,7 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="is_crud" (click)="upload_modal_f()" class="data-sq-button">
+              <div *ngIf="is_crud && importvis_" (click)="upload_modal_f()" class="data-sq-button">
                 <ion-icon name="download-sharp"></ion-icon><br />
                 {{ 'Import File' | translate }}
               </div>
@@ -158,7 +158,7 @@ https://www.gnu.org/licenses.
               <!-- DATA LIST HEADER -->
               <th *ngFor="let item of properties_ | keyvalue : orderByIndex">
                 <div>
-                  {{ item.value.title }}<br />
+                  {{ item.value.title | translate }}<br />
                   <ion-button size="small"
                     [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'"
                     (click)="set_search(item.key)">{{
@@ -166,7 +166,7 @@ https://www.gnu.org/licenses.
                 </div>
                 <!-- SEARCH BOX -->
                 <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
-                  <div class="searched-title">{{ item.value.title }}&nbsp;&nbsp;</div>
+                  <div class="searched-title">{{ item.value.title | translate }}&nbsp;&nbsp;</div>
                   <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
                     <ion-icon name="arrow-down"></ion-icon>
                   </ion-button>
@@ -257,7 +257,7 @@ https://www.gnu.org/licenses.
                 <ion-text color="primary">{{ '_modified_by' }}</ion-text>
               </th>
               <th>
-                {{ 'ID' | translate }}<br />
+                {{ 'Record ID' | translate }}<br />
                 <ion-text color="primary">{{ '_id' }}</ion-text>
               </th>
             </tr>

@@ -1457,130 +1457,6 @@ class Crud:
         except Exception as exc__:
             return Misc().notify_exception_f(exc__)
 
-    def link_f(self, obj_):
-        """
-        docstring is in progress
-        """
-        try:
-            source_ = obj_["source"] if "source" in obj_ else None
-            _id = obj_["_id"] if "_id" in obj_ else None
-            link_ = obj_["link"] if "link" in obj_ else None
-            data_ = obj_["data"] if "data" in obj_ else None
-            linked_ = obj_["linked"] if "linked" in obj_ and len(obj_["linked"]) > 0 else None
-            user_ = obj_["user"] if "user" in obj_ else None
-            col_id_ = link_["collection"] if "collection" in link_ else None
-            get_ = link_["get"] if "get" in link_ else None
-            set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
-            match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
-            usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
-            tags_ = link_["_tags"] if "_tags" in link_ and len(link_["_tags"]) > 0 else None
-
-            if not source_:
-                raise APIError("source collection is missing")
-
-            if not _id:
-                raise APIError("source document id is missing")
-
-            if link_ is None:
-                raise APIError("link info is missing")
-
-            if linked_ is None:
-                raise APIError("linked data is missing")
-
-            if data_ is None:
-                raise APIError("master data is missing")
-
-            if user_ is None:
-                raise APIError("user is missing")
-
-            if not tags_:
-                raise AppException("no link tags found")
-
-            if col_id_ is None:
-                raise APIError("linked collection is missing")
-
-            if get_ is None:
-                raise APIError("link get is missing")
-
-            if set_ is None:
-                raise APIError("link set is missing")
-
-            if not match_:
-                raise APIError("link match is missing")
-
-            if usr_id_ is None:
-                raise APIError("link user id is missing")
-
-            get_properties_ = self.get_properties_f(col_id_)
-            if not get_properties_["result"]:
-                raise APIError("collection properties is missing")
-            target_properties_ = get_properties_["properties"]
-
-            collection_ = f"{col_id_}_data"
-            source_id_ = f"_{source_}_id"
-            setc_ = {}
-            setc_[source_id_] = _id
-
-            for set__ in set_:
-                if "key" in set__ and "value" in set__:
-                    targetkey__ = set__["key"]
-                    setto__ = set__["value"]
-                    if targetkey__ and setto__:
-                        val_ = Misc().set_value_f(targetkey__, setto__, target_properties_, data_)
-                        if val_:
-                            setc_[targetkey__] = val_
-                            setc_["_modified_at"] = Misc().get_now_f()
-                            setc_["_modified_by"] = usr_id_
-
-            if not setc_:
-                raise APIError(f"no assignments to set {collection_}")
-
-            filter0_ = {}
-            filter0_[get_] = {"$in": linked_}
-            filter1_ = self.get_filtered_f({"match": match_, "properties": target_properties_, "data": data_})
-            filter_ = {"$and": [filter0_, filter1_]}
-
-            update_many_ = Mongo().db_[collection_].update_many(filter_, {"$set": setc_})
-            count_ = update_many_.matched_count
-            if count_ == 0:
-                raise AppException("no record found to get linked")
-
-            notification_ = link_["notification"] if "notification" in link_ else None
-            notify_ = notification_ and "notify" in notification_ and notification_["notify"] is True
-            attachment_ = notification_ and "attachment" in notification_ and notification_["attachment"] is True
-            files_ = []
-
-            if notify_:
-                subject_ = notification_["subject"] if "subject" in notification_ else "Link Completed"
-                body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
-                if attachment_:
-                    fields_ = str(notification_["fields"].replace(" ", "")) if "fields" in notification_ else None
-                    if not fields_:
-                        raise AppException("no fields field found in link")
-                    type_ = "csv"
-                    file_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
-                    query_ = json.dumps(filter0_, default=json_util.default, sort_keys=False)
-                    cmd_ = ["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
-                    subprocess.call(cmd_)
-                    files_ = [{"name": file_, "type": type_}] if attachment_ else []
-                    email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
-                    if not email_sent_["result"]:
-                        raise APIError(email_sent_["msg"])
-
-            return {"result": True, "data": setc_, "count": count_}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except AppException as exc:
-            return Misc().app_exception_f(exc)
-
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
-
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
-
     def get_filtered_f(self, obj):
         """
         docstring is in progress
@@ -2604,7 +2480,7 @@ class Crud:
                         ixs = []
                         ix_name_ = ""
                         for ix_ in indexes_:
-                            if ix_ not in properties_:
+                            if ix_ not in properties_ and ix_ not in ["_created_at", "_modified_at"]:
                                 break_ = True
                                 err_ = f"{ix_} was indexed but not found in properties"
                                 break
@@ -2693,7 +2569,7 @@ class Crud:
             if not Auth().is_admin_f(user_) and que_type_ != "query":
                 raise AuthError("no permission to save job")
 
-            if not Auth().is_manager_f(user_):
+            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
                 permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": que_collection_id_, "per_is_active": True, "per_tag": {"$in": usr_tags_}, "per_query": True})
                 if not permission_:
                     raise AuthError("no permission to save query")
@@ -2968,7 +2844,7 @@ class Crud:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
 
-            if not API_DELETE_ALLOWED_:
+            if not API_DELETE_ALLOWED_ and not Auth().is_admin_f(user_):
                 raise APIError("delete operation is not allowed")
 
             if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
@@ -3022,7 +2898,7 @@ class Crud:
             if op_ not in ["clone", "delete"]:
                 raise APIError("operation not supported")
 
-            if op_ == "delete" and not API_DELETE_ALLOWED_:
+            if op_ == "delete" and not API_DELETE_ALLOWED_ and not Auth().is_admin_f(user_):
                 raise APIError("delete operation is not allowed")
 
             if op_ != "delete" or collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
@@ -3104,6 +2980,205 @@ class Crud:
 
         except Exception as exc:
             return Misc().notify_exception_f(exc)
+
+    def link_f(self, obj_):
+        """
+        docstring is in progress
+        """
+        try:
+            source_ = obj_["source"] if "source" in obj_ else None
+            _id = obj_["_id"] if "_id" in obj_ else None
+            link_ = obj_["link"] if "link" in obj_ else None
+            data_ = obj_["data"] if "data" in obj_ else None
+            linked_ = obj_["linked"] if "linked" in obj_ and len(obj_["linked"]) > 0 else None
+            user_ = obj_["user"] if "user" in obj_ else None
+            col_id_ = link_["collection"] if "collection" in link_ else None
+            get_ = link_["get"] if "get" in link_ else None
+            set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
+            match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
+            usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
+            tags_ = link_["_tags"] if "_tags" in link_ and len(link_["_tags"]) > 0 else None
+            apis_ = link_["apis"] if "apis" in link_ and len(link_["apis"]) > 0 else []
+
+            if not source_:
+                raise APIError("source collection is missing")
+
+            if not _id:
+                raise APIError("source document id is missing")
+
+            if link_ is None:
+                raise APIError("link info is missing")
+
+            if linked_ is None:
+                raise APIError("linked data is missing")
+
+            if data_ is None:
+                raise APIError("master data is missing")
+
+            if user_ is None:
+                raise APIError("user is missing")
+
+            if not tags_:
+                raise AppException("no link tags found")
+
+            if col_id_ is None:
+                raise APIError("linked collection is missing")
+
+            if get_ is None:
+                raise APIError("link get is missing")
+
+            if set_ is None:
+                raise APIError("link set is missing")
+
+            if not match_:
+                raise APIError("link match is missing")
+
+            if usr_id_ is None:
+                raise APIError("link user id is missing")
+
+            get_properties_ = self.get_properties_f(col_id_)
+            if not get_properties_["result"]:
+                raise APIError("collection properties is missing")
+            target_properties_ = get_properties_["properties"]
+
+            collection_ = f"{col_id_}_data"
+            source_id_ = f"_{source_}_id"
+            setc_ = {}
+            setc_[source_id_] = _id
+
+            for set__ in set_:
+                if "key" in set__ and "value" in set__:
+                    targetkey__ = set__["key"]
+                    setto__ = set__["value"]
+                    if targetkey__ and setto__:
+                        val_ = Misc().set_value_f(targetkey__, setto__, target_properties_, data_)
+                        if val_:
+                            setc_[targetkey__] = val_
+                            setc_["_modified_at"] = Misc().get_now_f()
+                            setc_["_modified_by"] = usr_id_
+
+            if not setc_:
+                raise APIError(f"no assignments to set {collection_}")
+
+            filter0_ = {}
+            filter0_[get_] = {"$in": linked_}
+            filter1_ = self.get_filtered_f({"match": match_, "properties": target_properties_, "data": data_})
+            filter_ = {"$and": [filter0_, filter1_]}
+
+            update_many_ = Mongo().db_[collection_].update_many(filter_, {"$set": setc_})
+            count_ = update_many_.matched_count
+            if count_ == 0:
+                raise AppException("no record found to get linked")
+
+            notification_ = link_["notification"] if "notification" in link_ else None
+            notify_ = notification_ and "notify" in notification_ and notification_["notify"] is True
+            attachment_ = notification_ and "attachment" in notification_ and notification_["attachment"] is True
+
+            files_ = []
+
+            if apis_:
+                run_apis_f_ = self.run_apis_f(apis_[0], data_, [_id], usr_id_)
+                if not run_apis_f_["result"]:
+                    raise AppException(run_apis_f_["msg"])
+                files_ += run_apis_f_["files"]
+
+            if notify_:
+                subject_ = notification_["subject"] if "subject" in notification_ else "Link Completed"
+                body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
+                if attachment_:
+                    fields_ = str(notification_["fields"].replace(" ", "")) if "fields" in notification_ else None
+                    if not fields_:
+                        raise AppException("no fields field found in link")
+                    type_ = "csv"
+                    file_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
+                    query_ = json.dumps(filter0_, default=json_util.default, sort_keys=False)
+                    cmd_ = ["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
+                    subprocess.call(cmd_)
+                    files_ += [{"name": file_, "type": type_}] if attachment_ else []
+                    email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                    if not email_sent_["result"]:
+                        raise APIError(email_sent_["msg"])
+
+            return {"result": True, "data": setc_, "count": count_}
+
+        except pymongo.errors.PyMongoError as exc:
+            return Misc().mongo_error_f(exc)
+
+        except AppException as exc:
+            return Misc().app_exception_f(exc)
+
+        except APIError as exc:
+            return Misc().notify_exception_f(exc)
+
+        except Exception as exc:
+            return Misc().notify_exception_f(exc)
+
+    def run_apis_f(self, api_, doc_, ids_, email_):
+        """
+        docstring is in progress
+        """
+        files_ = []
+        res_ = {}
+        try:
+            id_ = api_["id"] if "id" in api_ and api_["id"] is not None else None
+            if not id_:
+                raise PassException("no action api id found")
+
+            enabled_ = "enabled" in api_ and api_["enabled"] is True
+            if not enabled_:
+                raise PassException(f"action api not enabled: {id_}")
+
+            url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
+            if not url_:
+                raise PassException(f"invalid url in action api {id_}")
+
+            headers_ = api_["headers"] if "headers" in api_ else None
+            if not headers_:
+                raise PassException(f"invalid headers in action api: {id_}")
+
+            method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
+            if not method_:
+                raise PassException(f"invalid method in action api: {id_}")
+
+            map_ = api_["map"] if "map" in api_ else None
+            if not map_:
+                raise PassException(f"no mapping found: {id_}")
+
+            json_ = {}
+            for _, value_ in map_.items():
+                if value_ in doc_:
+                    json_["key"] = value_
+                    json_["value"] = doc_[value_]
+            if not json_:
+                raise PassException(f"no mapping values found: {id_}")
+
+            json_["ids"] = []
+            if ids_ and len(ids_) > 0:
+                json_["ids"] = ids_
+            json_["map"] = map_
+            json_["email"] = email_
+
+            response_ = requests.post(url_, json=json.loads(JSONEncoder().encode(json_)), headers=headers_, timeout=60)
+            res_ = json.loads(response_.content)
+            res_content_ = res_["content"] if "content" in res_ else ""
+            if response_.status_code != 200:
+                raise PassException(res_content_)
+
+            files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
+
+            res_ = {"result": True, "files": files_}
+
+        except pymongo.errors.PyMongoError as exc__:
+            res_ = Misc().mongo_error_f(exc__)
+
+        except PassException as exc__:
+            res_ = {"result": True, "files": files_, "msg": str(exc__)}
+
+        except Exception as exc__:
+            res_ = {"result": True, "files": files_, "msg": str(exc__)}
+
+        finally:
+            return res_
 
     def action_f(self, obj):
         """
@@ -3202,55 +3277,12 @@ class Crud:
                     raise PassException("no rows affected due to the match criteria")
 
             files_ = []
-            for api_ in apis_:
-                id_ = api_["id"] if "id" in api_ and api_["id"] is not None else None
-                if not id_:
-                    PRINT_("!!! no action api id found")
-                    continue
-                enabled_ = "enabled" in api_ and api_["enabled"] is True
-                if not enabled_:
-                    PRINT_(f"!!! action api not enabled: {id_}")
-                    continue
-                url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
-                if not url_:
-                    PRINT_(f"!!! invalid url in action api: {id_}")
-                    continue
-                headers_ = api_["headers"] if "headers" in api_ else None
-                if not headers_:
-                    PRINT_(f"!!! invalid headers in action api: {id_}")
-                    continue
-                method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
-                if not method_:
-                    PRINT_(f"!!! invalid method in action api: {id_}")
-                    continue
-                map_ = api_["map"] if "map" in api_ else None
-                if not map_:
-                    PRINT_(f"!!! no map found: {id_}")
-                    continue
 
-                json_ = {}
-                for _, value_ in map_.items():
-                    if value_ in doc_:
-                        json_["key"] = value_
-                        json_["value"] = doc_[value_]
-                if not json_:
-                    PRINT_(f"!!! no mapping values found: {id_}")
-                    continue
-                json_["ids"] = []
-                if ids_ and len(ids_) > 0:
-                    json_["ids"] = ids_
-                json_["map"] = map_
-                json_["email"] = email_
-
-                response_ = requests.post(url_, json=json.loads(JSONEncoder().encode(json_)), headers=headers_, timeout=60)
-                res_ = json.loads(response_.content)
-                res_content_ = res_["content"] if "content" in res_ else ""
-                res_files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
-                if response_.status_code != 200:
-                    raise AppException(f"{res_content_}")
-
-                if res_files_:
-                    files_ += res_files_
+            if apis_:
+                run_apis_f_ = self.run_apis_f(apis_[0], doc_, ids_, email_)
+                if not run_apis_f_["result"]:
+                    raise AppException(run_apis_f_["msg"])
+                files_ += run_apis_f_["files"]
 
             if notify_:
                 notify_collection_ = f"{notification_['collection']}_data" if "collection" in notification_ else collection_

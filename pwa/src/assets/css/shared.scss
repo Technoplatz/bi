@@ -1173,21 +1173,25 @@ sup {
 
 .filtered-btn {
   --background: var(--ion-color-primary) !important;
-  --padding: 0px !important;
+  --padding-end: 0px;
   --border-width: 0px !important;
   margin-bottom: -2px;
+  margin-right: 0px !important;
 }
 
 .unfiltered-btn {
   --color: var(--ion-color-primary) !important;
   --background: none !important;
   --padding-start: 0px;
+  --padding-end: 0px;
   --border-width: 0px !important;
   margin-bottom: -2px;
+  margin-right: 0px !important;
 }
 
 .filtered-btn ion-icon,
 .unfiltered-btn ion-icon {
+  font-size: 14px;
   margin-left: 8px;
 }
 

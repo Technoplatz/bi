@@ -6,7 +6,8 @@
       "description": "Delivery number",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9A-Z-]{10,16}$"
+      "pattern": "^[0-9A-Z-]{10,16}$",
+      "permanent": true
     },
     "dnn_line_no": {
       "bsonType": "string",
@@ -14,7 +15,8 @@
       "description": "Line Number",
       "minLength": 1,
       "maxLength": 4,
-      "pattern": "^[0-9]{1,4}$"
+      "pattern": "^[0-9]{1,4}$",
+      "permanent": true
     },
     "dnn_status": {
       "bsonType": "string",
@@ -365,7 +367,9 @@
   ],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
-    "_modified_at": -1
+    "dnn_status": 1,
+    "dnn_no": 1,
+    "dnn_line_no": 1
   },
   "parents": [
     {
@@ -594,103 +598,6 @@
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
-    },
-    {
-      "id": "shipment",
-      "title": "Shipment",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "60-ReadyToBeDelivered"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "70-Delivered"
-        },
-        {
-          "key": "dnn_wayb_date",
-          "value": null
-        },
-        {
-          "key": "dnn_wayb_id",
-          "value": "$TIMESTAMP"
-        },
-        {
-          "key": "dnn_wayb_cname",
-          "value": null
-        },
-        {
-          "key": "dnn_wayb_cid",
-          "value": null
-        },
-        {
-          "key": "dnn_wayb_vid",
-          "value": null
-        },
-        {
-          "key": "dnn_wayb_no",
-          "value": null
-        },
-        {
-          "key": "dnn_wayb_ettn",
-          "value": null
-        }
-      ],
-      "required": ["dnn_status", "dnn_wayb_id", "dnn_wayb_date", "dnn_wayb_cname", "dnn_wayb_cid", "dnn_wayb_vid"],
-      "readonly": ["dnn_status", "dnn_wayb_id", "dnn_wayb_no", "dnn_wayb_ettn"],
-      "one_click": false,
-      "icon": "bus",
-      "uniqueness": true,
-      "unique": ["dnn_acc_no"],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"],
-      "apis": [
-        {
-          "id": "waybill-issue",
-          "enabled": true,
-          "url": "http://172.18.0.8/issue",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "method": "post",
-          "map": {
-            "key": "dnn_wayb_id"
-          }
-        }
-      ],
-      "notification": {
-        "notify": true,
-        "subject": "Delivery [70-Delivered]",
-        "body": "Hi,<br /><br />We would like to let you know that the attached DNs were shipped.",
-        "attachment": false,
-        "fields": [
-          "dnn_no",
-          "dnn_line_no",
-          "dnn_status",
-          "dnn_acc_no",
-          "dnn_acc_name",
-          "dnn_prd_no",
-          "dnn_prd_description",
-          "dnn_qty",
-          "dnn_wayb_id",
-          "dnn_wayb_date",
-          "dnn_wayb_cname",
-          "dnn_wayb_cid",
-          "dnn_wayb_vid",
-          "dnn_wayb_no",
-          "dnn_wayb_ettn"
-        ],
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "60-ReadyToBeDelivered"
-          }
-        ]
-      }
     }
   ],
   "links": [],
@@ -1291,12 +1198,13 @@
   },
   "fetchers": [],
   "import": {
+    "enabled": true,
     "upsertable": false,
     "upsertables": []
   },
   "queries": {
     "query": true,
     "cronjob": true,
-    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status"]
+    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_ship_type"]
   }
 }

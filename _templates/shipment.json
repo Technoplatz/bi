@@ -2,7 +2,7 @@
   "properties": {
     "shp_id": {
       "bsonType": "string",
-      "title": "ID",
+      "title": "Shipment No",
       "description": "Shipment ID",
       "placeholder": "Automatically assigned",
       "minLength": 14,
@@ -11,26 +11,27 @@
       "timestamp": true,
       "permanent": true
     },
-    "shp_date": {
-      "bsonType": "date",
-      "title": "Ship Date",
-      "description": "Shipment Date",
-      "dateOnly": false
-    },
     "shp_acc_no": {
       "bsonType": "string",
       "title": "Account No",
       "description": "Account No",
       "minLength": 10,
       "maxLength": 11,
-      "pattern": "^[A-Z0-9-]{10,11}$"
+      "pattern": "^[A-Z0-9-]{10,11}$",
+      "readonly": true
+    },
+    "shp_date": {
+      "bsonType": "date",
+      "title": "Ship Date",
+      "description": "Shipment Date",
+      "dateOnly": false
     },
     "shp_carrier_name": {
       "bsonType": "string",
       "title": "Carrier Name",
       "description": "Carrier name or driver name surname",
       "placeholder": "Carrier or driver Name",
-      "minLength": 1,
+      "minLength": 2,
       "maxLength": 32
     },
     "shp_carrier_id": {
@@ -38,18 +39,18 @@
       "title": "Carrier Tax/ID No",
       "description": "Carrier tax no or driver id",
       "placeholder": "Carrier Tax/Id No",
-      "minLength": 1,
-      "maxLength": 16,
-      "pattern": "^[0-9]{1,16}$"
+      "minLength": 10,
+      "maxLength": 12,
+      "pattern": "^[0-9]{10,12}$"
     },
     "shp_vehicle_id": {
       "bsonType": "string",
       "title": "Vehicle Plate",
       "description": "Vehicle plate number",
       "placeholder": "Vehicle plate number",
-      "minLength": 1,
+      "minLength": 6,
       "maxLength": 16,
-      "pattern": "^[A-Za-z0-9 ]{1,16}$",
+      "pattern": "^[A-Za-z0-9 ]{6,16}$",
       "caseType": "uppercase"
     },
     "shp_notes": {
@@ -134,51 +135,26 @@
           "value": "shp_id"
         },
         {
-          "key": "dnn_status",
-          "value": "70-Delivered"
+          "key": "dnn_wayb_cname",
+          "value": "shp_carrier_name"
+        },
+        {
+          "key": "dnn_wayb_cid",
+          "value": "shp_carrier_id"
+        },
+        {
+          "key": "dnn_wayb_vid",
+          "value": "shp_vehicle_id"
         }
       ],
       "autofill": true,
       "btntext": "delivery",
-      "_tags": ["#Technoplatz"]
-    }
-  ],
-  "actions": [
-    {
-      "id": "waybill-issue",
-      "title": "E-Waybill",
-      "enabled": true,
-      "match": [
-        {
-          "key": "shp_status",
-          "op": "eq",
-          "value": "10-Ready"
-        }
-      ],
-      "set": [
-        {
-          "key": "shp_notes",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "icon": "newspaper-outline",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Administrators"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs Shipped",
-        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
-        "fields": "dnn_no,dnn_status",
-        "filter": []
-      },
       "apis": [
         {
-          "id": "multi-issue",
+          "id": "issue",
           "name": "Waybill Issue",
           "enabled": true,
-          "url": "http://172.18.0.8/multi-issue",
+          "url": "http://172.18.0.8/issue",
           "headers": {
             "Content-Type": "application/json"
           },
@@ -203,7 +179,82 @@
             "delivery_product_desc_field": "dnn_prd_description",
             "delivery_waybill_no_field": "dnn_wayb_no",
             "delivery_waybill_date_field": "dnn_wayb_date",
-            "delivery_status_field": "dnn_status",
+            "delivery_set_status": "70-Delivered",
+            "document_format": 2
+          }
+        }
+      ],
+      "notification": {
+        "notify": true,
+        "subject": "DNs Shipped",
+        "body": "Hi,<br /><br />We would like to let you know that DNs were shipped.",
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
+        "attachment": true,
+        "filter": []
+      },
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+    }
+  ],
+  "actions": [
+    {
+      "id": "waybill-issue",
+      "title": "E-Waybill",
+      "enabled": true,
+      "match": [
+        {
+          "key": "shp_wayb_no",
+          "op": "eq",
+          "value": null
+        }
+      ],
+      "set": [
+        {
+          "key": "shp_notes",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "icon": "newspaper-outline",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "notification": {
+        "notify": true,
+        "subject": "DNs Shipped",
+        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
+        "filter": []
+      },
+      "apis": [
+        {
+          "id": "issue",
+          "name": "Waybill Issue",
+          "enabled": true,
+          "url": "http://172.18.0.8/issue",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "method": "post",
+          "map": {
+            "tag_prefix": "{http://tempuri.org/}",
+            "shipment_collection": "shipment_data",
+            "shipment_id_field": "shp_id",
+            "shipment_ettn_field": "shp_wayb_ettn",
+            "shipment_waybill_no_field": "shp_wayb_no",
+            "shipment_waybill_date_field": "shp_wayb_date",
+            "shipment_account_no_field": "shp_acc_no",
+            "shipment_notes_field": "shp_notes",
+            "account_collection": "account_data",
+            "account_no_field": "acc_no",
+            "delivery_collection": "delivery_data",
+            "delivery_shipment_id_field": "dnn_wayb_id",
+            "delivery_qty_field": "dnn_qty",
+            "delivery_no_field": "dnn_no",
+            "delivery_account_no_field": "dnn_acc_no",
+            "delivery_product_no_field": "dnn_prd_no",
+            "delivery_product_desc_field": "dnn_prd_description",
+            "delivery_waybill_no_field": "dnn_wayb_no",
+            "delivery_waybill_date_field": "dnn_wayb_date",
             "delivery_set_status": "70-Delivered",
             "document_format": 2
           }
@@ -227,7 +278,7 @@
       "icon": "cloud-download-outline",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators"],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
       "apis": [
         {
           "id": "waybill-download",
@@ -249,9 +300,9 @@
       ],
       "notification": {
         "notify": true,
-        "subject": "DNs Shipped",
-        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
-        "fields": "dnn_no,dnn_status",
+        "subject": "Waybills Downloaded",
+        "body": "Hi,<br /><br />We would like to let you know that Waybills of the attached DNs were donwloaded.",
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
         "filter": []
       }
     }
@@ -259,5 +310,7 @@
   "triggers": [],
   "views": {},
   "fetchers": [],
-  "import": {}
+  "import": {
+    "enabled": false
+  }
 }
