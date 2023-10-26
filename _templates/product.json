@@ -73,8 +73,24 @@
       "title": "CPU",
       "description": "CPU",
       "minLength": 0,
-      "maxLength": 16,
-      "pattern": "^[A-Za-z0-9]{0,16}$"
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.()/ ]{0,64}$"
+    },
+    "prd_os": {
+      "bsonType": "string",
+      "title": "OS",
+      "description": "Operation system",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.()/ ]{0,64}$"
+    },
+    "prd_memory": {
+      "bsonType": "string",
+      "title": "Memory",
+      "description": "Memory",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.()/ ]{0,64}$"
     }
   },
   "required": ["prd_no", "prd_description", "prd_group"],
@@ -84,25 +100,7 @@
     "_modified_at": -1
   },
   "parents": [],
-  "actions": [
-    {
-      "id": "cpu",
-      "title": "CPU Assign",
-      "enabled": true,
-      "match": [],
-      "set": [
-        {
-          "key": "prd_cpu",
-          "value": null
-        }
-      ],
-      "one_click": true,
-      "icon": "hardware-chip-sharp",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Technoplatz"]
-    }
-  ],
+  "actions": [],
   "links": [],
   "triggers": [],
   "views": {},
@@ -110,6 +108,6 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["prd_cpu"]
+    "upsertables": ["prd_cpu", "prd_os", "prd_memory"]
   }
 }

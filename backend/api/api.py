@@ -1112,7 +1112,8 @@ class Crud:
             form_ = obj["form"]
             file_ = obj["file"]
             collection_ = obj["collection"]
-            upserted_ = "process" in obj and obj["process"] == "update"
+            upserted_ = "process" in obj and obj["process"] == "upsert"
+            updated_ = "process" in obj and obj["process"] == "update"
             email_ = form_["email"]
             mimetype_ = file_.content_type
 
@@ -1227,20 +1228,26 @@ class Crud:
 
             wrote_, count_ = [], 0
             if "_id" in df_.columns:
-                wrote_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=True) for doc_ in payload_]
-            elif upserted_ and upsertable_ and uniques_:
+                wrote_ = [pymongo.UpdateOne({"_id": ObjectId(doc_["_id"])}, {"$set": doc_}, upsert=False) for doc_ in payload_]
+            elif (upserted_ or updated_) and upsertable_ and uniques_:
                 fieldsgiven_ = False
+                get_now_f_ = Misc().get_now_f()
                 for doc_ in payload_:
                     filter_, set_ = {}, {}
                     for uniques__ in uniques_:
-                        filter_[uniques__] = doc_[uniques__]
-                    for upsertables__ in upsertables_:
-                        if upsertables__ in doc_:
+                        if uniques__ in doc_ and doc_[uniques__] is not None:
+                            filter_[uniques__] = doc_[uniques__]
+                    if not filter_:
+                        continue
+                    for upsertable__ in upsertables_:
+                        if upsertable__ in doc_ and doc_[upsertable__] is not None:
                             fieldsgiven_ = True
-                            set_[upsertables__] = doc_[upsertables__]
-                    set_["_modified_at"] = Misc().get_now_f()
+                            set_[upsertable__] = doc_[upsertable__]
+                    if not set_:
+                        continue
+                    set_["_modified_at"] = get_now_f_
                     set_["_modified_by"] = email_
-                    wrote_.append(pymongo.UpdateOne(filter_, {"$set": set_}, upsert=True))
+                    wrote_.append(pymongo.UpdateOne(filter_, {"$set": set_}, upsert=upserted_))
                 if not fieldsgiven_:
                     raise APIError("no upsertable fields provided")
             else:

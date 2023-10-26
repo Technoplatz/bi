@@ -1,0 +1,37 @@
+{
+  "properties": {
+    "fam_id": {
+      "bsonType": "string",
+      "title": "ID",
+      "description": "Family ID",
+      "minLength": 3,
+      "maxLength": 3,
+      "pattern": "^[A-Z]{3,3}$",
+      "caseType": "uppercase",
+      "permanent": true
+    },
+    "fam_name": {
+      "bsonType": "string",
+      "title": "Name",
+      "description": "Family name",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-_ ]{1,64}$"
+    }
+  },
+  "required": ["fam_id", "fam_name"],
+  "index": [],
+  "unique": [["fam_id"]],
+  "sort": {
+    "fam_id": 1
+  },
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "views": {},
+  "fetchers": [],
+  "import": {
+    "enabled": false
+  }
+}

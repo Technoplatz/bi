@@ -79,7 +79,8 @@ export const environment = {
         "description": "Process",
         "enum": [
           "insert",
-          "update"
+          "update",
+          "upsert"
         ],
         "default": "insert"
       },
