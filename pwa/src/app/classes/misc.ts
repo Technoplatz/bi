@@ -117,7 +117,7 @@ export class Miscellaneous {
     });
   }
 
-  upload_modal_f(id: any) {
+  import_modal(id: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.modal.create({

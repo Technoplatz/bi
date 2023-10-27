@@ -78,7 +78,6 @@ export class CollectionPage implements OnInit {
   public collections: any = [];
   public is_initialized: boolean = false;
   public scan_: boolean = false;
-  public status_: any = {};
   private view: any = null;
   public actions: any = [];
   private sweeped: any = [];
@@ -146,21 +145,18 @@ export class CollectionPage implements OnInit {
       this.limit_ = LSPAGINATION * 1;
       this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
         this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-          this.storage.get("LSSTATUS_" + this.id).then((LSSTATUS: any) => {
-            this.status_ = LSSTATUS;
-            this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-            LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-            this.actions = [];
-            this.crud.get_collection(this.id).then((res: any) => {
-              this.counters_ = res && res.counters ? res.counters : {};
-              this.refresh_data(0).then(() => { }).catch((error: any) => {
-                this.misc.doMessage(error, "error");
-              }).finally(() => {
-                this.is_initialized = true;
-              });
-            }).catch((error: any) => {
+          this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+          LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+          this.actions = [];
+          this.crud.get_collection(this.id).then((res: any) => {
+            this.counters_ = res && res.counters ? res.counters : {};
+            this.refresh_data(0).then(() => { }).catch((error: any) => {
               this.misc.doMessage(error, "error");
+            }).finally(() => {
+              this.is_initialized = true;
             });
+          }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
           });
         });
       });
@@ -192,7 +188,6 @@ export class CollectionPage implements OnInit {
             this.json_content_ = res.structure;
             this.actions = this.structure_.actions;
             this.properties_ = res.structure.properties;
-            Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
             this.importvis_ = res.structure.import?.enabled;
             this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
             this.count = res.count;
@@ -203,7 +198,7 @@ export class CollectionPage implements OnInit {
             const lmt = this.pages_ >= 10 ? 10 : this.pages_;
             this.paget_ = new Array(lmt);
             this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
-            this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
+            this.searched === null ? this.reset_search(true) : this.reset_search(false);
             for (let p = 0; p < this.paget_.length; p++) {
               this.paget_[p] = this.page_start + p;
             }
@@ -213,15 +208,19 @@ export class CollectionPage implements OnInit {
             this.misc.doMessage(error, "error");
             reject(error);
           }).finally(() => {
-
-            this.crud.get_all().then(() => { });
+            this.crud.get_all().then(() => {
+              this.propkeys_ = "";
+              Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
+            }).catch((err_: any) => {
+              console.error("get_all", err_);
+            });
           });
         });
       });
     });
   }
 
-  doAction(ix_: any) {
+  action(ix_: any) {
     if (this.actions[ix_]?.one_click || this.sweeped[this.segment]?.length > 0) {
       this.actionix = ix_;
       this.go_crud(null, "action");
@@ -230,7 +229,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  MultiCrud(op_: string) {
+  multi_crud(op_: string) {
     if (this.data.length > 0 && this.is_selected) {
       if (op_ === "action") {
         if (this.structure_ && this.structure_.actions && this.structure_.actions.length > 0) {
@@ -315,7 +314,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  async GetIsSelectData() {
+  async get_is_select_data() {
     this.sweeped[this.segment] = [];
     const q = await this.selected.findIndex((obj: boolean) => obj === true);
     this.clonok = q;
@@ -325,15 +324,15 @@ export class CollectionPage implements OnInit {
     }, []);
   }
 
-  SwitchSelectData(event: any) {
+  switch_select_data(event: any) {
     this.selected = new Array(this.data.length).fill(event);
-    this.GetIsSelectData();
+    this.get_is_select_data();
   }
 
-  SetSelectData(i: number, event: any) {
+  set_select_data(i: number, event: any) {
     if (!["_log", "_backup", "_announcement"].includes(this.segment)) {
       this.selected[i] = event.detail.checked;
-      this.GetIsSelectData();
+      this.get_is_select_data();
     }
   }
 
@@ -350,14 +349,14 @@ export class CollectionPage implements OnInit {
   set_search(k_: string) {
     setTimeout(() => {
       this.searchfocus?.setFocus();
-    }, 1000);
+    }, 500);
     this.searched[k_].setmode = false;
     for (let key_ in this.structure_.properties) {
       this.searched[key_].actived = k_ === key_ ? true : false;
     }
   }
 
-  doResetSearch(full: boolean) {
+  reset_search(full: boolean) {
     full ? this.searched = {} : null;
     this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
       for (let key_ in this.structure_.properties) {
@@ -368,28 +367,25 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  doClearFilter() {
+  clear_filter() {
     return new Promise((resolve, reject) => {
       this.filter_ = [];
-      this.status_ = null;
       this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
-          this.storage.remove("LSSTATUS_" + this.id).then(() => {
-            this.doResetSearch(true);
-            this.searched = null;
-            this.sweeped[this.segment] = [];
-            this.refresh_data(0).then(() => {
-              resolve(true);
-            }).catch((res: any) => {
-              this.misc.doMessage(res, "error");
-            });
+          this.reset_search(true);
+          this.searched = null;
+          this.sweeped[this.segment] = [];
+          this.refresh_data(0).then(() => {
+            resolve(true);
+          }).catch((res: any) => {
+            this.misc.doMessage(res, "error");
           });
         });
       });
     });
   }
 
-  doResetSearchItem(k: string) {
+  reset_search_item(k: string) {
     const n_ = this.filter_.length;
     this.searched[k].actived = false;
     for (let d = 0; d < n_; d++) {
@@ -410,7 +406,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  doSearch(k: string, v: string) {
+  search(k: string, v: string) {
     this.searched[k].setmode = false;
     if (!this.filter_ || this.filter_.length === 0) {
       if (["true", "false"].includes(v)) {
@@ -429,10 +425,7 @@ export class CollectionPage implements OnInit {
       this.searched[k].f = true;
       this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-          this.storage.remove("LSSTATUS_" + this.id).then(() => {
-            this.status_ = null;
-            this.refresh_data(0);
-          });
+          this.refresh_data(0);
         });
       });
     } else {
@@ -453,10 +446,7 @@ export class CollectionPage implements OnInit {
           this.searched[k].f = true;
           this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
             this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-              this.storage.remove("LSSTATUS_" + this.id).then(() => {
-                this.status_ = null;
-                this.refresh_data(0);
-              });
+              this.refresh_data(0);
             });
           });
         }
@@ -485,23 +475,12 @@ export class CollectionPage implements OnInit {
   }
 
   doFlashcard(item_: any) {
-    this.status_ = item_;
     this.filter_ = item_.view.data_filter;
-    this.storage.set("LSSTATUS_" + this.id, this.status_).then(() => {
-      this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-        this.refresh_data(0).then(() => { }).catch((res: any) => {
-          this.misc.doMessage(res, "error");
-        });
+    this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
+      this.refresh_data(0).then(() => { }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
       });
     });
-  }
-
-  compareWith(o1: any, o2: any) {
-    return o1 && o2 ? o1.id === o2.id : o1 === o2;
-  }
-
-  doClearAttr() {
-    this.status_ = null;
   }
 
   save_json_f() {
@@ -527,13 +506,13 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  upload_modal_f() {
-    this.misc.upload_modal_f(this.id).then(() => { }).finally(() => {
+  import_modal() {
+    this.misc.import_modal(this.id).then(() => {
       this.refresh_data(0).then(() => { });
-    });
+    }).finally(() => { });
   }
 
-  setCopy(key: any) {
+  copy_column(key: any) {
     this.is_key_copying = true;
     this.is_key_copied = false;
     this.misc.api_call("crud", {
@@ -562,12 +541,12 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  copy(copied_: any) {
+  copy_headers() {
     this.is_copied = false;
-    this.misc.copy_to_clipboard(copied_).then(() => {
+    this.misc.copy_to_clipboard(this.propkeys_).then(() => {
       this.is_copied = true;
     }).catch((error: any) => {
-      console.error("*** copy error", error);
+      console.error("copy_headers", error);
     }).finally(() => {
       setTimeout(() => {
         this.is_copied = false;

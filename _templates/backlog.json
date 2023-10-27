@@ -248,12 +248,6 @@
       "description": "Sales Order Created Date",
       "dateOnly": true
     },
-    "blo_credit_release_date": {
-      "bsonType": "date",
-      "title": "Credit Release Date",
-      "description": "Credit Release Date",
-      "dateOnly": true
-    },
     "blo_mfg_po_date": {
       "bsonType": "date",
       "title": "MFG PO Date",
@@ -344,11 +338,6 @@
       "bsonType": "string",
       "title": "Sales Order Type",
       "description": "Sales Order Type"
-    },
-    "blo_header_billing_block": {
-      "bsonType": "string",
-      "title": "Header Billing Block",
-      "description": "Header Billing Block"
     },
     "blo_item_billing_block": {
       "bsonType": "string",

@@ -42,7 +42,7 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="is_crud && importvis_" (click)="upload_modal_f()" class="data-sq-button">
+              <div *ngIf="is_crud && importvis_" (click)="import_modal()" class="data-sq-button">
                 <ion-icon name="download-sharp"></ion-icon><br />
                 {{ 'Import File' | translate }}
               </div>
@@ -67,27 +67,27 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Please Wait' | translate }}
               </div>
-              <div *ngIf="filter_ && filter_.length>0" (click)="doClearFilter()" class="data-sq-button">
+              <div *ngIf="filter_ && filter_.length>0" (click)="clear_filter()" class="data-sq-button">
                 <ion-icon name="close"></ion-icon>
                 <br />
                 <span>{{ 'Clear Filter' | translate }}</span>
               </div>
-              <div (click)="MultiCrud('clone')" class="data-sq-button">
+              <div (click)="multi_crud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-sharp"></ion-icon><br />
                 {{ 'Clone Record' | translate }}
               </div>
-              <div (click)="copy(propkeys_)" class="data-sq-button">
+              <div *ngIf="perma_" (click)="multi_crud('delete')" class="data-sq-button">
+                <ion-icon *ngIf="is_deleting" name="lines-sharp"></ion-icon>
+                <ion-icon *ngIf="!is_deleting" name="trash-sharp"></ion-icon>
+                <br />
+                {{ 'Delete Record' | translate }}
+              </div>
+              <div (click)="copy_headers()" class="data-sq-button">
                 <ion-icon *ngIf="!is_copied" name="browsers-sharp"></ion-icon>
                 <ion-icon *ngIf="is_copied" name="checkmark-sharp"></ion-icon>
                 <br />
                 <span *ngIf="!is_copied">{{ 'Copy Headers' | translate }}</span>
                 <span *ngIf="is_copied">{{ 'Headers Copied' | translate }}</span>
-              </div>
-              <div *ngIf="perma_" (click)="MultiCrud('delete')" class="data-sq-button">
-                <ion-icon *ngIf="is_deleting" name="lines-sharp"></ion-icon>
-                <ion-icon *ngIf="!is_deleting" name="trash-sharp"></ion-icon>
-                <br />
-                {{ 'Delete Record' | translate }}
               </div>
               <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">
                 <div class="ion-no-padding">
@@ -132,7 +132,7 @@ https://www.gnu.org/licenses.
             <ion-row>
               <ion-col size="12">
                 <span *ngFor="let item of actions; let ac = index">
-                  <ion-button *ngIf="item.enabled; actionhide" (click)="doAction(ac)">
+                  <ion-button *ngIf="item.enabled; actionhide" (click)="action(ac)">
                     <ion-icon [name]="item?.icon" class="action-icon"></ion-icon>
                     {{ item.title | translate }}
                   </ion-button>
@@ -156,7 +156,7 @@ https://www.gnu.org/licenses.
             <tr>
               <th>&nbsp;</th>
               <th>
-                <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="SwitchSelectData($event.detail.checked)"
+                <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="switch_select_data($event.detail.checked)"
                   mode="md">
                 </ion-checkbox>
               </th>
@@ -178,7 +178,7 @@ https://www.gnu.org/licenses.
                   <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
                     <ion-icon name="arrow-up"></ion-icon>
                   </ion-button>
-                  <ion-button color="light" size="small" (click)="setCopy(item.key)">
+                  <ion-button color="light" size="small" (click)="copy_column(item.key)">
                     <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-sharp"></ion-icon>
                     <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
                     <ion-icon *ngIf="is_key_copying" name="stopwatch-"></ion-icon>
@@ -231,11 +231,11 @@ https://www.gnu.org/licenses.
                       class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
                     </ion-input>
                   </div>
-                  <ion-button size="small" (click)="doSearch(item.key, searched[item.key].kw)">
+                  <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
                     <ion-icon name="search"></ion-icon>
                     {{ 'Search' | translate }}
                   </ion-button>
-                  <ion-button size="small" (click)="doResetSearchItem(item.key)" color="medium">
+                  <ion-button size="small" (click)="reset_search_item(item.key)" color="medium">
                     <ion-icon name="close"></ion-icon>
                     {{ 'Cancel' | translate }}
                   </ion-button>
@@ -271,7 +271,7 @@ https://www.gnu.org/licenses.
               <td class="primary aligned-right">{{ ((pager_ - 1) * limit_) + i + 1}}</td>
               <td (click)="tdc($event)">
                 <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
-                  (ionChange)="SetSelectData(i,$event)" mode="md">
+                  (ionChange)="set_select_data(i,$event)" mode="md">
                 </ion-checkbox>
               </td>
               <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex">
