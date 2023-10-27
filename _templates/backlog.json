@@ -398,7 +398,51 @@
   "actions": [],
   "triggers": [
     {
-      "name": "order creator",
+      "name": "product-updater",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        {
+          "key": "blo_prd_no",
+          "op": "ne",
+          "value": null
+        },
+        {
+          "key": "blo_prd_description",
+          "op": "ne",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "product",
+          "match": [
+            {
+              "key": "prd_no",
+              "value": "blo_prd_no"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "prd_no",
+              "value": "blo_prd_no"
+            },
+            {
+              "key": "prd_description",
+              "value": "blo_prd_description"
+            },
+            {
+              "key": "prd_group",
+              "value": "OTH"
+            }
+          ],
+          "upsert": true
+        }
+      ]
+    },
+    {
+      "name": "order-updater",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [

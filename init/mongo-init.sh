@@ -40,7 +40,9 @@ selfsignedreplace=$MONGO_CERTS_REPLACE
 
 echo "step 0: Clearing the $apitempfilepath directory..."
 rm -rf $apitempfilepath/*
-echo "step 0: $apitempfilepath is empty."
+mkdir -p $apitempfilepath
+touch $apitempfilepath/_init.txt
+echo "step 0: $apitempfilepath is initiated."
 
 mongotlscertkeyfilepassword=$(</run/secrets/mongo_tls_keyfile_password)
 

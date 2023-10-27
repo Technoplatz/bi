@@ -1143,7 +1143,12 @@ class Crud:
                 raise APIError(f"no import rules defined for {collection_}")
             ignored_ = import_["ignored"] if "ignored" in import_ and len(import_["ignored"]) > 0 else []
             upsertable_ = "upsertable" in import_ and import_["upsertable"] is True
+            purge_ = "purge" in import_ and import_["purge"] is True
+            enabled_ = "enabled" in import_ and import_["enabled"] is True
             upsertables_ = import_["upsertables"] if "upsertables" in import_ and len(import_["upsertables"]) > 0 else []
+
+            if not enabled_:
+                raise APIError("collection is not enabled to import")
 
             if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
                 filesize_ = file_.tell()
@@ -1252,6 +1257,11 @@ class Crud:
                     raise APIError("no upsertable fields provided")
             else:
                 wrote_ = [pymongo.InsertOne(doc_) for doc_ in payload_]
+
+            if purge_:
+                suffix_ = Misc().get_timestamp_f()
+                Mongo().db_[collection__].aggregate([{"$match": {}}, {"$out": f"{collection__}_bin_{suffix_}"}])
+                Mongo().db_[collection__].delete_many({})
 
             bulk_write_ = Mongo().db_[collection__].bulk_write(wrote_, ordered=False)
             details_, content_ = bulk_write_.bulk_api_result, ""

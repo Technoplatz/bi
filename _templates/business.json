@@ -4,12 +4,12 @@
       "bsonType": "number",
       "title": "Bu ID",
       "description": "Business Unit ID",
-      "readonly": true
+      "permanent": true
     },
     "bun_name": {
       "bsonType": "string",
       "title": "Buisness Name",
-      "description": "Business Unit Name",
+      "description": "Unit Name",
       "minLength": 1,
       "maxLength": 16,
       "pattern": "^[A-Za-z]{1,16}$"
