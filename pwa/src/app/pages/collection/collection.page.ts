@@ -50,14 +50,13 @@ import { JsonEditorOptions } from "ang-jsoneditor";
 export class CollectionPage implements OnInit {
   @ViewChild("searchfocus", { static: false }) searchfocus: any = [];
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
-  public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "Collections";
   public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
-  private submenu: string = "";
   private segment = "data";
   public user: any = null;
   public perm_: boolean = false;
+  public perma_: boolean = false;
   public is_crud: boolean = false;
   public paget_: any = [];
   public id: string = "";
@@ -80,17 +79,14 @@ export class CollectionPage implements OnInit {
   public is_initialized: boolean = false;
   public scan_: boolean = false;
   public status_: any = {};
-  public action_: any = {};
   private view: any = null;
   public actions: any = [];
   private sweeped: any = [];
   private actionix: number = -1;
   private menu: string = "";
-  private page_end: number = 1;
   private clonok: number = -1;
   private collections_: any;
   private user_: any;
-  private segmentsadm_: any = environment.segmentsadm;
   public properties_: any = {};
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
@@ -103,19 +99,8 @@ export class CollectionPage implements OnInit {
   public is_key_copying: boolean = false;
   public is_inprogress: boolean = false;
   public flashcards_: any = [];
-  public schema_: any = {
-    "properties": { "title": "Properties", "count": 0 },
-    "required": { "title": "Required", "count": 0 },
-    "index": { "title": "Indexes", "count": 0 },
-    "actions": { "title": "Actions", "count": 0 },
-    "parents": { "title": "Parents", "count": 0 },
-    "triggers": { "title": "Triggers", "count": 0 },
-    "views": { "title": "Views", "count": 0 },
-    "unique": { "title": "Unique", "count": 0 },
-    "sort": { "title": "Sort", "count": 0 },
-    "links": { "title": "Links", "count": 0 },
-    "fetchers": { "title": "Fetchers", "count": 0 }
-  }
+  public propkeys_: string = "";
+  public is_copied: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -135,6 +120,7 @@ export class CollectionPage implements OnInit {
     });
     this.user_ = this.auth.user.subscribe((res: any) => {
       this.perm_ = res && res.perm;
+      this.perma_ = res && res.perma;
       this.user = res;
     });
   }
@@ -149,7 +135,7 @@ export class CollectionPage implements OnInit {
 
   ngOnInit() {
     this.menu = this.router.url.split("/")[1];
-    this.subheader = this.id = this.submenu = this.router.url.split("/")[2];
+    this.subheader = this.id = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
     this.header = this.is_crud ? "COLLECTIONS" : this.id === "_collection" ? "DATA COLLECTIONS" : this.id === "_query" ? "QUERIES" : this.id === "_visual" ? "VISUALIZATION" : "ADMINISTRATION";
   }
@@ -181,18 +167,9 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  build_schema_f(prop_: any) {
-    for (let p_ in prop_) {
-      if (this.schema_[p_]) {
-        this.schema_[p_].count = ["properties", "sort", "views"].includes(p_) ? Object.keys(prop_[p_]).length : prop_[p_].length;
-      }
-    }
-  }
-
   refresh_data(p: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
-      // this.data = [];
       this.schemavis_ = false;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
@@ -210,12 +187,12 @@ export class CollectionPage implements OnInit {
             limit: this.limit_
           }).then((res: any) => {
             this.pager_ = this.page_;
-            this.build_schema_f(res.structure);
             this.data = res.data;
             this.structure_ = res.structure;
             this.json_content_ = res.structure;
             this.actions = this.structure_.actions;
             this.properties_ = res.structure.properties;
+            Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
             this.importvis_ = res.structure.import?.enabled;
             this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
             this.count = res.count;
@@ -226,7 +203,6 @@ export class CollectionPage implements OnInit {
             const lmt = this.pages_ >= 10 ? 10 : this.pages_;
             this.paget_ = new Array(lmt);
             this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
-            this.page_end = this.page_start + 10;
             this.searched === null ? this.doResetSearch(true) : this.doResetSearch(false);
             for (let p = 0; p < this.paget_.length; p++) {
               this.paget_[p] = this.page_start + p;
@@ -526,7 +502,6 @@ export class CollectionPage implements OnInit {
 
   doClearAttr() {
     this.status_ = null;
-    this.action_ = null;
   }
 
   save_json_f() {
@@ -584,6 +559,19 @@ export class CollectionPage implements OnInit {
     }).catch((error: any) => {
       this.is_key_copying = false;
       this.misc.doMessage(error, "error");
+    });
+  }
+
+  copy(copied_: any) {
+    this.is_copied = false;
+    this.misc.copy_to_clipboard(copied_).then(() => {
+      this.is_copied = true;
+    }).catch((error: any) => {
+      console.error("*** copy error", error);
+    }).finally(() => {
+      setTimeout(() => {
+        this.is_copied = false;
+      }, 1000);
     });
   }
 

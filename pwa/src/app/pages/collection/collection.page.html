@@ -76,12 +76,17 @@ https://www.gnu.org/licenses.
                 <ion-icon name="duplicate-sharp"></ion-icon><br />
                 {{ 'Clone Record' | translate }}
               </div>
-              <div *ngIf="is_deleting" class="data-sq-button">
-                <ion-spinner name="lines-sharp"></ion-spinner><br />
-                {{ 'Deleting Records' | translate }}
+              <div (click)="copy(propkeys_)" class="data-sq-button">
+                <ion-icon *ngIf="!is_copied" name="browsers-sharp"></ion-icon>
+                <ion-icon *ngIf="is_copied" name="checkmark-sharp"></ion-icon>
+                <br />
+                <span *ngIf="!is_copied">{{ 'Copy Headers' | translate }}</span>
+                <span *ngIf="is_copied">{{ 'Headers Copied' | translate }}</span>
               </div>
-              <div *ngIf="!is_deleting" (click)="MultiCrud('delete')" class="data-sq-button">
-                <ion-icon name="trash-sharp"></ion-icon><br />
+              <div *ngIf="perma_" (click)="MultiCrud('delete')" class="data-sq-button">
+                <ion-icon *ngIf="is_deleting" name="lines-sharp"></ion-icon>
+                <ion-icon *ngIf="!is_deleting" name="trash-sharp"></ion-icon>
+                <br />
                 {{ 'Delete Record' | translate }}
               </div>
               <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">

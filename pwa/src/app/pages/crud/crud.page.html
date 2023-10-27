@@ -161,7 +161,7 @@ https://www.gnu.org/licenses.
         </div>
         <ng-template #nolink>
             <div *ngIf="isnoninteractive_" class="ion-margin-top">
-                <h5>{{ 'Please click RUN button' | translate }}.</h5>
+                <strong>{{ 'Please click RUN button' | translate }}.</strong>
             </div>
             <ul *ngIf="!crudForm.valid" class="ion-no-padding ion-margin-top danger">
                 <div *ngFor="let field of fieldsupd; let f=index">

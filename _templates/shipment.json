@@ -132,28 +132,18 @@
         {
           "key": "dnn_wayb_id",
           "value": "shp_id"
-        },
-        {
-          "key": "dnn_wayb_cname",
-          "value": "shp_carrier_name"
-        },
-        {
-          "key": "dnn_wayb_cid",
-          "value": "shp_carrier_id"
-        },
-        {
-          "key": "dnn_wayb_vid",
-          "value": "shp_vehicle_id"
         }
       ],
       "autofill": true,
       "btntext": "delivery",
       "apis": [
         {
-          "id": "issue",
-          "name": "Waybill Issue",
+          "id": "waybill-issue",
           "enabled": true,
-          "url": "http://172.18.0.8/issue",
+          "protocol": "http",
+          "subdomain": "",
+          "domain": "172.18.0.8",
+          "path": "/issue",
           "headers": {
             "Content-Type": "application/json"
           },
@@ -185,8 +175,8 @@
       ],
       "notification": {
         "notify": true,
-        "subject": "DNs Shipped",
-        "body": "Hi,<br /><br />We would like to let you know that DNs were shipped.",
+        "subject": "Touchpoint [DNs Shipped]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached deliveries have been shipped successfully.",
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
         "attachment": true,
         "filter": []
@@ -196,73 +186,8 @@
   ],
   "actions": [
     {
-      "id": "waybill-issue",
-      "title": "E-Waybill",
-      "enabled": true,
-      "match": [
-        {
-          "key": "shp_wayb_no",
-          "op": "eq",
-          "value": null
-        }
-      ],
-      "set": [
-        {
-          "key": "shp_notes",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "icon": "newspaper-outline",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
-      "notification": {
-        "notify": true,
-        "subject": "DNs Shipped",
-        "body": "Hi,<br /><br />We would like to let you know that shipment of attached DNs was completed.",
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
-        "filter": []
-      },
-      "apis": [
-        {
-          "id": "issue",
-          "name": "Waybill Issue",
-          "enabled": true,
-          "url": "http://172.18.0.8/issue",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "method": "post",
-          "map": {
-            "tag_prefix": "{http://tempuri.org/}",
-            "shipment_collection": "shipment_data",
-            "shipment_id_field": "shp_id",
-            "shipment_ettn_field": "shp_wayb_ettn",
-            "shipment_waybill_no_field": "shp_wayb_no",
-            "shipment_waybill_date_field": "shp_wayb_date",
-            "shipment_account_no_field": "shp_acc_no",
-            "shipment_notes_field": "shp_notes",
-            "account_collection": "account_data",
-            "account_no_field": "acc_no",
-            "delivery_collection": "delivery_data",
-            "delivery_shipment_id_field": "dnn_wayb_id",
-            "delivery_qty_field": "dnn_qty",
-            "delivery_no_field": "dnn_no",
-            "delivery_account_no_field": "dnn_acc_no",
-            "delivery_product_no_field": "dnn_prd_no",
-            "delivery_product_desc_field": "dnn_prd_description",
-            "delivery_waybill_no_field": "dnn_wayb_no",
-            "delivery_waybill_date_field": "dnn_wayb_date",
-            "delivery_set_status": "70-Delivered",
-            "document_format": 2
-          }
-        }
-      ]
-    },
-    {
       "id": "waybill-download",
-      "title": "Download",
+      "title": "Download Selected",
       "enabled": true,
       "match": [
         {
@@ -281,9 +206,11 @@
       "apis": [
         {
           "id": "waybill-download",
-          "name": "Waybill Download",
           "enabled": true,
-          "url": "http://172.18.0.8/download",
+          "protocol": "http",
+          "subdomain": "",
+          "domain": "172.18.0.8",
+          "path": "/download",
           "headers": {
             "Content-Type": "application/json"
           },
@@ -299,8 +226,8 @@
       ],
       "notification": {
         "notify": true,
-        "subject": "Waybills Downloaded",
-        "body": "Hi,<br /><br />We would like to let you know that Waybills of the attached DNs were donwloaded.",
+        "subject": "Touchpoint [Waybill Downloaded]",
+        "body": "Hi,<br /><br />We would like to let you know that the waybill of the attached deliveries has been donwloaded.",
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
         "filter": []
       }

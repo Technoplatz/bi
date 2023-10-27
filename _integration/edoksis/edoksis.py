@@ -683,6 +683,9 @@ def multi_issue_f():
             set_["dnn_wayb_id"] = shipment_id_
             set_["dnn_wayb_no"] = waybill_no_
             set_["dnn_wayb_date"] = process_date_
+            set_["dnn_wayb_cname"] = shipment_partynamename_
+            set_["dnn_wayb_cid"] = shipment_partyidentificationid_
+            set_["dnn_wayb_vid"] = shipment_licenseplateid_
             set_["dnn_wayb_ettn"] = waybill_ettn_
             set_["dnn_status"] = delivery_set_status_
             set_["_modified_at"] = process_date_

@@ -3135,21 +3135,17 @@ class Crud:
             if not enabled_:
                 raise PassException(f"action api not enabled: {id_}")
 
-            url_ = api_["url"] if "url" in api_ and api_["url"][:4] in ["http", "https"] else None
-            if not url_:
-                raise PassException(f"invalid url in action api {id_}")
-
             headers_ = api_["headers"] if "headers" in api_ else None
             if not headers_:
-                raise PassException(f"invalid headers in action api: {id_}")
+                raise PassException(f"invalid api headers in {id_}")
 
             method_ = api_["method"] if "method" in api_ and api_["method"].lower() in ["get", "post"] else None
             if not method_:
-                raise PassException(f"invalid method in action api: {id_}")
+                raise PassException(f"invalid api method in {id_}")
 
             map_ = api_["map"] if "map" in api_ else None
             if not map_:
-                raise PassException(f"no mapping found: {id_}")
+                raise PassException(f"no api mapping found in {id_}")
 
             json_ = {}
             for _, value_ in map_.items():
@@ -3157,7 +3153,7 @@ class Crud:
                     json_["key"] = value_
                     json_["value"] = doc_[value_]
             if not json_:
-                raise PassException(f"no mapping values found: {id_}")
+                raise PassException(f"no mapping values found in api {id_}")
 
             json_["ids"] = []
             if ids_ and len(ids_) > 0:
@@ -3165,7 +3161,20 @@ class Crud:
             json_["map"] = map_
             json_["email"] = email_
 
-            response_ = requests.post(url_, json=json.loads(JSONEncoder().encode(json_)), headers=headers_, timeout=60)
+            protocol_ = api_["protocol"] if "protocol" in api_ and api_["protocol"] in ["http", "https"] else None
+            if not protocol_:
+                raise PassException(f"invalid api protocol in {id_}")
+
+            domain_ = api_["domain"] if "domain" in api_ and api_["domain"] != DOMAIN_ else None
+            if not domain_:
+                raise PassException(f"invalid api domain in {id_}")
+            subdomain_ = f"{api_['subdomain']}." if "subdomain" in api_ and api_["subdomain"] != "" else ""
+
+            path_ = api_["path"] if "path" in api_ and api_["path"][:1] == "/" else None
+            if not path_:
+                raise PassException(f"invalid api path in {id_}")
+
+            response_ = requests.post(f"{protocol_}://{subdomain_}{domain_}{path_}", json=json.loads(JSONEncoder().encode(json_)), headers=headers_, timeout=60)
             res_ = json.loads(response_.content)
             res_content_ = res_["content"] if "content" in res_ else ""
             if response_.status_code != 200:
@@ -3329,7 +3338,7 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            return {"result": True, "count": count_, "content": "OK"}
+            return {"result": True, "count": count_, "content": "action completed successfully"}
 
         except pymongo.errors.PyMongoError as exc__:
             return Misc().mongo_error_f(exc__)
