@@ -64,7 +64,7 @@ https://www.gnu.org/licenses.
       <ion-row class="ion-margin-top">
         <ion-col size="1"></ion-col>
         <ion-col size="11" class="ion-padding-top">
-          <ion-button (click)="misc.doSign('signin')" class="ion-margin-top">
+          <ion-button (click)="misc.sign_modal('signin')" class="ion-margin-top">
             <ion-icon name="log-in-sharp"></ion-icon>
             {{ 'Sign in' | translate }}
           </ion-button>
@@ -72,8 +72,8 @@ https://www.gnu.org/licenses.
       </ion-row>
       <ion-row class="ion-margin-top">
         <ion-col size="1"></ion-col>
-        <ion-col size="11">{{ "Don't have an account?" | translate }}
-          <a href="#" (click)="doSignup()">{{ 'Sign up' | translate }}</a>.
+        <ion-col size="11" (click)="misc.sign_modal('signup')">{{ "Don't have an account?" | translate }}
+          <a href="#">{{ 'Sign up' | translate }}</a>.
         </ion-col>
       </ion-row>
     </ng-template>

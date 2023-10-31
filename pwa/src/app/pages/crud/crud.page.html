@@ -62,7 +62,7 @@ https://www.gnu.org/licenses.
                 </ion-button>
                 <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium">
                     <ion-icon name="close"></ion-icon>
-                    {{ 'Cancel' |
+                    {{ 'Dismiss' |
                     translate }} </ion-button>
                 <ion-button *ngIf="op=='update' && user?.perma" color="danger" (click)="doRemove()" class="end-item">
                     <ion-icon name="trash-bin-sharp"></ion-icon>
@@ -80,12 +80,6 @@ https://www.gnu.org/licenses.
         </ion-row>
         <ion-row *ngIf="tab=='link'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
-                <ion-button (click)="submit_f()">
-                    <ion-spinner *ngIf="isInProgress; else noattachinprocess" name="dots"></ion-spinner>
-                    <ng-template #noattachinprocess>
-                        {{ 'Save' | translate }}
-                    </ng-template>
-                </ion-button>
                 <ion-button (click)="goTab('data')" color="medium">
                     <ion-icon name="arrow-back"></ion-icon>
                     {{ 'Back' | translate }} </ion-button>
@@ -111,7 +105,7 @@ https://www.gnu.org/licenses.
         </ion-item>
         <ion-item *ngIf="reloading; else notreloading" class="clicked-item" lines="none">
             <ion-spinner name="lines" class="ion-margin-end"></ion-spinner>
-            <ion-label> {{ parent.collection }} {{ 'is loading' | translate }}... </ion-label>
+            <ion-label>{{ 'Loading' | translate }}... </ion-label>
         </ion-item>
         <ng-template #notreloading>
             <ion-grid *ngIf="parent.get?.length > 0; else nogetfields" class="ion-no-padding data-grid">
@@ -143,14 +137,13 @@ https://www.gnu.org/licenses.
         <div *ngIf="tab=='link'; else nolink" class="ion-padding-bottom ion-margin-top">
             <ion-item class="ion-no-margin ion-margin-bottom full-width">
                 <div class="ion-margin-top ion-margin-bottom">
-                    <ion-button color="primary" size="default" (click)="doGetLinked()">
+                    <ion-button color="primary" size="default" (click)="get_linked()">
                         <ion-icon name="download-outline"></ion-icon>
                         <span *ngIf="reloading">{{ 'Running' | translate }}...</span>
                         <span *ngIf="!reloading">{{ 'Get Automatically' | translate }}</span>
-                        <!-- <span *ngIf="!reloading">{{ link_?.get }}</span> -->
                     </ion-button>
                 </div>
-                <ion-label position="stacked"><strong>{{ 'Get automatically, enter manually or Paste' | translate
+                <ion-label position="stacked"><strong>{{ 'Get automatically, enter manually or paste' | translate
                         }}.</strong></ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
                     spellcheck="false" class="linked-data" counter="true" maxlength="512" clearOnEdit="true"
@@ -216,7 +209,7 @@ https://www.gnu.org/licenses.
                                         [id]="field.name" (ionChange)="doTextManipulate($event, field)">
                                     </ion-input>
                                     <ng-template #istextarea>
-                                        <ion-textarea class="ion-no-padding" cols="64" [(ngModel)]="data_[field.name]"
+                                        <ion-textarea cols="64" [(ngModel)]="data_[field.name]"
                                             [disabled]="field.disabled" [readonly]="field.readonly" auto-grow="true"
                                             [maxlength]="field.maxLength" [minlength]="field.minLength"
                                             autocorrect="off"
@@ -227,18 +220,16 @@ https://www.gnu.org/licenses.
                                     </ng-template>
                                 </div>
                                 <ng-template #checkpassword>
-                                    <ion-input *ngIf="field.password; else checkenum" class="ion-no-padding"
-                                        [formControlName]="field.name" type="password" spellcheck="false"
-                                        autocorrect="off" [required]="field.required" [(ngModel)]="data_[field.name]"
-                                        auto-grow="true" [id]="field.name">
+                                    <ion-input *ngIf="field.password; else checkenum" [formControlName]="field.name"
+                                        type="password" spellcheck="false" autocorrect="off" [required]="field.required"
+                                        [(ngModel)]="data_[field.name]" auto-grow="true" [id]="field.name">
                                     </ion-input>
                                 </ng-template>
                                 <ng-template #checkenum>
                                     <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : '' | translate"
-                                        [required]="field.required" class="ion-no-padding ion-no-margin"
-                                        [disabled]="field.disabled" [(ngModel)]="data_[field.name]"
-                                        [value]="data_[field.name]"
+                                        [required]="field.required" [disabled]="field.disabled"
+                                        [(ngModel)]="data_[field.name]" [value]="data_[field.name]"
                                         (ionChange)="doChangeEnum(field, $event.target.value)" [id]="field.name">
                                         <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item |
                                             translate }}
@@ -247,8 +238,8 @@ https://www.gnu.org/licenses.
                                 </ng-template>
                                 <ng-template #checkproperty>
                                     <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
-                                        [required]="field.required" class="ion-no-padding ion-no-margin"
-                                        [(ngModel)]="data_[field.name]" [disabled]="field.disabled">
+                                        [required]="field.required" [(ngModel)]="data_[field.name]"
+                                        [disabled]="field.disabled">
                                         <ion-select-option *ngFor="let item of properties_" [value]="item"
                                             [id]="field.name"> {{ item | translate }}
                                         </ion-select-option>
@@ -257,8 +248,8 @@ https://www.gnu.org/licenses.
                             </div>
                             <ng-template #isfile>
                                 <div class="full-width">
-                                    <ion-input [id]="field.name" class="ion-no-padding" [formControlName]="field.name"
-                                        type="file" [required]="field.required" (change)="onFileChange($event)"
+                                    <ion-input [id]="field.name" [formControlName]="field.name" type="file"
+                                        [required]="field.required" (change)="onFileChange($event)"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : '' | translate">
                                     </ion-input>
                                 </div>
@@ -296,8 +287,8 @@ https://www.gnu.org/licenses.
                             </ng-template>
                         </div>
                         <ion-input *ngIf="['int','number','decimal','float'].includes(field.bsonType)"
-                            class="ion-no-padding" [formControlName]="field.name" type="number"
-                            [required]="field.required" [(ngModel)]="data_[field.name]"
+                            [formControlName]="field.name" type="number" [required]="field.required"
+                            [(ngModel)]="data_[field.name]"
                             [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : '' | translate"
                             [disabled]="field.disabled" [readonly]="field.readonly" [id]="field.name">
                         </ion-input>

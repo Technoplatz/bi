@@ -563,16 +563,14 @@ class Misc:
         docstring is in progress
         """
         try:
-            personalizations_ = []
-            to_ = []
+            personalizations_, to_ = [], []
             users_ = Mongo().db_["_user"].find({"usr_enabled": True, "_tags": {"$elemMatch": {"$in": tags_}}})
-            if users_:
-                for member_ in users_:
-                    if member_["usr_id"] not in to_:
-                        to_.append(member_["usr_id"])
-                        personalizations_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
+            for member_ in users_:
+                if member_["usr_id"] not in to_:
+                    to_.append(member_["usr_id"])
+                    personalizations_.append({"list": "to", "email": member_["usr_id"], "name": member_["usr_name"]})
 
-            return {"result": True, "to": personalizations_}
+            return {"result": True, "personalizations": personalizations_}
 
         except Exception as exc:
             return Misc().notify_exception_f(exc)
@@ -639,8 +637,13 @@ class Misc:
         """
         docstring is in progress
         """
-        data_ = escape(data_) if isinstance(data_, str) else data_
-        return bleach.clean(data_) if data_ else None
+        try:
+            data_ = data_.strip()
+            data_ = escape(data_) if isinstance(data_, str) else data_
+            return bleach.clean(data_) if data_ else None
+
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
 
 class Mongo:
@@ -1107,7 +1110,7 @@ class Crud:
         """
         docstring is in progress
         """
-        content_, stats_, res_, details_, files_, filename_, upsertable_ = "", "", None, {}, [], "", False
+        content_, stats_, res_, details_, files_, filename_, upsertable_, df_, name_ = "", "", None, {}, [], "", False, None, ""
         try:
             form_ = obj["form"]
             file_ = obj["file"]
@@ -1117,6 +1120,11 @@ class Crud:
             email_ = form_["email"]
             mimetype_ = file_.content_type
 
+            user_ = Mongo().db_["_user"].find_one({"usr_id": email_})
+            if not user_:
+                raise APIError("user not found")
+            name_ = user_["usr_name"]
+
             collection__ = f"{collection_}_data"
             find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
@@ -1124,7 +1132,7 @@ class Crud:
 
             col_structure_ = find_one_["col_structure"] if "col_structure" in find_one_ else None
             if not col_structure_:
-                raise APIError(f"no structure found {collection_}")
+                raise APIError("no structure found")
 
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
@@ -1150,21 +1158,29 @@ class Crud:
             if not enabled_:
                 raise APIError("collection is not enabled to import")
 
-            if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
-                filesize_ = file_.tell()
-                if filesize_ > API_UPLOAD_LIMIT_BYTES_:
-                    raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
-                file_.seek(0, os.SEEK_END)
-                df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")
-            elif mimetype_ == "text/csv":
-                decoded_ = file_.read().decode("utf-8")
-                filesize_ = file_.content_length
-                if filesize_ > API_UPLOAD_LIMIT_BYTES_:
-                    raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
-                if mimetype_ == "text/csv":
+            dferr_ = ""
+            try:
+                if mimetype_ in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
+                    filesize_ = file_.tell()
+                    if filesize_ > API_UPLOAD_LIMIT_BYTES_:
+                        raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
+                    file_.seek(0, os.SEEK_END)
+                    df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")                       
+                elif mimetype_ == "text/csv":
+                    decoded_ = file_.read().decode("utf-8")
+                    filesize_ = file_.content_length
+                    if filesize_ > API_UPLOAD_LIMIT_BYTES_:
+                        raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                     df_ = pd.read_csv(io.StringIO(decoded_), header=0, dtype="object")
-            else:
-                raise APIError("file type is not supported")
+                else:
+                    raise APIError("file type is not supported")
+
+            except ValueError as exc__:
+                dferr_ = str(exc__)
+
+            if dferr_ != "":
+                df_ = None
+                raise APIError(dferr_)
 
             df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
 
@@ -1291,27 +1307,35 @@ class Crud:
             res_ = Misc().notify_exception_f(exc__)
 
         finally:
-            stats_ += f"<br />ROW COUNT: {str(len(df_))}<br />"
-            stats_ += f"<br />INSERTED: {str(details_['nInserted'])}" if "nInserted" in details_ else ""
-            stats_ += f"<br />UPSERTED: {str(details_['nUpserted'])}" if "nUpserted" in details_ else ""
-            stats_ += f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else ""
-            stats_ += f"<br />MODIFIED: {str(details_['nModified'])}" if "nModified" in details_ else ""
-            stats_ += f"<br />REMOVED: {str(details_['nRemoved'])}" if "nRemoved" in details_ else ""
-            filename_ = f"imported-{collection_}-{Misc().get_timestamp_f()}.txt"
-            fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
-            if not fullpath_.startswith(TEMP_PATH_):
-                PRINT_("!!! [import] fullpath_", fullpath_)
-                raise APIError("file not allowed [import]")
-            with open(fullpath_, "w", encoding="utf-8") as file_:
-                file_.write(stats_.replace("<br />", "\n") + "\n\n-----BEGIN ERROR LIST-----\n" + content_ + "-----END ERROR LIST-----")
-            file_.close()
-            files_.append({"name": fullpath_, "type": "txt"})
+            if df_:
+                stats_ += f"<br /><br />ROW COUNT: {str(len(df_))}<br />"
+                stats_ += f"<br />INSERTED: {str(details_['nInserted'])}" if "nInserted" in details_ else ""
+                stats_ += f"<br />UPSERTED: {str(details_['nUpserted'])}" if "nUpserted" in details_ else ""
+                stats_ += f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else ""
+                stats_ += f"<br />MODIFIED: {str(details_['nModified'])}" if "nModified" in details_ else ""
+                stats_ += f"<br />REMOVED: {str(details_['nRemoved'])}" if "nRemoved" in details_ else ""
+                filename_ = f"imported-{collection_}-{Misc().get_timestamp_f()}.txt"
+                fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
+                if not fullpath_.startswith(TEMP_PATH_):
+                    PRINT_("!!! [import] fullpath_", fullpath_)
+                    raise APIError("file not allowed [import]")
+                with open(fullpath_, "w", encoding="utf-8") as file_:
+                    file_.write(stats_.replace("<br />", "\n") + "\n\n-----BEGIN ERROR LIST-----\n" + content_ + "-----END ERROR LIST-----")
+                file_.close()
+                files_.append({"name": fullpath_, "type": "txt"})
+            else:
+                stats_ += f"<br /><br />{dferr_}.<br />" if dferr_ != "" else ""
+
             Email().send_email_f({
-                "personalizations": {"to": [{"email": email_, "name": None}]},
+                "personalizations": [
+                    {"list": "to", "email": email_, "name": name_},
+                    {"list": "cc", "email": ADMIN_EMAIL_, "name": ADMIN_NAME_}
+                ],
                 "op": "importerr",
-                "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}<br />{stats_}",
+                "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}{stats_}",
                 "files": files_
             })
+
             return res_
 
     def announce_f(self, input_):
@@ -1357,15 +1381,14 @@ class Crud:
             data_csv_ = view_["data_csv"]
             vie_attach_pivot_ = view_["pivot"]
 
-            personalizations_to_ = []
+            personalizations_ = []
             to_ = []
             users_ = Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": _tags}}})
             if users_:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
                         to_.append(member_["usr_id"])
-                        personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
-            personalizations_ = {"to": personalizations_to_}
+                        personalizations_.append({"list": "to", "email": member_["usr_id"], "name": member_["usr_name"]})
 
             files_ = []
             if data_json_:
@@ -2162,7 +2185,7 @@ class Crud:
         docstring is in progress
         """
         schema_, query_, data_, fields_, count_, permitted_, aggregate_base_, err_ = {}, {}, [], [], 0, False, [], None
-        files_, personalizations_to_, to_, orig_ = [], [], [], None
+        files_, personalizations_, to_, orig_ = [], [], [], None
         init_res_ = {"result": True, "query": query_, "data": data_, "count": count_, "fields": fields_, "err": err_}
         try:
             que_id_ = obj_["id"] if "id" in obj_ else None
@@ -2327,8 +2350,7 @@ class Crud:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
                         to_.append(member_["usr_id"])
-                        personalizations_to_.append({"email": member_["usr_id"], "name": member_["usr_name"]})
-                personalizations_ = {"to": personalizations_to_}
+                        personalizations_.append({"list": "to", "email": member_["usr_id"], "name": member_["usr_name"]})
                 df_raw_ = pd.DataFrame(data_).fillna("")
                 file_excel_ = f"{API_TEMPFILE_PATH_}/query-{que_id_}-{Misc().get_timestamp_f()}.xlsx"
                 df_raw_.to_excel(file_excel_, sheet_name=que_id_, engine="xlsxwriter", header=True, index=False)
@@ -3026,6 +3048,7 @@ class Crud:
             if link_ is None:
                 raise APIError("link info is missing")
 
+            linked_ = filter(lambda x: not re.match(r'^\s*$', x), linked_)
             if linked_ is None:
                 raise APIError("linked data is missing")
 
@@ -3112,7 +3135,7 @@ class Crud:
                     cmd_ = ["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     subprocess.call(cmd_)
                     files_ += [{"name": file_, "type": type_}] if attachment_ else []
-                    email_sent_ = Email().send_email_f({"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                    email_sent_ = Email().send_email_f({"list": "to", "op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
@@ -3334,7 +3357,7 @@ class Crud:
                     subprocess.call(["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": notify_collection_}))
                     files_ += [{"name": file_, "type": type_}]
 
-                email_sent_ = Email().send_email_f({"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                email_sent_ = Email().send_email_f({"list": "to", "op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
 
@@ -3502,23 +3525,16 @@ class Email:
             files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
             html_ = f"{msg['html']} {EMAIL_DISCLAIMER_HTML_}" if "html" in msg else EMAIL_DISCLAIMER_HTML_
             tags_ = msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
-            personalizations_ = msg["personalizations"] if "personalizations" in msg else None
+            personalizations_ = msg["personalizations"] if "personalizations" in msg else []
             subject_ = msg["subject"] if "subject" in msg else None
 
             if subject_ is None:
-                subject_ = (
-                    EMAIL_UPLOADERR_SUBJECT_
-                    if op_ in ["uploaderr", "importerr"]
-                    else EMAIL_SIGNIN_SUBJECT_
-                    if op_ == "signin"
-                    else EMAIL_TFA_SUBJECT_
-                    if op_ == "tfa"
-                    else EMAIL_SIGNUP_SUBJECT_
-                    if op_ == "signup"
-                    else msg["subject"]
-                    if msg["subject"]
+                subject_ = EMAIL_UPLOADERR_SUBJECT_ if op_ in ["uploaderr", "importerr"] \
+                    else EMAIL_SIGNIN_SUBJECT_ if op_ == "signin" \
+                    else EMAIL_TFA_SUBJECT_ if op_ == "tfa" \
+                    else EMAIL_SIGNUP_SUBJECT_ if op_ == "signup" \
+                    else msg["subject"] if msg["subject"] \
                     else EMAIL_DEFAULT_SUBJECT_
-                )
 
             if subject_ is None:
                 raise APIError("subject is missing")
@@ -3530,13 +3546,10 @@ class Email:
                 get_users_from_tags_f_ = Misc().get_users_from_tags_f(tags_)
                 if not get_users_from_tags_f_["result"]:
                     raise APIError(f"personalizations error {get_users_from_tags_f_['msg']}")
-                personalizations_ = get_users_from_tags_f_ if "to" in get_users_from_tags_f_ else None
+                personalizations_ = get_users_from_tags_f_["personalizations"] if "personalizations" in get_users_from_tags_f_ else None
 
-            if personalizations_ is None:
+            if not personalizations_:
                 raise APIError("email personalizations is missing")
-
-            if "to" not in personalizations_ or len(personalizations_["to"]) == 0:
-                raise APIError("to list is missing")
 
             email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
             server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
@@ -3563,14 +3576,16 @@ class Email:
                 part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
                 message_.attach(part_)
 
-            recipients_ = []
-            recipients_str_ = ""
-            for recipient_ in personalizations_["to"]:
-                email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
-                recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
+            recipients_to_, recipients_cc_, recipients_ = "", "", []
+            for recipient_ in personalizations_:
+                addr_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
+                recipients_to_ += addr_ if recipient_["list"] == "to" else ""
+                recipients_cc_ += addr_ if recipient_["list"] == "cc" else ""
                 recipients_.append(recipient_["email"])
 
-            message_["To"] = recipients_str_
+            message_["To"] = recipients_to_
+            if recipients_cc_ != "":
+                message_["Cc"] = recipients_cc_
             server_.sendmail(email_from_, recipients_, message_.as_string())
             server_.close()
 
@@ -3753,7 +3768,7 @@ class OTP:
             Mongo().db_["_auth"].update_one({"aut_id": usr_id_}, {"$set": {"aut_tfac": tfac_, "_tfac_modified_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
             email_sent_ = Email().send_email_f({
                 "op": "tfa",
-                "personalizations": {"to": [{"email": usr_id_, "name": name_}]},
+                "personalizations": [{"list": "to", "email": usr_id_, "name": name_}],
                 "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>"
             })
             if not email_sent_["result"]:
@@ -4230,11 +4245,11 @@ class Auth:
         """
         try:
             input_ = request.json
-            email_ = escape(input_["email"])
-            password_ = escape(input_["password"])
-            tfac_ = escape(input_["tfac"])
+            email_ = Misc().clean_f(input_["email"])
+            password_ = Misc().clean_f(input_["password"])
+            tfac_ = Misc().clean_f(input_["tfac"])
 
-            user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_})
+            user_validate_ = self.user_validate_by_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
             user_ = user_validate_["user"] if "user" in user_validate_ else None
@@ -4294,7 +4309,7 @@ class Auth:
             if "_otp_validated_ip" in auth_ and auth_["_otp_validated_ip"] is not None and auth_["_otp_validated_ip"] != ip_:
                 email_sent_ = Email().send_email_f({
                     "op": "signin",
-                    "personalizations": {"to": [{"email": email_, "name": usr_name_}]},
+                    "personalizations": [{"list": "to", "email": email_, "name": usr_name_}],
                     "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",
                 })
                 if not email_sent_["result"]:
@@ -4374,64 +4389,57 @@ class Auth:
         except Exception as exc_:
             return ({"result": False, "msg": "invalid session", "exc": str(exc_)})
 
-    def user_validate_by_basic_auth_f(self, input_):
+    def user_validate_by_auth_f(self, input_):
         """
         docstring is in progress
         """
         try:
-            user_id_ = Misc().clean_f(input_["userid"]) if "userid" in input_ else None
-            password_ = Misc().clean_f(input_["password"]) if "password" in input_ else None
+            user_id_ = input_["userid"] if "userid" in input_ else None
+            password_ = input_["password"] if "password" in input_ else None
+            if not password_ or not user_id_:
+                raise AuthError("invalid user credentials")
 
-            if not user_id_:
-                raise APIError("email must be provided")
-
-            pat = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
-            if not re.search(pat, user_id_):
-                raise APIError("invalid user id")
+            pat_ = re.compile("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
+            if not re.search(pat_, user_id_):
+                raise AuthError("invalid user id")
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
                 raise AuthError("account not found")
 
-            if "aut_salt" not in auth_ or auth_["aut_salt"] is None:
-                raise AuthError("please set a new password")
-            if "aut_key" not in auth_ or auth_["aut_key"] is None:
-                raise AuthError("you need to set a new password")
-
             user_ = Mongo().db_["_user"].find_one({"usr_id": user_id_, "usr_enabled": True, "usr_scope": {"$in": ["Internal", "Administrator"]}})
             if not user_:
-                raise AuthError("user not found for validate")
-            user_["aut_api_key"] = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
+                raise AuthError("user not found")
 
-            if not password_:
-                raise AuthError("no credentials provided")
+            firewall_f_ = self.firewall_f(user_)
+            if not firewall_f_["result"]:
+                raise AuthError(firewall_f_["msg"])
 
-            salt_ = auth_["aut_salt"]
-            key_ = auth_["aut_key"]
-            hash_f_ = self.password_hash_f(password_, salt_)
+            aut_salt_ = auth_["aut_salt"].strip() if "aut_salt" in auth_ and auth_["aut_salt"] is not None else None
+            aut_key_ = auth_["aut_key"].strip() if "aut_key" in auth_ and auth_["aut_key"] is not None else None
+            if not aut_salt_ or not aut_key_:
+                raise AuthError("please set a new password")
+
+            hash_f_ = self.password_hash_f(password_, aut_salt_)
             if not hash_f_["result"]:
-                raise APIError(hash_f_["msg"])
+                raise AuthError(hash_f_["msg"])
+
             new_key_ = hash_f_["key"]
-            if new_key_ != key_:
+            if new_key_ != aut_key_:
                 raise AuthError("invalid email or password")
 
-            firewall_ = self.firewall_f(user_)
-            if not firewall_["result"]:
-                raise AuthError(firewall_["msg"])
+            user_["aut_api_key"] = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
 
             return {"result": True, "user": user_, "auth": auth_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except AuthError as exc:
-            return Misc().auth_error_f(exc)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
-
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def user_validate_by_api_key_f(self, input_):
         """
@@ -4475,10 +4483,10 @@ class Auth:
         """
         try:
             input_ = request.json
-            email_ = escape(input_["email"])
-            password_ = escape(input_["password"])
+            email_ = Misc().clean_f(input_["email"])
+            password_ = Misc().clean_f(input_["password"])
 
-            user_validate_ = self.user_validate_by_basic_auth_f({"userid": email_, "password": password_})
+            user_validate_ = self.user_validate_by_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
 
@@ -4571,6 +4579,8 @@ DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
+ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
+ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
 SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
 SMTP_PORT_ = os.environ.get("SMTP_PORT")
 SMTP_USERID_ = os.environ.get("SMTP_USERID")

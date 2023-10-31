@@ -30,6 +30,11 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
+@font-face {
+  font-family: "Roboto Mono Regular";
+  src: url("../fonts/RobotoMono-Regular.ttf") format("truetype");
+}
+
 ion-content,
 ion-footer {
   font-size: small;
@@ -73,11 +78,6 @@ ion-reorder {
 
 ion-segment-button ion-label {
   margin-bottom: 4px !important;
-}
-
-ion-title {
-  color: var(--ion-color-dark) !important;
-  padding: 0px;
 }
 
 ion-button {
@@ -523,7 +523,7 @@ ion-note {
 }
 
 .linked-data {
-  margin-top: 16px;
+  margin-top: 16px !important;
   font-family: consolas, monospace, menlo, monaco, Ubuntu Mono;
   font-size: 13px;
   border-top: 1px solid var(--ion-color-light);
@@ -812,16 +812,10 @@ ion-spinner {
   height: 28px;
 }
 
-.signin-modal {
-  --height: 370px !important;
-}
-
-.signup-modal {
-  --height: 450px !important;
-}
-
 .sign-modal {
-  --height: 440px !important;
+  --height: 370px !important;
+  --box-shadow: none !important;
+  --webkit-box-shadow: none !important;
 }
 
 .crud-modal {
@@ -870,12 +864,6 @@ ion-spinner {
   padding: 0px;
   width: 200px;
   height: 200px;
-}
-
-ion-select {
-  min-height: 38px !important;
-  max-width: 100% !important;
-  width: auto !important;
 }
 
 .tabs-row {
@@ -933,7 +921,7 @@ ion-select {
 .datetime-class {
   margin-left: -2px !important;
   margin-top: 4px !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 4px !important;
   height: 28px;
 }
 
@@ -1041,13 +1029,12 @@ app-menu:hover {
   bottom: 0px;
   padding-top: 32px;
   padding-bottom: 8px;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .app-footer ion-icon {
   color: var(--ion-color-primary) !important;
 }
-
 
 .margin-top-12 {
   margin-top: 12px;
@@ -1131,8 +1118,30 @@ app-menu:hover {
   display: flexbox !important;
 }
 
+ion-title {
+  color: var(--ion-color-primary) !important;
+  padding: 0px;
+}
+
 ion-select {
   --placeholder-opacity: 0.5 !important;
+  min-height: 28px !important;
+  max-width: 100% !important;
+  width: auto !important;
+  margin-top: 4px !important;
+  --padding-start: 0px !important;
+  --padding-bottom: 7px !important;
+}
+
+ion-checkbox {
+  --size: 13px;
+  margin-bottom: 8px !important;
+}
+
+ion-input,
+ion-textarea {
+  --padding-bottom: 0px !important;
+  margin-top: 4px !important;
 }
 
 .scan-ok span {
@@ -1320,12 +1329,6 @@ sup {
 
 .crud-form-list ion-item {
   padding-top: 0px;
-}
-
-.crud-form-list ion-item ion-input,
-.crud-form-list ion-item ion-datetime,
-.crud-form-list ion-item ion-select {
-  margin-top: 4px;
 }
 
 .crud-form-list ion-item .margin-t-8 {
@@ -1607,7 +1610,7 @@ sup {
   background-color: var(--ion-color-danger);
   color: #fff;
   font-weight: 600;
-  width: calc(100% - 32px);
+  width: calc(100% - 64px);
   z-index: 999;
 }
 
@@ -1656,29 +1659,33 @@ sup {
   width: 100% !important;
 }
 
-.jeditor {
-  min-height: calc(90vh - 400px);
-  margin-top: 8px;
-  margin-bottom: 8px;
-  padding: 0px;
-}
-
 .jeditor-hide {
   display: none;
 }
 
-json-editor,
-json-editor .jsoneditor,
-json-editor>div,
-json-editor jsoneditor-outer {
-  width: 99.5% !important;
+json-editor {
+  display: block;
   height: 100%;
-  min-height: 320px;
+}
+
+.jrow {
+  padding-bottom: 8px;
+}
+
+json-editor>div {
+  margin-top: 8px;
+  height: 100%;
+  width: 99.5% !important;
+}
+
+json-editor .jsoneditor {  
+  min-height: calc(90vh - 210px);
+  border: 1px solid var(--ion-color-medium);
 }
 
 .jsoneditor-menu {
-  background-color: var(--ion-color-medium);
-  border: 1px solid var(--ion-color-medium);
+  background-color: var(--ion-color-primary);
+  border: 1px solid var(--ion-color-primary);
 }
 
 .jsoneditor-value.jsoneditor-object {
@@ -1694,14 +1701,6 @@ json-editor jsoneditor-outer {
   font-family: source-code-pro, monospace, consolas, menlo, monaco, Ubuntu Mono;
   font-size: 13px !important;
   font-weight: 600;
-}
-
-.jsoneditor {
-  border: 1px solid var(--ion-color-medium);
-}
-
-ion-checkbox {
-  --size: 13px;
 }
 
 .notification-button ion-label {
@@ -1804,7 +1803,7 @@ ion-checkbox {
   width: 240px;
   height: auto;
   margin-left: -7px;
-  margin-top: 6px;
+  margin-top: 5px;
   border: 2px solid var(--ion-color-primary);
   z-index: 999999 !important;
   background-color: #fff;
@@ -1820,13 +1819,6 @@ ion-checkbox {
   width: 85vw !important;
   max-width: 1280px !important;
   margin: 0 auto !important;
-}
-
-.web-footer {
-  padding-left: 10vw !important;
-  background-color: var(--ion-color-dark);
-  color: var(--ion-color-light) !important;
-  padding-bottom: 16px;
 }
 
 .copyright {
@@ -1959,8 +1951,8 @@ ion-checkbox {
 
 .data-table td,
 .data-table th {
-  padding: 0.4rem;
-  padding-right: 0.8rem !important;
+  padding: 0.3rem;
+  padding-right: 0.5rem !important;
   text-align: left !important;
   border: 1px solid var(--ion-color-light);
   max-width: 270px;
@@ -1969,7 +1961,15 @@ ion-checkbox {
 }
 
 .data-table th {
+  padding-top: 0.4rem !important;
   border-bottom: 2px solid var(--ion-color-primary);
+}
+
+.data-table th ion-checkbox,
+.data-table td ion-checkbox {
+  margin-top: 0.2rem !important;
+  margin-left: 0.2rem !important;
+  margin-bottom: 0px !important;
 }
 
 .data-table tr:not(:first-child):hover {

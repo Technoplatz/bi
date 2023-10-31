@@ -34,14 +34,14 @@ https://www.gnu.org/licenses.
     <ion-grid *ngIf="error" class="ion-no-padding error-grid">
         <ion-row>
             <ion-col class="ion-padding">
-                {{ error }}
+                {{ error | translate }}
             </ion-col>
         </ion-row>
     </ion-grid>
     <ion-grid *ngIf="success_str" class="ion-no-padding success-grid">
         <ion-row>
             <ion-col class="ion-padding">
-                {{ success_str }}
+                {{ success_str | translate }}
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -112,11 +112,6 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
-        <ion-item lines="none" class="ion-no-padding ion-padding-top">
-            <ion-icon name="newspaper-sharp"></ion-icon>&nbsp;
-            <ion-text class="smalli">{{ 'By creating an account, you accept the terms and conditions' | translate
-                }}.</ion-text>
-        </ion-item>
     </form>
     <form [formGroup]="signinForm" *ngIf="formtype=='signin'">
         <ion-item lines="none">
@@ -128,7 +123,7 @@ https://www.gnu.org/licenses.
                 </sup>
             </ion-label>
             <ion-input #emailfocussignin class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required [value]="email" placeholder="{{ 'Business E-mail' | translate}}">
+                autocorrect="off" required [value]="email" placeholder="{{ 'Business e-mail' | translate}}">
             </ion-input>
         </ion-item>
         <ion-item lines="full">
@@ -136,7 +131,8 @@ https://www.gnu.org/licenses.
                     <ion-icon name="star"></ion-icon>
                 </sup>
             </ion-label>
-            <ion-input #passwordfocus formControlName="password" type="password" required placeholder="{{ 'User Password' | translate}}">
+            <ion-input #passwordfocus formControlName="password" type="password" required
+                placeholder="{{ 'User password' | translate}}">
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
@@ -153,7 +149,7 @@ https://www.gnu.org/licenses.
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe" mode="md" class="ion-margin-end">
-            </ion-checkbox><ion-text size="small">{{ 'Remember me' | translate }}</ion-text>
+            </ion-checkbox>{{ 'Remember me' | translate }}
         </ion-item>
     </form>
     <form [formGroup]="TFACForm" *ngIf="formtype=='tfac'">
@@ -177,8 +173,7 @@ https://www.gnu.org/licenses.
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
-            <ion-button fill="clear" size="small"
-                class="no-hover ion-no-padding clear-dark-button">
+            <ion-button fill="clear" size="small" class="no-hover ion-no-padding clear-dark-button">
                 <ion-icon name="mail-sharp"></ion-icon>
                 <span>{{ 'Your OTP has been sent by E-mail' | translate }}.</span>
             </ion-button>
@@ -192,7 +187,7 @@ https://www.gnu.org/licenses.
             <ion-label position="stacked">{{ 'E-mail' | translate }}
             </ion-label>
             <ion-input #emailfocus class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required>
+                autocorrect="off" placeholder="{{ 'Business e-mail' | translate}}" required>
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">

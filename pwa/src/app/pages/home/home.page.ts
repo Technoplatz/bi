@@ -31,10 +31,8 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { ModalController } from "@ionic/angular";
 import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "../../classes/misc";
-import { SignPage } from "../sign/sign.page";
 
 @Component({
   selector: "app-home",
@@ -46,28 +44,14 @@ export class HomePage implements OnInit {
   public user: any;
 
   constructor(
-    private modal: ModalController,
     public misc: Miscellaneous,
     private storage: Storage
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.user = LSUSERMETA ? LSUSERMETA : null;
     });
-  }
-
-  async doSignup() {
-    const modal = await this.modal.create({
-      component: SignPage,
-      backdropDismiss: false,
-      cssClass: "signup-modal",
-      componentProps: {
-        op: "signup",
-        user: this.user
-      }
-    });
-    return await modal.present();
   }
 
 }

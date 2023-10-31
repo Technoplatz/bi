@@ -32,6 +32,7 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { SwUpdate, VersionEvent } from "@angular/service-worker";
+import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./misc";
 
 @Injectable({
@@ -42,16 +43,16 @@ export class Su {
 
     constructor(
         private swu: SwUpdate,
-        private misc: Miscellaneous
+        private misc: Miscellaneous,
+        private storage: Storage
     ) {
         if (swu.isEnabled) {
-            console.log("swu is enabled");
+            console.log("swu enabled");
             setInterval(() => {
-                console.log("swu checking for an update...");
-                this.swu.checkForUpdate().then((res: any) => {
-                    console.log("swu checked for update", res);
-                }).catch((err: any) => {
-                    console.error("swu update check error", err);
+                this.swu.checkForUpdate().then((res_: any) => {
+                    console.log(res_ ? "swu update found" : "swu no update found");
+                }).catch((err_: any) => {
+                    console.error("swu check error", err_);
                 });
             }, 3 * 60 * 1000);
         } else {
@@ -63,28 +64,29 @@ export class Su {
         this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
             switch (event_.type) {
                 case "VERSION_DETECTED":
-                    console.log(`swu downloading new version: ${event_.version.hash}`);
+                    console.log(`swu downloading... ${event_.version.hash}`);
                     break;
                 case "VERSION_READY":
-                    console.log(`swu current version: ${event_.currentVersion.hash}`);
-                    console.log(`swu new version: ${event_.latestVersion.hash}`);
+                    console.log("swu downloaded");
+                    console.log(`swu old version is ${event_.currentVersion.hash}`);
                     this.promptUser(event_);
                     break;
                 case "VERSION_INSTALLATION_FAILED":
-                    console.log(`swu failed installing new version "${event_.version.hash}": ${event_.error}`);
+                    console.log(`swu install failed: ${event_.error}`);
                     break;
             }
         });
     }
 
     private promptUser(event_: any): void {
-        console.log("swu new version available");
         this.swu.activateUpdate().then(() => {
-            console.log("swu update activated");
+            console.log("swu activated");
             this.misc.version.next({
                 upgrade: true,
                 version: event_.latestVersion.hash
             });
+        }).catch((err_: any) => {
+            console.error("swu not activated", err_);
         });
     }
 }

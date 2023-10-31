@@ -133,7 +133,7 @@
       "_tags": ["#Managers", "#Technoplatz", "#Operation", "#Logistics"],
       "notification": {
         "notify": true,
-        "subject": "Ordino [DNs Attached]",
+        "subject": "Logistics [Ordino Created]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to ordino.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty"
@@ -163,14 +163,14 @@
           "value": null
         }
       ],
-      "one_click": true,
+      "one_click": false,
       "icon": "megaphone",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "Ordino [Arrived]",
+        "subject": "Logistics [Ordino Arrived]",
         "body": "Hi,<br /><br />We would like to let you know that attached ordinos have been arrived at customs.",
         "attachment": true,
         "fields": "odi_no,odi_sub_no,odi_date,odi_from,odi_customs,odi_arrived_date",
@@ -279,7 +279,7 @@
           "upsert": false,
           "notification": {
             "notify": true,
-            "subject": "Ordino [DNs Arrived]",
+            "subject": "Logistics [Ordino Arrived]",
             "body": "Hi,<br /><br />We would like to let you know that attached DNs have been arrived at customs.",
             "collection": "delivery",
             "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",

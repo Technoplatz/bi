@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
     <ion-row>
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
-        <h3>{{ subheader | titlecase | translate }}&nbsp;</h3>
+        <h3><span *ngIf="title_">{{ title_ | translate | titlecase }}&nbsp;</span>[{{ subheader }}]</h3>
         <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span *ngIf="!is_loaded">{{
           'Please wait while the data is retrieved' | translate }}...</span>
         <div class="filler-10"></div>
@@ -117,8 +117,8 @@ https://www.gnu.org/licenses.
               </ion-button>
             </ion-col>
           </ion-row>
-          <ion-row>
-            <ion-col size="12" class="jeditor">
+          <ion-row class="jrow">
+            <ion-col size="12">
               <json-editor id="struc" [options]="jeoptions" [data]="structure_" (change)="json_changed($event)"
                 #editor></json-editor>
             </ion-col>

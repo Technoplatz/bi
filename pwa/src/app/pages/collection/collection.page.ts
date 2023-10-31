@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
+import { Component, OnInit, ViewChild, HostListener } from "@angular/core";
 import { ModalController, AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
@@ -53,7 +53,6 @@ export class CollectionPage implements OnInit {
   public header: string = "Collections";
   public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
-  private segment = "data";
   public user: any = null;
   public perm_: boolean = false;
   public perma_: boolean = false;
@@ -64,28 +63,18 @@ export class CollectionPage implements OnInit {
   public searched: any = null;
   public data: any = [];
   public selected: any = [];
-  private views: any = [];
   public pages_: any = [];
   public limit_: number = environment.misc.limit;
   public page_: number = 1;
   public pager_: number = 1;
-  private page_start: number = 1;
   public count: number = 0;
   public is_loaded: boolean = true;
-  private is_selected: boolean = false;
   public multicheckbox: boolean = false;
-  private counters_: any = {};
-  public collections: any = [];
+  public collections_: any = [];
+  public title_: any = [];
   public is_initialized: boolean = false;
   public scan_: boolean = false;
-  private view: any = null;
   public actions: any = [];
-  private sweeped: any = [];
-  private actionix: number = -1;
-  private menu: string = "";
-  private clonok: number = -1;
-  private collections_: any;
-  private user_: any;
   public properties_: any = {};
   public is_saving: boolean = false;
   public is_deleting: boolean = false;
@@ -93,13 +82,32 @@ export class CollectionPage implements OnInit {
   public structure_: any = {};
   public schemavis_: boolean = false;
   public importvis_: boolean = false;
-  private json_content_: any = null;
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public is_inprogress: boolean = false;
   public flashcards_: any = [];
   public propkeys_: string = "";
   public is_copied: boolean = false;
+  private views: any = [];
+  private json_content_: any = null;
+  private sweeped: any = [];
+  private actionix: number = -1;
+  private menu: string = "";
+  private clonok: number = -1;
+  private view: any = null;
+  private is_selected: boolean = false;
+  private counters_: any = {};
+  private segment = "data";
+  private page_start: number = 1;
+  private key_: any = null;
+
+  @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
+    if (event.key === "Enter") {
+      if (this.searched && this.searched[this.key_]?.actived) {
+        this.search(this.key_, this.searched[this.key_]?.kw);
+      }
+    }
+  }
 
   constructor(
     private storage: Storage,
@@ -108,16 +116,16 @@ export class CollectionPage implements OnInit {
     private modal: ModalController,
     private alert: AlertController,
     private router: Router,
-    public misc: Miscellaneous,
-    private cd: ChangeDetectorRef
+    public misc: Miscellaneous
   ) {
     this.crud.views.subscribe((res: any) => {
       this.flashcards_ = res ? res.filter((obj: any) => obj.collection === this.id && obj.view.flashcard === true) : [];
     });
-    this.collections_ = this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
+    this.crud.collections.subscribe((res: any) => {
+      this.collections_ = res && res.data ? res.data : [];
+      this.title_ = this.collections_?.find((obj_: any) => obj_.col_id === this.subheader)?.col_title;
     });
-    this.user_ = this.auth.user.subscribe((res: any) => {
+    this.auth.user.subscribe((res: any) => {
       this.perm_ = res && res.perm;
       this.perma_ = res && res.perma;
       this.user = res;
@@ -128,8 +136,6 @@ export class CollectionPage implements OnInit {
     this.auth.user.unsubscribe;
     this.crud.collections.unsubscribe;
     this.crud.views.unsubscribe;
-    this.collections_ = null;
-    this.user_ = null;
   }
 
   ngOnInit() {
@@ -186,7 +192,7 @@ export class CollectionPage implements OnInit {
             this.data = res.data;
             this.structure_ = res.structure;
             this.json_content_ = res.structure;
-            this.actions = this.structure_.actions;
+            this.actions = res.structure.actions;
             this.properties_ = res.structure.properties;
             this.importvis_ = res.structure.import?.enabled;
             this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
@@ -225,7 +231,7 @@ export class CollectionPage implements OnInit {
       this.actionix = ix_;
       this.go_crud(null, "action");
     } else {
-      this.misc.doMessage("please make a selection to run this action", "error");
+      this.misc.doMessage("please select the rows to be processed", "error");
     }
   }
 
@@ -273,7 +279,7 @@ export class CollectionPage implements OnInit {
         });
       }
     } else {
-      this.misc.doMessage("you must select record(s) prior to " + op_, "error");
+      this.misc.doMessage("please select the rows to be processed", "error");
     }
   }
 
@@ -287,7 +293,7 @@ export class CollectionPage implements OnInit {
           shuttle: {
             op: op,
             collection: this.id ? this.id : null,
-            collections: this.collections ? this.collections : [],
+            collections: this.collections_ ? this.collections_ : [],
             views: this.views ? this.views : [],
             user: this.user,
             data: rec,
@@ -303,10 +309,8 @@ export class CollectionPage implements OnInit {
         }
       });
       modal.onDidDismiss().then((res: any) => {
-        if (res.data.modified || this.scan_) {
-          if (op === "action" && res.data.res) {
-            this.misc.doMessage(res.data.res.content, "success");
-          }
+        if (op === "action" || res.data.modified || this.scan_) {
+          res.data.res ? this.misc.doMessage(res.data.res.content, "success") : null;
           this.refresh_data(0);
         }
       });
@@ -349,6 +353,7 @@ export class CollectionPage implements OnInit {
   set_search(k_: string) {
     setTimeout(() => {
       this.searchfocus?.setFocus();
+      this.key_ = k_;
     }, 500);
     this.searched[k_].setmode = false;
     for (let key_ in this.structure_.properties) {

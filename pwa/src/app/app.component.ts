@@ -83,13 +83,16 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    "serviceWorker" in navigator ? navigator.serviceWorker.getRegistrations().then((regs_: any) => {
+      if (regs_.length) {
+        for (let reg_ of regs_) { reg_.unregister(); }
+      }
+    }) : null;
     this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
       this.auth.user.next(LSUSERMETA);
-      if (LSUSERMETA) {
-        this.crud.get_all().then(() => { }).catch((error: any) => {
-          this.misc.doMessage(error, "error");
-        });
-      }
+      LSUSERMETA ? this.crud.get_all().then(() => { }).catch((error: any) => {
+        this.misc.doMessage(error, "error");
+      }) : null;
       this.misc.getLanguage().then((res: any) => {
         this.translate.setDefaultLang(res ? res : "en");
         this.translate.use(res ? res : "en");

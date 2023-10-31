@@ -471,7 +471,7 @@ export class CrudPage implements OnInit {
     this.link_ = link_;
   }
 
-  doGetLinked() {
+  get_linked() {
     let filter_ = [];
     this.link_text = "";
     const match_ = this.link_?.match;

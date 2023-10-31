@@ -55,6 +55,7 @@ export class Miscellaneous {
   public api = new BehaviorSubject<any>(null);
   private collections_: any;
   private uri_: string = "";
+  private mopen_: boolean = false;
 
   constructor(
     private storage: Storage,
@@ -224,22 +225,6 @@ export class Miscellaneous {
     });
   }
 
-  dismissModal(obj: any) {
-    return new Promise((resolve, reject) => {
-      if (this.modal) {
-        setTimeout(() => {
-          this.modal.dismiss(obj).then((res: any) => {
-            resolve(res);
-          }).catch((error: any) => {
-            reject(error);
-          });
-        }, 200);
-      } else {
-        resolve(true);
-      }
-    });
-  }
-
   async doMessage(msg: string, type: string) {
     type === "error" ? console.error("!!! err msg", msg) : null;
     if (msg) {
@@ -272,17 +257,44 @@ export class Miscellaneous {
     });
   }
 
-  async doSign(op: string) {
-    const modal = await this.modal.create({
-      component: SignPage,
-      backdropDismiss: false,
-      cssClass: "signin-modal",
-      componentProps: {
-        op: op,
-        user: null
-      }
+  dismissModal(obj_: any) {
+    return new Promise((resolve, reject) => {
+      this.mopen_ = false;
+      this.modal ? setTimeout(() => {
+        this.modal.dismiss(obj_).then((dismiss_: any) => {
+          resolve(dismiss_);
+        }).catch((error: any) => {
+          reject(error);
+        });
+      }, 200) : null;
     });
-    return await modal.present();
+  }
+
+  sign_modal(op: string) {
+    return new Promise((resolve, reject) => {
+      this.mopen_ ? null : this.modal.create({
+        component: SignPage,
+        backdropDismiss: false,
+        cssClass: "sign-modal",
+        componentProps: {
+          op: op,
+          user: null
+        }
+      }).then((modal_: any) => {
+        modal_.present().then(() => {
+          this.mopen_ = true;
+          resolve(modal_);
+        }).catch((error: any) => {
+          reject(error);
+        });
+        modal_.onDidDismiss().then((dismiss_: any) => {
+          this.mopen_ = false;
+          resolve(dismiss_);
+        }).catch((error: any) => {
+          reject(error);
+        });
+      });
+    });
   }
 
 }
