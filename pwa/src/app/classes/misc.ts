@@ -197,13 +197,13 @@ export class Miscellaneous {
     });
   }
 
-  setLanguage(l_: string) {
+  set_locale(LSLOCALE_: string) {
     return new Promise((resolve, reject) => {
-      if (l_) {
-        this.storage.set("LSLOCALE", l_).then(() => {
-          this.translate.setDefaultLang(l_);
-          this.translate.use(l_);
-          this.localization.next(l_ === "tr" ? "tr-TR" : l_ === "de" ? "de-DE" : "en-US");
+      if (LSLOCALE_) {
+        this.storage.set("LSLOCALE", LSLOCALE_).then(() => {
+          this.translate.setDefaultLang(LSLOCALE_);
+          this.translate.use(LSLOCALE_);
+          this.localization.next(LSLOCALE_ === "tr" ? "tr-TR" : LSLOCALE_ === "de" ? "de-DE" : LSLOCALE_ === "en" ? "en-US" : null);
           resolve(true);
         }).catch((error: any) => {
           reject("storage lang set error");

@@ -63,12 +63,12 @@ export class LangComponent implements OnInit {
 
   ngOnInit() { }
 
-  set_language(i: number, lang_: string) {
+  do_set_locale(i: number, lang_: string) {
     this.lang_proc_ = true;
     for (let j = 0; j < this.langsoriginal.length; j++) {
       this.langs_[j].class = "selection-passive";
       j === this.langsoriginal.length - 1
-        ? this.misc.setLanguage(lang_).then(() => {
+        ? this.misc.set_locale(lang_).then(() => {
           this.langs_[i].class = "selection-active";
           setTimeout(() => {
             this.lang_proc_ = false;

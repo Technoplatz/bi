@@ -32,7 +32,6 @@ https://www.gnu.org/licenses.
 
 import { Injectable } from "@angular/core";
 import { SwUpdate, VersionEvent } from "@angular/service-worker";
-import { Storage } from "@ionic/storage";
 import { Miscellaneous } from "./misc";
 
 @Injectable({
@@ -43,14 +42,13 @@ export class Su {
 
     constructor(
         private swu: SwUpdate,
-        private misc: Miscellaneous,
-        private storage: Storage
+        private misc: Miscellaneous
     ) {
         if (swu.isEnabled) {
             console.log("swu enabled");
             setInterval(() => {
                 this.swu.checkForUpdate().then((res_: any) => {
-                    console.log(res_ ? "swu update found" : "swu no update found");
+                    console.log(res_ ? "swu processed" : "no swu found");
                 }).catch((err_: any) => {
                     console.error("swu check error", err_);
                 });
@@ -68,25 +66,12 @@ export class Su {
                     break;
                 case "VERSION_READY":
                     console.log("swu downloaded");
-                    console.log(`swu old version is ${event_.currentVersion.hash}`);
-                    this.promptUser(event_);
+                    this.misc.version.next({ upgrade: true, version: event_.latestVersion.hash });
                     break;
                 case "VERSION_INSTALLATION_FAILED":
                     console.log(`swu install failed: ${event_.error}`);
                     break;
             }
-        });
-    }
-
-    private promptUser(event_: any): void {
-        this.swu.activateUpdate().then(() => {
-            console.log("swu activated");
-            this.misc.version.next({
-                upgrade: true,
-                version: event_.latestVersion.hash
-            });
-        }).catch((err_: any) => {
-            console.error("swu not activated", err_);
         });
     }
 }
