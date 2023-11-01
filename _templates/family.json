@@ -5,8 +5,8 @@
       "title": "ID",
       "description": "Family ID",
       "minLength": 3,
-      "maxLength": 3,
-      "pattern": "^[A-Z]{3,3}$",
+      "maxLength": 5,
+      "pattern": "^[A-Z0-9-]{3,5}$",
       "caseType": "uppercase",
       "permanent": true
     },
@@ -20,7 +20,7 @@
     }
   },
   "required": ["fam_id", "fam_name"],
-  "index": [],
+  "index": [["fam_name"]],
   "unique": [["fam_id"]],
   "sort": {
     "fam_id": 1

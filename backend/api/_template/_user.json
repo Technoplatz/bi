@@ -34,6 +34,14 @@
       "trueText": "Enabled",
       "falseText": "Disabled"
     },
+    "usr_locale": {
+      "bsonType": "string",
+      "title": "Locale",
+      "description": "User locale",
+      "enum": ["en", "de", "tr"],
+      "required": true,
+      "default": "de"
+    },
     "_tags": {
       "bsonType": "array",
       "title": "Tags",

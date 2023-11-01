@@ -938,14 +938,17 @@ ion-datetime-button::part(native) {
   padding-inline: 0px !important;
 }
 
-.datetime-clear-button {
-  position: absolute;
-  right: 8px !important;
-  top: 12px !important;
-}
-
 ion-datetime {
   border: 1px solid var(--ion-color-primary);
+}
+
+.nulla-button {
+  position: absolute;
+  right: 8px !important;
+  top: 18px !important;
+  z-index: 999;
+  margin-right: 0px !important;
+  --padding-end: 0px !important
 }
 
 ion-list {
@@ -1126,8 +1129,6 @@ ion-title {
 ion-select {
   --placeholder-opacity: 0.5 !important;
   min-height: 28px !important;
-  max-width: 100% !important;
-  width: auto !important;
   margin-top: 4px !important;
   --padding-start: 0px !important;
   --padding-bottom: 7px !important;
@@ -1140,7 +1141,7 @@ ion-checkbox {
 
 ion-input,
 ion-textarea {
-  --padding-bottom: 0px !important;
+  --padding-bottom: 3px !important;
   margin-top: 4px !important;
 }
 
@@ -1678,7 +1679,7 @@ json-editor>div {
   width: 99.5% !important;
 }
 
-json-editor .jsoneditor {  
+json-editor .jsoneditor {
   min-height: calc(90vh - 210px);
   border: 1px solid var(--ion-color-medium);
 }
@@ -1797,6 +1798,28 @@ json-editor .jsoneditor {
   --padding-end: 8px !important;
 }
 
+.search-selection {
+  border-top: 1px solid var(--ion-color-light);
+  margin-top: 4px;
+  max-height: 25vh;
+  overflow-y: scroll;
+}
+
+.search-selection ul {
+  margin-left: 0px !important;
+  padding-left: 0px !important;
+  width: 100%;
+}
+
+.search-selection ul li {
+  margin-left: 0px !important;
+  padding-left: 0px !important;
+  font-weight: normal !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
 .search-box {
   position: absolute;
   padding: 8px;
@@ -1808,6 +1831,7 @@ json-editor .jsoneditor {
   z-index: 999999 !important;
   background-color: #fff;
   cursor: default;
+  overflow: hidden;
 }
 
 .search-box ion-button {

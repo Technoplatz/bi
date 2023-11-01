@@ -4,9 +4,9 @@
       "bsonType": "string",
       "title": "Product ID",
       "description": "Product ID",
-      "minLength": 7,
+      "minLength": 6,
       "maxLength": 16,
-      "pattern": "^[A-Z0-9-]{7,16}$",
+      "pattern": "^[A-Z0-9-]{6,16}$",
       "replacement": [
         {
           "find": "-",
@@ -65,7 +65,16 @@
         "XHR",
         "XHS",
         "XSP",
-        "OTH"
+        "OTH",
+        "Service",
+        "Desktop",
+        "Notebook",
+        "Option",
+        "Visual",
+        "Monitor",
+        "Tablet",
+        "Workstation_DT",
+        "Workstation_NB"
       ]
     },
     "prd_cpu": {
@@ -74,7 +83,7 @@
       "description": "CPU",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.()/ ]{0,64}$"
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
     },
     "prd_os": {
       "bsonType": "string",
@@ -82,15 +91,47 @@
       "description": "Operation system",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.()/ ]{0,64}$"
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
     },
-    "prd_memory": {
+    "prd_memory_ob": {
       "bsonType": "string",
-      "title": "Memory",
-      "description": "Memory",
+      "title": "OB Memory",
+      "description": "On board memory",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.()/ ]{0,64}$"
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+    },
+    "prd_memory_dimm": {
+      "bsonType": "string",
+      "title": "DIMM Memory",
+      "description": "DIMM Memory",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+    },
+    "prd_display": {
+      "bsonType": "string",
+      "title": "Display",
+      "description": "Display type",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+    },
+    "prd_gpu": {
+      "bsonType": "string",
+      "title": "Graphics",
+      "description": "Graphics card",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+    },
+    "prd_storage": {
+      "bsonType": "string",
+      "title": "Storage",
+      "description": "Storage",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
     }
   },
   "required": ["prd_no", "prd_description", "prd_group"],
@@ -108,6 +149,6 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["prd_cpu", "prd_os", "prd_memory"]
+    "upsertables": ["prd_cpu", "prd_os", "prd_memory_ob", "prd_memory_dimm", "prd_display", "prd_gpu", "prd_storage"]
   }
 }

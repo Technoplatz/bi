@@ -387,9 +387,9 @@
   "actions": [],
   "triggers": [
     {
-      "name": "product-updater",
+      "name": "product",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": ["insert"],
       "changes": [
         {
           "key": "blo_prd_no",
@@ -423,15 +423,15 @@
             },
             {
               "key": "prd_group",
-              "value": "OTH"
+              "value": "blo_prd_group"
             }
           ],
-          "upsert": true
+          "upsert": false
         }
       ]
     },
     {
-      "name": "order-updater",
+      "name": "order",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [

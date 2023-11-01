@@ -167,11 +167,11 @@ https://www.gnu.org/licenses.
                   <ion-button size="small"
                     [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'"
                     (click)="set_search(item.key)">{{
-                    item.key }}<ion-icon name="filter-sharp"></ion-icon></ion-button>
+                    item.key }}<ion-icon name="filter-sharp"></ion-icon>
+                  </ion-button>
                 </div>
                 <!-- SEARCH BOX -->
                 <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
-                  <div class="searched-title">{{ item.value.title | translate }}&nbsp;&nbsp;</div>
                   <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
                     <ion-icon name="arrow-down"></ion-icon>
                   </ion-button>
@@ -231,14 +231,25 @@ https://www.gnu.org/licenses.
                       class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
                     </ion-input>
                   </div>
-                  <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
-                    <ion-icon name="search"></ion-icon>
-                    {{ 'Search' | translate }}
-                  </ion-button>
-                  <ion-button size="small" (click)="reset_search_item(item.key)" color="medium">
-                    <ion-icon name="close"></ion-icon>
-                    {{ 'Cancel' | translate }}
-                  </ion-button>
+                  <div>
+                    <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
+                      <ion-icon name="search"></ion-icon>
+                      {{ 'Search' | translate }}
+                    </ion-button>
+                    <ion-button size="small" (click)="reset_search_item(item.key)" color="medium">
+                      <ion-icon name="close"></ion-icon>
+                      {{ 'Cancel' | translate }}
+                    </ion-button>
+                  </div>
+                  <div *ngIf="item.value.selection" class="search-selection">
+                    <ul>
+                      <li *ngFor="let item_ of selections_[item.key]; let s_ = index"
+                        (click)="selection_changed(item.key, s_)">
+                        <ion-checkbox [(ngModel)]="selections_[item.key][s_].value" disabled>
+                        </ion-checkbox> {{ item_.id | translate }}
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </th>
               <th *ngIf="id==='_query'">

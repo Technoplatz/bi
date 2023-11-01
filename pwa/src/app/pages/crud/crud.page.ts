@@ -182,7 +182,7 @@ export class CrudPage implements OnInit {
           this.fieldsupd = this.op === "insert" && this.collection === "_collection" ? res.fields.filter((obj: any) => obj.name !== "col_structure") : res.fields;
           this.data_ = this.shuttle.data ? this.shuttle.data : res.init;
           this._id = this.op === "update" ? this.shuttle.data && this.shuttle.data._id ? this.shuttle.data._id : null : null;
-          this.doGetSubProperties(this.collection).then(() => {
+          this.get_sub_properties(this.collection).then(() => {
             if (this.actionix >= 0) {
               this.doAktionChange(this.actionix).then(() => { }).catch((error: any) => {
                 this.misc.doMessage(error, "error");
@@ -421,7 +421,7 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doGetSubProperties(coll_: string) {
+  get_sub_properties(coll_: string) {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         op: "read",
@@ -456,9 +456,9 @@ export class CrudPage implements OnInit {
     });
   }
 
-  doChangeEnum(field_: any, coll_: any) {
+  change_enum(field_: any, coll_: any) {
     if (field_.collection) {
-      this.doGetSubProperties(coll_).then((props_: any) => {
+      this.get_sub_properties(coll_).then((props_: any) => {
         this.property_list = props_;
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
@@ -613,9 +613,9 @@ export class CrudPage implements OnInit {
     this.crudForm.get(fn)?.setValue(date_);
   }
 
-  doCancelDate(fn: string) {
-    this.data_[fn] = null;
-    this.crudForm.get(fn)?.setValue(null);
+  field_nulla(fn_: string) {
+    this.data_[fn_] = null;
+    this.crudForm.get(fn_)?.setValue(null);
   }
 
 }

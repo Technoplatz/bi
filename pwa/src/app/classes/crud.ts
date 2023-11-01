@@ -104,6 +104,7 @@ export class Crud {
         const view_ = p.view ? true : false;
         const decimals_ = p.decimals && p.decimals > 0 ? p.decimals : null;
         const manualAdd_ = p.manualAdd ? true : false;
+        const selection_ = p.selection ? true : false;
         const counter_ = p.counter && p.counter === true ? true : false;
         view_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < views.length; v++) { arr_.push(views[v].record.vie_id) } return arr_; })() : null;
         collection_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < collections.length; v++) { arr_.push(collections[v].col_id) } return arr_; })() : null;
@@ -148,7 +149,8 @@ export class Crud {
           counter: counter_,
           dateOnly: dateOnly_,
           caseType: caseType_,
-          timestamp: timestamp_
+          timestamp: timestamp_,
+          selection: selection_
         });
         const kvval_: any = [{
           key: null,

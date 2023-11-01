@@ -267,7 +267,8 @@ class Misc:
             "trueText",
             "falseText",
             "caseType",
-            "query"
+            "query",
+            "selection"
         ]
 
     def boto_s3_f(self, input_):
@@ -1165,7 +1166,7 @@ class Crud:
                     if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                         raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                     file_.seek(0, os.SEEK_END)
-                    df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")                       
+                    df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")
                 elif mimetype_ == "text/csv":
                     decoded_ = file_.read().decode("utf-8")
                     filesize_ = file_.content_length
@@ -2407,24 +2408,38 @@ class Crud:
             group_ = "group" in input_ and input_["group"] is True
             skip_ = limit_ * (page_ - 1)
             match_ = input_["match"] if "match" in input_ and len(input_["match"]) > 0 else []
+            selections_ = input_["selections"] if "selections" in input_ and len(input_["selections"]) > 0 else []
             allowed_cols_ = ["_collection", "_query"]
             is_crud_ = collection_id_[:1] != "_"
+            selected_ = {}
 
             if collection_id_ not in allowed_cols_ and not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_) and not is_crud_:
                 raise AuthError(f"collection is not allowed to read: {collection_id_}")
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": "tr"}
+            collation_ = {"locale": user_["locale"]} if user_ and "locale" in user_ else {"locale": DEFAULT_LOCALE_}
             cursor_ = Mongo().db_["_collection"].find_one({"col_id": collection_id_}) if is_crud_ else self.root_schemas_f(f"{collection_id_}")
             if not cursor_:
                 raise APIError(f"collection not found to read: {collection_id_}")
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise AuthError(f"properties not found {collection_id_}")
+
             reconfig_ = cursor_["_reconfig_req"] if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True else False
-            get_filtered_ = self.get_filtered_f({"match": match_, "properties": structure_["properties"] if "properties" in structure_ else None})
+            get_filtered_ = self.get_filtered_f({"match": match_, "properties": properties_})
 
             if collection_id_ == "_query" and not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
                 get_filtered_["_tags"] = {"$elemMatch": {"$in": user_["_tags"]}}
+
+            for property_ in selections_:
+                sel_ = []
+                for item_ in selections_[property_]:
+                    if item_["value"] is True:
+                        sel_.append(item_["id"])
+                if len(sel_) > 0:
+                    get_filtered_[property_] = {"$in": sel_}
 
             sort_ = list(input_["sort"].items()) if "sort" in input_ and input_["sort"] else list(structure_["sort"].items()) if "sort" in structure_ and structure_["sort"] else [("_modified_at", -1)]
 
@@ -2447,12 +2462,23 @@ class Crud:
             docs_ = json.loads(JSONEncoder().encode(list(cursor_)))[:limit_] if cursor_ else []
             count_ = Mongo().db_[collection_].count_documents(get_filtered_)
 
+            for property_ in properties_:
+                prop_ = properties_[property_]
+                if "selection" in prop_ and prop_["selection"] is True:
+                    selected_[property_] = []
+                    cursor_ = Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": f"${property_}", "count": {"$sum": 1}}}, {"$sort": {"_id": 1}}])
+                    grps_ = json.loads(JSONEncoder().encode(list(cursor_)))[:100] if cursor_ else []
+                    for item_ in grps_:
+                        selected_[property_].append({"id": item_["_id"], "value": False})
+
             return {
                 "result": True,
                 "data": docs_,
                 "count": count_,
                 "structure": structure_,
-                "reconfig": reconfig_
+                "reconfig": reconfig_,
+                "selections": selections_,
+                "selected": selected_
             }
 
         except AuthError as exc_:
@@ -4260,6 +4286,7 @@ class Auth:
                 raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
+            locale_ = user_["usr_locale"] if "usr_locale" in user_ else DEFAULT_LOCALE_
             perm_ = Auth().is_manager_f(user_) or Auth().is_admin_f(user_)
             perma_ = Auth().is_admin_f(user_)
             payload_ = {
@@ -4294,7 +4321,7 @@ class Auth:
             })
 
             ip_ = Misc().get_client_ip_f()
-            user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_, "perma": perma_, "api_key": api_key_, "ip": ip_}
+            user_payload_ = {"token": token_, "name": usr_name_, "email": email_, "perm": perm_, "perma": perma_, "api_key": api_key_, "ip": ip_, "locale": locale_}
 
             log_ = Misc().log_f({
                 "type": "Info",
@@ -4579,6 +4606,7 @@ DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
+DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
 SMTP_SERVER_ = os.environ.get("SMTP_SERVER")

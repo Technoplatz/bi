@@ -49,6 +49,18 @@ import { JsonEditorOptions } from "ang-jsoneditor";
 
 export class CollectionPage implements OnInit {
   @ViewChild("searchfocus", { static: false }) searchfocus: any = [];
+  private views: any = [];
+  private json_content_: any = null;
+  private sweeped: any = [];
+  private actionix: number = -1;
+  private menu: string = "";
+  private clonok: number = -1;
+  private view: any = null;
+  private is_selected: boolean = false;
+  private counters_: any = {};
+  private segment = "data";
+  private page_start: number = 1;
+  private key_: any = null;
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public header: string = "Collections";
   public subheader: string = "";
@@ -88,18 +100,7 @@ export class CollectionPage implements OnInit {
   public flashcards_: any = [];
   public propkeys_: string = "";
   public is_copied: boolean = false;
-  private views: any = [];
-  private json_content_: any = null;
-  private sweeped: any = [];
-  private actionix: number = -1;
-  private menu: string = "";
-  private clonok: number = -1;
-  private view: any = null;
-  private is_selected: boolean = false;
-  private counters_: any = {};
-  private segment = "data";
-  private page_start: number = 1;
-  private key_: any = null;
+  public selections_: any = {}
 
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
     if (event.key === "Enter") {
@@ -186,8 +187,10 @@ export class CollectionPage implements OnInit {
             match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
             sort: this.sort,
             page: this.page_,
-            limit: this.limit_
+            limit: this.limit_,
+            selections: this.selections_
           }).then((res: any) => {
+            this.selections_ = res.selected;
             this.pager_ = this.page_;
             this.data = res.data;
             this.structure_ = res.structure;
@@ -355,7 +358,6 @@ export class CollectionPage implements OnInit {
       this.searchfocus?.setFocus();
       this.key_ = k_;
     }, 500);
-    this.searched[k_].setmode = false;
     for (let key_ in this.structure_.properties) {
       this.searched[key_].actived = k_ === key_ ? true : false;
     }
@@ -366,7 +368,7 @@ export class CollectionPage implements OnInit {
     this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
       for (let key_ in this.structure_.properties) {
         if (this.searched) {
-          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains", setmode: false } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null, setmode: this.searched[key_].setmode ? this.searched[key_].setmode : null };
+          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
         }
       }
     });
@@ -399,7 +401,6 @@ export class CollectionPage implements OnInit {
         this.searched[k].f = false;
         this.searched[k].kw = null;
         this.searched[k].op = "contains";
-        this.searched[k].setmode = false;
       }
       if (d === n_ - 1) {
         this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
@@ -412,7 +413,7 @@ export class CollectionPage implements OnInit {
   }
 
   search(k: string, v: string) {
-    this.searched[k].setmode = false;
+    this.searched[k].actived = false;
     if (!this.filter_ || this.filter_.length === 0) {
       if (["true", "false"].includes(v)) {
         this.filter_.push({
@@ -434,16 +435,16 @@ export class CollectionPage implements OnInit {
         });
       });
     } else {
-      let found = false;
+      let found_ = false;
       const n_ = this.filter_.length;
       for (let d = 0; d < n_; d++) {
         if (this.filter_[d] && this.filter_[d]["key"] === k) {
-          found = true;
+          found_ = true;
           this.filter_[d]["op"] = this.searched[k].op;
           this.filter_[d]["value"] = v;
         }
         if (d === n_ - 1) {
-          !found ? this.filter_.push({
+          !found_ ? this.filter_.push({
             key: k,
             op: this.searched[k].op,
             value: v
@@ -570,8 +571,12 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  tdc(event: any) {
-    event.stopPropagation();
+  tdc(event_: any) {
+    event_.stopPropagation();
+  }
+
+  selection_changed(item_: string, s_: number) {
+    this.selections_[item_][s_].value = !this.selections_[item_][s_].value;
   }
 
 }

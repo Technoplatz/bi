@@ -185,6 +185,11 @@ https://www.gnu.org/licenses.
                             (click)="get_parent(field.parents)" class="parent-link-button">{{
                             field.parents.collection | translate }}
                         </ion-button>
+                        <ion-button *ngIf="!field.readonly && !field.permanent && !field.disabled" slot="end"
+                            color="medium" (click)="field_nulla(field.name)" fill="clear"
+                            class="nulla-button">
+                            <ion-icon name="close-sharp"></ion-icon>
+                        </ion-button>
                         <ion-label position="stacked">
                             {{ field.title | translate }}:
                             <sup *ngIf="field.required">
@@ -230,7 +235,7 @@ https://www.gnu.org/licenses.
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : '' | translate"
                                         [required]="field.required" [disabled]="field.disabled"
                                         [(ngModel)]="data_[field.name]" [value]="data_[field.name]"
-                                        (ionChange)="doChangeEnum(field, $event.target.value)" [id]="field.name">
+                                        (ionChange)="change_enum(field, $event.target.value)" [id]="field.name">
                                         <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item |
                                             translate }}
                                         </ion-select-option>
@@ -272,11 +277,11 @@ https://www.gnu.org/licenses.
                                         </ion-datetime>
                                     </ng-template>
                                 </ion-modal>
-                                <ion-button *ngIf="op=='insert' || (!field.readonly && !field.disabled)"
+                                <!-- <ion-button *ngIf="op=='insert' || (!field.readonly && !field.disabled)"
                                     (click)="doCancelDate(field.name)" fill="clear"
-                                    class="ion-no-padding datetime-clear-button" size="default" color="medium">
+                                    class="ion-no-padding nulla-button" size="default" color="medium">
                                     <ion-icon name="close"></ion-icon>
-                                </ion-button>
+                                </ion-button> -->
                             </div>
                             <ng-template #nodatevalue>
                                 <ion-button (click)="doInitDate(field.name)" fill="clear"
