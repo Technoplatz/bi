@@ -67,18 +67,14 @@ export class LangComponent implements OnInit {
     this.lang_proc_ = true;
     for (let j = 0; j < this.langsoriginal.length; j++) {
       this.langs_[j].class = "selection-passive";
-      const setLang =
-        j === this.langsoriginal.length - 1
-          ? this.misc.setLanguage(lang_).then(() => {
-            this.langs_[i].class = "selection-active";
-            setTimeout(() => {
-              this.lang_proc_ = false;
-            }, 500);
-          })
-          : null;
+      j === this.langsoriginal.length - 1
+        ? this.misc.setLanguage(lang_).then(() => {
+          this.langs_[i].class = "selection-active";
+          setTimeout(() => {
+            this.lang_proc_ = false;
+          }, 500);
+        })
+        : null;
     }
   }
-
-
-
 }

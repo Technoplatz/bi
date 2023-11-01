@@ -43,7 +43,8 @@
         "ND-NotDefined",
         "RJ-Rejected"
       ],
-      "default": "00-Standby"
+      "default": "00-Standby",
+      "selection": true
     },
     "dnn_acc_no": {
       "bsonType": "string",
@@ -52,7 +53,8 @@
       "minLength": 9,
       "maxLength": 16,
       "pattern": "^[A-Z0-9-]{9,16}$",
-      "readonly": true
+      "readonly": true,
+      "selection": true
     },
     "dnn_acc_name": {
       "bsonType": "string",
@@ -60,7 +62,8 @@
       "description": "Account Name",
       "minLength": 1,
       "maxLength": 128,
-      "readonly": true
+      "readonly": true,
+      "selection": true
     },
     "dnn_odi_no": {
       "bsonType": "string",
@@ -97,7 +100,8 @@
       "enum": ["Air", "Sea", "Truck", "Other"],
       "minLength": 0,
       "maxLength": 8,
-      "pattern": "^[A-Za-z]{0,8}$"
+      "pattern": "^[A-Za-z]{0,8}$",
+      "selection": true
     },
     "dnn_bill_no": {
       "bsonType": "string",
@@ -132,7 +136,8 @@
       "bsonType": "number",
       "title": "BU ID",
       "description": "Business Unit Id",
-      "readonly": true
+      "readonly": true,
+      "selection": true
     },
     "dnn_prd_no": {
       "bsonType": "string",
@@ -340,6 +345,15 @@
       "minLength": 32,
       "maxLength": 40,
       "readonly": true
+    },
+    "dnn_warning": {
+      "bsonType": "string",
+      "title": "Warning",
+      "description": "Warning",
+      "minLength": 0,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z&/ ]{0,128}$",
+      "enum": ["Please Hold", "Awaiting for Another Order", "Missing Product", "Test Product", "Damaged", "Lost", "Approved"]
     }
   },
   "required": [
@@ -359,6 +373,7 @@
   ],
   "index": [
     ["dnn_acc_no"],
+    ["dnn_acc_name"],
     ["dnn_status"],
     ["dnn_status", "dnn_no", "dnn_line_no"],
     ["dnn_status", "dnn_date"],
@@ -374,7 +389,7 @@
   ],
   "unique": [["dnn_no", "dnn_line_no"]],
   "sort": {
-    "dnn_status": 1,
+    "_modified_at": -1,
     "dnn_no": 1,
     "dnn_line_no": 1
   },

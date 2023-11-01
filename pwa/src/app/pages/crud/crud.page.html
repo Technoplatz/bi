@@ -185,9 +185,8 @@ https://www.gnu.org/licenses.
                             (click)="get_parent(field.parents)" class="parent-link-button">{{
                             field.parents.collection | translate }}
                         </ion-button>
-                        <ion-button *ngIf="!field.readonly && !field.permanent && !field.disabled" slot="end"
-                            color="medium" (click)="field_nulla(field.name)" fill="clear"
-                            class="nulla-button">
+                        <ion-button *ngIf="!field?.readonly && !field?.permanent && !field?.disabled" slot="end"
+                            color="medium" (click)="field_nulla(field.name)" fill="clear" class="nulla-button">
                             <ion-icon name="close-sharp"></ion-icon>
                         </ion-button>
                         <ion-label position="stacked">
@@ -233,7 +232,7 @@ https://www.gnu.org/licenses.
                                 <ng-template #checkenum>
                                     <ion-select *ngIf="field.enum; else checkproperty" [formControlName]="field.name"
                                         [placeholder]="field.placeholder ? field.placeholder : field.description ? field.description : '' | translate"
-                                        [required]="field.required" [disabled]="field.disabled"
+                                        [required]="field.required" [disabled]="field.readonly || field.disabled"
                                         [(ngModel)]="data_[field.name]" [value]="data_[field.name]"
                                         (ionChange)="change_enum(field, $event.target.value)" [id]="field.name">
                                         <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item |
@@ -244,7 +243,7 @@ https://www.gnu.org/licenses.
                                 <ng-template #checkproperty>
                                     <ion-select *ngIf="field.subType=='property'" [formControlName]="field.name"
                                         [required]="field.required" [(ngModel)]="data_[field.name]"
-                                        [disabled]="field.disabled">
+                                        [disabled]="field.readonly || field.disabled">
                                         <ion-select-option *ngFor="let item of properties_" [value]="item"
                                             [id]="field.name"> {{ item | translate }}
                                         </ion-select-option>
@@ -263,7 +262,7 @@ https://www.gnu.org/licenses.
                         <div *ngIf="field.bsonType=='date'" class="datetime-class">
                             <div *ngIf="data_[field.name]; else nodatevalue">
                                 <ion-datetime-button [datetime]="field.name"
-                                    [disabled]="field?.readonly || field?.disabled">
+                                    [disabled]="field.readonly || field.disabled">
                                 </ion-datetime-button>
                                 <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
                                     <ng-template>
@@ -271,22 +270,18 @@ https://www.gnu.org/licenses.
                                             [presentation]="field.dateOnly ? 'date' : 'date-time'" [multiple]="false"
                                             [value]="data_[field.name]?.substring(0, 19).replace(' ', 'T') + 'Z'"
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
-                                            [firstDayOfWeek]="1" [showDefaultButtons]="true" [disabled]="field.disabled"
-                                            [readonly]="field.readonly" [locale]="locale_">
+                                            [firstDayOfWeek]="1" [showDefaultButtons]="true"
+                                            [disabled]="field.readonly || field.disabled"
+                                            [readonly]="field.readonly || field.disabled" [locale]="locale_">
                                             <span slot="title">{{ field.title }}</span>
                                         </ion-datetime>
                                     </ng-template>
                                 </ion-modal>
-                                <!-- <ion-button *ngIf="op=='insert' || (!field.readonly && !field.disabled)"
-                                    (click)="doCancelDate(field.name)" fill="clear"
-                                    class="ion-no-padding nulla-button" size="default" color="medium">
-                                    <ion-icon name="close"></ion-icon>
-                                </ion-button> -->
                             </div>
                             <ng-template #nodatevalue>
                                 <ion-button (click)="doInitDate(field.name)" fill="clear"
                                     class="ion-no-padding datetime-button-nov"
-                                    [disabled]="field?.readonly || field?.disabled">
+                                    [disabled]="field.readonly || field.disabled">
                                     <ion-icon name="calendar-sharp"></ion-icon>
                                 </ion-button>
                             </ng-template>

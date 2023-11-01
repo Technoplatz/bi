@@ -146,7 +146,7 @@ https://www.gnu.org/licenses.
           <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
             <ion-row>
               <ion-col size="12" class="schema-flashcard-container">
-                <div *ngFor="let item of flashcards_" (click)="doFlashcard(item)">{{
+                <div *ngFor="let item of flashcards_" (click)="do_flashcard(item)">{{
                   item.view.title | translate }}<br /><span>{{ item.count }}</span></div>
               </ion-col>
             </ion-row>
@@ -172,10 +172,10 @@ https://www.gnu.org/licenses.
                 </div>
                 <!-- SEARCH BOX -->
                 <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
-                  <ion-button color="light" size="small" (click)="setSort(item.key, 1)">
+                  <ion-button color="light" size="small" (click)="do_sort(item.key, -1)">
                     <ion-icon name="arrow-down"></ion-icon>
                   </ion-button>
-                  <ion-button color="light" size="small" (click)="setSort(item.key, -1)">
+                  <ion-button color="light" size="small" (click)="do_sort(item.key, 1)">
                     <ion-icon name="arrow-up"></ion-icon>
                   </ion-button>
                   <ion-button color="light" size="small" (click)="copy_column(item.key)">
@@ -279,7 +279,9 @@ https://www.gnu.org/licenses.
             </tr>
             <tr *ngFor="let record of data; let i = index"
               (click)="id=='_query' ? go_query(record, $event) : go_crud(record, 'update')">
-              <td class="primary aligned-right">{{ ((pager_ - 1) * limit_) + i + 1}}</td>
+              <td [class]="record['_reminder'] ? 'bg-danger' : 'primary'"
+                (click)="do_show_note(record['_note'], $event)">{{ ((pager_ - 1) * limit_) + i + 1}}
+              </td>
               <td (click)="tdc($event)">
                 <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                   (ionChange)="set_select_data(i,$event)" mode="md">

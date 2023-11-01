@@ -40,6 +40,7 @@ import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
 import { JsonEditorOptions } from "ang-jsoneditor";
+import { TranslateService } from "@ngx-translate/core";
 
 @Component({
   selector: "app-collection",
@@ -117,7 +118,8 @@ export class CollectionPage implements OnInit {
     private modal: ModalController,
     private alert: AlertController,
     private router: Router,
-    public misc: Miscellaneous
+    public misc: Miscellaneous,
+    private translate: TranslateService
   ) {
     this.crud.views.subscribe((res: any) => {
       this.flashcards_ = res ? res.filter((obj: any) => obj.collection === this.id && obj.view.flashcard === true) : [];
@@ -347,7 +349,7 @@ export class CollectionPage implements OnInit {
     return a.value.index < b.value.index ? -1 : (b.value.index > a.value.index ? 1 : 0);
   }
 
-  setSort(key: string, d: number) {
+  do_sort(key: string, d: number) {
     this.sort = {};
     this.sort[key] = d ? d * -1 : 1;
     this.refresh_data(0);
@@ -382,6 +384,7 @@ export class CollectionPage implements OnInit {
           this.reset_search(true);
           this.searched = null;
           this.sweeped[this.segment] = [];
+          this.sort = {};
           this.refresh_data(0).then(() => {
             resolve(true);
           }).catch((res: any) => {
@@ -480,7 +483,7 @@ export class CollectionPage implements OnInit {
     set_ ? this.json_editor_init().then(() => { }) : null;
   }
 
-  doFlashcard(item_: any) {
+  do_flashcard(item_: any) {
     this.filter_ = item_.view.data_filter;
     this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
       this.refresh_data(0).then(() => { }).catch((res: any) => {
@@ -564,8 +567,8 @@ export class CollectionPage implements OnInit {
     !event_.isTrusted ? this.json_content_ = event_ : null;
   }
 
-  go_query(record_: any, event: any) {
-    event.stopPropagation();
+  go_query(record_: any, event_: any) {
+    event_.stopPropagation();
     this.storage.set("LSQUERY", record_).then(() => {
       this.misc.navi.next("/query/" + record_.que_id);
     });
@@ -573,6 +576,23 @@ export class CollectionPage implements OnInit {
 
   tdc(event_: any) {
     event_.stopPropagation();
+  }
+
+  do_show_note(note_: string, event_: any) {
+    event_.stopPropagation();
+    console.log(note_);
+    this.alert.create({
+      header: this.translate.instant("Reminder"),
+      message: this.translate.instant(note_),
+      buttons: [{
+        text: this.translate.instant("Got It"),
+        role: "cancel",
+        handler: () => { }
+      }],
+    }).then((alert: any) => {
+      alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
+      alert.present();
+    });
   }
 
   selection_changed(item_: string, s_: number) {

@@ -268,7 +268,8 @@ class Misc:
             "falseText",
             "caseType",
             "query",
-            "selection"
+            "selection",
+            "reminder"
         ]
 
     def boto_s3_f(self, input_):
@@ -2464,6 +2465,11 @@ class Crud:
 
             for property_ in properties_:
                 prop_ = properties_[property_]
+                if "reminder" in prop_ and prop_["reminder"] is True:
+                    for ix_, doc_ in enumerate(docs_):
+                        if property_ in doc_ and doc_[property_] is not None:
+                            docs_[ix_]["_reminder"] = True
+                            docs_[ix_]["_note"] = f"{docs_[ix_]['_note']}<br />{doc_[property_]}" if "_note" in docs_[ix_] and docs_[ix_]["_note"] != "" else doc_[property_]
                 if "selection" in prop_ and prop_["selection"] is True:
                     selected_[property_] = []
                     cursor_ = Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": f"${property_}", "count": {"$sum": 1}}}, {"$sort": {"_id": 1}}])
