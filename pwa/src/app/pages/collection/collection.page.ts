@@ -580,7 +580,6 @@ export class CollectionPage implements OnInit {
 
   do_show_note(note_: string, event_: any) {
     event_.stopPropagation();
-    console.log(note_);
     this.alert.create({
       header: this.translate.instant("Reminder"),
       message: this.translate.instant(note_),
