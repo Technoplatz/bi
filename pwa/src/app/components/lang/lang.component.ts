@@ -55,8 +55,8 @@ export class LangComponent implements OnInit {
     private misc: Miscellaneous,
   ) {
     this.langs_ = this.langsoriginal;
-    this.misc.getLanguage().then((LSLANG) => {
-      const index = this.langs_.findIndex((obj: any) => obj["id"] === LSLANG);
+    this.misc.locale().then((LSLOCALE_: any) => {
+      const index = this.langs_.findIndex((obj: any) => obj["id"] === LSLOCALE_);
       this.langs_[index].class = "selection-active";
     });
   }

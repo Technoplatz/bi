@@ -359,7 +359,7 @@ export class CollectionPage implements OnInit {
       this.key_ = k_;
     }, 500);
     for (let key_ in this.structure_.properties) {
-      this.searched[key_].actived = k_ === key_ ? true : false;
+      this.searched[key_].actived = k_ === key_ ? !this.searched[key_].actived : false;
     }
   }
 

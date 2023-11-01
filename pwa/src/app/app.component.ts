@@ -88,14 +88,15 @@ export class AppComponent implements OnInit {
         for (let reg_ of regs_) { reg_.unregister(); }
       }
     }) : null;
-    this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-      this.auth.user.next(LSUSERMETA);
-      LSUSERMETA ? this.crud.get_all().then(() => { }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      }) : null;
-      this.misc.getLanguage().then((res: any) => {
-        this.translate.setDefaultLang(res ? res : "en");
-        this.translate.use(res ? res : "en");
+    this.storage.get("LSUSERMETA").then((LSUSERMETA_: any) => {
+      this.auth.user.next(LSUSERMETA_);
+      this.misc.locale().then((locale_: any) => {
+        locale_ = locale_ ? locale_ : LSUSERMETA_.locale;
+        this.translate.setDefaultLang(locale_);
+        this.translate.use(locale_);
+        LSUSERMETA_ ? this.crud.get_all().then(() => { }).catch((error: any) => {
+          this.misc.doMessage(error, "error");
+        }) : null;
       }).catch((error: any) => {
         console.error(error);
       });

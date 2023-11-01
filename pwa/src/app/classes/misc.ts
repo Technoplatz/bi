@@ -200,7 +200,7 @@ export class Miscellaneous {
   setLanguage(l_: string) {
     return new Promise((resolve, reject) => {
       if (l_) {
-        this.storage.set("LSLANG", l_).then(() => {
+        this.storage.set("LSLOCALE", l_).then(() => {
           this.translate.setDefaultLang(l_);
           this.translate.use(l_);
           this.localization.next(l_ === "tr" ? "tr-TR" : l_ === "de" ? "de-DE" : "en-US");
@@ -214,13 +214,11 @@ export class Miscellaneous {
     });
   }
 
-  getLanguage() {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSLANG").then((l_: any) => {
-        this.localization.next(l_ === "tr" ? "tr-TR" : l_ === "de" ? "de-DE" : "en-US");
-        resolve(l_ ? l_ : "en");
-      }).catch(() => {
-        resolve("en");
+  locale() {
+    return new Promise((resolve) => {
+      this.storage.get("LSLOCALE").then((LSLOCALE_: any) => {
+        this.localization.next(LSLOCALE_ === "tr" ? "tr-TR" : LSLOCALE_ === "de" ? "de-DE" : LSLOCALE_ === "en" ? "en-US" : null);
+        resolve(LSLOCALE_);
       });
     });
   }
