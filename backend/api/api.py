@@ -408,7 +408,7 @@ class Misc:
         """
         docstring is in progress
         """
-        if not NOTIFICATION_SLACK_HOOK_URL_:
+        if not NOTIFICATION_PUSH_URL_:
             return True
 
         ip_ = self.get_client_ip_f()
@@ -416,7 +416,7 @@ class Misc:
         file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
         line_ = exc_tb_.tb_lineno
         notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {notification_}"
-        response_ = requests.post(NOTIFICATION_SLACK_HOOK_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
+        response_ = requests.post(NOTIFICATION_PUSH_URL_, json.dumps({"text": str(notification_str_)}), timeout=10)
         if response_.status_code != 200:
             PRINT_("!!! Notification Error", response_.content)
 
@@ -1472,7 +1472,13 @@ class Crud:
                 subprocess.call(["mongodump"] + Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_}))
                 size_ = os.path.getsize(fullpath_)
                 Mongo().db_["_dump"].insert_one({
-                    "dmp_id": dmp_id_, "dmp_type": type_, "dmp_size": size_, "_created_at": Misc().get_now_f(), "_created_by": email_, "_modified_at": Misc().get_now_f(), "_modified_by": email_
+                    "dmp_id": dmp_id_,
+                    "dmp_type": type_,
+                    "dmp_size": size_,
+                    "_created_at": Misc().get_now_f(),
+                    "_created_by": email_,
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": email_
                 })
 
             boto_s3_f_ = Misc().boto_s3_f({
@@ -1491,7 +1497,9 @@ class Crud:
             if op_ == "dumpr":
                 subprocess.call(["mongorestore"] + Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_}))
 
-            return {"result": True, "id": dmp_id_, "file": fn_, "type": type_, "size": size_}
+            files_ = [{"name": fn_, "type": type_}]
+
+            return {"result": True, "id": dmp_id_, "files": files_, "type": type_, "size": size_}
 
         except APIError as exc__:
             return Misc().notify_exception_f(exc__)
@@ -3069,7 +3077,7 @@ class Crud:
             match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
             usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
             tags_ = link_["_tags"] if "_tags" in link_ and len(link_["_tags"]) > 0 else None
-            apis_ = link_["apis"] if "apis" in link_ and len(link_["apis"]) > 0 else []
+            api_ = link_["api"] if "api" in link_ and link_["api"] is not None else None
 
             if not source_:
                 raise APIError("source collection is missing")
@@ -3079,10 +3087,6 @@ class Crud:
 
             if link_ is None:
                 raise APIError("link info is missing")
-
-            linked_ = filter(lambda x: not re.match(r'^\s*$', x), linked_)
-            if linked_ is None:
-                raise APIError("linked data is missing")
 
             if data_ is None:
                 raise APIError("master data is missing")
@@ -3148,11 +3152,11 @@ class Crud:
 
             files_ = []
 
-            if apis_:
-                run_apis_f_ = self.run_apis_f(apis_[0], data_, [_id], usr_id_)
-                if not run_apis_f_["result"]:
-                    raise AppException(run_apis_f_["msg"])
-                files_ += run_apis_f_["files"]
+            if api_:
+                run_api_f_ = self.run_api_f(api_, data_, [_id], usr_id_)
+                if not run_api_f_["result"]:
+                    raise AppException(run_api_f_["msg"])
+                files_ += run_api_f_["files"]
 
             if notify_:
                 subject_ = notification_["subject"] if "subject" in notification_ else "Link Completed"
@@ -3173,19 +3177,19 @@ class Crud:
 
             return {"result": True, "data": setc_, "count": count_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except AppException as exc:
-            return Misc().app_exception_f(exc)
+        except AppException as exc__:
+            return Misc().app_exception_f(exc__)
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
-    def run_apis_f(self, api_, doc_, ids_, email_):
+    def run_api_f(self, api_, doc_, ids_, email_):
         """
         docstring is in progress
         """
@@ -3316,13 +3320,13 @@ class Crud:
             if not tags_:
                 raise AppException("no tags found in action")
 
-            apis_ = action_["apis"] if "apis" in action_ and len(action_["apis"]) > 0 else []
+            api_ = action_["api"] if "api" in action_ and action_["api"] is not None else None
             uniqueness_ = "uniqueness" in action_ and action_["uniqueness"] is True
             unique_ = action_["unique"] if "unique" in action_ and len(action_["unique"]) > 0 else None
 
             set_ = action_["set"] if "set" in action_ else None
-            if not set_ and not apis_:
-                raise AppException("no set or apis provided in action")
+            if not set_ and not api_:
+                raise AppException("no set or api provided in action")
 
             notification_ = action_["notification"] if "notification" in action_ else None
             notify_ = notification_ and notification_["notify"] is True
@@ -3340,7 +3344,7 @@ class Crud:
                 if get_notification_filtered_:
                     get_notification_filtered_ = {"$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]}
             else:
-                if apis_:
+                if api_:
                     raise AppException("no selection was made")
 
             if uniqueness_ and unique_:
@@ -3362,11 +3366,11 @@ class Crud:
 
             files_ = []
 
-            if apis_:
-                run_apis_f_ = self.run_apis_f(apis_[0], doc_, ids_, email_)
-                if not run_apis_f_["result"]:
-                    raise AppException(run_apis_f_["msg"])
-                files_ += run_apis_f_["files"]
+            if api_:
+                run_api_f_ = self.run_api_f(api_, doc_, ids_, email_)
+                if not run_api_f_["result"]:
+                    raise AppException(run_api_f_["msg"])
+                files_ += run_api_f_["files"]
 
             if notify_:
                 notify_collection_ = f"{notification_['collection']}_data" if "collection" in notification_ else collection_
@@ -4610,7 +4614,7 @@ class Auth:
 
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
-NOTIFICATION_SLACK_HOOK_URL_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
+NOTIFICATION_PUSH_URL_ = os.environ.get("NOTIFICATION_PUSH_URL")
 COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
 DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
@@ -4869,13 +4873,15 @@ def api_crud_f():
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
-        if res_["result"] and op_ == "dumpd":
-            hdr_ = {"Content-Type": "application/json; charset=utf-8"}
-            return send_from_directory(directory=API_MONGODUMP_PATH_, path=res_["file"], as_attachment=True), 200, hdr_
+        if res_["result"] and op_ in ["dumpd"]:
+            hdr_ = {"Content-Type": "application/octet-stream; charset=utf-8"}
+            files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else []
+            response_ = send_from_directory(directory=API_MONGODUMP_PATH_, path=files_[0]["name"], as_attachment=True), 200, hdr_
+        else:
+            response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+            response_.status_code = sc__
+            response_.mimetype = "application/json"
 
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        response_.status_code = sc__
-        response_.mimetype = "application/json"
         return response_
 
 

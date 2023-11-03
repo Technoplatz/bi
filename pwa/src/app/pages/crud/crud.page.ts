@@ -67,7 +67,7 @@ export class CrudPage implements OnInit {
   public selected_: any = [];
   public fieldsupd: any = [];
   public fields: any = [];
-  public isInProgress: boolean = false;
+  public in_progress: boolean = false;
   public is_ready: boolean = false;
   public _id: string = "";
   public arrayitem: any = {};
@@ -252,7 +252,7 @@ export class CrudPage implements OnInit {
   }
 
   submit_f() {
-    if (!this.isInProgress) {
+    if (!this.in_progress) {
       this.input_ = "";
       this.crudForm.updateValueAndValidity();
       if (!["remove"].includes(this.op) && !this.crudForm.valid && !this.isnoninteractive_) {
@@ -261,7 +261,7 @@ export class CrudPage implements OnInit {
       } else {
         this.linked_ = this.link_text ? this.link_text.split('\n').filter((e: any) => { return e }) : [];
         this.modified = true;
-        this.isInProgress = true;
+        this.in_progress = true;
         this.crud.submit_f(this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix, this.link_, this.linked_).then((res: any) => {
           res && res?.result === true ? this.misc.doMessage(`${this.op} completed successfully`, "success") : null;
           this.crud.modalSubmitListener.next({ result: true });
@@ -275,7 +275,7 @@ export class CrudPage implements OnInit {
                   this.misc.copy_to_clipboard(`Bearer ${res.token}`).then(() => { }).catch((error: any) => {
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
-                    this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+                    this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
                   });
                 }
               }]
@@ -293,21 +293,20 @@ export class CrudPage implements OnInit {
                 this.crudForm.get(iot_input_)?.setValue(this.data_[iot_input_]);
               });
             } else {
-              this.doDismissModal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+              this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
             }
           }
         }).catch((res: any) => {
           this.misc.doMessage(res, "error");
         }).finally(() => {
-          this.isInProgress = false;
+          this.in_progress = false;
         });
       }
     }
   }
 
-  do_dump(op_: string) {
-    this.modified = true;
-    this.isInProgress = true;
+  dump(op_: string) {
+    this.in_progress = true;
     this.misc.api_call("crud", {
       op: op_,
       collection: "_dump",
@@ -325,14 +324,12 @@ export class CrudPage implements OnInit {
         downloadLink.setAttribute("download", fn_);
         document.body.appendChild(downloadLink);
         downloadLink.click();
-        this.doDismissModal({ op: op_, modified: true, filter: [] });
-      } else {
-        this.doDismissModal({ op: op_, modified: this.modified, filter: [] });
       }
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     }).finally(() => {
-      this.isInProgress = false;
+      this.dismiss_modal({ op: op_, modified: true, filter: [] });
+      this.in_progress = false;
     });
   }
 
@@ -404,7 +401,7 @@ export class CrudPage implements OnInit {
     }
   }
 
-  doDismissModal(obj: any) {
+  dismiss_modal(obj: any) {
     this.misc.dismissModal(obj ? obj : { modified: false, filter: [] }).then(() => { }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     });

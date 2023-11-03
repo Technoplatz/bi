@@ -113,13 +113,13 @@ class Trigger():
         line_no_ = exc_.__traceback__.tb_lineno if hasattr(exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
         name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
         PRINT_(f"!!! worker error type: {name_}, line: {line_no_}:", str(exc_))
-        if notification_slack_hook_url_:
+        if notification_push_url_:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
             line_ = exc_tb_.tb_lineno
             exception_ = str(exc_)
             notification_str_ = f"TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
-            resp_ = requests.post(notification_slack_hook_url_, json.dumps({"text": str(notification_str_)}), timeout=10)
+            resp_ = requests.post(notification_push_url_, json.dumps({"text": str(notification_str_)}), timeout=10)
             if resp_.status_code != 200:
                 PRINT_("!!! notification error", resp_)
 
@@ -706,6 +706,7 @@ class Trigger():
                 notification_ = target_["notification"] if "notification" in target_ else None
                 if notification_:
                     notify_ = "notify" in notification_ and notification_["notify"] is True
+                    push_ = "push" in notification_ and notification_["push"] is True
                     attachment_ = "attachment" in notification_ and notification_["attachment"] is True
                     subject_ = notification_["subject"] if "subject" in notification_ and notification_["subject"] != "" else None
                     body_ = notification_["body"] if "body" in notification_ and notification_["body"] != "" else None
@@ -760,6 +761,14 @@ class Trigger():
                                 files_ = [{"filename": file_, "filetype": type_}]
                             else:
                                 raise PassException("no data records exported")
+
+                    if push_:
+                        msg_ = json.dumps({"text": f"OK {keyf_}"})
+                        resp_ = requests.post(notification_push_url_, msg_, timeout=10)
+                        if resp_.status_code != 200:
+                            PRINT_("!!! push notification error", resp_)
+                        res_ = str(resp_.content)
+                        PRINT_("res_", res_)
 
                     msg_ = {
                         "files": files_,
@@ -885,7 +894,7 @@ mongo_tls_allow_invalid_certificates_ = os.environ.get("MONGO_TLS_ALLOW_INVALID_
 mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
 mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
-notification_slack_hook_url_ = os.environ.get("NOTIFICATION_SLACK_HOOK_URL")
+notification_push_url_ = os.environ.get("NOTIFICATION_PUSH_URL")
 API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
 REPEATER_LIMIT_ = 1000
 PRINT_ = partial(print, flush=True)

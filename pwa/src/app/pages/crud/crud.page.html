@@ -33,34 +33,37 @@ https://www.gnu.org/licenses.
     <ion-grid class="ion-no-padding">
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
-                <ion-button *ngIf="isInProgress">
+                <ion-button *ngIf="in_progress; else ready">
                     <ion-spinner name="dots"></ion-spinner>
-                    &nbsp;{{ 'In Progress' | translate }}</ion-button>
-                <ion-button *ngIf="collection=='_dump' && op=='insert' && !isInProgress" (click)="do_dump('dumpu')">
-                    {{ 'Make Dump' | translate }}
+                    &nbsp;{{ 'In Progress' | translate }}
                 </ion-button>
-                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpd')">
-                    <ion-icon name="arrow-down-circle-sharp"></ion-icon>
-                    {{ 'Download' | translate }}
-                </ion-button>
-                <ion-button *ngIf="collection=='_dump' && op=='update' && !isInProgress" (click)="do_dump('dumpr')">
-                    {{ 'Restore' | translate }}
-                </ion-button>
-                <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">
-                    <ion-icon name="barcode-sharp"></ion-icon>&nbsp;
-                    {{ 'Scan' | translate }}
-                </ion-button>
-                <ng-template #noscan>
-                    <ion-button *ngIf="collection!='_dump' && collection!='_storage' && op!='filter' && !isInProgress"
-                        (click)="submit_f()">
-                        <span *ngIf="op=='action'; else noaction"> {{ 'Run' | translate }} </span>
-                        <ng-template #noaction> {{ 'Save' | translate }} </ng-template>
+                <ng-template #ready>
+                    <ion-button *ngIf="collection=='_dump' && op=='insert'" (click)="dump('dumpu')">
+                        {{ 'Make Dump' | translate }}
+                    </ion-button>
+                    <ion-button *ngIf="collection=='_dump' && op=='update'" (click)="dump('dumpd')">
+                        <ion-icon name="arrow-down-circle-sharp"></ion-icon>
+                        {{ 'Download' | translate }}
+                    </ion-button>
+                    <ion-button *ngIf="collection=='_dump' && op=='update'" (click)="dump('dumpr')">
+                        {{ 'Restore' | translate }}
+                    </ion-button>
+                    <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">
+                        <ion-icon name="barcode-sharp"></ion-icon>&nbsp;
+                        {{ 'Scan' | translate }}
+                    </ion-button>
+                    <ng-template #noscan>
+                        <ion-button *ngIf="collection!='_dump' && collection!='_storage' && op!='filter'"
+                            (click)="submit_f()">
+                            <span *ngIf="op=='action'; else noaction"> {{ 'Run' | translate }} </span>
+                            <ng-template #noaction> {{ 'Save' | translate }} </ng-template>
+                        </ion-button>
+                    </ng-template>
+                    <ion-button *ngIf="collection=='_storage' && op=='import'" (click)="submit_f()">
+                        {{ 'Upload' | translate }}
                     </ion-button>
                 </ng-template>
-                <ion-button *ngIf="collection=='_storage' && op=='import' && !isInProgress" (click)="submit_f()">
-                    {{ 'Upload' | translate }}
-                </ion-button>
-                <ion-button (click)="doDismissModal({ modified: false, filter: [] })" color="medium">
+                <ion-button (click)="dismiss_modal({ modified: false, filter: [] })" color="medium">
                     <ion-icon name="close"></ion-icon>
                     {{ 'Dismiss' |
                     translate }} </ion-button>
@@ -146,8 +149,8 @@ https://www.gnu.org/licenses.
                 <ion-label position="stacked"><strong>{{ 'Get automatically, enter manually or paste' | translate
                         }}.</strong></ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
-                    spellcheck="false" class="linked-data" counter="true" maxlength="512" clearOnEdit="true"
-                    autofocus="true" maxlength="512" counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
+                    spellcheck="false" class="linked-data" counter="true" maxlength="512" autofocus="true"
+                    maxlength="512" counterFormatter="customCounterFormatter" [(ngModel)]="link_text">
                 </ion-textarea>
             </ion-item>
             {{ 'The maximum number of lines allowed is' | translate }} {{ link_limit_ }}.
@@ -262,7 +265,7 @@ https://www.gnu.org/licenses.
                         <div *ngIf="field.bsonType=='date'" class="datetime-class">
                             <div *ngIf="data_[field.name]; else nodatevalue">
                                 <ion-datetime-button [datetime]="field.name"
-                                    [disabled]="field.readonly || field.disabled">
+                                    [disabled]="field.readonly || field.disabled || field.permanent">
                                 </ion-datetime-button>
                                 <ion-modal [keepContentsMounted]="true" [showBackdrop]="true">
                                     <ng-template>

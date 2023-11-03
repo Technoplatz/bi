@@ -136,43 +136,41 @@
       ],
       "autofill": true,
       "btntext": "delivery",
-      "apis": [
-        {
-          "id": "waybill-issue",
-          "enabled": true,
-          "protocol": "http",
-          "subdomain": "",
-          "domain": "172.18.0.8",
-          "path": "/issue",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "method": "post",
-          "map": {
-            "tag_prefix": "{http://tempuri.org/}",
-            "shipment_collection": "shipment_data",
-            "shipment_id_field": "shp_id",
-            "shipment_ettn_field": "shp_wayb_ettn",
-            "shipment_waybill_no_field": "shp_wayb_no",
-            "shipment_waybill_date_field": "shp_wayb_date",
-            "shipment_account_no_field": "shp_acc_no",
-            "shipment_notes_field": "shp_notes",
-            "account_collection": "account_data",
-            "account_no_field": "acc_no",
-            "delivery_collection": "delivery_data",
-            "delivery_shipment_id_field": "dnn_wayb_id",
-            "delivery_qty_field": "dnn_qty",
-            "delivery_no_field": "dnn_no",
-            "delivery_account_no_field": "dnn_acc_no",
-            "delivery_product_no_field": "dnn_prd_no",
-            "delivery_product_desc_field": "dnn_prd_description",
-            "delivery_waybill_no_field": "dnn_wayb_no",
-            "delivery_waybill_date_field": "dnn_wayb_date",
-            "delivery_set_status": "70-Delivered",
-            "document_format": 2
-          }
+      "api": {
+        "id": "waybill-issue",
+        "enabled": true,
+        "protocol": "http",
+        "subdomain": "",
+        "domain": "172.18.0.8",
+        "path": "/issue",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "post",
+        "map": {
+          "tag_prefix": "{http://tempuri.org/}",
+          "shipment_collection": "shipment_data",
+          "shipment_id_field": "shp_id",
+          "shipment_ettn_field": "shp_wayb_ettn",
+          "shipment_waybill_no_field": "shp_wayb_no",
+          "shipment_waybill_date_field": "shp_wayb_date",
+          "shipment_account_no_field": "shp_acc_no",
+          "shipment_notes_field": "shp_notes",
+          "account_collection": "account_data",
+          "account_no_field": "acc_no",
+          "delivery_collection": "delivery_data",
+          "delivery_shipment_id_field": "dnn_wayb_id",
+          "delivery_qty_field": "dnn_qty",
+          "delivery_no_field": "dnn_no",
+          "delivery_account_no_field": "dnn_acc_no",
+          "delivery_product_no_field": "dnn_prd_no",
+          "delivery_product_desc_field": "dnn_prd_description",
+          "delivery_waybill_no_field": "dnn_wayb_no",
+          "delivery_waybill_date_field": "dnn_wayb_date",
+          "delivery_set_status": "70-Delivered",
+          "document_format": 2
         }
-      ],
+      },
       "notification": {
         "notify": true,
         "subject": "Touchpoint [DNs Shipped]",
@@ -203,27 +201,25 @@
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
-      "apis": [
-        {
-          "id": "waybill-download",
-          "enabled": true,
-          "protocol": "http",
-          "subdomain": "",
-          "domain": "172.18.0.8",
-          "path": "/download",
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "method": "post",
-          "map": {
-            "tag_prefix": "{http://tempuri.org/}",
-            "shipment_collection": "shipment_data",
-            "shipment_id_field": "shp_id",
-            "shipment_ettn_field": "shp_wayb_ettn",
-            "document_format": 2
-          }
+      "api": {
+        "id": "waybill-download",
+        "enabled": true,
+        "protocol": "http",
+        "subdomain": "",
+        "domain": "172.18.0.8",
+        "path": "/download",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "post",
+        "map": {
+          "tag_prefix": "{http://tempuri.org/}",
+          "shipment_collection": "shipment_data",
+          "shipment_id_field": "shp_id",
+          "shipment_ettn_field": "shp_wayb_ettn",
+          "document_format": 2
         }
-      ],
+      },
       "notification": {
         "notify": true,
         "subject": "Touchpoint [Waybill Downloaded]",
