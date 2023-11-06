@@ -1309,7 +1309,7 @@ class Crud:
             res_ = Misc().notify_exception_f(exc__)
 
         finally:
-            if df_:
+            if df_ is not None:
                 stats_ += f"<br /><br />ROW COUNT: {str(len(df_))}<br />"
                 stats_ += f"<br />INSERTED: {str(details_['nInserted'])}" if "nInserted" in details_ else ""
                 stats_ += f"<br />UPSERTED: {str(details_['nUpserted'])}" if "nUpserted" in details_ else ""
@@ -4103,17 +4103,17 @@ class Auth:
 
             return {"result": True, "allowmatch": allowmatch_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except AuthError as exc:
-            return Misc().auth_error_f(exc)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def firewall_f(self, user_):
         """
@@ -4133,10 +4133,10 @@ class Auth:
 
             return {"result": True}
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except AuthError as exc:
+        except AuthError as exc__:
             Misc().log_f({
                 "type": "Error",
                 "collection": "_firewall",
@@ -4144,15 +4144,15 @@ class Auth:
                 "user": user_["usr_id"],
                 "document": {
                     "ip": ip_,
-                    "exception": str(exc),
+                    "exception": str(exc__),
                     "_modified_at": Misc().get_now_f(),
                     "_modified_by": user_["usr_id"],
                 }
             })
-            return Misc().auth_error_f(exc)
+            return Misc().auth_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def account_f(self, input_):
         """
