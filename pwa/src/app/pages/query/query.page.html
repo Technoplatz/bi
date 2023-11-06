@@ -135,7 +135,7 @@ https://www.gnu.org/licenses.
           <!-- NO DATA FOUND FOR QUERY -->
           <ng-template #nodata>
             <div *ngIf="!running_; else ontheway" class="ion-margin-top">
-              <h6>{{ 'No data found' | translate }}.</h6>
+              <h6>{{ 'No data matching the criteria found' | translate }}.</h6>
               {{ 'You can edit the query or get help from the Administrators' | translate }}.
             </div>
             <ng-template #ontheway>

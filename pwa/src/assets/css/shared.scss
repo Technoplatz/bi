@@ -64,12 +64,12 @@ ion-label {
   --opacity: 1 !important;
 }
 
-/* .checkbox-disabled,
+.checkbox-disabled,
 .native-input[disabled],
 ion-label {
   opacity: 1 !important;
   --opacity: 1 !important;
-} */
+}
 
 ion-reorder {
   margin-top: 4px !important;
@@ -1215,12 +1215,18 @@ sup {
   --color: #c00 !important;
 }
 
-.bg-danger {
-  background-color: #c00 !important;
-  --background-color: #c00 !important;
+.bg-success {
+  background-color: var(--ion-color-success) !important;
+  --background-color: var(--ion-color-success) !important;
   color: #fff !important;
   font-weight: 600;
-  border: 1px solid #c00 !important;
+}
+
+.bg-danger {
+  background-color: var(--ion-color-danger) !important;
+  --background-color: var(--ion-color-danger) !important;
+  color: #fff !important;
+  font-weight: 600;
 }
 
 .light {

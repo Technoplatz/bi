@@ -1298,7 +1298,7 @@ class Crud:
                         content_ += f"{str(werrs_['errInfo'])}"
                     content_ += "\n"
                 stats_ += f"<br />FAILED: {str(len(details_['writeErrors']))}<br />"
-            res_["msg"] = "please find the error details in the email we've just sent you"
+            res_["msg"] = "Sorry! We have just e-mailed you the error details about this upload."
 
         except APIError as exc__:
             content_, details_ = str(exc__), {}
@@ -2262,7 +2262,7 @@ class Crud:
 
             que_aggregate_ = query_["que_aggregate"] if "que_aggregate" in query_ and len(query_["que_aggregate"]) > 0 else None
             if not que_aggregate_:
-                raise APIError("aggregation not found")
+                raise PassException("no query defined yet")
 
             queries_ = structure_["queries"] if "queries" in structure_ else None
             if not queries_:

@@ -5,7 +5,10 @@
       "title": "Type",
       "description": "Query type",
       "enum": ["query", "job"],
-      "default": "query"
+      "pattern": "^[a-z]{3,5}$",
+      "default": "query",
+      "caseType": "lowercase",
+      "permanent": true
     },
     "que_id": {
       "bsonType": "string",
