@@ -2989,85 +2989,6 @@ class Crud:
         except Exception as exc:
             return Misc().notify_exception_f(exc)
 
-    def saveview_f(self, obj):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = obj["userindb"] if "userindb" in obj else None
-            col_id_ = obj["collection"]
-            filter_ = obj["filter"]
-            title_ = obj["title"].strip().title()
-            view_id_ = title_.lower().replace(" ", "-")
-            email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
-            _tags = user_["_tags"]
-
-            doc_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
-            if not doc_:
-                raise APIError("collection not found")
-
-            view_ = {
-                "title": title_,
-                "description": f"{title_} Description",
-                "priority": 9999,
-                "enabled": True,
-                "dashboard": False,
-                "data_filter": filter_,
-                "data_sort": {"_modified_at": -1},
-                "data_excluded": [],
-                "data_index": [],
-                "data_columns": [],
-                "data_values": [],
-                "data_json": True,
-                "data_excel": True,
-                "data_csv": True,
-                "pivot": True,
-                "pivot_totals": True,
-                "chart": True,
-                "flashcard": False,
-                "chart_type": "Stacked Vertical Bar",
-                "chart_label": True,
-                "chart_gradient": True,
-                "chart_grid": True,
-                "chart_legend": False,
-                "chart_xaxis": True,
-                "chart_xaxis_label": False,
-                "chart_yaxis": True,
-                "chart_yaxis_label": False,
-                "chart_colors": [],
-                "scheduled": False,
-                "scheduled_cron": "15 14,15,16 * * mon,tue",
-                "_tags": [
-                    "#Managers",
-                    "#Administrators"
-                ]
-            }
-            doc_["col_structure"]["views"][view_id_] = view_
-            doc_["_modified_at"] = Misc().get_now_f()
-            doc_["_modified_by"] = email_
-
-            Mongo().db_["_collection"].update_one(
-                {"col_id": col_id_}, {"$set": doc_})
-
-            Misc().log_f({
-                "type": "Info",
-                "collection": col_id_,
-                "op": "saveview",
-                "user": email_,
-                "document": doc_
-            })
-
-            return {"result": True, "id": view_id_}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
-
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
-
     def upsert_f(self, obj):
         """
         docstring is in progress
@@ -3941,7 +3862,6 @@ class Email:
                 message_["To"] = ", ".join(recipients_to_)
             if recipients_cc_:
                 message_["Cc"] = ", ".join(recipients_cc_)
-            recipients_ = ", ".join(recipients_)
 
             server_ = smtplib.SMTP(SMTP_SERVER_, SMTP_PORT_) if SMTP_PORT_ == 587 else smtplib.SMTP_SSL(
                 SMTP_SERVER_, SMTP_PORT_)
@@ -3954,17 +3874,17 @@ class Email:
 
             return {"result": True}
 
-        except smtplib.SMTPResponseException as exc_:
-            return Misc().notify_exception_f(f"smtp error: {exc_.smtp_error}")
+        except smtplib.SMTPResponseException as exc__:
+            return Misc().notify_exception_f(f"smtp error: {exc__.smtp_error}")
 
-        except smtplib.SMTPServerDisconnected as exc_:
-            return {"result": True, "exc": str(exc_)}
+        except smtplib.SMTPServerDisconnected as exc__:
+            return {"result": True, "msg": str(exc__)}
 
-        except APIError as exc_:
-            return Misc().notify_exception_f(exc_)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
 
 class OTP:
@@ -5259,8 +5179,6 @@ def api_crud_f():
             res_ = Crud().saveschema_f(input_)
         elif op_ == "savequery":
             res_ = Crud().savequery_f(input_)
-        elif op_ == "saveview":
-            res_ = Crud().saveview_f(input_)
         else:
             raise APIError(f"invalid operation: {op_}")
 
