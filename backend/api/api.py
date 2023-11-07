@@ -1335,6 +1335,7 @@ class Crud:
                 ],
                 "op": "importerr",
                 "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}{stats_}",
+                "subject": "Data Management [Upload Result]",
                 "files": files_
             })
 
@@ -2370,7 +2371,7 @@ class Crud:
                     email_sent_ = Email().send_email_f({
                         "personalizations": personalizations_,
                         "html": que_message_body_,
-                        "subject": que_title_,
+                        "subject": f"Query [{que_title_}]",
                         "files": files_
                     })
                     if not email_sent_["result"]:
@@ -3156,7 +3157,7 @@ class Crud:
                 files_ += run_api_f_["files"]
 
             if notify_:
-                subject_ = notification_["subject"] if "subject" in notification_ else "Link Completed"
+                subject_ = notification_["subject"] if "subject" in notification_ else "Link"
                 body_ = notification_["body"] if "body" in notification_ else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
                 if attachment_:
                     fields_ = str(notification_["fields"].replace(" ", "")) if "fields" in notification_ else None
@@ -3168,6 +3169,7 @@ class Crud:
                     cmd_ = ["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": collection_})
                     subprocess.call(cmd_)
                     files_ += [{"name": file_, "type": type_}] if attachment_ else []
+                    subject_ = f"Automation [{subject_}]"
                     email_sent_ = Email().send_email_f({"list": "to", "op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
@@ -3390,6 +3392,7 @@ class Crud:
                     subprocess.call(["mongoexport"] + Misc().commands_f("mongoexport", {"query": query_, "fields": fields_, "type": type_, "file": file_, "collection": notify_collection_}))
                     files_ += [{"name": file_, "type": type_}]
 
+                subject_ = f"Action [{subject_}]"
                 email_sent_ = Email().send_email_f({"list": "to", "op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
@@ -3548,7 +3551,6 @@ class Email:
     """
     docstring is in progress
     """
-
     def send_email_f(self, msg):
         """
         docstring is in progress
@@ -3585,10 +3587,6 @@ class Email:
                 raise APIError("email personalizations is missing")
 
             email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
-            server_ = smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
-            server_.ehlo()
-            server_.login(SMTP_USERID_, SMTP_PASSWORD_)
-
             message_ = MIMEMultipart()
             message_["From"] = email_from_
             message_["Subject"] = subject_
@@ -3609,17 +3607,25 @@ class Email:
                 part_.add_header("Content-Disposition", f"attachment; filename= {filename_}")
                 message_.attach(part_)
 
-            recipients_to_, recipients_cc_, recipients_ = "", "", []
+            recipients_to_, recipients_cc_, recipients_ = [], [], []
             for recipient_ in personalizations_:
                 addr_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_["name"] and "name" in recipient_ else recipient_["email"]
-                recipients_to_ += addr_ if recipient_["list"] == "to" else ""
-                recipients_cc_ += addr_ if recipient_["list"] == "cc" else ""
-                recipients_.append(recipient_["email"])
+                recipients_.append(addr_)
+                if recipient_["list"] == "to":
+                    recipients_to_.append(addr_)
+                if recipient_["list"] == "cc":
+                    recipients_cc_.append(addr_)
 
-            message_["To"] = recipients_to_
-            if recipients_cc_ != "":
-                message_["Cc"] = recipients_cc_
-            server_.sendmail(email_from_, recipients_, message_.as_string())
+            message_["To"] = ", ".join(recipients_to_)
+            if recipients_cc_:
+                message_["Cc"] = ", ".join(recipients_cc_)
+
+            server_ = smtplib.SMTP(SMTP_SERVER_, SMTP_PORT_) if SMTP_PORT_ == 587 else smtplib.SMTP_SSL(SMTP_SERVER_, SMTP_PORT_)
+            server_.ehlo()
+            if SMTP_PORT_ == 587:
+                server_.starttls()
+            server_.login(SMTP_USERID_, SMTP_PASSWORD_)
+            server_.sendmail(email_from_, ", ".join(recipients_), message_.as_string())
             server_.close()
 
             return {"result": True}
@@ -3802,7 +3808,8 @@ class OTP:
             email_sent_ = Email().send_email_f({
                 "op": "tfa",
                 "personalizations": [{"list": "to", "email": usr_id_, "name": name_}],
-                "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>"
+                "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>",
+                "subject": "Sign in [OTP]"
             })
             if not email_sent_["result"]:
                 raise APIError(email_sent_["msg"])
@@ -4345,6 +4352,7 @@ class Auth:
                     "op": "signin",
                     "personalizations": [{"list": "to", "email": email_, "name": usr_name_}],
                     "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",
+                    "subject": "Sign in [Validated!]"
                 })
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
@@ -4617,7 +4625,7 @@ DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
 SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
-SMTP_PORT_ = os.environ.get("SMTP_PORT")
+SMTP_PORT_ = int(str(os.environ.get("SMTP_PORT"))) if os.environ.get("SMTP_PORT") else 587
 SMTP_USERID_ = os.environ.get("SMTP_USERID")
 SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
 FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
