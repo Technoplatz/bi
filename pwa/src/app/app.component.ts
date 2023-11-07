@@ -83,10 +83,8 @@ export class AppComponent implements OnInit {
   navworker_unregister() {
     return new Promise((resolve) => {
       if (navigator.serviceWorker) {
-        console.log("service worker exists");
         navigator.serviceWorker.getRegistrations().then((regs_: any) => {
           if (regs_.length) {
-            console.log(`service worker length ${regs_.length}`);
             let i_ = 0;
             for (let reg_ of regs_) {
               reg_.unregister().then(() => { }).finally(() => {
@@ -100,6 +98,7 @@ export class AppComponent implements OnInit {
           }
         });
       } else {
+        console.error("no sw found");
         resolve(true);
       }
     });
@@ -107,7 +106,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.navworker_unregister().then(() => {
-      console.info("service worker unregistered successfully");
+      console.info("sw unregistered");
       this.su.checkForUpdates();
       this.storage.get("LSUSERMETA").then((LSUSERMETA_: any) => {
         this.misc.locale().then((locale_: any) => {

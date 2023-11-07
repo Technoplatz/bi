@@ -30,16 +30,15 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild } from "@angular/core";
-
-import { ModalController, AlertController } from "@ionic/angular";
+import { Component, OnInit } from "@angular/core";
+import { ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
-import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
+import { JsonEditorOptions } from "ang-jsoneditor";
 import { CrudPage } from "../crud/crud.page";
 
 @Component({

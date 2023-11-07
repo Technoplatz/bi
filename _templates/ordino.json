@@ -186,7 +186,7 @@
   ],
   "triggers": [
     {
-      "name": "ordino-keys-updated",
+      "name": "_ordino_id",
       "enabled": true,
       "operations": ["update"],
       "changes": [
@@ -233,7 +233,7 @@
       ]
     },
     {
-      "name": "ordino-arrived",
+      "name": "arrived",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [
@@ -308,7 +308,7 @@
       ]
     },
     {
-      "name": "ordino-arrived-cancel",
+      "name": "arrived-cancel",
       "enabled": true,
       "operations": ["update", "insert"],
       "changes": [

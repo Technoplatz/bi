@@ -158,7 +158,7 @@ class Schedular:
         docstring is in progress
         """
         try:
-            queries_ = Mongo().db_["_query"].find({"que_scheduled": True})
+            queries_ = Mongo().db_["_query"].find({"que_scheduled": True, "_approved": True})
             if not queries_:
                 return {"result": True}
 

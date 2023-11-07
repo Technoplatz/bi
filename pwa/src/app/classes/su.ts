@@ -69,9 +69,6 @@ export class Su {
                     console.log("swu version is ready");
                     this.misc.version.next({ upgrade: true, version: event_.latestVersion.hash });
                     break;
-                case "VERSION_INSTALLATION_FAILED":
-                    console.log(`swu install failed: ${event_.error}`);
-                    break;
             }
         });
     }
