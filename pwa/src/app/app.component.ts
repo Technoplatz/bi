@@ -65,8 +65,6 @@ export class AppComponent implements OnInit {
       this.user_ = user;
     });
     // version check
-    this.su.checkForUpdates();
-    // pagination
     this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
       !LSPAGINATION ? this.storage.set("LSPAGINATION", this.paginations_[1]).then(() => { }) : null;
     });
@@ -82,25 +80,49 @@ export class AppComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-    "serviceWorker" in navigator ? navigator.serviceWorker.getRegistrations().then((regs_: any) => {
-      if (regs_.length) {
-        for (let reg_ of regs_) { reg_.unregister(); }
-      }
-    }) : null;
-    this.storage.get("LSUSERMETA").then((LSUSERMETA_: any) => {
-      this.misc.locale().then((locale_: any) => {
-        locale_ = locale_ ? locale_ : LSUSERMETA_?.locale ? LSUSERMETA_.locale : "de";
-        this.storage.set("LSLOCALE", locale_).then(() => {
-          this.translate.setDefaultLang(locale_);
-          this.translate.use(locale_);
-          this.auth.user.next(LSUSERMETA_);
-          LSUSERMETA_ ? this.crud.get_all().then(() => { }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
-          }) : null;
+  navworker_unregister() {
+    return new Promise((resolve) => {
+      if (navigator.serviceWorker) {
+        console.log("service worker exists");
+        navigator.serviceWorker.getRegistrations().then((regs_: any) => {
+          if (regs_.length) {
+            console.log(`service worker length ${regs_.length}`);
+            let i_ = 0;
+            for (let reg_ of regs_) {
+              reg_.unregister().then(() => { }).finally(() => {
+                if (i_ === regs_.length - 1) {
+                  resolve(true);
+                } else {
+                  i_++;
+                }
+              });
+            }
+          }
         });
-      }).catch((error: any) => {
-        console.error(error);
+      } else {
+        resolve(true);
+      }
+    });
+  }
+
+  ngOnInit() {
+    this.navworker_unregister().then(() => {
+      console.info("service worker unregistered successfully");
+      this.su.checkForUpdates();
+      this.storage.get("LSUSERMETA").then((LSUSERMETA_: any) => {
+        this.misc.locale().then((locale_: any) => {
+          locale_ = locale_ ? locale_ : LSUSERMETA_?.locale ? LSUSERMETA_.locale : "de";
+          this.storage.set("LSLOCALE", locale_).then(() => {
+            this.translate.setDefaultLang(locale_);
+            this.translate.use(locale_);
+            this.auth.user.next(LSUSERMETA_);
+            LSUSERMETA_ ? this.crud.get_all().then(() => { }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+            }) : null;
+          });
+        }).catch((error: any) => {
+          console.error(error);
+        });
       });
     });
   }

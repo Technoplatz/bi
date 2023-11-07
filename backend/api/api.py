@@ -2225,7 +2225,7 @@ class Crud:
             que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
             approved_ = "_approved" in query_ and query_["_approved"] is True
-            if que_type_ != "query" and not approved_:
+            if not approved_:
                 err_ = "query needs to be approved by the administrators"
                 raise PassException(err_)
 
@@ -2871,9 +2871,6 @@ class Crud:
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = user_["email"] if user_ and "email" in user_ else None
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            if collection_id_ == "_query":
-                doc_["_approved"] = False
-
             Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
             if is_crud_ and link_ and linked_:

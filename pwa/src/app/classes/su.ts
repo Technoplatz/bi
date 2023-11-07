@@ -33,26 +33,26 @@ https://www.gnu.org/licenses.
 import { Injectable } from "@angular/core";
 import { SwUpdate, VersionEvent } from "@angular/service-worker";
 import { Miscellaneous } from "./misc";
+import { environment } from "../../environments/environment";
 
 @Injectable({
     providedIn: "root"
 })
 
 export class Su {
+    private interval_: number = environment.swu_interval_mins;
 
     constructor(
         private swu: SwUpdate,
         private misc: Miscellaneous
     ) {
-        if (swu.isEnabled) {
+        if (this.swu.isEnabled) {
             console.log("swu enabled");
             setInterval(() => {
-                this.swu.checkForUpdate().then((res_: any) => {
-                    console.log(res_ ? "swu processed" : "no swu found");
-                }).catch((err_: any) => {
+                this.swu.checkForUpdate().then(() => { }).catch((err_: any) => {
                     console.error("swu check error", err_);
                 });
-            }, 3 * 60 * 1000);
+            }, this.interval_ * 60 * 1000);
         } else {
             console.error("swu is not enabled");
         }
@@ -62,10 +62,11 @@ export class Su {
         this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
             switch (event_.type) {
                 case "VERSION_DETECTED":
-                    console.log(`swu downloading... ${event_.version.hash}`);
+                    console.log(`swu version detected ${event_.version.hash}`);
+                    console.log("downloading...");
                     break;
                 case "VERSION_READY":
-                    console.log("swu downloaded");
+                    console.log("swu version is ready");
                     this.misc.version.next({ upgrade: true, version: event_.latestVersion.hash });
                     break;
                 case "VERSION_INSTALLATION_FAILED":

@@ -38,6 +38,7 @@ export const environment = {
   release: "Brezel",
   apiPort: "8443",
   support_url: "#",
+  swu_interval_mins: 3,
   misc: {
     logo: "logo-electron",
     default_sort: '{"_modified_at": -1}',
