@@ -2559,7 +2559,7 @@ class Crud:
                         ixs = []
                         ix_name_ = ""
                         for ix_ in indexes_:
-                            if ix_ not in properties_ and ix_ not in ["_created_at", "_modified_at"]:
+                            if ix_ not in properties_ and ix_ not in ["_created_at", "_modified_at", "_created_by", "_modified_by", "_approved"]:
                                 break_ = True
                                 err_ = f"{ix_} was indexed but not found in properties"
                                 break
