@@ -49,7 +49,9 @@ export class Su {
         if (this.swu.isEnabled) {
             console.log("swu enabled");
             setInterval(() => {
-                this.swu.checkForUpdate().then(() => { }).catch((err_: any) => {
+                this.swu.checkForUpdate().then((res_: any) => {
+                    console.log(res_ ? "swu processed" : "no swu found");
+                }).catch((err_: any) => {
                     console.error("swu check error", err_);
                 });
             }, this.interval_ * 60 * 1000);
