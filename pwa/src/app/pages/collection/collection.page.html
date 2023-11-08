@@ -161,8 +161,7 @@ https://www.gnu.org/licenses.
                 </ion-checkbox>
               </th>
               <th *ngIf="id==='_query'">
-                {{ 'Approved' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_approved'}}</ion-button>
+                &nbsp;&nbsp;&nbsp;
               </th>
               <!-- DATA LIST HEADER -->
               <th *ngFor="let item of properties_ | keyvalue : orderByIndex">
@@ -257,6 +256,10 @@ https://www.gnu.org/licenses.
                   </div>
                 </div>
               </th>
+              <th *ngIf="id==='_query'">
+                {{ 'Approved' | translate }}<br />
+                <ion-button size="small" class="unfiltered-btn">{{'_approved'}}</ion-button>
+              </th>
               <th>
                 {{ 'Created At' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_created_at'}}</ion-button>
@@ -278,8 +281,7 @@ https://www.gnu.org/licenses.
                 <ion-button size="small" class="unfiltered-btn">{{'_id'}}</ion-button>
               </th>
             </tr>
-            <tr *ngFor="let record of data; let i = index"
-              (click)="id=='_query' ? go_query(record, $event) : go_crud(record, 'update')">
+            <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
               <td [class]="record['_reminder'] ? 'bg-danger align-right' : 'primary align-right'"
                 (click)="do_show_note(record['_note'], $event)">
                 <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>
@@ -292,11 +294,9 @@ https://www.gnu.org/licenses.
                   (ionChange)="set_select_data(i,$event)" mode="md">
                 </ion-checkbox>
               </td>
-              <td *ngIf="id==='_query'" class="ion-text-center">
-                <ion-icon *ngIf="record?._approved; else notapproved" name="checkbox-sharp" color="success"></ion-icon>
-                <ng-template #notapproved>
-                  <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
-                </ng-template>
+              <td *ngIf="id==='_query'" class="ion-text-center" (click)="go_query(record, $event)">
+                <ion-icon name="play-sharp" [color]="record?._approved ? 'success' : 'danger'"
+                  class="ion-margin-start ion-margin-end"></ion-icon>
               </td>
               <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex"
                 [class]="['number','decimal','float'].includes(item_.value.bsonType) ? 'align-right' : ''">
@@ -339,6 +339,12 @@ https://www.gnu.org/licenses.
                 </ng-template>
                 <ng-template #else0>
                   {{ record[item_.key]?.toString() | translate }}
+                </ng-template>
+              </td>
+              <td *ngIf="id==='_query'" class="ion-text-center">
+                <ion-icon *ngIf="record?._approved; else notapproved" name="checkbox-sharp" color="success"></ion-icon>
+                <ng-template #notapproved>
+                  <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
                 </ng-template>
               </td>
               <td>

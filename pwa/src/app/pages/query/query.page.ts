@@ -31,7 +31,6 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
@@ -39,7 +38,6 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { JsonEditorOptions } from "ang-jsoneditor";
-import { CrudPage } from "../crud/crud.page";
 
 @Component({
   selector: "app-query",
@@ -96,8 +94,7 @@ export class QueryPage implements OnInit {
     private storage: Storage,
     private auth: Auth,
     private crud: Crud,
-    private router: Router,
-    private modal: ModalController
+    private router: Router
   ) {
     this.misc.api.subscribe((api_: any) => {
       this.uri_ = api_.uri;
@@ -241,39 +238,6 @@ export class QueryPage implements OnInit {
         this.running_ = false;
       });
     }
-  }
-
-  edit_query() {
-    this.modal.create({
-      component: CrudPage,
-      backdropDismiss: true,
-      cssClass: "crud-modal",
-      componentProps: {
-        shuttle: {
-          op: "update",
-          collection: "_query",
-          collections: this.collections_,
-          user: this.user,
-          data: this.query_,
-          counters: null,
-          structure: this.schema_,
-          sweeped: [],
-          filter: null,
-          actions: [],
-          actionix: -1,
-          view: null,
-          scan: null
-        }
-      }
-    }).then((modal_: any) => {
-      modal_.present();
-      modal_.onDidDismiss().then((res: any) => {
-        if (res.data.modified && res.data.res.result) {
-          this.misc.doMessage("query updated successfully", "success");
-          this.refresh_data(0, false);
-        }
-      });
-    });
   }
 
 }
