@@ -1912,11 +1912,8 @@ class Crud:
             aggregate_base_.append({"$count": "count"})
 
             if orig_ == "api/crud":
-                page_ = obj_["page"] if "page" in obj_ and obj_[
-                    "page"] > 0 else 1
                 limit_ = obj_["limit"] if "limit" in obj_ and obj_[
                     "limit"] > 0 else API_QUERY_PAGE_SIZE_
-                aggregate_.append({"$skip": limit_ * (page_ - 1)})
                 aggregate_.append({"$limit": limit_})
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
@@ -3736,7 +3733,8 @@ class Auth:
 
             permit_ = False
             for usr_tag_ in usr_tags_:
-                permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": collection_id_, "per_is_active": True, "per_tag": usr_tag_})
+                permission_ = Mongo().db_["_permission"].find_one(
+                    {"per_collection_id": collection_id_, "per_is_active": True, "per_tag": usr_tag_})
                 if permission_:
                     per_insert_ = "per_insert" in permission_ and permission_[
                         "per_insert"] is True

@@ -74,9 +74,6 @@ export class QueryPage implements OnInit {
   public is_url_copied: boolean = false;
   public running_: boolean = false;
   public query_url_: string = "";
-  public pages_: number = 1;
-  public page_: number = 1;
-  public pager_: number = 1;
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
   private menu: string = "";
@@ -134,12 +131,10 @@ export class QueryPage implements OnInit {
   refresh_data(page_: number, run_: boolean) {
     return new Promise((resolve, reject) => {
       this.running_ = true;
-      this.page_ = page_ === 0 ? 1 : page_;
       this.schemavis_ = false;
-      this.crud.get_query(this.id, this.page_, this.limit_, run_).then((res: any) => {
+      this.crud.get_query(this.id, this.limit_, run_).then((res: any) => {
         if (res.query && res.data) {
           this.schema_ = res.schema;
-          this.pager_ = this.page_;
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;
           this.subheader = res.query.que_title;
@@ -149,8 +144,6 @@ export class QueryPage implements OnInit {
           this.fields_ = res.fields;
           this.data_ = res.data;
           this.count_ = res.count;
-          this.pages_ = this.count_ > 0 ? Math.ceil(this.count_ / this.limit_) : environment.misc.default_page;
-          const lmt = this.pages_ >= 10 ? 10 : this.pages_;
           resolve(true);
         } else {
           this.misc.doMessage("no data found", "error");

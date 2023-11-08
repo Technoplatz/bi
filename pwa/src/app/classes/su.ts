@@ -40,7 +40,8 @@ import { environment } from "../../environments/environment";
 })
 
 export class Su {
-    private interval_: number = environment.swu_interval_mins;
+    private delay_: number = environment.swu_interval_mins;
+    private interval_: any = null;
 
     constructor(
         private swu: SwUpdate,
@@ -48,13 +49,13 @@ export class Su {
     ) {
         if (this.swu.isEnabled) {
             console.log("swu enabled");
-            setInterval(() => {
+            this.interval_ = setInterval(() => {
                 this.swu.checkForUpdate().then((res_: any) => {
                     console.log(res_ ? "swu processed" : "no swu found");
                 }).catch((err_: any) => {
                     console.error("swu check error", err_);
                 });
-            }, this.interval_ * 60 * 1000);
+            }, this.delay_ * 60 * 1000);
         } else {
             console.error("swu is not enabled");
         }
@@ -64,10 +65,12 @@ export class Su {
         this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
             switch (event_.type) {
                 case "VERSION_DETECTED":
+                    this.interval_ ? clearInterval(this.interval_) : null;
                     console.log(`swu version detected ${event_.version.hash}`);
                     console.log("downloading...");
                     break;
                 case "VERSION_READY":
+                    this.interval_ ? clearInterval(this.interval_) : null;
                     console.log("swu version is ready");
                     this.misc.version.next({ upgrade: true, version: event_.latestVersion.hash });
                     break;
