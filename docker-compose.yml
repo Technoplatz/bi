@@ -70,7 +70,7 @@ services:
     container_name: init
     hostname: init
     labels:
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -241,7 +241,7 @@ services:
       mongo2:
         condition: service_healthy
     labels:
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -292,7 +292,7 @@ services:
     hostname: stream
     restart: always
     labels:
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - bi-cert-volume:/cert
       - bi-storage-volume:${API_TEMPFILE_PATH}
@@ -354,7 +354,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)
       - traefik.http.services.api.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - bi-storage-volume:${API_TEMPFILE_PATH}
       - bi-storage-volume:${API_MONGODUMP_PATH}
@@ -446,7 +446,7 @@ services:
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`) && !PathPrefix(`/api`)
       - traefik.http.routers.pwa.priority=0
       - traefik.http.services.pwa.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=true
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -471,7 +471,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-    command: --interval ${WATCHTOWER_UPDATE_INTERVAL_MIN}
+    command: --interval ${WATCHTOWER_INTERVAL_SECONDS}
     environment:
       - TZ=${TZ}
       - WATCHTOWER_NOTIFICATIONS=slack
