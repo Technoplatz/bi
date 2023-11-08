@@ -48,9 +48,7 @@ export class Crud {
   public objectsListener = new BehaviorSubject([]);
   public objects = this.objectsListener.asObservable();
   public collections = new BehaviorSubject<any>([]);
-  public views = new BehaviorSubject<any>([]);
   public queries = new BehaviorSubject<any>([]);
-  public charts = new BehaviorSubject<any>([]);
   public visuals = new BehaviorSubject<any>([]);
   public announcements = new BehaviorSubject<any>([]);
 
@@ -58,7 +56,7 @@ export class Crud {
     private misc: Miscellaneous
   ) { }
 
-  init_form(op: string, structure: any, form: any, data: any, collections: any, views: any, counters: any, actionix_: number) {
+  init_form(op: string, structure: any, form: any, data: any, collections: any, counters: any, actionix_: number) {
     return new Promise((resolve, reject) => {
       let i = 0;
       let init: any = {};
@@ -107,7 +105,6 @@ export class Crud {
         const selection_ = p.selection ? true : false;
         const reminder_ = p.reminder ? true : false;
         const counter_ = p.counter && p.counter === true ? true : false;
-        view_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < views.length; v++) { arr_.push(views[v].record.vie_id) } return arr_; })() : null;
         collection_ ? enums_ = (() => { let arr_ = []; for (let v = 0; v < collections.length; v++) { arr_.push(collections[v].col_id) } return arr_; })() : null;
         const parents_ = structure.parents ? structure.parents.find((obj: any) => obj.match[0]?.key === item) : null;
         const v = [];
@@ -265,34 +262,6 @@ export class Crud {
     });
   }
 
-  get_charts() {
-    return new Promise((resolve, reject) => {
-      this.misc.api_call("crud", {
-        op: "charts",
-        collection: "_query",
-        source: "internal",
-        dashboard: false
-      }).then((res: any) => {
-        resolve(this.charts.next(res));
-      }).catch((err: any) => {
-        reject(err);
-      });
-    });
-  }
-
-  get_views() {
-    return new Promise((resolve, reject) => {
-      this.misc.api_call("crud", {
-        op: "views",
-        collection: "_query"
-      }).then((res: any) => {
-        resolve(this.views.next(res.views));
-      }).catch((err: any) => {
-        reject(err);
-      });
-    });
-  }
-
   get_announcements() {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
@@ -308,11 +277,6 @@ export class Crud {
 
   get_all() {
     return new Promise((resolve, reject) => {
-      this.get_views().then(() => { }).catch((error: any) => {
-        console.error("*** views error", error);
-      }).finally(() => {
-        resolve(true);
-      });
       this.get_collections().then(() => { }).catch((error: any) => {
         console.error("*** collections error", error);
       }).finally(() => {

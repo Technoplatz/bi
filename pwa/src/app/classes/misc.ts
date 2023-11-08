@@ -130,7 +130,6 @@ export class Miscellaneous {
               op: "import",
               collection: "_storage",
               collections: this.collections_ ? this.collections_ : [],
-              views: [],
               user: LSUSERMETA,
               data: {
                 "sto_id": "data-import",

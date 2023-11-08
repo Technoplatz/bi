@@ -50,7 +50,6 @@ import { TranslateService } from "@ngx-translate/core";
 
 export class CollectionPage implements OnInit {
   @ViewChild("searchfocus", { static: false }) searchfocus: any = [];
-  private views: any = [];
   private json_content_: any = null;
   private sweeped: any = [];
   private actionix: number = -1;
@@ -121,9 +120,6 @@ export class CollectionPage implements OnInit {
     public misc: Miscellaneous,
     private translate: TranslateService
   ) {
-    this.crud.views.subscribe((res: any) => {
-      this.flashcards_ = res ? res.filter((obj: any) => obj.collection === this.id && obj.view.flashcard === true) : [];
-    });
     this.crud.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
       this.title_ = this.collections_?.find((obj_: any) => obj_.col_id === this.subheader)?.col_title;
@@ -138,7 +134,6 @@ export class CollectionPage implements OnInit {
   ngOnDestroy() {
     this.auth.user.unsubscribe;
     this.crud.collections.unsubscribe;
-    this.crud.views.unsubscribe;
   }
 
   ngOnInit() {
@@ -299,7 +294,6 @@ export class CollectionPage implements OnInit {
             op: op,
             collection: this.id ? this.id : null,
             collections: this.collections_ ? this.collections_ : [],
-            views: this.views ? this.views : [],
             user: this.user,
             data: rec,
             counters: this.counters_,

@@ -15,6 +15,14 @@
       "minLength": 1,
       "maxLength": 16
     },
+    "acc_is_active": {
+      "bsonType": "bool",
+      "title": "Active?",
+      "description": "Account is Active",
+      "trueText": "Active",
+      "falseText": "Inactive",
+      "default": true
+    },
     "acc_name": {
       "bsonType": "string",
       "title": "Business Name",
@@ -171,14 +179,6 @@
       "description": "Alias",
       "minLength": 0,
       "maxLength": 64
-    },
-    "acc_is_active": {
-      "bsonType": "bool",
-      "title": "Active?",
-      "description": "Account is Active",
-      "trueText": "Active",
-      "falseText": "Inactive",
-      "default": true
     }
   },
   "required": ["acc_no", "acc_name", "acc_nick_name", "acc_tax_no", "acc_tax_office", "acc_ship_to_street"],
@@ -191,7 +191,5 @@
   },
   "links": [],
   "triggers": [],
-  "views": {},
-  "fetchers": [],
   "import": {}
 }

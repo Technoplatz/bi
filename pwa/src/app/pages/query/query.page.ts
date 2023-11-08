@@ -79,12 +79,9 @@ export class QueryPage implements OnInit {
   public pages_: number = 1;
   public page_: number = 1;
   public pager_: number = 1;
-  public paget_: any = [];
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
   private menu: string = "";
-  private page_start_: number = 1;
-  private page_end_: number = 1;
   private submenu: string = "";
   private query_: any = {};
   private uri_: string = "";
@@ -157,12 +154,6 @@ export class QueryPage implements OnInit {
           this.count_ = res.count;
           this.pages_ = this.count_ > 0 ? Math.ceil(this.count_ / this.limit_) : environment.misc.default_page;
           const lmt = this.pages_ >= 10 ? 10 : this.pages_;
-          this.paget_ = new Array(lmt);
-          this.page_start_ = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
-          this.page_end_ = this.page_start_ + 10;
-          for (let p = 0; p < this.paget_.length; p++) {
-            this.paget_[p] = this.page_start_ + p;
-          }
           resolve(true);
         } else {
           this.misc.doMessage("no data found", "error");
@@ -262,7 +253,6 @@ export class QueryPage implements OnInit {
           op: "update",
           collection: "_query",
           collections: this.collections_,
-          views: [],
           user: this.user,
           data: this.query_,
           counters: null,

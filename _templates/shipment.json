@@ -230,8 +230,6 @@
     }
   ],
   "triggers": [],
-  "views": {},
-  "fetchers": [],
   "import": {
     "enabled": false
   }

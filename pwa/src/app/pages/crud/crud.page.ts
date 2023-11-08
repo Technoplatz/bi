@@ -106,7 +106,6 @@ export class CrudPage implements OnInit {
   private file: any = null;
   private relatedx: any = [];
   private collections: any = [];
-  private views: any = [];
   private view: any = null;
   private structure__: any = {};
   private link_projection_: any = {};
@@ -163,7 +162,6 @@ export class CrudPage implements OnInit {
     this.counters = this.shuttle.counters;
     this.filter = this.shuttle.filter;
     this.collections = this.shuttle.collections;
-    this.views = this.shuttle.views;
     this.actionix = this.shuttle.actionix;
     this.view = this.shuttle.view;
     this.scan_ = this.shuttle.scan;
@@ -175,7 +173,7 @@ export class CrudPage implements OnInit {
       this.scanned_ = LSSCANNED ? LSSCANNED : [];
       this.doGetAllAktions(this.op).then((res: any) => {
         this.aktions = res;
-        this.crud.init_form(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.views, this.counters, this.actionix).then((res: any) => {
+        this.crud.init_form(this.op, this.structure__, this.crudForm, this.shuttle.data, this.collections, this.counters, this.actionix).then((res: any) => {
           this.tab = "data";
           this.crudForm = res.form;
           this.fields = res.fields;

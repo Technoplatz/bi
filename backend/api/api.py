@@ -37,7 +37,6 @@ import logging
 import re
 import secrets
 import json
-import operator
 import smtplib
 import hashlib
 import ast
@@ -1430,126 +1429,6 @@ class Crud:
 
             return res_
 
-    def announce_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            if "collection" not in input_:
-                raise APIError("collection is missing")
-
-            if "id" not in input_:
-                raise APIError("id is missing")
-
-            if "scope" not in input_:
-                raise APIError("scope is missing")
-
-            id_ = input_["id"]
-            scope_ = input_["scope"]
-            col_id_ = input_["collection"]
-
-            user_ = None
-            email_ = None
-            if "user" in input_:
-                user_ = input_["userindb"]
-                email_ = user_["usr_id"]
-
-            if scope_ not in ["test", "live"]:
-                raise APIError("invalid scope")
-
-            get_view_data_f_ = self.get_view_data_f(user_, id_, "announcement")
-            if not get_view_data_f_["result"]:
-                raise APIError(get_view_data_f_["msg"])
-
-            df_ = get_view_data_f_["df"]
-            df_raw_ = get_view_data_f_["dfraw"]
-            pivotify_ = get_view_data_f_["pivotify"]
-
-            view_ = get_view_data_f_["view"]
-            _tags = view_["_tags"]
-            vie_title_ = view_["title"]
-            data_json_ = view_["data_json"]
-            data_excel_ = view_["data_excel"]
-            data_csv_ = view_["data_csv"]
-            vie_attach_pivot_ = view_["pivot"]
-
-            personalizations_ = []
-            to_ = []
-            users_ = Mongo().db_["_user"].find(
-                {"_tags": {"$elemMatch": {"$in": _tags}}})
-            if users_:
-                for member_ in users_:
-                    if member_["usr_id"] not in to_:
-                        to_.append(member_["usr_id"])
-                        personalizations_.append({"list": "to", "email": member_[
-                                                 "usr_id"], "name": member_["usr_name"]})
-
-            files_ = []
-            if data_json_:
-                file_json_ = f"{API_TEMPFILE_PATH_}/{id_}.json"
-                file_json_raw_ = f"{API_TEMPFILE_PATH_}/{id_}-detail.json"
-                df_.to_json(f"{file_json_}", orient="records", date_format="iso", force_ascii=False,
-                            date_unit="s", default_handler=None, lines=False, compression=None, index=False)
-                df_raw_.to_json(f"{file_json_raw_}", orient="records", date_format="iso", force_ascii=False,
-                                date_unit="s", default_handler=None, lines=False, compression=None, index=False)
-                files_.append({"name": file_json_, "type": "json"})
-                files_.append({"name": file_json_raw_, "type": "json"})
-            if data_csv_:
-                file_csv_ = f"{API_TEMPFILE_PATH_}/{id_}.csv"
-                file_csv_raw_ = f"{API_TEMPFILE_PATH_}/{id_}-detail.csv"
-                df_.to_csv(f"{file_csv_}", sep=";", encoding="utf-8",
-                           header=True, decimal=".", index=False)
-                df_raw_.to_csv(f"{file_csv_raw_}", sep=";",
-                               encoding="utf-8", header=True, decimal=".", index=False)
-                files_.append({"name": file_csv_, "type": "csv"})
-                files_.append({"name": file_csv_raw_, "type": "csv"})
-            if data_excel_:
-                file_excel_ = f"{API_TEMPFILE_PATH_}/{id_}.xlsx"
-                file_excel_raw_ = f"{API_TEMPFILE_PATH_}/{id_}-detail.xlsx"
-                df_.to_excel(f"{file_excel_}", sheet_name=col_id_,
-                             engine="xlsxwriter", header=True, index=False)
-                df_raw_.to_excel(f"{file_excel_raw_}", sheet_name=col_id_,
-                                 engine="xlsxwriter", header=True, index=False)
-                files_.append({"name": file_excel_, "type": "xlsx"})
-                files_.append({"name": file_excel_raw_, "type": "xlsx"})
-
-            body_ = ""
-            if vie_attach_pivot_:
-                body_ += f"{pivotify_}"
-
-            footer_ = f"<br />Generated at {Misc().get_now_f().strftime('%d.%m.%Y %H:%M')}"
-            html_ = f'<div style="font-size: 13px;"><h1>{vie_title_}</h1><p>{body_}</p><p>{footer_}</p></div>' if scope_ == "live" else f'<div style="font-size: 13px;"><p style="color: #c00; font-weight: bold;">THIS IS A TEST MESSAGE</p><p>{vie_title_}</p><p>{body_}</p><p>{footer_}</p></div>'
-
-            email_sent_ = Email().send_email_f({
-                "personalizations": personalizations_,
-                "op": "view",
-                "html": html_,
-                "subject": vie_title_ if scope_ == "live" else f"TEST: {vie_title_}",
-                "files": files_
-            })
-
-            if not email_sent_["result"]:
-                raise APIError(email_sent_["msg"])
-
-            Mongo().db_["_announcement"].insert_one({
-                "ano_id": f"ano-{Misc().get_timestamp_f()}",
-                "ano_scope": scope_,
-                "ano_vie_id": id_,
-                "ano_vie_title": vie_title_,
-                "ano_to": to_,
-                "_tags": _tags,
-                "_created_at": Misc().get_now_f(),
-                "_created_by": email_ if email_ else "cronjob"
-            })
-
-            return {"result": True}
-
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
-
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
-
     def dump_f(self, obj_):
         """
         docstring is in progress
@@ -1753,418 +1632,6 @@ class Crud:
             PRINT_("!!! get filtered exception", exc_)
             return None
 
-    def get_view_data_f(self, user_, view_id_, scope_):
-        """
-        docstring is in progress
-        """
-        try:
-            filter_ = {}
-            filter_[f"col_structure.views.{view_id_}.enabled"] = True
-            if user_:
-                filter_[f"col_structure.views.{view_id_}._tags"] = {
-                    "$elemMatch": {"$in": user_["_tags"]}}
-            collection_ = Mongo().db_["_collection"].find_one(filter_)
-            if not collection_:
-                return {"result": True, "skip": True}
-            collection_id_ = f"{collection_['col_id']}_data"
-            view_ = collection_["col_structure"]["views"][view_id_]
-            col_structure_ = collection_["col_structure"]
-            properties_ = col_structure_["properties"]
-            properties_master_ = {}
-            for property_ in properties_:
-                properties_property_ = properties_[property_]
-                properties_master_[property_] = properties_property_
-                bson_type_ = properties_property_[
-                    "bsonType"] if "bsonType" in properties_property_ else None
-                if bson_type_ == "array":
-                    if "items" in properties_property_:
-                        items_ = properties_property_["items"]
-                        if "properties" in items_:
-                            item_properties_ = items_["properties"]
-                            for item_property_ in item_properties_:
-                                properties_master_[
-                                    item_property_] = item_properties_[item_property_]
-
-            parents_ = []
-            if "parents" in col_structure_:
-                parents_ = col_structure_["parents"]
-
-            pipe_ = []
-            vie_filter_ = view_[
-                "data_filter"] if "data_filter" in view_ else []
-            if len(vie_filter_) > 0:
-                get_filtered_ = self.get_filtered_f(
-                    {"match": vie_filter_, "properties": properties_master_ if properties_master_ else None})
-                pipe_.append({"$match": get_filtered_})
-
-            unset_ = []
-            unset_.append("_modified_by")
-            unset_.append("_modified_at")
-            unset_.append("_modified_count")
-            unset_.append("_resume_token")
-            unset_.append("_created_at")
-            unset_.append("_created_by")
-            unset_.append("_structure")
-            unset_.append("_tags")
-            unset_.append("_id")
-
-            for properties_master__ in properties_master_:
-                if (properties_master__[:1] == "_" and properties_master__ not in Misc().get_except_underdashes()):
-                    unset_.append(properties_master__)
-
-            for parent_ in parents_:
-                if "match" in parent_ and "collection" in parent_:
-                    parent_collection_ = parent_["collection"]
-                    find_one_ = Mongo().db_["_collection"].find_one(
-                        {"col_id": parent_collection_})
-                    if (find_one_ and "col_structure" in find_one_ and "properties" in find_one_["col_structure"]):
-                        for property_ in find_one_["col_structure"]["properties"]:
-                            properties_master_[property_] = find_one_[
-                                "col_structure"]["properties"][property_]
-                        match_ = parent_["match"]
-                        pipeline__ = []
-                        let_ = {}
-                        for match__ in match_:
-                            if "exclude" in match__ and match__["exclude"] is True:
-                                continue
-                            if match__["key"] and match__["value"]:
-                                key_ = match__["key"]
-                                value_ = match__["value"]
-                                let_[f"{key_}"] = f"${key_}"
-                                if key_:
-                                    pipeline__.append(
-                                        {"$eq": [f"$${key_}", f"${value_}"]})
-
-                        pipeline_ = [
-                            {"$match": {"$expr": {"$and": pipeline__}}}]
-                        lookup_ = {"from": f"{parent_collection_}_data", "let": let_,
-                                   "pipeline": pipeline_, "as": parent_collection_}
-                        unwind_ = {"path": f"${parent_collection_}",
-                                   "preserveNullAndEmptyArrays": True}
-                        replace_with_ = {"$mergeObjects": [
-                            "$$ROOT", f"${parent_collection_}"]}
-                        pipe_.append({"$lookup": lookup_})
-                        pipe_.append({"$unwind": unwind_})
-                        pipe_.append({"$replaceWith": replace_with_})
-                        unset_.append(parent_collection_)
-
-            if unset_ and len(unset_) > 0:
-                unset_ = list(dict.fromkeys(unset_))
-                pipe_.append({"$unset": unset_})
-
-            set_ = {"$set": {"_ID": {"$toObjectId": "$_id"}}}
-            pipe_.append(set_)
-
-            records_ = json.loads(JSONEncoder().encode(
-                list(Mongo().db_[collection_id_].aggregate(pipe_))))
-
-            count_ = len(records_) if records_ else 0
-            df_ = pd.DataFrame(records_).fillna("#N/A")
-            df_raw_ = pd.DataFrame(records_).fillna("")
-            vie_visual_style_ = view_[
-                "chart_type"] if "chart_type" in view_ else "Vertical Bar"
-            data_index_0_ = view_["data_index"][0] if "data_index" in view_ and len(
-                view_["data_index"]) > 0 else None
-            data_values_0_k_ = view_["data_values"][0]["key"] if "data_values" in view_ and len(
-                view_["data_values"]) > 0 and "key" in view_["data_values"][0] else None
-            data_values_0_v_ = view_["data_values"][0]["value"] if "data_values" in view_ and len(
-                view_["data_values"]) > 0 and "value" in view_["data_values"][0] else "sum"
-            data_columns_0_ = view_["data_columns"][0] if "data_columns" in view_ and len(
-                view_["data_columns"]) > 0 else None
-            pivot_totals_ = view_[
-                "pivot_totals"] if "pivot_totals" in view_ else False
-            data_values_ = view_["data_values"] if "data_values" in view_ and len(
-                ["data_values"]) > 0 else None
-            dropped_ = []
-
-            if data_index_0_ in df_.columns:
-                dropped_.append(data_index_0_)
-
-            if data_values_0_k_ in df_.columns:
-                dropped_.append(data_values_0_k_)
-
-            if data_columns_0_ in df_.columns:
-                dropped_.append(data_columns_0_)
-
-            groupby_ = []
-
-            if vie_visual_style_ == "Line":
-                if data_columns_0_ and data_columns_0_ in df_.columns:
-                    groupby_.append(data_columns_0_)
-                if data_index_0_ and data_index_0_ in df_.columns:
-                    groupby_.append(data_index_0_)
-            else:
-                if data_index_0_ and data_index_0_ in df_.columns:
-                    groupby_.append(data_index_0_)
-                if data_columns_0_ and data_columns_0_ in df_.columns:
-                    groupby_.append(data_columns_0_)
-
-            df_ = df_.drop(
-                [x for x in df_.columns if x not in dropped_], axis=1)
-            dtypes_ = list(df_.select_dtypes(
-                exclude=["float", "int", "float64", "int64"]).columns)
-            df_grp_ = df_.groupby(dtypes_, as_index=False).sum() if len(
-                dtypes_) > 0 else None
-
-            count_ = None
-            sum_ = None
-            unique_ = None
-            mean_ = None
-            stdev_ = None
-            var_ = None
-
-            if df_ is not None:
-                count_ = len(df_)
-                if count_ > 0 and data_values_0_k_ in df_.columns:
-                    count_ = int(len(df_[data_values_0_k_]))
-                    sum_ = float(pd.to_numeric(
-                        df_[data_values_0_k_], errors="coerce").sum())
-                    unique_ = float(pd.to_numeric(
-                        df_[data_values_0_k_], errors="coerce").nunique())
-                    mean_ = float(pd.to_numeric(
-                        df_[data_values_0_k_], errors="coerce").mean())
-                    stdev_ = float(pd.to_numeric(
-                        df_[data_values_0_k_], errors="coerce").std())
-                    var_ = float(pd.to_numeric(
-                        df_[data_values_0_k_], errors="coerce").var())
-
-                if len(groupby_) > 0:
-                    df_ = df_.groupby(groupby_, as_index=False).sum(
-                    ) if data_values_0_v_ == "sum" else df_.groupby(groupby_, as_index=False).count()
-
-            dfj_ = json.loads(df_.to_json(orient="records"))
-
-            series_ = []
-            series_sub_ = []
-            xaxis_ = None
-            legend_ = None
-
-            if data_index_0_ and data_values_0_k_ in df_.columns:
-                if vie_visual_style_ in ["Pie", "Vertical Bar", "Horizontal Bar"]:
-                    for idx_, item_ in enumerate(dfj_):
-                        xaxis_ = item_[
-                            data_index_0_] if data_index_0_ in item_ else None
-                        yaxis_ = item_[
-                            data_values_0_k_] if data_values_0_k_ in item_ else None
-                        if xaxis_ and yaxis_:
-                            series_.append({"name": xaxis_, "value": yaxis_})
-                elif vie_visual_style_ == "Line":
-                    for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[data_columns_0_] != legend_:
-                            series_.append(
-                                {"name": legend_, "series": series_sub_})
-                            series_sub_ = []
-                        series_sub_.append(
-                            {"name": item_[data_index_0_], "value": item_[data_values_0_k_]})
-                        legend_ = item_[
-                            data_columns_0_] if data_columns_0_ in item_ else None
-                    if legend_:
-                        series_.append(
-                            {"name": legend_, "series": series_sub_})
-                else:
-                    for idx_, item_ in enumerate(dfj_):
-                        if idx_ > 0 and item_[data_index_0_] != xaxis_:
-                            series_.append(
-                                {"name": xaxis_, "series": series_sub_})
-                            series_sub_ = []
-                        if data_columns_0_ in item_ and item_[data_columns_0_] is not None:
-                            series_sub_.append(
-                                {"name": item_[data_columns_0_], "value": item_[data_values_0_k_]})
-                        xaxis_ = item_[
-                            data_index_0_] if data_index_0_ in item_ else None
-                    if xaxis_:
-                        series_.append({"name": xaxis_, "series": series_sub_})
-
-            pvs_ = []
-            aggfunc_ = {}
-
-            for idx_, kv_ in enumerate(data_values_):
-                if "key" in kv_ and "value" in kv_:
-                    key_ = kv_["key"]
-                    value_ = kv_["value"]
-                    if key_ in df_.columns and value_ in ["count", "size", "sum", "mean", "average", "stdev", "var", "max", "min", "unique"]:
-                        prfx_ = " " * idx_
-                        nc_ = f"{prfx_}{key_} [{value_}]"
-                        df_[nc_] = df_[key_]
-                        pvs_.append(nc_)
-                        df_[nc_] = pd.to_numeric(df_[nc_], errors="coerce")
-                        if value_ == "count":
-                            aggfunc_[nc_] = "count"
-                        elif value_ == "size":
-                            aggfunc_[nc_] = np.size
-                        elif value_ == "sum":
-                            aggfunc_[nc_] = np.sum
-                        elif value_ == "mean":
-                            aggfunc_[nc_] = np.mean
-                        elif value_ == "average":
-                            aggfunc_[nc_] = np.average
-                        elif value_ == "stdev":
-                            aggfunc_[nc_] = np.std
-                        elif value_ == "var":
-                            aggfunc_[nc_] = np.var
-                        elif value_ == "unique":
-                            aggfunc_[nc_] = lambda x: len(x.unique())
-                        elif value_ == "max":
-                            aggfunc_[nc_] = np.max
-                        elif value_ == "min":
-                            aggfunc_[nc_] = np.min
-                        else:
-                            aggfunc_[nc_] = "count"
-
-            pivot_html_ = ""
-            pivotify_html_ = ""
-
-            if pvs_ and data_index_0_ and data_columns_0_ and aggfunc_ and pivot_totals_:
-                pivot_table_ = pd.pivot_table(
-                    df_,
-                    values=pvs_,
-                    index=data_index_0_,
-                    columns=data_columns_0_,
-                    aggfunc=aggfunc_,
-                    margins=pivot_totals_,
-                    margins_name="Total",
-                    fill_value=0
-                )
-
-                background_ = "#eee"
-                padding_ = 8
-                padding_r_ = 2 * padding_
-                font_size_table_ = 13
-                styles_ = [
-                    {"selector": "th", "props": [
-                        ("background", f"{background_}"),
-                        ("padding", f"{padding_}px {padding_r_}px"),
-                        ("font-size", f"{font_size_table_}px"),
-                    ]},
-                    {"selector": "td", "props": [
-                        ("background", f"{background_}"),
-                        ("padding", f"{padding_}px {padding_r_}px"),
-                        ("text-align", "right"),
-                        ("font-size", f"{font_size_table_}px"),
-                    ]},
-                    {"selector": "table", "props": [
-                        ("font-size", f"{font_size_table_}px")]},
-                    {"selector": "caption", "props": [("caption-side", "top")]}
-                ]
-
-                pivot_html_ = pivot_table_.to_html().replace('border="1"', "")
-                pivot_table_ = pivot_table_.style.set_table_styles(styles_)
-                pivotify_html_ = pivot_table_.to_html().replace('border="1"', "")
-
-            return {
-                "result": True,
-                "series": series_,
-                "data": records_ if scope_ == "external" else [] if scope_ == "propsonly" else records_[:PREVIEW_ROWS_],
-                "properties": properties_master_,
-                "pivot": pivot_html_,
-                "pivotify": pivotify_html_,
-                "df": df_ if scope_ == "announcement" else None,
-                "dfgrp": df_grp_ if scope_ == "announcement" else None,
-                "dfraw": df_raw_ if scope_ == "announcement" else None,
-                "view": view_,
-                "stats": {
-                    "count": count_ if count_ else 0,
-                    "sum": sum_ if sum_ and sum_ > 0 else 0,
-                    "unique": unique_ if unique_ and unique_ > 0 else 0,
-                    "mean": mean_ if mean_ and mean_ > 0 else 0,
-                    "stdev": stdev_ if stdev_ and stdev_ > 0 else 0,
-                    "var": var_ if var_ and var_ > 0 else 0
-                }
-            }
-
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
-
-        except APIError as exc_:
-            return Misc().notify_exception_f(exc_)
-
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
-
-    def charts_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = input_["userindb"]
-            source_ = input_["source"]
-            if source_ not in ["internal", "external", "propsonly"]:
-                raise APIError("invalid source")
-
-            collections_ = list(Mongo().db_["_collection"].aggregate([
-                {
-                    "$project": {
-                        "col_id": 1,
-                        "col_structure": 1,
-                        "views": {"$objectToArray": "$col_structure.views"}
-                    }
-                }, {
-                    "$match": {
-                        "views": {
-                            "$elemMatch": {
-                                "v.enabled": True,
-                                "v.flashcard": {"$ne": True},
-                                "v._tags": {
-                                    "$elemMatch": {"$in": user_["_tags"]}
-                                }
-                            }
-                        }
-                    }
-                }
-            ]))
-
-            returned_views_ = []
-            for collection_ in collections_:
-                views_ = collection_["views"] if "views" in collection_ and len(
-                    collection_["views"]) > 0 else []
-                for view_ in views_:
-                    id__ = view_["k"]
-                    view__ = view_["v"]
-
-                    if "enabled" not in view__ or not view__["enabled"]:
-                        continue
-
-                    if "flashcard" in view__ and view__["flashcard"] is True:
-                        continue
-
-                    if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
-                        continue
-
-                    get_view_data_f_ = self.get_view_data_f(
-                        user_, id__, source_)
-
-                    if "skip" in get_view_data_f_ and get_view_data_f_["skip"] is True:
-                        continue
-
-                    if not get_view_data_f_["result"]:
-                        continue
-
-                    returned_views_.append({
-                        "id": id__,
-                        "collection": collection_["col_id"],
-                        "properties": get_view_data_f_["properties"],
-                        "view": view__,
-                        "data": get_view_data_f_["data"],
-                        "series": get_view_data_f_["series"],
-                        "pivot": get_view_data_f_["pivot"],
-                        "stats": get_view_data_f_["stats"],
-                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999
-                    })
-
-            returned_views_.sort(key=operator.itemgetter(
-                "priority", "id"), reverse=False)
-
-            return {"result": True, "views": returned_views_}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
-
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
-
     def announcements_f(self, input_):
         """
         docstring is in progress
@@ -2179,82 +1646,6 @@ class Crud:
 
         except pymongo.errors.PyMongoError as exc_:
             return Misc().mongo_error_f(exc_)
-
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
-
-    def views_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = input_["userindb"]
-
-            collections_ = list(Mongo().db_["_collection"].aggregate([
-                {
-                    "$project": {
-                        "col_id": 1,
-                        "col_structure": 1,
-                        "views": {"$objectToArray": "$col_structure.views"}
-                    }
-                }, {
-                    "$match": {
-                        "views": {
-                            "$elemMatch": {
-                                "v.enabled": True,
-                                "v._tags": {
-                                    "$elemMatch": {"$in": user_["_tags"]}
-                                }
-                            }
-                        }
-                    }
-                }
-            ]))
-
-            returned_views_ = []
-            for collection_ in collections_:
-                cid_ = collection_["col_id"]
-                col_structure_ = collection_["col_structure"]
-                properties_ = col_structure_["properties"]
-                views_ = collection_["views"] if "views" in collection_ and len(
-                    collection_["views"]) > 0 else []
-                for view_ in views_:
-                    id__ = view_["k"]
-                    view__ = view_["v"]
-
-                    if "enabled" not in view__ or not view__["enabled"]:
-                        continue
-
-                    if not any(tag_ in user_["_tags"] for tag_ in view__["_tags"]):
-                        continue
-
-                    count_ = 0
-                    filter_ = view__[
-                        "data_filter"] if "data_filter" in view__ else []
-                    if len(filter_) > 0:
-                        get_filtered_ = self.get_filtered_f(
-                            {"match": filter_, "properties": properties_ if properties_ else None})
-                        count_ = Mongo().db_[f"{cid_}_data"].count_documents(
-                            get_filtered_)
-
-                    returned_views_.append({
-                        "id": id__,
-                        "collection": collection_["col_id"],
-                        "view": view__,
-                        "priority": view__["priority"] if "priority" in view__ and view__["priority"] > 0 else 9999,
-                        "count": count_
-                    })
-
-            returned_views_.sort(key=operator.itemgetter(
-                "priority", "id"), reverse=False)
-
-            return {"result": True, "views": returned_views_}
-
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
-
-        except APIError as exc_:
-            return Misc().notify_exception_f(exc_)
 
         except Exception as exc_:
             return Misc().notify_exception_f(exc_)
@@ -3809,7 +3200,8 @@ class Email:
             if tags_:
                 get_users_from_tags_f_ = Misc().get_users_from_tags_f(tags_)
                 if not get_users_from_tags_f_["result"]:
-                    raise APIError(f"personalizations error {get_users_from_tags_f_['msg']}")
+                    raise APIError(
+                        f"personalizations error {get_users_from_tags_f_['msg']}")
                 personalizations_ = get_users_from_tags_f_[
                     "personalizations"] if "personalizations" in get_users_from_tags_f_ else None
 
@@ -4306,8 +3698,8 @@ class Auth:
             op_ = input_["op"] if "op" in input_ else None
             adminops_ = ["dumpu", "dumpr", "dumpd"]
             read_permissive_colls_ = ["_collection", "_query", "_announcement"]
-            read_permissive_ops_ = ["read", "query", "savequery", "queries",
-                                    "charts", "views", "collection", "collections", "announcements"]
+            read_permissive_ops_ = ["read", "query", "savequery",
+                                    "queries", "collection", "collections", "announcements"]
             insert_permissive_ops_ = ["clone"]
             is_crud_ = collection_id_ and collection_id_[:1] != "_"
             allowmatch_ = []
@@ -4344,8 +3736,7 @@ class Auth:
 
             permit_ = False
             for usr_tag_ in usr_tags_:
-                permission_ = Mongo().db_["_permission"].find_one(
-                    {"per_collection_id": collection_id_, "per_is_active": True, "per_is_active": True, "per_tag": usr_tag_})
+                permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": collection_id_, "per_is_active": True, "per_tag": usr_tag_})
                 if permission_:
                     per_insert_ = "per_insert" in permission_ and permission_[
                         "per_insert"] is True
@@ -4920,12 +4311,14 @@ class Auth:
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_PUSH_URL_ = os.environ.get("NOTIFICATION_PUSH_URL")
-COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
+COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get(
+    "COMPANY_NAME") else "Technoplatz BI"
 DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
 SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
-SMTP_PORT_ = int(str(os.environ.get("SMTP_PORT"))) if os.environ.get("SMTP_PORT") else 587
+SMTP_PORT_ = int(str(os.environ.get("SMTP_PORT"))
+                 ) if os.environ.get("SMTP_PORT") else 587
 SMTP_USERID_ = os.environ.get("SMTP_USERID")
 SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
 FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
@@ -4986,8 +4379,8 @@ PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get(
     "PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
 PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
-STRUCTURE_KEYS_ = ["properties", "views", "unique", "index", "required",
-                   "sort", "parents", "links", "actions", "triggers", "fetchers", "import"]
+STRUCTURE_KEYS_ = ["properties", "unique", "index", "required",
+                   "sort", "parents", "links", "actions", "triggers", "import"]
 STRUCTURE_KEYS_OPTIN_ = ["queries"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
 TEMP_PATH_ = "/temp"
@@ -5159,14 +4552,8 @@ def api_crud_f():
             res_ = Crud().remove_f(input_)
         elif op_ == "copykey":
             res_ = Crud().copykey_f(input_)
-        elif op_ == "charts":
-            res_ = Crud().charts_f(input_)
-        elif op_ == "views":
-            res_ = Crud().views_f(input_)
         elif op_ == "announcements":
             res_ = Crud().announcements_f(input_)
-        elif op_ == "announce":
-            res_ = Crud().announce_f(input_)
         elif op_ == "collections":
             res_ = Crud().collections_f(input_)
         elif op_ == "collection":
@@ -5634,55 +5021,6 @@ def api_get_query(id_):
     except Exception as exc__:
         Misc().notify_exception_f(exc__)
         res_ = ast.literal_eval(str(exc__))
-        status_code_ = 500
-
-    finally:
-        response_ = make_response(json.dumps(
-            res_, default=json_util.default, sort_keys=False))
-        response_.status_code = status_code_
-        response_.mimetype = "application/json"
-        return response_
-
-
-@ app.route("/api/get/view/<string:id_>", methods=["GET"])
-def get_data_f(id_):
-    """
-    docstring is in progress
-    """
-    status_code_ = 200
-    res_ = None
-    try:
-        if not request.headers:
-            raise AuthError({"result": False, "msg": "no headers provided"})
-        id_ = Misc().clean_f(id_)
-        user_ = None
-        api_token_ = request.headers["X-Api-Token"] if "X-Api-Token" in request.headers and request.headers["X-Api-Token"] is not None else None
-        if api_token_:
-            access_validate_by_api_token_f_ = Auth(
-            ).access_validate_by_api_token_f(api_token_, "read", id_)
-            if not access_validate_by_api_token_f_["result"]:
-                raise AuthError(access_validate_by_api_token_f_)
-        else:
-            PRINT_("!!! missing token", id_)
-            raise AuthError({"result": False, "msg": "missing token"})
-
-        generate_view_data_f_ = Crud().get_view_data_f(user_, id_, "external")
-        if not generate_view_data_f_["result"]:
-            raise APIError(generate_view_data_f_)
-
-        res_ = generate_view_data_f_[
-            "data"] if generate_view_data_f_ and "data" in generate_view_data_f_ else []
-
-    except AuthError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        status_code_ = 401
-
-    except APIError as exc_:
-        res_ = ast.literal_eval(str(exc_))
-        status_code_ = 500
-
-    except Exception as exc_:
-        res_ = ast.literal_eval(str(exc_))
         status_code_ = 500
 
     finally:

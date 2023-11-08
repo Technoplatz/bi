@@ -31,7 +31,6 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { Storage } from "@ionic/storage";
 import { environment } from "../../../environments/environment";
 import { Miscellaneous } from "../../classes/misc";
 import { Auth } from "../../classes/auth";
@@ -49,19 +48,16 @@ export class MenuComponent implements OnInit {
   public segmentsadm: any;
   public user_: any;
   public perm_: boolean = false;
-  public views: any = [];
   public collections_: any = [];
 
   constructor(
     public misc: Miscellaneous,
     private auth: Auth,
-    private crud: Crud,
-    private storage: Storage
+    private crud: Crud
   ) { }
 
   ngOnDestroy() {
     this.crud.queries.unsubscribe;
-    this.crud.views.unsubscribe;
     this.crud.collections.unsubscribe;
     this.auth.user.unsubscribe;
   }
@@ -69,9 +65,6 @@ export class MenuComponent implements OnInit {
   ngOnInit() {
     this.crud.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
-    });
-    this.crud.views.subscribe((res: any) => {
-      this.views = res ? res : [];
     });
     this.auth.user.subscribe((res: any) => {
       this.user_ = res;

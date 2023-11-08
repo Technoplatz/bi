@@ -29,8 +29,6 @@
   "links": [],
   "actions": [],
   "triggers": [],
-  "views": {},
-  "fetchers": [],
   "import": {
     "enabled": false
   }

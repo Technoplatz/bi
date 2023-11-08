@@ -41,59 +41,9 @@ https://www.gnu.org/licenses.
         <span *ngIf="flashcards.length > 0 && charts.length > 0">&nbsp;{{ 'and' | translate }}&nbsp;</span>
         <span *ngIf="charts.length == 1">{{ charts.length }} {{ 'Chart' | translate }}</span>
         <span *ngIf="charts.length > 1">{{ charts.length }} {{ 'Charts' | translate }}</span>.
-        <!-- flashcards -->
-        <div *ngIf="charts.length > 0 || flashcards.length > 0">
-          <div class="filler-10"></div>
-          <div class="brz-visual-group">
-            <div *ngFor="let item of flashcards; let f = index" class="flash-sq" #chcontainer
-              (click)="doFlashcard(item)">
-              <div class="visual-buttons">
-                <h2>{{ item.count }}</h2>
-              </div>
-              <h5>{{ item.view.title | translate }}</h5>
-              {{ item.collection }} | {{ item.view.data_values[0]?.value }}
-            </div>
-          </div>
 
-          <!-- charts -->
-          <div class="brz-visual-group ion-margin-bottom">
-            <div *ngFor="let item of charts; let i = index" [class]="chart_css" #chcontainer>
-              <div class="visual-buttons">
-                <ion-button size="small" fill="clear" (click)="doResizeCharts()" class="clear-dark-button" color="dark"
-                  mode="ios">
-                  <ion-icon name="expand-sharp"></ion-icon>
-                </ion-button>
-                <ion-button size="small" fill="clear" (click)="misc.navi.next('view/' + item.id)"
-                  class="clear-dark-button" color="dark" mode="ios">
-                  <ion-icon name="list-sharp"></ion-icon>
-                </ion-button>
-              </div>
-              <h6>{{ item.view.title | translate }}</h6>
-              <div class="full-width">
-                {{ item.view.description }}<br />
-                {{ 'Shared with' | translate }} {{ item.view._tags?.length }} {{ '#Hashtags' | translate }}
-              </div>
-              <div *ngIf="is_refreshing; else showchart" class="app-charts">
-                <ion-item lines="none">
-                  <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-                  <ion-label>{{ loadingText | translate }}</ion-label>
-                </ion-item>
-              </div>
-              <ng-template #showchart>
-                <div class="app-charts">
-                  <app-chart *ngIf="item.series && item.series.length > 0; else noviewdata" [item]="item"
-                    [width]="chcontainer.offsetWidth"></app-chart>
-                  <ng-template #noviewdata>
-                    <div class="visual-error">
-                      {{ 'CHART NOT GENERATED' | translate }}<br />
-                      {{ item?.error | translate }}
-                    </div>
-                  </ng-template>
-                </div>
-              </ng-template>
-            </div>
-          </div>
-        </div>
+        <!-- flashcards -->
+        <!-- charts -->
 
         <!-- RECENT ANNOUNCEMENTS -->
         <div class="filler-10"></div>

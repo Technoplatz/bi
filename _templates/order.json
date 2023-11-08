@@ -43,9 +43,7 @@
   "parents": [],
   "actions": [],
   "triggers": [],
-  "views": {},
   "links": [],
-  "fetchers": [],
   "import": {
     "enabled": true
   }

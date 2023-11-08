@@ -510,9 +510,7 @@
       ]
     }
   ],
-  "views": {},
   "links": [],
-  "fetchers": [],
   "import": {
     "enabled": true,
     "purge": true,

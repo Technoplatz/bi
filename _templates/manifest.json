@@ -181,7 +181,7 @@
   ],
   "triggers": [
     {
-      "name": "keys-updated",
+      "name": "relation",
       "enabled": true,
       "operations": ["update"],
       "changes": [
@@ -219,7 +219,7 @@
       ]
     },
     {
-      "name": "closed",
+      "name": "closing",
       "enabled": true,
       "operations": ["update"],
       "changes": [
@@ -229,6 +229,7 @@
           "value": null
         }
       ],
+      "conditions": [],
       "targets": [
         {
           "collection": "delivery",
@@ -254,7 +255,7 @@
           "upsert": false,
           "notification": {
             "notify": true,
-            "subject": "Manifest [Clearance Completed]",
+            "subject": "Logistics [Clearance Completed]",
             "body": "Hi,<br /><br />Manifest has been closed.",
             "collection": "delivery",
             "fields": "dnn_man_no,dnn_no,dnn_line_no,dnn_status,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
@@ -267,13 +268,14 @@
               }
             ],
             "attachment": true,
+            "push": true,
             "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
           }
         }
       ]
     },
     {
-      "name": "closed-rollback",
+      "name": "unclosing",
       "enabled": true,
       "operations": ["update"],
       "changes": [
@@ -283,6 +285,7 @@
           "value": null
         }
       ],
+      "conditions": [],
       "targets": [
         {
           "collection": "delivery",
@@ -310,8 +313,6 @@
       ]
     }
   ],
-  "views": {},
-  "fetchers": [],
   "import": {
     "enabled": false
   },
