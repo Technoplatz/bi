@@ -120,6 +120,7 @@
   "index": [
     ["per_tag"],
     ["per_collection_id"],
+    ["per_collection_id", "per_is_active", "per_query"],
     ["per_collection_id", "per_is_active", "per_tag", "per_query"],
     ["per_collection_id", "per_is_active", "per_tag", "per_read", "per_insert", "per_update", "per_delete", "per_query"]
   ],

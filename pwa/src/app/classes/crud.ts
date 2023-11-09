@@ -245,12 +245,12 @@ export class Crud {
     });
   }
 
-  get_query(id_: string, limit_: number, run_: boolean) {
+  get_query_job(type_: string, id_: string, limit_: number, run_: boolean) {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
         id: id_,
-        op: "query",
-        collection: "_query",
+        op: type_,
+        collection: type_ === "job" ? "_job" : "_query",
         limit: limit_,
         run: run_
       }).then((res: any) => {

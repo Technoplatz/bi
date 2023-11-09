@@ -49,7 +49,7 @@ from functools import partial
 from random import randint
 from datetime import datetime, timedelta
 from pymongo import MongoClient
-from boto3 import session
+import boto3
 import botocore
 import pymongo
 import bson
@@ -153,23 +153,35 @@ class Schedular:
         except Exception as exc_:
             return Misc().notify_exception_f(exc_)
 
-    def schedule_queries_f(self, sched_):
+    def schedule_query_job_f(self, source_, sched_):
         """
         docstring is in progress
         """
         try:
-            queries_ = Mongo().db_["_query"].find(
-                {"que_scheduled": True, "_approved": True})
-            if not queries_:
+            if source_ == "_query":
+                schedules_ = Mongo().db_["_query"].find({"que_scheduled": True, "_approved": True})
+            elif source_ == "_job":
+                schedules_ = Mongo().db_["_job"].find({"job_scheduled": True, "_approved": True})
+            else:
                 return {"result": True}
 
-            for query_ in queries_:
-                id__ = query_["que_id"] if "que_id" in query_ else None
+            if not schedules_:
+                return {"result": True}
+
+            for query_ in schedules_:
+                id__ = query_["que_id"] \
+                    if source_ == "_query" and "que_id" in query_ \
+                    else query_["job_id"] if source_ == "_job" and "job_id" in query_ \
+                    else None
+
                 if not id__:
                     continue
 
-                scheduled_cron_ = query_[
-                    "que_scheduled_cron"] if "que_scheduled_cron" in query_ else None
+                scheduled_cron_ = query_["que_scheduled_cron"] \
+                    if source_ == "_query" and "que_scheduled_cron" in query_ \
+                    else query_["job_scheduled_cron"] if source_ == "_job" and "job_scheduled_cron" in query_ \
+                    else None
+
                 if not croniter.is_valid(scheduled_cron_):
                     continue
 
@@ -183,14 +195,28 @@ class Schedular:
                 month_ = str(separated_[3].strip())
                 day_of_week_ = str(separated_[4].lower().strip())
 
-                args_ = [{
-                    "id": query_["que_id"],
-                    "sched": True,
-                    "key": SMTP_PASSWORD_
-                }]
-
-                sched_.add_job(Crud().query_f, trigger="cron", minute=minute_, hour=hour_, day=day_,
-                               month=month_, day_of_week=day_of_week_, id=id__, replace_existing=True, args=args_)
+                if source_ == "_job":
+                    sched_.add_job(Crud().job_f, 
+                    trigger="cron", 
+                    minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, 
+                    id=id__, 
+                    replace_existing=True, 
+                    args=[{
+                        "id": query_["job_id"]
+                    }])
+                elif source_ == "_query":
+                    sched_.add_job(Crud().query_f, 
+                    trigger="cron", 
+                    minute=minute_, hour=hour_, day=day_, month=month_, day_of_week=day_of_week_, 
+                    id=id__, 
+                    replace_existing=True, 
+                    args=[{
+                        "id": query_["que_id"],
+                        "sched": True,
+                        "key": SMTP_PASSWORD_
+                    }])
+                else:
+                    raise APIError("invalid scheduled source")
 
             return {"result": True}
 
@@ -209,8 +235,10 @@ class Schedular:
             sched_.remove_all_jobs()
             sched_.add_job(Crud().dump_f, trigger="cron", minute="0", hour=f"{MONGO_DUMP_HOURS_}", day="*", month="*",
                            day_of_week="*", id="schedule_dump", replace_existing=True, args=[{"user": {"email": "cronjob"}, "op": "dumpu"}])
-            sched_.add_job(self.schedule_queries_f, trigger="cron", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", hour="*",
-                           day="*", month="*", day_of_week="*", id="schedule_queries", replace_existing=True, args=[sched_])
+            sched_.add_job(self.schedule_query_job_f, trigger="cron", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", hour="*",
+                           day="*", month="*", day_of_week="*", id="schedule_queries", replace_existing=True, args=["_query", sched_])
+            sched_.add_job(self.schedule_query_job_f, trigger="cron", minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}", hour="*",
+                day="*", month="*", day_of_week="*", id="schedule_jobs", replace_existing=True, args=["_job", sched_])
             sched_.start()
             return True
 
@@ -277,7 +305,7 @@ class Misc:
             "reminder"
         ]
 
-    def boto_s3_f(self, input_):
+    def s3_f(self, input_):
         """
         docstring is in progress
         """
@@ -286,34 +314,20 @@ class Misc:
                 return {"result": True}
 
             op_ = input_["op"]
-            origin_ = input_["origin"]
+            localfile_ = input_["localfile"]
             object_ = input_["object"]
+            s3_ = boto3.client("s3", region_name=API_S3_REGION_,
+                               aws_access_key_id=API_S3_KEY_ID_, aws_secret_access_key=API_S3_KEY_)
+            try:
+                s3_.download_file(API_S3_BUCKET_NAME_, object_, localfile_) if op_ in [
+                    "dumpr", "dumpd"] else s3_.upload_file(localfile_, API_S3_BUCKET_NAME_, object_)
+            except botocore.exceptions.ClientError as exc__:
+                msg_ = str(exc__)
+                if exc__.response["Error"]["Code"] == "404":
+                    msg_ = "object does not exist"
+                return {"result": False, "msg": msg_}
 
-            extra_args_ = {
-                "ServerSideEncryption": "AES256"
-            }
-
-            boto_client_ = session.Session().client(
-                "s3",
-                region_name=API_S3_REGION_,
-                endpoint_url=API_S3_ENDPOINT_URL_,
-                aws_access_key_id=API_S3_ACCESS_ID_,
-                aws_secret_access_key=API_S3_SECRET_KEY_
-            )
-
-            if op_ in ["dumpr", "dumpd"]:
-                try:
-                    boto_client_.download_file(
-                        API_S3_BUCKET_NAME_, object_, origin_)
-                except botocore.exceptions.ClientError as exc__:
-                    msg_ = str(exc__)
-                    if exc__.response["Error"]["Code"] == "404":
-                        msg_ = "object does not exist"
-                    return {"result": False, "msg": msg_}
-            else:
-                boto_client_.upload_file(
-                    origin_, API_S3_BUCKET_NAME_, object_, ExtraArgs=extra_args_)
-
+            s3_.close()
             return {"result": True}
 
         except APIError as exc__:
@@ -321,9 +335,6 @@ class Misc:
 
         except Exception as exc__:
             return {"result": False, "msg": str(exc__)}
-
-        finally:
-            boto_client_.close()
 
     def commands_f(self, command_, input_):
         """
@@ -585,8 +596,8 @@ class Misc:
             for member_ in users_:
                 if member_["usr_id"] not in to_:
                     to_.append(member_["usr_id"])
-                    personalizations_.append({"list": "to", "email": member_[
-                                             "usr_id"], "name": member_["usr_name"]})
+                    personalizations_.append(
+                        {"email": member_["usr_id"], "name": member_["usr_name"]})
 
             return {"result": True, "personalizations": personalizations_}
 
@@ -1418,8 +1429,8 @@ class Crud:
 
             Email().send_email_f({
                 "personalizations": [
-                    {"list": "to", "email": email_, "name": name_},
-                    {"list": "cc", "email": ADMIN_EMAIL_, "name": ADMIN_NAME_}
+                    {"email": email_, "name": name_},
+                    {"email": ADMIN_EMAIL_, "name": ADMIN_NAME_}
                 ],
                 "op": "importerr",
                 "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}{stats_}",
@@ -1462,13 +1473,13 @@ class Crud:
                     "_modified_by": email_
                 })
 
-            boto_s3_f_ = Misc().boto_s3_f({
+            s3_f_ = Misc().s3_f({
                 "op": op_,
-                "origin": fullpath_,
-                "object": fn_
+                "localfile": fullpath_,
+                "object": f"mongodump/{fn_}"
             })
-            if not boto_s3_f_["result"]:
-                raise APIError(boto_s3_f_["msg"])
+            if not s3_f_["result"]:
+                raise APIError(s3_f_["msg"])
 
             size_ = os.path.getsize(fullpath_)
 
@@ -1751,8 +1762,7 @@ class Crud:
         """
         docstring is in progress
         """
-        schema_, query_, data_, fields_, count_, permitted_, aggregate_base_, err_ = {
-        }, {}, [], [], 0, False, [], None
+        schema_, query_, data_, fields_, count_, permitted_, err_ = {}, {}, [], [], 0, False, None
         files_, personalizations_, to_, orig_ = [], [], [], None
         init_res_ = {"result": True, "query": query_, "data": data_,
                      "count": count_, "fields": fields_, "err": err_}
@@ -1766,8 +1776,7 @@ class Crud:
                 raise APIError("query schema not found")
 
             sched_ = "sched" in obj_ and obj_["sched"] is True
-            key_ = obj_["key"] if "key" in obj_ and obj_[
-                "key"] is not None else None
+            key_ = obj_["key"] if "key" in obj_ and obj_["key"] is not None else None
 
             if not request:
                 if key_ and key_ == SMTP_PASSWORD_:
@@ -1786,7 +1795,7 @@ class Crud:
 
             approved_ = "_approved" in query_ and query_["_approved"] is True
             if not approved_:
-                err_ = "query needs to be approved by the administrators"
+                err_ = "query needs to be approved by administrators"
                 raise PassException(err_)
 
             if orig_ == "api/crud":
@@ -1859,57 +1868,7 @@ class Crud:
                 if "$project" in agg_:
                     for prj_ in agg_["$project"]:
                         fields_.append(prj_)
-                aggregate_base_.append(agg_)
-
-            aggregate_ = aggregate_base_.copy()
-
-            if que_type_ == "job":
-                if not update_allowed_:
-                    err_ = "update queries not allowed for the collection"
-                    raise PassException(err_)
-                if not updatables_:
-                    err_ = "no updatable fields defined in the collection structure"
-                    raise PassException(err_)
-                if not match_exists_:
-                    err_ = "no match found in the update query"
-                    raise PassException(err_)
-                if not set_:
-                    err_ = "no set found in the update query"
-                    raise PassException(err_)
-                set__ = {}
-                for item_ in set_:
-                    if item_ not in properties_:
-                        continue
-                    if item_ not in updatables_:
-                        continue
-                    value_ = set_[item_]
-                    if str(value_).lower() == "$current_date":
-                        value_ = Misc().get_now_f()
-                    set__[item_] = value_
-                if not set__:
-                    err_ = "no valid set fields found in the update query"
-                    raise PassException(err_)
-                aggregate_update_ = []
-                for agg_ in que_aggregate_:
-                    if "$project" in agg_ or "$set" in agg_ or "$unset" in agg_:
-                        continue
-                    aggregate_update_.append(agg_)
-                aggregate_update_.append({"$project": {"_id": "$_id"}})
-                cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(
-                    aggregate_update_)
-                if not cursor_:
-                    err_ = "no record found to update"
-                    raise PassException(err_)
-                data_ = json.loads(JSONEncoder().encode(list(cursor_)))
-                ids_ = [ObjectId(doc_["_id"]) for doc_ in data_]
-                if ids_:
-                    set__["_modified_at"] = Misc().get_now_f()
-                    update_many_ = Mongo().db_[f"{que_collection_id_}_data"].update_many(
-                        {"_id": {"$in": ids_}}, {"$set": set__})
-                    count_ = update_many_.matched_count
-                return {"result": True, "query": query_, "data": [], "count": count_, "fields": [], "schema": schema_, "err": err_}
-
-            aggregate_base_.append({"$count": "count"})
+                aggregate_.append(agg_)
 
             if orig_ == "api/crud":
                 limit_ = obj_["limit"] if "limit" in obj_ and obj_[
@@ -1918,8 +1877,7 @@ class Crud:
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
-            cursor_ = Mongo().db_[
-                f"{que_collection_id_}_data"].aggregate(aggregate_)
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             count_ = len(data_)
 
@@ -1935,8 +1893,8 @@ class Crud:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
                         to_.append(member_["usr_id"])
-                        personalizations_.append({"list": "to", "email": member_[
-                                                 "usr_id"], "name": member_["usr_name"]})
+                        personalizations_.append(
+                            {"email": member_["usr_id"], "name": member_["usr_name"]})
                 df_raw_ = pd.DataFrame(data_).fillna("")
                 file_excel_ = f"{API_TEMPFILE_PATH_}/query-{que_id_}-{Misc().get_timestamp_f()}.xlsx"
                 df_raw_.to_excel(file_excel_, sheet_name=que_id_,
@@ -1978,6 +1936,144 @@ class Crud:
             init_res_["result"] = False
             init_res_["schema"] = {}
             init_res_["query"] = query_
+            init_res_["err"] = str(exc__)
+            return init_res_
+
+    def job_f(self, obj_):
+        """
+        docstring is in progress
+        """
+        count_, err_ = 0, None
+        init_res_ = {"result": True, "count": count_, "err": err_}
+        try:
+            job_id_ = obj_["id"] if "id" in obj_ else None
+            if not job_id_:
+                raise APIError("no job defined")
+
+            schema_ = self.root_schemas_f("_job")
+            if not schema_:
+                raise APIError("job schema not found")
+
+            job_ = Mongo().db_["_job"].find_one({"job_id": job_id_})
+            if not job_:
+                raise APIError("job not found")
+
+            approved_ = "_approved" in job_ and job_["_approved"] is True
+            if not approved_:
+                err_ = "job needs to be approved by administrators"
+                raise PassException(err_)
+
+            job_collection_id_ = job_["job_collection_id"] if "job_collection_id" in job_ else None
+            if not job_collection_id_:
+                raise APIError("job collection not defined")
+
+            collection_ = Mongo().db_["_collection"].find_one({"col_id": job_collection_id_})
+            if not collection_:
+                raise APIError("query collection not found")
+
+            structure_ = collection_["col_structure"] if "col_structure" in collection_ else None
+            if not structure_:
+                raise APIError("collection structure not found")
+
+            properties_ = structure_["properties"] if "properties" in structure_ else None
+            if not properties_:
+                raise APIError("properties not found in structure")
+
+            queries_ = structure_["queries"] if "queries" in structure_ else None
+            if not queries_:
+                err_ = "queries not defined in the structure"
+                raise PassException(err_)
+
+            job_allowed_ = "query" in queries_ and queries_["query"] is True
+            if not job_allowed_:
+                err_ = "job not allowed for the collection"
+                raise PassException(err_)
+
+            job_aggregate_ = job_["job_aggregate"] if "job_aggregate" in job_ and len(job_["job_aggregate"]) > 0 else None
+            if not job_aggregate_:
+                raise PassException("no job defined yet")
+
+            update_allowed_ = "cronjob" in queries_ and queries_["cronjob"] is True
+            updatables_ = queries_["updatables"] if "updatables" in queries_ and len(queries_["updatables"]) > 0 else None
+
+            match_exists_, set_ = False, None
+            for agg_ in job_aggregate_:
+                if "$limit" in agg_ or "$skip" in agg_:
+                    continue
+                if "$match" in agg_:
+                    match_exists_ = True
+                if "$set" in agg_:
+                    set_ = agg_["$set"]
+
+            if not update_allowed_:
+                err_ = "update not allowed on the collection"
+                raise PassException(err_)
+
+            if not updatables_:
+                err_ = "no updatable fields found in the collection structure"
+                raise PassException(err_)
+
+            if not match_exists_:
+                err_ = "no match found in the update query"
+                raise PassException(err_)
+
+            if not set_:
+                err_ = "no set found in the update query"
+                raise PassException(err_)
+
+            set__ = {}
+            for item_ in set_:
+                if item_ not in properties_:
+                    continue
+                if item_ not in updatables_:
+                    continue
+                value_ = set_[item_]
+                if str(value_).lower() == "$current_date":
+                    value_ = Misc().get_now_f()
+                set__[item_] = value_
+
+            if not set__:
+                err_ = "no set found in the job"
+                raise PassException(err_)
+
+            aggregate_update_ = []
+            for agg_ in job_aggregate_:
+                if "$project" in agg_ or "$set" in agg_ or "$unset" in agg_:
+                    continue
+                aggregate_update_.append(agg_)
+
+            aggregate_update_.append({"$project": {"_id": "$_id"}})
+            cursor_ = Mongo().db_[f"{job_collection_id_}_data"].aggregate(aggregate_update_)
+            if not cursor_:
+                err_ = "no record found to update"
+                raise PassException(err_)
+
+            data_ = json.loads(JSONEncoder().encode(list(cursor_)))
+            ids_ = [ObjectId(doc_["_id"]) for doc_ in data_]
+            if ids_:
+                set__["_modified_at"] = Misc().get_now_f()
+                update_many_ = Mongo().db_[f"{job_collection_id_}_data"].update_many({"_id": {"$in": ids_}}, {"$set": set__})
+                count_ = update_many_.matched_count
+
+            return {"result": True, "count": count_, "job": job_ ,"err": err_}
+
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
+
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
+
+        except pymongo.errors.PyMongoError as exc__:
+            init_res_["result"] = False
+            init_res_["err"] = str(exc__)
+            return init_res_
+
+        except PassException as exc__:
+            init_res_["err"] = str(exc__)
+            return init_res_
+
+        except Exception as exc__:
+            init_res_["result"] = False
             init_res_["err"] = str(exc__)
             return init_res_
 
@@ -2212,6 +2308,71 @@ class Crud:
                 raise APIError(schemavalidate_["msg"])
 
             return {"result": True}
+
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
+
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
+
+    def savejob_f(self, obj_):
+        """
+        docstring is in progress
+        """
+        try:
+            job_id_ = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
+            if not job_id_:
+                raise APIError("job not provided")
+
+            aggregate_ = obj_["aggregate"] if "aggregate" in obj_ and obj_["aggregate"] else None
+            if not aggregate_:
+                raise APIError("no aggregation provided")
+
+            job_ = Mongo().db_["_job"].find_one({"job_id": job_id_})
+            if not job_:
+                raise APIError("job not found")
+
+            job_collection_id_ = job_["job_collection_id"] if "job_collection_id" in job_ and job_["job_collection_id"] is not None else None
+            if not job_collection_id_:
+                raise APIError("no collection provided")
+
+            user_ = obj_["userindb"] if "userindb" in obj_ and obj_["userindb"] else None
+            if not user_:
+                raise AuthError("user not found")
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+
+            if not Auth().is_admin_f(user_):
+                raise AuthError("no permission to save job")
+
+            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
+                permission_ = Mongo().db_["_permission"].find_one({"per_collection_id": job_collection_id_, "per_is_active": True, "per_query": True})
+                if not permission_:
+                    raise AuthError("no permission to save job")
+
+            doc_ = {
+                "job_aggregate": aggregate_,
+                "_modified_at": Misc().get_now_f(),
+                "_modified_by": user_["usr_id"],
+                "_approved": False
+            }
+
+            approved_ = "approved" in obj_ and obj_["approved"] is True
+            if approved_:
+                if not Auth().is_admin_f(user_):
+                    raise AuthError("no permission to approve")
+                doc_["_approved"] = True
+                doc_["_approved_at"] = Misc().get_now_f()
+                doc_["_approved_by"] = user_["usr_id"]
+
+            Mongo().db_["_job"].update_one({"job_id": job_id_}, {"$set": doc_, "$inc": {"_modified_count": 1}})
+
+            return {"result": True}
+
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
+
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
         except APIError as exc__:
             return Misc().notify_exception_f(exc__)
@@ -2742,7 +2903,7 @@ class Crud:
                                ] if attachment_ else []
                     subject_ = f"Automation [{subject_}]"
                     email_sent_ = Email().send_email_f(
-                        {"list": "to", "op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                        {"op": "link", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
@@ -3001,7 +3162,7 @@ class Crud:
 
                 subject_ = f"Action [{subject_}]"
                 email_sent_ = Email().send_email_f(
-                    {"list": "to", "op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
+                    {"op": "action", "tags": tags_, "subject": subject_, "html": body_, "files": files_})
                 if not email_sent_["result"]:
                     raise APIError(email_sent_["msg"])
 
@@ -3205,10 +3366,19 @@ class Email:
             if not personalizations_:
                 raise APIError("email personalizations is missing")
 
-            email_from_ = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
+            recipients_, to_ = [], []
+            for recipient_ in personalizations_:
+                recipients_.append(recipient_["email"])
+                to_.append(f"{recipient_['name']} <{recipient_['email']}>" if "name" in recipient_ and recipient_[
+                           "name"] != "" else recipient_["email"])
+
+            if not recipients_:
+                return {"result": True}
+
             message_ = MIMEMultipart()
-            message_["From"] = email_from_
+            message_["From"] = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
             message_["Subject"] = f"{EMAIL_SUBJECT_PREFIX_}{subject_}"
+            message_["To"] = ", ".join(to_)
             message_.attach(MIMEText(html_, "html"))
 
             for file_ in files_:
@@ -3219,7 +3389,6 @@ class Email:
                 fullpath_ = os.path.normpath(
                     os.path.join(API_TEMPFILE_PATH_, filename_))
                 if not fullpath_.startswith(TEMP_PATH_):
-                    PRINT_("!!! [email] fullpath_", fullpath_)
                     raise APIError("file not allowed [email]")
                 with open(fullpath_, "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
@@ -3229,37 +3398,12 @@ class Email:
                                  f"attachment; filename= {filename_}")
                 message_.attach(part_)
 
-            recipients_to_, recipients_cc_, recipients_ = [], [], []
-            for recipient_ in personalizations_:
-                addr_ = recipient_["email"] if "email" in recipient_ else None
-                if addr_:
-                    if recipient_["list"] == "to":
-                        recipients_to_.append(addr_)
-                    if recipient_["list"] == "cc":
-                        recipients_cc_.append(addr_)
-
-            if not recipients_to_:
-                recipients_to_ = recipients_cc_
-                recipients_cc_ = []
-
-            recipients_ = recipients_to_ + recipients_cc_
-
-            if not recipients_:
-                return {"result": True}
-
-            if recipients_to_:
-                message_["To"] = ", ".join(recipients_to_)
-            if recipients_cc_:
-                message_["Cc"] = ", ".join(recipients_cc_)
-
-            server_ = smtplib.SMTP(SMTP_SERVER_, SMTP_PORT_) if SMTP_PORT_ == 587 else smtplib.SMTP_SSL(
-                SMTP_SERVER_, SMTP_PORT_)
-            server_.ehlo()
-            if SMTP_PORT_ == 587:
-                server_.starttls()
-            server_.login(SMTP_USERID_, SMTP_PASSWORD_)
-            server_.sendmail(email_from_, recipients_, message_.as_string())
-            server_.close()
+            endpoint_ = smtplib.SMTP(SMTP_ENDPOINT_, SMTP_TLS_PORT_)
+            endpoint_.ehlo()
+            endpoint_.starttls()
+            endpoint_.login(SMTP_USERID_, SMTP_PASSWORD_)
+            endpoint_.sendmail(FROM_EMAIL_, recipients_, message_.as_string())
+            endpoint_.close()
 
             return {"result": True}
 
@@ -3445,7 +3589,7 @@ class OTP:
                 "aut_tfac": tfac_, "_tfac_modified_at": Misc().get_now_f()}, "$inc": {"_modified_count": 1}})
             email_sent_ = Email().send_email_f({
                 "op": "tfa",
-                "personalizations": [{"list": "to", "email": usr_id_, "name": name_}],
+                "personalizations": [{"email": usr_id_, "name": name_}],
                 "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>",
                 "subject": "Sign in [OTP]"
             })
@@ -3695,7 +3839,7 @@ class Auth:
             op_ = input_["op"] if "op" in input_ else None
             adminops_ = ["dumpu", "dumpr", "dumpd"]
             read_permissive_colls_ = ["_collection", "_query", "_announcement"]
-            read_permissive_ops_ = ["read", "query", "savequery",
+            read_permissive_ops_ = ["read", "query", "savequery", "savejob",
                                     "queries", "collection", "collections", "announcements"]
             insert_permissive_ops_ = ["clone"]
             is_crud_ = collection_id_ and collection_id_[:1] != "_"
@@ -3749,7 +3893,7 @@ class Auth:
                     per_query_ = "per_query" in permission_ and permission_[
                         "per_query"] is True
                     if (op_ == "read" and per_read_) or \
-                        (op_ == "savequery" and per_query_) or \
+                        (op_ in ["savequery", "savejob"] and per_query_) or \
                         (op_ == "insert" and per_insert_ and per_read_) or \
                         (op_ == "import" and per_insert_ and per_read_) or \
                         (op_ == "upsert" and per_insert_ and per_update_ and per_read_) or \
@@ -4027,7 +4171,7 @@ class Auth:
             if "_otp_validated_ip" in auth_ and auth_["_otp_validated_ip"] is not None and auth_["_otp_validated_ip"] != ip_:
                 email_sent_ = Email().send_email_f({
                     "op": "signin",
-                    "personalizations": [{"list": "to", "email": email_, "name": usr_name_}],
+                    "personalizations": [{"email": email_, "name": usr_name_}],
                     "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",
                     "subject": "Sign in [Validated!]"
                 })
@@ -4314,11 +4458,10 @@ COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get(
 DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
-SMTP_SERVER_ = os.environ.get("SMTP_SERVER")
-SMTP_PORT_ = int(str(os.environ.get("SMTP_PORT"))
-                 ) if os.environ.get("SMTP_PORT") else 587
-SMTP_USERID_ = os.environ.get("SMTP_USERID")
-SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
+SMTP_TLS_PORT_ = int(str(os.environ.get("SMTP_TLS_PORT")))
+SMTP_USERID_ = get_docker_secret("smtp_userid", default="")
+SMTP_PASSWORD_ = get_docker_secret("smtp_password", default="")
+SMTP_ENDPOINT_ = get_docker_secret("smtp_endpoint", default="")
 FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
 EMAIL_DISCLAIMER_HTML_ = os.environ.get("EMAIL_DISCLAIMER_HTML")
 EMAIL_TFA_SUBJECT_ = "Your Backup OTP"
@@ -4342,9 +4485,8 @@ API_CORS_ORIGINS_ = os.environ.get('API_CORS_ORIGINS').strip().split(",")
 API_S3_ACTIVE_ = os.environ.get("API_S3_ACTIVE") in [
     True, "true", "True", "TRUE"]
 API_S3_REGION_ = os.environ.get("API_S3_REGION")
-API_S3_ENDPOINT_URL_ = os.environ.get("API_S3_ENDPOINT_URL")
-API_S3_ACCESS_ID_ = os.environ.get("API_S3_ACCESS_ID")
-API_S3_SECRET_KEY_ = os.environ.get("API_S3_SECRET_KEY")
+API_S3_KEY_ID_ = get_docker_secret("s3_keyid", default="")
+API_S3_KEY_ = get_docker_secret("s3_key", default="")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 API_PERMISSIVE_TAGS_ = os.environ.get(
     "API_PERMISSIVE_TAGS").replace(" ", "").split(",")
@@ -4558,12 +4700,16 @@ def api_crud_f():
             res_ = Crud().collection_f(input_)
         elif op_ == "query":
             res_ = Crud().query_f(input_)
+        elif op_ == "job":
+            res_ = Crud().job_f(input_)
         elif op_ in ["dumpu", "dumpd", "dumpr"]:
             res_ = Crud().dump_f(input_)
         elif op_ == "saveschema":
             res_ = Crud().saveschema_f(input_)
         elif op_ == "savequery":
             res_ = Crud().savequery_f(input_)
+        elif op_ == "savejob":
+            res_ = Crud().savejob_f(input_)
         else:
             raise APIError(f"invalid operation: {op_}")
 

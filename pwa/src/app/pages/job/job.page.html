@@ -36,45 +36,36 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}</p>
         <h3>{{ subheader }}</h3>
-        <span *ngIf="type_==='query'">{{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
-          }}. </span>[ {{
-        que_scheduled_cron_ ?
-        que_scheduled_cron_ : 'Not scheduled' | translate }} ]<br />
-        <strong>_collection: {{ col_ }}</strong>
+        <strong>_collection: {{ col_ }} [{{
+          job_scheduled_cron_ ?
+          job_scheduled_cron_ : 'Not scheduled' | translate }}]</strong>
         <div class="filler-10"></div>
 
         <!-- BUTTONS -->
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div (click)="misc.navi.next('admin/_query')" class="data-sq-button">
+              <div (click)="misc.navi.next('admin/_job')" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="arrow-back-sharp"></ion-icon><br />
                   {{ 'Back-To List' | translate }}
                 </div>
               </div>
-              <div (click)="type_!=='query' ? run_query() : refresh_data(false)"
+              <div (click)="run_job()"
                 [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
                 <span *ngIf="!running_">
                   <ion-icon name="play-sharp"></ion-icon><br />
-                  {{ 'Run Query' | translate }}
+                  {{ 'Run Job' | translate }}
                 </span>
                 <span *ngIf="running_">
                   <ion-spinner name="lines-sharp"></ion-spinner><br />
                   {{ 'Please Wait' | translate }}
                 </span>
               </div>
-              <div (click)="copy_url()" class="data-sq-button">
-                <ion-icon *ngIf="!is_url_copied" name="globe-sharp"></ion-icon>
-                <ion-icon *ngIf="is_url_copied" name="checkmark-sharp"></ion-icon>
-                <br />
-                <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
-                <span *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</span>
-              </div>
               <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-sharp"></ion-icon><br />
-                  {{ 'Edit Query' | translate }}
+                  {{ 'Edit Job' | translate }}
                 </div>
               </div>
             </ion-col>
@@ -108,38 +99,6 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
-
-        <!-- CRUD GRID SECTION -->
-        <div *ngIf="type_==='query'; else job">
-          <table *ngIf="data_.length > 0; else nodata" class="data-table">
-            <tr>
-              <th>#</th>
-              <th *ngFor="let item_ of fields_">
-                {{ item_ }}
-              </th>
-            </tr>
-            <tr *ngFor="let record of data_; let i = index">
-              <td>{{ i + 1}}</td>
-              <td *ngFor="let item_ of fields_">
-                {{ record[item_]?.toString() }}
-              </td>
-            </tr>
-          </table>
-
-          <!-- NO DATA FOUND FOR QUERY -->
-          <ng-template #nodata>
-            <div *ngIf="!running_; else ontheway" class="ion-margin-top">
-              <h6>{{ 'No data matching the criteria found' | translate }}.</h6>
-              {{ 'You can edit the query or get help from the Administrators' | translate }}.
-            </div>
-            <ng-template #ontheway>
-              <div class="ion-margin-top">
-                <h6>{{ 'Data is on the way' | translate }}...</h6>
-                {{ 'Please wait while the data is retrieved' | translate }}.
-              </div>
-            </ng-template>
-          </ng-template>
-        </div>
 
         <!-- RESULT FOR A JOB -->
         <ng-template #job>

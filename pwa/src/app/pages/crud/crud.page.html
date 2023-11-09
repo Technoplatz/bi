@@ -29,6 +29,7 @@ if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 -->
+
 <ion-header class="ion-padding-start ion-padding-end ion-no-border ion-no-margin modal-header">
     <ion-grid class="ion-no-padding">
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
@@ -39,13 +40,14 @@ https://www.gnu.org/licenses.
                 </ion-button>
                 <ng-template #ready>
                     <ion-button *ngIf="collection=='_dump' && op=='insert'" (click)="dump('dumpu')">
-                        {{ 'Make Dump' | translate }}
+                        {{ 'Dump' | translate }}
                     </ion-button>
                     <ion-button *ngIf="collection=='_dump' && op=='update'" (click)="dump('dumpd')">
-                        <ion-icon name="arrow-down-circle-sharp"></ion-icon>
+                        <ion-icon name="cloud-download-sharp"></ion-icon>
                         {{ 'Download' | translate }}
                     </ion-button>
-                    <ion-button *ngIf="collection=='_dump' && op=='update'" (click)="dump('dumpr')">
+                    <ion-button *ngIf="collection=='_dump' && op=='update'" (click)="dump('dumpr')" color="danger">
+                        <ion-icon name="alert-circle-sharp"></ion-icon>
                         {{ 'Restore' | translate }}
                     </ion-button>
                     <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">

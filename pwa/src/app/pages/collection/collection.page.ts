@@ -140,7 +140,7 @@ export class CollectionPage implements OnInit {
     this.menu = this.router.url.split("/")[1];
     this.subheader = this.id = this.router.url.split("/")[2];
     this.is_crud = this.id.charAt(0) === "_" ? false : true;
-    this.header = this.is_crud ? "COLLECTIONS" : this.id === "_collection" ? "DATA COLLECTIONS" : this.id === "_query" ? "QUERIES" : this.id === "_visual" ? "VISUALIZATION" : "ADMINISTRATION";
+    this.header = this.is_crud ? "COLLECTIONS" : this.id === "_collection" ? "DATA COLLECTIONS" : this.id === "_query" ? "QUERIES" : this.id === "_job" ? "JOBS" : this.id === "_visual" ? "VISUALIZATION" : "ADMINISTRATION";
   }
 
   ionViewDidEnter() {
@@ -561,10 +561,12 @@ export class CollectionPage implements OnInit {
     !event_.isTrusted ? this.json_content_ = event_ : null;
   }
 
-  go_query(record_: any, event_: any) {
+  go_query_job(record_: any, event_: any) {
     event_.stopPropagation();
-    this.storage.set("LSQUERY", record_).then(() => {
+    this.id === "_query" ? this.storage.set("LSQUERY", record_).then(() => {
       this.misc.navi.next("/query/" + record_.que_id);
+    }) : this.storage.set("LSJOB", record_).then(() => {
+      this.misc.navi.next("/job/" + record_.job_id);
     });
   }
 

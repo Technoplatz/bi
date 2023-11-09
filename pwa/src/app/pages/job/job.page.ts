@@ -40,15 +40,15 @@ import { environment } from "../../../environments/environment";
 import { JsonEditorOptions } from "ang-jsoneditor";
 
 @Component({
-  selector: "app-query",
-  templateUrl: "./query.page.html",
-  styleUrls: ["./query.page.scss"]
+  selector: "app-job",
+  templateUrl: "./job.page.html",
+  styleUrls: ["./job.page.scss"]
 })
 
-export class QueryPage implements OnInit {
+export class JobPage implements OnInit {
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
-  public header: string = "QUERIES";
+  public header: string = "JOBS";
   public subheader: string = "";
   public loadingText: string = environment.misc.loadingText;
   public user: any = null;
@@ -60,12 +60,10 @@ export class QueryPage implements OnInit {
   public count_: number = 0;
   public status_: any = {};
   public columns_: any;
-  public fields_: any = {};
   public _saving: boolean = false;
   public is_deleting: boolean = false;
   public sort: any = {};
   public schemavis_: boolean = false;
-  public type_: string = "aggregate";
   public aggregate_: any = [];
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
@@ -73,16 +71,13 @@ export class QueryPage implements OnInit {
   public is_inprogress: boolean = false;
   public is_url_copied: boolean = false;
   public running_: boolean = false;
-  public query_url_: string = "";
-  public que_scheduled_cron_: string = "";
-  public _tags: any = [];
+  public job_scheduled_cron_: string = "";
   private menu: string = "";
   private submenu: string = "";
   private query_: any = {};
   private uri_: string = "";
   public perma_: boolean = false;
   private collections_: any = [];
-  private schema_: any = {};
   public json_content_: any = null;
   public col_: string = "";
 
@@ -116,13 +111,11 @@ export class QueryPage implements OnInit {
   ionViewDidEnter() {
     this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
       this.limit_ = LSPAGINATION * 1;
-      this.storage.get("LSQUERY").then((LSQUERY_: any) => {
-        this.col_ = LSQUERY_?.que_collection_id;
-        this.query_ = LSQUERY_;
-        this.type_ = LSQUERY_?.que_type;
+      this.storage.get("LSJOB").then((LSJOB_: any) => {
+        this.col_ = LSJOB_?.job_collection_id;
+        this.query_ = LSJOB_;
         this.menu = this.router.url.split("/")[1];
         this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
-        this.query_url_ = `${this.uri_}/get/query/${this.id}`;
         this.refresh_data(false).then(() => { });
       });
     });
@@ -132,17 +125,12 @@ export class QueryPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.running_ = true;
       this.schemavis_ = false;
-      this.crud.get_query_job("query", this.id, this.limit_, run_).then((res: any) => {
-        if (res.query && res.data) {
-          this.schema_ = res.schema;
-          this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
-          this._tags = res.query?._tags;
-          this.subheader = res.query.que_title;
-          this.json_content_ = res.query.que_aggregate;
-          this.aggregate_ = res.query.que_aggregate;
-          this.type_ = res.query.que_type;
-          this.fields_ = res.fields;
-          this.data_ = res.data;
+      this.crud.get_query_job("job", this.id, this.limit_, run_).then((res: any) => {
+        if (res && res.job) {
+          this.job_scheduled_cron_ = res.job?.job_scheduled_cron;
+          this.subheader = res.job.job_title;
+          this.json_content_ = res.job.job_aggregate;
+          this.aggregate_ = res.job.job_aggregate;
           this.count_ = res.count;
           resolve(true);
         } else {
@@ -163,7 +151,7 @@ export class QueryPage implements OnInit {
   }
 
   json_editor_init() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.jeoptions = new JsonEditorOptions();
       this.jeoptions.modes = ["tree", "code", "text"]
       this.jeoptions.mode = "code";
@@ -183,16 +171,13 @@ export class QueryPage implements OnInit {
       this._saving = true;
       this.aggregate_ = this.json_content_;
       this.misc.api_call("crud", {
-        op: "savequery",
-        collection: "_query",
+        op: "savejob",
+        collection: "_job",
         id: this.id,
         aggregate: this.aggregate_,
         approved: approved_
       }).then(() => {
-        this.misc.doMessage("query saved successfully", "success");
-        this.refresh_data(false).then(() => {
-          this.schemavis_ = false;
-        });
+        this.misc.doMessage("job saved successfully", "success");
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
       }).finally(() => {
@@ -207,26 +192,10 @@ export class QueryPage implements OnInit {
     !event_.isTrusted ? this.json_content_ = event_ : null;
   }
 
-  copy_url() {
-    this.is_url_copied = false;
-    this.misc.copy_to_clipboard(this.query_url_).then(() => {
-      this.is_url_copied = true;
-    }).catch((error: any) => {
-      console.error("*** copy error", error);
-    }).finally(() => {
-      setTimeout(() => {
-        this.is_url_copied = false;
-      }, 1000);
+  run_job() {
+    this.refresh_data(true).then(() => {
+      console.log("*** jub run");
     });
-  }
-
-  run_query() {
-    if (!this.running_) {
-      this.running_ = true;
-      this.refresh_data(true).then(() => { }).finally(() => {
-        this.running_ = false;
-      });
-    }
   }
 
 }

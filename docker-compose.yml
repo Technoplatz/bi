@@ -42,7 +42,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     command:
       - --log.level=INFO
       - --api.insecure=true
@@ -70,7 +70,7 @@ services:
     container_name: init
     hostname: init
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -112,7 +112,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     ports:
       - "${MONGO_PORT0}:${MONGO_PORT0}"
     volumes:
@@ -155,7 +155,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     ports:
       - "${MONGO_PORT1}:${MONGO_PORT0}"
     volumes:
@@ -196,7 +196,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     ports:
       - "${MONGO_PORT2}:${MONGO_PORT0}"
     volumes:
@@ -241,7 +241,7 @@ services:
       mongo2:
         condition: service_healthy
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -292,7 +292,7 @@ services:
     hostname: stream
     restart: always
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     volumes:
       - bi-cert-volume:/cert
       - bi-storage-volume:${API_TEMPFILE_PATH}
@@ -316,10 +316,7 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
-      - SMTP_SERVER=${SMTP_SERVER}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_USERID=${SMTP_USERID}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_TLS_PORT=${SMTP_TLS_PORT}
       - FROM_EMAIL=${FROM_EMAIL}
       - COMPANY_NAME=${COMPANY_NAME}
       - NOTIFICATION_PUSH_URL=${NOTIFICATION_PUSH_URL}
@@ -337,6 +334,9 @@ services:
       - mongo_username
       - mongo_password
       - mongo_tls_keyfile_password
+      - smtp_userid
+      - smtp_password
+      - smtp_endpoint
 
   api:
     build:
@@ -354,7 +354,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)
       - traefik.http.services.api.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     volumes:
       - bi-storage-volume:${API_TEMPFILE_PATH}
       - bi-storage-volume:${API_MONGODUMP_PATH}
@@ -381,10 +381,7 @@ services:
       - MONGO_PORT1=${MONGO_PORT1}
       - MONGO_PORT2=${MONGO_PORT2}
       - MONGO_RS=${MONGO_RS}
-      - SMTP_SERVER=${SMTP_SERVER}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_USERID=${SMTP_USERID}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_TLS_PORT=${SMTP_TLS_PORT}
       - EMAIL_SUBJECT_PREFIX=${EMAIL_SUBJECT_PREFIX}
       - EMAIL_DISCLAIMER_HTML=${EMAIL_DISCLAIMER_HTML}
       - API_SCHEDULE_INTERVAL_MIN=${API_SCHEDULE_INTERVAL_MIN}
@@ -400,9 +397,6 @@ services:
       - API_CORS_ORIGINS=${API_CORS_ORIGINS}
       - API_S3_ACTIVE=${API_S3_ACTIVE}
       - API_S3_REGION=${API_S3_REGION}
-      - API_S3_ENDPOINT_URL=${API_S3_ENDPOINT_URL}
-      - API_S3_ACCESS_ID=${API_S3_ACCESS_ID}
-      - API_S3_SECRET_KEY=${API_S3_SECRET_KEY}
       - API_S3_BUCKET_NAME=${API_S3_BUCKET_NAME}
       - API_PERMISSIVE_TAGS=${API_PERMISSIVE_TAGS}
       - API_ADMIN_TAGS=${API_ADMIN_TAGS}
@@ -428,6 +422,11 @@ services:
       - mongo_password
       - mongo_tls_keyfile_password
       - admin_ips
+      - smtp_userid
+      - smtp_password
+      - smtp_endpoint
+      - s3_keyid
+      - s3_key
 
   pwa:
     build:
@@ -446,7 +445,7 @@ services:
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`) && !PathPrefix(`/api`)
       - traefik.http.routers.pwa.priority=0
       - traefik.http.services.pwa.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -466,7 +465,7 @@ services:
     hostname: watchtower
     restart: always
     labels:
-      - com.centurylinklabs.watchtower.enable=false
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
@@ -524,3 +523,13 @@ secrets:
     file: ./.secret/.mongo_tls_keyfile_password
   admin_ips:
     file: ./.secret/.admin_ips
+  smtp_userid:
+    file: ./.secret/.smtp_userid
+  smtp_password:
+    file: ./.secret/.smtp_password
+  smtp_endpoint:
+    file: ./.secret/.smtp_endpoint
+  s3_keyid:
+    file: ./.secret/.s3_keyid
+  s3_key:
+    file: ./.secret/.s3_key

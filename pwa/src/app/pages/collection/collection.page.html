@@ -36,7 +36,8 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
         <h3><span *ngIf="title_">{{ title_ | translate | titlecase }}&nbsp;</span>[{{ subheader }}]</h3>
-        <span *ngIf="is_loaded">{{ count }} {{ 'records were filtered' | translate }}.</span><span *ngIf="!is_loaded">{{
+        <span *ngIf="is_loaded" class="bold primary">{{ count }} {{ count > 1 ? 'documents were filtered' : 'document
+          was filtered' | translate }}.</span><span *ngIf="!is_loaded" class="bold primary">{{
           'Please wait while the data is retrieved' | translate }}...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
@@ -54,7 +55,7 @@ https://www.gnu.org/licenses.
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-sharp"></ion-icon><br />
-                  {{ 'New Record' | translate }}
+                  {{ 'New Document' | translate }}
                 </div>
               </ng-template>
               <div *ngIf="is_loaded" (click)="refresh_data(0)" class="data-sq-button">
@@ -74,15 +75,15 @@ https://www.gnu.org/licenses.
               </div>
               <div (click)="multi_crud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-sharp"></ion-icon><br />
-                {{ 'Clone Record' | translate }}
+                {{ 'Clone Document' | translate }}
               </div>
               <div *ngIf="perma_" (click)="multi_crud('delete')" class="data-sq-button">
                 <ion-icon *ngIf="is_deleting" name="lines-sharp"></ion-icon>
                 <ion-icon *ngIf="!is_deleting" name="trash-sharp"></ion-icon>
                 <br />
-                {{ 'Delete Record' | translate }}
+                {{ 'Delete Document' | translate }}
               </div>
-              <div (click)="copy_headers()" class="data-sq-button">
+              <div *ngIf="is_crud" (click)="copy_headers()" class="data-sq-button">
                 <ion-icon *ngIf="!is_copied" name="browsers-sharp"></ion-icon>
                 <ion-icon *ngIf="is_copied" name="checkmark-sharp"></ion-icon>
                 <br />
@@ -160,7 +161,7 @@ https://www.gnu.org/licenses.
                   mode="md">
                 </ion-checkbox>
               </th>
-              <th *ngIf="id==='_query'">
+              <th *ngIf="['_query','_job'].includes(id)">
                 &nbsp;&nbsp;&nbsp;
               </th>
               <!-- DATA LIST HEADER -->
@@ -256,7 +257,7 @@ https://www.gnu.org/licenses.
                   </div>
                 </div>
               </th>
-              <th *ngIf="id==='_query'">
+              <th *ngIf="['_query','_job'].includes(id)">
                 {{ 'Approved' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_approved'}}</ion-button>
               </th>
@@ -276,10 +277,6 @@ https://www.gnu.org/licenses.
                 {{ 'Modified By' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_modified_by'}}</ion-button>
               </th>
-              <th>
-                {{ 'Record ID' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_id'}}</ion-button>
-              </th>
             </tr>
             <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
               <td [class]="record['_reminder'] ? 'bg-danger align-right' : 'primary align-right'"
@@ -294,7 +291,7 @@ https://www.gnu.org/licenses.
                   (ionChange)="set_select_data(i,$event)" mode="md">
                 </ion-checkbox>
               </td>
-              <td *ngIf="id==='_query'" class="ion-text-center" (click)="go_query(record, $event)">
+              <td *ngIf="['_query','_job'].includes(id)" class="ion-text-center" (click)="go_query_job(record, $event)">
                 <ion-icon name="play-sharp" [color]="record?._approved ? 'success' : 'danger'"
                   class="ion-margin-start ion-margin-end"></ion-icon>
               </td>
@@ -341,7 +338,7 @@ https://www.gnu.org/licenses.
                   {{ record[item_.key]?.toString() | translate }}
                 </ng-template>
               </td>
-              <td *ngIf="id==='_query'" class="ion-text-center">
+              <td *ngIf="['_query','_job'].includes(id)" class="ion-text-center">
                 <ion-icon *ngIf="record?._approved; else notapproved" name="checkbox-sharp" color="success"></ion-icon>
                 <ng-template #notapproved>
                   <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
@@ -358,9 +355,6 @@ https://www.gnu.org/licenses.
               </td>
               <td>
                 {{ record._modified_by }}
-              </td>
-              <td>
-                {{ record._id }}
               </td>
             </tr>
           </table>
@@ -399,7 +393,7 @@ https://www.gnu.org/licenses.
           </div>
           <ng-template #norecs>
             <div *ngIf="is_loaded" class="ion-margin-top">
-              {{ 'NO RECORDS FOUND' | translate }}
+              {{ 'NO DOCUMENTS FOUND' | translate }}
             </div>
           </ng-template>
         </div>

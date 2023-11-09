@@ -133,6 +133,15 @@ const routes: Routes = [
     }
   },
   {
+    path: "job/:p",
+    canActivate: [SessionGuard],
+    loadChildren: () => import("./pages/job/job.module").then((m) => m.JobPageModule),
+    data: { preload: true },
+    resolve: {
+      user: UserResolver,
+    }
+  },
+  {
     path: "admin/:p",
     canActivate: [SessionGuard],
     loadChildren: () => import("./pages/collection/collection.module").then((m) => m.CollectionPageModule),
