@@ -308,7 +308,6 @@ export class CollectionPage implements OnInit {
         }
       });
       modal.onDidDismiss().then((res: any) => {
-        console.log("*** res", res);
         if (op === "action" || res.data.modified || this.scan_) {
           res.data.res ? this.misc.doMessage(res.data.res.content, "success") : null;
           this.refresh_data(0);

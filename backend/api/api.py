@@ -2354,7 +2354,7 @@ class Crud:
                         {
                             "personalizations": personalizations_,
                             "html": que_message_body_,
-                            "subject": f"Query [{que_title_}]",
+                            "subject": f"Query - {que_title_}",
                             "files": files_,
                         }
                     )
@@ -3607,7 +3607,7 @@ class Crud:
                     )
                     subprocess.call(cmd_)
                     files_ += [{"name": file_, "type": type_}] if attachment_ else []
-                    subject_ = f"Automation [{subject_}]"
+                    subject_ = f"Automation - {subject_}"
                     email_sent_ = Email().send_email_f(
                         {
                             "op": "link",
@@ -3661,6 +3661,7 @@ class Crud:
                 raise PassException(f"invalid api method in {id_}")
 
             map_ = api_["map"] if "map" in api_ else None
+            json_["email"] = email_
             if map_:
                 for _, value_ in map_.items():
                     if value_ in doc_:
@@ -3947,7 +3948,6 @@ class Crud:
                     if notification_ and "fields" in notification_
                     else None
                 )
-
                 if get_notification_filtered_ and fields_ and attachment_:
                     type_ = "csv"
                     file_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
@@ -3971,7 +3971,7 @@ class Crud:
                     )
                     files_ += [{"name": file_, "type": type_}]
 
-                subject_ = f"Action [{subject_}]"
+                subject_ = f"Action - {subject_}"
                 email_sent_ = Email().send_email_f(
                     {
                         "op": "action",
@@ -4937,7 +4937,6 @@ class Auth:
                             },
                             {
                                 "fwa_tag": {"$in": tags_},
-                                "fwa_source_ip": "0.0.0.0",
                                 "fwa_enabled": True,
                             },
                         ]
@@ -4945,7 +4944,8 @@ class Auth:
                 )
             )
             if not allowed_:
-                raise AuthError(f"connection is not allowed from IP address {ip_}")
+                if not Misc().in_admin_ips_f():
+                    raise AuthError(f"connection is not allowed from IP address {ip_}")
 
             return {"result": True}
 

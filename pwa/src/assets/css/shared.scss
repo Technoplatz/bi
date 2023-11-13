@@ -941,6 +941,8 @@ ion-datetime-button::part(native) {
   margin-top: 8px;
   margin-left: 2px;
   padding-inline: 0px !important;
+  opacity: 1 !important;
+  --opacity: 1 !important;
 }
 
 ion-datetime {

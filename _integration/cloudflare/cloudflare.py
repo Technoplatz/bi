@@ -4,6 +4,7 @@ import sys
 import os
 import pymongo
 from pymongo import MongoClient
+from datetime import datetime
 from flask import Flask, request, make_response
 from flask_cors import CORS
 from get_docker_secret import get_docker_secret
@@ -114,7 +115,7 @@ class Cloudflare:
             "Content-Type": "application/json",
         }
 
-    def set_rules(self):
+    def set_rules(self, json_):
         """
         docstring is in progress
         """
@@ -234,6 +235,18 @@ class Cloudflare:
                 content_ = json.loads(response_.content)
                 raise APIException(content_)
 
+            for doc_ in docs_:
+                Mongo().db_["_firewall"].update_many(
+                    {"fwa_source_ip": doc_["_id"]},
+                    {
+                        "$set": {
+                            "fwa_waf_sync_date": datetime.now(),
+                            "_modified_at": datetime.now(),
+                            "_modified_by": json_["email"] if "email" in json_ else "_action",
+                        }
+                    },
+                )
+
             result_ = True
             msg_ = f"waf was synchronized successfully [{count_}]"
 
@@ -267,7 +280,11 @@ def waf_f():
     """
     status_code_, count_, msg_ = 200, 0, ""
     try:
-        set_rules_ = Cloudflare().set_rules()
+        json_ = request.json
+        if not json_:
+            raise APIError("no request json provided")
+
+        set_rules_ = Cloudflare().set_rules(json_)
         msg_ = set_rules_["msg"] if "msg" in set_rules_ else None
         if not set_rules_["result"]:
             raise APIError(msg_)

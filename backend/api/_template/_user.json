@@ -65,19 +65,5 @@
   "sort": {
     "_modified_at": -1
   },
-  "actions": [
-    {
-      "id": "act-assign-tag",
-      "title": "ASSIGN TAGS",
-      "description": "Assign TAG to users which are selected.",
-      "enabled": true,
-      "filter": [],
-      "fields": [
-        {
-          "key": "_tags",
-          "value": null
-        }
-      ]
-    }
-  ]
+  "actions": []
 }

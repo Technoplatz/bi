@@ -29,14 +29,22 @@
       "title": "Enabled",
       "default": true,
       "description": "Enabled or not"
+    },
+    "fwa_waf_sync_date": {
+      "bsonType": "date",
+      "title": "WAF Sync Date",
+      "description": "WAF sync date",
+      "readonly": true
     }
   },
   "required": ["fwa_name", "fwa_source_ip", "fwa_tag"],
   "index": [
+    ["fwa_tag", "fwa_source_ip", "fwa_enabled"],
     ["fwa_name", "fwa_source_ip", "fwa_enabled"],
+    ["fwa_tag", "fwa_enabled"],
     ["fwa_source_ip", "fwa_enabled"]
   ],
-  "unique": [["fwa_name"]],
+  "unique": [["fwa_name"], ["fwa_tag", "fwa_source_ip"]],
   "sort": {
     "_modified_at": -1
   },
@@ -60,12 +68,18 @@
       "unique": [],
       "_tags": ["#Managers", "#Administrators", "#Technoplatz"],
       "notification": {
-        "notify": false,
-        "subject": "Admin [WAF Updated]",
+        "notify": true,
+        "subject": "Security [WAF Updated]",
         "body": "Hi,<br /><br />We would like to let you know that WAF has been updated.",
-        "attachment": false,
+        "attachment": true,
         "fields": "fwa_name,fwa_tag,fwa_source_ip",
-        "filter": []
+        "filter": [
+          {
+            "key": "fwa_enabled",
+            "op": "ne",
+            "value": false
+          }
+        ]
       },
       "api": {
         "id": "waf",
