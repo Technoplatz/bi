@@ -41,7 +41,7 @@ import { environment } from "../../environments/environment";
 
 export class Su {
     private delay_: number = environment.swu_interval_mins;
-    private interval_: any = null;
+    public interval_: any = null;
 
     constructor(
         private swu: SwUpdate,
@@ -65,14 +65,17 @@ export class Su {
         this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
             switch (event_.type) {
                 case "VERSION_DETECTED":
-                    this.interval_ ? clearInterval(this.interval_) : null;
+                    clearInterval(this.interval_);
+                    this.interval_ = null;
                     console.log(`swu version detected ${event_.version.hash}`);
                     console.log("downloading...");
+                    this.misc.version.next({ downloading: true, upgrade: false, version: event_.version.hash });
                     break;
                 case "VERSION_READY":
-                    this.interval_ ? clearInterval(this.interval_) : null;
+                    clearInterval(this.interval_);
+                    this.interval_ = null;
                     console.log("swu version is ready");
-                    this.misc.version.next({ upgrade: true, version: event_.latestVersion.hash });
+                    this.misc.version.next({ downloading: false, upgrade: true, version: event_.latestVersion.hash });
                     break;
             }
         });

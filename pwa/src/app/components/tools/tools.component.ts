@@ -43,15 +43,15 @@ import { Auth } from "../../classes/auth";
 export class ToolsComponent implements OnInit {
   public user_: any = null;
   public new_version_: boolean = false;
+  public downloading_: boolean = false;
 
   constructor(
     private auth: Auth,
     public misc: Miscellaneous
   ) {
     this.misc.version.subscribe((version_: any) => {
-      if (version_.upgrade) {
-        this.new_version_ = true;
-      }
+      this.new_version_ = version_.upgrade ? true : false;
+      this.downloading_ = version_.downloading ? true : false;
     });
   }
 
