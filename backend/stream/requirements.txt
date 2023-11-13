@@ -4,3 +4,4 @@ dnspython
 partial
 get-docker-secret
 requests
+unidecode

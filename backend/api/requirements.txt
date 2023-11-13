@@ -18,3 +18,4 @@ python-jose
 get-docker-secret
 boto3
 botocore
+unidecode

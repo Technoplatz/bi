@@ -75,7 +75,6 @@ export class JobPage implements OnInit {
   private menu: string = "";
   private submenu: string = "";
   private query_: any = {};
-  private uri_: string = "";
   public perma_: boolean = false;
   private collections_: any = [];
   public json_content_: any = null;
@@ -88,9 +87,6 @@ export class JobPage implements OnInit {
     private crud: Crud,
     private router: Router
   ) {
-    this.misc.api.subscribe((api_: any) => {
-      this.uri_ = api_.uri;
-    });
     this.auth.user.subscribe((res: any) => {
       this.user = res;
       this.perma_ = res.perma;

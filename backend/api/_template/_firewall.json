@@ -32,9 +32,54 @@
     }
   },
   "required": ["fwa_name", "fwa_source_ip", "fwa_tag"],
-  "index": [["fwa_name", "fwa_source_ip", "fwa_enabled"]],
+  "index": [
+    ["fwa_name", "fwa_source_ip", "fwa_enabled"],
+    ["fwa_source_ip", "fwa_enabled"]
+  ],
   "unique": [["fwa_name"]],
   "sort": {
     "_modified_at": -1
-  }
+  },
+  "actions": [
+    {
+      "id": "cloudflare",
+      "title": "Cloudflare WAF Sync",
+      "enabled": true,
+      "match": [
+        {
+          "key": "wfa_enabled",
+          "op": "ne",
+          "value": false
+        }
+      ],
+      "set": [],
+      "noninteractive": true,
+      "one_click": true,
+      "icon": "swap-vertical-sharp",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Administrators", "#Technoplatz"],
+      "notification": {
+        "notify": false,
+        "subject": "Admin [WAF Updated]",
+        "body": "Hi,<br /><br />We would like to let you know that WAF has been updated.",
+        "attachment": false,
+        "fields": "fwa_name,fwa_tag,fwa_source_ip",
+        "filter": []
+      },
+      "api": {
+        "id": "waf",
+        "enabled": true,
+        "protocol": "http",
+        "subdomain": "",
+        "domain": "172.18.0.9",
+        "path": "/waf",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "post",
+        "map": {}
+      }
+    }
+  ]
 }

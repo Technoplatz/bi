@@ -95,7 +95,7 @@ function pruneBI() {
 function startBI() {
     echo -e "\nStarting containers..."
     mkdir -p .secret
-     if [[ ! -f .secret/.admin_ips ]]; then
+    if [[ ! -f .secret/.admin_ips ]]; then
         echo -n "0.0.0.0" >.secret/.admin_ips
     fi
     if [[ ! -f .secret/.mongo_tls_keyfile_password ]]; then
@@ -122,6 +122,12 @@ function startBI() {
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
+    fi
+    if [[ -f _integration/cloudflare/docker-compose.yml ]]; then
+        env docker compose --project-name technoplatz-bi --env-file _integration/cloudflare/.env -f _integration/cloudflare/docker-compose.yml up --detach --no-build
+    fi
+    if [[ -f _integration/edoksis/docker-compose.yml ]]; then
+        env docker compose --project-name technoplatz-bi --env-file _integration/edoksis/.env -f _integration/edoksis/docker-compose.yml up --detach --no-build
     fi
     return 1
 }
@@ -176,8 +182,8 @@ DCYML="docker-compose.yml"
 LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
 DOTENV=".env"
-if [[ -f .env-dev ]]; then
-    DOTENV=".env-dev"
+if [[ -f .env-dev0 ]]; then
+    DOTENV=".env-dev0"
 fi
 
 case $1 in

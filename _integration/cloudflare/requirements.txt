@@ -1,0 +1,7 @@
+Flask
+flask-cors
+pymongo[tls]
+requests
+get-docker-secret
+python-dotenv
+partial

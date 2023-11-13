@@ -45,6 +45,7 @@ from functools import partial
 from subprocess import call
 from bson.objectid import ObjectId
 from get_docker_secret import get_docker_secret
+from unidecode import unidecode
 import pymongo
 import requests
 
@@ -61,7 +62,7 @@ class PassException(BaseException):
     """
 
 
-class Trigger():
+class Trigger:
     """
     docstring is in progress
     """
@@ -72,8 +73,7 @@ class Trigger():
         """
         PRINT_(">>> init started")
         self.operations_ = ["insert", "update", "replace", "delete"]
-        self.pipeline_ = [
-            {"$match": {"operationType": {"$in": self.operations_}}}]
+        self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
         self.groupbys_ = ["sum", "count", "mean", "std", "var"]
         self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_keyfile_password_}&retryWrites={mongo_retry_writes_}"
@@ -102,22 +102,27 @@ class Trigger():
         """
         docstring is in progress
         """
-        line_no_ = exc_.__traceback__.tb_lineno if hasattr(
-            exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
-        name_ = type(exc_).__name__ if hasattr(
-            type(exc_), "__name__") else "Exception"
-        PRINT_(
-            f"!!! worker exception type: {name_}, line: {line_no_}:", str(exc_))
+        line_no_ = (
+            exc_.__traceback__.tb_lineno
+            if hasattr(exc_, "__traceback__")
+            and hasattr(exc_.__traceback__, "tb_lineno")
+            else None
+        )
+        name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
+        PRINT_(f"!!! worker exception type: {name_}, line: {line_no_}:", str(exc_))
         return True
 
     def exception_reported_f(self, exc_):
         """
         docstring is in progress
         """
-        line_no_ = exc_.__traceback__.tb_lineno if hasattr(
-            exc_, "__traceback__") and hasattr(exc_.__traceback__, "tb_lineno") else None
-        name_ = type(exc_).__name__ if hasattr(
-            type(exc_), "__name__") else "Exception"
+        line_no_ = (
+            exc_.__traceback__.tb_lineno
+            if hasattr(exc_, "__traceback__")
+            and hasattr(exc_.__traceback__, "tb_lineno")
+            else None
+        )
+        name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
         PRINT_(f"!!! worker error type: {name_}, line: {line_no_}:", str(exc_))
         if notification_push_url_:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
@@ -125,8 +130,11 @@ class Trigger():
             line_ = exc_tb_.tb_lineno
             exception_ = str(exc_)
             notification_str_ = f"TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {exception_}"
-            resp_ = requests.post(notification_push_url_, json.dumps(
-                {"text": str(notification_str_)}), timeout=10)
+            resp_ = requests.post(
+                notification_push_url_,
+                json.dumps({"text": str(notification_str_)}),
+                timeout=10,
+            )
             if resp_.status_code != 200:
                 PRINT_("!!! notification error", resp_)
 
@@ -157,12 +165,28 @@ class Trigger():
         try:
             PRINT_(">>> getting collections structure...")
             self.properties_ = {}
-            cursor_ = self.db_["_collection"].aggregate([{
-                "$match": {"$and": [{"col_structure.properties": {"$exists": True, "$ne": None}}]}
-            }])
+            cursor_ = self.db_["_collection"].aggregate(
+                [
+                    {
+                        "$match": {
+                            "$and": [
+                                {
+                                    "col_structure.properties": {
+                                        "$exists": True,
+                                        "$ne": None,
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            )
             for item_ in cursor_:
-                self.properties_[item_["col_id"]] = item_[
-                    "col_structure"]["properties"] if "properties" in item_["col_structure"] else None
+                self.properties_[item_["col_id"]] = (
+                    item_["col_structure"]["properties"]
+                    if "properties" in item_["col_structure"]
+                    else None
+                )
 
             PRINT_(">>> structure refreshed")
 
@@ -188,26 +212,50 @@ class Trigger():
             PRINT_(">>> getting triggers...")
             self.triggers_ = []
             cursor_ = self.db_["_collection"].aggregate(
-                [{"$match": {"col_structure.triggers": {"$elemMatch": {"enabled": True}}}}])
+                [
+                    {
+                        "$match": {
+                            "col_structure.triggers": {"$elemMatch": {"enabled": True}}
+                        }
+                    }
+                ]
+            )
             for item_ in cursor_:
                 for trigger_ in item_["col_structure"]["triggers"]:
-                    enabled_ = "enabled" in trigger_ and trigger_[
-                        "enabled"] is True
+                    enabled_ = "enabled" in trigger_ and trigger_["enabled"] is True
                     if not enabled_:
                         continue
                     for cluster_ in trigger_["targets"]:
-                        self.triggers_.append({
-                            "source": item_["col_id"],
-                            "target": cluster_["collection"],
-                            "operations": trigger_["operations"] if "operations" in trigger_ and len(trigger_["operations"]) > 0 else [],
-                            "changes": trigger_["changes"] if "changes" in trigger_ and len(trigger_["changes"]) > 0 else [],
-                            "on_changes_all": "on_changes_all" in trigger_ and trigger_["on_changes_all"] is True,
-                            "match": cluster_["match"] if "match" in cluster_ and len(cluster_["match"]) > 0 else [],
-                            "filter": cluster_["filter"] if "filter" in cluster_ and len(cluster_["filter"]) > 0 else [],
-                            "set": cluster_["set"] if "set" in cluster_ and len(cluster_["set"]) > 0 else [],
-                            "upsert": "upsert" in cluster_ and cluster_["upsert"] is True,
-                            "notification": cluster_["notification"] if "notification" in cluster_ else None,
-                        })
+                        self.triggers_.append(
+                            {
+                                "source": item_["col_id"],
+                                "target": cluster_["collection"],
+                                "operations": trigger_["operations"]
+                                if "operations" in trigger_
+                                and len(trigger_["operations"]) > 0
+                                else [],
+                                "changes": trigger_["changes"]
+                                if "changes" in trigger_
+                                and len(trigger_["changes"]) > 0
+                                else [],
+                                "on_changes_all": "on_changes_all" in trigger_
+                                and trigger_["on_changes_all"] is True,
+                                "match": cluster_["match"]
+                                if "match" in cluster_ and len(cluster_["match"]) > 0
+                                else [],
+                                "filter": cluster_["filter"]
+                                if "filter" in cluster_ and len(cluster_["filter"]) > 0
+                                else [],
+                                "set": cluster_["set"]
+                                if "set" in cluster_ and len(cluster_["set"]) > 0
+                                else [],
+                                "upsert": "upsert" in cluster_
+                                and cluster_["upsert"] is True,
+                                "notification": cluster_["notification"]
+                                if "notification" in cluster_
+                                else None,
+                            }
+                        )
 
             if not self.triggers_:
                 raise PassException("!!! no trigger found - passed")
@@ -244,8 +292,11 @@ class Trigger():
                 value_ = mat_["value"]
                 if key_ and op_ and key_ in properties_:
                     fres_ = None
-                    typ = properties_[
-                        key_]["bsonType"] if key_ in properties_ else "string"
+                    typ = (
+                        properties_[key_]["bsonType"]
+                        if key_ in properties_
+                        else "string"
+                    )
                     if data_ and value_ in data_ and data_[value_] is not None:
                         value_ = data_[value_]
                     if op_ == "null" or (op_ == "eq" and value_ is None):
@@ -272,8 +323,11 @@ class Trigger():
                         elif typ == "date":
                             fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
                         else:
-                            fres_ = {"$regex": value_, "$options": "i"} if value_ else {
-                                "$regex": "", "$options": "i"}
+                            fres_ = (
+                                {"$regex": value_, "$options": "i"}
+                                if value_
+                                else {"$regex": "", "$options": "i"}
+                            )
                     elif op_ == "eq":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = float(value_)
@@ -293,29 +347,43 @@ class Trigger():
                         elif typ == "bool":
                             fres_ = {"$not": {"$eq": bool(value_)}}
                         elif typ == "date":
-                            fres_ = {"$not": {"$eq": datetime.strptime(
-                                value_[:10], "%Y-%m-%d")}}
+                            fres_ = {
+                                "$not": {
+                                    "$eq": datetime.strptime(value_[:10], "%Y-%m-%d")
+                                }
+                            }
                         else:
-                            fres_ = {"$not": {"$regex": value_, "$options": "i"}} if value_ else {
-                                "$not": {"$regex": "", "$options": "i"}}
+                            fres_ = (
+                                {"$not": {"$regex": value_, "$options": "i"}}
+                                if value_
+                                else {"$not": {"$regex": "", "$options": "i"}}
+                            )
                     elif op_ in ["in", "nin"]:
                         separated_ = re.split(",", value_)
-                        list_ = [s.strip() for s in separated_] if key_ != "_id" else [
-                            ObjectId(s.strip()) for s in separated_]
+                        list_ = (
+                            [s.strip() for s in separated_]
+                            if key_ != "_id"
+                            else [ObjectId(s.strip()) for s in separated_]
+                        )
                         if op_ == "in":
-                            fres_ = {"$in": list_ if typ !=
-                                     "number" else list(map(float, list_))}
+                            fres_ = {
+                                "$in": list_
+                                if typ != "number"
+                                else list(map(float, list_))
+                            }
                         else:
-                            fres_ = {"$nin": list_ if typ !=
-                                     "number" else list(map(float, list_))}
+                            fres_ = {
+                                "$nin": list_
+                                if typ != "number"
+                                else list(map(float, list_))
+                            }
                     elif op_ == "gt":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = {"$gt": float(value_)}
                         elif typ == "int":
                             fres_ = {"$gt": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$gt": datetime.strptime(
-                                value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$gt": value_}
                     elif op_ == "gte":
@@ -324,8 +392,7 @@ class Trigger():
                         elif typ == "int":
                             fres_ = {"$gte": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$gte": datetime.strptime(
-                                value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$gte": value_}
                     elif op_ == "lt":
@@ -334,8 +401,7 @@ class Trigger():
                         elif typ == "int":
                             fres_ = {"$lt": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$lt": datetime.strptime(
-                                value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$lt": value_}
                     elif op_ == "lte":
@@ -344,8 +410,7 @@ class Trigger():
                         elif typ == "int":
                             fres_ = {"$lte": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$lte": datetime.strptime(
-                                value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$lte": value_}
                     elif op_ == "true":
@@ -378,8 +443,13 @@ class Trigger():
         try:
             sum_ = None
             match_ = filter_ if filter_ else {}
-            aggregate_ = self.db_[coll_].aggregate([{"$match": match_}, {"$group": {
-                                                   "_id": None, "sum": {"$sum": f"${field_}"}}}, {"$project": {"_id": 0}}])
+            aggregate_ = self.db_[coll_].aggregate(
+                [
+                    {"$match": match_},
+                    {"$group": {"_id": None, "sum": {"$sum": f"${field_}"}}},
+                    {"$project": {"_id": 0}},
+                ]
+            )
             for doc_ in aggregate_:
                 sum_ = doc_["sum"] if "sum" in doc_ else None
             return sum_
@@ -399,8 +469,13 @@ class Trigger():
         try:
             count_ = None
             match_ = filter_ if filter_ else {}
-            aggregate_ = self.db_[coll_].aggregate([{"$match": match_}, {"$group": {
-                                                   "_id": None, "count": {"$sum": 1}}}, {"$project": {"_id": 0}}])
+            aggregate_ = self.db_[coll_].aggregate(
+                [
+                    {"$match": match_},
+                    {"$group": {"_id": None, "count": {"$sum": 1}}},
+                    {"$project": {"_id": 0}},
+                ]
+            )
             for doc_ in aggregate_:
                 count_ = doc_["count"] if "count" in doc_ else None
             return count_
@@ -428,13 +503,18 @@ class Trigger():
             personalizations_ = []
             to_ = []
             users_ = self.db_["_user"].find(
-                {"usr_enabled": True, "_tags": {"$elemMatch": {"$in": tags_}}})
+                {"usr_enabled": True, "_tags": {"$elemMatch": {"$in": tags_}}}
+            )
             if users_:
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
                         to_.append(member_["usr_id"])
                         personalizations_.append(
-                            {"email": member_["usr_id"], "name": member_["usr_name"]})
+                            {
+                                "email": member_["usr_id"],
+                                "name": unidecode(member_["usr_name"]),
+                            }
+                        )
 
             return {"result": True, "to": personalizations_}
 
@@ -449,8 +529,11 @@ class Trigger():
         docstring is in progress
         """
         try:
-            company_name_ = os.environ.get("COMPANY_NAME") if os.environ.get(
-                "COMPANY_NAME") else "Technoplatz BI"
+            company_name_ = (
+                os.environ.get("COMPANY_NAME")
+                if os.environ.get("COMPANY_NAME")
+                else "Technoplatz BI"
+            )
             SMTP_ENDPOINT_ = get_docker_secret("smtp_endpoint", default="")
             SMTP_USERID_ = get_docker_secret("smtp_userid", default="")
             SMTP_PASSWORD_ = get_docker_secret("smtp_password", default="")
@@ -463,13 +546,25 @@ class Trigger():
             server_.ehlo()
             server_.starttls()
             server_.login(SMTP_USERID_, SMTP_PASSWORD_)
-            files_ = msg["files"] if "files" in msg and len(
-                msg["files"]) > 0 else []
+            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
+
+            recipients_, recipients_str_ = [], ""
+            for recipient_ in msg["personalizations"]["to"]:
+                email_to_ = (
+                    f"{recipient_['name']} <{recipient_['email']}>"
+                    if recipient_["name"] and "name" in recipient_
+                    else recipient_["email"]
+                )
+                recipients_str_ += (
+                    email_to_ if recipients_str_ == "" else f", {email_to_}"
+                )
+                recipients_.append(recipient_["email"])
 
             message_ = MIMEMultipart()
             message_["From"] = email_from_
             message_["Subject"] = msg["subject"]
             message_.attach(MIMEText(html_, "html"))
+            message_["To"] = recipients_str_
 
             for file_ in files_:
                 filename_ = file_["filename"]
@@ -477,21 +572,14 @@ class Trigger():
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())
                 encoders.encode_base64(part_)
-                filename_ = filename_.replace(
-                    f"{API_TEMPFILE_PATH_}/", "").replace("/cron/", "")
-                part_.add_header("Content-Disposition",
-                                 f"attachment; filename= {filename_}")
+                filename_ = filename_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(
+                    "/cron/", ""
+                )
+                part_.add_header(
+                    "Content-Disposition", f"attachment; filename= {filename_}"
+                )
                 message_.attach(part_)
 
-            recipients_ = []
-            recipients_str_ = ""
-            for recipient_ in msg["personalizations"]["to"]:
-                email_to_ = f"{recipient_['name']} <{recipient_['email']}>" if recipient_[
-                    "name"] and "name" in recipient_ else recipient_["email"]
-                recipients_str_ += email_to_ if recipients_str_ == "" else f", {email_to_}"
-                recipients_.append(recipient_["email"])
-
-            message_["To"] = recipients_str_
             server_.sendmail(email_from_, recipients_, message_.as_string())
             server_.close()
 
@@ -532,55 +620,91 @@ class Trigger():
             if not changed_keys_:
                 raise PassException(">>> passed, no changed keys")
 
-            trigger_targets_ = \
-                [tg_ for tg_ in self.triggers_ if tg_["source"] == source_collection_id_ and op_ in tg_["operations"] and
-                 [ma_ for ma_ in tg_["changes"] if ma_["key"] in changed_keys_ and (
-                     (ma_["op"].lower() == "eq" and changed_[ma_["key"]] == ma_["value"]) or
-                     (ma_["op"].lower() == "ne" and changed_[ma_["key"]] != ma_["value"]) or
-                     (ma_["op"].lower() == "gt" and changed_[ma_["key"]] > ma_["value"]) or
-                     (ma_["op"].lower() == "gte" and changed_[ma_["key"]] >= ma_["value"]) or
-                     (ma_["op"].lower() == "lt" and changed_[ma_["key"]] < ma_["value"]) or
-                     (ma_["op"].lower() == "lte" and changed_[ma_["key"]] <= ma_["value"]) or
-                     (ma_["op"].lower() == "null" and changed_[ma_["key"]] in [None, ""]) or
-                     (ma_["op"].lower() == "nnull" and changed_[
-                      ma_["key"]] not in [None, ""])
-                 )]]
+            trigger_targets_ = [
+                tg_
+                for tg_ in self.triggers_
+                if tg_["source"] == source_collection_id_
+                and op_ in tg_["operations"]
+                and [
+                    ma_
+                    for ma_ in tg_["changes"]
+                    if ma_["key"] in changed_keys_
+                    and (
+                        (
+                            ma_["op"].lower() == "eq"
+                            and changed_[ma_["key"]] == ma_["value"]
+                        )
+                        or (
+                            ma_["op"].lower() == "ne"
+                            and changed_[ma_["key"]] != ma_["value"]
+                        )
+                        or (
+                            ma_["op"].lower() == "gt"
+                            and changed_[ma_["key"]] > ma_["value"]
+                        )
+                        or (
+                            ma_["op"].lower() == "gte"
+                            and changed_[ma_["key"]] >= ma_["value"]
+                        )
+                        or (
+                            ma_["op"].lower() == "lt"
+                            and changed_[ma_["key"]] < ma_["value"]
+                        )
+                        or (
+                            ma_["op"].lower() == "lte"
+                            and changed_[ma_["key"]] <= ma_["value"]
+                        )
+                        or (
+                            ma_["op"].lower() == "null"
+                            and changed_[ma_["key"]] in [None, ""]
+                        )
+                        or (
+                            ma_["op"].lower() == "nnull"
+                            and changed_[ma_["key"]] not in [None, ""]
+                        )
+                    )
+                ]
+            ]
             if trigger_targets_ == []:
                 raise PassException("!!! no trigger target found")
 
-            PRINT_(
-                f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
+            PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
 
             for target_ in trigger_targets_:
                 target_collection_id_ = target_["target"].lower()
                 target_collection_ = f"{target_collection_id_}_data"
-                target_properties_ = self.properties_[
-                    target_collection_id_] if target_collection_id_ in self.properties_ else None
+                target_properties_ = (
+                    self.properties_[target_collection_id_]
+                    if target_collection_id_ in self.properties_
+                    else None
+                )
 
                 PRINT_(">>> target found", target_collection_id_)
                 if target_properties_ is None:
                     raise AppException(
-                        f"no target properties found {target_collection_id_}")
+                        f"no target properties found {target_collection_id_}"
+                    )
 
-                target_changes_ = target_["changes"] if "changes" in target_ and len(
-                    target_["changes"]) > 0 else None
+                target_changes_ = (
+                    target_["changes"]
+                    if "changes" in target_ and len(target_["changes"]) > 0
+                    else None
+                )
                 if not target_changes_:
-                    PRINT_(
-                        f"no target changes defined {target_collection_id_}")
+                    PRINT_(f"no target changes defined {target_collection_id_}")
                     raise AppException(
-                        f"no target changes defined {target_collection_id_}")
+                        f"no target changes defined {target_collection_id_}"
+                    )
 
                 match_ = {"_id": _id}
-                conditions_filter_ = self.get_filtered_f({
-                    "match": target_changes_,
-                    "properties": source_properties_
-                })
+                conditions_filter_ = self.get_filtered_f(
+                    {"match": target_changes_, "properties": source_properties_}
+                )
                 match_ = {**match_, **conditions_filter_}
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
-                    PRINT_(
-                        f"full document not found ({source_collection_}): {match_}")
+                    PRINT_(f"full document not found ({source_collection_}): {match_}")
                     continue
 
                 match_ = {}
@@ -590,36 +714,48 @@ class Trigger():
 
                 for item_ in target_matches_:
                     key__ = item_["key"] if "key" in item_ else None
-                    value__ = item_["value"] if \
-                        "value" in item_ and \
-                        item_["value"] is not None and \
-                        item_["value"] in full_document_ and \
-                        (item_["key"] in target_properties_ or item_["value"] == "_id") \
+                    value__ = (
+                        item_["value"]
+                        if "value" in item_
+                        and item_["value"] is not None
+                        and item_["value"] in full_document_
+                        and (
+                            item_["key"] in target_properties_
+                            or item_["value"] == "_id"
+                        )
                         else None
+                    )
 
                     if key__ and value__:
-                        match_[key__] = match_for_aggregate_[value__] = str(full_document_["_id"]) \
-                            if item_["value"] == "_id" and source_collection_id_ != target_collection_id_ \
+                        match_[key__] = match_for_aggregate_[value__] = (
+                            str(full_document_["_id"])
+                            if item_["value"] == "_id"
+                            and source_collection_id_ != target_collection_id_
                             else full_document_[value__]
+                        )
                     else:
                         continue
 
                 if not match_:
                     PRINT_(
-                        f"!!! no data found with the target {target_collection_id_}", match_)
+                        f"!!! no data found with the target {target_collection_id_}",
+                        match_,
+                    )
                     continue
 
                 on_changes_all_ = target_["on_changes_all"]
                 if on_changes_all_ is True:
-                    changes_filter0_ = self.get_filtered_f({
-                        "match": target_changes_,
-                        "properties": source_properties_
-                    })
+                    changes_filter0_ = self.get_filtered_f(
+                        {"match": target_changes_, "properties": source_properties_}
+                    )
                     count0_ = 0
-                    aggregate0_ = self.db_[source_collection_].aggregate([
-                        {"$match": changes_filter0_},
-                        {"$group": {"_id": None, "count": {"$sum": 1}}},
-                        {"$project": {"_id": 0}}])
+                    aggregate0_ = self.db_[source_collection_].aggregate(
+                        [
+                            {"$match": changes_filter0_},
+                            {"$group": {"_id": None, "count": {"$sum": 1}}},
+                            {"$project": {"_id": 0}},
+                        ]
+                    )
 
                     for doc_ in aggregate0_:
                         count0_ = doc_["count"] if "count" in doc_ else 0
@@ -627,43 +763,51 @@ class Trigger():
                     match1_ = {}
                     for item_ in target_matches_:
                         key__ = item_["key"] if "key" in item_ else None
-                        value__ = item_["value"] if \
-                            "value" in item_ and \
-                            item_["value"] is not None and \
-                            item_["value"] in full_document_ and \
-                            (item_["key"] in target_properties_ or item_["value"] == "_id") \
+                        value__ = (
+                            item_["value"]
+                            if "value" in item_
+                            and item_["value"] is not None
+                            and item_["value"] in full_document_
+                            and (
+                                item_["key"] in target_properties_
+                                or item_["value"] == "_id"
+                            )
                             else None
+                        )
 
                         if key__ and value__:
-                            match1_[key__] = str(full_document_["_id"]) \
-                                if item_["value"] == "_id" and source_collection_id_ != target_collection_id_ \
+                            match1_[key__] = (
+                                str(full_document_["_id"])
+                                if item_["value"] == "_id"
+                                and source_collection_id_ != target_collection_id_
                                 else full_document_[value__]
+                            )
                         else:
                             continue
 
-                        changes_filter1_ = self.get_filtered_f({
-                            "match": match1_,
-                            "properties": source_properties_
-                        })
+                        changes_filter1_ = self.get_filtered_f(
+                            {"match": match1_, "properties": source_properties_}
+                        )
                         count1_ = 0
-                        aggregate1_ = self.db_[source_collection_].aggregate([
-                            {"$match": changes_filter1_},
-                            {"$group": {"_id": None, "count": {"$sum": 1}}},
-                            {"$project": {"_id": 0}}])
+                        aggregate1_ = self.db_[source_collection_].aggregate(
+                            [
+                                {"$match": changes_filter1_},
+                                {"$group": {"_id": None, "count": {"$sum": 1}}},
+                                {"$project": {"_id": 0}},
+                            ]
+                        )
                         for doc_ in aggregate1_:
                             count1_ = doc_["count"] if "count" in doc_ else 0
 
                     if count0_ != count1_:
-                        PRINT_("!!! on changes all not completed",
-                               changes_filter0_)
+                        PRINT_("!!! on changes all not completed", changes_filter0_)
                         continue
 
                 filter_ = {}
                 if "filter" in target_ and len(target_["filter"]) > 0 and not upsert_:
-                    filter_ = self.get_filtered_f({
-                        "match": target_["filter"],
-                        "properties": target_properties_
-                    })
+                    filter_ = self.get_filtered_f(
+                        {"match": target_["filter"], "properties": target_properties_}
+                    )
                 match_ = {**match_, **filter_}
 
                 set_ = {}
@@ -672,25 +816,45 @@ class Trigger():
                 for item_ in sets_:
                     target_field_ = item_["key"]
                     value_ = str(item_["value"])
-                    source_bson_type_ = source_properties_[
-                        value_]["bsonType"] if value_ in source_properties_ and "bsonType" in source_properties_[value_] else None
-                    target_enum_ = target_field_ in target_properties_ and "enum" in target_properties_[
-                        target_field_] and len(target_properties_[target_field_]["enum"]) > 0
-                    target_bson_type_ = target_properties_[
-                        target_field_]["bsonType"] if "bsonType" in target_properties_[target_field_] else None
-                    decimals_ = int(target_properties_[target_field_]["decimals"]) if "decimals" in target_properties_[
-                        target_field_] and int(target_properties_[target_field_]["decimals"]) >= 0 else None
+                    source_bson_type_ = (
+                        source_properties_[value_]["bsonType"]
+                        if value_ in source_properties_
+                        and "bsonType" in source_properties_[value_]
+                        else None
+                    )
+                    target_enum_ = (
+                        target_field_ in target_properties_
+                        and "enum" in target_properties_[target_field_]
+                        and len(target_properties_[target_field_]["enum"]) > 0
+                    )
+                    target_bson_type_ = (
+                        target_properties_[target_field_]["bsonType"]
+                        if "bsonType" in target_properties_[target_field_]
+                        else None
+                    )
+                    decimals_ = (
+                        int(target_properties_[target_field_]["decimals"])
+                        if "decimals" in target_properties_[target_field_]
+                        and int(target_properties_[target_field_]["decimals"]) >= 0
+                        else None
+                    )
                     parts_ = re.split("([+-/*()])", value_)
                     chkgroupbys_ = re.findall("[a-zA-Z_]+", value_)
                     chkgroup0_ = chkgroupbys_[0]
 
-                    type_ = \
-                        "sourcevalue" if value_ in source_properties_ else \
-                        "targetvalue" if value_ in target_properties_ else \
-                        "enum" if target_enum_ else \
-                        "string" if target_bson_type_ == "string" else \
-                        "formula" if len(parts_) > 1 or chkgroup0_ in self.groupbys_ else \
-                        target_bson_type_
+                    type_ = (
+                        "sourcevalue"
+                        if value_ in source_properties_
+                        else "targetvalue"
+                        if value_ in target_properties_
+                        else "enum"
+                        if target_enum_
+                        else "string"
+                        if target_bson_type_ == "string"
+                        else "formula"
+                        if len(parts_) > 1 or chkgroup0_ in self.groupbys_
+                        else target_bson_type_
+                    )
 
                     if type_ == "formula":
                         if target_bson_type_ in self.numerics_:
@@ -699,30 +863,44 @@ class Trigger():
                                 chkgroup1_ = chkgroupbys_[1]
                                 if chkgroup0_ == "sum":
                                     set_[target_field_] = self.aggregater_sum_f(
-                                        source_collection_, match_for_aggregate_, chkgroup1_)
+                                        source_collection_,
+                                        match_for_aggregate_,
+                                        chkgroup1_,
+                                    )
                                 elif chkgroup0_ == "count":
                                     set_[target_field_] = self.aggregater_count_f(
-                                        source_collection_, match_for_aggregate_)
+                                        source_collection_, match_for_aggregate_
+                                    )
                                 else:
-                                    set_[target_field_] = full_document_[
-                                        chkgroup1_]
+                                    set_[target_field_] = full_document_[chkgroup1_]
                             else:
                                 for part_ in parts_:
                                     part_ = part_.strip()
                                     if part_ in full_document_:
                                         value_ = value_.replace(
-                                            part_, str(full_document_[part_]))
-                                set_[target_field_] = round(
-                                    eval(value_), decimals_) if decimals_ else eval(value_)
+                                            part_, str(full_document_[part_])
+                                        )
+                                set_[target_field_] = (
+                                    round(eval(value_), decimals_)
+                                    if decimals_
+                                    else eval(value_)
+                                )
                         else:
-                            set_[target_field_] = round(
-                                eval(value_), decimals_) if decimals_ else eval(value_)
+                            set_[target_field_] = (
+                                round(eval(value_), decimals_)
+                                if decimals_
+                                else eval(value_)
+                            )
                     elif type_ == "sourcevalue":
                         if full_document_ and value_ in full_document_:
-                            set_[target_field_] = \
-                                str(full_document_[value_]) if source_bson_type_ and source_bson_type_ == "string" else \
-                                full_document_[value_] * 1 if source_bson_type_ and source_bson_type_ in self.numerics_ else \
-                                full_document_[value_]
+                            set_[target_field_] = (
+                                str(full_document_[value_])
+                                if source_bson_type_ and source_bson_type_ == "string"
+                                else full_document_[value_] * 1
+                                if source_bson_type_
+                                and source_bson_type_ in self.numerics_
+                                else full_document_[value_]
+                            )
                     elif type_ == "targetvalue":
                         set_[target_field_] = f"${value_}"
                     elif type_ == "string":
@@ -735,8 +913,7 @@ class Trigger():
                         else:
                             ln_ = 10 if len(value_) == 10 else 19
                             rgx_ = "%Y-%m-%d" if ln_ == 10 else "%Y-%m-%dT%H:%M:%S"
-                            set_[target_field_] = datetime.strptime(
-                                value_[:ln_], rgx_)
+                            set_[target_field_] = datetime.strptime(value_[:ln_], rgx_)
                     elif type_ == "number":
                         set_[target_field_] = float(value_) * 1
                     elif type_ == "enum":
@@ -752,44 +929,93 @@ class Trigger():
 
                 set_["_resume_token"] = token_
                 update_many_ = self.db_[target_collection_].update_many(
-                    match_, {"$set": set_}, upsert=upsert_)
+                    match_, {"$set": set_}, upsert=upsert_
+                )
                 count_ = update_many_.matched_count
-                PRINT_(">>> updated :)", {
-                       "coll": target_collection_, "match": match_, "set": set_, "count": count_})
+                PRINT_(
+                    ">>> updated :)",
+                    {
+                        "coll": target_collection_,
+                        "match": match_,
+                        "set": set_,
+                        "count": count_,
+                    },
+                )
 
-                notification_ = target_[
-                    "notification"] if "notification" in target_ else None
+                notification_ = (
+                    target_["notification"] if "notification" in target_ else None
+                )
                 if notification_:
-                    notify_ = "notify" in notification_ and notification_[
-                        "notify"] is True
-                    push_ = "push" in notification_ and notification_[
-                        "push"] is True
-                    attachment_ = "attachment" in notification_ and notification_[
-                        "attachment"] is True
-                    subject_ = notification_["subject"] if "subject" in notification_ and notification_[
-                        "subject"] != "" else None
-                    body_ = notification_["body"] if "body" in notification_ and notification_[
-                        "body"] != "" else None
-                    ncollection_ = notification_['collection'] if "collection" in notification_ and notification_[
-                        "collection"] != "" else None
-                    fields_ = notification_["fields"].replace(
-                        " ", "") if "fields" in notification_ and notification_["fields"] != "" else None
-                    nkey_ = notification_["key"] if "key" in notification_ and notification_[
-                        "key"] != "" else None
-                    nfilter_ = notification_["filter"] if "filter" in notification_ and len(
-                        notification_["filter"]) > 0 else None
-                    tags_ = notification_["_tags"] if "_tags" in notification_ and len(
-                        notification_["_tags"]) > 0 else None
-                    if not (notify_ and subject_ and body_ and ncollection_ and fields_ and nfilter_ and nkey_ and tags_):
+                    notify_ = (
+                        "notify" in notification_ and notification_["notify"] is True
+                    )
+                    push_ = "push" in notification_ and notification_["push"] is True
+                    attachment_ = (
+                        "attachment" in notification_
+                        and notification_["attachment"] is True
+                    )
+                    subject_ = (
+                        notification_["subject"]
+                        if "subject" in notification_ and notification_["subject"] != ""
+                        else None
+                    )
+                    body_ = (
+                        notification_["body"]
+                        if "body" in notification_ and notification_["body"] != ""
+                        else None
+                    )
+                    ncollection_ = (
+                        notification_["collection"]
+                        if "collection" in notification_
+                        and notification_["collection"] != ""
+                        else None
+                    )
+                    fields_ = (
+                        notification_["fields"].replace(" ", "")
+                        if "fields" in notification_ and notification_["fields"] != ""
+                        else None
+                    )
+                    nkey_ = (
+                        notification_["key"]
+                        if "key" in notification_ and notification_["key"] != ""
+                        else None
+                    )
+                    nfilter_ = (
+                        notification_["filter"]
+                        if "filter" in notification_
+                        and len(notification_["filter"]) > 0
+                        else None
+                    )
+                    tags_ = (
+                        notification_["_tags"]
+                        if "_tags" in notification_ and len(notification_["_tags"]) > 0
+                        else None
+                    )
+                    if not (
+                        notify_
+                        and subject_
+                        and body_
+                        and ncollection_
+                        and fields_
+                        and nfilter_
+                        and nkey_
+                        and tags_
+                    ):
                         continue
                     keyf_ = full_document_[nkey_] if nkey_ else None
                     get_users_from_tags_f_ = self.get_users_from_tags_f(tags_)
                     if not get_users_from_tags_f_["result"]:
-                        PRINT_("!!! error get_users_from_tags_f_:",
-                               get_users_from_tags_f_["msg"])
+                        PRINT_(
+                            "!!! error get_users_from_tags_f_:",
+                            get_users_from_tags_f_["msg"],
+                        )
                         continue
-                    to_ = get_users_from_tags_f_["to"] if "to" in get_users_from_tags_f_ and len(
-                        get_users_from_tags_f_["to"]) > 0 else None
+                    to_ = (
+                        get_users_from_tags_f_["to"]
+                        if "to" in get_users_from_tags_f_
+                        and len(get_users_from_tags_f_["to"]) > 0
+                        else None
+                    )
                     if not to_:
                         PRINT_("!!! _tags to not found")
                         continue
@@ -800,23 +1026,31 @@ class Trigger():
                     type_ = "csv"
 
                     ndocument_ = self.db_["_collection"].find_one(
-                        {"col_id": ncollection_})
+                        {"col_id": ncollection_}
+                    )
                     if not ndocument_:
-                        PRINT_("!!! notification collection not found",
-                               ncollection_)
+                        PRINT_("!!! notification collection not found", ncollection_)
                         continue
 
-                    nproperties_ = ndocument_["col_structure"]["properties"] if "col_structure" in ndocument_ and "properties" in ndocument_[
-                        "col_structure"] else None
+                    nproperties_ = (
+                        ndocument_["col_structure"]["properties"]
+                        if "col_structure" in ndocument_
+                        and "properties" in ndocument_["col_structure"]
+                        else None
+                    )
                     if not nproperties_:
                         continue
 
                     if attachment_:
-                        query_ = json.dumps(self.get_filtered_f({
-                            "match": nfilter_,
-                            "properties": nproperties_,
-                            "data": full_document_
-                        }))
+                        query_ = json.dumps(
+                            self.get_filtered_f(
+                                {
+                                    "match": nfilter_,
+                                    "properties": nproperties_,
+                                    "data": full_document_,
+                                }
+                            )
+                        )
                         file_ = f"{API_TEMPFILE_PATH_}/stream-{self.get_timestamp_f()}.{type_}"
                         ncollection_ += "_data"
                         command_ = f"mongoexport --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}' --quiet"
@@ -828,15 +1062,13 @@ class Trigger():
                                 raise PassException("no output generated")
                             lines_ = len(output_.readlines())
                             if lines_ and lines_ > 1:
-                                files_ = [
-                                    {"filename": file_, "filetype": type_}]
+                                files_ = [{"filename": file_, "filetype": type_}]
                             else:
                                 raise PassException("no data records exported")
 
                     if push_:
                         msg_ = json.dumps({"text": f"OK {keyf_}"})
-                        resp_ = requests.post(
-                            notification_push_url_, msg_, timeout=10)
+                        resp_ = requests.post(notification_push_url_, msg_, timeout=10)
                         if resp_.status_code != 200:
                             PRINT_("!!! push notification error", resp_)
                         res_ = str(resp_.content)
@@ -846,7 +1078,7 @@ class Trigger():
                         "files": files_,
                         "personalizations": personalizations_,
                         "subject": subject_,
-                        "html": body_
+                        "html": body_,
                     }
                     email_sent_ = self.send_email_smtp_f(msg_)
                     if not email_sent_["result"]:
@@ -886,69 +1118,101 @@ class Trigger():
 
             with self.db_.watch(self.pipeline_) as changes_stream_:
                 for event_ in changes_stream_:
-
-                    source_collection_ = event_[
-                        "ns"]["coll"] if "ns" in event_ and "coll" in event_["ns"] else None
+                    source_collection_ = (
+                        event_["ns"]["coll"]
+                        if "ns" in event_ and "coll" in event_["ns"]
+                        else None
+                    )
                     if source_collection_ is None:
                         PRINT_("!!! no collection provided")
                         continue
-                    source_collection_id_ = source_collection_.replace(
-                        "_data", "")
+                    source_collection_id_ = source_collection_.replace("_data", "")
 
                     if source_collection_ == "_collection":
                         refresh_properties_f_ = self.refresh_properties_f()
                         if not refresh_properties_f_["result"]:
-                            PRINT_(">>> properties refresh error",
-                                   refresh_properties_f_["exc"])
+                            PRINT_(
+                                ">>> properties refresh error",
+                                refresh_properties_f_["exc"],
+                            )
                             continue
                         refresh_triggers_f_ = self.refresh_triggers_f()
                         if not refresh_triggers_f_["result"]:
-                            PRINT_(">>> triggers refresh error",
-                                   refresh_triggers_f_["exc"])
+                            PRINT_(
+                                ">>> triggers refresh error", refresh_triggers_f_["exc"]
+                            )
                             continue
                         PRINT_(">>> _collection updated and refreshed")
 
-                    source_properties_ = self.properties_[
-                        source_collection_id_] if source_collection_id_ in self.properties_ else None
+                    source_properties_ = (
+                        self.properties_[source_collection_id_]
+                        if source_collection_id_ in self.properties_
+                        else None
+                    )
                     if source_properties_ is None:
                         continue
 
-                    op_ = event_["operationType"] if "operationType" in event_ and event_[
-                        "operationType"] in self.operations_ else None
+                    op_ = (
+                        event_["operationType"]
+                        if "operationType" in event_
+                        and event_["operationType"] in self.operations_
+                        else None
+                    )
                     if op_ is None:
                         PRINT_("!!! no operation provided")
                         continue
 
-                    changed_ = event_["updateDescription"]["updatedFields"] if "updateDescription" in event_ and "updatedFields" in event_[
-                        "updateDescription"] and op_ in ["update", "replace"] else None
+                    changed_ = (
+                        event_["updateDescription"]["updatedFields"]
+                        if "updateDescription" in event_
+                        and "updatedFields" in event_["updateDescription"]
+                        and op_ in ["update", "replace"]
+                        else None
+                    )
                     if changed_ is None:
-                        changed_ = event_[
-                            "fullDocument"] if "fullDocument" in event_ and op_ == "insert" else None
+                        changed_ = (
+                            event_["fullDocument"]
+                            if "fullDocument" in event_ and op_ == "insert"
+                            else None
+                        )
                         if changed_ is None:
                             PRINT_("!!! no changed fields provided")
                             continue
 
                     if source_collection_[:1] == "_":
-                        PRINT_(
-                            f">>> system collection passed {source_collection_}")
+                        PRINT_(f">>> system collection passed {source_collection_}")
                         continue
 
                     resume_token_ = changes_stream_.resume_token
-                    token_ = resume_token_["_data"] if "_data" in resume_token_ and resume_token_[
-                        "_data"] is not None else None
-                    _id = event_["documentKey"]["_id"] if "documentKey" in event_ and "_id" in event_[
-                        "documentKey"] else None
+                    token_ = (
+                        resume_token_["_data"]
+                        if "_data" in resume_token_
+                        and resume_token_["_data"] is not None
+                        else None
+                    )
+                    _id = (
+                        event_["documentKey"]["_id"]
+                        if "documentKey" in event_ and "_id" in event_["documentKey"]
+                        else None
+                    )
 
                     if _id is None:
                         continue
 
-                    params_ = {"collection": source_collection_, "properties": source_properties_,
-                               "id": _id, "token": token_, "op": op_, "changed": changed_}
+                    params_ = {
+                        "collection": source_collection_,
+                        "properties": source_properties_,
+                        "id": _id,
+                        "token": token_,
+                        "op": op_,
+                        "changed": changed_,
+                    }
                     await asyncio.create_task(self.starter_changes_f(params_))
 
             current_task_ = asyncio.current_task()
             running_tasks_ = [
-                task for task in asyncio.all_tasks() if task is not current_task_]
+                task for task in asyncio.all_tasks() if task is not current_task_
+            ]
             await asyncio.wait(running_tasks_)
 
         except pymongo.errors.PyMongoError as exc_:
@@ -973,16 +1237,18 @@ mngo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_username_ = get_docker_secret("mongo_username", default="")
 mongo_password_ = get_docker_secret("mongo_password", default="")
 mongo_tls_cert_keyfile_password_ = get_docker_secret(
-    "mongo_tls_keyfile_password", default="")
+    "mongo_tls_keyfile_password", default=""
+)
 mongo_tls_ = os.environ.get("MONGO_TLS")
 mongo_tls_cert_keyfile_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 mongo_tls_allow_invalid_certificates_ = os.environ.get(
-    "MONGO_TLS_ALLOW_INVALID_CERTIFICATES")
+    "MONGO_TLS_ALLOW_INVALID_CERTIFICATES"
+)
 mongo_retry_writes_ = os.environ.get("MONGO_RETRY_WRITES")
 mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 notification_push_url_ = os.environ.get("NOTIFICATION_PUSH_URL")
-API_TEMPFILE_PATH_ = os.environ.get('API_TEMPFILE_PATH')
+API_TEMPFILE_PATH_ = os.environ.get("API_TEMPFILE_PATH")
 REPEATER_LIMIT_ = 1000
 PRINT_ = partial(print, flush=True)
 
