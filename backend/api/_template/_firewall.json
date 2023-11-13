@@ -2,49 +2,59 @@
   "properties": {
     "fwa_name": {
       "bsonType": "string",
-      "minLength": 3,
-      "maxLength": 64,
-      "pattern": "^[a-zA-Z0-9- ]+$",
       "title": "Rule Name",
-      "description": "Rule Name"
-    },
-    "fwa_tag": {
-      "bsonType": "string",
+      "description": "Rule Name",
       "minLength": 3,
       "maxLength": 64,
-      "pattern": "^[#@][a-zA-Z0-9]{4,64}$",
-      "title": "Tag",
-      "description": "Enter a tag #..."
+      "pattern": "^[a-zA-Z0-9- ]{3,64}$"
     },
     "fwa_source_ip": {
       "bsonType": "string",
-      "minLength": 7,
-      "maxLength": 15,
       "title": "Source IP",
       "description": "Source IP",
+      "minLength": 7,
+      "maxLength": 16,
+      "pattern": "^[0-9.-]{7,16}$",
       "required": true
     },
     "fwa_enabled": {
       "bsonType": "bool",
       "title": "Enabled",
-      "default": true,
-      "description": "Enabled or not"
+      "description": "Enabled or not",
+      "default": true
     },
     "fwa_waf_sync_date": {
       "bsonType": "date",
       "title": "WAF Sync Date",
       "description": "WAF sync date",
       "readonly": true
+    },
+    "_tags": {
+      "bsonType": "array",
+      "title": "Tags",
+      "description": "Enter a tag #...",
+      "uniqueItems": true,
+      "minItems": 0,
+      "maxItems": 32,
+      "items": {
+        "bsonType": "string",
+        "minLength": 2,
+        "maxLength": 64,
+        "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
+      },
+      "subType": "tag",
+      "manualAdd": true
     }
   },
-  "required": ["fwa_name", "fwa_source_ip", "fwa_tag"],
+  "required": ["fwa_name", "fwa_source_ip", "_tags"],
   "index": [
-    ["fwa_tag", "fwa_source_ip", "fwa_enabled"],
+    ["fwa_source_ip", "fwa_enabled", "_tags"],
     ["fwa_name", "fwa_source_ip", "fwa_enabled"],
-    ["fwa_tag", "fwa_enabled"],
-    ["fwa_source_ip", "fwa_enabled"]
+    ["fwa_enabled"],
+    ["fwa_source_ip", "fwa_enabled"],
+    ["fwa_source_ip", "_tags"]
   ],
-  "unique": [["fwa_name"], ["fwa_tag", "fwa_source_ip"]],
+  "unique": [["fwa_name"], ["fwa_source_ip"]],
   "sort": {
     "_modified_at": -1
   },
@@ -69,10 +79,10 @@
       "_tags": ["#Managers", "#Administrators", "#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "Security [WAF Updated]",
+        "subject": "Security [Firewall Updated]",
         "body": "Hi,<br /><br />We would like to let you know that WAF has been updated.",
         "attachment": true,
-        "fields": "fwa_name,fwa_tag,fwa_source_ip",
+        "fields": "fwa_name,fwa_source_ip",
         "filter": [
           {
             "key": "fwa_enabled",

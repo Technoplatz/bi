@@ -1782,7 +1782,7 @@ class Crud:
                     ],
                     "op": "importerr",
                     "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}{stats_}",
-                    "subject": "Data Management [Upload Result]",
+                    "subject": "Management [Data Upload Result]",
                     "files": files_,
                 }
             )
@@ -2354,7 +2354,7 @@ class Crud:
                         {
                             "personalizations": personalizations_,
                             "html": que_message_body_,
-                            "subject": f"Query - {que_title_}",
+                            "subject": que_title_,
                             "files": files_,
                         }
                     )
@@ -3977,7 +3977,6 @@ class Crud:
                     )
                     files_ += [{"name": file_, "type": type_}]
 
-                subject_ = f"Action - {subject_}"
                 email_sent_ = Email().send_email_f(
                     {
                         "op": "action",
@@ -4511,7 +4510,7 @@ class OTP:
                     "op": "tfa",
                     "personalizations": [{"email": usr_id_, "name": name_}],
                     "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>",
-                    "subject": "Sign in [OTP]",
+                    "subject": "Account [2FA Code]",
                 }
             )
             if not email_sent_["result"]:
@@ -4931,27 +4930,15 @@ class Auth:
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
             allowed_ = (
-                Mongo()
-                .db_["_firewall"]
-                .find_one(
-                    {
-                        "$or": [
-                            {
-                                "fwa_tag": {"$in": tags_},
-                                "fwa_source_ip": ip_,
-                                "fwa_enabled": True,
-                            },
-                            {
-                                "fwa_tag": {"$in": tags_},
-                                "fwa_enabled": True,
-                            },
-                        ]
-                    }
-                )
+                Mongo().db_["_firewall"].find_one({
+                "fwa_source_ip": ip_,
+                "fwa_enabled": True,
+                "_tags": {"$elemMatch": {"$in": tags_}}
+                })
             )
             if not allowed_:
                 if not Misc().in_admin_ips_f():
-                    raise AuthError(f"connection is not allowed from IP address {ip_}")
+                    raise AuthError(f"connection is not allowed from {ip_}")
 
             return {"result": True}
 
@@ -5222,7 +5209,7 @@ class Auth:
                         "op": "signin",
                         "personalizations": [{"email": email_, "name": usr_name_}],
                         "html": f"<p>Hi {usr_name_},<br /><br />You have now signed-in from {ip_}.</p>",
-                        "subject": "Sign in [Validated!]",
+                        "subject": "Account [Sign-in Reminder]",
                     }
                 )
                 if not email_sent_["result"]:

@@ -63,15 +63,15 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - CF_ACTIVE=${CF_ACTIVE}
-      - CF_ZONE_ID=${CF_ZONE_ID}
       - CF_RULE_NAME=${CF_RULE_NAME}
       - CF_COUNTRIES=${CF_COUNTRIES}
-      - CF_TOKEN=${CF_TOKEN}
     secrets:
       - mongo_username
       - mongo_password
       - mongo_tls_keyfile_password
       - admin_ips
+      - cf_zoneid
+      - cf_token
     extra_hosts:
       - mongo0:${SUBNET_MONGO0_IPV4}
       - mongo1:${SUBNET_MONGO1_IPV4}
@@ -103,3 +103,7 @@ secrets:
     file: ./../../.secret/.mongo_tls_keyfile_password
   admin_ips:
     file: ./../../.secret/.admin_ips
+  cf_zoneid:
+    file: ./../../.secret/.cf_zoneid
+  cf_token:
+    file: ./../../.secret/.cf_token

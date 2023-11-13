@@ -100,10 +100,10 @@ class Cloudflare:
         docstring is in progress
         """
         self.cf_active_ = os.environ.get("CF_ACTIVE") in [True, "true", "True", "TRUE"]
-        self.cf_zone_id_ = os.environ.get("CF_ZONE_ID")
+        self.cf_zone_id_ = get_docker_secret("cf_zoneid", default="")
+        self.token_ = get_docker_secret("cf_token", default="")
         self.cf_rule_name_ = os.environ.get("CF_RULE_NAME")
         self.cf_countries_ = os.environ.get("CF_COUNTRIES").replace(" ", "").split(",")
-        self.token_ = os.environ.get("CF_TOKEN")
 
         self.admin_ips_ = (
             get_docker_secret("admin_ips", default="").replace(" ", "").split(",")
@@ -204,7 +204,10 @@ class Cloudflare:
                 client_ips_.append(doc_["_id"])
 
             ips_ = self.admin_ips_ + client_ips_
-            count_ = len(ips_)
+            count_ = len(ips_) if ips_ and len(ips_) > 0 else None
+            if not count_:
+                raise APIException("no ip addresses found")
+
             ipsq_ = "{" + " ".join(f"{ip_}" for ip_ in ips_) + "}"
             countriesq_ = (
                 "{" + " ".join(f'"{country_}"' for country_ in self.cf_countries_) + "}"

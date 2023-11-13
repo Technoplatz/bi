@@ -2,20 +2,20 @@
   "properties": {
     "per_tag": {
       "bsonType": "string",
-      "minLength": 3,
-      "maxLength": 64,
-      "pattern": "^[#@][a-zA-Z0-9-]{4,64}$",
       "title": "Tag",
       "description": "Enter a tag #...",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[#@][a-zA-Z0-9-]{3,64}$",
       "required": true
     },
     "per_collection_id": {
       "bsonType": "string",
+      "title": "Collection ID",
+      "description": "Collection ID",
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "title": "Collection ID",
-      "description": "Collection ID",
       "required": true,
       "collection": true
     },
@@ -77,6 +77,8 @@
     },
     "per_match": {
       "bsonType": "array",
+      "title": "Match",
+      "description": "Match",
       "minItems": 0,
       "maxItems": 8,
       "uniqueItems": true,
@@ -84,7 +86,7 @@
       "filter": true,
       "items": {
         "bsonType": "object",
-        "title": "Match",
+        "title": "Filter",
         "description": "Match filter",
         "additionalProperties": false,
         "properties": {
