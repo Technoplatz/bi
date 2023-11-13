@@ -3580,6 +3580,12 @@ class Crud:
                     if "body" in notification_
                     else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
                 )
+                nkey_ = (
+                    notification_["key"]
+                    if "key" in notification_ and notification_["key"] != ""
+                    else None
+                )
+                keyf_ = data_[nkey_] if data_ and nkey_ and nkey_ in data_ else None
                 if attachment_:
                     fields_ = (
                         str(notification_["fields"].replace(" ", ""))
@@ -3607,7 +3613,7 @@ class Crud:
                     )
                     subprocess.call(cmd_)
                     files_ += [{"name": file_, "type": type_}] if attachment_ else []
-                    subject_ = f"Automation - {subject_}"
+                    subject_ += f" - {keyf_}" if keyf_ else ""
                     email_sent_ = Email().send_email_f(
                         {
                             "op": "link",
@@ -4246,8 +4252,8 @@ class Email:
                 return {"result": True}
 
             message_ = MIMEMultipart()
-            message_["From"] = f"{COMPANY_NAME_} <{FROM_EMAIL_}>"
-            message_["Subject"] = f"{EMAIL_SUBJECT_PREFIX_}{subject_}"
+            message_["From"] = f"{unidecode(COMPANY_NAME_)} <{FROM_EMAIL_}>"
+            message_["Subject"] = unidecode(f"{EMAIL_SUBJECT_PREFIX_}{subject_}")
             message_["To"] = ", ".join(to_)
             message_.attach(MIMEText(html_, "html"))
 

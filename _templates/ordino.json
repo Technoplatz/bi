@@ -136,54 +136,12 @@
         "subject": "Logistics [Ordino Created]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to ordino.",
         "attachment": true,
+        "key": "odi_sub_no",
         "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty"
       }
     }
   ],
-  "actions": [
-    {
-      "id": "bulk-arrived",
-      "title": "Arrived at Customs",
-      "enabled": true,
-      "match": [
-        {
-          "key": "odi_arrived_date",
-          "op": "null",
-          "value": null
-        },
-        {
-          "key": "odi_closed",
-          "op": "ne",
-          "value": true
-        }
-      ],
-      "set": [
-        {
-          "key": "odi_arrived_date",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "icon": "megaphone",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"],
-      "notification": {
-        "notify": true,
-        "subject": "Logistics [Ordino Arrived]",
-        "body": "Hi,<br /><br />We would like to let you know that attached ordinos have been arrived at customs.",
-        "attachment": true,
-        "fields": "odi_no,odi_sub_no,odi_date,odi_from,odi_customs,odi_arrived_date",
-        "filter": [
-          {
-            "key": "odi_arrived_date",
-            "op": "nnull",
-            "value": null
-          }
-        ]
-      }
-    }
-  ],
+  "actions": [],
   "triggers": [
     {
       "name": "_ordino_id",

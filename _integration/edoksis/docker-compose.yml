@@ -36,7 +36,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: technoplatz/bi-intg-edoksis${REF}:${VERSION}
+    image: technoplatz/bi-edoksis${REF}:${VERSION}
     container_name: edoksis
     hostname: edoksis
     restart: always

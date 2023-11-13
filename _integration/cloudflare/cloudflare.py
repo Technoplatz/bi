@@ -242,7 +242,9 @@ class Cloudflare:
                         "$set": {
                             "fwa_waf_sync_date": datetime.now(),
                             "_modified_at": datetime.now(),
-                            "_modified_by": json_["email"] if "email" in json_ else "_action",
+                            "_modified_by": json_["email"]
+                            if "email" in json_
+                            else "_action",
                         }
                     },
                 )
@@ -265,11 +267,14 @@ class Cloudflare:
 
 PRINT_ = partial(print, flush=True)
 DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
+SUBNET_API_IPV4_ = os.environ.get("SUBNET_API_IPV4")
+
 app = Flask(__name__)
 app.config[
     "CORS_ORIGINS"
 ] = f"http://{DOMAIN_}:8101,http://{DOMAIN_}:8100,https://{DOMAIN_}"
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
+app.json_encoder = JSONEncoder
 CORS(app)
 
 

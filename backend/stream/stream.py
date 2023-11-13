@@ -540,9 +540,9 @@ class Trigger:
             SMTP_TLS_PORT_ = int(str(os.environ.get("SMTP_TLS_PORT")))
             FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
             disclaimer_ = f"<p>Sincerely,</p><p>{company_name_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {company_name_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
-            email_from_ = f"{company_name_} <{FROM_EMAIL_}>"
+            email_from_ = f"{unidecode(company_name_)} <{FROM_EMAIL_}>"
             html_ = f"{msg['html']} {disclaimer_}"
-            server_ = smtplib.SMTP_SSL(SMTP_ENDPOINT_, SMTP_TLS_PORT_)
+            server_ = smtplib.SMTP(SMTP_ENDPOINT_, SMTP_TLS_PORT_)
             server_.ehlo()
             server_.starttls()
             server_.login(SMTP_USERID_, SMTP_PASSWORD_)
@@ -562,7 +562,7 @@ class Trigger:
 
             message_ = MIMEMultipart()
             message_["From"] = email_from_
-            message_["Subject"] = msg["subject"]
+            message_["Subject"] = unidecode(msg["subject"])
             message_.attach(MIMEText(html_, "html"))
             message_["To"] = recipients_str_
 
@@ -1082,7 +1082,7 @@ class Trigger:
                     }
                     email_sent_ = self.send_email_smtp_f(msg_)
                     if not email_sent_["result"]:
-                        raise PassException(email_sent_["msg"])
+                        raise AppException(email_sent_["msg"])
 
             return {"result": True}
 
