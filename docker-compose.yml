@@ -42,7 +42,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     command:
       - --log.level=INFO
       - --api.insecure=true
@@ -70,7 +70,7 @@ services:
     container_name: init
     hostname: init
     labels:
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -112,7 +112,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     ports:
       - "${MONGO_PORT0}:${MONGO_PORT0}"
     volumes:
@@ -155,7 +155,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     ports:
       - "${MONGO_PORT1}:${MONGO_PORT0}"
     volumes:
@@ -196,7 +196,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     ports:
       - "${MONGO_PORT2}:${MONGO_PORT0}"
     volumes:
@@ -241,7 +241,7 @@ services:
       mongo2:
         condition: service_healthy
     labels:
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -292,7 +292,7 @@ services:
     hostname: stream
     restart: always
     labels:
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     volumes:
       - bi-cert-volume:/cert
       - bi-storage-volume:${API_TEMPFILE_PATH}
@@ -354,7 +354,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)
       - traefik.http.services.api.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     volumes:
       - bi-storage-volume:${API_TEMPFILE_PATH}
       - bi-storage-volume:${API_MONGODUMP_PATH}
@@ -394,13 +394,13 @@ services:
       - API_QUERY_PAGE_SIZE=${API_QUERY_PAGE_SIZE}
       - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
       - API_MONGODUMP_PATH=${API_MONGODUMP_PATH}
-      - API_CORS_ORIGINS=${API_CORS_ORIGINS}
       - API_S3_ACTIVE=${API_S3_ACTIVE}
       - API_S3_REGION=${API_S3_REGION}
       - API_S3_BUCKET_NAME=${API_S3_BUCKET_NAME}
       - API_PERMISSIVE_TAGS=${API_PERMISSIVE_TAGS}
       - API_ADMIN_TAGS=${API_ADMIN_TAGS}
       - API_DELETE_ALLOWED=${API_DELETE_ALLOWED}
+      - API_CORS_ORIGINS=${API_CORS_ORIGINS}
       - NOTIFICATION_PUSH_URL=${NOTIFICATION_PUSH_URL}
       - MONGO_TLS=${MONGO_TLS}
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
@@ -445,7 +445,7 @@ services:
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`) && !PathPrefix(`/api`)
       - traefik.http.routers.pwa.priority=0
       - traefik.http.services.pwa.loadbalancer.server.port=80
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
+      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -464,18 +464,16 @@ services:
     container_name: watchtower
     hostname: watchtower
     restart: always
-    labels:
-      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_CHECK}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-    command: --interval ${WATCHTOWER_INTERVAL_SECONDS}
     environment:
       - TZ=${TZ}
       - WATCHTOWER_NOTIFICATIONS=slack
       - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER=${DOMAIN}
       - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_PUSH_URL}
+      - WATCHTOWER_POLL_INTERVAL=${WATCHTOWER_INTERVAL_SECONDS}
     links:
       - traefik
     networks:
