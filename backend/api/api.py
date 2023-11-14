@@ -2212,7 +2212,6 @@ class Crud:
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
                 raise APIError("query not found")
-            que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
             approved_ = "_approved" in query_ and query_["_approved"] is True
             if not approved_:
@@ -2286,8 +2285,6 @@ class Crud:
                 if "updatables" in queries_ and len(queries_["updatables"]) > 0
                 else None
             )
-
-            que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
             match_exists_, set_, aggregate_ = False, None, []
             for agg_ in que_aggregate_:
@@ -2416,11 +2413,6 @@ class Crud:
             if not job_:
                 raise APIError("job not found")
 
-            approved_ = "_approved" in job_ and job_["_approved"] is True
-            if not approved_:
-                err_ = "job needs to be approved by administrators"
-                raise PassException(err_)
-
             job_collection_id_ = (
                 job_["job_collection_id"] if "job_collection_id" in job_ else None
             )
@@ -2493,6 +2485,11 @@ class Crud:
 
             if not set_:
                 err_ = "no set found in the update query"
+                raise PassException(err_)
+
+            approved_ = "_approved" in job_ and job_["_approved"] is True
+            if not approved_:
+                err_ = "job needs to be approved by the administrators"
                 raise PassException(err_)
 
             set__ = {}
@@ -2987,7 +2984,6 @@ class Crud:
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
                 raise APIError("query not found")
-            que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
             que_collection_id_ = (
                 query_["que_collection_id"]
@@ -3013,7 +3009,7 @@ class Crud:
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
 
-            if not Auth().is_admin_f(user_) and que_type_ != "query":
+            if not Auth().is_admin_f(user_):
                 raise AuthError("no permission to save job")
 
             if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):

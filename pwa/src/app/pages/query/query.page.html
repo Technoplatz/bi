@@ -36,10 +36,9 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}</p>
         <h3>{{ subheader }}</h3>
-        <span *ngIf="type_==='query'">{{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
-          }}. </span>[ {{
+        {{
         que_scheduled_cron_ ?
-        que_scheduled_cron_ : 'Not scheduled' | translate }} ]<br />
+        que_scheduled_cron_ : 'Not scheduled' | translate }}<br />
         <strong>_collection: {{ col_ }}</strong>
         <div class="filler-10"></div>
 
@@ -53,8 +52,7 @@ https://www.gnu.org/licenses.
                   {{ 'Back-To List' | translate }}
                 </div>
               </div>
-              <div (click)="type_!=='query' ? run_query() : refresh_data(false)"
-                [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
+              <div (click)="refresh_data(false)" [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
                 <span *ngIf="!running_">
                   <ion-icon name="play-sharp"></ion-icon><br />
                   {{ 'Run Query' | translate }}
@@ -110,8 +108,8 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
-        <div *ngIf="type_==='query'; else job">
-          <table *ngIf="data_.length > 0; else nodata" class="data-table">
+        <div *ngIf="data_.length > 0; else nodata">
+          <table class="data-table">
             <tr>
               <th>#</th>
               <th *ngFor="let item_ of fields_">
@@ -125,31 +123,24 @@ https://www.gnu.org/licenses.
               </td>
             </tr>
           </table>
-
-          <!-- NO DATA FOUND FOR QUERY -->
-          <ng-template #nodata>
-            <div *ngIf="!running_; else ontheway" class="ion-margin-top">
-              <h6>{{ 'No data matching the criteria found' | translate }}.</h6>
-              {{ 'You can edit the query or get help from the Administrators' | translate }}.
-            </div>
-            <ng-template #ontheway>
-              <div class="ion-margin-top">
-                <h6>{{ 'Data is on the way' | translate }}...</h6>
-                {{ 'Please wait while the data is retrieved' | translate }}.
-              </div>
-            </ng-template>
-          </ng-template>
+          {{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
+          }}.
         </div>
 
-        <!-- RESULT FOR A JOB -->
-        <ng-template #job>
-          <div class="ion-margin-top">
-            <h6><span *ngIf="!running_">{{ count_ }} {{'records affected' | translate }}</span>
-              <span *ngIf="running_">{{'Processing' | translate }}..</span>.
-            </h6>
-            {{ 'You can manually run this query' | translate }}.
+        <!-- NO DATA FOUND FOR QUERY -->
+        <ng-template #nodata>
+          <div *ngIf="!running_; else ontheway" class="ion-margin-top">
+            <h6>{{ 'No data matching the criteria found' | translate }}.</h6>
+            {{ 'You can edit the query or get help from the Administrators' | translate }}.
           </div>
+          <ng-template #ontheway>
+            <div class="ion-margin-top">
+              <h6>{{ loadingText | translate }}...</h6>
+              {{ 'Please wait while the data is retrieved' | translate }}.
+            </div>
+          </ng-template>
         </ng-template>
+
       </ion-col>
     </ion-row>
   </ion-grid>

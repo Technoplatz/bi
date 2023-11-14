@@ -51,8 +51,7 @@ https://www.gnu.org/licenses.
                   {{ 'Back-To List' | translate }}
                 </div>
               </div>
-              <div (click)="run_job()"
-                [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
+              <div (click)="run_job()" [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
                 <span *ngIf="!running_">
                   <ion-icon name="play-sharp"></ion-icon><br />
                   {{ 'Run Job' | translate }}
@@ -65,7 +64,7 @@ https://www.gnu.org/licenses.
               <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="create-sharp"></ion-icon><br />
-                  {{ 'Edit Job' | translate }}
+                  {{ 'Edit Job' | translate }}x
                 </div>
               </div>
             </ion-col>
@@ -101,14 +100,16 @@ https://www.gnu.org/licenses.
         </ion-grid>
 
         <!-- RESULT FOR A JOB -->
-        <ng-template #job>
-          <div class="ion-margin-top">
-            <h6><span *ngIf="!running_">{{ count_ }} {{'records affected' | translate }}</span>
-              <span *ngIf="running_">{{'Processing' | translate }}..</span>.
-            </h6>
-            {{ 'You can manually run this query' | translate }}.
-          </div>
-        </ng-template>
+        <div class="ion-margin-top">
+          <h6>
+            <span *ngIf="running_; else norunning">{{'Processing' | translate }}..</span>.
+            <ng-template #norunning>
+              <span>{{ count_ }} {{ count_ > 1 ? 'records affected' : 'record affected' | translate
+                }}</span>
+            </ng-template>
+          </h6>
+          {{ 'You can manually run this query' | translate }}.
+        </div>
       </ion-col>
     </ion-row>
   </ion-grid>

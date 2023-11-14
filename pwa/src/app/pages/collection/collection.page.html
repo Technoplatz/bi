@@ -38,7 +38,7 @@ https://www.gnu.org/licenses.
         <h3><span *ngIf="title_">{{ title_ | translate | titlecase }}&nbsp;</span>[{{ subheader }}]</h3>
         <span *ngIf="is_loaded" class="bold primary">{{ count }} {{ count > 1 ? 'documents were filtered' : 'document
           was filtered' | translate }}.</span><span *ngIf="!is_loaded" class="bold primary">{{
-          'Please wait while the data is retrieved' | translate }}...</span>
+          loadingText | translate }}...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
@@ -399,7 +399,7 @@ https://www.gnu.org/licenses.
         </div>
         <ng-template #notinit>
           <div class="ion-margin-top">
-            {{ 'Initializing' | translate }}...
+            {{ loadingText | translate }}...
           </div>
         </ng-template>
       </ion-col>

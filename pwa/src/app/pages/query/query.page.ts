@@ -58,14 +58,10 @@ export class QueryPage implements OnInit {
   public pages: any = [];
   public limit_: number = environment.misc.limit;
   public count_: number = 0;
-  public status_: any = {};
-  public columns_: any;
   public fields_: any = {};
   public _saving: boolean = false;
-  public is_deleting: boolean = false;
   public sort: any = {};
   public schemavis_: boolean = false;
-  public type_: string = "aggregate";
   public aggregate_: any = [];
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
@@ -81,7 +77,6 @@ export class QueryPage implements OnInit {
   private query_: any = {};
   private uri_: string = "";
   public perma_: boolean = false;
-  private collections_: any = [];
   private schema_: any = {};
   public json_content_: any = null;
   public col_: string = "";
@@ -100,9 +95,6 @@ export class QueryPage implements OnInit {
       this.user = res;
       this.perma_ = res.perma;
     });
-    this.crud.collections.subscribe((res: any) => {
-      this.collections_ = res && res.data ? res.data : [];
-    });
   }
 
   ngOnDestroy() {
@@ -119,7 +111,6 @@ export class QueryPage implements OnInit {
       this.storage.get("LSQUERY").then((LSQUERY_: any) => {
         this.col_ = LSQUERY_?.que_collection_id;
         this.query_ = LSQUERY_;
-        this.type_ = LSQUERY_?.que_type;
         this.menu = this.router.url.split("/")[1];
         this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
         this.query_url_ = `${this.uri_}/get/query/${this.id}`;
@@ -140,7 +131,6 @@ export class QueryPage implements OnInit {
           this.subheader = res.query.que_title;
           this.json_content_ = res.query.que_aggregate;
           this.aggregate_ = res.query.que_aggregate;
-          this.type_ = res.query.que_type;
           this.fields_ = res.fields;
           this.data_ = res.data;
           this.count_ = res.count;

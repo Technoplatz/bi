@@ -1,15 +1,5 @@
 {
   "properties": {
-    "que_type": {
-      "bsonType": "string",
-      "title": "Type",
-      "description": "Query type",
-      "enum": ["query", "job"],
-      "pattern": "^[a-z]{3,5}$",
-      "default": "query",
-      "caseType": "lowercase",
-      "permanent": true
-    },
     "que_id": {
       "bsonType": "string",
       "title": "ID",
@@ -82,7 +72,7 @@
       "description": "Query aggregation"
     }
   },
-  "required": ["que_id", "que_title", "que_collection_id", "que_type"],
+  "required": ["que_id", "que_title", "que_collection_id"],
   "index": [["que_collection_id"], ["que_scheduled"], ["que_scheduled", "_approved"]],
   "unique": [["que_id"]],
   "sort": {
