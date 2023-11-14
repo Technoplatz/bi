@@ -154,7 +154,7 @@ export class QueryPage implements OnInit {
           reject();
         }
       }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
+        this.misc.doMessage(res.err, "error");
         reject();
       }).finally(() => {
         this.running_ = false;

@@ -2289,7 +2289,7 @@ class Crud:
 
             que_type_ = query_["que_type"] if "que_type" in query_ else "query"
 
-            match_exists_, set_ = False, None
+            match_exists_, set_, aggregate_ = False, None, []
             for agg_ in que_aggregate_:
                 if "$limit" in agg_ or "$skip" in agg_:
                     continue
