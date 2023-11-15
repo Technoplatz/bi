@@ -286,7 +286,7 @@ https://www.gnu.org/licenses.
                   {{ ((pager_ - 1) * limit_) + i + 1}}
                 </ng-template>
               </td>
-              <td (click)="tdc($event)">
+              <td (click)="tdc($event, record)">
                 <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                   (ionChange)="set_select_data(i,$event)" mode="md">
                 </ion-checkbox>

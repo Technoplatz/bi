@@ -237,7 +237,7 @@ Enumerates are certain type of string properties with predefined values which al
 
 #### Boolean Properties
 
-Sample boolean  field;
+Sample boolean field;
 
 ```json
 {
@@ -257,27 +257,32 @@ Sample boolean  field;
 ```json
 [
   {
-    "id": "shipment",
-    "title": "Shipment",
+    "id": "change",
+    "title": "DN Split",
     "enabled": true,
-    "match": [{ "key": "dnn_status", "op": "eq", "value": "60-ReadyToBeDelivered" }],
+    "match": [{ "key": "dnn_status", "op": "in", "value": "40-ClearanceCompleted,50-OnTheTouchpoint" }],
     "set": [
-      { "key": "dnn_status", "value": "70-Delivered" },
-      { "key": "dnn_shp_id", "value": null }
+      { "key": "dnn_acc_no", "value": null },
+      { "key": "dnn_acc_name", "value": null },
+      { "key": "dnn_qty", "value": null }
     ],
     "one_click": false,
-    "icon": "bus",
+    "icon": "git-branch",
     "uniqueness": true,
-    "unique": ["dnn_acc_no"],
-    "_tags": ["#Technoplatz"],
+    "unique": ["dnn_no"],
+    "split": true,
+    "split_key_field": "dnn_no",
+    "split_key_suffix": "-20",
+    "split_num_field": "dnn_qty",
     "notification": {
       "notify": true,
-      "subject": "DNs shipped",
-      "body": "Hi,<br /><br />We would like to let you know that attached DNs was shipped.",
+      "subject": "Operations [Delivery Split]",
+      "body": "Hi,<br /><br />We would like to let you know that the attached DN has been split.",
       "attachment": true,
-      "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-      "filter": [{ "key": "dnn_status", "op": "eq", "value": "70-Delivered" }]
-    }
+      "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_qty",
+      "filter": [{ "key": "dnn_status", "op": "in", "value": "40-ClearanceCompleted,50-OnTheTouchpoint" }]
+    },
+    "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations"]
   }
 ]
 ```

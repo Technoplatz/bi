@@ -41,7 +41,7 @@ import { environment } from "../../environments/environment";
 
 export class Su {
     private delay_: number = environment.swu_interval_mins;
-    public interval_: any = null;
+    private swu_check_: boolean = true;
 
     constructor(
         private swu: SwUpdate,
@@ -49,14 +49,16 @@ export class Su {
     ) {
         if (this.swu.isEnabled) {
             console.log("swu enabled");
-            this.interval_ = setInterval(() => {
-                this.swu.checkForUpdate().then((res_: any) => {
-                    console.log(res_ ? "swu processed" : "no swu found");
-                }).catch((err_: any) => {
-                    console.error("swu check error", err_);
-                });
+            setInterval(() => {
+                this.swu_check_ ?
+                    this.swu.checkForUpdate().then((res_: any) => {
+                        console.log(res_ ? "swu processed" : "no swu found");
+                    }).catch((err_: any) => {
+                        console.error("swu check error", err_);
+                    }) : null;
             }, this.delay_ * 60 * 1000);
         } else {
+            this.swu_check_ = false;
             console.error("swu is not enabled");
         }
     }
@@ -65,15 +67,13 @@ export class Su {
         this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
             switch (event_.type) {
                 case "VERSION_DETECTED":
-                    clearInterval(this.interval_);
-                    this.interval_ = null;
+                    this.swu_check_ = false;
                     console.log(`swu version detected ${event_.version.hash}`);
                     console.log("downloading...");
                     this.misc.version.next({ downloading: true, upgrade: false, version: event_.version.hash });
                     break;
                 case "VERSION_READY":
-                    clearInterval(this.interval_);
-                    this.interval_ = null;
+                    this.swu_check_ = false;
                     console.log("swu version is ready");
                     this.misc.version.next({ downloading: false, upgrade: true, version: event_.latestVersion.hash });
                     break;

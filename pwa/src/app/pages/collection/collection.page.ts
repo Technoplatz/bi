@@ -75,6 +75,7 @@ export class CollectionPage implements OnInit {
   public searched: any = null;
   public data: any = [];
   public selected: any = [];
+  public record_: any = [];
   public pages_: any = [];
   public limit_: number = environment.misc.limit;
   public page_: number = 1;
@@ -229,7 +230,7 @@ export class CollectionPage implements OnInit {
   action(ix_: any) {
     if (this.actions[ix_]?.one_click || this.sweeped[this.segment]?.length > 0) {
       this.actionix = ix_;
-      this.go_crud(null, "action");
+      this.go_crud(this.record_, "action");
     } else {
       this.misc.doMessage("please select the rows to be processed", "error");
     }
@@ -283,7 +284,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  async go_crud(rec: any, op: string) {
+  async go_crud(record_: any, op: string) {
     if (this.id === "_query" && !this.perm_) { } else {
       const modal = await this.modal.create({
         component: CrudPage,
@@ -295,7 +296,7 @@ export class CollectionPage implements OnInit {
             collection: this.id ? this.id : null,
             collections: this.collections_ ? this.collections_ : [],
             user: this.user,
-            data: rec,
+            data: record_,
             counters: this.counters_,
             structure: this.structure_,
             sweeped: this.sweeped[this.segment] && op === "action" ? this.sweeped[this.segment] : [],
@@ -570,7 +571,8 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  tdc(event_: any) {
+  tdc(event_: any, record_: any) {
+    this.record_ = record_;
     event_.stopPropagation();
   }
 

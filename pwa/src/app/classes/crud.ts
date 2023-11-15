@@ -92,7 +92,8 @@ export class Crud {
         const kv_ = p.subType === "keyvalue" ? true : false;
         const ko_ = p.subType === "keyop" ? true : false;
         const permanent_ = p.permanent && data?._modified_count >= 0 ? true : false;
-        const readonly_ = p.readonly ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].readonly?.indexOf(item) !== -1 ? true : false;
+        // const readonly_ = p.readonly ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].readonly?.indexOf(item) !== -1 ? true : false;
+        const readonly_ = p.readonly ? true : false;
         const dateOnly_ = p.dateOnly ? true : false;
         const collection_ = p.collection ? true : false;
         const textarea_ = p.textarea ? true : false;
@@ -170,7 +171,7 @@ export class Crud {
     });
   }
 
-  submit_f(collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, view: any, actionix: any, link_: any, linked_: any) {
+  submit_f(data_: any, collection: string, structure: any, form: any, _id: string, op: string, file: any, match: any, filter: any, actionix: any, link_: any, linked_: any) {
     return new Promise((resolve, reject) => {
       const properties = structure.properties;
       let doc_: any = {};
@@ -197,10 +198,10 @@ export class Crud {
               op: op,
               collection: collection,
               doc: doc_,
+              data: data_,
               match: match && match.length > 0 ? match : null,
               filter: filter ? filter : null,
               _id: _id ? _id : null,
-              view: view,
               actionix: actionix,
               link: link_,
               linked: linked_

@@ -156,11 +156,11 @@ class Schedular:
                 "day_of_week": str(day_of_week_),
             }
 
-        except PassException as exc_:
-            return Misc().pass_exception_f(exc_)
+        except PassException as exc__:
+            return Misc().pass_exception_f(exc__)
 
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def schedule_query_job_f(self, source_, sched_):
         """
@@ -501,17 +501,17 @@ class Misc:
 
             return {"result": True, "jwt": claims_}
 
-        except jwt.ExpiredSignatureError as exc_:
-            return {"result": False, "msg": str(exc_), "exc": str(exc_)}
+        except jwt.ExpiredSignatureError as exc__:
+            return {"result": False, "msg": str(exc__), "exc": str(exc__)}
 
-        except jwt.JWTClaimsError as exc_:
-            return {"result": False, "msg": str(exc_), "exc": str(exc_)}
+        except jwt.JWTClaimsError as exc__:
+            return {"result": False, "msg": str(exc__), "exc": str(exc__)}
 
-        except jwt.JWTError as exc_:
-            return {"result": False, "msg": str(exc_), "exc": str(exc_)}
+        except jwt.JWTError as exc__:
+            return {"result": False, "msg": str(exc__), "exc": str(exc__)}
 
-        except Exception as exc_:
-            return {"result": False, "msg": str(exc_), "exc": str(exc_)}
+        except Exception as exc__:
+            return {"result": False, "msg": str(exc__), "exc": str(exc__)}
 
     def post_notification_f(self, notification_):
         """
@@ -787,14 +787,14 @@ class Misc:
 
             return setto__
 
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except APIError as exc_:
-            return Misc().notify_exception_f(exc_)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def clean_f(self, data_):
         """
@@ -962,11 +962,11 @@ class Iot:
 
             return {"result": True, "payload": docs_, "msg": None, "status": 200}
 
-        except APIError as exc_:
-            return {"result": False, "payload": None, "msg": str(exc_), "status": 400}
+        except APIError as exc__:
+            return {"result": False, "payload": None, "msg": str(exc__), "status": 400}
 
-        except Exception as exc_:
-            return {"result": False, "payload": None, "msg": str(exc_), "status": 500}
+        except Exception as exc__:
+            return {"result": False, "payload": None, "msg": str(exc__), "status": 500}
 
     def barcode_scan_f(self, aut_id_):
         """
@@ -1098,11 +1098,11 @@ class Iot:
                 "status": 200,
             }
 
-        except APIError as exc_:
-            return {"result": False, "payload": None, "msg": str(exc_), "status": 400}
+        except APIError as exc__:
+            return {"result": False, "payload": None, "msg": str(exc__), "status": 400}
 
-        except Exception as exc_:
-            return {"result": False, "payload": None, "msg": str(exc_), "status": 500}
+        except Exception as exc__:
+            return {"result": False, "payload": None, "msg": str(exc__), "status": 500}
 
 
 class Crud:
@@ -1170,11 +1170,11 @@ class Crud:
 
             return {"result": True, "properties": properties_}
 
-        except APIError as exc_:
-            return Misc().notify_exception_f(exc_)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def inner_collection_f(self, cid_):
         """
@@ -2018,8 +2018,8 @@ class Crud:
 
             return filtered_
 
-        except Exception as exc_:
-            PRINT_("!!! get filtered exception", exc_)
+        except Exception as exc__:
+            PRINT_("!!! get filtered exception", exc__)
             return None
 
     def announcements_f(self, input_):
@@ -2038,11 +2038,11 @@ class Crud:
 
             return {"result": True, "data": announcements_}
 
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def collections_f(self, obj):
         """
@@ -2153,17 +2153,17 @@ class Crud:
 
             return {"result": True, "data": data_}
 
-        except AuthError as exc_:
-            return Misc().auth_error_f(exc_)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except pymongo.errors.PyMongoError as exc_:
-            return Misc().mongo_error_f(exc_)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except APIError as exc_:
-            return Misc().notify_exception_f(exc_)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def query_f(self, obj_):
         """
@@ -2743,17 +2743,17 @@ class Crud:
                 "selected": selected_,
             }
 
-        except AuthError as exc_:
-            return Misc().auth_error_f(exc_)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def crudschema_validate_f(self, obj):
         """
@@ -3749,6 +3749,7 @@ class Crud:
             if not email_:
                 raise AppException("user is not allowed")
 
+            data_ = obj["data"] if "data" in obj else None
             doc_ = obj["doc"] if "doc" in obj else None
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = email_
@@ -3889,22 +3890,80 @@ class Crud:
                         f"{(','.join(unique_))} must be unique in selection"
                     )
 
+            split_ = "split" in action_ and action_["split"] is True
+            split_key_suffix_ = (
+                action_["split_key_suffix"]
+                if "split_key_suffix" in action_
+                and action_["split_key_suffix"] is not None
+                else None
+            )
+            split_key_field_ = (
+                action_["split_key_field"]
+                if "split_key_field" in action_
+                and action_["split_key_field"] is not None
+                and action_["split_key_field"] in properties_
+                and action_["split_key_field"] in data_
+                else None
+            )
+            split_num_field_ = (
+                action_["split_num_field"]
+                if "split_num_field" in action_
+                and action_["split_num_field"] is not None
+                and action_["split_num_field"] in properties_
+                and action_["split_num_field"] in data_
+                and action_["split_num_field"] in doc_
+                else None
+            )
+
             if is_crud_ and set_:
-                set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
-                update_many_ = Mongo().db_[collection_].update_many(get_filtered_, set_)
-                count_ = (
-                    update_many_.matched_count if update_many_.matched_count > 0 else 0
-                )
-                if count_ == 0:
-                    raise PassException("no rows affected due to match criteria")
+                if (
+                    split_
+                    and split_key_suffix_
+                    and split_key_field_
+                    and split_num_field_
+                ):
+                    data_ = (
+                        Mongo()
+                        .db_[collection_]
+                        .find_one({"_id": ObjectId(data_["_id"])})
+                    )
+                    data_[
+                        split_key_field_
+                    ] = f"{data_[split_key_field_]}{split_key_suffix_}"
+
+                    diff_ = data_[split_num_field_] - doc_[split_num_field_]
+                    for doc__ in doc_:
+                        data_[doc__] = doc_[doc__]
+
+                    data_.pop("_id", None)
+                    data_["_created_at"] = Misc().get_now_f()
+                    data_["_created_by"] = email_
+                    data_["_modified_at"] = None
+                    data_["_modified_by"] = None
+                    data_["_resume_token"] = None
+                    data_["_modified_count"] = 0
+                    insert_one_ = Mongo().db_[collection_].insert_one(data_)
+                    count_ = 1
+                    docu_ = {}
+                    docu_[split_num_field_] = diff_
+                    if diff_ <= 0:
+                        Mongo().db_[collection_].delete_one(get_filtered_)
+                    else:
+                        Mongo().db_[collection_].update_one(get_filtered_, {"$set": docu_, "$inc": {"_modified_count": 1}})
+                else:
+                    set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
+                    update_many_ = Mongo().db_[collection_].update_many(get_filtered_, set_)
+                    count_ = (
+                        update_many_.matched_count if update_many_.matched_count > 0 else 0
+                    )
+                    if count_ == 0:
+                        raise PassException("no rows affected due to match criteria")
 
             if api_:
                 run_api_f_ = self.run_api_f(api_, doc_, ids_, email_)
                 if not run_api_f_["result"]:
                     raise AppException(run_api_f_["msg"])
-
                 msg_ = run_api_f_["msg"] if "msg" in run_api_f_ else None
-
                 files_ += (
                     run_api_f_["files"]
                     if "files" in run_api_f_
@@ -4165,14 +4224,14 @@ class Crud:
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
 
-        except AuthError as exc_:
-            return Misc().auth_error_f(exc_)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except APIError as exc_:
-            return Misc().notify_exception_f(exc_)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc_:
-            return Misc().notify_exception_f(exc_)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
 
 class Email:
@@ -4612,20 +4671,20 @@ class Auth:
 
             return {"result": True}
 
-        except AuthError as exc_:
-            return {"result": False, "msg": str(exc_)}
+        except AuthError as exc__:
+            return {"result": False, "msg": str(exc__)}
 
-        except jwt.ExpiredSignatureError as exc_:
-            return {"result": False, "msg": str(exc_)}
+        except jwt.ExpiredSignatureError as exc__:
+            return {"result": False, "msg": str(exc__)}
 
-        except jwt.JWTClaimsError as exc_:
-            return {"result": False, "msg": str(exc_)}
+        except jwt.JWTClaimsError as exc__:
+            return {"result": False, "msg": str(exc__)}
 
-        except jwt.JWTError as exc_:
-            return {"result": False, "msg": str(exc_)}
+        except jwt.JWTError as exc__:
+            return {"result": False, "msg": str(exc__)}
 
-        except Exception as exc_:
-            return {"result": False, "msg": str(exc_)}
+        except Exception as exc__:
+            return {"result": False, "msg": str(exc__)}
 
     def verify_otp_f(self, email_, tfac_, op_):
         """
@@ -4926,11 +4985,15 @@ class Auth:
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
             allowed_ = (
-                Mongo().db_["_firewall"].find_one({
-                "fwa_source_ip": ip_,
-                "fwa_enabled": True,
-                "_tags": {"$elemMatch": {"$in": tags_}}
-                })
+                Mongo()
+                .db_["_firewall"]
+                .find_one(
+                    {
+                        "fwa_source_ip": ip_,
+                        "fwa_enabled": True,
+                        "_tags": {"$elemMatch": {"$in": tags_}},
+                    }
+                )
             )
             if not allowed_:
                 if not Misc().in_admin_ips_f():
@@ -5294,14 +5357,14 @@ class Auth:
 
             return {"result": True, "user": user_, "auth": auth_}
 
-        except PassException as exc_:
-            return Misc().pass_exception_f(exc_)
+        except PassException as exc__:
+            return Misc().pass_exception_f(exc__)
 
-        except AuthError as exc_:
-            return Misc().auth_error_f(exc_)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except Exception as exc_:
-            return {"result": False, "msg": "invalid session", "exc": str(exc_)}
+        except Exception as exc__:
+            return {"result": False, "msg": "invalid session", "exc": str(exc__)}
 
     def user_validate_by_auth_f(self, input_):
         """
@@ -5676,7 +5739,7 @@ log.setLevel(logging.ERROR)
 
 
 @app.route("/api/import", methods=["POST"], endpoint="import")
-def storage_f():
+def api_import_f():
     """
     docstring is in progress
     """
@@ -5750,14 +5813,14 @@ def storage_f():
             hdr_,
         )
 
-    except AuthError as exc_:
-        return {"msg": str(exc_), "status": 401}
+    except AuthError as exc__:
+        return {"msg": str(exc__), "status": 401}
 
-    except APIError as exc_:
-        return {"msg": str(exc_), "status": 400}
+    except APIError as exc__:
+        return {"msg": str(exc__), "status": 400}
 
-    except Exception as exc_:
-        return {"msg": str(exc_), "status": 500}
+    except Exception as exc__:
+        return {"msg": str(exc__), "status": 500}
 
 
 @app.route("/api/crud", methods=["POST"])
@@ -5905,7 +5968,7 @@ def api_crud_f():
 
 
 @app.route("/api/otp", methods=["POST"])
-def otp_f():
+def api_otp_f():
     """
     docstring is in progress
     """
@@ -5969,7 +6032,7 @@ def otp_f():
 
 
 @app.route("/api/auth", methods=["POST"], endpoint="auth")
-def auth_f():
+def api_auth_f():
     """
     docstring is in progress
     """
@@ -6037,7 +6100,7 @@ def auth_f():
 
 
 @app.route("/api/iot", methods=["POST"])
-def iot_post_f():
+def api_iot_f():
     """
     docstring is in progress
     """
@@ -6089,7 +6152,7 @@ def iot_post_f():
 
 
 @app.route("/api/post", methods=["POST"])
-def post_f():
+def api_post_f():
     """
     docstring is in progress
     """
@@ -6286,8 +6349,8 @@ def post_f():
         response_.mimetype = "application/json"
         return response_
 
-    except AuthError as exc_:
-        res_ = {"result": False, "msg": str(exc_)}
+    except AuthError as exc__:
+        res_ = {"result": False, "msg": str(exc__)}
         response_ = make_response(
             json.dumps(res_, default=json_util.default, sort_keys=False)
         )
@@ -6295,8 +6358,8 @@ def post_f():
         response_.mimetype = "application/json"
         return response_
 
-    except APIError as exc_:
-        res_ = {"result": False, "msg": str(exc_)}
+    except APIError as exc__:
+        res_ = {"result": False, "msg": str(exc__)}
         response_ = make_response(
             json.dumps(res_, default=json_util.default, sort_keys=False)
         )
@@ -6304,8 +6367,8 @@ def post_f():
         response_.mimetype = "application/json"
         return response_
 
-    except Exception as exc_:
-        res_ = {"result": False, "msg": str(exc_)}
+    except Exception as exc__:
+        res_ = {"result": False, "msg": str(exc__)}
         response_ = make_response(
             json.dumps(res_, default=json_util.default, sort_keys=False)
         )

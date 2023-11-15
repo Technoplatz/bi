@@ -59,7 +59,6 @@ export class CrudPage implements OnInit {
   public collection: string = "";
   public user: any;
   public data_: any = {};
-  public dataprev: any = {};
   public filterops: any = environment.filterops;
   public pivotvalueops: any = environment.pivotvalueops;
   public loadingText: string = environment.misc.loadingText;
@@ -106,7 +105,6 @@ export class CrudPage implements OnInit {
   private file: any = null;
   private relatedx: any = [];
   private collections: any = [];
-  private view: any = null;
   private structure__: any = {};
   private link_projection_: any = {};
   private input_: string = "";
@@ -155,7 +153,6 @@ export class CrudPage implements OnInit {
     this.collection = this.shuttle.collection;
     this.user = this.shuttle.user;
     this.op = this.shuttle.op;
-    this.dataprev = this.shuttle.data;
     this.structure__ = this.shuttle.structure;
     this.properties_ = this.shuttle.structure.properties;
     this.sweeped = this.shuttle.sweeped;
@@ -163,7 +160,6 @@ export class CrudPage implements OnInit {
     this.filter = this.shuttle.filter;
     this.collections = this.shuttle.collections;
     this.actionix = this.shuttle.actionix;
-    this.view = this.shuttle.view;
     this.scan_ = this.shuttle.scan;
     this.links = this.shuttle.structure.links;
     this.parents = this.structure__?.parents ? this.structure__.parents : [];
@@ -233,8 +229,8 @@ export class CrudPage implements OnInit {
                 for (let f = 0; f < action_.set.length; f++) {
                   const ndate_ = new Date(Date.now() - ((new Date()).getTimezoneOffset() * 60000));
                   action_.set[f].value === "$CURRENT_DATE" ? action_.set[f].value = ndate_.toISOString().substring(0, 19) : action_.set[f].value === "$TIMESTAMP" ? action_.set[f].value = ndate_.toISOString().replace(/-|:|T/gi, '').substring(0, 14) : null;
-                  this.data_[action_.set[f].key] = action_.set[f].value;
-                  this.crudForm.get(action_.set[f].key)?.setValue(action_.set[f].value);
+                  this.data_[action_.set[f].key] = !action_.set[f].value ? this.data_[action_.set[f].key] : action_.set[f].value;
+                  this.crudForm.get(action_.set[f].key)?.setValue(!action_.set[f].value ? this.data_[action_.set[f].key] : action_.set[f].value);
                   if (f === action_.set.length - 1) {
                     this.crudForm.controls = controls_;
                     this.visible = "show";
@@ -260,7 +256,7 @@ export class CrudPage implements OnInit {
         this.linked_ = this.link_text ? this.link_text.split('\n').filter((e: any) => { return e }) : [];
         this.modified = true;
         this.in_progress = true;
-        this.crud.submit_f(this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.view, this.actionix, this.link_, this.linked_).then((res: any) => {
+        this.crud.submit_f(this.data_, this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.actionix, this.link_, this.linked_).then((res: any) => {
           res && res?.result === true ? this.misc.doMessage(`${this.op} completed successfully`, "success") : null;
           this.crud.modalSubmitListener.next({ result: true });
           if (res && res.token) {
