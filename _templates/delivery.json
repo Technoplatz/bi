@@ -12,7 +12,7 @@
     "dnn_line_no": {
       "bsonType": "string",
       "title": "Line",
-      "description": "Line Number",
+      "description": "Line no",
       "minLength": 1,
       "maxLength": 4,
       "pattern": "^[0-9]{1,4}$",
@@ -356,6 +356,13 @@
       "enum": ["Please Hold", "Awaiting for Another Order", "Missing Product", "Test Product", "Damaged", "Lost", "Approved", null],
       "reminder": true
     },
+    "dnn_change": {
+      "bsonType": "string",
+      "title": "Change",
+      "description": "Change code",
+      "readonly": true,
+      "enum": ["CC-Customer", "SP-Split"]
+    },
     "dnn_note": {
       "bsonType": "string",
       "title": "Note",
@@ -496,7 +503,7 @@
   "actions": [
     {
       "id": "stby-to-open",
-      "title": "Standby To Open",
+      "title": "Stby To Open",
       "enabled": true,
       "match": [
         {
@@ -533,7 +540,7 @@
     },
     {
       "id": "open-to-stby",
-      "title": "Open To Standby",
+      "title": "Open To Stby",
       "enabled": true,
       "match": [
         {
@@ -570,7 +577,7 @@
     },
     {
       "id": "rtd",
-      "title": "Ready To Be Delivered",
+      "title": "Ready",
       "enabled": true,
       "match": [
         {
@@ -638,8 +645,8 @@
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
     },
     {
-      "id": "change",
-      "title": "DN Split",
+      "id": "split",
+      "title": "Line Split",
       "enabled": true,
       "match": [
         {
@@ -666,21 +673,74 @@
       "icon": "git-branch",
       "uniqueness": true,
       "unique": ["dnn_no"],
-      "split": true,
-      "split_key_field": "dnn_no",
-      "split_key_suffix": "-20",
-      "split_num_field": "dnn_qty",
+      "split": {
+        "enabled": true,
+        "key_field": "dnn_no",
+        "key_suffix": "-10",
+        "num_field": "dnn_qty",
+        "set_field": "dnn_change",
+        "set_value": "SP-Split"
+      },
       "notification": {
         "notify": true,
         "subject": "Operations [Delivery Split]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DN has been split.",
         "attachment": true,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_change",
         "filter": [
           {
             "key": "dnn_status",
             "op": "in",
-            "value": "30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+            "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+          }
+        ]
+      },
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
+    },
+    {
+      "id": "customer-change",
+      "title": "Customer Change",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_acc_no",
+          "value": null
+        },
+        {
+          "key": "dnn_acc_name",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "icon": "business",
+      "uniqueness": true,
+      "unique": ["dnn_no"],
+      "split": {
+        "enabled": true,
+        "key_field": "dnn_no",
+        "key_suffix": "-20",
+        "num_field": null,
+        "set_field": "dnn_change",
+        "set_value": "CC-Customer"
+      },
+      "notification": {
+        "notify": true,
+        "subject": "Operations [Customer Change]",
+        "body": "Hi,<br /><br />We would like to let you know that the customer of the attached DNs has been changed.",
+        "attachment": true,
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_change",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "in",
+            "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
           }
         ]
       },

@@ -106,10 +106,10 @@ https://www.gnu.org/licenses.
             <ion-col size="12">
               <ion-button *ngIf="!is_saving" (click)="save_json_f()">
                 <ion-icon name="save-outline"></ion-icon>
-                <span>{{ 'Save' | translate }}</span>
+                <span>{{ 'Save Schema' | translate }}</span>
               </ion-button>
               <ion-button *ngIf="is_saving">
-                <ion-spinner name="dots"></ion-spinner>&nbsp;
+                <ion-spinner name="dots"></ion-spinner>&nbsp;&nbsp;
                 <span>{{ 'Saving' | translate }}</span>
               </ion-button>
               <ion-button (click)="set_editor(false)" color="medium">
@@ -169,7 +169,7 @@ https://www.gnu.org/licenses.
                 <div
                   [class]="['number','decimal','float'].includes(item.value.bsonType) ? 'align-right' : 'align-left'">
                   {{ item.value.title | translate }}<br />
-                  <ion-button size="small"
+                  <ion-button size="small" fill="clear"
                     [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'"
                     (click)="set_search(item.key)">{{
                     item.key }}<ion-icon name="filter-sharp"></ion-icon>

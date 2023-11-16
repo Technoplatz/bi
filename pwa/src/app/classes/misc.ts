@@ -227,7 +227,7 @@ export class Miscellaneous {
     if (msg) {
       const typed: any = {
         message: `${this.translate.instant(msg?.toString())?.toLowerCase()}.`,
-        duration: type === "success" ? 3000 : 10000,
+        duration: ["success", "warning"].includes(type) ? 3000 : 7000,
         cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
         buttons: [{
           side: "end",

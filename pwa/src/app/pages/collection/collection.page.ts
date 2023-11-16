@@ -168,7 +168,7 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  refresh_data(p: number) {
+  refresh_data(page_: number) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.schemavis_ = false;
@@ -177,7 +177,7 @@ export class CollectionPage implements OnInit {
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
           this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
           this.count = 0;
-          this.page_ = p === 0 ? 1 : p;
+          this.page_ = page_ === 0 ? 1 : page_;
           this.misc.api_call("crud", {
             op: "read",
             collection: this.id,
@@ -237,50 +237,52 @@ export class CollectionPage implements OnInit {
   }
 
   multi_crud(op_: string) {
-    if (this.data.length > 0 && this.is_selected) {
-      if (op_ === "action") {
-        if (this.structure_ && this.structure_.actions && this.structure_.actions.length > 0) {
-          this.go_crud(null, op_);
+    if (this.data.length > 0 && this.is_loaded) {
+      if (this.is_selected) {
+        if (op_ === "action") {
+          if (this.structure_ && this.structure_.actions && this.structure_.actions.length > 0) {
+            this.go_crud(null, op_);
+          } else {
+            this.misc.doMessage("no action defined for the collection", "error");
+          }
         } else {
-          this.misc.doMessage("no action defined for the collection", "error");
+          this.alert.create({
+            header: "Confirm",
+            message: "Please confirm this " + op_,
+            buttons: [{
+              text: "Cancel",
+              role: "cancel",
+              cssClass: "secondary",
+              handler: () => { }
+            }, {
+              text: "OKAY",
+              handler: () => {
+                this.is_deleting = true;
+                this.is_loaded = this.is_selected = false;
+                this.misc.api_call("crud", {
+                  op: op_,
+                  collection: this.id,
+                  match: this.sweeped[this.segment],
+                  doc: null,
+                  is_crud: true
+                }).then(() => {
+                  this.refresh_data(0);
+                }).catch((res: any) => {
+                  this.misc.doMessage(res && res.msg ? res.msg : res, "error");
+                }).finally(() => {
+                  this.is_loaded = true;
+                  this.is_deleting = false;
+                });
+              }
+            }]
+          }).then((alert: any) => {
+            alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
+            alert.present();
+          });
         }
       } else {
-        this.alert.create({
-          header: "Confirm",
-          message: "Please confirm this " + op_,
-          buttons: [{
-            text: "Cancel",
-            role: "cancel",
-            cssClass: "secondary",
-            handler: () => { }
-          }, {
-            text: "OKAY",
-            handler: () => {
-              this.is_deleting = true;
-              this.is_loaded = this.is_selected = false;
-              this.misc.api_call("crud", {
-                op: op_,
-                collection: this.id,
-                match: this.sweeped[this.segment],
-                doc: null,
-                is_crud: true
-              }).then(() => {
-                this.refresh_data(0);
-              }).catch((res: any) => {
-                this.misc.doMessage(res && res.msg ? res.msg : res, "error");
-              }).finally(() => {
-                this.is_loaded = true;
-                this.is_deleting = false;
-              });
-            }
-          }]
-        }).then((alert: any) => {
-          alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
-          alert.present();
-        });
+        this.misc.doMessage("please select the rows to be processed", "warning");
       }
-    } else {
-      this.misc.doMessage("please select the rows to be processed", "error");
     }
   }
 
@@ -410,23 +412,24 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  search(k: string, v: string) {
-    this.searched[k].actived = false;
+  search(key_: string, value_: string) {
+    this.searched[key_].actived = false;
     if (!this.filter_ || this.filter_.length === 0) {
-      if (["true", "false"].includes(v)) {
+      this.filter_ = [];
+      if (["true", "false"].includes(value_)) {
         this.filter_.push({
-          key: k,
-          op: v,
+          key: key_,
+          op: value_,
           value: null
         });
       } else {
         this.filter_.push({
-          key: k,
-          op: this.searched[k].op,
-          value: v
+          key: key_,
+          op: this.searched[key_].op,
+          value: value_
         });
       }
-      this.searched[k].f = true;
+      this.searched[key_].f = true;
       this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
           this.refresh_data(0);
@@ -436,18 +439,18 @@ export class CollectionPage implements OnInit {
       let found_ = false;
       const n_ = this.filter_.length;
       for (let d = 0; d < n_; d++) {
-        if (this.filter_[d] && this.filter_[d]["key"] === k) {
+        if (this.filter_[d] && this.filter_[d]["key"] === key_) {
           found_ = true;
-          this.filter_[d]["op"] = this.searched[k].op;
-          this.filter_[d]["value"] = v;
+          this.filter_[d]["op"] = this.searched[key_].op;
+          this.filter_[d]["value"] = value_;
         }
         if (d === n_ - 1) {
           !found_ ? this.filter_.push({
-            key: k,
-            op: this.searched[k].op,
-            value: v
+            key: key_,
+            op: this.searched[key_].op,
+            value: value_
           }) : null;
-          this.searched[k].f = true;
+          this.searched[key_].f = true;
           this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
             this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
               this.refresh_data(0);

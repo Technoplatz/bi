@@ -3740,11 +3740,16 @@ class Crud:
         docstring is in progress
         """
         count_, files_, msg_ = 0, [], None
+        split_id_ = Misc().get_timestamp_f()
+        session_client_ = MongoClient(Mongo().connstr)
+        session_db_ = session_client_[MONGO_DB_]
+        session_ = session_client_.start_session()
+
         try:
             collection_id_ = obj["collection"]
             user_ = obj["userindb"] if "userindb" in obj else None
             match_ = obj["match"] if "match" in obj else None
-            actionix_ = obj["actionix"] if "actionix" in obj else None
+            actionix_ = int(obj["actionix"]) if "actionix" in obj else None
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             if not email_:
                 raise AppException("user is not allowed")
@@ -3758,9 +3763,8 @@ class Crud:
             if not is_crud_ and collection_id_ != "_firewall":
                 raise AppException("actions are not allowed")
 
-            if int(actionix_) < 0:
+            if actionix_ < 0:
                 raise AppException("please select an action to run")
-            actionix_ = int(actionix_)
 
             ids_ = []
             if match_ and len(match_) > 0:
@@ -3890,74 +3894,148 @@ class Crud:
                         f"{(','.join(unique_))} must be unique in selection"
                     )
 
-            split_ = "split" in action_ and action_["split"] is True
-            split_key_suffix_ = (
-                action_["split_key_suffix"]
-                if "split_key_suffix" in action_
-                and action_["split_key_suffix"] is not None
+            split_ = (
+                action_["split"]
+                if "split" in action_
+                and action_["split"] is not None
+                and "enabled" in action_["split"]
+                and action_["split"]["enabled"] is True
+                else {}
+            )
+            key_suffix_ = (
+                split_["key_suffix"]
+                if split_
+                and "key_suffix" in split_
+                and split_["key_suffix"] is not None
                 else None
             )
-            split_key_field_ = (
-                action_["split_key_field"]
-                if "split_key_field" in action_
-                and action_["split_key_field"] is not None
-                and action_["split_key_field"] in properties_
-                and action_["split_key_field"] in data_
+            key_field_ = (
+                split_["key_field"]
+                if split_
+                and "key_field" in split_
+                and split_["key_field"] is not None
+                and split_["key_field"] in properties_
+                and split_["key_field"] in data_
                 else None
             )
-            split_num_field_ = (
-                action_["split_num_field"]
-                if "split_num_field" in action_
-                and action_["split_num_field"] is not None
-                and action_["split_num_field"] in properties_
-                and action_["split_num_field"] in data_
-                and action_["split_num_field"] in doc_
+            set_field_ = (
+                split_["set_field"]
+                if split_
+                and "set_field" in split_
+                and split_["set_field"] is not None
+                and split_["set_field"] in properties_
+                else None
+            )
+            set_value_ = (
+                split_["set_value"]
+                if split_ and "set_value" in split_ and split_["set_value"] is not None
+                else None
+            )
+            num_field_ = (
+                split_["num_field"]
+                if split_
+                and "num_field" in split_
+                and split_["num_field"] is not None
+                and split_["num_field"] in properties_
+                and split_["num_field"] in data_
+                and split_["num_field"] in doc_
                 else None
             )
 
             if is_crud_ and set_:
-                if (
-                    split_
-                    and split_key_suffix_
-                    and split_key_field_
-                    and split_num_field_
-                ):
+
+                session_.start_transaction()
+
+                if split_ and key_suffix_ and key_field_ and set_field_ and set_value_:
                     data_ = (
                         Mongo()
                         .db_[collection_]
                         .find_one({"_id": ObjectId(data_["_id"])})
                     )
-                    data_[
-                        split_key_field_
-                    ] = f"{data_[split_key_field_]}{split_key_suffix_}"
 
-                    diff_ = data_[split_num_field_] - doc_[split_num_field_]
+                    key_value_ = data_[key_field_] if key_field_ in data_ and data_[key_field_] is not None else None
+                    if not key_value_:
+                        session_.abort_transaction()
+                        raise AppException("no key value found")
+
+                    num_value_ = data_[num_field_] if num_field_ and num_field_ in data_ and data_[num_field_] > 0 else None
+
+                    data_[key_field_] = f"{data_[key_field_]}{key_suffix_}"
                     for doc__ in doc_:
                         data_[doc__] = doc_[doc__]
 
-                    data_.pop("_id", None)
-                    data_["_created_at"] = Misc().get_now_f()
-                    data_["_created_by"] = email_
-                    data_["_modified_at"] = None
-                    data_["_modified_by"] = None
-                    data_["_resume_token"] = None
-                    data_["_modified_count"] = 0
-                    insert_one_ = Mongo().db_[collection_].insert_one(data_)
-                    count_ = 1
-                    docu_ = {}
-                    docu_[split_num_field_] = diff_
-                    if diff_ <= 0:
-                        Mongo().db_[collection_].delete_one(get_filtered_)
+                    data_["_split_id"] = split_id_
+                    data_[set_field_] = set_value_
+                    filter_ = {"_split_id": split_id_}
+                    get_notification_filtered_ = filter_
+                    get_filtered_ = {}
+                    get_filtered_[key_field_] = key_value_
+
+                    if num_field_ and num_value_:
+                        count_ = 1
+                        data_.pop("_id", None)
+                        data_["_created_at"] = Misc().get_now_f()
+                        data_["_created_by"] = email_
+                        data_["_resume_token"] = None
+                        data_["_modified_count"] = 0
+                        insert_one_ = session_db_[collection_].insert_one(data_, session=session_)
+                        if doc_[num_field_] > num_value_:
+                            doc_[num_field_] = num_value_
+                        if doc_[num_field_] < 0:
+                            doc_[num_field_] = 0
+                        diff_ = num_value_ - doc_[num_field_]
+                        if diff_ > 0:
+                            docu_ = {}
+                            docu_[set_field_] = set_value_
+                            docu_[num_field_] = diff_
+                            docu_["_split_id"] = split_id_
+                            docu_["_modified_at"] = Misc().get_now_f()
+                            docu_["_modified_by"] = email_
+                            docu_.pop("_modified_count", None)
+                            session_db_[collection_].update_one(
+                                get_filtered_,
+                                {"$set": docu_, "$inc": {"_modified_count": 1}}, session=session_
+                            )
+                        else:
+                            session_db_[collection_].delete_one(get_filtered_, session=session_)
                     else:
-                        Mongo().db_[collection_].update_one(get_filtered_, {"$set": docu_, "$inc": {"_modified_count": 1}})
+                        data_["_modified_at"] = Misc().get_now_f()
+                        data_["_modified_by"] = email_
+                        data_.pop("_modified_count", None)
+                        update_many_ = (
+                            session_db_[collection_]
+                            .update_many(
+                                get_filtered_,
+                                {"$set": data_, "$inc": {"_modified_count": 1}}, session=session_
+                            )
+                        )
+                        count_ = (
+                            update_many_.matched_count
+                            if update_many_.matched_count > 0
+                            else 0
+                        )
                 else:
-                    set_ = {"$set": doc_, "$inc": {"_modified_count": 1}}
-                    update_many_ = Mongo().db_[collection_].update_many(get_filtered_, set_)
-                    count_ = (
-                        update_many_.matched_count if update_many_.matched_count > 0 else 0
+                    doc_["_modified_at"] = Misc().get_now_f()
+                    doc_["_modified_by"] = email_
+                    doc_.pop("_modified_count", None)
+                    update_many_ = (
+                        session_db_[collection_]
+                        .update_many(
+                            get_filtered_,
+                            {"$set": doc_, "$inc": {"_modified_count": 1}}, session=session_
+                        )
                     )
-                    if count_ == 0:
-                        raise PassException("no rows affected due to match criteria")
+                    count_ = (
+                        update_many_.matched_count
+                        if update_many_.matched_count > 0
+                        else 0
+                    )
+
+                if count_ == 0:
+                    session_.abort_transaction()
+                    raise PassException("no rows affected due to match criteria")
+
+                session_.commit_transaction()
 
             if api_:
                 run_api_f_ = self.run_api_f(api_, doc_, ids_, email_)
@@ -4063,6 +4141,7 @@ class Crud:
             }
 
         except pymongo.errors.PyMongoError as exc__:
+            session_.abort_transaction()
             return Misc().mongo_error_f(exc__)
 
         except AppException as exc__:
@@ -4075,7 +4154,11 @@ class Crud:
             return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
+            session_.abort_transaction()
             return Misc().notify_exception_f(exc__)
+
+        finally:
+            session_client_.close()
 
     def insert_f(self, obj):
         """
@@ -5945,7 +6028,7 @@ def api_crud_f():
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
-        if res_["result"] and op_ in ["dumpd"]:
+        if "result" in res_ and res_["result"] and op_ in ["dumpd"]:
             hdr_ = {"Content-Type": "application/octet-stream; charset=utf-8"}
             files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else []
             response_ = (

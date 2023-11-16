@@ -1194,22 +1194,19 @@ sup {
   font-size: 9px;
 }
 
-.filtered-btn {
-  --background: var(--ion-color-primary) !important;
-  --padding-end: 0px;
-  --border-width: 0px !important;
-  margin-bottom: -2px;
-  margin-right: 0px !important;
-}
-
+.filtered-btn,
 .unfiltered-btn {
-  --color: var(--ion-color-primary) !important;
+  --color: var(--ion-color-primary);
   --background: none !important;
   --padding-start: 0px;
   --padding-end: 0px;
   --border-width: 0px !important;
   margin-bottom: -2px;
   margin-right: 0px !important;
+}
+
+.filtered-btn {
+  --color: var(--ion-color-danger) !important;
 }
 
 .filtered-btn ion-icon,
