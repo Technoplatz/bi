@@ -52,7 +52,12 @@ export class Su {
             setInterval(() => {
                 this.swu_check_ ?
                     this.swu.checkForUpdate().then((res_: any) => {
-                        console.log(res_ ? "swu processed" : "no swu found");
+                        if (res_) {
+                            this.swu_check_ = false;
+                            console.info("swu processed");
+                        } else {
+                            console.info("no swu found");
+                        }
                     }).catch((err_: any) => {
                         console.error("swu check error", err_);
                     }) : null;
@@ -74,7 +79,6 @@ export class Su {
                 case "VERSION_READY":
                     console.log("swu version is ready");
                     this.misc.version.next({ downloading: false, upgrade: true, version: event_.latestVersion.hash });
-                    this.swu_check_ = false;
                     break;
             }
         });

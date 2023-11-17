@@ -3,7 +3,7 @@
     "inv_dnn_no": {
       "bsonType": "string",
       "title": "DN No",
-      "description": "Delivery Number",
+      "description": "Delivery no",
       "minLength": 10,
       "maxLength": 16,
       "pattern": "^[0-9A-Z-]{10,16}$"
@@ -28,6 +28,8 @@
   "actions": [],
   "triggers": [],
   "import": {
-    "enabled": true
+    "enabled": true,
+    "upsertable": true,
+    "upsertables": ["inv_no"]
   }
 }

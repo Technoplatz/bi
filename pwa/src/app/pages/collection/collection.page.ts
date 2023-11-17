@@ -527,7 +527,10 @@ export class CollectionPage implements OnInit {
 
   import_modal() {
     this.misc.import_modal(this.id).then(() => {
+      this.misc.doMessage("file imported successfully", "success");
       this.refresh_data(0).then(() => { });
+    }).catch((error: any) => {
+      console.error(error);
     }).finally(() => { });
   }
 

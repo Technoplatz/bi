@@ -148,7 +148,6 @@ export class Miscellaneous {
           modal.present().then(() => {
             modal.onDidDismiss().then((res: any) => {
               if (res.data && res.data.modified) {
-                this.doMessage("file imported successfully", "success");
                 resolve(res.data.cid);
               } else {
                 reject(res);

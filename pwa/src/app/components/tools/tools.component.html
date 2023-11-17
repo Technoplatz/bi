@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
     {{ 'New Version Available' | translate }}
   </ion-button>
   <ion-button *ngIf="downloading_" color="success" (click)="reload_app()" size="small" class="new-version-downloading">
-    {{ 'Downloading' | translate }}...
+    {{ 'Downloaded' | translate }}
   </ion-button>
   <ion-button *ngIf="user_" fill="clear" (click)="misc.navi.next('settings/account')">
     <ion-label>{{ user_.name }}&nbsp;</ion-label>
