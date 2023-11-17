@@ -13,8 +13,8 @@
       "title": "Source IP",
       "description": "Source IP",
       "minLength": 7,
-      "maxLength": 16,
-      "pattern": "^[0-9.-]{7,16}$",
+      "maxLength": 17,
+      "pattern": "^[0-9.-]{7,17}$",
       "required": true
     },
     "fwa_enabled": {

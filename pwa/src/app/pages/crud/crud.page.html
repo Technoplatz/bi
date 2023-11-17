@@ -240,8 +240,8 @@ https://www.gnu.org/licenses.
                                         [required]="field.required" [disabled]="field.readonly || field.disabled"
                                         [(ngModel)]="data_[field.name]" [value]="data_[field.name]"
                                         (ionChange)="change_enum(field, $event.target.value)" [id]="field.name">
-                                        <ion-select-option *ngFor="let item of field.enum" [value]="item"> {{ item |
-                                            translate }}
+                                        <ion-select-option *ngFor="let item of filter_pipe_nulls(field.enum)" [value]="item">
+                                            {{ item | translate }}
                                         </ion-select-option>
                                     </ion-select>
                                 </ng-template>

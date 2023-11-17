@@ -609,4 +609,8 @@ export class CrudPage implements OnInit {
     this.crudForm.get(fn_)?.setValue(null);
   }
 
+  filter_pipe_nulls(items_: any) {
+    return items_.filter((item_: any) => item_ !== null);
+  }
+
 }
