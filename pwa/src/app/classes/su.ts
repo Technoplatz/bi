@@ -67,15 +67,14 @@ export class Su {
         this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
             switch (event_.type) {
                 case "VERSION_DETECTED":
-                    this.swu_check_ = false;
                     console.log(`swu version detected ${event_.version.hash}`);
                     console.log("downloading...");
                     this.misc.version.next({ downloading: true, upgrade: false, version: event_.version.hash });
                     break;
                 case "VERSION_READY":
-                    this.swu_check_ = false;
                     console.log("swu version is ready");
                     this.misc.version.next({ downloading: false, upgrade: true, version: event_.latestVersion.hash });
+                    this.swu_check_ = false;
                     break;
             }
         });

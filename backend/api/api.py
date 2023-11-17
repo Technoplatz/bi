@@ -366,6 +366,7 @@ class Misc:
             "query",
             "selection",
             "reminder",
+            "masked"
         ]
 
     def s3_f(self, input_):

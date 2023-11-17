@@ -15,7 +15,8 @@
       "minLength": 7,
       "maxLength": 17,
       "pattern": "^[0-9.-]{7,17}$",
-      "required": true
+      "required": true,
+      "masked": true
     },
     "fwa_enabled": {
       "bsonType": "bool",
@@ -86,8 +87,8 @@
         "filter": [
           {
             "key": "fwa_enabled",
-            "op": "ne",
-            "value": false
+            "op": "eq",
+            "value": true
           }
         ]
       },
