@@ -80,9 +80,9 @@
       "_tags": ["#Managers", "#Administrators", "#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "Security [Firewall Updated]",
-        "body": "Hi,<br /><br />We would like to let you know that WAF has been updated.",
-        "attachment": true,
+        "subject": "Security [WAF Updated]",
+        "body": "Hi,<br /><br />We would like to let you know that the Application Firewall has been updated.",
+        "attachment": false,
         "fields": "fwa_name,fwa_source_ip",
         "filter": [
           {
