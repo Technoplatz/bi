@@ -173,53 +173,56 @@ export class CollectionPage implements OnInit {
       this.is_loaded = this.is_selected = false;
       this.schemavis_ = false;
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-        this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-          this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-          this.count = 0;
-          this.page_ = page_ === 0 ? 1 : page_;
-          this.misc.api_call("crud", {
-            op: "read",
-            collection: this.id,
-            projection: null,
-            match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
-            sort: this.sort,
-            page: this.page_,
-            limit: this.limit_,
-            selections: this.selections_
-          }).then((res: any) => {
-            this.selections_ = res.selected;
-            this.pager_ = this.page_;
-            this.data = res.data;
-            this.structure_ = res.structure;
-            this.json_content_ = res.structure;
-            this.actions = res.structure.actions;
-            this.properties_ = res.structure.properties;
-            this.importvis_ = res.structure.import?.enabled;
-            this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
-            this.count = res.count;
-            this.multicheckbox = false;
-            this.multicheckbox ? this.multicheckbox = false : null;
-            this.selected = new Array(res.data.length).fill(false);
-            this.pages_ = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
-            const lmt = this.pages_ >= 10 ? 10 : this.pages_;
-            this.paget_ = new Array(lmt);
-            this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
-            this.searched === null ? this.reset_search(true) : this.reset_search(false);
-            for (let p = 0; p < this.paget_.length; p++) {
-              this.paget_[p] = this.page_start + p;
-            }
-            this.is_loaded = true;
-            resolve(true);
-          }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
-            reject(error);
-          }).finally(() => {
-            this.crud.get_all().then(() => {
-              this.propkeys_ = "";
-              Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
-            }).catch((err_: any) => {
-              console.error("get_all", err_);
+          this.storage.get("LSSELECTIONS_" + this.id).then((LSSELECTIONS_: any) => {
+            this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
+            this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+            this.selections_ = LSSELECTIONS_ ? LSSELECTIONS_ : {};
+            this.count = 0;
+            this.page_ = page_ === 0 ? 1 : page_;
+            this.misc.api_call("crud", {
+              op: "read",
+              collection: this.id,
+              projection: null,
+              match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
+              sort: this.sort,
+              page: this.page_,
+              limit: this.limit_,
+              selections: this.selections_
+            }).then((res: any) => {
+              this.selections_ = res.selected;
+              this.pager_ = this.page_;
+              this.data = res.data;
+              this.structure_ = res.structure;
+              this.json_content_ = res.structure;
+              this.actions = res.structure.actions;
+              this.properties_ = res.structure.properties;
+              this.importvis_ = res.structure.import?.enabled;
+              this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
+              this.count = res.count;
+              this.multicheckbox = false;
+              this.multicheckbox ? this.multicheckbox = false : null;
+              this.selected = new Array(res.data.length).fill(false);
+              this.pages_ = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
+              const lmt = this.pages_ >= 10 ? 10 : this.pages_;
+              this.paget_ = new Array(lmt);
+              this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
+              this.searched === null ? this.init_search(true) : this.init_search(false);
+              for (let p = 0; p < this.paget_.length; p++) {
+                this.paget_[p] = this.page_start + p;
+              }
+              this.is_loaded = true;
+              resolve(true);
+            }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+              reject(error);
+            }).finally(() => {
+              this.crud.get_all().then(() => {
+                this.propkeys_ = "";
+                Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
+              }).catch((err_: any) => {
+                console.error("get_all", err_);
+              });
             });
           });
         });
@@ -362,37 +365,40 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  reset_search(full: boolean) {
+  init_search(full: boolean) {
     full ? this.searched = {} : null;
-    this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
+    // this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
+    if (this.searched) {
       for (let key_ in this.structure_.properties) {
-        if (this.searched) {
-          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
-        }
+        this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
       }
-    });
+    }
+    // });
   }
 
   clear_filter() {
     return new Promise((resolve, reject) => {
       this.filter_ = [];
-      this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-        this.storage.set("LSSEARCHED_" + this.id, null).then(() => {
-          this.reset_search(true);
-          this.searched = null;
-          this.sweeped[this.segment] = [];
-          this.sort = {};
-          this.refresh_data(0).then(() => {
-            resolve(true);
-          }).catch((res: any) => {
-            this.misc.doMessage(res, "error");
+      this.storage.remove("LSFILTER_" + this.id).then(() => {
+        this.storage.remove("LSSEARCHED_" + this.id).then(() => {
+          this.storage.remove("LSSELECTIONS_" + this.id).then(() => {
+            this.init_search(true);
+            this.searched = null;
+            this.sweeped[this.segment] = [];
+            this.sort = {};
+            this.refresh_data(0).then(() => {
+              resolve(true);
+            }).catch((error: any) => {
+              this.misc.doMessage(error, "error");
+              reject(error);
+            });
           });
         });
       });
     });
   }
 
-  reset_search_item(k: string) {
+  init_search_item(k: string) {
     const n_ = this.filter_.length;
     this.searched[k].actived = false;
     for (let d = 0; d < n_; d++) {
@@ -405,7 +411,9 @@ export class CollectionPage implements OnInit {
       if (d === n_ - 1) {
         this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
           this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-            this.refresh_data(0);
+            this.storage.set("LSSELECTIONS_" + this.id, this.selections_).then(() => {
+              this.refresh_data(0);
+            });
           });
         });
       }
@@ -432,7 +440,9 @@ export class CollectionPage implements OnInit {
       this.searched[key_].f = true;
       this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-          this.refresh_data(0);
+          this.storage.set("LSSELECTIONS_" + this.id, this.selections_).then(() => {
+            this.refresh_data(0);
+          });
         });
       });
     } else {
@@ -453,7 +463,9 @@ export class CollectionPage implements OnInit {
           this.searched[key_].f = true;
           this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
             this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
-              this.refresh_data(0);
+              this.storage.set("LSSELECTIONS_" + this.id, this.selections_).then(() => {
+                this.refresh_data(0);
+              });
             });
           });
         }

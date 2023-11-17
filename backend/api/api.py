@@ -2582,8 +2582,8 @@ class Crud:
             )
             selections_ = (
                 input_["selections"]
-                if "selections" in input_ and len(input_["selections"]) > 0
-                else []
+                if "selections" in input_ and input_["selections"] is not None
+                else {}
             )
             allowed_cols_ = ["_collection", "_query"]
             is_crud_ = collection_id_[:1] != "_"
@@ -2728,10 +2728,15 @@ class Crud:
                         if cursor_
                         else []
                     )
+
                     for item_ in grps_:
-                        selected_[property_].append(
-                            {"id": item_["_id"], "value": False}
-                        )
+                        value__ = False
+                        if selections_ and property_ in selections_:
+                            for selection_ in selections_[property_]:
+                                if selection_["id"] == item_["_id"]:
+                                    value__ = "value" in selection_ and selection_["value"] is True
+                                    break
+                        selected_[property_].append({"id": item_["_id"], "value": value__})
 
             return {
                 "result": True,
