@@ -83,7 +83,7 @@ https://www.gnu.org/licenses.
                 <br />
                 {{ 'Delete Document' | translate }}
               </div>
-              <div *ngIf="is_crud" (click)="copy_headers()" class="data-sq-button">
+              <div (click)="copy_headers()" class="data-sq-button">
                 <ion-icon *ngIf="!is_copied" name="browsers-sharp"></ion-icon>
                 <ion-icon *ngIf="is_copied" name="checkmark-sharp"></ion-icon>
                 <br />
@@ -385,10 +385,9 @@ https://www.gnu.org/licenses.
                 <ion-icon name="caret-forward"></ion-icon>
               </ion-button>
             </span>
-            <ion-button size="small" fill="clear" (click)="misc.navi.next('settings/profile-settings')"
-              class="ion-no-padding ion-margin-start">
+            <ion-button size="small" fill="clear" (click)="refresh_data(0)" class="ion-no-padding ion-margin-start">
               <ion-icon name="list-sharp"></ion-icon>
-              {{ 'Pagination' | translate }} [{{ limit_ }}]
+              {{ 'Pagination' | translate }} [<app-pagination></app-pagination>]
             </ion-button>
           </div>
           <ng-template #norecs>

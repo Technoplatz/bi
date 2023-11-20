@@ -253,11 +253,64 @@ class Schedular:
 
             return {"result": True}
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
+
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
+
+    def schedule_fw_f(self):
+        """
+        docstring is in progress
+        """
+        try:
+            past_ = datetime(2020, 1, 1, 00, 00)
+            agg_ = [
+                {
+                    "$set": {
+                        "minutediff": {
+                            "$dateDiff": {
+                                "startDate": { "$ifNull": ["$fwa_waf_sync_date", past_] },
+                                "endDate": Misc().get_now_f(),
+                                "unit": "minute",
+                            },
+                        }
+                    },
+                },
+                {
+                    "$match": {
+                        "$and": [
+                            {"fwa_type": {"$eq": "Temporary"}},
+                            {"fwa_enabled": {"$eq": True}},
+                            {"minutediff": {"$gt": API_FW_TEMP_DURATION_MIN_}},
+                        ],
+                    },
+                }
+            ]
+            cursor_ = Mongo().db_["_firewall"].aggregate(agg_)
+            rules_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            for rule_ in rules_:
+                Mongo().db_["_firewall"].update_one(
+                    {"_id": ObjectId(rule_["_id"])},
+                    {
+                        "$set": {
+                            "fwa_enabled": False,
+                            "_modified_at": Misc().get_now_f(),
+                            "_modified_by": "cron",
+                        }
+                    },
+                )
+
+            return {"result": True}
+
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
+
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def main_f(self):
         """
@@ -301,6 +354,18 @@ class Schedular:
                 id="schedule_jobs",
                 replace_existing=True,
                 args=["_job", sched_],
+            )
+            sched_.add_job(
+                self.schedule_fw_f,
+                trigger="cron",
+                minute=f"*/{API_SCHEDULE_INTERVAL_MIN_}",
+                hour="*",
+                day="*",
+                month="*",
+                day_of_week="*",
+                id="schedule_fw",
+                replace_existing=True,
+                args=[],
             )
             sched_.start()
             return True
@@ -366,7 +431,7 @@ class Misc:
             "query",
             "selection",
             "reminder",
-            "masked"
+            "masked",
         ]
 
     def s3_f(self, input_):
@@ -1130,8 +1195,7 @@ class Crud:
 
             fullpath_ = os.path.normpath(os.path.join(base_path_, filename_))
             if not fullpath_.startswith(base_path_):
-                PRINT_("!!! [schema] fullpath_", fullpath_)
-                raise APIError("file not allowed [schema]")
+                raise APIError(f"file not allowed [schema] {fullpath_}")
 
             with open(fullpath_, "r", encoding="utf-8") as fopen_:
                 res_ = json.loads(fopen_.read())
@@ -1761,8 +1825,7 @@ class Crud:
                     os.path.join(API_TEMPFILE_PATH_, filename_)
                 )
                 if not fullpath_.startswith(TEMP_PATH_):
-                    PRINT_("!!! [import] fullpath_", fullpath_)
-                    raise APIError("file not allowed [import]")
+                    raise APIError(f"file not allowed [import] {fullpath_}")
                 with open(fullpath_, "w", encoding="utf-8") as file_:
                     file_.write(
                         stats_.replace("<br />", "\n")
@@ -1807,8 +1870,7 @@ class Crud:
             type_ = "gzip"
             fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
             if not fullpath_.startswith(DUMP_PATH_):
-                PRINT_("!!! [dump] fullpath_", fullpath_)
-                raise APIError("file not allowed [restore]")
+                raise APIError(f"file not allowed [restore] {fullpath_}")
 
             if op_ == "dumpu":
                 subprocess.call(
@@ -2735,9 +2797,14 @@ class Crud:
                         if selections_ and property_ in selections_:
                             for selection_ in selections_[property_]:
                                 if selection_["id"] == item_["_id"]:
-                                    value__ = "value" in selection_ and selection_["value"] is True
+                                    value__ = (
+                                        "value" in selection_
+                                        and selection_["value"] is True
+                                    )
                                     break
-                        selected_[property_].append({"id": item_["_id"], "value": value__})
+                        selected_[property_].append(
+                            {"id": item_["_id"], "value": value__}
+                        )
 
             return {
                 "result": True,
@@ -3015,10 +3082,7 @@ class Crud:
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
 
-            if not Auth().is_admin_f(user_):
-                raise AuthError("no permission to save job")
-
-            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
+            if not (Auth().is_manager_f(user_) and not Auth().is_admin_f(user_)):
                 permission_ = (
                     Mongo()
                     .db_["_permission"]
@@ -3937,83 +4001,101 @@ class Crud:
                 if split_ and "set_value" in split_ and split_["set_value"] is not None
                 else None
             )
-            num_field_ = (
-                split_["num_field"]
+            ref_field_ = (
+                split_["ref_field"]
                 if split_
-                and "num_field" in split_
-                and split_["num_field"] is not None
-                and split_["num_field"] in properties_
-                and split_["num_field"] in data_
-                and split_["num_field"] in doc_
+                and "ref_field" in split_
+                and split_["ref_field"] is not None
+                and split_["ref_field"] in properties_
+                and split_["ref_field"] in data_
+                and split_["ref_field"] in doc_
+                else None
+            )
+            num_fields_ = (
+                split_["num_fields"]
+                if split_
+                and "num_fields" in split_
+                and len(split_["num_fields"]) > 0
                 else None
             )
 
+            docu_ = {}
+            data_ = (
+                Mongo()
+                .db_[collection_]
+                .find_one({"_id": ObjectId(data_["_id"])})
+            )
+            datax_ = data_.copy()
+
             if is_crud_ and set_:
-
                 session_.start_transaction()
-
                 if split_ and key_suffix_ and key_field_ and set_field_ and set_value_:
-                    data_ = (
-                        Mongo()
-                        .db_[collection_]
-                        .find_one({"_id": ObjectId(data_["_id"])})
+                    key_value_ = (
+                        data_[key_field_]
+                        if key_field_ in data_ and data_[key_field_] is not None
+                        else None
                     )
-
-                    key_value_ = data_[key_field_] if key_field_ in data_ and data_[key_field_] is not None else None
                     if not key_value_:
                         session_.abort_transaction()
                         raise AppException("no key value found")
 
-                    num_value_ = data_[num_field_] if num_field_ and num_field_ in data_ and data_[num_field_] > 0 else None
+                    if doc_[ref_field_] > data_[ref_field_]:
+                        doc_[ref_field_] = data_[ref_field_]
+
+                    if doc_[ref_field_] < 0:
+                        doc_[ref_field_] = 0
 
                     data_[key_field_] = f"{data_[key_field_]}{key_suffix_}"
+                    ration_ = doc_[ref_field_] / data_[ref_field_]
+
                     for doc__ in doc_:
                         data_[doc__] = doc_[doc__]
 
-                    data_["_split_id"] = split_id_
-                    data_[set_field_] = set_value_
+                    data_["_split_id"] = docu_["_split_id"] = split_id_
+                    data_[set_field_] = docu_[set_field_] = set_value_
+
                     filter_ = {"_split_id": split_id_}
                     get_notification_filtered_ = filter_
                     get_filtered_ = {}
                     get_filtered_[key_field_] = key_value_
 
-                    if num_field_ and num_value_:
+                    if ref_field_ and num_fields_:
                         count_ = 1
                         data_.pop("_id", None)
-                        data_["_created_at"] = Misc().get_now_f()
-                        data_["_created_by"] = email_
+                        data_["_created_at"] = docu_["_modified_at"] = Misc().get_now_f()
+                        data_["_created_by"] = docu_["_modified_by"] = email_
                         data_["_resume_token"] = None
                         data_["_modified_count"] = 0
-                        insert_one_ = session_db_[collection_].insert_one(data_, session=session_)
-                        if doc_[num_field_] > num_value_:
-                            doc_[num_field_] = num_value_
-                        if doc_[num_field_] < 0:
-                            doc_[num_field_] = 0
-                        diff_ = num_value_ - doc_[num_field_]
-                        if diff_ > 0:
-                            docu_ = {}
-                            docu_[set_field_] = set_value_
-                            docu_[num_field_] = diff_
-                            docu_["_split_id"] = split_id_
-                            docu_["_modified_at"] = Misc().get_now_f()
-                            docu_["_modified_by"] = email_
-                            docu_.pop("_modified_count", None)
+                        docu_.pop("_modified_count", None)
+
+                        for num_field_ in num_fields_:
+                            dnf_ = datax_[num_field_]
+                            if num_field_ == ref_field_:
+                                data_[num_field_] = doc_[num_field_]
+                                docu_[num_field_] = dnf_ - doc_[num_field_]
+                            else:
+                                data_[num_field_] = round(ration_ * dnf_, 3)
+                                docu_[num_field_] = round((1 - ration_) * dnf_, 3)
+
+                        session_db_[collection_].insert_one(data_, session=session_)
+                        if ration_ < 1:
                             session_db_[collection_].update_one(
                                 get_filtered_,
-                                {"$set": docu_, "$inc": {"_modified_count": 1}}, session=session_
+                                {"$set": docu_, "$inc": {"_modified_count": 1}},
+                                session=session_,
                             )
                         else:
-                            session_db_[collection_].delete_one(get_filtered_, session=session_)
+                            session_db_[collection_].delete_one(
+                                get_filtered_, session=session_
+                            )
                     else:
                         data_["_modified_at"] = Misc().get_now_f()
                         data_["_modified_by"] = email_
                         data_.pop("_modified_count", None)
-                        update_many_ = (
-                            session_db_[collection_]
-                            .update_many(
-                                get_filtered_,
-                                {"$set": data_, "$inc": {"_modified_count": 1}}, session=session_
-                            )
+                        update_many_ = session_db_[collection_].update_many(
+                            get_filtered_,
+                            {"$set": data_, "$inc": {"_modified_count": 1}},
+                            session=session_,
                         )
                         count_ = (
                             update_many_.matched_count
@@ -4024,12 +4106,10 @@ class Crud:
                     doc_["_modified_at"] = Misc().get_now_f()
                     doc_["_modified_by"] = email_
                     doc_.pop("_modified_count", None)
-                    update_many_ = (
-                        session_db_[collection_]
-                        .update_many(
-                            get_filtered_,
-                            {"$set": doc_, "$inc": {"_modified_count": 1}}, session=session_
-                        )
+                    update_many_ = session_db_[collection_].update_many(
+                        get_filtered_,
+                        {"$set": doc_, "$inc": {"_modified_count": 1}},
+                        session=session_,
                     )
                     count_ = (
                         update_many_.matched_count
@@ -4938,7 +5018,7 @@ class Auth:
                 else None
             )
             op_ = input_["op"] if "op" in input_ else None
-            adminops_ = ["dumpu", "dumpr", "dumpd"]
+            adminops_ = ["dumpu", "dumpr"]
             read_permissive_colls_ = ["_collection", "_query", "_announcement"]
             read_permissive_ops_ = [
                 "read",
@@ -5715,9 +5795,7 @@ EMAIL_UPLOADERR_SUBJECT_ = "File Upload Result"
 EMAIL_DEFAULT_SUBJECT_ = "Hello"
 EMAIL_SUBJECT_PREFIX_ = os.environ.get("EMAIL_SUBJECT_PREFIX")
 API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
-MONGO_DUMP_HOURS_ = (
-    os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
-)
+API_FW_TEMP_DURATION_MIN_ = int(os.environ.get("API_FW_TEMP_DURATION_MIN"))
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_MB_ = int(os.environ.get("API_MAX_CONTENT_LENGTH_MB"))
 API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
@@ -5753,6 +5831,9 @@ MONGO_USERNAME_ = get_docker_secret("mongo_username", default="")
 MONGO_PASSWORD_ = get_docker_secret("mongo_password", default="")
 MONGO_TLS_CERT_KEYFILE_PASSWORD_ = get_docker_secret(
     "mongo_tls_keyfile_password", default=""
+)
+MONGO_DUMP_HOURS_ = (
+    os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
 )
 MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")

@@ -257,14 +257,14 @@ Sample boolean field;
 ```json
 [
   {
-    "id": "change",
-    "title": "Split",
+    "id": "split",
+    "title": "Line Split",
     "enabled": true,
     "match": [
       {
         "key": "dnn_status",
         "op": "in",
-        "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
       }
     ],
     "set": [
@@ -276,11 +276,12 @@ Sample boolean field;
     "icon": "git-branch",
     "uniqueness": true,
     "unique": ["dnn_no"],
-    "change": {
+    "split": {
       "enabled": true,
       "key_field": "dnn_no",
-      "key_suffix": "-20",
-      "num_field": "dnn_qty",
+      "key_suffix": "-10",
+      "ref_field": "dnn_qty",
+      "num_fields": ["dnn_qty", "dnn_gross_weight"],
       "set_field": "dnn_change",
       "set_value": "SP-Split"
     },
@@ -289,12 +290,12 @@ Sample boolean field;
       "subject": "Operations [Delivery Split]",
       "body": "Hi,<br /><br />We would like to let you know that the attached DN has been split.",
       "attachment": true,
-      "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+      "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_change",
       "filter": [
         {
           "key": "dnn_status",
           "op": "in",
-          "value": "30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+          "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted"
         }
       ]
     },

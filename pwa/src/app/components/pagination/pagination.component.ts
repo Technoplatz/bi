@@ -70,15 +70,15 @@ export class PaginationComponent implements OnInit {
     this.set_proc_ = true;
     for (let j = 0; j < this.selectionsoriginal_.length; j++) {
       this.selections_[j].class = "selection-passive";
-      const setLang =
-        j === this.selectionsoriginal_.length - 1
-          ? this.storage.set("LSPAGINATION", limit_).then(() => {
-            this.selections_[i].class = "selection-active";
-            setTimeout(() => {
-              this.set_proc_ = false;
-            }, 500);
-          })
-          : null;
+      j === this.selectionsoriginal_.length - 1
+        ? this.storage.set("LSPAGINATION", limit_).then(() => {
+          this.selections_[i].class = "selection-active";
+          setTimeout(() => {
+            this.set_proc_ = false;
+            window.location.reload();
+          }, 500);
+        })
+        : null;
     }
   }
 }

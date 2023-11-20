@@ -18,6 +18,13 @@
       "required": true,
       "masked": true
     },
+    "fwa_type": {
+      "bsonType": "string",
+      "title": "IP Type",
+      "description": "IP type",
+      "enum": ["Permanent", "Temporary"],
+      "default": "Temporary"
+    },
     "fwa_enabled": {
       "bsonType": "bool",
       "title": "Enabled",
@@ -47,10 +54,11 @@
       "manualAdd": true
     }
   },
-  "required": ["fwa_name", "fwa_source_ip", "_tags"],
+  "required": ["fwa_name", "fwa_source_ip", "fwa_type", "_tags"],
   "index": [
     ["fwa_source_ip", "fwa_enabled", "_tags"],
     ["fwa_name", "fwa_source_ip", "fwa_enabled"],
+    ["fwa_type", "fwa_enabled", "fwa_waf_sync_date"],
     ["fwa_enabled"],
     ["fwa_source_ip", "fwa_enabled"],
     ["fwa_source_ip", "_tags"]

@@ -348,6 +348,13 @@
       "maxLength": 40,
       "readonly": true
     },
+    "dnn_change": {
+      "bsonType": "string",
+      "title": "Change",
+      "description": "Change code",
+      "readonly": true,
+      "enum": ["CC-Customer", "SP-Split"]
+    },
     "dnn_reminder": {
       "bsonType": "string",
       "title": "Reminder",
@@ -355,13 +362,6 @@
       "placeholder": "Message for others to get notified",
       "enum": ["Please Hold", "Awaiting for Another Order", "Missing Product", "Test Product", "Damaged", "Lost", "Approved", null],
       "reminder": true
-    },
-    "dnn_change": {
-      "bsonType": "string",
-      "title": "Change",
-      "description": "Change code",
-      "readonly": true,
-      "enum": ["CC-Customer", "SP-Split"]
     },
     "dnn_note": {
       "bsonType": "string",
@@ -622,29 +622,6 @@
       }
     },
     {
-      "id": "shiptype",
-      "title": "Ship Type",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_ship_type",
-          "op": "eq",
-          "value": null
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_ship_type",
-          "value": null
-        }
-      ],
-      "one_click": true,
-      "icon": "boat",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"]
-    },
-    {
       "id": "split",
       "title": "Line Split",
       "enabled": true,
@@ -677,7 +654,8 @@
         "enabled": true,
         "key_field": "dnn_no",
         "key_suffix": "-10",
-        "num_field": "dnn_qty",
+        "ref_field": "dnn_qty",
+        "num_fields": ["dnn_qty", "dnn_gross_weight"],
         "set_field": "dnn_change",
         "set_value": "SP-Split"
       },
@@ -726,7 +704,8 @@
         "enabled": true,
         "key_field": "dnn_no",
         "key_suffix": "-20",
-        "num_field": null,
+        "ref_field": null,
+        "num_fields": [],
         "set_field": "dnn_change",
         "set_value": "CC-Customer"
       },

@@ -2096,13 +2096,15 @@ json-editor .jsoneditor {
 
 .selection-active {
   color: var(--ion-color-primary) !important;
-  margin-right: 8px;
+  margin-left: 4px;
+  margin-right: 4px;
   font-weight: 500;
 }
 
 .selection-passive {
   color: var(--ion-color-medium) !important;
-  margin-right: 8px;
+  margin-left: 4px;
+  margin-right: 4px;
   cursor: pointer;
   font-weight: 500;
 }
