@@ -3082,7 +3082,7 @@ class Crud:
                 user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
             )
 
-            if not (Auth().is_manager_f(user_) and not Auth().is_admin_f(user_)):
+            if not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
                 permission_ = (
                     Mongo()
                     .db_["_permission"]

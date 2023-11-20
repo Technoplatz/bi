@@ -42,7 +42,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     command:
       - --log.level=INFO
       - --api.insecure=true
@@ -70,7 +70,7 @@ services:
     container_name: init
     hostname: init
     labels:
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -112,7 +112,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     ports:
       - "${MONGO_PORT0}:${MONGO_PORT0}"
     volumes:
@@ -155,7 +155,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     ports:
       - "${MONGO_PORT1}:${MONGO_PORT0}"
     volumes:
@@ -196,7 +196,7 @@ services:
       init:
         condition: service_completed_successfully
     labels:
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     ports:
       - "${MONGO_PORT2}:${MONGO_PORT0}"
     volumes:
@@ -241,7 +241,7 @@ services:
       mongo2:
         condition: service_healthy
     labels:
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - bi-cert-volume:/cert
       - bi-mongo0-volume:/data/db
@@ -292,7 +292,7 @@ services:
     hostname: stream
     restart: always
     labels:
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - bi-cert-volume:/cert
       - bi-storage-volume:${API_TEMPFILE_PATH}
@@ -354,7 +354,7 @@ services:
       - traefik.docker.network=network0
       - traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)
       - traefik.http.services.api.loadbalancer.server.port=80
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - bi-storage-volume:${API_TEMPFILE_PATH}
       - bi-storage-volume:${API_MONGODUMP_PATH}
@@ -446,7 +446,7 @@ services:
       - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`) && !PathPrefix(`/api`)
       - traefik.http.routers.pwa.priority=0
       - traefik.http.services.pwa.loadbalancer.server.port=80
-      - "com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}"
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
