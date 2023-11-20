@@ -3415,9 +3415,10 @@ class Crud:
             ):
                 raise APIError("delete operation is not allowed")
 
-            if op_ != "delete" or collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
-                if collection_id_ in PROTECTED_COLLS_:
-                    raise APIError("collection is protected for bulk processes")
+            if not Auth().is_admin_f(user_):
+                if op_ != "delete" or collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
+                    if collection_id_ in PROTECTED_COLLS_:
+                        raise APIError("collection is protected for bulk processing")
 
             if op_ == "delete" and collection_id_ == "_user":
                 raise APIError("user collection is protected to delete")
@@ -4039,14 +4040,7 @@ class Crud:
                         session_.abort_transaction()
                         raise AppException("no key value found")
 
-                    if doc_[ref_field_] > data_[ref_field_]:
-                        doc_[ref_field_] = data_[ref_field_]
-
-                    if doc_[ref_field_] < 0:
-                        doc_[ref_field_] = 0
-
                     data_[key_field_] = f"{data_[key_field_]}{key_suffix_}"
-                    ration_ = doc_[ref_field_] / data_[ref_field_]
 
                     for doc__ in doc_:
                         data_[doc__] = doc_[doc__]
@@ -4060,7 +4054,14 @@ class Crud:
                     get_filtered_[key_field_] = key_value_
 
                     if ref_field_ and num_fields_:
+
                         count_ = 1
+                        if doc_[ref_field_] > datax_[ref_field_]:
+                            doc_[ref_field_] = datax_[ref_field_]
+                        if doc_[ref_field_] < 0:
+                            doc_[ref_field_] = 0
+                        ration_ = doc_[ref_field_] / datax_[ref_field_]
+
                         data_.pop("_id", None)
                         data_["_created_at"] = docu_["_modified_at"] = Misc().get_now_f()
                         data_["_created_by"] = docu_["_modified_by"] = email_
@@ -6347,7 +6348,7 @@ def api_post_f():
             raise APIError("no operation provided in header")
 
         if operation_ == "delete" and not API_DELETE_ALLOWED_:
-            raise APIError("delete operation is not allowed")
+            raise APIError("record deleting is not allowed")
 
         rh_collection_ = (
             request.headers.get("collection", None).lower()
