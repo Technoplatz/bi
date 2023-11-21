@@ -31,7 +31,6 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
-import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
@@ -43,29 +42,15 @@ import { environment } from "../../../environments/environment";
 })
 
 export class DashboardPage implements OnInit {
-  public id: string = "";
-  public data: any = [];
-  public flashcards: any = [];
-  public is_refreshing: boolean = false;
-  public view: any = null;
-  public chart: any = null;
-  public announcements: any = [];
-  public charts: any = [];
+  public announcements_: any = [];
   public loadingText: string = environment.misc.loadingText;
-  public collections: any = [];
-  public status_: any = {};
-  public filter_: any = [];
 
   constructor(
-    private storage: Storage,
     private crud: Crud,
     public misc: Miscellaneous
   ) {
-    this.crud.collections.subscribe((res: any) => {
-      this.collections = res && res.data ? res.data : [];
-    });
     this.crud.announcements.subscribe((res: any) => {
-      this.announcements = res && res.data ? res.data : [];
+      this.announcements_ = res && res.data ? res.data : [];
     });
   }
 

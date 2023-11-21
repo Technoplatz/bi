@@ -106,7 +106,7 @@ export class CollectionPage implements OnInit {
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
     if (event.key === "Enter") {
       if (this.searched && this.searched[this.key_]?.actived) {
-        this.search(this.key_, this.searched[this.key_]?.kw);
+        this.search(this.key_, this.searched[this.key_].kw ? this.searched[this.key_].kw : null);
       }
     }
   }
@@ -367,13 +367,13 @@ export class CollectionPage implements OnInit {
 
   init_search(full: boolean) {
     full ? this.searched = {} : null;
-    // this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-    if (this.searched) {
-      for (let key_ in this.structure_.properties) {
-        this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
+    this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
+      if (this.searched) {
+        for (let key_ in this.structure_.properties) {
+          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
+        }
       }
-    }
-    // });
+    });
   }
 
   clear_filter() {

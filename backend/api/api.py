@@ -425,8 +425,6 @@ class Misc:
             "uuid",
             "dateOnly",
             "decimals",
-            "trueText",
-            "falseText",
             "caseType",
             "query",
             "selection",
@@ -2227,6 +2225,19 @@ class Crud:
 
         except Exception as exc__:
             return Misc().notify_exception_f(exc__)
+
+
+    def visuals_f(self, obj_):
+        """
+        docstring is in progress
+        """
+        try:
+            visuals_ = []
+            res_ = { "result": True, "visuals": visuals_ }
+
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
+
 
     def query_f(self, obj_):
         """
@@ -5717,7 +5728,7 @@ class Auth:
                 )
             )
             if not user_:
-                raise AuthError("user not found")
+                raise AuthError("no user found")
 
             usr_scope_ = user_["usr_scope"] if "usr_scope" in user_ else None
             if not usr_scope_ or usr_scope_ not in ["Internal", "Administrator"]:
@@ -6026,14 +6037,12 @@ def api_crud_f():
         )
         allowmatch_ = []
 
-        permission_f_ = Auth().permission_f(
-            {
-                "user": jwt_validate_f_["user"],
-                "auth": jwt_validate_f_["auth"],
-                "collection": collection_,
-                "op": op_,
-            }
-        )
+        permission_f_ = Auth().permission_f({
+            "user": jwt_validate_f_["user"],
+            "auth": jwt_validate_f_["auth"],
+            "collection": collection_,
+            "op": op_,
+        })
         if not permission_f_["result"]:
             raise AuthError(permission_f_)
 
@@ -6042,6 +6051,7 @@ def api_crud_f():
             if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0
             else []
         )
+
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ += allowmatch_
             input_["match"] = match_
@@ -6097,6 +6107,8 @@ def api_crud_f():
             res_ = Crud().savequery_f(input_)
         elif op_ == "savejob":
             res_ = Crud().savejob_f(input_)
+        elif op_ == "visuals":
+            res_ = Crud().visuals_f(input_)
         else:
             raise APIError(f"invalid operation: {op_}")
 

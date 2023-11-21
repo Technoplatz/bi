@@ -237,7 +237,8 @@ https://www.gnu.org/licenses.
                     </ion-input>
                   </div>
                   <div>
-                    <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
+                    <ion-button size="small"
+                      (click)="search(item.key, searched[item.key].kw ? searched[item.key].kw : null)">
                       <ion-icon name="search"></ion-icon>
                       {{ 'Search' | translate }}
                     </ion-button>
@@ -318,12 +319,10 @@ https://www.gnu.org/licenses.
                 </ng-template>
                 <ng-template #else2>
                   <span *ngIf="item_.value.bsonType=='bool'; else else3">
-                    <span *ngIf="record[item_.key] && item_.value.trueText">{{ item_.value.trueText | translate
-                      }}</span>
-                    <span *ngIf="record[item_.key] && !item_.value.trueText">{{ 'Yes' | translate }}</span>
-                    <span *ngIf="!record[item_.key] && item_.value.falseText">{{ item_.value.falseText | translate
-                      }}</span>
-                    <span *ngIf="!record[item_.key] && !item_.value.falseText">{{ 'No' | translate }}</span>
+                    <ion-icon *ngIf="record[item_.key]; else isfalse" name="checkbox-sharp" color="success"></ion-icon>
+                    <ng-template #isfalse>
+                      <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
+                    </ng-template>
                   </span>
                 </ng-template>
                 <ng-template #else3>

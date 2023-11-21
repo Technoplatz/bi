@@ -233,6 +233,20 @@ export class Crud {
     });
   }
 
+  get_visuals(scope_: any) {
+    return new Promise((resolve, reject) => {
+      this.misc.api_call("crud", {
+        op: "visuals",
+        collection: "_query",
+        scope: scope_
+      }).then((res: any) => {
+        resolve(true);
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
   get_collection(id: string) {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {

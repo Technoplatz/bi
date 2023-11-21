@@ -74,7 +74,7 @@ export class Miscellaneous {
     this.api.next({ uri: this.uri_ });
   }
 
-  api_call(qstr_: string, posted: any) {
+  api_call(qstr_: string, posted_: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
@@ -87,13 +87,13 @@ export class Miscellaneous {
           }),
           observe: "response"
         }
-        if (posted.responseType) {
-          hdr_.responseType = posted.responseType;
+        if (posted_.responseType) {
+          hdr_.responseType = posted_.responseType;
         }
         const uri_ = `${this.uri_}/${qstr_}`;
-        this.http.post<any>(uri_, posted, hdr_).subscribe((res: any) => {
+        this.http.post<any>(uri_, posted_, hdr_).subscribe((res: any) => {
           const res_ = res.body;
-          if (posted.responseType) {
+          if (posted_.responseType) {
             resolve(res_);
           } else {
             if (res_?.result) {
@@ -223,21 +223,21 @@ export class Miscellaneous {
 
   async doMessage(msg: string, type: string) {
     type === "error" ? console.error("!!! err msg", msg) : null;
-    if (msg) {
-      const typed: any = {
-        message: `${this.translate.instant(msg?.toString())?.toLowerCase()}.`,
-        duration: ["success", "warning"].includes(type) ? 3000 : 7000,
-        cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
-        buttons: [{
-          side: "end",
-          icon: "close-outline",
-          role: "cancel",
-          handler: () => { }
-        }]
-      };
-      const toast = await this.toast.create(typed);
-      toast.present();
-    }
+    try {
+      this.toast.dismiss();
+    } catch (e) { }
+    const toast = await this.toast.create({
+      message: `${this.translate.instant(msg?.toString())?.toLowerCase()}.`,
+      duration: ["success", "warning"].includes(type) ? 3000 : 7000,
+      cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
+      buttons: [{
+        side: "end",
+        icon: "close-outline",
+        role: "cancel",
+        handler: () => { }
+      }]
+    });
+    toast.present();
   }
 
   getFormattedDate(val: any) {

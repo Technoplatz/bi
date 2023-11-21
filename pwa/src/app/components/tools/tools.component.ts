@@ -42,16 +42,16 @@ import { Auth } from "../../classes/auth";
 
 export class ToolsComponent implements OnInit {
   public user_: any = null;
-  public new_version_: boolean = false;
-  public downloading_: boolean = false;
+  public ready_: boolean = false;
+  public detected_: boolean = false;
 
   constructor(
     private auth: Auth,
     public misc: Miscellaneous
   ) {
     this.misc.version.subscribe((version_: any) => {
-      this.new_version_ = version_.upgrade ? true : false;
-      this.downloading_ = version_.downloading ? true : false;
+      this.ready_ = version_.ready ? true : false;
+      this.detected_ = version_.detected ? true : false;
     });
   }
 

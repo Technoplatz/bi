@@ -57,7 +57,6 @@ export class MenuComponent implements OnInit {
   ) { }
 
   ngOnDestroy() {
-    this.crud.queries.unsubscribe;
     this.crud.collections.unsubscribe;
     this.auth.user.unsubscribe;
   }

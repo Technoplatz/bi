@@ -28,9 +28,36 @@
       "collection": true,
       "caseType": "lowercase"
     },
+    "_tags": {
+      "bsonType": "array",
+      "title": "Tags",
+      "description": "Enter a tag #...",
+      "uniqueItems": false,
+      "minItems": 0,
+      "maxItems": 128,
+      "items": {
+        "bsonType": "string",
+        "minLength": 2,
+        "maxLength": 64,
+        "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
+      },
+      "manualAdd": true
+    },
+    "que_in_dashboard": {
+      "bsonType": "bool",
+      "title": "In Dashboard?",
+      "description": "Show in dashboard",
+      "default": false
+    },
+    "que_in_collection": {
+      "bsonType": "bool",
+      "title": "In Collection?",
+      "description": "Show in collection",
+      "default": false
+    },
     "que_scheduled": {
       "bsonType": "bool",
-      "title": "Scheduled",
+      "title": "Scheduled?",
       "description": "Scheduled or not",
       "default": false
     },
@@ -50,21 +77,6 @@
       "minLength": 0,
       "maxLength": 512,
       "textarea": true
-    },
-    "_tags": {
-      "bsonType": "array",
-      "title": "Tags",
-      "description": "Enter a tag #...",
-      "uniqueItems": false,
-      "minItems": 0,
-      "maxItems": 256,
-      "items": {
-        "bsonType": "string",
-        "minLength": 2,
-        "maxLength": 64,
-        "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
-      },
-      "manualAdd": true
     },
     "que_aggregate": {
       "bsonType": "object",

@@ -31,11 +31,11 @@ https://www.gnu.org/licenses.
 -->
 
 <div class="top-tools">
-  <ion-button *ngIf="new_version_" color="danger" (click)="reload_app()" size="small" class="new-version">
-    {{ 'New Version' | translate }}
+  <ion-button *ngIf="ready_" color="danger" (click)="reload_app()" size="small" class="new-version">
+    {{ 'New Version is Ready' | translate }}
   </ion-button>
-  <ion-button *ngIf="downloading_" color="success" (click)="reload_app()" size="small" class="new-version-downloading">
-    {{ 'Downloading' | translate }}...
+  <ion-button *ngIf="detected_" color="success" (click)="reload_app()" size="small" class="new-version-downloading">
+    {{ 'New Version Detected' | translate }}
   </ion-button>
   <ion-button *ngIf="user_" fill="clear" (click)="misc.navi.next('settings/account')">
     <ion-label>{{ user_.name }}&nbsp;</ion-label>

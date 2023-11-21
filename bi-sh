@@ -44,7 +44,6 @@ function helpBI() {
     echo "Available commands:"
     echo "./bi-sh init"
     echo "./bi-sh start"
-    echo "./bi-sh restart"
     echo "./bi-sh stop"
     echo "./bi-sh update"
     echo "./bi-sh prune [--all]"
@@ -55,15 +54,16 @@ function helpBI() {
 
 function initBI() {
     echo "Initializing..."
-    cp $DOTENV $DOTENV.bak.$(date '+%Y%m%d%H%M%S')
-    cp $DCYML $DCYML.bak.$(date '+%Y%m%d%H%M%S')
-    curl -Ls -o $DCYML --create-dirs $RAWREPO/{$DCYML}
-    if [ $? -eq 0 ]; then
-        echo "✔ Initialized successfully."
-    else
-        echo -e "✘ Sorry! Process was terminated ($?)."
-        return 0
+    if [[ -f $DOTENV ]]; then
+        echo -e "! $DOTENV already exists."
+        cp $DOTENV $DOTENV.bak.$(date '+%Y%m%d%H%M%S')
     fi
+    if [[ -f $DCYML ]]; then
+        echo -e "! $DCYML already exists."
+        cp $DCYML $DCYML.bak.$(date '+%Y%m%d%H%M%S')
+    fi
+    curl -Ls -o $DOTENV --create-dirs $RAWREPO/{$DOTENV}
+    curl -Ls -o $DCYML --create-dirs $RAWREPO/{$DCYML}
     return 1
 }
 
@@ -191,10 +191,6 @@ case $1 in
     initBI
     ;;
 "start")
-    startBI
-    ;;
-"restart")
-    stopBI
     startBI
     ;;
 "stop")

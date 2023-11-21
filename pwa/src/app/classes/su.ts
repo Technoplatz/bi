@@ -46,16 +46,44 @@ export class Su {
         private swu: SwUpdate,
         private misc: Miscellaneous
     ) {
-        if (this.swu.isEnabled) {
-            console.log("swu enabled");
-            setInterval(() => {
-                this.swu.checkForUpdate().then(() => { }).catch((error_: any) => {
-                    console.error("swu check error", error_);
+        this.navworker_unregister().then((res_: any) => {
+            console.log(res_);
+            if (this.swu.isEnabled) {
+                console.log("swu enabled");
+                setInterval(() => {
+                    this.swu.checkForUpdate().then(() => { }).catch((error_: any) => {
+                        console.error("swu check error", error_);
+                    });
+                }, this.delay_ * 60 * 1000);
+            } else {
+                console.error("swu is not enabled");
+            }
+        });
+    }
+
+    navworker_unregister() {
+        return new Promise((resolve) => {
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.getRegistrations().then((regs_: any) => {
+                    if (regs_.length) {
+                        let i_ = 0;
+                        for (let reg_ of regs_) {
+                            reg_.unregister().then(() => { }).finally(() => {
+                                if (i_ === regs_.length - 1) {
+                                    resolve("s-w unregistered");
+                                } else {
+                                    i_++;
+                                }
+                            });
+                        }
+                    }
+                }).catch((res_: any) => {
+                    resolve(res_);
                 });
-            }, this.delay_ * 60 * 1000);
-        } else {
-            console.error("swu is not enabled");
-        }
+            } else {
+                resolve("no s-w found");
+            }
+        });
     }
 
     check_for_updates() {
@@ -66,11 +94,11 @@ export class Su {
                     break;
                 case "VERSION_DETECTED":
                     console.log(`swu new version detected: ${event_.version.hash}`);
-                    this.misc.version.next({ downloading: true, upgrade: false, version: event_.version.hash });
+                    this.misc.version.next({ detected: true });
                     break;
                 case "VERSION_READY":
                     console.log(`swu new version is ready: ${event_.latestVersion.hash}`);
-                    this.misc.version.next({ downloading: false, upgrade: true, version: event_.latestVersion.hash });
+                    this.misc.version.next({ ready: true });
                     break;
                 case "VERSION_INSTALLATION_FAILED":
                     console.error(`swu version installation failed`);

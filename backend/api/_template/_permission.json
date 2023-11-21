@@ -23,57 +23,43 @@
       "bsonType": "bool",
       "title": "Is Active",
       "description": "Permission is active",
-      "default": true,
-      "trueText": "Yes",
-      "falseText": "No"
+      "default": true
     },
     "per_read": {
       "bsonType": "bool",
       "title": "Read",
       "description": "Read permission",
-      "default": false,
-      "trueText": "Yes",
-      "falseText": "No"
+      "default": false
     },
     "per_insert": {
       "bsonType": "bool",
       "title": "Insert",
       "description": "Insert permission",
-      "default": false,
-      "trueText": "Yes",
-      "falseText": "No"
+      "default": false
     },
     "per_update": {
       "bsonType": "bool",
       "title": "Update",
       "description": "Update permission",
-      "default": false,
-      "trueText": "Yes",
-      "falseText": "No"
+      "default": false
     },
     "per_delete": {
       "bsonType": "bool",
       "title": "Delete",
       "description": "Delete permission",
-      "default": false,
-      "trueText": "Yes",
-      "falseText": "No"
+      "default": false
     },
     "per_action": {
       "bsonType": "bool",
       "title": "Action",
       "description": "Action run permission",
-      "default": false,
-      "trueText": "Yes",
-      "falseText": "No"
+      "default": false
     },
     "per_query": {
       "bsonType": "bool",
       "title": "Query",
       "description": "Query run permission",
-      "default": false,
-      "trueText": "Yes",
-      "falseText": "No"
+      "default": false
     },
     "per_match": {
       "bsonType": "array",

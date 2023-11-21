@@ -36,19 +36,14 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ 'DASHBOARD' | translate }}</p>
         <h3>{{ 'Welcome Aboard' | translate }}.</h3>
-        <span *ngIf="flashcards.length == 1">{{ flashcards.length }} {{ 'Flashcard' | translate }}</span>
-        <span *ngIf="flashcards.length > 1">{{ flashcards.length }} {{ 'Flashcards' | translate }}</span>
-        <span *ngIf="flashcards.length > 0 && charts.length > 0">&nbsp;{{ 'and' | translate }}&nbsp;</span>
-        <span *ngIf="charts.length == 1">{{ charts.length }} {{ 'Chart' | translate }}.</span>
-        <span *ngIf="charts.length > 1">{{ charts.length }} {{ 'Charts' | translate }}.</span>
-
+        
         <!-- flashcards -->
         <!-- charts -->
 
         <!-- RECENT ANNOUNCEMENTS -->
         <div class="filler-10"></div>
         <h4>{{ 'Announcements' | translate }}</h4>
-        <ion-grid *ngIf="announcements?.length > 0; else noannouncement" class="ion-no-padding data-grid">
+        <ion-grid *ngIf="announcements_?.length > 0; else noannouncement" class="ion-no-padding data-grid">
           <ion-row>
             <ion-col size="2">
               <span class="column-title">{{ 'Date' | translate }}</span>
@@ -66,7 +61,7 @@ https://www.gnu.org/licenses.
               <span class="column-title">{{ 'Tags' | translate }}</span>
             </ion-col>
           </ion-row>
-          <ion-row *ngFor="let item of announcements; let a = index">
+          <ion-row *ngFor="let item of announcements_; let a = index">
             <ion-col size="2"> {{ item._created_at.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }} </ion-col>
             <ion-col size="2"> {{ item.ano_scope | translate }}</ion-col>
             <ion-col size="2"> {{ item.ano_vie_title }}</ion-col>
@@ -74,7 +69,7 @@ https://www.gnu.org/licenses.
             <ion-col size="4"> {{ item._tags?.join(' ') }} </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col size="12">{{ 'Last' | translate }} {{ announcements.length }} {{ 'announcements' | translate
+            <ion-col size="12">{{ 'Last' | translate }} {{ announcements_.length }} {{ 'announcements' | translate
               }}.</ion-col>
           </ion-row>
           <div class="filler-16"></div>
