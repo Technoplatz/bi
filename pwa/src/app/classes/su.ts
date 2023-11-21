@@ -41,7 +41,6 @@ import { environment } from "../../environments/environment";
 
 export class Su {
     private delay_: number = environment.swu_interval_mins;
-    private swu_check_: boolean = true;
 
     constructor(
         private swu: SwUpdate,
@@ -50,35 +49,34 @@ export class Su {
         if (this.swu.isEnabled) {
             console.log("swu enabled");
             setInterval(() => {
-                this.swu_check_ ?
-                    this.swu.checkForUpdate().then((res_: any) => {
-                        if (res_) {
-                            this.swu_check_ = false;
-                            console.info("swu processed");
-                        } else {
-                            console.info("no swu found");
-                        }
-                    }).catch((err_: any) => {
-                        console.error("swu check error", err_);
-                    }) : null;
+                this.swu.checkForUpdate().then(() => { }).catch((error_: any) => {
+                    console.error("swu check error", error_);
+                });
             }, this.delay_ * 60 * 1000);
         } else {
-            this.swu_check_ = false;
             console.error("swu is not enabled");
         }
     }
 
-    public checkForUpdates(): void {
+    check_for_updates() {
         this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
             switch (event_.type) {
+                case "NO_NEW_VERSION_DETECTED":
+                    console.log(`swu is up-to-date: ${event_.version.hash}`);
+                    break;
                 case "VERSION_DETECTED":
-                    console.log(`swu version detected ${event_.version.hash}`);
-                    console.log("downloading...");
+                    console.log(`swu new version detected: ${event_.version.hash}`);
                     this.misc.version.next({ downloading: true, upgrade: false, version: event_.version.hash });
                     break;
                 case "VERSION_READY":
-                    console.log("swu version is ready");
+                    console.log(`swu new version is ready: ${event_.latestVersion.hash}`);
                     this.misc.version.next({ downloading: false, upgrade: true, version: event_.latestVersion.hash });
+                    break;
+                case "VERSION_INSTALLATION_FAILED":
+                    console.error(`swu version installation failed`);
+                    break;
+                default:
+                    console.error(`swu status not verified`);
                     break;
             }
         });

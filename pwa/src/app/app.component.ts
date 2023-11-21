@@ -61,8 +61,8 @@ export class AppComponent implements OnInit {
     private su: Su
   ) {
     // auth
-    this.auth.user.subscribe((user: any) => {
-      this.user_ = user;
+    this.auth.user.subscribe((user_: any) => {
+      this.user_ = user_;
     });
     // version check
     this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
@@ -78,50 +78,24 @@ export class AppComponent implements OnInit {
     this.storage.get("LSTHEME").then((LSTHEME: any) => {
       document.documentElement.style.setProperty("--ion-color-primary", LSTHEME ? LSTHEME.color : environment.themes[0].color);
     });
-  }
-
-  navworker_unregister() {
-    return new Promise((resolve) => {
-      if (navigator.serviceWorker) {
-        navigator.serviceWorker.getRegistrations().then((regs_: any) => {
-          if (regs_.length) {
-            let i_ = 0;
-            for (let reg_ of regs_) {
-              reg_.unregister().then(() => { }).finally(() => {
-                if (i_ === regs_.length - 1) {
-                  resolve(true);
-                } else {
-                  i_++;
-                }
-              });
-            }
-          }
-        });
-      } else {
-        console.error("no sw found");
-        resolve(true);
-      }
-    });
+    // swu
+    this.su.check_for_updates();
   }
 
   ngOnInit() {
-    this.navworker_unregister().then(() => {
-      console.info("sw unregistered");
-      this.su.checkForUpdates();
-      this.storage.get("LSUSERMETA").then((LSUSERMETA_: any) => {
-        this.misc.locale().then((locale_: any) => {
-          locale_ = locale_ ? locale_ : LSUSERMETA_?.locale ? LSUSERMETA_.locale : "de";
-          this.storage.set("LSLOCALE", locale_).then(() => {
-            this.translate.setDefaultLang(locale_);
-            this.translate.use(locale_);
-            this.auth.user.next(LSUSERMETA_);
-            LSUSERMETA_ ? this.crud.get_all().then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-            }) : null;
-          });
-        }).catch((error: any) => {
-          console.error(error);
+    this.storage.get("LSUSERMETA").then((LSUSERMETA_: any) => {
+      this.misc.locale().then((locale_: any) => {
+        locale_ = locale_ ? locale_ : LSUSERMETA_?.locale ? LSUSERMETA_.locale : "de";
+        this.storage.set("LSLOCALE", locale_).then(() => {
+          this.translate.setDefaultLang(locale_);
+          this.translate.use(locale_);
+          this.auth.user.next(LSUSERMETA_);
+          LSUSERMETA_ ? this.crud.get_all().then(() => { }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          }) : null;
         });
+      }).catch((error: any) => {
+        console.error(error);
       });
     });
   }
