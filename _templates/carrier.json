@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "car_id": {
+      "bsonType": "string",
+      "title": "Carrier ID",
+      "description": "Carrier ID",
+      "placeholder": "Automatically assigned",
+      "minLength": 4,
+      "maxLength": 6,
+      "pattern": "^[A-Z0-9-]{4,6}$",
+      "permanent": true
+    },
+    "car_name": {
+      "bsonType": "string",
+      "title": "Carrier Name",
+      "description": "Carrier name or driver name surname",
+      "placeholder": "Carrier company or driver name",
+      "minLength": 2,
+      "maxLength": 32
+    },
+    "car_tax_no": {
+      "bsonType": "string",
+      "title": "Tax No",
+      "description": "Carrier tax no",
+      "minLength": 10,
+      "maxLength": 10,
+      "pattern": "^[0-9]{10,10}$"
+    },
+    "car_plate_no": {
+      "bsonType": "string",
+      "title": "Plate No",
+      "description": "Vehicle plate number",
+      "minLength": 6,
+      "maxLength": 16,
+      "pattern": "^[A-Za-z0-9 ]{6,16}$",
+      "caseType": "uppercase"
+    },
+    "car_acc_no": {
+      "bsonType": "string",
+      "title": "Account No",
+      "description": "Account No",
+      "placeholder": "Please select an account",
+      "minLength": 10,
+      "maxLength": 11,
+      "pattern": "^[A-Z0-9-]{10,11}$",
+      "readonly": true
+    }
+  },
+  "sort": {
+    "_modified_at": -1
+  },
+  "required": ["car_id", "car_acc_no", "car_name", "car_tax_no", "car_plate_no"],
+  "index": [["car_id"], ["car_acc_no"]],
+  "unique": [["car_id"]],
+  "parents": [
+    {
+      "collection": "account",
+      "match": [
+        {
+          "key": "car_acc_no",
+          "value": "acc_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "acc_is_active",
+          "op": "eq",
+          "value": true
+        }
+      ],
+      "get": ["acc_no", "acc_name"],
+      "group": false
+    }
+  ],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "import": {
+    "enabled": false
+  }
+}

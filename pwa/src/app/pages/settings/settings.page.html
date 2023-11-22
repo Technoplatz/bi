@@ -98,8 +98,7 @@ https://www.gnu.org/licenses.
           <div *ngIf="otp_qr && otp_show">
             <qrcode [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'" [allowEmptyString]="true">
             </qrcode>
-            <ion-note slot="start" class="ion-margin-start">{{ 'Read QR code with your Authenticator App to get 2FA
-              codes' | translate }}.</ion-note>
+            <ion-note slot="start" class="ion-margin-start">{{ 'Read QR code with your Authenticator App to generate a one-time password' | translate }}.</ion-note>
             <div class="filler-8"></div>
           </div>
           <ion-button *ngIf="!otp_show" (click)="doOTP({ op: 'show' })" size="small" slot="end">
@@ -112,7 +111,7 @@ https://www.gnu.org/licenses.
             <ion-label>{{ 'Hide' | translate }}</ion-label>
           </ion-button>
           <ion-button *ngIf="otp_show" (click)="doResetOTP()" size="small" slot="end">
-            <ion-label>{{ 'Reset 2FA' | translate }}</ion-label>
+            <ion-label>{{ 'Reset' | translate }}</ion-label>
           </ion-button>
           <ion-button *ngIf="otp_show" (click)="doValidateOTP()" size="small" slot="end">
             <ion-label>{{ 'Validate' | translate }}</ion-label>

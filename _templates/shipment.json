@@ -27,21 +27,33 @@
       "description": "Shipment date",
       "dateOnly": false
     },
+    "shp_carrier_id": {
+      "bsonType": "string",
+      "title": "Carrier ID",
+      "description": "Carrier ID",
+      "placeholder": "Please select a carrier",
+      "minLength": 4,
+      "maxLength": 4,
+      "pattern": "^[A-Z0-9]{4,4}$",
+      "readonly": true
+    },
     "shp_carrier_name": {
       "bsonType": "string",
       "title": "Carrier Name",
       "description": "Carrier name or driver name surname",
       "placeholder": "Carrier company or driver name",
       "minLength": 2,
-      "maxLength": 32
+      "maxLength": 32,
+      "readonly": true
     },
-    "shp_carrier_id": {
+    "shp_carrier_tax_no": {
       "bsonType": "string",
-      "title": "Carrier Tax/ID No",
-      "description": "Carrier tax no or driver ID",
+      "title": "Carrier Tax No",
+      "description": "Carrier tax no",
       "minLength": 10,
       "maxLength": 12,
-      "pattern": "^[0-9]{10,12}$"
+      "pattern": "^[0-9]{10,12}$",
+      "readonly": true
     },
     "shp_vehicle_id": {
       "bsonType": "string",
@@ -50,7 +62,8 @@
       "minLength": 6,
       "maxLength": 16,
       "pattern": "^[A-Za-z0-9 ]{6,16}$",
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "readonly": true
     },
     "shp_notes": {
       "bsonType": "string",
@@ -90,7 +103,7 @@
   "sort": {
     "shp_id": -1
   },
-  "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_vehicle_id"],
+  "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_carrier_tax_no", "shp_vehicle_id"],
   "index": [["shp_id"], ["shp_acc_no"], ["shp_wayb_no"]],
   "unique": [["shp_id"]],
   "parents": [
@@ -110,6 +123,35 @@
         }
       ],
       "get": ["acc_no", "acc_name"]
+    },
+    {
+      "collection": "carrier",
+      "match": [
+        {
+          "key": "shp_carrier_id",
+          "value": "car_id"
+        },
+        {
+          "key": "shp_carrier_name",
+          "value": "car_name"
+        },
+        {
+          "key": "shp_carrier_tax_no",
+          "value": "car_tax_no"
+        },
+        {
+          "key": "shp_vehicle_id",
+          "value": "car_plate_no"
+        }
+      ],
+      "filter": [
+        {
+          "key": "car_acc_no",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "get": ["car_id", "car_name", "car_tax_no", "car_plate_no"]
     }
   ],
   "links": [

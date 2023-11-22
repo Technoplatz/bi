@@ -491,7 +491,7 @@ def multi_issue_f():
             deliverycustomerparty_electronicmail_ = account_["acc_email"] if "acc_email" in account_ else None
             shipment_licenseplateid_ = shipment_["shp_vehicle_id"] if "shp_vehicle_id" in shipment_ else None
             shipment_licenseplateidscheme_ = "PLAKA"
-            shipment_partyidentificationid_ = shipment_["shp_carrier_id"] if "shp_carrier_id" in shipment_ else None
+            shipment_partyidentificationid_ = shipment_["shp_carrier_tax_no"] if "shp_carrier_tax_no" in shipment_ else None
             shipment_partynamename_ = shipment_["shp_carrier_name"] if "shp_carrier_name" in shipment_ else None
             shipment_postaladdressid_ = account_["acc_ship_to_address_id"] if "acc_ship_to_address_id" in account_ else None
             shipment_streetname_ = account_["acc_ship_to_street"] if "acc_ship_to_street" in account_ else None
@@ -642,6 +642,7 @@ def multi_issue_f():
             }
 
             response_ = requests.post(EDOKSIS_URL_, data=request_xml_.encode("utf-8"), headers=headers_, timeout=EDOKSIS_TIMEOUT_SECONDS_)
+            
             root_ = ElementTree.fromstring(response_.content)
 
             for tag in root_.iter(f"{tag_prefix_}Sonuc"):
@@ -669,7 +670,7 @@ def multi_issue_f():
             set_["shp_date"] = shp_date_
             set_["shp_acc_no"] = shipment_account_no_
             set_["shp_carrier_name"] = shipment_partynamename_
-            set_["shp_carrier_id"] = shipment_partyidentificationid_
+            set_["shp_carrier_tax_no"] = shipment_partyidentificationid_
             set_["shp_vehicle_id"] = shipment_licenseplateid_
             set_["shp_notes"] = notes_
             set_["shp_wayb_no"] = waybill_no_

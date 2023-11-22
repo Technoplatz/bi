@@ -221,12 +221,9 @@ export class Miscellaneous {
     });
   }
 
-  async doMessage(msg: string, type: string) {
+  doMessage(msg: string, type: string) {
     type === "error" ? console.error("!!! err msg", msg) : null;
-    try {
-      this.toast.dismiss();
-    } catch (e) { }
-    const toast = await this.toast.create({
+    this.toast.create({
       message: `${this.translate.instant(msg?.toString())?.toLowerCase()}.`,
       duration: ["success", "warning"].includes(type) ? 3000 : 7000,
       cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
@@ -236,8 +233,9 @@ export class Miscellaneous {
         role: "cancel",
         handler: () => { }
       }]
+    }).then((toast_: any) => {
+      toast_.present();
     });
-    toast.present();
   }
 
   getFormattedDate(val: any) {

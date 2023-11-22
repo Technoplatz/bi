@@ -958,11 +958,7 @@ class Iot:
                     "ser_in_count": {
                         "$sum": {"$cond": [{"$eq": ["$ser_is_in", True]}, 1, 0]}
                     },
-                    "ser_out_count": {
-                        "$sum": {"$cond": [{"$eq": ["$ser_is_out", True]}, 1, 0]}
-                    },
-                    "ser_in_date": {"$first": "$ser_in_date"},
-                    "ser_out_date": {"$first": "$ser_out_date"},
+                    "ser_in_date": {"$first": "$ser_in_date"}
                 }
             }
             replacewith_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_id"]}}
@@ -1084,7 +1080,8 @@ class Iot:
 
             data_ = {}
             payload_ = []
-            total_ = total_in_ = total_out_ = 0
+            total_ = 0
+            total_in_ = 0
             find_one_ = (
                 Mongo()
                 .db_["serial_data"]
@@ -1114,12 +1111,7 @@ class Iot:
                                     "$sum": {
                                         "$cond": [{"$eq": ["$ser_is_in", True]}, 1, 0]
                                     }
-                                },
-                                "ser_out_count": {
-                                    "$sum": {
-                                        "$cond": [{"$eq": ["$ser_is_out", True]}, 1, 0]
-                                    }
-                                },
+                                }
                             }
                         }
                         replacewith_ = {
@@ -1146,14 +1138,12 @@ class Iot:
             for pl_ in payload_:
                 total_ += pl_["count"]
                 total_in_ += pl_["ser_in_count"]
-                total_out_ += pl_["ser_out_count"]
 
             data_["payload"] = payload_
             data_["input"] = bar_input_
             data_["delivery"] = delivery_
             data_["total"] = total_
             data_["total_in"] = total_in_
-            data_["total_out"] = total_out_
 
             return {
                 "result": True,

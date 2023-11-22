@@ -313,9 +313,8 @@ export class CollectionPage implements OnInit {
           }
         }
       });
-      modal.onDidDismiss().then((res: any) => {
-        if (op === "action" || res.data.modified || this.scan_) {
-          res.data.res ? this.misc.doMessage(res.data.res.content, "success") : null;
+      modal.onDidDismiss().then((res_: any) => {
+        if (op === "action" || res_.data.modified || this.scan_) {
           this.refresh_data(0);
         }
       });
@@ -367,13 +366,13 @@ export class CollectionPage implements OnInit {
 
   init_search(full: boolean) {
     full ? this.searched = {} : null;
-    this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-      if (this.searched) {
-        for (let key_ in this.structure_.properties) {
-          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
-        }
+    // this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
+    if (this.searched) {
+      for (let key_ in this.structure_.properties) {
+        this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
       }
-    });
+    }
+    // });
   }
 
   clear_filter() {

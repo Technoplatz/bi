@@ -36,8 +36,9 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
         <h3><span *ngIf="title_">{{ title_ | translate | titlecase }}&nbsp;</span>[{{ subheader }}]</h3>
-        <span *ngIf="is_loaded" class="bold primary">{{ count }} {{ count > 1 ? 'documents were filtered' : 'document
-          was filtered' | translate }}.</span><span *ngIf="!is_loaded" class="bold primary">{{
+        <span *ngIf="is_loaded" class="bold primary">{{ count }} {{ count > 1 ? ('documents' | translate)
+          : ('document' | translate) }} {{ (filter_?.length > 0 ? 'filtered' : 'found') | translate }}.</span><span
+          *ngIf="!is_loaded" class="bold primary">{{
           loadingText | translate }}...</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
