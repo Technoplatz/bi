@@ -335,5 +335,6 @@
   "update completed successfully": "Aktualisierung erfolgreich abgeschlossen",
   "user not found": "Benutzer nicht gefunden",
   "user session ended": "Benutzersitzung beendet",
-  "user session not found": "Benutzersitzung nicht gefunden"
+  "user session not found": "Benutzersitzung nicht gefunden",
+  "records displayed": "Datensätze angezeigt"
 }

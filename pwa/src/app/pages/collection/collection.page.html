@@ -223,11 +223,11 @@ https://www.gnu.org/licenses.
                   <div *ngIf="item.value.bsonType=='bool'">
                     <ion-button [color]="searched[item.key].op == 'true' ? 'primary' : 'light'" size="small"
                       (click)="set_search_item(item.key, 'true')">
-                      {{ 'True' | translate }}
+                      <ion-icon name="checkbox-sharp" color="success"></ion-icon>
                     </ion-button>
                     <ion-button [color]="searched[item.key].op == 'false' ? 'primary' : 'light'" size="small"
                       (click)="set_search_item(item.key, 'false')">
-                      {{ 'False' | translate }}
+                      <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
                     </ion-button>
                   </div>
                   <div>

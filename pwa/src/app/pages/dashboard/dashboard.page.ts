@@ -44,6 +44,7 @@ import { environment } from "../../../environments/environment";
 export class DashboardPage implements OnInit {
   public announcements_: any = [];
   public loadingText: string = environment.misc.loadingText;
+  public visuals_: any = [];
 
   constructor(
     private crud: Crud,
@@ -56,6 +57,13 @@ export class DashboardPage implements OnInit {
 
   ngOnInit() {
     this.crud.get_announcements();
+    this.crud.get_visuals(null).then((visuals_: any) => {
+      this.visuals_ = visuals_.visuals;
+    });
+  }
+
+  orderByIndex = (a: any, b: any): number => {
+    return a.value.index < b.value.index ? -1 : (b.value.index > a.value.index ? 1 : 0);
   }
 
 }

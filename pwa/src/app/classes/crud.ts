@@ -92,7 +92,6 @@ export class Crud {
         const kv_ = p.subType === "keyvalue" ? true : false;
         const ko_ = p.subType === "keyop" ? true : false;
         const permanent_ = p.permanent && data?._modified_count >= 0 ? true : false;
-        // const readonly_ = p.readonly ? true : actionix_ && actionix_ > 0 && structure.actions[actionix_].readonly?.indexOf(item) !== -1 ? true : false;
         const readonly_ = p.readonly ? true : false;
         const dateOnly_ = p.dateOnly ? true : false;
         const collection_ = p.collection ? true : false;
@@ -239,8 +238,8 @@ export class Crud {
         op: "visuals",
         collection: "_query",
         scope: scope_
-      }).then((res: any) => {
-        resolve(true);
+      }).then((res_: any) => {
+        resolve(res_);
       }).catch((err: any) => {
         reject(err);
       });

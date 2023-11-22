@@ -273,7 +273,7 @@ class Schedular:
                     "$set": {
                         "minutediff": {
                             "$dateDiff": {
-                                "startDate": { "$ifNull": ["$fwa_waf_sync_date", past_] },
+                                "startDate": {"$ifNull": ["$fwa_waf_sync_date", past_]},
                                 "endDate": Misc().get_now_f(),
                                 "unit": "minute",
                             },
@@ -288,7 +288,7 @@ class Schedular:
                             {"minutediff": {"$gt": API_FW_TEMP_DURATION_MIN_}},
                         ],
                     },
-                }
+                },
             ]
             cursor_ = Mongo().db_["_firewall"].aggregate(agg_)
             rules_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
@@ -958,7 +958,7 @@ class Iot:
                     "ser_in_count": {
                         "$sum": {"$cond": [{"$eq": ["$ser_is_in", True]}, 1, 0]}
                     },
-                    "ser_in_date": {"$first": "$ser_in_date"}
+                    "ser_in_date": {"$first": "$ser_in_date"},
                 }
             }
             replacewith_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_id"]}}
@@ -1111,7 +1111,7 @@ class Iot:
                                     "$sum": {
                                         "$cond": [{"$eq": ["$ser_is_in", True]}, 1, 0]
                                     }
-                                }
+                                },
                             }
                         }
                         replacewith_ = {
@@ -2216,18 +2216,45 @@ class Crud:
         except Exception as exc__:
             return Misc().notify_exception_f(exc__)
 
-
     def visuals_f(self, obj_):
         """
         docstring is in progress
         """
+        res_ = {}
         try:
+            user_ = obj_["userindb"]
+            col_id_ = obj_["collection"]
+            scope_ = obj_["scope"]
             visuals_ = []
-            res_ = { "result": True, "visuals": visuals_ }
+            cursor_ = (
+                Mongo()
+                .db_["_query"]
+                .find({"que_in_dashboard": True, "_approved": True})
+                .limit(16)
+            )
+            for item_ in cursor_:
+                query_f_ = self.query_f(
+                    {"id": item_["que_id"], "key": "visual", "userindb": user_}
+                )
+                if not query_f_["result"]:
+                    continue
+                visuals_.append(
+                    {
+                        "title": item_["que_title"],
+                        "collection": item_["que_collection_id"],
+                        "count": query_f_["count"],
+                        "data": query_f_["data"],
+                        "fields": query_f_["fields"],
+                    }
+                )
+
+            res_ = {"result": True, "visuals": visuals_}
 
         except Exception as exc__:
-            return Misc().notify_exception_f(exc__)
+            res_ = Misc().notify_exception_f(exc__)
 
+        finally:
+            return res_
 
     def query_f(self, obj_):
         """
@@ -2269,9 +2296,12 @@ class Crud:
                 else:
                     raise APIError("no request detected")
             else:
-                orig_ = request.base_url.replace(request.host_url, "")
-                if orig_ not in ["api/crud", f"api/get/query/{que_id_}"]:
-                    raise AuthError("request is not authenticated")
+                if key_ and key_ == "visual":
+                    orig_ = "visual"
+                else:
+                    orig_ = request.base_url.replace(request.host_url, "")
+                    if orig_ not in ["api/crud", f"api/get/query/{que_id_}"]:
+                        raise AuthError("request is not authenticated")
 
             query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
             if not query_:
@@ -2282,7 +2312,7 @@ class Crud:
                 err_ = "query needs to be approved by administrators"
                 raise PassException(err_)
 
-            if orig_ == "api/crud":
+            if orig_ in ["api/crud", "visual"]:
                 user_ = obj_["userindb"] if "userindb" in obj_ else None
                 if not user_:
                     raise APIError(f"no user defined for {que_id_}")
@@ -2370,6 +2400,8 @@ class Crud:
                     else API_QUERY_PAGE_SIZE_
                 )
                 aggregate_.append({"$limit": limit_})
+            elif orig_ == "visual":
+                aggregate_.append({"$limit": API_DEFAULT_VISUAL_LIMIT_})
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
@@ -4015,18 +4047,12 @@ class Crud:
             )
             num_fields_ = (
                 split_["num_fields"]
-                if split_
-                and "num_fields" in split_
-                and len(split_["num_fields"]) > 0
+                if split_ and "num_fields" in split_ and len(split_["num_fields"]) > 0
                 else None
             )
 
             docu_ = {}
-            data_ = (
-                Mongo()
-                .db_[collection_]
-                .find_one({"_id": ObjectId(data_["_id"])})
-            )
+            data_ = Mongo().db_[collection_].find_one({"_id": ObjectId(data_["_id"])})
             datax_ = data_.copy()
 
             if is_crud_ and set_:
@@ -4055,7 +4081,6 @@ class Crud:
                     get_filtered_[key_field_] = key_value_
 
                     if ref_field_ and num_fields_:
-
                         count_ = 1
                         if doc_[ref_field_] > datax_[ref_field_]:
                             doc_[ref_field_] = datax_[ref_field_]
@@ -4064,7 +4089,9 @@ class Crud:
                         ration_ = doc_[ref_field_] / datax_[ref_field_]
 
                         data_.pop("_id", None)
-                        data_["_created_at"] = docu_["_modified_at"] = Misc().get_now_f()
+                        data_["_created_at"] = docu_[
+                            "_modified_at"
+                        ] = Misc().get_now_f()
                         data_["_created_by"] = docu_["_modified_by"] = email_
                         data_["_resume_token"] = None
                         data_["_modified_count"] = 0
@@ -5031,6 +5058,7 @@ class Auth:
                 "collection",
                 "collections",
                 "announcements",
+                "visuals",
             ]
             insert_permissive_ops_ = ["clone"]
             is_crud_ = collection_id_ and collection_id_[:1] != "_"
@@ -5801,6 +5829,7 @@ API_FW_TEMP_DURATION_MIN_ = int(os.environ.get("API_FW_TEMP_DURATION_MIN"))
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_MB_ = int(os.environ.get("API_MAX_CONTENT_LENGTH_MB"))
 API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
+API_DEFAULT_VISUAL_LIMIT_ = int(os.environ.get("API_DEFAULT_VISUAL_LIMIT"))
 API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 API_TEMPFILE_PATH_ = os.environ.get("API_TEMPFILE_PATH")
@@ -6027,12 +6056,14 @@ def api_crud_f():
         )
         allowmatch_ = []
 
-        permission_f_ = Auth().permission_f({
-            "user": jwt_validate_f_["user"],
-            "auth": jwt_validate_f_["auth"],
-            "collection": collection_,
-            "op": op_,
-        })
+        permission_f_ = Auth().permission_f(
+            {
+                "user": jwt_validate_f_["user"],
+                "auth": jwt_validate_f_["auth"],
+                "collection": collection_,
+                "op": op_,
+            }
+        )
         if not permission_f_["result"]:
             raise AuthError(permission_f_)
 

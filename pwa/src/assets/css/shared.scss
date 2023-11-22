@@ -1481,6 +1481,36 @@ sup {
   z-index: 9999;
 }
 
+.visual-container {
+  margin-top: 4px;
+  width: 90% !important;
+  line-height: 18px;
+  gap: 8px !important;
+  display: flex;
+}
+
+.visual-item {
+  position: relative;
+  margin-top: 16px;
+  margin-bottom: 4px;
+  gap: 4px !important;
+  justify-content: flex-start;
+  border: 5px solid #f6f6f6;
+  padding: 16px;
+  max-width: 320px;
+  overflow: hidden;
+}
+
+.visual-table {
+  max-height: 460px;
+  padding-bottom: 10px;
+}
+
+.visual-footer {
+  position: absolute;
+  bottom: 8px;
+}
+
 .schema-flashcard-container {
   margin-top: 4px;
   width: 90% !important;

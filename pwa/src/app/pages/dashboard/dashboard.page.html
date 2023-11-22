@@ -36,8 +36,29 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ 'DASHBOARD' | translate }}</p>
         <h3>{{ 'Welcome Aboard' | translate }}.</h3>
-        
-        <!-- flashcards -->
+
+        <!-- visuals -->
+        <div class="visual-container">
+          <div *ngFor="let visual_ of visuals_; let a = index" class="visual-item">
+            <h6 class="primary">{{ visual_.title }}</h6>
+            [{{ visual_.collection }}]
+            <div *ngIf="visual_.data.length > 0" class="visual-table">
+              <table class="data-table">
+                <tr>
+                  <th *ngFor="let item_ of visual_.fields">
+                    {{ item_ }}
+                  </th>
+                </tr>
+                <tr *ngFor="let record_ of visual_.data; let i = index">
+                  <td *ngFor="let item_ of visual_.fields">
+                    {{ record_[item_]?.toString() | translate }}
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="visual-footer">{{ visual_.count }} {{ 'records displayed' | translate }}.</div>
+          </div>
+        </div>
         <!-- charts -->
 
         <!-- RECENT ANNOUNCEMENTS -->
