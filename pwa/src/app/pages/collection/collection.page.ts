@@ -366,13 +366,13 @@ export class CollectionPage implements OnInit {
 
   init_search(full: boolean) {
     full ? this.searched = {} : null;
-    // this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-    if (this.searched) {
-      for (let key_ in this.structure_.properties) {
-        this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
+    this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
+      if (this.searched) {
+        for (let key_ in this.structure_.properties) {
+          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
+        }
       }
-    }
-    // });
+    });
   }
 
   clear_filter() {
@@ -397,15 +397,15 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  init_search_item(k: string) {
+  init_search_item(key_: string) {
     const n_ = this.filter_.length;
-    this.searched[k].actived = false;
+    this.searched[key_].actived = false;
     for (let d = 0; d < n_; d++) {
-      if (this.filter_[d] && this.filter_[d]["key"] === k) {
+      if (this.filter_[d] && this.filter_[d]["key"] === key_) {
         this.filter_.splice(d, 1);
-        this.searched[k].f = false;
-        this.searched[k].kw = null;
-        this.searched[k].op = "contains";
+        this.searched[key_].f = false;
+        this.searched[key_].kw = null;
+        this.searched[key_].op = "contains";
       }
       if (d === n_ - 1) {
         this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
@@ -422,7 +422,6 @@ export class CollectionPage implements OnInit {
   search(key_: string, value_: string) {
     this.searched[key_].actived = false;
     if (!this.filter_ || this.filter_.length === 0) {
-      this.filter_ = [];
       if (["true", "false"].includes(value_)) {
         this.filter_.push({
           key: key_,

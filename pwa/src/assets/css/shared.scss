@@ -448,7 +448,7 @@ ion-note {
 }
 
 .data-sq-container {
-  gap: 3px;
+  gap: 2px;
   margin-bottom: 4px;
   height: 90px;
 }
@@ -495,11 +495,12 @@ ion-note {
 
 .data-sq-button.disabled {
   pointer-events: none !important;
-  opacity: 1;
 }
 
 .data-sq-button.disabled > * {
-  color: var(--ion-color-medium);
+  pointer-events: none !important;
+  opacity: 0.5 !important;
+  --opacity: 0.5 !important;
 }
 
 .data-sq-button.actions {
@@ -763,9 +764,7 @@ form ion-item ion-label {
   width: 100% !important;
   height: calc(100vh - 30px);
   overflow: scroll !important;
-  padding-left: 20px;
-  padding-top: 16px;
-  padding-bottom: 16px;
+  padding: 16px;
   position: sticky !important;
   white-space: nowrap;
 }
@@ -818,8 +817,8 @@ form ion-item ion-label {
 }
 
 ion-spinner {
-  width: 28px;
-  height: 28px;
+  width: 28px !important;
+  height: 28px !important;
 }
 
 .sign-modal {
@@ -1031,7 +1030,8 @@ app-menu:hover {
   overflow: hidden !important;
   font-weight: 600;
   font-size: 13px !important;
-  --background: var(--ion-color-primary);
+  --border-radius: 2px;
+  margin-right: 2px !important;
 }
 
 .actions-grid ion-button ion-icon {
@@ -1495,20 +1495,40 @@ sup {
   margin-bottom: 4px;
   gap: 4px !important;
   justify-content: flex-start;
-  border: 5px solid #f6f6f6;
+  border: 5px solid #f1f1f1;
   padding: 16px;
-  max-width: 320px;
   overflow: hidden;
+  max-width: 400px;
+  max-height: 580px;
 }
 
 .visual-table {
-  max-height: 460px;
-  padding-bottom: 10px;
+  padding-bottom: 20px;
+}
+
+.visual-table .data-table {
+  margin-right: 0px !important;
 }
 
 .visual-footer {
+  width: 100%;
   position: absolute;
-  bottom: 8px;
+  bottom: 40px;
+  font-size: 11px;
+}
+
+.visual-footer .start {
+  position: absolute;
+  left: 0px !important;
+}
+
+.visual-footer .end {
+  position: absolute;
+  right: 28px !important;
+}
+
+.visual-footer ion-button {
+  font-size: 12px;
 }
 
 .schema-flashcard-container {
@@ -2020,7 +2040,6 @@ json-editor .jsoneditor {
   margin-top: 10px;
   margin-right: 10px;
   margin-bottom: 10px;
-  border: 1px solid var(--ion-color-light);
   border-collapse: collapse;
 }
 
@@ -2036,8 +2055,17 @@ json-editor .jsoneditor {
 
 .data-table th {
   padding-top: 0.4rem !important;
+  border-top: none;
   border-bottom: 2px solid var(--ion-color-primary);
   text-align: left;
+}
+
+.data-table th:first-child {
+  border-left: none;
+}
+
+.data-table th:last-child {
+  border-right: none;
 }
 
 .data-table th ion-checkbox,
@@ -2050,6 +2078,14 @@ json-editor .jsoneditor {
 .data-table tr:not(:first-child):hover {
   background-color: #eee;
   cursor: pointer;
+}
+
+.data-table td:first-child {
+  border-left: none;
+}
+
+.data-table td:last-child {
+  border-right: none;
 }
 
 .data-grid {

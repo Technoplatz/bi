@@ -41,7 +41,6 @@ https://www.gnu.org/licenses.
         <div class="visual-container">
           <div *ngFor="let visual_ of visuals_; let a = index" class="visual-item">
             <h6 class="primary">{{ visual_.title }}</h6>
-            [{{ visual_.collection }}]
             <div *ngIf="visual_.data.length > 0" class="visual-table">
               <table class="data-table">
                 <tr>
@@ -56,7 +55,13 @@ https://www.gnu.org/licenses.
                 </tr>
               </table>
             </div>
-            <div class="visual-footer">{{ visual_.count }} {{ 'records displayed' | translate }}.</div>
+            <div class="visual-footer">
+              <div class="start"><ion-button size="small" (click)="misc.navi.next('query/' + visual_.id)">{{ 'Query' |
+                translate }}</ion-button></div>
+              <div class="end">
+                {{ visual_.count }} {{ 'records displayed' | translate }}.
+              </div>
+            </div>
           </div>
         </div>
         <!-- charts -->

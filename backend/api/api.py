@@ -2229,7 +2229,13 @@ class Crud:
             cursor_ = (
                 Mongo()
                 .db_["_query"]
-                .find({"que_in_dashboard": True, "_approved": True})
+                .find(
+                    {
+                        "que_in_dashboard": True,
+                        "_approved": True,
+                        "_tags": {"$elemMatch": {"$in": user_["_tags"]}},
+                    }
+                )
                 .limit(16)
             )
             for item_ in cursor_:
@@ -2240,6 +2246,7 @@ class Crud:
                     continue
                 visuals_.append(
                     {
+                        "id": item_["que_id"],
                         "title": item_["que_title"],
                         "collection": item_["que_collection_id"],
                         "count": query_f_["count"],

@@ -44,43 +44,36 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="is_crud && importvis_" (click)="import_modal()" class="data-sq-button">
-                <ion-icon name="download-sharp"></ion-icon><br />
-                {{ 'Import File' | translate }}
+              <div (click)="import_modal()"
+                [class]="is_crud && importvis_ ? 'data-sq-button' : 'data-sq-button disabled'">
+                <ion-icon name="download-sharp"></ion-icon><br /><span>{{ 'Import File' | translate }}</span>
               </div>
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-sharp"></ion-icon><br />
-                {{ 'Scan Barcode' | translate }}
+                <span>{{ 'Scan Barcode' | translate }}</span>
               </div>
               <ng-template #newrecord>
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-sharp"></ion-icon><br />
-                  {{ 'New Document' | translate }}
+                  <span>{{ 'New Document' | translate }}</span>
                 </div>
               </ng-template>
-              <div *ngIf="is_loaded" (click)="refresh_data(0)" class="data-sq-button">
-                <ion-icon name="sync-circle-sharp"></ion-icon>
+              <div (click)="refresh_data(0)" class="data-sq-button">
+                <ion-icon *ngIf="is_loaded" name="sync-circle-sharp"></ion-icon>
+                <ion-spinner *ngIf="!is_loaded" name="lines-sharp"></ion-spinner>
                 <br />
-                {{ 'Refresh List' | translate }}
+                <span>{{ 'Refresh List' | translate }}</span>
               </div>
-              <div *ngIf="!is_loaded" class="data-sq-button">
-                <ion-spinner name="lines-sharp"></ion-spinner>
-                <br />
-                {{ 'Please Wait' | translate }}
-              </div>
-              <div *ngIf="filter_ && filter_.length>0" (click)="clear_filter()" class="data-sq-button">
-                <ion-icon name="close"></ion-icon>
-                <br />
-                <span>{{ 'Clear Filter' | translate }}</span>
+              <div (click)="clear_filter()" [class]="is_loaded ? 'data-sq-button' : 'data-sq-button disabled'">
+                <ion-icon name="filter-circle-outline"></ion-icon><br /><span>{{ 'Clear Filter' | translate }}</span>
               </div>
               <div (click)="multi_crud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-sharp"></ion-icon><br />
                 {{ 'Clone Document' | translate }}
               </div>
-              <div *ngIf="perma_" (click)="multi_crud('delete')" class="data-sq-button">
-                <ion-icon *ngIf="is_deleting" name="lines-sharp"></ion-icon>
-                <ion-icon *ngIf="!is_deleting" name="trash-sharp"></ion-icon>
+              <div (click)="multi_crud('delete')" [class]="perma_ ? 'data-sq-button' : 'data-sq-button disabled'">
+                <ion-icon name="trash-sharp"></ion-icon>
                 <br />
                 {{ 'Delete Document' | translate }}
               </div>
@@ -91,11 +84,10 @@ https://www.gnu.org/licenses.
                 <span *ngIf="!is_copied">{{ 'Copy Headers' | translate }}</span>
                 <span *ngIf="is_copied">{{ 'Headers Copied' | translate }}</span>
               </div>
-              <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">
-                <div class="ion-no-padding">
-                  <ion-icon name="create-sharp"></ion-icon><br />
-                  {{ 'Edit Schema' | translate }}
-                </div>
+              <div (click)="set_editor(true)"
+                [class]="is_crud && perm_ ? 'data-sq-button' : 'data-sq-button disabled'">
+                <ion-icon name="create-sharp"></ion-icon><br />
+                <span>{{ 'Edit Schema' | translate }}</span>
               </div>
             </ion-col>
           </ion-row>
