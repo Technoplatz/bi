@@ -41,27 +41,39 @@ https://www.gnu.org/licenses.
         <div class="visual-container">
           <div *ngFor="let visual_ of visuals_; let a = index" class="visual-item">
             <h6 class="primary">{{ visual_.title }}</h6>
-            <div *ngIf="visual_.data.length > 0" class="visual-table">
-              <table class="data-table">
-                <tr>
-                  <th *ngFor="let item_ of visual_.fields">
-                    {{ item_ }}
-                  </th>
-                </tr>
-                <tr *ngFor="let record_ of visual_.data; let i = index">
-                  <td *ngFor="let item_ of visual_.fields">
-                    {{ record_[item_]?.toString() | translate }}
-                  </td>
-                </tr>
-              </table>
-            </div>
-            <div class="visual-footer">
-              <div class="start"><ion-button size="small" (click)="misc.navi.next('query/' + visual_.id)">{{ 'Query' |
-                translate }}</ion-button></div>
-              <div class="end">
-                {{ visual_.count }} {{ 'records displayed' | translate }}.
+            <div *ngIf="visual_?.is_loaded; else notvisloaded">
+              <div *ngIf="visual_?.error">
+                {{ visual_.error.msg }}
+              </div>
+              <div *ngIf="visual_.data?.length > 0" class="visual-table">
+                <table class="data-table">
+                  <tr>
+                    <th *ngFor="let item_ of visual_.fields"
+                      [class]="item_.indexOf('count') >= 0 ? 'ion-text-right' : ''">
+                      {{ item_ }}
+                    </th>
+                  </tr>
+                  <tr *ngFor="let record_ of visual_.data; let i = index">
+                    <td *ngFor="let item_ of visual_.fields"
+                      [class]="item_.indexOf('count') >= 0 ? 'ion-text-right' : ''">
+                      {{ record_[item_]?.toString() | translate }}
+                    </td>
+                  </tr>
+                </table>
+                <div class="visual-footer">
+                  <div class="start"><ion-button size="small" (click)="misc.navi.next('query/' + visual_.id)">{{ 'Query'
+                      | translate }}</ion-button></div>
+                  <div class="end">
+                    {{ visual_.count }} {{ 'records displayed' | translate }}.
+                  </div>
+                </div>
               </div>
             </div>
+            <ng-template #notvisloaded>
+              <div>
+                <ion-spinner name="dots"></ion-spinner>
+              </div>
+            </ng-template>
           </div>
         </div>
         <!-- charts -->

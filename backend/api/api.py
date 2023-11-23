@@ -2239,23 +2239,57 @@ class Crud:
                 .limit(16)
             )
             for item_ in cursor_:
-                query_f_ = self.query_f(
-                    {"id": item_["que_id"], "key": "visual", "userindb": user_}
-                )
-                if not query_f_["result"]:
-                    continue
                 visuals_.append(
                     {
                         "id": item_["que_id"],
                         "title": item_["que_title"],
                         "collection": item_["que_collection_id"],
-                        "count": query_f_["count"],
-                        "data": query_f_["data"],
-                        "fields": query_f_["fields"],
                     }
                 )
 
             res_ = {"result": True, "visuals": visuals_}
+
+        except Exception as exc__:
+            res_ = Misc().notify_exception_f(exc__)
+
+        finally:
+            return res_
+
+    def visual_f(self, obj_):
+        """
+        docstring is in progress
+        """
+        res_, visual_ = {}, {}
+        try:
+            user_ = obj_["userindb"]
+            id_ = obj_["id"]
+            cursor_ = Mongo().db_["_query"].find_one({
+                "que_id": id_,
+                "_approved": True,
+                "_tags": {"$elemMatch": {"$in": user_["_tags"]}},
+            })
+
+            if not cursor_:
+                raise APIError(f"visual not found {id_}")
+
+            query_f_ = self.query_f({"id": id_, "key": "visual", "userindb": user_})
+            if not query_f_["result"]:
+                raise APIError(query_f_["msg"])
+
+            visual_ = {
+                "id": id_,
+                "title": cursor_["que_title"],
+                "collection": cursor_["que_collection_id"],
+                "count": query_f_["count"],
+                "data": query_f_["data"],
+                "fields": query_f_["fields"],
+                "schema": query_f_["schema"],
+            }
+
+            res_ = {"result": True, "visual": visual_}
+
+        except APIError as exc__:
+            res_ = Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
             res_ = Misc().notify_exception_f(exc__)
@@ -5066,6 +5100,7 @@ class Auth:
                 "collections",
                 "announcements",
                 "visuals",
+                "visual",
             ]
             insert_permissive_ops_ = ["clone"]
             is_crud_ = collection_id_ and collection_id_[:1] != "_"
@@ -6137,6 +6172,8 @@ def api_crud_f():
             res_ = Crud().savejob_f(input_)
         elif op_ == "visuals":
             res_ = Crud().visuals_f(input_)
+        elif op_ == "visual":
+            res_ = Crud().visual_f(input_)
         else:
             raise APIError(f"invalid operation: {op_}")
 

@@ -59,6 +59,22 @@ export class DashboardPage implements OnInit {
     this.crud.get_announcements();
     this.crud.get_visuals(null).then((visuals_: any) => {
       this.visuals_ = visuals_.visuals;
+      for (let i: number = 0; i < this.visuals_.length; i++) {
+        this.visual(i);
+      }
+    });
+  }
+
+  visual(ix_: number) {
+    this.visuals_[ix_].is_loaded = false;
+    this.crud.get_visual(this.visuals_[ix_].id).then((visual_: any) => {
+      this.visuals_[ix_].data = visual_.visual.data;
+      this.visuals_[ix_].fields = visual_.visual.fields;
+      this.visuals_[ix_].count = visual_.visual.count;
+    }).catch((err_: any) => {
+      this.visuals_[ix_].error = err_;
+    }).finally(() => {
+      this.visuals_[ix_].is_loaded = true;
     });
   }
 

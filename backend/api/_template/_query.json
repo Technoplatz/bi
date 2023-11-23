@@ -85,7 +85,13 @@
     }
   },
   "required": ["que_id", "que_title", "que_collection_id"],
-  "index": [["que_collection_id"], ["que_scheduled"], ["que_scheduled", "_approved"]],
+  "index": [
+    ["que_collection_id"],
+    ["que_scheduled"],
+    ["que_scheduled", "_approved"],
+    ["que_id", "_approved", "_tags"],
+    ["que_in_dashboard", "_approved", "_tags"]
+  ],
   "unique": [["que_id"]],
   "sort": {
     "_modified_at": -1
