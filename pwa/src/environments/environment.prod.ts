@@ -51,6 +51,12 @@ export const environment = {
     default_delay: 500
   },
   paginations: [25, 50, 100],
+  flashsizes: {
+    S: "width: 240px !important;",
+    M: "width: 330px !important;",
+    L: "width: 520px !important;",
+    XL: "width: 1024px !important;"
+  },
   import_structure: {
     "properties": {
       "sto_id": {

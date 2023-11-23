@@ -62,7 +62,7 @@ import bleach
 import pyotp
 from jose import jwt
 import numexpr as ne
-from flask import Flask, request, send_from_directory, make_response
+from flask import Flask, request, send_from_directory, make_response, send_file
 from flask_cors import CORS
 from markupsafe import escape
 import requests
@@ -1897,7 +1897,7 @@ class Crud:
                     )
                 )
 
-            files_ = [{"name": fn_, "type": type_}]
+            files_ = [{"name": fullpath_, "type": type_}]
 
             return {
                 "result": True,
@@ -2244,6 +2244,7 @@ class Crud:
                         "id": item_["que_id"],
                         "title": item_["que_title"],
                         "collection": item_["que_collection_id"],
+                        "size": item_["que_flashcard_size"] if "que_flashcard_size" in item_ else "M"
                     }
                 )
 
@@ -2263,11 +2264,17 @@ class Crud:
         try:
             user_ = obj_["userindb"]
             id_ = obj_["id"]
-            cursor_ = Mongo().db_["_query"].find_one({
-                "que_id": id_,
-                "_approved": True,
-                "_tags": {"$elemMatch": {"$in": user_["_tags"]}},
-            })
+            cursor_ = (
+                Mongo()
+                .db_["_query"]
+                .find_one(
+                    {
+                        "que_id": id_,
+                        "_approved": True,
+                        "_tags": {"$elemMatch": {"$in": user_["_tags"]}},
+                    }
+                )
+            )
 
             if not cursor_:
                 raise APIError(f"visual not found {id_}")
@@ -2280,6 +2287,7 @@ class Crud:
                 "id": id_,
                 "title": cursor_["que_title"],
                 "collection": cursor_["que_collection_id"],
+                "size": cursor_["que_flashcard_size"] if "que_flashcard_size" in cursor_ else "M",
                 "count": query_f_["count"],
                 "data": query_f_["data"],
                 "fields": query_f_["fields"],
@@ -3880,7 +3888,7 @@ class Crud:
         finally:
             return res_
 
-    def action_f(self, obj):
+    def action_f(self, obj_):
         """
         docstring is in progress
         """
@@ -3891,16 +3899,16 @@ class Crud:
         session_ = session_client_.start_session()
 
         try:
-            collection_id_ = obj["collection"]
-            user_ = obj["userindb"] if "userindb" in obj else None
-            match_ = obj["match"] if "match" in obj else None
-            actionix_ = int(obj["actionix"]) if "actionix" in obj else None
+            collection_id_ = obj_["collection"]
+            user_ = obj_["userindb"] if "userindb" in obj_ else None
+            match_ = obj_["match"] if "match" in obj_ else None
+            actionix_ = int(obj_["actionix"]) if "actionix" in obj_ else None
             email_ = user_["usr_id"] if user_ and "usr_id" in user_ else None
             if not email_:
                 raise AppException("user is not allowed")
 
-            data_ = obj["data"] if "data" in obj else None
-            doc_ = obj["doc"] if "doc" in obj else None
+            data_ = obj_["data"] if "data" in obj_ else None
+            doc_ = obj_["doc"] if "doc" in obj_ else None
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = email_
 
@@ -4290,13 +4298,11 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            PRINT_("*** action files_", files_)
-
             return {
                 "result": True,
                 "count": count_,
                 "content": msg_ if msg_ else "action completed successfully",
-                "files": files_
+                "files": files_,
             }
 
         except pymongo.errors.PyMongoError as exc__:
@@ -5953,17 +5959,18 @@ PRINT_ = partial(print, flush=True)
 TFAC_OPS_ = ["announce"]
 
 app = Flask(__name__)
+app.config["CORS_SUPPORTS_CREDENTIALS"] = True
+app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_MB_ * 1024 * 1024
 app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_
+app.config["UPLOAD_FOLDER"] = API_TEMPFILE_PATH_
 app.config["CORS_HEADERS"] = [
     "Content-Type",
     "Origin",
     "Authorization",
     "X-Requested-With",
     "Accept",
-    "x-auth",
+    "X-Auth"
 ]
-app.config["CORS_SUPPORTS_CREDENTIALS"] = True
-app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_MB_ * 1024 * 1024
 app.config["UPLOAD_EXTENSIONS"] = [
     "pdf",
     "png",
@@ -5976,7 +5983,6 @@ app.config["UPLOAD_EXTENSIONS"] = [
     "csv",
     "txt",
 ]
-app.config["UPLOAD_FOLDER"] = API_TEMPFILE_PATH_
 app.json_encoder = JSONEncoder
 CORS(app)
 
@@ -6196,25 +6202,34 @@ def api_crud_f():
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
-        if "result" in res_ and res_["result"] and op_ in ["dumpd", "action"]:
+
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_.status_code = sc__
+        response_.headers["Content-Type"] = "application/json; charset=utf-8"
+        # response_.mimetype = "application/json"
+
+        if "result" in res_ and res_["result"] is True and op_ in ["dumpd", "action"]:
             files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else []
             if files_:
-                hdr_ = {"Content-Type": "application/octet-stream; charset=utf-8"}
-                response_ = (
-                    send_from_directory(
-                        directory=API_MONGODUMP_PATH_ if op_ == "dumpd" else API_TEMPFILE_PATH_,
-                        path=files_[0]["name"],
-                        as_attachment=True,
-                    ),
-                    200,
-                    hdr_,
+                path_ = files_[0]["name"].strip().lower()
+                fname_ = path_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(f"{API_MONGODUMP_PATH_}/", "")
+                content_type_ = (
+                    "text/csv"
+                    if (fname_[-4:] == ".csv" or fname_[-4:] == ".txt")
+                    else "application/vnd.ms-excel"
+                    if (fname_[-4:] == ".xls" or fname_[-5:] == ".xlsx")
+                    else "application/json"
+                    if fname_[-5:] == ".json"
+                    else "application/pdf"
+                    if fname_[-4:] == ".pdf"
+                    else "application/gzip"
+                    if (fname_[-3:] == ".gz" or fname_[-5:] == ".gzip")
+                    else "application/octet-stream"
                 )
-        else:
-            response_ = make_response(
-                json.dumps(res_, default=json_util.default, sort_keys=False)
-            )
-            response_.status_code = sc__
-            response_.mimetype = "application/json"
+                response_ = make_response(send_file(path_))
+                response_.headers[
+                    "Content-Type"
+                ] = f"{content_type_}; charset=utf-8; filename={fname_}"
 
         return response_
 

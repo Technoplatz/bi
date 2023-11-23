@@ -48,7 +48,7 @@ function helpBI() {
     echo "./bi-sh update"
     echo "./bi-sh prune [--all]"
     echo "./bi-sh logs api|pwa|init|replicaset|stream [last n rows]"
-    echo "./bi-sh build [api|pwa|init|replicaset|stream]"
+    echo "./bi-sh build [api|pwa|init|replicaset|stream] [--no-cache]"
     echo "./bi-sh help"
 }
 
@@ -165,7 +165,7 @@ function logsBI() {
 }
 
 function buildBI() {
-    docker compose --env-file $DOTENV -f $DCYML build $1 --no-cache
+    docker compose --env-file $DOTENV -f $DCYML build $1 $2
     if [ $? -ne 0 ]; then
         echo -e "\n✘ Sorry! An error occured."
         return 0
@@ -206,7 +206,7 @@ case $1 in
     logsBI "$2" "$3"
     ;;
 "build")
-    buildBI "$2"
+    buildBI "$2" "$3"
     ;;
 "help")
     helpBI

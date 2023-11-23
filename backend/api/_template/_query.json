@@ -55,6 +55,13 @@
       "description": "Show in collection",
       "default": false
     },
+    "que_flashcard_size": {
+      "bsonType": "string",
+      "title": "Flashcard Size",
+      "description": "Flashcard size",
+      "enum": ["S", "M", "L", "XL"],
+      "default": "M"
+    },
     "que_scheduled": {
       "bsonType": "bool",
       "title": "Scheduled?",

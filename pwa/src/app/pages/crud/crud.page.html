@@ -56,8 +56,8 @@ https://www.gnu.org/licenses.
                     </ion-button>
                     <ng-template #noscan>
                         <ion-button *ngIf="collection!='_dump' && collection!='_storage' && op!='filter'"
-                            (click)="submit_f()">
-                            <span *ngIf="op=='action'; else noaction"> {{ 'Run' | translate }} </span>
+                            (click)="op==='action' ? action_f() : submit_f()">
+                            <span *ngIf="op=='action'; else noaction">{{ 'Run' | translate }} </span>
                             <ng-template #noaction> {{ 'Save' | translate }} </ng-template>
                         </ion-button>
                     </ng-template>
@@ -166,7 +166,7 @@ https://www.gnu.org/licenses.
                     <li *ngIf="f===0" class="ion-margin-start bold"> {{ 'Please enter the required fields' | translate
                         }}
                     </li>
-                    <li *ngIf="!crudForm.controls[field.name].valid && (crudForm.controls[field.name].dirty || (op === 'update' && !data_[field.name]))"
+                    <li *ngIf="!crudForm.controls[field.name].valid && (crudForm.controls[field.name].dirty || (op=='update' && !data_[field.name]))"
                         class="ion-margin-start">
                         {{ field.title | translate }} [{{ field.name }}]
                     </li>
@@ -240,7 +240,8 @@ https://www.gnu.org/licenses.
                                         [required]="field.required" [disabled]="field.readonly || field.disabled"
                                         [(ngModel)]="data_[field.name]" [value]="data_[field.name]"
                                         (ionChange)="change_enum(field, $event.target.value)" [id]="field.name">
-                                        <ion-select-option *ngFor="let item of filter_pipe_nulls(field.enum)" [value]="item">
+                                        <ion-select-option *ngFor="let item of filter_pipe_nulls(field.enum)"
+                                            [value]="item">
                                             {{ item | translate }}
                                         </ion-select-option>
                                     </ion-select>

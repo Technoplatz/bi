@@ -44,6 +44,7 @@ import { environment } from "../../../environments/environment";
 export class DashboardPage implements OnInit {
   public announcements_: any = [];
   public loadingText: string = environment.misc.loadingText;
+  public flashsizes_: any = environment.flashsizes;
   public visuals_: any = [];
 
   constructor(

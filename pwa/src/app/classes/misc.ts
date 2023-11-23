@@ -91,11 +91,12 @@ export class Miscellaneous {
         if (posted_.responseType) {
           hdr_.responseType = posted_.responseType;
         }
-        const uri_ = `${this.uri_}/${qstr_}`;
-        this.http.post<any>(uri_, posted_, hdr_).subscribe((res: any) => {
+        this.http.post<any>(`${this.uri_}/${qstr_}`, posted_, hdr_).subscribe((res: any) => {
           const res_ = res.body;
+          const qt_ = res.headers.get("Content-Type");
+          const filename_ = qt_.indexOf("filename=") > 0 ? qt_.substring(qt_.indexOf("filename=") + 9).trim() : null;
           if (posted_.responseType) {
-            resolve(res_);
+            resolve({ "binary": res_, "filename": filename_ });
           } else {
             if (res_?.result) {
               resolve(res_);
@@ -103,16 +104,15 @@ export class Miscellaneous {
               reject(res_ && res_.msg ? res_.msg : res_);
             }
           }
-        }, (res: any) => {
-          const res_ = res;
-          if (res_.error && res_.status) {
-            if (res_.status === 403) {
+        }, (res__: any) => {
+          if (res__.error && res__.status) {
+            if (res__.status === 403) {
               this.session_.next("ended");
-              this.doMessage(res_.error.msg, "error");
+              this.doMessage(res__.error.msg, "error");
             }
-            reject(res_.error.msg ? res_.error.msg : res_.error);
+            reject(res__.error.msg ? res__.error.msg : res__.error);
           } else {
-            reject(res_);
+            reject(res__);
           }
         });
       });
@@ -204,8 +204,6 @@ export class Miscellaneous {
           this.translate.use(LSLOCALE_);
           this.localization.next(LSLOCALE_ === "tr" ? "tr-TR" : LSLOCALE_ === "de" ? "de-DE" : LSLOCALE_ === "en" ? "en-US" : null);
           resolve(true);
-        }).catch((error: any) => {
-          reject("storage lang set error");
         });
       } else {
         reject("language code not valid");
@@ -223,7 +221,7 @@ export class Miscellaneous {
   }
 
   doMessage(msg: string, type: string) {
-    type === "error" ? console.error("!!! err msg", msg) : null;
+    type === "error" ? console.error("!!! err", msg) : null;
     this.toast.create({
       message: `${this.translate.instant(msg?.toString())?.toLowerCase()}.`,
       duration: ["success", "warning"].includes(type) ? 3000 : 7000,

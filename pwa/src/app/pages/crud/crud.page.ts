@@ -257,7 +257,6 @@ export class CrudPage implements OnInit {
         this.modified = true;
         this.in_progress = true;
         this.crud.submit_f(this.data_, this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.actionix, this.link_, this.linked_).then((res_: any) => {
-          console.log("*** res0_", res_);
           res_ && res_?.result === true ? this.misc.doMessage(`${this.op} completed successfully`, "success") : null;
           this.crud.modalSubmitListener.next({ result: true });
           if (res_ && res_.token) {
@@ -292,7 +291,6 @@ export class CrudPage implements OnInit {
             }
           }
         }).catch((error_: any) => {
-          console.log("*** error_", error_);
           this.misc.doMessage(error_, "error");
         }).finally(() => {
           this.in_progress = false;
@@ -310,23 +308,65 @@ export class CrudPage implements OnInit {
       type: this.data_.dmp_type,
       responseType: "blob" as "json"
     }).then((res_: any) => {
-      this.misc.doMessage(`${op_} completed successfully`, "success");
       if (op_ === "dumpd") {
-        const fn_ = this.data_.dmp_id + ".gz";
+        const fn_ = res_.filename;
         let binaryData = [];
-        binaryData.push(res_);
+        binaryData.push(res_.binary);
         let downloadLink = document.createElement("a");
         downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
         downloadLink.setAttribute("download", fn_);
         document.body.appendChild(downloadLink);
         downloadLink.click();
       }
+      this.misc.doMessage(`${op_} completed successfully`, "success");
     }).catch((error: any) => {
       this.misc.doMessage(error, "error");
     }).finally(() => {
       this.dismiss_modal({ op: op_, modified: true, filter: [] });
       this.in_progress = false;
     });
+  }
+
+  action_f() {
+    const op_ = "action";
+    this.in_progress = true;
+    const properties = this.structure__.properties;
+    let doc_: any = {};
+    let i = 0;
+    this.crudForm.updateValueAndValidity();
+    for (let item in properties) {
+      doc_[item] = properties[item].bsonType === "date" && this.crudForm.get(item)?.value ? new Date(this.crudForm.get(item)?.value) : this.crudForm.get(item)?.value;
+      if (i === Object.keys(properties).length - 1) {
+        this.misc.api_call("crud", {
+          op: op_,
+          collection: this.collection,
+          doc: doc_,
+          data: this.data_,
+          match: this.sweeped,
+          filter: this.filter,
+          _id: this._id,
+          actionix: this.actionix,
+          responseType: "blob"
+        }).then((res_: any) => {
+          const fn_ = res_.filename;
+          let binaryData = [];
+          binaryData.push(res_.binary);
+          let downloadLink = document.createElement("a");
+          downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
+          downloadLink.setAttribute("download", fn_);
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          this.misc.doMessage(`action completed successfully`, "success");
+        }).catch((error_: any) => {
+          this.misc.doMessage(error_, "error");
+        }).finally(() => {
+          this.dismiss_modal({ op: op_, modified: true, filter: [] });
+          this.in_progress = false;
+        });
+      } else {
+        i++;
+      }
+    }
   }
 
   async doRemove() {
