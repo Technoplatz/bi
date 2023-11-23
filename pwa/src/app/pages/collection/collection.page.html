@@ -61,7 +61,7 @@ https://www.gnu.org/licenses.
               </ng-template>
               <div (click)="refresh_data(0)" class="data-sq-button">
                 <ion-icon *ngIf="is_loaded" name="sync-circle-sharp"></ion-icon>
-                <ion-spinner *ngIf="!is_loaded" name="lines-sharp"></ion-spinner>
+                <ion-spinner *ngIf="!is_loaded" name="dots"></ion-spinner>
                 <br />
                 <span>{{ 'Refresh List' | translate }}</span>
               </div>

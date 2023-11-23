@@ -11,6 +11,12 @@
       "timestamp": true,
       "permanent": true
     },
+    "shp_date": {
+      "bsonType": "date",
+      "title": "Ship Date",
+      "description": "Shipment date",
+      "dateOnly": false
+    },
     "shp_acc_no": {
       "bsonType": "string",
       "title": "Account No",
@@ -20,12 +26,6 @@
       "maxLength": 11,
       "pattern": "^[A-Z0-9-]{10,11}$",
       "readonly": true
-    },
-    "shp_date": {
-      "bsonType": "date",
-      "title": "Ship Date",
-      "description": "Shipment date",
-      "dateOnly": false
     },
     "shp_carrier_id": {
       "bsonType": "string",
@@ -48,7 +48,7 @@
     },
     "shp_carrier_tax_no": {
       "bsonType": "string",
-      "title": "Carrier Tax No",
+      "title": "Tax No",
       "description": "Carrier tax no",
       "minLength": 10,
       "maxLength": 12,

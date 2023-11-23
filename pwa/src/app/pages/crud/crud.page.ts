@@ -348,6 +348,7 @@ export class CrudPage implements OnInit {
           actionix: this.actionix,
           responseType: "blob"
         }).then((res_: any) => {
+          console.log("*** ress0", res_);
           const fn_ = res_.filename;
           let binaryData = [];
           binaryData.push(res_.binary);
@@ -358,6 +359,7 @@ export class CrudPage implements OnInit {
           downloadLink.click();
           this.misc.doMessage(`action completed successfully`, "success");
         }).catch((error_: any) => {
+          console.error("*** ress1", error_);
           this.misc.doMessage(error_, "error");
         }).finally(() => {
           this.dismiss_modal({ op: op_, modified: true, filter: [] });

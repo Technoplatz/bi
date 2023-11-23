@@ -2244,7 +2244,9 @@ class Crud:
                         "id": item_["que_id"],
                         "title": item_["que_title"],
                         "collection": item_["que_collection_id"],
-                        "size": item_["que_flashcard_size"] if "que_flashcard_size" in item_ else "M"
+                        "size": item_["que_flashcard_size"]
+                        if "que_flashcard_size" in item_
+                        else "M",
                     }
                 )
 
@@ -2287,7 +2289,9 @@ class Crud:
                 "id": id_,
                 "title": cursor_["que_title"],
                 "collection": cursor_["que_collection_id"],
-                "size": cursor_["que_flashcard_size"] if "que_flashcard_size" in cursor_ else "M",
+                "size": cursor_["que_flashcard_size"]
+                if "que_flashcard_size" in cursor_
+                else "M",
                 "count": query_f_["count"],
                 "data": query_f_["data"],
                 "fields": query_f_["fields"],
@@ -3907,10 +3911,10 @@ class Crud:
             if not email_:
                 raise AppException("user is not allowed")
 
-            data_ = obj_["data"] if "data" in obj_ else None
             doc_ = obj_["doc"] if "doc" in obj_ else None
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = email_
+            data_ = obj_["data"] if "data" in obj_ else None
 
             is_crud_ = collection_id_[:1] != "_"
             if not is_crud_ and collection_id_ != "_firewall":
@@ -4100,29 +4104,41 @@ class Crud:
                 else None
             )
 
-            docu_ = {}
-            data_ = Mongo().db_[collection_].find_one({"_id": ObjectId(data_["_id"])})
-            datax_ = data_.copy()
-
             if is_crud_ and set_:
                 session_.start_transaction()
-                if split_ and key_suffix_ and key_field_ and set_field_ and set_value_:
+
+                if (
+                    data_
+                    and split_
+                    and key_suffix_
+                    and key_field_
+                    and set_field_
+                    and set_value_
+                ):
+                    docu_ = {}
+                    datanew_ = (
+                        Mongo()
+                        .db_[collection_]
+                        .find_one({"_id": ObjectId(data_["_id"])})
+                    )
+                    datax_ = datanew_.copy()
+
                     key_value_ = (
-                        data_[key_field_]
-                        if key_field_ in data_ and data_[key_field_] is not None
+                        datanew_[key_field_]
+                        if key_field_ in datanew_ and datanew_[key_field_] is not None
                         else None
                     )
                     if not key_value_:
                         session_.abort_transaction()
                         raise AppException("no key value found")
 
-                    data_[key_field_] = f"{data_[key_field_]}{key_suffix_}"
+                    datanew_[key_field_] = f"{datanew_[key_field_]}{key_suffix_}"
 
                     for doc__ in doc_:
-                        data_[doc__] = doc_[doc__]
+                        datanew_[doc__] = doc_[doc__]
 
-                    data_["_split_id"] = docu_["_split_id"] = split_id_
-                    data_[set_field_] = docu_[set_field_] = set_value_
+                    datanew_["_split_id"] = docu_["_split_id"] = split_id_
+                    datanew_[set_field_] = docu_[set_field_] = set_value_
 
                     filter_ = {"_split_id": split_id_}
                     get_notification_filtered_ = filter_
@@ -4137,25 +4153,25 @@ class Crud:
                             doc_[ref_field_] = 0
                         ration_ = doc_[ref_field_] / datax_[ref_field_]
 
-                        data_.pop("_id", None)
-                        data_["_created_at"] = docu_[
+                        datanew_.pop("_id", None)
+                        datanew_["_created_at"] = docu_[
                             "_modified_at"
                         ] = Misc().get_now_f()
-                        data_["_created_by"] = docu_["_modified_by"] = email_
-                        data_["_resume_token"] = None
-                        data_["_modified_count"] = 0
+                        datanew_["_created_by"] = docu_["_modified_by"] = email_
+                        datanew_["_resume_token"] = None
+                        datanew_["_modified_count"] = 0
                         docu_.pop("_modified_count", None)
 
                         for num_field_ in num_fields_:
                             dnf_ = datax_[num_field_]
                             if num_field_ == ref_field_:
-                                data_[num_field_] = doc_[num_field_]
+                                datanew_[num_field_] = doc_[num_field_]
                                 docu_[num_field_] = dnf_ - doc_[num_field_]
                             else:
-                                data_[num_field_] = round(ration_ * dnf_, 3)
+                                datanew_[num_field_] = round(ration_ * dnf_, 3)
                                 docu_[num_field_] = round((1 - ration_) * dnf_, 3)
 
-                        session_db_[collection_].insert_one(data_, session=session_)
+                        session_db_[collection_].insert_one(datanew_, session=session_)
                         if ration_ < 1:
                             session_db_[collection_].update_one(
                                 get_filtered_,
@@ -4167,12 +4183,12 @@ class Crud:
                                 get_filtered_, session=session_
                             )
                     else:
-                        data_["_modified_at"] = Misc().get_now_f()
-                        data_["_modified_by"] = email_
-                        data_.pop("_modified_count", None)
+                        datanew_["_modified_at"] = Misc().get_now_f()
+                        datanew_["_modified_by"] = email_
+                        datanew_.pop("_modified_count", None)
                         update_many_ = session_db_[collection_].update_many(
                             get_filtered_,
-                            {"$set": data_, "$inc": {"_modified_count": 1}},
+                            {"$set": datanew_, "$inc": {"_modified_count": 1}},
                             session=session_,
                         )
                         count_ = (
@@ -5969,7 +5985,7 @@ app.config["CORS_HEADERS"] = [
     "Authorization",
     "X-Requested-With",
     "Accept",
-    "X-Auth"
+    "X-Auth",
 ]
 app.config["UPLOAD_EXTENSIONS"] = [
     "pdf",
@@ -6202,17 +6218,21 @@ def api_crud_f():
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
-
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        response_ = make_response(
+            json.dumps(res_, default=json_util.default, sort_keys=False)
+        )
         response_.status_code = sc__
         response_.headers["Content-Type"] = "application/json; charset=utf-8"
-        # response_.mimetype = "application/json"
 
         if "result" in res_ and res_["result"] is True and op_ in ["dumpd", "action"]:
+
             files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else []
+
             if files_:
                 path_ = files_[0]["name"].strip().lower()
-                fname_ = path_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(f"{API_MONGODUMP_PATH_}/", "")
+                fname_ = path_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(
+                    f"{API_MONGODUMP_PATH_}/", ""
+                )
                 content_type_ = (
                     "text/csv"
                     if (fname_[-4:] == ".csv" or fname_[-4:] == ".txt")

@@ -20,16 +20,10 @@
       "caseType": "uppercase",
       "permanent": true
     },
-    "odi_date": {
-      "bsonType": "date",
-      "title": "Ordino Date",
-      "description": "Ordino opening date",
-      "dateOnly": true
-    },
     "odi_from": {
       "bsonType": "string",
-      "title": "From",
-      "description": "Country where the goods were loaded",
+      "title": "Factory",
+      "description": "Factory country",
       "minLength": 3,
       "maxLength": 16,
       "pattern": "^[A-Za-z-]{3,16}$",
@@ -43,6 +37,12 @@
       "maxLength": 16,
       "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{3,16}$",
       "readonly": true
+    },
+    "odi_date": {
+      "bsonType": "date",
+      "title": "Ordino Date",
+      "description": "Ordino opening date",
+      "dateOnly": true
     },
     "odi_arrived_date": {
       "bsonType": "date",

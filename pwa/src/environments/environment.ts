@@ -52,7 +52,7 @@ export const environment = {
   },
   paginations: [25, 50, 100],
   flashsizes: {
-    S: "width: 240px !important;",
+    S: "width: 220px !important;",
     M: "width: 330px !important;",
     L: "width: 520px !important;",
     XL: "width: 1024px !important;"
