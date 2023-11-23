@@ -592,22 +592,6 @@ export class CollectionPage implements OnInit {
     event_.stopPropagation();
   }
 
-  do_show_note(note_: string, event_: any) {
-    event_.stopPropagation();
-    this.alert.create({
-      header: this.translate.instant("Reminder"),
-      message: this.translate.instant(note_),
-      buttons: [{
-        text: this.translate.instant("Got It"),
-        role: "cancel",
-        handler: () => { }
-      }],
-    }).then((alert: any) => {
-      alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
-      alert.present();
-    });
-  }
-
   selection_changed(item_: string, s_: number) {
     this.selections_[item_][s_].value = !this.selections_[item_][s_].value;
   }

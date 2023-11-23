@@ -4290,10 +4290,13 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
+            PRINT_("*** action files_", files_)
+
             return {
                 "result": True,
                 "count": count_,
                 "content": msg_ if msg_ else "action completed successfully",
+                "files": files_
             }
 
         except pymongo.errors.PyMongoError as exc__:
@@ -6193,18 +6196,19 @@ def api_crud_f():
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
-        if "result" in res_ and res_["result"] and op_ in ["dumpd"]:
-            hdr_ = {"Content-Type": "application/octet-stream; charset=utf-8"}
+        if "result" in res_ and res_["result"] and op_ in ["dumpd", "action"]:
             files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else []
-            response_ = (
-                send_from_directory(
-                    directory=API_MONGODUMP_PATH_,
-                    path=files_[0]["name"],
-                    as_attachment=True,
-                ),
-                200,
-                hdr_,
-            )
+            if files_:
+                hdr_ = {"Content-Type": "application/octet-stream; charset=utf-8"}
+                response_ = (
+                    send_from_directory(
+                        directory=API_MONGODUMP_PATH_ if op_ == "dumpd" else API_TEMPFILE_PATH_,
+                        path=files_[0]["name"],
+                        as_attachment=True,
+                    ),
+                    200,
+                    hdr_,
+                )
         else:
             response_ = make_response(
                 json.dumps(res_, default=json_util.default, sort_keys=False)

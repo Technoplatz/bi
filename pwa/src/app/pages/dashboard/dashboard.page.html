@@ -38,6 +38,7 @@ https://www.gnu.org/licenses.
         <h3>{{ 'Welcome Aboard' | translate }}.</h3>
 
         <!-- visuals -->
+        <div class="filler-10"></div>
         <div class="visual-container">
           <div *ngFor="let visual_ of visuals_; let a = index" class="visual-item">
             <h6 class="primary">{{ visual_.title }}</h6>
@@ -48,12 +49,20 @@ https://www.gnu.org/licenses.
               <div *ngIf="visual_.data?.length > 0" class="visual-table">
                 <table class="data-table">
                   <tr>
+                    <th></th>
                     <th *ngFor="let item_ of visual_.fields"
                       [class]="item_.indexOf('count') >= 0 ? 'ion-text-right' : ''">
                       {{ item_ }}
                     </th>
                   </tr>
                   <tr *ngFor="let record_ of visual_.data; let i = index">
+                    <td [class]="record_['_reminder'] ? 'danger align-right' : 'primary align-right'"
+                      (click)="misc.show_note(record_['_note'], $event)">
+                      <ion-icon *ngIf="record_['_reminder']; else noreminder" name="flag"></ion-icon>
+                      <ng-template #noreminder>
+                        {{ i + 1}}
+                      </ng-template>
+                    </td>
                     <td *ngFor="let item_ of visual_.fields"
                       [class]="item_.indexOf('count') >= 0 ? 'ion-text-right' : ''">
                       {{ record_[item_]?.toString() | translate }}

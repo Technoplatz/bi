@@ -186,9 +186,9 @@ export class Crud {
             posted_.append("file", file, file.name);
             posted_.append("collection", sto_collection_id_);
             posted_.append("process", sto_process_);
-            this.misc.api_call_file("import", posted_).then((res: any) => {
-              res.cid = sto_collection_id_;
-              resolve(res);
+            this.misc.api_call_file("import", posted_).then((res_: any) => {
+              res_.cid = sto_collection_id_;
+              resolve(res_);
             }).catch((err: any) => {
               reject(err);
             });
@@ -204,10 +204,10 @@ export class Crud {
               actionix: actionix,
               link: link_,
               linked: linked_
-            }).then((res: any) => {
-              resolve(res);
-            }).catch((err: any) => {
-              reject(err);
+            }).then((res_: any) => {
+              resolve(res_);
+            }).catch((error_: any) => {
+              reject(error_);
             });
           }
         } else {

@@ -462,7 +462,7 @@ ion-note {
   padding-left: 8px;
   font-weight: 500;
   cursor: pointer;
-  background-color: #ddd;
+  background-color: #e6e6e6;
   color: var(--ion-color-dark);
   min-width: 88px;
   max-width: 88px;
@@ -1485,22 +1485,22 @@ sup {
 
 .visual-container {
   margin-top: 4px;
-  width: 90% !important;
+  width: 98% !important;
   line-height: 18px;
   gap: 8px !important;
   display: flex;
+  flex-wrap: wrap;
 }
 
 .visual-item {
   position: relative;
-  margin-top: 16px;
-  margin-bottom: 4px;
   gap: 4px !important;
   justify-content: flex-start;
   border: 5px solid #f1f1f1;
   padding: 16px;
   overflow: hidden;
-  max-width: 400px;
+  min-width: 330px;
+  max-width: 330px;
   max-height: 580px;
 }
 
@@ -1509,13 +1509,19 @@ sup {
 }
 
 .visual-table .data-table {
+  width: 100% !important;
   margin-right: 0px !important;
+}
+
+.visual-table .data-table th:first-child,
+.visual-table .data-table td:first-child {
+  width: 28px !important;
 }
 
 .visual-footer {
   width: 100%;
   position: absolute;
-  bottom: 40px;
+  bottom: 35px;
   font-size: 11px;
 }
 
@@ -2088,6 +2094,10 @@ json-editor .jsoneditor {
 
 .data-table td:last-child {
   border-right: none;
+}
+
+.data-table td ion-icon {
+  margin-bottom: -3px;
 }
 
 .data-grid {

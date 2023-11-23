@@ -31,7 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Injectable } from "@angular/core";
-import { ModalController, ToastController } from "@ionic/angular";
+import { ModalController, AlertController, ToastController } from "@ionic/angular";
 import { Subject, BehaviorSubject } from "rxjs";
 import { Storage } from "@ionic/storage";
 import { TranslateService } from "@ngx-translate/core";
@@ -61,6 +61,7 @@ export class Miscellaneous {
     private storage: Storage,
     private translate: TranslateService,
     private modal: ModalController,
+    private alert: AlertController,
     private toast: ToastController,
     private cb: ClipboardService,
     private http: HttpClient
@@ -288,6 +289,22 @@ export class Miscellaneous {
           reject(error);
         });
       });
+    });
+  }
+
+  show_note(note_: string, event_: any) {
+    event_.stopPropagation();
+    this.alert.create({
+      header: this.translate.instant("Reminder"),
+      message: this.translate.instant(note_),
+      buttons: [{
+        text: this.translate.instant("Got It"),
+        role: "cancel",
+        handler: () => { }
+      }],
+    }).then((alert: any) => {
+      alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
+      alert.present();
     });
   }
 

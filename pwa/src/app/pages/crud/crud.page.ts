@@ -256,20 +256,21 @@ export class CrudPage implements OnInit {
         this.linked_ = this.link_text ? this.link_text.split('\n').filter((e: any) => { return e }) : [];
         this.modified = true;
         this.in_progress = true;
-        this.crud.submit_f(this.data_, this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.actionix, this.link_, this.linked_).then((res: any) => {
-          res && res?.result === true ? this.misc.doMessage(`${this.op} completed successfully`, "success") : null;
+        this.crud.submit_f(this.data_, this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.actionix, this.link_, this.linked_).then((res_: any) => {
+          console.log("*** res0_", res_);
+          res_ && res_?.result === true ? this.misc.doMessage(`${this.op} completed successfully`, "success") : null;
           this.crud.modalSubmitListener.next({ result: true });
-          if (res && res.token) {
+          if (res_ && res_.token) {
             this.alert.create({
               subHeader: "A new API Token has been generated. This is the only chance to copy!",
-              message: res.token,
+              message: res_.token,
               buttons: [{
                 text: "COPY",
                 handler: () => {
-                  this.misc.copy_to_clipboard(`Bearer ${res.token}`).then(() => { }).catch((error: any) => {
+                  this.misc.copy_to_clipboard(`Bearer ${res_.token}`).then(() => { }).catch((error: any) => {
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
-                    this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+                    this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res_ && res_.cid ? res_.cid : null, res: res_ });
                   });
                 }
               }]
@@ -287,11 +288,12 @@ export class CrudPage implements OnInit {
                 this.crudForm.get(iot_input_)?.setValue(this.data_[iot_input_]);
               });
             } else {
-              this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res && res.cid ? res.cid : null, res: res });
+              this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res_ && res_.cid ? res_.cid : null, res: res_ });
             }
           }
-        }).catch((res: any) => {
-          this.misc.doMessage(res, "error");
+        }).catch((error_: any) => {
+          console.log("*** error_", error_);
+          this.misc.doMessage(error_, "error");
         }).finally(() => {
           this.in_progress = false;
         });
@@ -307,12 +309,12 @@ export class CrudPage implements OnInit {
       dumpid: this.data_.dmp_id,
       type: this.data_.dmp_type,
       responseType: "blob" as "json"
-    }).then((res: any) => {
+    }).then((res_: any) => {
       this.misc.doMessage(`${op_} completed successfully`, "success");
       if (op_ === "dumpd") {
         const fn_ = this.data_.dmp_id + ".gz";
         let binaryData = [];
-        binaryData.push(res);
+        binaryData.push(res_);
         let downloadLink = document.createElement("a");
         downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
         downloadLink.setAttribute("download", fn_);

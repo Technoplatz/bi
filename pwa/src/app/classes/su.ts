@@ -46,44 +46,16 @@ export class Su {
         private swu: SwUpdate,
         private misc: Miscellaneous
     ) {
-        this.navworker_unregister().then((res_: any) => {
-            console.log(res_);
-            if (this.swu.isEnabled) {
-                console.log("swu enabled");
-                setInterval(() => {
-                    this.swu.checkForUpdate().then(() => { }).catch((error_: any) => {
-                        console.error("swu check error", error_);
-                    });
-                }, this.delay_ * 60 * 1000);
-            } else {
-                console.error("swu is not enabled");
-            }
-        });
-    }
-
-    navworker_unregister() {
-        return new Promise((resolve) => {
-            if (navigator.serviceWorker) {
-                navigator.serviceWorker.getRegistrations().then((regs_: any) => {
-                    if (regs_.length) {
-                        let i_ = 0;
-                        for (let reg_ of regs_) {
-                            reg_.unregister().then(() => { }).finally(() => {
-                                if (i_ === regs_.length - 1) {
-                                    resolve("s-w unregistered");
-                                } else {
-                                    i_++;
-                                }
-                            });
-                        }
-                    }
-                }).catch((res_: any) => {
-                    resolve(res_);
+        if (this.swu.isEnabled) {
+            console.log("swu enabled");
+            setInterval(() => {
+                this.swu.checkForUpdate().then(() => { }).catch((error_: any) => {
+                    console.error("swu check error", error_);
                 });
-            } else {
-                resolve("no s-w found");
-            }
-        });
+            }, this.delay_ * 60 * 1000);
+        } else {
+            console.error("swu is not enabled");
+        }
     }
 
     check_for_updates() {

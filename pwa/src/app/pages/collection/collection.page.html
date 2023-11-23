@@ -66,7 +66,10 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Refresh List' | translate }}</span>
               </div>
               <div (click)="clear_filter()" [class]="is_loaded ? 'data-sq-button' : 'data-sq-button disabled'">
-                <ion-icon name="filter-circle-outline"></ion-icon><br /><span>{{ 'Clear Filter' | translate }}</span>
+                <ion-icon name="filter-circle-outline"
+                  [color]="filter_?.length > 0 ? 'danger' : 'primary'"></ion-icon><br />
+                <ion-text [color]="filter_?.length > 0 ? 'danger' : 'dark'">{{ 'Clear Filter' | translate
+                  }}</ion-text>
               </div>
               <div (click)="multi_crud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-sharp"></ion-icon><br />
@@ -84,8 +87,7 @@ https://www.gnu.org/licenses.
                 <span *ngIf="!is_copied">{{ 'Copy Headers' | translate }}</span>
                 <span *ngIf="is_copied">{{ 'Headers Copied' | translate }}</span>
               </div>
-              <div (click)="set_editor(true)"
-                [class]="is_crud && perm_ ? 'data-sq-button' : 'data-sq-button disabled'">
+              <div (click)="set_editor(true)" [class]="is_crud && perm_ ? 'data-sq-button' : 'data-sq-button disabled'">
                 <ion-icon name="create-sharp"></ion-icon><br />
                 <span>{{ 'Edit Schema' | translate }}</span>
               </div>
@@ -274,7 +276,7 @@ https://www.gnu.org/licenses.
             </tr>
             <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
               <td [class]="record['_reminder'] ? 'bg-danger align-right' : 'primary align-right'"
-                (click)="do_show_note(record['_note'], $event)">
+                (click)="misc.show_note(record['_note'], $event)">
                 <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>
                 <ng-template #noreminder>
                   {{ ((pager_ - 1) * limit_) + i + 1}}

@@ -111,15 +111,21 @@ https://www.gnu.org/licenses.
         <div *ngIf="data_.length > 0; else nodata">
           <table class="data-table">
             <tr>
-              <th>#</th>
+              <th></th>
               <th *ngFor="let item_ of fields_">
                 {{ item_ }}
               </th>
             </tr>
-            <tr *ngFor="let record of data_; let i = index">
-              <td>{{ i + 1}}</td>
+            <tr *ngFor="let record_ of data_; let i = index">
+              <td [class]="record_['_reminder'] ? 'danger align-right' : 'primary align-right'"
+                (click)="misc.show_note(record_['_note'], $event)">
+                <ion-icon *ngIf="record_['_reminder']; else noreminder" name="flag"></ion-icon>
+                <ng-template #noreminder>
+                  {{ i + 1}}
+                </ng-template>
+              </td>
               <td *ngFor="let item_ of fields_">
-                {{ record[item_]?.toString() | translate }}
+                {{ record_[item_]?.toString() | translate }}
               </td>
             </tr>
           </table>
