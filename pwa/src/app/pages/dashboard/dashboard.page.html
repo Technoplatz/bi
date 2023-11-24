@@ -40,8 +40,7 @@ https://www.gnu.org/licenses.
         <!-- visuals -->
         <div class="filler-10"></div>
         <div class="visual-container">
-          <div *ngFor="let visual_ of visuals_; let a = index" class="visual-item"
-            [style]="flashsizes_[visual_.size]">
+          <div *ngFor="let visual_ of visuals_; let a = index" class="visual-item" [style]="flashsizes_[visual_.size]">
             <h6 class="primary">{{ visual_.title }}</h6>
             <div *ngIf="visual_?.is_loaded; else notvisloaded">
               <div *ngIf="visual_?.error">
@@ -58,7 +57,7 @@ https://www.gnu.org/licenses.
                   </tr>
                   <tr *ngFor="let record_ of visual_.data; let i = index">
                     <td [class]="record_['_reminder'] ? 'danger align-right' : 'primary align-right'"
-                      (click)="misc.show_note(record_['_note'], $event)">
+                      (click)="misc.show_note(record_['_reminder'], record_['_note'], $event)">
                       <ion-icon *ngIf="record_['_reminder']; else noreminder" name="flag"></ion-icon>
                       <ng-template #noreminder>
                         {{ i + 1}}

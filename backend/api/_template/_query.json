@@ -85,6 +85,15 @@
       "maxLength": 512,
       "textarea": true
     },
+    "que_priority": {
+      "bsonType": "number",
+      "title": "Priority",
+      "description": "Sort Number",
+      "placeholder": "Priority",
+      "minimum": 1,
+      "maximum": 1000000,
+      "default": 1000
+    },
     "que_aggregate": {
       "bsonType": "object",
       "title": "Aggregation",
@@ -100,7 +109,24 @@
     ["que_in_dashboard", "_approved", "_tags"]
   ],
   "unique": [["que_id"]],
+  "actions": [
+    {
+      "id": "priority",
+      "title": "Set Priority",
+      "enabled": true,
+      "match": [],
+      "set": [{ "key": "que_priority", "value": 9000 }],
+      "one_click": false,
+      "icon": "swap-vertical-sharp",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": [],
+      "notification": {},
+      "api": {}
+    }
+  ],
   "sort": {
+    "que_priority": 1,
     "_modified_at": -1
   }
 }

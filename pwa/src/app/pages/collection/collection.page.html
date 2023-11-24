@@ -276,7 +276,7 @@ https://www.gnu.org/licenses.
             </tr>
             <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
               <td [class]="record['_reminder'] ? 'bg-danger align-right' : 'primary align-right'"
-                (click)="misc.show_note(record['_note'], $event)">
+                (click)="misc.show_note(record['_reminder'], record['_note'], $event)">
                 <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>
                 <ng-template #noreminder>
                   {{ ((pager_ - 1) * limit_) + i + 1}}

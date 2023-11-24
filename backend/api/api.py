@@ -840,7 +840,6 @@ class Misc:
                 for part_ in formula_parts_:
                     val_ = self.set_value_f(key_, part_, properties_, data_)
                     formula_ = formula_.replace(part_, val_)
-                # setto__ = ne.evaluate(formula_)
                 setto__ = (
                     round(ne.evaluate(formula_), decimals_)
                     if decimals_
@@ -3966,6 +3965,7 @@ class Crud:
                 if "id" in action_ and action_["id"] is not None
                 else "action"
             )
+
             tags_ = (
                 action_["_tags"]
                 if "_tags" in action_ and len(action_["_tags"]) > 0
@@ -3979,6 +3979,7 @@ class Crud:
                 if "api" in action_ and action_["api"] is not None
                 else None
             )
+
             uniqueness_ = "uniqueness" in action_ and action_["uniqueness"] is True
             unique_ = (
                 action_["unique"]
@@ -4017,6 +4018,13 @@ class Crud:
                 if "match" in action_ and len(action_["match"]) > 0
                 else {}
             )
+
+            download_by_ = (
+                action_["download_by"]
+                if "download_by" in action_ and action_["download_by"] in properties_
+                else None
+            )
+
             get_filtered_ = self.get_filtered_f(
                 {"match": match_, "properties": properties_}
             )
@@ -4104,9 +4112,9 @@ class Crud:
                 else None
             )
 
-            if is_crud_ and set_:
-                session_.start_transaction()
+            session_.start_transaction()
 
+            if is_crud_ and set_:
                 if (
                     data_
                     and split_
@@ -4215,8 +4223,6 @@ class Crud:
                     session_.abort_transaction()
                     raise PassException("no rows affected due to match criteria")
 
-                session_.commit_transaction()
-
             if api_:
                 run_api_f_ = self.run_api_f(api_, doc_, ids_, email_)
                 if not run_api_f_["result"]:
@@ -4229,6 +4235,8 @@ class Crud:
                     and len(run_api_f_["files"]) > 0
                     else []
                 )
+
+            session_.commit_transaction()
 
             if notify_:
                 notify_collection_ = (
@@ -4317,8 +4325,8 @@ class Crud:
             return {
                 "result": True,
                 "count": count_,
-                "content": msg_ if msg_ else "action completed successfully",
-                "files": files_,
+                "msg": msg_ if msg_ else "action completed successfully",
+                "files": files_ if download_by_ else [],
             }
 
         except pymongo.errors.PyMongoError as exc__:
@@ -6221,36 +6229,26 @@ def api_crud_f():
         response_ = make_response(
             json.dumps(res_, default=json_util.default, sort_keys=False)
         )
+        files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
+
+        if (
+            "result" in res_
+            and res_["result"] is True
+            and op_ in ["dumpd", "action"]
+            and files_
+        ):
+            path_ = files_[0]["name"].strip().lower()
+            fname_ = path_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(
+                f"{API_MONGODUMP_PATH_}/", ""
+            )
+            response_ = make_response(send_file(path_))
+            response_.status_code = sc__
+            response_.headers[
+                "Content-Type"
+            ] = f"application/octet-stream; filename={fname_}"
+            return response_
+
         response_.status_code = sc__
-        response_.headers["Content-Type"] = "application/json; charset=utf-8"
-
-        if "result" in res_ and res_["result"] is True and op_ in ["dumpd", "action"]:
-
-            files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else []
-
-            if files_:
-                path_ = files_[0]["name"].strip().lower()
-                fname_ = path_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(
-                    f"{API_MONGODUMP_PATH_}/", ""
-                )
-                content_type_ = (
-                    "text/csv"
-                    if (fname_[-4:] == ".csv" or fname_[-4:] == ".txt")
-                    else "application/vnd.ms-excel"
-                    if (fname_[-4:] == ".xls" or fname_[-5:] == ".xlsx")
-                    else "application/json"
-                    if fname_[-5:] == ".json"
-                    else "application/pdf"
-                    if fname_[-4:] == ".pdf"
-                    else "application/gzip"
-                    if (fname_[-3:] == ".gz" or fname_[-5:] == ".gzip")
-                    else "application/octet-stream"
-                )
-                response_ = make_response(send_file(path_))
-                response_.headers[
-                    "Content-Type"
-                ] = f"{content_type_}; charset=utf-8; filename={fname_}"
-
         return response_
 
 

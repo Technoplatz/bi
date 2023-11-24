@@ -262,6 +262,7 @@
           "document_format": 2
         }
       },
+      "download_by": "shp_wayb_no",
       "notification": {
         "notify": true,
         "subject": "Touchpoint [Waybill Downloaded]",

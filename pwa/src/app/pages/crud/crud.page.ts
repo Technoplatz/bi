@@ -330,14 +330,14 @@ export class CrudPage implements OnInit {
   action_f() {
     const op_ = "action";
     this.in_progress = true;
-    const properties = this.structure__.properties;
+    const properties_ = this.structure__.properties;
     let doc_: any = {};
     let i = 0;
     this.crudForm.updateValueAndValidity();
-    for (let item in properties) {
-      doc_[item] = properties[item].bsonType === "date" && this.crudForm.get(item)?.value ? new Date(this.crudForm.get(item)?.value) : this.crudForm.get(item)?.value;
-      if (i === Object.keys(properties).length - 1) {
-        this.misc.api_call("crud", {
+    for (let item in properties_) {
+      doc_[item] = properties_[item].bsonType === "date" && this.crudForm.get(item)?.value ? new Date(this.crudForm.get(item)?.value) : this.crudForm.get(item)?.value;
+      if (i === Object.keys(properties_).length - 1) {
+        const posted_: any = {
           op: op_,
           collection: this.collection,
           doc: doc_,
@@ -345,21 +345,30 @@ export class CrudPage implements OnInit {
           match: this.sweeped,
           filter: this.filter,
           _id: this._id,
-          actionix: this.actionix,
-          responseType: "blob"
-        }).then((res_: any) => {
-          console.log("*** ress0", res_);
-          const fn_ = res_.filename;
-          let binaryData = [];
-          binaryData.push(res_.binary);
-          let downloadLink = document.createElement("a");
-          downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
-          downloadLink.setAttribute("download", fn_);
-          document.body.appendChild(downloadLink);
-          downloadLink.click();
-          this.misc.doMessage(`action completed successfully`, "success");
+          actionix: this.actionix
+        }
+        const download_by_ = this.actions[this.actionix]["download_by"];
+        download_by_ && this.data_ && this.data_[download_by_] ? posted_.responseType = "blob" : null;
+        this.misc.api_call("crud", posted_).then((res_: any) => {
+          if (res_.filename) {
+            const fn_ = res_.filename;
+            let binaryData = [];
+            binaryData.push(res_.binary);
+            let downloadLink = document.createElement("a");
+            downloadLink.href = window.URL.createObjectURL(new Blob(binaryData, { type: "application/octet-strem" }));
+            downloadLink.setAttribute("download", fn_);
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            this.misc.doMessage(`action completed successfully`, "success");
+          } else {
+            if (res_.result) {
+              this.misc.doMessage(res_.msg ? res_.msg : `action completed successfully`, "success");
+            } else {
+              this.misc.doMessage(res_.msg ? res_.msg : "action error", "error");
+            }
+          }
         }).catch((error_: any) => {
-          console.error("*** ress1", error_);
+          console.error("!!! E1", error_);
           this.misc.doMessage(error_, "error");
         }).finally(() => {
           this.dismiss_modal({ op: op_, modified: true, filter: [] });

@@ -1504,10 +1504,13 @@ sup {
 
 .visual-table {
   padding-bottom: 20px;
+  width: 100% !important;
+  height: 100%;
+  overflow-x: scroll;
 }
 
 .visual-table .data-table {
-  width: 100% !important;
+  min-width: 100% !important;
   margin-right: 0px !important;
 }
 

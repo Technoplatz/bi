@@ -88,8 +88,8 @@ export class Miscellaneous {
           }),
           observe: "response"
         }
-        if (posted_.responseType) {
-          hdr_.responseType = posted_.responseType;
+        if (posted_["responseType"]) {
+          hdr_.responseType = posted_["responseType"];
         }
         this.http.post<any>(`${this.uri_}/${qstr_}`, posted_, hdr_).subscribe((res: any) => {
           const res_ = res.body;
@@ -98,7 +98,7 @@ export class Miscellaneous {
           if (posted_.responseType) {
             resolve({ "binary": res_, "filename": filename_ });
           } else {
-            if (res_?.result) {
+            if (res_.result) {
               resolve(res_);
             } else {
               reject(res_ && res_.msg ? res_.msg : res_);
@@ -160,14 +160,14 @@ export class Miscellaneous {
     });
   }
 
-  api_call_file(qstr_: string, posted: any) {
+  api_call_file(qstr_: string, posted_: any) {
     return new Promise((resolve, reject) => {
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
         const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
-        posted.append("email", LSUSERMETA.email);
+        posted_.append("email", LSUSERMETA.email);
         const uri_ = `${this.uri_}/${qstr_}`;
-        this.http.post<any>(uri_, posted, {
+        this.http.post<any>(uri_, posted_, {
           headers: new HttpHeaders({
             "Authorization": "Bearer " + token_,
             "X-Api-Key": api_key_
@@ -290,10 +290,11 @@ export class Miscellaneous {
     });
   }
 
-  show_note(note_: string, event_: any) {
+  show_note(reminder_: string, note_: string, event_: any) {
     event_.stopPropagation();
     this.alert.create({
       header: this.translate.instant("Reminder"),
+      subHeader: reminder_,
       message: this.translate.instant(note_),
       buttons: [{
         text: this.translate.instant("Got It"),
