@@ -104,10 +104,10 @@ class Cloudflare:
         self.token_ = get_docker_secret("cf_token", default="")
         self.cf_rule_name_ = os.environ.get("CF_RULE_NAME")
         self.cf_countries_ = os.environ.get("CF_COUNTRIES").replace(" ", "").split(",")
-
         self.admin_ips_ = (
             get_docker_secret("admin_ips", default="").replace(" ", "").split(",")
         )
+        self.cf_hosts_ = os.environ.get("CF_HOSTS").replace(" ", "").split(",")
         self.custom_phase_ = "http_request_firewall_custom"
         self.log_enabled_ = True
         self.headers_ = {
@@ -208,16 +208,20 @@ class Cloudflare:
             if not count_:
                 raise APIException("no ip addresses found")
 
+            if not self.cf_hosts_:
+                raise APIException("no hosts found")
+
             ipsq_ = "{" + " ".join(f"{ip_}" for ip_ in ips_) + "}"
+            hosts_ = "{" + " ".join(f'"{host_}"' for host_ in self.cf_hosts_) + "}"
             countriesq_ = (
                 "{" + " ".join(f'"{country_}"' for country_ in self.cf_countries_) + "}"
             )
 
             expressions_ = []
-            expressions_.append(f'http.host contains "{DOMAIN_}"')
+            expressions_.append(f"http.host in {hosts_}")
             expressions_.append(f"ip.geoip.country in {countriesq_}")
-            expressions_.append(f"ssl")
             expressions_.append(f"ip.src in {ipsq_}")
+            expressions_.append(f"ssl")
             expression_ = "(" + " and ".join(expressions_) + ")"
 
             json_data_ = {
@@ -256,12 +260,15 @@ class Cloudflare:
             msg_ = f"waf was synchronized successfully [{count_}]"
 
         except pymongo.errors.PyMongoError as exc__:
+            result_ = False
             msg_ = str(exc__)
 
         except APIException as exc__:
+            result_ = False
             msg_ = str(exc__)
 
         except Exception as exc__:
+            result_ = False
             msg_ = str(exc__)
 
         finally:
@@ -269,13 +276,8 @@ class Cloudflare:
 
 
 PRINT_ = partial(print, flush=True)
-DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
-SUBNET_API_IPV4_ = os.environ.get("SUBNET_API_IPV4")
 
 app = Flask(__name__)
-app.config[
-    "CORS_ORIGINS"
-] = f"http://{DOMAIN_}:8101,http://{DOMAIN_}:8100,https://{DOMAIN_}"
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.json_encoder = JSONEncoder
 CORS(app)

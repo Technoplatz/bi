@@ -40,7 +40,6 @@ import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
 import { JsonEditorOptions } from "ang-jsoneditor";
-import { TranslateService } from "@ngx-translate/core";
 
 @Component({
   selector: "app-collection",
@@ -106,7 +105,7 @@ export class CollectionPage implements OnInit {
   @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
     if (event.key === "Enter") {
       if (this.searched && this.searched[this.key_]?.actived) {
-        this.search(this.key_, this.searched[this.key_].kw ? this.searched[this.key_].kw : null);
+        this.search(this.key_, this.searched[this.key_]?.kw ? this.searched[this.key_]?.kw : null);
       }
     }
   }
@@ -118,8 +117,7 @@ export class CollectionPage implements OnInit {
     private modal: ModalController,
     private alert: AlertController,
     private router: Router,
-    public misc: Miscellaneous,
-    private translate: TranslateService
+    public misc: Miscellaneous
   ) {
     this.crud.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
@@ -360,7 +358,7 @@ export class CollectionPage implements OnInit {
       this.key_ = k_;
     }, 500);
     for (let key_ in this.structure_.properties) {
-      this.searched[key_].actived = k_ === key_ ? !this.searched[key_].actived : false;
+      this.searched[key_].actived = k_ === key_ ? !this.searched[key_]?.actived : false;
     }
   }
 
@@ -369,7 +367,7 @@ export class CollectionPage implements OnInit {
     this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
       if (this.searched) {
         for (let key_ in this.structure_.properties) {
-          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_].kw ? this.searched[key_].kw : null, f: this.searched[key_].f ? this.searched[key_].f : null, op: this.searched[key_].op ? this.searched[key_].op : null };
+          this.searched[key_] = full ? { actived: false, kw: null, f: false, op: "contains" } : { actived: false, kw: this.searched[key_]?.kw ? this.searched[key_]?.kw : null, f: this.searched[key_]?.f, op: this.searched[key_]?.op };
         }
       }
     });
@@ -431,7 +429,7 @@ export class CollectionPage implements OnInit {
       } else {
         this.filter_.push({
           key: key_,
-          op: this.searched[key_].op,
+          op: this.searched[key_]?.op,
           value: value_
         });
       }
@@ -449,13 +447,13 @@ export class CollectionPage implements OnInit {
       for (let d = 0; d < n_; d++) {
         if (this.filter_[d] && this.filter_[d]["key"] === key_) {
           found_ = true;
-          this.filter_[d]["op"] = this.searched[key_].op;
+          this.filter_[d]["op"] = this.searched[key_]?.op;
           this.filter_[d]["value"] = value_;
         }
         if (d === n_ - 1) {
           !found_ ? this.filter_.push({
             key: key_,
-            op: this.searched[key_].op,
+            op: this.searched[key_]?.op,
             value: value_
           }) : null;
           this.searched[key_].f = true;

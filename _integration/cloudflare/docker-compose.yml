@@ -48,7 +48,6 @@ services:
       - "${SUBNET_CLOUDFLARE_PORT}:80"
     environment:
       - TZ=${TZ}
-      - DOMAIN=${DOMAIN}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST0=${MONGO_HOST0}
@@ -63,6 +62,7 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - CF_ACTIVE=${CF_ACTIVE}
+      - CF_HOSTS=${CF_HOSTS}
       - CF_RULE_NAME=${CF_RULE_NAME}
       - CF_COUNTRIES=${CF_COUNTRIES}
     secrets:

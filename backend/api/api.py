@@ -588,7 +588,7 @@ class Misc:
         exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
         file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
         line_ = exc_tb_.tb_lineno
-        notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {notification_}"
+        notification_str_ = f"CLIENT IP: {ip_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {notification_}"
         response_ = requests.post(
             NOTIFICATION_PUSH_URL_,
             json.dumps({"text": str(notification_str_)}),
@@ -2881,7 +2881,10 @@ class Crud:
                         value__ = False
                         if selections_ and property_ in selections_:
                             for selection_ in selections_[property_]:
-                                if selection_["id"] == item_["_id"]:
+                                if (
+                                    selection_["id"] is not None
+                                    and selection_["id"] == item_["_id"]
+                                ):
                                     value__ = (
                                         "value" in selection_
                                         and selection_["value"] is True
@@ -3841,11 +3844,7 @@ class Crud:
             if not protocol_:
                 raise PassException(f"invalid api protocol in {id_}")
 
-            domain_ = (
-                api_["domain"]
-                if "domain" in api_ and api_["domain"] != DOMAIN_
-                else None
-            )
+            domain_ = api_["domain"] if "domain" in api_ else None
             if not domain_:
                 raise PassException(f"invalid api domain in {id_}")
             subdomain_ = (
@@ -5876,7 +5875,6 @@ class Auth:
             return Misc().notify_exception_f(exc)
 
 
-DOMAIN_ = os.environ.get("DOMAIN") if os.environ.get("DOMAIN") else "localhost"
 API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
 NOTIFICATION_PUSH_URL_ = os.environ.get("NOTIFICATION_PUSH_URL")
 COMPANY_NAME_ = (

@@ -52,9 +52,7 @@ export class Miscellaneous {
   public version = new BehaviorSubject<any>({});
   public saas = new BehaviorSubject<any>(null);
   public localization = new BehaviorSubject<any>(null);
-  public api = new BehaviorSubject<any>(null);
   private collections_: any;
-  private uri_: string = "";
   private mopen_: boolean = false;
 
   constructor(
@@ -69,10 +67,6 @@ export class Miscellaneous {
     this.collections.subscribe((res: any) => {
       this.collections_ = res && res.data ? res.data : [];
     });
-    const ipaddrregx_ = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
-    const domain_ = window.location.host.split(":")[0];
-    this.uri_ = `${window.location.protocol}//${ipaddrregx_.test(domain_) || domain_ === "localhost" ? domain_ + ":" + environment.apiPort : domain_}/api`;
-    this.api.next({ uri: this.uri_ });
   }
 
   api_call(qstr_: string, posted_: any) {
@@ -91,7 +85,7 @@ export class Miscellaneous {
         if (posted_["responseType"]) {
           hdr_.responseType = posted_["responseType"];
         }
-        this.http.post<any>(`${this.uri_}/${qstr_}`, posted_, hdr_).subscribe((res: any) => {
+        this.http.post<any>(`${environment.apiUrl}/${qstr_}`, posted_, hdr_).subscribe((res: any) => {
           const res_ = res.body;
           const qt_ = res.headers.get("Content-Type");
           const filename_ = qt_.indexOf("filename=") > 0 ? qt_.substring(qt_.indexOf("filename=") + 9).trim() : null;
@@ -166,7 +160,7 @@ export class Miscellaneous {
         const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
         const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
         posted_.append("email", LSUSERMETA.email);
-        const uri_ = `${this.uri_}/${qstr_}`;
+        const uri_ = `${environment.apiUrl}/${qstr_}`;
         this.http.post<any>(uri_, posted_, {
           headers: new HttpHeaders({
             "Authorization": "Bearer " + token_,

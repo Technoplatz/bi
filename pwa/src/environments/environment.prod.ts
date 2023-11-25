@@ -36,9 +36,9 @@ export const environment = {
   production: true,
   appVersion: require("../../package.json").version,
   release: "Brezel",
-  apiPort: "8443",
   support_url: "#",
   swu_interval_mins: 3,
+  apiUrl: (window as any)["env"]["API_URL"],
   misc: {
     logo: "logo-electron",
     default_sort: '{"_modified_at": -1}',

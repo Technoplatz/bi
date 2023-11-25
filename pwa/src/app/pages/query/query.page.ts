@@ -75,7 +75,6 @@ export class QueryPage implements OnInit {
   private menu: string = "";
   private submenu: string = "";
   private query_: any = {};
-  private uri_: string = "";
   public perma_: boolean = false;
   private schema_: any = {};
   public json_content_: any = null;
@@ -88,9 +87,6 @@ export class QueryPage implements OnInit {
     private crud: Crud,
     private router: Router
   ) {
-    this.misc.api.subscribe((api_: any) => {
-      this.uri_ = api_.uri;
-    });
     this.auth.user.subscribe((res: any) => {
       this.user = res;
       this.perma_ = res.perma;
@@ -99,7 +95,6 @@ export class QueryPage implements OnInit {
 
   ngOnDestroy() {
     this.auth.user.unsubscribe;
-    this.misc.api.unsubscribe;
     this.crud.collections.unsubscribe;
   }
 
@@ -113,7 +108,7 @@ export class QueryPage implements OnInit {
         this.query_ = LSQUERY_;
         this.menu = this.router.url.split("/")[1];
         this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
-        this.query_url_ = `${this.uri_}/get/query/${this.id}`;
+        this.query_url_ = `${environment.apiUrl}/get/query/${this.id}`;
         this.refresh_data(false).then(() => { });
       });
     });

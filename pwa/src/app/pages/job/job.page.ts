@@ -98,7 +98,6 @@ export class JobPage implements OnInit {
 
   ngOnDestroy() {
     this.auth.user.unsubscribe;
-    this.misc.api.unsubscribe;
     this.crud.collections.unsubscribe;
   }
 
