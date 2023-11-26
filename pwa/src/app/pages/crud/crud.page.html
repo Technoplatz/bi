@@ -161,13 +161,10 @@ https://www.gnu.org/licenses.
             <div *ngIf="isnoninteractive_" class="ion-margin-top">
                 <strong>{{ 'Please click RUN button' | translate }}.</strong>
             </div>
-            <ul *ngIf="!crudForm.valid" class="ion-no-padding ion-margin-top danger">
+            <ul *ngIf="!crudForm.valid" class="ion-no-margin ion-no-padding ion-margin-top danger">
                 <div *ngFor="let field of fieldsupd; let f=index">
-                    <li *ngIf="f===0" class="ion-margin-start bold"> {{ 'Please enter the required fields' | translate
-                        }}
-                    </li>
                     <li *ngIf="!crudForm.controls[field.name].valid && (crudForm.controls[field.name].dirty || (op=='update' && !data_[field.name]))"
-                        class="ion-margin-start">
+                        class="ion-margin-start bold">
                         {{ field.title | translate }} [{{ field.name }}]
                     </li>
                 </div>
@@ -180,20 +177,12 @@ https://www.gnu.org/licenses.
                             <ion-button *ngFor="let item of links" (click)="doGoLink(item)" color="primary"
                                 size="default" slot="end">
                                 {{ translate.instant(item.btntext ? item.btntext :
-                                item.collection) }}&nbsp;<ion-icon name="arrow-forward-sharp"></ion-icon>
+                                item?.collection) }}&nbsp;<ion-icon name="arrow-forward-sharp"></ion-icon>
                             </ion-button>
                         </div>
                     </ion-item>
                     <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index"
                         class="ion-no-margin full-width">
-                        <ion-button slot="end" *ngIf="field.parents && field.bsonType!='array'" size="small"
-                            (click)="get_parent(field.parents)" class="parent-link-button">{{
-                            field.parents.collection | translate }}
-                        </ion-button>
-                        <ion-button *ngIf="!field?.readonly && !field?.permanent && !field?.disabled" slot="end"
-                            color="medium" (click)="field_nulla(field.name)" fill="clear" class="nulla-button">
-                            <ion-icon name="close-sharp"></ion-icon>
-                        </ion-button>
                         <ion-label position="stacked">
                             {{ field.title | translate }}:
                             <sup *ngIf="field.required">
@@ -315,6 +304,14 @@ https://www.gnu.org/licenses.
                                 [id]="field.name"></ion-input>
                             <app-kov [data]="data_" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
                         </div>
+                        <ion-button slot="end" *ngIf="field.parents && field.bsonType!='array'" size="small"
+                            (click)="get_parent(field.parents)" class="parent-link-button">{{
+                            field.parents?.collection | translate }}
+                        </ion-button>
+                        <ion-button slot="end" *ngIf="!field?.readonly && !field?.permanent && !field?.disabled"
+                            color="medium" (click)="field_nulla(field.name)" fill="clear" class="nulla-button">
+                            <ion-icon name="close-sharp"></ion-icon>
+                        </ion-button>
                     </ion-item>
                     <ion-item *ngIf="scan_" lines="none">
                         <ion-label position="stacked">{{ 'Scan History' }}</ion-label>
@@ -370,4 +367,4 @@ https://www.gnu.org/licenses.
     </ion-item>
 </ion-content>
 <br />
-<modal-footer [collection]="collection"></modal-footer>
+<modal-footer></modal-footer>

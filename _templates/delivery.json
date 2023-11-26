@@ -360,7 +360,7 @@
       "title": "Reminder",
       "description": "Reminder",
       "placeholder": "Message for others to get notified",
-      "enum": ["Please Hold", "Awaiting for Another Order", "Missing Product", "Test Product", "Damaged", "Lost", "Approved", null],
+      "enum": ["On-hold", "Awaiting", "Missing", "Test", "Damaged", "Lost", "Approved", null],
       "reminder": true
     },
     "dnn_note": {

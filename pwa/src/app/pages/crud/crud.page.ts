@@ -187,6 +187,9 @@ export class CrudPage implements OnInit {
           }).finally(() => {
             this.visible = "show";
             this.scan_ ? setInterval(() => { this.barcodefocus.setFocus(); }, 1000) : null;
+            for (let i in this.crudForm.controls) {
+              this.crudForm.controls[i].markAsTouched();
+            }
           });
         }).catch((error: any) => {
           this.misc.doMessage(error, "error");
@@ -269,7 +272,7 @@ export class CrudPage implements OnInit {
                   this.misc.copy_to_clipboard(`Bearer ${res_.token}`).then(() => { }).catch((error: any) => {
                     this.misc.doMessage(error, "error");
                   }).finally(() => {
-                    this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res_ && res_.cid ? res_.cid : null, res: res_ });
+                    this.dismiss_modal({ op: this.op, modified: this?.modified, filter: [], cid: res_ && res_.cid ? res_.cid : null, res: res_ });
                   });
                 }
               }]
@@ -287,7 +290,7 @@ export class CrudPage implements OnInit {
                 this.crudForm.get(iot_input_)?.setValue(this.data_[iot_input_]);
               });
             } else {
-              this.dismiss_modal({ op: this.op, modified: this.modified, filter: [], cid: res_ && res_.cid ? res_.cid : null, res: res_ });
+              this.dismiss_modal({ op: this.op, modified: this?.modified, filter: [], cid: res_ && res_.cid ? res_.cid : null, res: res_ });
             }
           }
         }).catch((error_: any) => {
@@ -333,7 +336,6 @@ export class CrudPage implements OnInit {
     const properties_ = this.structure__.properties;
     let doc_: any = {};
     let i = 0;
-    this.crudForm.updateValueAndValidity();
     for (let item in properties_) {
       doc_[item] = properties_[item].bsonType === "date" && this.crudForm.get(item)?.value ? new Date(this.crudForm.get(item)?.value) : this.crudForm.get(item)?.value;
       if (i === Object.keys(properties_).length - 1) {

@@ -15,7 +15,8 @@
       "description": "Delivery Nomber",
       "minLength": 10,
       "maxLength": 16,
-      "pattern": "^[0-9A-Z-]{10,16}$"
+      "pattern": "^[0-9A-Z-]{10,16}$",
+      "caseType": "uppercase"
     },
     "ser_line_no": {
       "bsonType": "string",
@@ -63,17 +64,6 @@
       "title": "In Date",
       "description": "Touchpoint incoming date"
     },
-    "ser_is_out": {
-      "bsonType": "bool",
-      "title": "Outgoing",
-      "description": "Touchpoint outgoing",
-      "default": false
-    },
-    "ser_out_date": {
-      "bsonType": "date",
-      "title": "Out Date",
-      "description": "Touchpoint outgoing date"
-    },
     "ser_label_no": {
       "bsonType": "string",
       "title": "Label No",
@@ -84,7 +74,7 @@
       "caseType": "uppercase"
     }
   },
-  "required": ["ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
+  "required": ["ser_no", "ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
   "index": [
     ["ser_is_in"],
     ["ser_dnn_no"],

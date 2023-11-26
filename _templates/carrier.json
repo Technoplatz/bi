@@ -32,7 +32,7 @@
       "description": "Vehicle plate number",
       "minLength": 6,
       "maxLength": 16,
-      "pattern": "^[A-Za-z0-9 ]{6,16}$",
+      "pattern": "^[A-Z0-9]{6,16}$",
       "caseType": "uppercase"
     },
     "car_acc_no": {

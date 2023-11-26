@@ -352,7 +352,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
-      - traefik.http.routers.api.rule=${API_URL}
+      - traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)
       - traefik.http.services.api.loadbalancer.server.port=${HTTP_PORT}
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
@@ -443,7 +443,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
-      - traefik.http.routers.pwa.rule=Host(`!PathPrefix(`/api`)
+      - traefik.http.routers.pwa.rule=Host(`${DOMAIN}`) && !PathPrefix(`/api`)
       - traefik.http.routers.pwa.priority=0
       - traefik.http.services.pwa.loadbalancer.server.port=${HTTP_PORT}
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
@@ -488,23 +488,23 @@ services:
 
 volumes:
   bi-mongo0-volume:
-    driver: local
     name: bi-mongo0-volume
+    driver: local
   bi-mongo1-volume:
-    driver: local
     name: bi-mongo1-volume
+    driver: local
   bi-mongo2-volume:
-    driver: local
     name: bi-mongo2-volume
+    driver: local
   bi-storage-volume:
-    driver: local
     name: bi-storage-volume
+    driver: local
   bi-cert-volume:
-    driver: local
     name: bi-cert-volume
-  bi-log-volume:
     driver: local
+  bi-log-volume:
     name: bi-log-volume
+    driver: local
 
 networks:
   network0:

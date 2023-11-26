@@ -937,19 +937,9 @@ ion-spinner {
   margin: 2px;
 }
 
-ion-datetime-button::part(native) {
-  background: #fff;
-  padding: 0px !important;
-  margin: 0px;
-  margin-top: 8px;
-  margin-left: 2px;
-  padding-inline: 0px !important;
-  opacity: 1 !important;
-  --opacity: 1 !important;
-}
-
-ion-datetime {
-  border: 1px solid var(--ion-color-primary);
+.parent-link-button {
+  margin: auto !important;
+  z-index: 9999;
 }
 
 .nulla-button {
@@ -1146,6 +1136,7 @@ ion-select {
   --padding-start: 0px !important;
   --padding-bottom: 7px !important;
   max-width: 90% !important;
+  font-size: 15px !important;
 }
 
 ion-checkbox {
@@ -1157,6 +1148,23 @@ ion-input,
 ion-textarea {
   --padding-bottom: 3px !important;
   margin-top: 4px !important;
+  font-size: 15px !important;
+}
+
+ion-datetime-button::part(native) {
+  background: #fff;
+  padding: 0px !important;
+  margin: 0px;
+  margin-top: 8px;
+  margin-left: 2px;
+  padding-inline: 0px !important;
+  opacity: 1 !important;
+  --opacity: 1 !important;
+  font-size: 15px !important;
+}
+
+ion-datetime {
+  border: 1px solid var(--ion-color-primary);
 }
 
 .scan-ok span {
@@ -1476,11 +1484,6 @@ sup {
 .no-cursor {
   cursor: none !important;
   pointer-events: none !important;
-}
-
-.parent-link-button {
-  margin: auto !important;
-  z-index: 9999;
 }
 
 .visual-container {
