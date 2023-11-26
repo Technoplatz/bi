@@ -43,7 +43,7 @@
         "ND-NotDefined",
         "RJ-Rejected"
       ],
-      "default": "00-Standby",
+      "default": "00-Open",
       "selection": true
     },
     "dnn_acc_no": {
@@ -360,8 +360,11 @@
       "title": "Reminder",
       "description": "Reminder",
       "placeholder": "Message for others to get notified",
+      "minLength": 0,
+      "maxLength": 8,
       "enum": ["On-hold", "Awaiting", "Missing", "Test", "Damaged", "Lost", "Approved", null],
-      "reminder": true
+      "reminder": true,
+      "selection": true
     },
     "dnn_note": {
       "bsonType": "string",
@@ -377,6 +380,7 @@
   },
   "required": [
     "dnn_no",
+    "dnn_line_no",
     "dnn_acc_no",
     "dnn_bill_no",
     "dnn_status",

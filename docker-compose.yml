@@ -409,6 +409,7 @@ services:
       - API_DELETE_ALLOWED=${API_DELETE_ALLOWED}
       - API_CORS_ORIGINS=${API_CORS_ORIGINS}
       - NOTIFICATION_PUSH_URL=${NOTIFICATION_PUSH_URL}
+      - RESTAPI_ENABLED=${RESTAPI_ENABLED}
     links:
       - replicaset
     extra_hosts:

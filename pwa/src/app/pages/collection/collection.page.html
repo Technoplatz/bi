@@ -227,14 +227,12 @@ https://www.gnu.org/licenses.
                   <div>
                     <ion-input #searchfocus *ngIf="item.value.bsonType!='bool'"
                       [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
-                      [(ngModel)]="searched[item.key].kw"
-                      [ngModelOptions]="{standalone: true}" class="ion-no-padding search-input"
-                      placeholder="{{ 'Search' | translate }}" disabled="false">
+                      [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
+                      class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
                     </ion-input>
                   </div>
                   <div>
-                    <ion-button size="small"
-                      (click)="search(item.key, searched[item.key].kw)">
+                    <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
                       <ion-icon name="search"></ion-icon>
                       {{ 'Search' | translate }}
                     </ion-button>
@@ -275,7 +273,8 @@ https://www.gnu.org/licenses.
                 <ion-button size="small" class="unfiltered-btn">{{'_modified_by'}}</ion-button>
               </th>
             </tr>
-            <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')">
+            <tr *ngFor="let record of data; let i = index" (click)="go_crud(record, 'update')"
+              [class]="record['_reminder'] ? 'data-tr' : ''">
               <td [class]="record['_reminder'] ? 'bg-danger align-right' : 'primary align-right'"
                 (click)="misc.show_note(record['_reminder'], record['_note'], $event)">
                 <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>

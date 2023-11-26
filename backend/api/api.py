@@ -3197,6 +3197,7 @@ class Crud:
             if approved_:
                 if not Auth().is_admin_f(user_):
                     raise AuthError("no permission to approve")
+
                 doc_["_approved"] = True
                 doc_["_approved_at"] = Misc().get_now_f()
                 doc_["_approved_by"] = user_["usr_id"]
@@ -5922,6 +5923,12 @@ API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [
     "True",
     "TRUE",
 ]
+RESTAPI_ENABLED_ = os.environ.get("RESTAPI_ENABLED") in [
+    True,
+    "true",
+    "True",
+    "TRUE",
+]
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -6442,6 +6449,9 @@ def api_post_f():
     docstring is in progress
     """
     try:
+        if not RESTAPI_ENABLED_:
+            raise APIError("rest api is disabled")
+
         if not request.headers:
             raise AuthError("no headers provided")
 

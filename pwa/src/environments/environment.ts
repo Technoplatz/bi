@@ -37,7 +37,7 @@ export const environment = {
   appVersion: require("../../package.json").version + "-dev",
   release: "Brezel",
   support_url: "#",
-  swu_interval_mins: 3,
+  swu_interval_mins: 15,
   apiUrl: "http://localhost:8443/api",
   misc: {
     logo: "logo-electron",
