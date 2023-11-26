@@ -58,7 +58,7 @@
     }
   },
   "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],
-  "index": [["odi_no"], ["odi_sub_no"], ["odi_from"], ["odi_customs"]],
+  "index": [["odi_no"], ["odi_sub_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_customs"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
     "_created_at": -1

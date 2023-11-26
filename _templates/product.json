@@ -135,7 +135,7 @@
     }
   },
   "required": ["prd_no", "prd_description", "prd_group"],
-  "index": [["prd_group"]],
+  "index": [["prd_no"], ["prd_group"]],
   "unique": [["prd_no"]],
   "sort": {
     "_modified_at": -1

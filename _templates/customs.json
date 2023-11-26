@@ -25,7 +25,7 @@
     }
   },
   "required": ["cum_id", "cum_name"],
-  "index": [["cum_name"], ["cum_is_active"]],
+  "index": [["cum_id"], ["cum_name"], ["cum_is_active"]],
   "unique": [["cum_id"]],
   "sort": {
     "cum_id": 1

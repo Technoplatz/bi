@@ -258,6 +258,10 @@ export class SignPage implements OnInit {
       }).catch((error: any) => {
         console.error(error);
         reject(error);
+      }).finally(() => {
+        for (let i in this.signinForm.controls) {
+          this.signinForm.controls[i].markAsTouched();
+        }
       });
     });
   }
@@ -273,6 +277,10 @@ export class SignPage implements OnInit {
       }).catch((error: any) => {
         console.error(error);
         reject(error);
+      }).finally(() => {
+        for (let i in this.forgotForm.controls) {
+          this.forgotForm.controls[i].markAsTouched();
+        }
       });
     });
   }
@@ -288,6 +296,10 @@ export class SignPage implements OnInit {
       }).catch((error: any) => {
         console.error(error);
         reject(error);
+      }).finally(() => {
+        for (let i in this.signupForm.controls) {
+          this.signupForm.controls[i].markAsTouched();
+        }
       });
     });
   }
@@ -390,6 +402,10 @@ export class SignPage implements OnInit {
           }, this.focustime);
         }).catch((error: any) => {
           console.error(error);
+        }).finally(() => {
+          for (let i in this.resetForm.controls) {
+            this.resetForm.controls[i].markAsTouched();
+          }
         });
       }).catch((error: any) => {
         this.isInProgress = false;

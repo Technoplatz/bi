@@ -16,7 +16,7 @@
     }
   },
   "required": ["bun_id", "bun_name"],
-  "index": [],
+  "index": [["bun_id"]],
   "unique": [["bun_id"]],
   "sort": {
     "bun_id": 1

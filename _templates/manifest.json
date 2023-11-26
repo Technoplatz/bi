@@ -78,7 +78,7 @@
     }
   },
   "required": ["man_no", "man_odi_no", "man_odi_sub_no", "man_opening_date", "man_file_no", "man_case_no"],
-  "index": [["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_odi_sub_no"], ["man_file_no"]],
+  "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_odi_sub_no"], ["man_file_no"]],
   "unique": [["man_no"]],
   "sort": {
     "_created_at": -1
@@ -146,7 +146,7 @@
       "btntext": "Attached DNs",
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"],
       "notification": {
-        "notify": true,
+        "notify": false,
         "subject": "Logistics [Manifest Created]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been attached to manifest.",
         "key": "man_no",
@@ -231,7 +231,7 @@
           ],
           "upsert": false,
           "notification": {
-            "notify": true,
+            "notify": false,
             "subject": "Logistics [Clearance Completed]",
             "body": "Hi,<br /><br />We would like to let you know that clearance of the attached manifest has been completed.",
             "collection": "delivery",

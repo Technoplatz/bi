@@ -180,7 +180,7 @@
     }
   },
   "required": ["acc_no", "acc_name", "acc_nick_name", "acc_tax_no", "acc_tax_office", "acc_ship_to_street"],
-  "index": [["acc_name"], ["acc_nick_name"], ["acc_tax_no"], ["acc_is_active"]],
+  "index": [["acc_no"], ["acc_name"], ["acc_nick_name"], ["acc_tax_no"], ["acc_is_active"]],
   "unique": [["acc_no"]],
   "parents": [],
   "actions": [],

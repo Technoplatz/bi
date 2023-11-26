@@ -36,7 +36,7 @@ https://www.gnu.org/licenses.
             <ion-col size="12">
                 <ion-button *ngIf="in_progress; else ready">
                     <ion-spinner name="dots"></ion-spinner>
-                    &nbsp;{{ 'In Progress' | translate }}
+                    &nbsp;&nbsp;{{ 'In Progress' | translate }}
                 </ion-button>
                 <ng-template #ready>
                     <ion-button *ngIf="collection=='_dump' && op=='insert'" (click)="dump('dumpu')">

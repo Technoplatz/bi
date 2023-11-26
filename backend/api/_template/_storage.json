@@ -32,7 +32,7 @@
   },
   "required": ["sto_id", "sto_collection_id", "sto_file"],
   "unique": [["sto_id"], ["sto_collection_id"]],
-  "index": [["sto_collection_id"]],
+  "index": [["sto_id"], ["sto_collection_id"]],
   "sort": {
     "_modified_at": -1
   }

@@ -50,7 +50,7 @@
     }
   },
   "required": ["job_id", "job_title", "job_collection_id"],
-  "index": [["job_collection_id"], ["job_scheduled"], ["job_scheduled", "_approved"]],
+  "index": [["job_id"], ["job_collection_id"], ["job_scheduled"], ["job_scheduled", "_approved"]],
   "unique": [["job_id"]],
   "sort": {
     "_modified_at": -1

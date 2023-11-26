@@ -2890,9 +2890,10 @@ class Crud:
                                         and selection_["value"] is True
                                     )
                                     break
-                        selected_[property_].append(
-                            {"id": item_["_id"], "value": value__}
-                        )
+                        if item_["_id"] is not None:
+                            selected_[property_].append(
+                                {"id": item_["_id"], "value": value__}
+                            )
 
             return {
                 "result": True,
@@ -3916,7 +3917,7 @@ class Crud:
             data_ = obj_["data"] if "data" in obj_ else None
 
             is_crud_ = collection_id_[:1] != "_"
-            if not is_crud_ and collection_id_ != "_firewall":
+            if not is_crud_ and collection_id_ not in ["_firewall", "_query", "_job"]:
                 raise AppException("actions are not allowed")
 
             if actionix_ < 0:
@@ -5855,9 +5856,9 @@ class Auth:
                     "_qr_modified_count": 0,
                     "_created_at": Misc().get_now_f(),
                     "_created_by": user_id_,
-                    "_created_ip": Misc().get_client_ip_f(),
                     "_modified_at": Misc().get_now_f(),
                     "_modified_by": user_id_,
+                    "_created_ip": Misc().get_client_ip_f(),
                 }
             )
 

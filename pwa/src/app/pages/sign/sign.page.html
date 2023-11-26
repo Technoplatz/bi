@@ -50,18 +50,19 @@ https://www.gnu.org/licenses.
             <h3>{{ 'Reset Password' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Password' | translate }} <sup>
+            <ion-label position="stacked">{{ 'Password' | translate }} [{{ '8+ [Aa9!]' |
+                translate }}]<sup>
                     <ion-icon name="star"></ion-icon>
                 </sup></ion-label>
-            <ion-input #passwordfocus formControlName="password" type="password"
-                placeholder="{{ '8-32 uppercase-lowercase-number-sign' | translate }}" class="ion-no-padding" required
+            <ion-input #tfacfocus formControlName="password" type="password"
+                placeholder="{{ '8+ [Aa9!]' | translate }}" class="ion-no-padding" required
                 [value]="email">
             </ion-input>
         </ion-item>
         <ion-item lines="full">
             <ion-label position="stacked">{{ 'One Time Password' | translate }}:
             </ion-label>
-            <ion-input #tfacfocus class="ion-no-padding ion-margin-top token" formControlName="tfac" type="text"
+            <ion-input class="ion-no-padding ion-margin-top token" formControlName="tfac" type="text"
                 required minlength="6" maxlength="6" size="8" autofocus="true" required="true" autocomplete="off">
             </ion-input>
         </ion-item>

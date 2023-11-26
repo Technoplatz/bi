@@ -132,7 +132,7 @@
     }
   },
   "required": ["vis_id", "vis_title", "vis_collection_id"],
-  "index": [["vis_collection_id"]],
+  "index": [["vis_id"], ["vis_collection_id"]],
   "unique": [["vis_id"]],
   "sort": {
     "_modified_at": -1

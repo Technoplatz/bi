@@ -43,7 +43,7 @@
         "ND-NotDefined",
         "RJ-Rejected"
       ],
-      "default": "00-Open",
+      "default": "00-Standby",
       "selection": true
     },
     "dnn_acc_no": {
@@ -380,7 +380,6 @@
   },
   "required": [
     "dnn_no",
-    "dnn_line_no",
     "dnn_acc_no",
     "dnn_bill_no",
     "dnn_status",
@@ -395,6 +394,8 @@
     "dnn_amount"
   ],
   "index": [
+    ["dnn_no"],
+    ["dnn_no", "dnn_line_no"],
     ["dnn_acc_no"],
     ["dnn_acc_name"],
     ["dnn_status"],

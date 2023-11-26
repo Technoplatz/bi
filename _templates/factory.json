@@ -27,7 +27,7 @@
     }
   },
   "required": ["fac_id", "fac_country"],
-  "index": [["fac_country"], ["fac_is_active"]],
+  "index": [["fac_id"], ["fac_country"], ["fac_is_active"]],
   "unique": [["fac_id"]],
   "sort": {
     "fac_id": 1

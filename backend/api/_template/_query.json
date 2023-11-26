@@ -102,6 +102,7 @@
   },
   "required": ["que_id", "que_title", "que_collection_id"],
   "index": [
+    ["que_id"],
     ["que_collection_id"],
     ["que_scheduled"],
     ["que_scheduled", "_approved"],
@@ -114,13 +115,19 @@
       "id": "priority",
       "title": "Set Priority",
       "enabled": true,
-      "match": [],
+      "match": [
+        {
+          "key": "que_id",
+          "op": "nnull",
+          "value": null
+        }
+      ],
       "set": [{ "key": "que_priority", "value": 9000 }],
       "one_click": false,
       "icon": "swap-vertical-sharp",
       "uniqueness": false,
       "unique": [],
-      "_tags": [],
+      "_tags": ["#Managers", "#Technoplatz"],
       "notification": {},
       "api": {}
     }

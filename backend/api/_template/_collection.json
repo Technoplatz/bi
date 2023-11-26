@@ -52,7 +52,7 @@
     }
   },
   "required": ["col_id", "col_title", "col_prefix"],
-  "index": [["col_prefix"], ["col_priority"]],
+  "index": [["col_id"], ["col_prefix"], ["col_priority"]],
   "unique": [["col_id"]],
   "sort": {
     "col_priority": 1,

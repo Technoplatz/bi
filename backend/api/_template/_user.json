@@ -59,7 +59,7 @@
   },
   "required": ["usr_id", "usr_name", "usr_scope"],
   "unique": [["usr_id"]],
-  "index": [["usr_id", "usr_enabled"], ["usr_enabled", "_tags"], ["usr_id", "usr_enabled", "usr_scope"], ["_tags"]],
+  "index": [["usr_id"], ["usr_id", "usr_enabled"], ["usr_enabled", "_tags"], ["usr_id", "usr_enabled", "usr_scope"], ["_tags"]],
   "sort": {
     "_modified_at": -1
   },
