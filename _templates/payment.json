@@ -26,6 +26,8 @@
   "actions": [],
   "triggers": [],
   "import": {
-    "enabled": true
+    "enabled": true,
+    "upsertable": true,
+    "upsertables": ["pay_date"]
   }
 }

@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
                 <ion-button *ngIf="in_progress; else ready">
-                    <ion-spinner name="dots"></ion-spinner>
+                    <ion-spinner name="lines-sharp"></ion-spinner>
                     &nbsp;&nbsp;{{ 'In Progress' | translate }}
                 </ion-button>
                 <ng-template #ready>
@@ -43,11 +43,11 @@ https://www.gnu.org/licenses.
                         {{ 'Dump' | translate }}
                     </ion-button>
                     <ion-button *ngIf="collection=='_dump' && op=='update'" (click)="dump('dumpd')">
-                        <ion-icon name="cloud-download-sharp"></ion-icon>
+                        <ion-icon name="cloud-download-outline"></ion-icon>
                         {{ 'Download' | translate }}
                     </ion-button>
                     <ion-button *ngIf="collection=='_dump' && op=='update'" (click)="dump('dumpr')" color="danger">
-                        <ion-icon name="alert-circle-sharp"></ion-icon>
+                        <ion-icon name="alert-circle-outline"></ion-icon>
                         {{ 'Restore' | translate }}
                     </ion-button>
                     <ion-button *ngIf="scan_ && op=='insert'; else noscan" (click)="submit_f()">
@@ -62,11 +62,11 @@ https://www.gnu.org/licenses.
                         </ion-button>
                     </ng-template>
                     <ion-button *ngIf="collection=='_storage' && op=='import'" (click)="submit_f()">
-                        {{ 'Upload' | translate }}
+                        {{ 'Import' | translate }}
                     </ion-button>
                 </ng-template>
                 <ion-button (click)="dismiss_modal({ modified: false, filter: [] })" color="medium">
-                    <ion-icon name="close"></ion-icon>
+                    <ion-icon name="close-circle-outline"></ion-icon>
                     {{ 'Dismiss' |
                     translate }} </ion-button>
                 <ion-button *ngIf="op=='update' && user?.perma" color="danger" (click)="doRemove()" class="end-item">
@@ -304,12 +304,13 @@ https://www.gnu.org/licenses.
                                 [id]="field.name"></ion-input>
                             <app-kov [data]="data_" [field]="field" [properties]="property_list" [op]="op"> </app-kov>
                         </div>
-                        <ion-button slot="end" *ngIf="field.parents && field.bsonType!='array'" size="small"
+                        <ion-button *ngIf="field.parents && field.bsonType!='array'" size="small"
                             (click)="get_parent(field.parents)" class="parent-link-button">{{
                             field.parents?.collection | translate }}
                         </ion-button>
-                        <ion-button slot="end" *ngIf="!field?.readonly && !field?.permanent && !field?.disabled"
-                            color="medium" (click)="field_nulla(field.name)" fill="clear" class="nulla-button">
+                        <ion-button *ngIf="op=='insert' || (!field?.readonly && !field?.permanent && !field?.disabled)"
+                            slot="end" color="medium" (click)="field_nulla(field.name)" fill="clear"
+                            class="nulla-button">
                             <ion-icon name="close-sharp"></ion-icon>
                         </ion-button>
                     </ion-item>
@@ -362,7 +363,7 @@ https://www.gnu.org/licenses.
 </ion-content>
 <ion-content *ngIf="visible=='hide'" class="ion-padding-start ion-padding-end">
     <ion-item lines="none">
-        <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
+        <ion-spinner name="lines-sharp" class="ion-margin-end"></ion-spinner>
         <ion-label> {{ loadingText | translate }}</ion-label>
     </ion-item>
 </ion-content>

@@ -404,6 +404,8 @@ services:
       - API_S3_ACTIVE=${API_S3_ACTIVE}
       - API_S3_REGION=${API_S3_REGION}
       - API_S3_BUCKET_NAME=${API_S3_BUCKET_NAME}
+      - API_S3_KEY_ID=${API_S3_KEY_ID}
+      - API_S3_KEY=${API_S3_KEY}
       - API_PERMISSIVE_TAGS=${API_PERMISSIVE_TAGS}
       - API_ADMIN_TAGS=${API_ADMIN_TAGS}
       - API_DELETE_ALLOWED=${API_DELETE_ALLOWED}
@@ -427,8 +429,6 @@ services:
       - smtp_userid
       - smtp_password
       - smtp_endpoint
-      - s3_keyid
-      - s3_key
 
   pwa:
     build:
@@ -534,7 +534,3 @@ secrets:
     file: ./.secret/.smtp_password
   smtp_endpoint:
     file: ./.secret/.smtp_endpoint
-  s3_keyid:
-    file: ./.secret/.s3_keyid
-  s3_key:
-    file: ./.secret/.s3_key

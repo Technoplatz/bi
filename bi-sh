@@ -113,7 +113,7 @@ function startBI() {
     if [[ ! -f .secret/.mongo_initdb_root_password ]]; then
         echo -n $(openssl rand -hex 10) >.secret/.mongo_initdb_root_password
     fi
-    env docker compose --project-name technoplatz-bi --env-file $DOTENV -f $DCYML up --detach --no-build
+    env docker compose --project-name technoplatz-bi --env-file $DOTENV -f $DCYML --compatibility up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
         docker cp init:/cert/mongo0.pem .secret/mongo0.pem
@@ -124,10 +124,10 @@ function startBI() {
         return 0
     fi
     if [[ -f _integration/cloudflare/docker-compose.yml ]]; then
-        env docker compose --project-name technoplatz-bi --env-file _integration/cloudflare/.env -f _integration/cloudflare/docker-compose.yml up --detach --no-build
+        env docker compose --project-name technoplatz-bi --env-file _integration/cloudflare/.env -f _integration/cloudflare/docker-compose.yml --compatibility up --detach --no-build
     fi
     if [[ -f _integration/edoksis/docker-compose.yml ]]; then
-        env docker compose --project-name technoplatz-bi --env-file _integration/edoksis/.env -f _integration/edoksis/docker-compose.yml up --detach --no-build
+        env docker compose --project-name technoplatz-bi --env-file _integration/edoksis/.env -f _integration/edoksis/docker-compose.yml --compatibility up --detach --no-build
     fi
     return 1
 }
