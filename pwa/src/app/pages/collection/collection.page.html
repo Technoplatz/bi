@@ -46,7 +46,8 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="data-sq-container">
               <div (click)="import_modal()"
                 [class]="is_crud && importvis_ ? 'data-sq-button' : 'data-sq-button disabled'">
-                <ion-icon name="download-outline"></ion-icon><br /><ion-text color="primary">{{ 'Import File' | translate }}</ion-text>
+                <ion-icon name="download-outline"></ion-icon><br /><ion-text color="primary">{{ 'Import File' |
+                  translate }}</ion-text>
               </div>
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-outline"></ion-icon><br />
@@ -104,7 +105,7 @@ https://www.gnu.org/licenses.
                 <span>{{ 'Save Schema' | translate }}</span>
               </ion-button>
               <ion-button *ngIf="is_saving">
-                <ion-spinner name="lines-sharp"></ion-spinner>&nbsp;&nbsp;
+                <ion-spinner name="lines-sharp-small"></ion-spinner>&nbsp;&nbsp;
                 <span>{{ 'Saving' | translate }}</span>
               </ion-button>
               <ion-button (click)="set_editor(false)" color="medium">

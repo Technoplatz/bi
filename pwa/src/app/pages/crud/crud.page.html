@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
         <ion-row *ngIf="tab=='data'" class="ion-padding-top ion-padding-bottom">
             <ion-col size="12">
                 <ion-button *ngIf="in_progress; else ready">
-                    <ion-spinner name="lines-sharp"></ion-spinner>
+                    <ion-spinner name="lines-sharp-small"></ion-spinner>
                     &nbsp;&nbsp;{{ 'In Progress' | translate }}
                 </ion-button>
                 <ng-template #ready>
@@ -363,7 +363,7 @@ https://www.gnu.org/licenses.
 </ion-content>
 <ion-content *ngIf="visible=='hide'" class="ion-padding-start ion-padding-end">
     <ion-item lines="none">
-        <ion-spinner name="lines-sharp" class="ion-margin-end"></ion-spinner>
+        <ion-spinner name="lines-sharp-small" class="ion-margin-end"></ion-spinner>
         <ion-label> {{ loadingText | translate }}</ion-label>
     </ion-item>
 </ion-content>

@@ -6181,8 +6181,6 @@ def api_crud_f():
             res_ = Crud().read_f(input_)
         elif op_ == "update":
             res_ = Crud().upsert_f(input_)
-        elif op_ == "import":
-            res_ = Crud().import_f(input_)
         elif op_ == "insert":
             res_ = Crud().insert_f(input_)
         elif op_ in ["clone", "delete"]:
