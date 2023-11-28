@@ -39,6 +39,7 @@ export const environment = {
   support_url: "#",
   swu_interval_mins: 15,
   apiUrl: "http://localhost:8443/api",
+  companyName: "Acme Inc,",
   misc: {
     logo: "logo-electron",
     default_sort: '{"_modified_at": -1}',

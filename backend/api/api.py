@@ -5887,10 +5887,10 @@ COMPANY_NAME_ = (
 DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
+SMTP_ENDPOINT_ = os.environ.get("SMTP_ENDPOINT")
+SMTP_USERID_ = os.environ.get("SMTP_USERID")
+SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
 SMTP_TLS_PORT_ = int(str(os.environ.get("SMTP_TLS_PORT")))
-SMTP_USERID_ = get_docker_secret("smtp_userid", default="")
-SMTP_PASSWORD_ = get_docker_secret("smtp_password", default="")
-SMTP_ENDPOINT_ = get_docker_secret("smtp_endpoint", default="")
 FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
 EMAIL_DISCLAIMER_HTML_ = os.environ.get("EMAIL_DISCLAIMER_HTML")
 EMAIL_TFA_SUBJECT_ = "Your Backup OTP"

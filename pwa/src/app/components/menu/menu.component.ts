@@ -45,6 +45,7 @@ import { Crud } from "../../classes/crud";
 export class MenuComponent implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
+  public companyName = environment.companyName;
   public segmentsadm: any;
   public user_: any;
   public perm_: boolean = false;

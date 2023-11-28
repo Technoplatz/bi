@@ -100,8 +100,8 @@ class Cloudflare:
         docstring is in progress
         """
         self.cf_active_ = os.environ.get("CF_ACTIVE") in [True, "true", "True", "TRUE"]
-        self.cf_zone_id_ = get_docker_secret("cf_zoneid", default="")
-        self.token_ = get_docker_secret("cf_token", default="")
+        self.cf_zone_id_ = os.environ.get("CF_ZONEID")
+        self.token_ = os.environ.get("CF_TOKEN")
         self.cf_rule_name_ = os.environ.get("CF_RULE_NAME")
         self.cf_countries_ = os.environ.get("CF_COUNTRIES").replace(" ", "").split(",")
         self.admin_ips_ = (
@@ -245,15 +245,7 @@ class Cloudflare:
             for doc_ in docs_:
                 Mongo().db_["_firewall"].update_many(
                     {"fwa_source_ip": doc_["_id"]},
-                    {
-                        "$set": {
-                            "fwa_waf_sync_date": datetime.now(),
-                            "_modified_at": datetime.now(),
-                            "_modified_by": json_["email"]
-                            if "email" in json_
-                            else "_action",
-                        }
-                    },
+                    {"$set": {"fwa_waf_sync_date": datetime.now()}},
                 )
 
             result_ = True
