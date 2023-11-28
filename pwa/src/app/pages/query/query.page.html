@@ -63,7 +63,7 @@ https://www.gnu.org/licenses.
                 </span>
               </div>
               <div (click)="copy_url()" class="data-sq-button">
-                <ion-icon *ngIf="!is_url_copied" name="globe-sharp"></ion-icon>
+                <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
                 <ion-icon *ngIf="is_url_copied" name="checkmark-sharp"></ion-icon>
                 <br />
                 <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
@@ -71,8 +71,14 @@ https://www.gnu.org/licenses.
               </div>
               <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
                 <div class="ion-no-padding">
-                  <ion-icon name="create-sharp"></ion-icon><br />
-                  {{ 'Edit Query' | translate }}
+                  <ion-icon name="create-outline"></ion-icon><br />
+                  {{ 'Edit JSON' | translate }}
+                </div>
+              </div>
+              <div (click)="edit_query()" class="data-sq-button">
+                <div class="ion-no-padding">
+                  <ion-icon name="settings-outline"></ion-icon><br />
+                  {{ 'Query' | translate }}<br />{{ 'Settings' | translate }}
                 </div>
               </div>
             </ion-col>
@@ -90,11 +96,11 @@ https://www.gnu.org/licenses.
               </ion-button>
               <ion-button *ngIf="perma_" (click)="save_json_f(true)">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span *ngIf="!_saving">{{ 'Approve' | translate }} & {{ 'Save' | translate }}</span>
+                <span *ngIf="!_saving">{{ 'Approve' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
               <ion-button (click)="set_editor(false)" color="medium">
-                <ion-icon name="close"></ion-icon>
+                <ion-icon name="close-circle-outline"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
             </ion-col>

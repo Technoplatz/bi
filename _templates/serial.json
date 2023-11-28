@@ -89,7 +89,7 @@
   ],
   "unique": [["ser_no"]],
   "sort": {
-    "_modified_at": -1
+    "ser_in_date": -1
   },
   "parents": [],
   "links": [],

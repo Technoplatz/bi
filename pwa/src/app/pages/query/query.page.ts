@@ -31,6 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
+import { ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
@@ -38,6 +39,7 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { JsonEditorOptions } from "ang-jsoneditor";
+import { CrudPage } from "../crud/crud.page";
 
 @Component({
   selector: "app-query",
@@ -72,6 +74,7 @@ export class QueryPage implements OnInit {
   public query_url_: string = "";
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
+  public collections_: any = [];
   private menu: string = "";
   private submenu: string = "";
   private query_: any = {};
@@ -85,11 +88,15 @@ export class QueryPage implements OnInit {
     private storage: Storage,
     private auth: Auth,
     private crud: Crud,
-    private router: Router
+    private router: Router,
+    private modal: ModalController
   ) {
     this.auth.user.subscribe((res: any) => {
       this.user = res;
       this.perma_ = res.perma;
+    });
+    this.crud.collections.subscribe((res: any) => {
+      this.collections_ = res && res.data ? res.data : [];
     });
   }
 
@@ -212,6 +219,39 @@ export class QueryPage implements OnInit {
         this.running_ = false;
       });
     }
+  }
+
+  async edit_query() {
+    const modal = await this.modal.create({
+      component: CrudPage,
+      backdropDismiss: true,
+      cssClass: "crud-modal",
+      componentProps: {
+        shuttle: {
+          op: "update",
+          collection: "_query",
+          collections: this.collections_,
+          views: [],
+          user: this.user,
+          data: this.query_,
+          counters: null,
+          structure: this.schema_,
+          sweeped: [],
+          filter: null,
+          actions: [],
+          actionix: -1,
+          view: null,
+          scan: null
+        }
+      }
+    });
+    modal.onDidDismiss().then((res: any) => {
+      if (res.data.modified && res.data.res.result) {
+        this.misc.doMessage("query settings updated successfully", "success");
+        this.refresh_data(true);
+      }
+    });
+    return await modal.present();
   }
 
 }
