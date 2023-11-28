@@ -668,4 +668,9 @@ export class CrudPage implements OnInit {
     return items_.filter((item_: any) => item_ !== null);
   }
 
+  unlock_field(fn_: string, index_: number) {
+    this.crudForm.get(fn_)?.enable();
+    this.fieldsupd[index_].permanent = false;
+  }
+
 }

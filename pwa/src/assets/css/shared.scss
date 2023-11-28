@@ -954,10 +954,11 @@ ion-spinner {
 .nulla-button {
   position: absolute;
   right: 8px !important;
-  top: 18px !important;
-  z-index: 999;
+  top: 16px !important;
+  z-index: 9999;
   margin-right: 0px !important;
   --padding-end: 0px !important;
+  pointer-events: all !important;
 }
 
 ion-list {

@@ -181,7 +181,7 @@ https://www.gnu.org/licenses.
                             </ion-button>
                         </div>
                     </ion-item>
-                    <ion-item lines="full" *ngFor="let field of fieldsupd; let i = index"
+                    <ion-item lines="full" *ngFor="let field of fieldsupd; let index_ = index"
                         class="ion-no-margin full-width">
                         <ion-label position="stacked">
                             {{ field.title | translate }}:
@@ -308,11 +308,17 @@ https://www.gnu.org/licenses.
                             (click)="get_parent(field.parents)" class="parent-link-button">{{
                             field.parents?.collection | translate }}
                         </ion-button>
-                        <ion-button *ngIf="op=='insert' || (!field?.readonly && !field?.permanent && !field?.disabled)"
-                            slot="end" color="medium" (click)="field_nulla(field.name)" fill="clear"
-                            class="nulla-button">
+                        <ion-button *ngIf="op=='insert' || (!field?.permanent && !field?.disabled); else locked"
+                            color="medium" (click)="field_nulla(field.name)" fill="clear" class="nulla-button"
+                            disabled="false">
                             <ion-icon name="close-sharp"></ion-icon>
                         </ion-button>
+                        <ng-template #locked>
+                            <ion-button *ngIf="field?.permanent" color="medium" (click)="unlock_field(field.name, index_)"
+                                fill="clear" class="nulla-button">
+                                <ion-icon name="lock-closed-outline"></ion-icon>
+                            </ion-button>
+                        </ng-template>
                     </ion-item>
                     <ion-item *ngIf="scan_" lines="none">
                         <ion-label position="stacked">{{ 'Scan History' }}</ion-label>
