@@ -225,8 +225,8 @@ export class QueryPage implements OnInit {
     }
   }
 
-  async edit_query() {
-    const modal = await this.modal.create({
+  edit_query() {
+    this.modal.create({
       component: CrudPage,
       backdropDismiss: true,
       cssClass: "crud-modal",
@@ -248,14 +248,15 @@ export class QueryPage implements OnInit {
           scan: null
         }
       }
+    }).then((modal_: any) => {
+      modal_.onDidDismiss().then((res: any) => {
+        if (res.data.modified && res.data.res.result) {
+          this.misc.doMessage("query settings updated successfully", "success");
+          this.refresh_data(true);
+        }
+      });
+      modal_.present();
     });
-    modal.onDidDismiss().then((res: any) => {
-      if (res.data.modified && res.data.res.result) {
-        this.misc.doMessage("query settings updated successfully", "success");
-        this.refresh_data(true);
-      }
-    });
-    return await modal.present();
   }
 
   json_editor_setmode(mode_: any) {

@@ -130,10 +130,10 @@ function startBI() {
         return 0
     fi
     if [[ -f $IXCFDIR/$DCYML ]]; then
-        env docker compose --project-name $PRJNAME --env-file $IXCFDIR/$DOTENV -f $IXCFDIR/$DCYML --compatibility up --detach --no-build
+        env docker compose --project-name $PRJNAME --env-file $IXCFDIR/$IXDOTENV -f $IXCFDIR/$DCYML --compatibility up --detach --no-build
     fi
     if [[ -f $IXEDOKSISDIR/$DCYML ]]; then
-        env docker compose --project-name $PRJNAME --env-file $IXEDOKSISDIR/$DOTENV -f $IXEDOKSISDIR/$DCYML --compatibility up --detach --no-build
+        env docker compose --project-name $PRJNAME --env-file $IXEDOKSISDIR/$IXDOTENV -f $IXEDOKSISDIR/$DCYML --compatibility up --detach --no-build
     fi
     return 1
 }
@@ -194,6 +194,7 @@ DOTENV=".env"
 if [[ -f .env-dev0 ]]; then
     DOTENV=".env-dev0"
 fi
+IXDOTENV=".env"
 
 case $1 in
 "init")

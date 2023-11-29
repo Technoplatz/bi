@@ -171,11 +171,15 @@ class Schedular:
                 schedules_ = (
                     Mongo()
                     .db_["_query"]
-                    .find({"que_scheduled": True, "_approved": True})
+                    .find({"que_enabled": True, "que_scheduled": True, "_approved": True})
                 )
             elif source_ == "_job":
                 schedules_ = (
-                    Mongo().db_["_job"].find({"job_scheduled": True, "_approved": True})
+                    Mongo()
+                    .db_["_job"]
+                    .find(
+                        {"job_enabled": True, "job_scheduled": True, "_approved": True}
+                    )
                 )
             else:
                 return {"result": True}
@@ -2359,6 +2363,11 @@ class Crud:
             if not query_:
                 raise APIError("query not found")
 
+            enabled_ = "que_enabled" in query_ and query_["que_enabled"] is True
+            if not enabled_:
+                err_ = "query is not enabled"
+                raise PassException(err_)
+
             approved_ = "_approved" in query_ and query_["_approved"] is True
             if not approved_:
                 err_ = "query needs to be approved by administrators"
@@ -2639,6 +2648,11 @@ class Crud:
                 err_ = "no set found in the update query"
                 raise PassException(err_)
 
+            enabled_ = "job_enabled" in job_ and job_["job_enabled"] is True
+            if not enabled_:
+                err_ = "job is not enabled"
+                raise PassException(err_)
+
             approved_ = "_approved" in job_ and job_["_approved"] is True
             if not approved_:
                 err_ = "job needs to be approved by the administrators"
@@ -2711,6 +2725,7 @@ class Crud:
 
         except pymongo.errors.PyMongoError as exc__:
             init_res_["result"] = False
+            init_res_["schema"] = {}
             init_res_["count"] = count_
             init_res_["job"] = job_
             init_res_["err"] = str(exc__)
@@ -2718,12 +2733,14 @@ class Crud:
 
         except PassException as exc__:
             init_res_["count"] = count_
+            init_res_["schema"] = schema_
             init_res_["job"] = job_
             init_res_["err"] = str(exc__)
             return init_res_
 
         except Exception as exc__:
             init_res_["result"] = False
+            init_res_["schema"] = {}
             init_res_["count"] = count_
             init_res_["job"] = job_
             init_res_["err"] = str(exc__)

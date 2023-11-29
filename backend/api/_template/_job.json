@@ -18,6 +18,12 @@
       "collection": true,
       "caseType": "lowercase"
     },
+    "job_enabled": {
+      "bsonType": "bool",
+      "title": "Enabled?",
+      "description": "Enabled or not",
+      "default": false
+    },
     "job_scheduled": {
       "bsonType": "bool",
       "title": "Scheduled",
@@ -40,9 +46,30 @@
     }
   },
   "required": ["job_name", "job_collection_id"],
-  "index": [["job_collection_id"], ["job_scheduled"], ["job_scheduled", "_approved"]],
+  "index": [
+    ["job_collection_id"],
+    ["job_scheduled"],
+    ["job_scheduled", "_approved"],
+    ["job_enabled", "job_scheduled", "_approved"]
+  ],
   "unique": [["job_name"]],
   "sort": {
     "_modified_at": -1
-  }
+  },
+  "actions": [
+    {
+      "id": "enabled",
+      "title": "Set Enabled",
+      "enabled": true,
+      "match": [],
+      "set": [{ "key": "job_enabled", "value": true }],
+      "one_click": false,
+      "icon": "eye-outline",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Technoplatz"],
+      "notification": {},
+      "api": {}
+    }
+  ]
 }

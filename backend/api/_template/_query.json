@@ -43,6 +43,12 @@
       },
       "manualAdd": true
     },
+    "que_enabled": {
+      "bsonType": "bool",
+      "title": "Enabled?",
+      "description": "Enabled or not",
+      "default": false
+    },
     "que_in_dashboard": {
       "bsonType": "bool",
       "title": "In Dashboard?",
@@ -105,6 +111,7 @@
     ["que_id"],
     ["que_collection_id"],
     ["que_scheduled"],
+    ["que_enabled", "que_scheduled", "_approved"],
     ["que_scheduled", "_approved"],
     ["que_id", "_approved", "_tags"],
     ["que_in_dashboard", "_approved", "_tags"]
@@ -119,6 +126,20 @@
       "set": [{ "key": "que_priority", "value": null }],
       "one_click": false,
       "icon": "swap-vertical-sharp",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Technoplatz"],
+      "notification": {},
+      "api": {}
+    },
+    {
+      "id": "enabled",
+      "title": "Set Enabled",
+      "enabled": true,
+      "match": [],
+      "set": [{ "key": "que_enabled", "value": true }],
+      "one_click": false,
+      "icon": "eye-outline",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Technoplatz"],
