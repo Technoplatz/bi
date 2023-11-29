@@ -498,7 +498,7 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  save_json_f() {
+  save_schema_f() {
     if (this.json_content_) {
       this.is_saving = true;
       this.structure_ = this.json_content_;
@@ -579,9 +579,9 @@ export class CollectionPage implements OnInit {
   go_query_job(record_: any, event_: any) {
     event_.stopPropagation();
     this.id === "_query" ? this.storage.set("LSQUERY", record_).then(() => {
-      this.misc.navi.next("/query/" + record_.que_id);
+      this.misc.navi.next("/query/" + record_._id);
     }) : this.storage.set("LSJOB", record_).then(() => {
-      this.misc.navi.next("/job/" + record_.job_id);
+      this.misc.navi.next("/job/" + record_._id);
     });
   }
 

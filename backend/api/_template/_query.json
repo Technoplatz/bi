@@ -115,16 +115,24 @@
       "id": "priority",
       "title": "Set Priority",
       "enabled": true,
-      "match": [
-        {
-          "key": "que_id",
-          "op": "nnull",
-          "value": null
-        }
-      ],
-      "set": [{ "key": "que_priority", "value": 9000 }],
+      "match": [],
+      "set": [{ "key": "que_priority", "value": null }],
       "one_click": false,
       "icon": "swap-vertical-sharp",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Technoplatz"],
+      "notification": {},
+      "api": {}
+    },
+    {
+      "id": "dash",
+      "title": "Show on Dashboard",
+      "enabled": true,
+      "match": [],
+      "set": [{ "key": "que_in_dashboard", "value": true }],
+      "one_click": false,
+      "icon": "easel-outline",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Technoplatz"],

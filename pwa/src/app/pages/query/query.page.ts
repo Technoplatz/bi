@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
@@ -38,8 +38,10 @@ import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
-import { JsonEditorOptions } from "ang-jsoneditor";
+import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 import { CrudPage } from "../crud/crud.page";
+import { clear } from "console";
+import { browser } from "protractor";
 
 @Component({
   selector: "app-query",
@@ -48,6 +50,7 @@ import { CrudPage } from "../crud/crud.page";
 })
 
 export class QueryPage implements OnInit {
+  @ViewChild("editor", { static: false }) editor: any = new JsonEditorComponent();
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "QUERIES";
@@ -159,8 +162,11 @@ export class QueryPage implements OnInit {
       this.jeoptions = new JsonEditorOptions();
       this.jeoptions.modes = ["tree", "code", "text"]
       this.jeoptions.mode = "code";
-      this.jeoptions.statusBar = this.jeoptions.navigationBar = true;
-      this.jeoptions.enableSort = this.jeoptions.expandAll = false;
+      this.jeoptions.statusBar = false;
+      this.jeoptions.navigationBar = false;
+      this.jeoptions.mainMenuBar = false;
+      this.jeoptions.enableSort = false;
+      this.jeoptions.expandAll = false;
       resolve(true);
     });
   }
@@ -170,7 +176,7 @@ export class QueryPage implements OnInit {
     set_ ? this.json_editor_init().then(() => { }) : null;
   }
 
-  save_json_f(approved_: boolean) {
+  save_query_json_f(approved_: boolean) {
     if (this.json_content_ && this.json_content_.length > 0) {
       this._saving = true;
       this.aggregate_ = this.json_content_;
@@ -252,6 +258,16 @@ export class QueryPage implements OnInit {
       }
     });
     return await modal.present();
+  }
+
+  json_editor_setmode(mode_: any) {
+    this.jeoptions.mode = mode_;
+    this.editor.setOptions(this.jeoptions);
+  }
+
+  json_editor_format() {
+    this.jeoptions.mode = 'code';
+    this.editor.setOptions(this.jeoptions);
   }
 
 }

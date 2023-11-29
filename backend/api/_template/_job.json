@@ -1,19 +1,9 @@
 {
   "properties": {
-    "job_id": {
+    "job_name": {
       "bsonType": "string",
-      "title": "ID",
-      "description": "Job ID",
-      "minLength": 3,
-      "maxLength": 64,
-      "pattern": "^[a-z0-9-_]{3,64}$",
-      "caseType": "lowercase",
-      "permanent": true
-    },
-    "job_title": {
-      "bsonType": "string",
-      "title": "Title",
-      "description": "Job Title",
+      "title": "Name",
+      "description": "Job Name",
       "minLength": 1,
       "maxLength": 64,
       "caseType": "capitalize"
@@ -49,9 +39,9 @@
       "description": "Query aggregation"
     }
   },
-  "required": ["job_id", "job_title", "job_collection_id"],
-  "index": [["job_id"], ["job_collection_id"], ["job_scheduled"], ["job_scheduled", "_approved"]],
-  "unique": [["job_id"]],
+  "required": ["job_name", "job_collection_id"],
+  "index": [["job_collection_id"], ["job_scheduled"], ["job_scheduled", "_approved"]],
+  "unique": [["job_name"]],
   "sort": {
     "_modified_at": -1
   }

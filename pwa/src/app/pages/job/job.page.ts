@@ -31,6 +31,7 @@ https://www.gnu.org/licenses.
 */
 
 import { Component, OnInit } from "@angular/core";
+import { ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
@@ -38,6 +39,7 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { JsonEditorOptions } from "ang-jsoneditor";
+import { CrudPage } from "../crud/crud.page";
 
 @Component({
   selector: "app-job",
@@ -74,18 +76,20 @@ export class JobPage implements OnInit {
   public job_scheduled_cron_: string = "";
   private menu: string = "";
   private submenu: string = "";
-  private query_: any = {};
+  private job_: any = {};
   public perma_: boolean = false;
   private collections_: any = [];
   public json_content_: any = null;
   public col_: string = "";
+  private schema_: any = {};
 
   constructor(
     public misc: Miscellaneous,
     private storage: Storage,
     private auth: Auth,
     private crud: Crud,
-    private router: Router
+    private router: Router,
+    private modal: ModalController
   ) {
     this.auth.user.subscribe((res: any) => {
       this.user = res;
@@ -108,7 +112,7 @@ export class JobPage implements OnInit {
       this.limit_ = LSPAGINATION * 1;
       this.storage.get("LSJOB").then((LSJOB_: any) => {
         this.col_ = LSJOB_?.job_collection_id;
-        this.query_ = LSJOB_;
+        this.job_ = LSJOB_;
         this.menu = this.router.url.split("/")[1];
         this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
         this.refresh_data(false).then(() => { });
@@ -122,8 +126,9 @@ export class JobPage implements OnInit {
       this.schemavis_ = false;
       this.crud.get_query_job("job", this.id, this.limit_, run_).then((res: any) => {
         if (res && res.job) {
+          this.schema_ = res.schema;
           this.job_scheduled_cron_ = res.job?.job_scheduled_cron;
-          this.subheader = res.job.job_title;
+          this.subheader = res.job.job_name;
           this.json_content_ = res.job.job_aggregate;
           this.aggregate_ = res.job.job_aggregate;
           this.count_ = res.count;
@@ -161,7 +166,7 @@ export class JobPage implements OnInit {
     set_ ? this.json_editor_init().then(() => { }) : null;
   }
 
-  save_json_f(approved_: boolean) {
+  save_job_json_f(approved_: boolean) {
     if (this.json_content_ && this.json_content_.length > 0) {
       this._saving = true;
       this.aggregate_ = this.json_content_;
@@ -191,6 +196,39 @@ export class JobPage implements OnInit {
     this.refresh_data(true).then(() => {
       console.log("*** jub run");
     });
+  }
+
+  async edit_query() {
+    const modal = await this.modal.create({
+      component: CrudPage,
+      backdropDismiss: true,
+      cssClass: "crud-modal",
+      componentProps: {
+        shuttle: {
+          op: "update",
+          collection: "_job",
+          collections: this.collections_,
+          views: [],
+          user: this.user,
+          data: this.job_,
+          counters: null,
+          structure: this.schema_,
+          sweeped: [],
+          filter: null,
+          actions: [],
+          actionix: -1,
+          view: null,
+          scan: null
+        }
+      }
+    });
+    modal.onDidDismiss().then((res: any) => {
+      if (res.data.modified && res.data.res.result) {
+        this.misc.doMessage("query settings updated successfully", "success");
+        this.refresh_data(true);
+      }
+    });
+    return await modal.present();
   }
 
 }

@@ -100,7 +100,7 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="is_crud && perm_ && schemavis_" class="actions-grid">
           <ion-row>
             <ion-col size="12">
-              <ion-button *ngIf="!is_saving" (click)="save_json_f()">
+              <ion-button *ngIf="!is_saving" (click)="save_schema_f()">
                 <ion-icon name="save-outline"></ion-icon>
                 <span>{{ 'Save Schema' | translate }}</span>
               </ion-button>
@@ -158,7 +158,7 @@ https://www.gnu.org/licenses.
                 </ion-checkbox>
               </th>
               <th *ngIf="['_query','_job'].includes(id)">
-                {{ 'Approved' | translate }}<br />
+                {{ 'Approval' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_approved'}}</ion-button>
               </th>
               <!-- DATA LIST HEADER -->
@@ -169,7 +169,7 @@ https://www.gnu.org/licenses.
                   <ion-button size="small" fill="clear"
                     [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'"
                     (click)="set_search(item.key)">{{
-                    item.key }}<ion-icon name="filter-sharp"></ion-icon>
+                    item.key }}<ion-icon name="caret-down"></ion-icon>
                   </ion-button>
                 </div>
                 <!-- SEARCH BOX -->
@@ -239,7 +239,7 @@ https://www.gnu.org/licenses.
                       {{ 'Search' | translate }}
                     </ion-button>
                     <ion-button size="small" (click)="init_search_item(item.key)" color="medium">
-                      <ion-icon name="close"></ion-icon>
+                      <ion-icon name="close-circle-outline"></ion-icon>
                       {{ 'Clear' | translate }}
                     </ion-button>
                   </div>
@@ -269,6 +269,10 @@ https://www.gnu.org/licenses.
               <th>
                 {{ 'Modified By' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_modified_by'}}</ion-button>
+              </th>
+              <th>
+                {{ 'Document ID' | translate }}<br />
+                <ion-button size="small" class="unfiltered-btn">{{'_id'}}</ion-button>
               </th>
             </tr>
             <tr *ngFor="let record of data; let i = index"
@@ -344,6 +348,9 @@ https://www.gnu.org/licenses.
               </td>
               <td>
                 {{ record._modified_by }}
+              </td>
+              <td>
+                {{ record._id }}
               </td>
             </tr>
           </table>

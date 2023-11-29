@@ -332,7 +332,7 @@ https://www.gnu.org/licenses.
                 </ion-list>
                 <ion-list *ngIf="op=='update'" class="ion-no-padding crud-form-list">
                     <ion-item *ngIf="data_['_id'] && collection!='_token'" lines="full" class="ion-no-margin">
-                        <ion-label position="stacked">{{ 'ID' | translate }}:</ion-label>
+                        <ion-label position="stacked">{{ 'Document ID' | translate }}:</ion-label>
                         <ion-input class="ion-no-padding" type="text" [value]="data_['_id']" id="_id" disabled>
                         </ion-input>
                     </ion-item>

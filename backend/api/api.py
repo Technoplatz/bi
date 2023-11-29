@@ -184,13 +184,7 @@ class Schedular:
                 return {"result": True}
 
             for query_ in schedules_:
-                id__ = (
-                    query_["que_id"]
-                    if source_ == "_query" and "que_id" in query_
-                    else query_["job_id"]
-                    if source_ == "_job" and "job_id" in query_
-                    else None
-                )
+                id__ = str(query_["_id"]) if "_id" in query_ else None
 
                 if not id__:
                     continue
@@ -227,7 +221,7 @@ class Schedular:
                         day_of_week=day_of_week_,
                         id=id__,
                         replace_existing=True,
-                        args=[{"id": query_["job_id"]}],
+                        args=[{"id": id__}],
                     )
                 elif source_ == "_query":
                     sched_.add_job(
@@ -242,7 +236,7 @@ class Schedular:
                         replace_existing=True,
                         args=[
                             {
-                                "id": query_["que_id"],
+                                "id": id__,
                                 "sched": True,
                                 "key": SMTP_PASSWORD_,
                             }
@@ -2222,25 +2216,25 @@ class Crud:
         res_ = {}
         try:
             user_ = obj_["userindb"]
-            col_id_ = obj_["collection"]
-            scope_ = obj_["scope"]
             visuals_ = []
             cursor_ = (
                 Mongo()
                 .db_["_query"]
                 .find(
-                    {
+                    filter={
                         "que_in_dashboard": True,
                         "_approved": True,
                         "_tags": {"$elemMatch": {"$in": user_["_tags"]}},
-                    }
+                    },
+                    sort={"que_priority": 1, "_modified_at": -1},
                 )
                 .limit(16)
             )
-            for item_ in cursor_:
+            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            for item_ in docs_:
                 visuals_.append(
                     {
-                        "id": item_["que_id"],
+                        "id": item_["_id"],
                         "title": item_["que_title"],
                         "collection": item_["que_collection_id"],
                         "size": item_["que_flashcard_size"]
@@ -2250,6 +2244,9 @@ class Crud:
                 )
 
             res_ = {"result": True, "visuals": visuals_}
+
+        except pymongo.errors.PyMongoError as exc__:
+            res_ = Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
             res_ = Misc().notify_exception_f(exc__)
@@ -2264,13 +2261,13 @@ class Crud:
         res_, visual_ = {}, {}
         try:
             user_ = obj_["userindb"]
-            id_ = obj_["id"]
+            id_ = ObjectId(obj_["id"])
             cursor_ = (
                 Mongo()
                 .db_["_query"]
                 .find_one(
                     {
-                        "que_id": id_,
+                        "_id": id_,
                         "_approved": True,
                         "_tags": {"$elemMatch": {"$in": user_["_tags"]}},
                     }
@@ -2298,6 +2295,9 @@ class Crud:
             }
 
             res_ = {"result": True, "visual": visual_}
+
+        except pymongo.errors.PyMongoError as exc__:
+            res_ = Misc().notify_exception_f(exc__)
 
         except APIError as exc__:
             res_ = Misc().notify_exception_f(exc__)
@@ -2331,8 +2331,8 @@ class Crud:
             "err": err_,
         }
         try:
-            que_id_ = obj_["id"] if "id" in obj_ else None
-            if not que_id_:
+            _id = obj_["id"] if "id" in obj_ else None
+            if not _id:
                 raise APIError("no query id defined")
 
             schema_ = self.root_schemas_f("_query")
@@ -2352,10 +2352,10 @@ class Crud:
                     orig_ = "visual"
                 else:
                     orig_ = request.base_url.replace(request.host_url, "")
-                    if orig_ not in ["api/crud", f"api/get/query/{que_id_}"]:
+                    if orig_ not in ["api/crud", f"api/get/query/{_id}"]:
                         raise AuthError("request is not authenticated")
 
-            query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
+            query_ = Mongo().db_["_query"].find_one({"_id": ObjectId(_id)})
             if not query_:
                 raise APIError("query not found")
 
@@ -2367,7 +2367,7 @@ class Crud:
             if orig_ in ["api/crud", "visual"]:
                 user_ = obj_["userindb"] if "userindb" in obj_ else None
                 if not user_:
-                    raise APIError(f"no user defined for {que_id_}")
+                    raise APIError(f"no user defined for the query")
                 usr_tags_ = (
                     user_["_tags"]
                     if "_tags" in user_ and len(user_["_tags"]) > 0
@@ -2467,7 +2467,7 @@ class Crud:
                     if "_tags" in query_ and len(query_["_tags"]) > 0
                     else API_PERMISSIVE_TAGS_
                 )
-                que_title_ = query_["que_title"] if "que_title" in query_ else que_id_
+                que_title_ = query_["que_title"] if "que_title" in query_ else _id
                 que_message_body_ = (
                     query_["que_message_body"]
                     if "que_message_body" in query_
@@ -2484,10 +2484,12 @@ class Crud:
                             {"email": member_["usr_id"], "name": member_["usr_name"]}
                         )
                 df_raw_ = pd.DataFrame(data_).fillna("")
-                file_excel_ = f"{API_TEMPFILE_PATH_}/query-{que_id_}-{Misc().get_timestamp_f()}.xlsx"
+                file_excel_ = (
+                    f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx"
+                )
                 df_raw_.to_excel(
                     file_excel_,
-                    sheet_name=que_id_,
+                    sheet_name=_id,
                     engine="xlsxwriter",
                     header=True,
                     index=False,
@@ -2549,15 +2551,15 @@ class Crud:
         count_, err_ = 0, None
         init_res_ = {"result": True, "count": count_, "err": err_}
         try:
-            job_id_ = obj_["id"] if "id" in obj_ else None
-            if not job_id_:
+            _id = obj_["id"] if "id" in obj_ else None
+            if not _id:
                 raise APIError("no job defined")
 
             schema_ = self.root_schemas_f("_job")
             if not schema_:
                 raise APIError("job schema not found")
 
-            job_ = Mongo().db_["_job"].find_one({"job_id": job_id_})
+            job_ = Mongo().db_["_job"].find_one({"_id": ObjectId(_id)})
             if not job_:
                 raise APIError("job not found")
 
@@ -2681,7 +2683,7 @@ class Crud:
                 count_ = update_many_.matched_count
                 Mongo().db_["_joblog"].insert_one(
                     {
-                        "jol_job_id": job_id_,
+                        "jol_id": _id,
                         "jol_run_date": Misc().get_now_f(),
                         "jol_count": count_,
                         "jol_ids": ids_,
@@ -2689,7 +2691,13 @@ class Crud:
                     }
                 )
 
-            return {"result": True, "count": count_, "job": job_, "err": err_}
+            return {
+                "result": True,
+                "count": count_,
+                "job": job_,
+                "schema": schema_,
+                "err": err_,
+            }
 
         except AuthError as exc__:
             return Misc().auth_error_f(exc__)
@@ -2699,15 +2707,21 @@ class Crud:
 
         except pymongo.errors.PyMongoError as exc__:
             init_res_["result"] = False
+            init_res_["count"] = count_
+            init_res_["job"] = job_
             init_res_["err"] = str(exc__)
             return init_res_
 
         except PassException as exc__:
+            init_res_["count"] = count_
+            init_res_["job"] = job_
             init_res_["err"] = str(exc__)
             return init_res_
 
         except Exception as exc__:
             init_res_["result"] = False
+            init_res_["count"] = count_
+            init_res_["job"] = job_
             init_res_["err"] = str(exc__)
             return init_res_
 
@@ -3052,8 +3066,8 @@ class Crud:
         docstring is in progress
         """
         try:
-            job_id_ = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
-            if not job_id_:
+            _id = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
+            if not _id:
                 raise APIError("job not provided")
 
             aggregate_ = (
@@ -3062,7 +3076,7 @@ class Crud:
             if not aggregate_:
                 raise APIError("no aggregation provided")
 
-            job_ = Mongo().db_["_job"].find_one({"job_id": job_id_})
+            job_ = Mongo().db_["_job"].find_one({"_id": ObjectId(_id)})
             if not job_:
                 raise APIError("job not found")
 
@@ -3117,7 +3131,7 @@ class Crud:
                 doc_["_approved_by"] = user_["usr_id"]
 
             Mongo().db_["_job"].update_one(
-                {"job_id": job_id_}, {"$set": doc_, "$inc": {"_modified_count": 1}}
+                {"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {"_modified_count": 1}}
             )
 
             return {"result": True}
@@ -3139,11 +3153,11 @@ class Crud:
         docstring is in progress
         """
         try:
-            que_id_ = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
-            if not que_id_:
+            _id = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
+            if not _id:
                 raise APIError("query not found")
 
-            query_ = Mongo().db_["_query"].find_one({"que_id": que_id_})
+            query_ = Mongo().db_["_query"].find_one({"_id": ObjectId(_id)})
             if not query_:
                 raise APIError("query not found")
 
@@ -3204,7 +3218,7 @@ class Crud:
                 doc_["_approved_by"] = user_["usr_id"]
 
             Mongo().db_["_query"].update_one(
-                {"que_id": que_id_}, {"$set": doc_, "$inc": {"_modified_count": 1}}
+                {"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {"_modified_count": 1}}
             )
 
             return {"result": True}
@@ -4007,8 +4021,8 @@ class Crud:
                 and len(notification_["filter"]) > 0
                 else None
             )
-            get_notification_filtered_ = None
 
+            get_notification_filtered_ = None
             if notify_ and filter_:
                 get_notification_filtered_ = self.get_filtered_f(
                     {"match": filter_, "properties": properties_, "data": doc_}
@@ -4026,12 +4040,18 @@ class Crud:
                 else None
             )
 
-            get_filtered_ = self.get_filtered_f(
-                {"match": match_, "properties": properties_}
+            get_filtered_ = (
+                self.get_filtered_f({"match": match_, "properties": properties_})
+                if match_
+                else {}
             )
 
             if ids_ and len(ids_) > 0:
-                get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
+                get_filtered_ = (
+                    {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
+                    if get_filtered_
+                    else {"_id": {"$in": ids_}}
+                )
                 if get_notification_filtered_:
                     get_notification_filtered_ = {
                         "$and": [get_notification_filtered_, {"_id": {"$in": ids_}}]
@@ -4115,7 +4135,7 @@ class Crud:
 
             session_.start_transaction()
 
-            if is_crud_ and set_:
+            if set_:
                 if (
                     data_
                     and split_
@@ -4206,19 +4226,24 @@ class Crud:
                             else 0
                         )
                 else:
-                    doc_["_modified_at"] = Misc().get_now_f()
-                    doc_["_modified_by"] = email_
-                    doc_.pop("_modified_count", None)
-                    update_many_ = session_db_[collection_].update_many(
-                        get_filtered_,
-                        {"$set": doc_, "$inc": {"_modified_count": 1}},
-                        session=session_,
-                    )
-                    count_ = (
-                        update_many_.matched_count
-                        if update_many_.matched_count > 0
-                        else 0
-                    )
+                    newdoc_, forex_ = {}, False
+                    for set__ in set_:
+                        if "key" in set__ and set__["key"] in doc_:
+                            newdoc_[set__["key"]] = doc_[set__["key"]]
+                            forex_ = True
+                    if forex_:
+                        newdoc_["_modified_at"] = Misc().get_now_f()
+                        newdoc_["_modified_by"] = email_
+                        update_many_ = session_db_[collection_].update_many(
+                            get_filtered_,
+                            {"$set": newdoc_, "$inc": {"_modified_count": 1}},
+                            session=session_,
+                        )
+                        count_ = (
+                            update_many_.matched_count
+                            if update_many_.matched_count > 0
+                            else 0
+                        )
 
                 if count_ == 0:
                     session_.abort_transaction()
@@ -6683,6 +6708,9 @@ def api_get_query(id_):
         if not request.headers:
             raise AuthError({"result": False, "msg": "no headers provided"})
 
+        if not id_:
+            raise AuthError({"result": False, "msg": "no query id provided"})
+
         x_api_token_ = (
             request.headers["X-Api-Token"]
             if "X-Api-Token" in request.headers
@@ -6702,7 +6730,7 @@ def api_get_query(id_):
 
         res_ = query_f_["data"] if "data" in query_f_ else []
         if not res_:
-            raise APIError(f"no data generated at /api/get/query/{id_}")
+            raise APIError(f"no data generated at for query: {id_}")
 
     except AuthError as exc__:
         Misc().notify_exception_f(exc__)

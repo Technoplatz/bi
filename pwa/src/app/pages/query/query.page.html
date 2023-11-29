@@ -49,36 +49,30 @@ https://www.gnu.org/licenses.
               <div (click)="misc.navi.next('admin/_query')" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="arrow-back-sharp"></ion-icon><br />
-                  {{ 'Back-To List' | translate }}
+                  <ion-text color="primary">{{ 'Back-To List' | translate }}</ion-text>
                 </div>
               </div>
               <div (click)="refresh_data(false)" [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
                 <span *ngIf="!running_">
                   <ion-icon name="play-sharp"></ion-icon><br />
-                  {{ 'Run Query' | translate }}
+                  <ion-text color="primary">{{ 'Run Query' | translate }}</ion-text>
                 </span>
                 <span *ngIf="running_">
                   <ion-spinner name="lines-sharp"></ion-spinner><br />
-                  {{ 'Please Wait' | translate }}
+                  <ion-text color="primary">{{ 'Please Wait' | translate }}</ion-text>
                 </span>
               </div>
               <div (click)="copy_url()" class="data-sq-button">
                 <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>
                 <ion-icon *ngIf="is_url_copied" name="checkmark-sharp"></ion-icon>
                 <br />
-                <span *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</span>
-                <span *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</span>
-              </div>
-              <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
-                <div class="ion-no-padding">
-                  <ion-icon name="create-outline"></ion-icon><br />
-                  {{ 'Edit JSON' | translate }}
-                </div>
+                <ion-text color="primary" *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</ion-text>
+                <ion-text color="primary" *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</ion-text>
               </div>
               <div (click)="edit_query()" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="settings-outline"></ion-icon><br />
-                  {{ 'Query' | translate }}<br />{{ 'Settings' | translate }}
+                  <ion-text color="primary">{{ 'Query Settings' | translate }}</ion-text>
                 </div>
               </div>
             </ion-col>
@@ -89,12 +83,12 @@ https://www.gnu.org/licenses.
         <ion-grid *ngIf="schemavis_" class="actions-grid">
           <ion-row>
             <ion-col size="12">
-              <ion-button (click)="save_json_f(false)">
-                <ion-icon name="save-outline"></ion-icon>
-                <span *ngIf="!_saving">{{ 'Save' | translate }}</span>
+              <ion-button (click)="save_query_json_f(false)">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+                <span *ngIf="!_saving">&nbsp;{{ 'Save' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
-              <ion-button *ngIf="perma_" (click)="save_json_f(true)">
+              <ion-button *ngIf="perma_" (click)="save_query_json_f(true)">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
                 <span *ngIf="!_saving">{{ 'Approve' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
@@ -103,18 +97,40 @@ https://www.gnu.org/licenses.
                 <ion-icon name="close-circle-outline"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
+              <ion-button (click)="json_editor_setmode('code')" color="medium" class="ion-margin-start">
+                <ion-img src="/assets/icon/json-code.svg" class="json-icon-medium"></ion-img>
+                {{ 'JSON' | translate }}
+              </ion-button>
+              <ion-button (click)="json_editor_setmode('tree')" color="medium">
+                <ion-icon name="reorder-four-outline"></ion-icon>
+                {{ 'Tree' | translate }}
+              </ion-button>
+              <ion-button (click)="json_editor_format()" color="medium">
+                <ion-icon name="color-wand-outline"></ion-icon>
+                {{ 'Format' | translate }}
+              </ion-button>
             </ion-col>
           </ion-row>
           <ion-row class="jrow">
             <ion-col size="12">
               <json-editor id="aggregate" [options]="jeoptions" [data]="aggregate_" (change)="json_changed($event)"
-                #editor></json-editor>
+                #editor id="editor"></json-editor>
             </ion-col>
           </ion-row>
         </ion-grid>
 
         <!-- CRUD GRID SECTION -->
         <div *ngIf="data_.length > 0; else nodata">
+          <ion-grid class="actions-grid">
+            <ion-row>
+              <ion-col size="12">
+                <ion-button (click)="!running_ ? set_editor(true) : null" color="primary">
+                  <ion-img src="/assets/icon/json-code.svg" class="json-icon-medium"></ion-img>
+                  {{ 'Edit JSON' | translate }}
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
           <table class="data-table">
             <tr>
               <th></th>
