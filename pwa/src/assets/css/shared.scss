@@ -1775,6 +1775,16 @@ sup {
   background-color: var(--ion-color-primary) !important;
 }
 
+svg {
+  fill:  var(--ion-color-primary) !important;
+}
+
+.json-icon-large {
+  width: 30px !important;
+  height: 30px !important;
+  margin-bottom: 2px;
+}
+
 .json-icon-medium {
   width: 20px !important;
   height: 20px !important;

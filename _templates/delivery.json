@@ -827,6 +827,6 @@
   "queries": {
     "query": true,
     "cronjob": true,
-    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_ship_type"]
+    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_ship_type", "dnn_rtd_date"]
   }
 }

@@ -178,6 +178,9 @@ export class JobPage implements OnInit {
         approved: approved_
       }).then(() => {
         this.misc.doMessage("job saved successfully", "success");
+        this.refresh_data(false).then(() => {
+          this.schemavis_ = false;
+        });
       }).catch((error: any) => {
         this.misc.doMessage(error, "error");
       }).finally(() => {
@@ -198,8 +201,8 @@ export class JobPage implements OnInit {
     });
   }
 
-  async edit_query() {
-    const modal = await this.modal.create({
+  edit_query() {
+    this.modal.create({
       component: CrudPage,
       backdropDismiss: true,
       cssClass: "crud-modal",
@@ -221,14 +224,16 @@ export class JobPage implements OnInit {
           scan: null
         }
       }
+    }).then((modal_: any) => {
+      modal_.onDidDismiss().then((res: any) => {
+        if (res.data.modified && res.data.res.result) {
+          this.misc.doMessage("job settings updated successfully", "success");
+          this.refresh_data(true);
+        }
+      });
+      modal_.present();
     });
-    modal.onDidDismiss().then((res: any) => {
-      if (res.data.modified && res.data.res.result) {
-        this.misc.doMessage("query settings updated successfully", "success");
-        this.refresh_data(true);
-      }
-    });
-    return await modal.present();
+
   }
 
 }

@@ -69,6 +69,16 @@ https://www.gnu.org/licenses.
                 <ion-text color="primary" *ngIf="!is_url_copied">{{ 'Copy URL' | translate }}</ion-text>
                 <ion-text color="primary" *ngIf="is_url_copied">{{ 'URL Copied' | translate }}</ion-text>
               </div>
+              <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000" #svg class="json-icon-large">
+                  <title>json_scheme</title>
+                  <rect fill="none" />
+                  <path
+                    d="M5,3H7V5H5v5a2,2,0,0,1-2,2,2,2,0,0,1,2,2v5H7v2H5c-1.07-.27-2-.9-2-2V15a2,2,0,0,0-2-2H0V11H1A2,2,0,0,0,3,9V5A2,2,0,0,1,5,3M19,3a2,2,0,0,1,2,2V9a2,2,0,0,0,2,2h1v2H23a2,2,0,0,0-2,2v4a2,2,0,0,1-2,2H17V19h2V14a2,2,0,0,1,2-2,2,2,0,0,1-2-2V5H17V3h2M12,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1M8,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1m8,0a1,1,0,1,1-1,1A1,1,0,0,1,16,15Z" />
+                </svg>
+                <br />
+                <ion-text color="primary">{{ 'Edit JSON' | translate }}</ion-text>
+              </div>
               <div (click)="edit_query()" class="data-sq-button">
                 <div class="ion-no-padding">
                   <ion-icon name="settings-outline"></ion-icon><br />
@@ -121,16 +131,6 @@ https://www.gnu.org/licenses.
 
         <!-- CRUD GRID SECTION -->
         <div *ngIf="data_.length > 0; else nodata">
-          <ion-grid class="actions-grid">
-            <ion-row>
-              <ion-col size="12">
-                <ion-button (click)="!running_ ? set_editor(true) : null" color="primary">
-                  <ion-img src="/assets/icon/json-code.svg" class="json-icon-medium"></ion-img>
-                  {{ 'Edit JSON' | translate }}
-                </ion-button>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
           <table class="data-table">
             <tr>
               <th></th>
@@ -151,8 +151,15 @@ https://www.gnu.org/licenses.
               </td>
             </tr>
           </table>
-          {{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
-          }}.
+          <span *ngIf="data_.length >= limit_; else underlimit">
+            {{ 'The first' | translate }} {{ limit_ }} {{ 'records are displayed' | translate
+            }}.
+          </span>
+          <ng-template #underlimit>
+            {{ data_.length }} {{ 'records displayed' | translate
+            }}.
+          </ng-template>
+
         </div>
 
         <!-- NO DATA FOUND FOR QUERY -->

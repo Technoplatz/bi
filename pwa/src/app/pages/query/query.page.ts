@@ -40,8 +40,6 @@ import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 import { CrudPage } from "../crud/crud.page";
-import { clear } from "console";
-import { browser } from "protractor";
 
 @Component({
   selector: "app-query",

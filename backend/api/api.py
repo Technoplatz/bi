@@ -2569,6 +2569,8 @@ class Crud:
             if not job_collection_id_:
                 raise APIError("job collection not defined")
 
+            name_ = job_["job_name"] if "job_name" in job_ else _id
+
             collection_ = (
                 Mongo().db_["_collection"].find_one({"col_id": job_collection_id_})
             )
@@ -2681,9 +2683,11 @@ class Crud:
                     .update_many({"_id": {"$in": ids_}}, {"$set": set__})
                 )
                 count_ = update_many_.matched_count
+
                 Mongo().db_["_joblog"].insert_one(
                     {
                         "jol_id": _id,
+                        "jol_name": name_,
                         "jol_run_date": Misc().get_now_f(),
                         "jol_count": count_,
                         "jol_ids": ids_,
