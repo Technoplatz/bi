@@ -2578,7 +2578,7 @@ class Crud:
             if not job_collection_id_:
                 raise APIError("job collection not defined")
 
-            name_ = job_["job_name"] if "job_name" in job_ else _id
+            job_name_ = job_["job_name"] if "job_name" in job_ else _id
 
             collection_ = (
                 Mongo().db_["_collection"].find_one({"col_id": job_collection_id_})
@@ -2684,30 +2684,70 @@ class Crud:
                 Mongo().db_[f"{job_collection_id_}_data"].aggregate(aggregate_update_)
             )
             if not cursor_:
-                err_ = "no record found to update"
+                err_ = "no record found to update [1]"
                 raise PassException(err_)
 
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             ids_ = [ObjectId(doc_["_id"]) for doc_ in data_]
-            if ids_:
-                set__["_modified_at"] = Misc().get_now_f()
-                update_many_ = (
-                    Mongo()
-                    .db_[f"{job_collection_id_}_data"]
-                    .update_many({"_id": {"$in": ids_}}, {"$set": set__})
-                )
-                count_ = update_many_.matched_count
 
-                Mongo().db_["_joblog"].insert_one(
-                    {
-                        "jol_id": _id,
-                        "jol_name": name_,
-                        "jol_run_date": Misc().get_now_f(),
-                        "jol_count": count_,
-                        "jol_ids": ids_,
-                        "jol_set": set__,
+            if len(ids_) == 0:
+                err_ = "no record found to update [2]"
+                raise PassException(err_)
+
+            personalizations_ = []
+            get_users_from_tags_f_ = Misc().get_users_from_tags_f(["#Managers"])
+            if not get_users_from_tags_f_["result"]:
+                raise APIError(
+                    f"personalizations error: {get_users_from_tags_f_['msg']}"
+                )
+                personalizations_ = (
+                    get_users_from_tags_f_["personalizations"]
+                    if "personalizations" in get_users_from_tags_f_
+                    else []
+                )
+
+            if len(ids_) > API_JOB_UPDATE_LIMIT_:
+                personalizations_.append({"email": ADMIN_EMAIL_, "name": ADMIN_NAME_})
+                html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)}.</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
+                email_sent_ = Email().send_email_f({
+                        "op": "job",
+                        "personalizations": personalizations_,
+                        "html": html_,
+                        "subject": f"Job Alert [{job_name_}]",
                     }
                 )
+                if not email_sent_["result"]:
+                    raise PassException(email_sent_["msg"])
+
+                err_ = f"job update limit exceeded [{len(ids_)}]"
+                raise PassException(err_)
+
+            set__["_modified_at"] = Misc().get_now_f()
+            update_many_ = (
+                Mongo()
+                .db_[f"{job_collection_id_}_data"]
+                .update_many({"_id": {"$in": ids_}}, {"$set": set__})
+            )
+            count_ = update_many_.matched_count
+
+            Mongo().db_["_joblog"].insert_one({
+                "jol_id": _id,
+                "jol_name": job_name_,
+                "jol_run_date": Misc().get_now_f(),
+                "jol_count": count_,
+                "jol_ids": ids_,
+                "jol_set": set__,
+            })
+
+            html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {count_}.</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
+            email_sent_ = Email().send_email_f({
+                "op": "job",
+                "personalizations": personalizations_,
+                "html": html_,
+                "subject": f"Job Alert [{job_name_}]",
+            })
+            if not email_sent_["result"]:
+                raise PassException(email_sent_["msg"])
 
             return {
                 "result": True,
@@ -5923,7 +5963,8 @@ class Auth:
             return Misc().notify_exception_f(exc)
 
 
-API_OUTPUT_ROWS_LIMIT_ = os.environ.get("API_OUTPUT_ROWS_LIMIT")
+API_OUTPUT_ROWS_LIMIT_ = int(str(os.environ.get("API_OUTPUT_ROWS_LIMIT")))
+API_JOB_UPDATE_LIMIT_ = int(str(os.environ.get("API_JOB_UPDATE_LIMIT")))
 NOTIFICATION_PUSH_URL_ = os.environ.get("NOTIFICATION_PUSH_URL")
 COMPANY_NAME_ = (
     os.environ.get("COMPANY_NAME")

@@ -171,7 +171,7 @@ https://www.gnu.org/licenses.
           <table class="data-table">
             <tr>
               <th>&nbsp;</th>
-              <th>
+              <th *ngIf="!['_log','_dump'].includes(id)">
                 <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="switch_select_data($event.detail.checked)"
                   mode="md">
                 </ion-checkbox>
@@ -201,7 +201,7 @@ https://www.gnu.org/licenses.
                   </ion-button>
                   <ion-button color="light" size="small" (click)="copy_column(item.key)">
                     <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-sharp"></ion-icon>
-                    <ion-icon *ngIf="is_key_copied" name="checkmark"></ion-icon>
+                    <ion-icon *ngIf="is_key_copied" name="checkmark-sharp"></ion-icon>
                     <ion-icon *ngIf="is_key_copying" name="stopwatch-"></ion-icon>
                   </ion-button>
                   <br />
@@ -304,15 +304,15 @@ https://www.gnu.org/licenses.
                   {{ ((pager_ - 1) * limit_) + i + 1}}
                 </ng-template>
               </td>
-              <td (click)="tdc($event, record)">
+              <td *ngIf="!['_log','_dump'].includes(id)" (click)="tdc($event, record)">
                 <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                   (ionChange)="set_select_data(i,$event)" mode="md">
                 </ion-checkbox>
               </td>
               <td *ngIf="['_query','_job'].includes(id)" class="ion-text-center">
-                <ion-icon *ngIf="record?._approved; else notapproved" name="checkbox-sharp" color="success"></ion-icon>
+                <ion-icon *ngIf="record?._approved; else notapproved" name="checkmark-sharp" class="bool-mark" color="success"></ion-icon>
                 <ng-template #notapproved>
-                  <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
+                  <ion-icon name="close-sharp" class="bool-mark" color="danger"></ion-icon>
                 </ng-template>
               </td>
               <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex"
@@ -338,9 +338,9 @@ https://www.gnu.org/licenses.
                 </ng-template>
                 <ng-template #else2>
                   <span *ngIf="item_.value.bsonType=='bool'; else else3">
-                    <ion-icon *ngIf="record[item_.key]; else isfalse" name="checkbox-sharp" color="success"></ion-icon>
+                    <ion-icon *ngIf="record[item_.key]; else isfalse" name="checkmark-sharp" color="success" class="bool-mark"></ion-icon>
                     <ng-template #isfalse>
-                      <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
+                      <ion-icon name="close-sharp" color="danger" class="bool-mark"></ion-icon>
                     </ng-template>
                   </span>
                 </ng-template>

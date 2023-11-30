@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
@@ -38,7 +38,7 @@ import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
-import { JsonEditorOptions } from "ang-jsoneditor";
+import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 import { CrudPage } from "../crud/crud.page";
 
 @Component({
@@ -48,6 +48,7 @@ import { CrudPage } from "../crud/crud.page";
 })
 
 export class JobPage implements OnInit {
+  @ViewChild("editor", { static: false }) editor: any = new JsonEditorComponent();
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = "JOBS";
@@ -155,8 +156,11 @@ export class JobPage implements OnInit {
       this.jeoptions = new JsonEditorOptions();
       this.jeoptions.modes = ["tree", "code", "text"]
       this.jeoptions.mode = "code";
-      this.jeoptions.statusBar = this.jeoptions.navigationBar = true;
-      this.jeoptions.enableSort = this.jeoptions.expandAll = false;
+      this.jeoptions.statusBar = false;
+      this.jeoptions.navigationBar = false;
+      this.jeoptions.mainMenuBar = false;
+      this.jeoptions.enableSort = false;
+      this.jeoptions.expandAll = false;
       resolve(true);
     });
   }
@@ -233,7 +237,16 @@ export class JobPage implements OnInit {
       });
       modal_.present();
     });
+  }
 
+  json_editor_setmode(mode_: any) {
+    this.jeoptions.mode = mode_;
+    this.editor.setOptions(this.jeoptions);
+  }
+
+  json_editor_format() {
+    this.jeoptions.mode = 'code';
+    this.editor.setOptions(this.jeoptions);
   }
 
 }

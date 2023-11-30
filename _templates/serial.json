@@ -72,6 +72,12 @@
       "maxLength": 15,
       "pattern": "^[A-Z0-9-]{0,15}$",
       "caseType": "uppercase"
+    },
+    "ser_is_synced": {
+      "bsonType": "bool",
+      "title": "Synced?",
+      "description": "Synced or not",
+      "default": false
     }
   },
   "required": ["ser_no", "ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
