@@ -2483,8 +2483,9 @@ class Crud:
                     and query_["que_message_body"] is not None
                     else ""
                 )
+
                 users_ = (
-                    Mongo().db_["_user"].find({"_tags": {"$elemMatch": {"$in": _tags}}})
+                    Mongo().db_["_user"].find({"usr_enabled": True, "_tags": {"$elemMatch": {"$in": _tags}}})
                 )
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
@@ -2492,6 +2493,7 @@ class Crud:
                         personalizations_.append(
                             {"email": member_["usr_id"], "name": member_["usr_name"]}
                         )
+
                 df_raw_ = pd.DataFrame(data_).fillna("")
                 file_excel_ = (
                     f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx"
