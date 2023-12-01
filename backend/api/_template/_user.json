@@ -61,6 +61,7 @@
   "unique": [["usr_id"]],
   "index": [["usr_id"], ["usr_id", "usr_enabled"], ["usr_enabled", "_tags"], ["usr_id", "usr_enabled", "usr_scope"], ["_tags"]],
   "sort": {
+    "usr_enabled": -1,
     "_modified_at": -1
   },
   "actions": []
