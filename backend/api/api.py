@@ -2702,15 +2702,15 @@ class Crud:
                 raise APIError(
                     f"personalizations error: {get_users_from_tags_f_['msg']}"
                 )
-                personalizations_ = (
-                    get_users_from_tags_f_["personalizations"]
-                    if "personalizations" in get_users_from_tags_f_
-                    else []
-                )
+            personalizations_ = (
+                get_users_from_tags_f_["personalizations"]
+                if "personalizations" in get_users_from_tags_f_
+                else []
+            )
 
             if len(ids_) > API_JOB_UPDATE_LIMIT_:
                 personalizations_.append({"email": ADMIN_EMAIL_, "name": ADMIN_NAME_})
-                html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)}.</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
+                html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)} [{API_JOB_UPDATE_LIMIT_}].</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
                 email_sent_ = Email().send_email_f({
                         "op": "job",
                         "personalizations": personalizations_,
@@ -2746,7 +2746,7 @@ class Crud:
                 "op": "job",
                 "personalizations": personalizations_,
                 "html": html_,
-                "subject": f"Job Alert [{job_name_}]",
+                "subject": f"Job Done [{job_name_}]",
             })
             if not email_sent_["result"]:
                 raise PassException(email_sent_["msg"])

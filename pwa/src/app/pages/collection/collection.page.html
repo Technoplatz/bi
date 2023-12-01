@@ -297,7 +297,7 @@ https://www.gnu.org/licenses.
             <tr *ngFor="let record of data; let i = index"
               (click)="['_query','_job'].includes(id) ? go_query_job(record, $event) : go_crud(record, 'update')"
               [class]="record['_reminder'] ? 'data-tr' : ''">
-              <td [class]="record['_reminder'] ? 'bg-danger align-right' : 'primary align-right'"
+              <td [class]="record['_reminder'] ? 'danger align-right' : 'primary align-right'"
                 (click)="misc.show_note(record['_reminder'], record['_note'], $event)">
                 <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>
                 <ng-template #noreminder>
