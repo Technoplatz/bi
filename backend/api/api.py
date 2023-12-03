@@ -171,7 +171,9 @@ class Schedular:
                 schedules_ = (
                     Mongo()
                     .db_["_query"]
-                    .find({"que_enabled": True, "que_scheduled": True, "_approved": True})
+                    .find(
+                        {"que_enabled": True, "que_scheduled": True, "_approved": True}
+                    )
                 )
             elif source_ == "_job":
                 schedules_ = (
@@ -1947,6 +1949,9 @@ class Crud:
                         array2_[key_] = {"$exists": True}
                         array_.append(array1_)
                         array_.append(array2_)
+                    elif op_ == "like":
+                        if typ == "string":
+                            fres_ = {"$regex": f"^{value_}", "$options": "i"}
                     elif op_ == "contains":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = float(value_)
@@ -2485,7 +2490,11 @@ class Crud:
                 )
 
                 users_ = (
-                    Mongo().db_["_user"].find({"usr_enabled": True, "_tags": {"$elemMatch": {"$in": _tags}}})
+                    Mongo()
+                    .db_["_user"]
+                    .find(
+                        {"usr_enabled": True, "_tags": {"$elemMatch": {"$in": _tags}}}
+                    )
                 )
                 for member_ in users_:
                     if member_["usr_id"] not in to_:
@@ -2711,7 +2720,8 @@ class Crud:
             if len(ids_) > API_JOB_UPDATE_LIMIT_:
                 personalizations_.append({"email": ADMIN_EMAIL_, "name": ADMIN_NAME_})
                 html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)} [{API_JOB_UPDATE_LIMIT_}].</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
-                email_sent_ = Email().send_email_f({
+                email_sent_ = Email().send_email_f(
+                    {
                         "op": "job",
                         "personalizations": personalizations_,
                         "html": html_,
@@ -2732,22 +2742,26 @@ class Crud:
             )
             count_ = update_many_.matched_count
 
-            Mongo().db_["_joblog"].insert_one({
-                "jol_id": _id,
-                "jol_name": job_name_,
-                "jol_run_date": Misc().get_now_f(),
-                "jol_count": count_,
-                "jol_ids": ids_,
-                "jol_set": set__,
-            })
+            Mongo().db_["_joblog"].insert_one(
+                {
+                    "jol_id": _id,
+                    "jol_name": job_name_,
+                    "jol_run_date": Misc().get_now_f(),
+                    "jol_count": count_,
+                    "jol_ids": ids_,
+                    "jol_set": set__,
+                }
+            )
 
             html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {count_}.</p><p>Set:<br />{str(set__)}</p>"
-            email_sent_ = Email().send_email_f({
-                "op": "job",
-                "personalizations": personalizations_,
-                "html": html_,
-                "subject": f"Job Done [{job_name_}]",
-            })
+            email_sent_ = Email().send_email_f(
+                {
+                    "op": "job",
+                    "personalizations": personalizations_,
+                    "html": html_,
+                    "subject": f"Job Done [{job_name_}]",
+                }
+            )
             if not email_sent_["result"]:
                 raise PassException(email_sent_["msg"])
 

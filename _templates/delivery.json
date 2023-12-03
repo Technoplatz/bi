@@ -227,7 +227,23 @@
         "XHR",
         "XHS",
         "XSP",
-        "OTH"
+        "OTH",
+        "Service",
+        "Desktop",
+        "Notebook",
+        "Option",
+        "Visual",
+        "Monitor",
+        "Tablet",
+        "Workstation_DT",
+        "Workstation_NB",
+        "SWA",
+        "SRW",
+        "VLS",
+        "CDM",
+        "SWR",
+        "NET",
+        "THS"
       ]
     },
     "dnn_length": {
@@ -380,6 +396,7 @@
   },
   "required": [
     "dnn_no",
+    "dnn_line_no",
     "dnn_acc_no",
     "dnn_bill_no",
     "dnn_status",

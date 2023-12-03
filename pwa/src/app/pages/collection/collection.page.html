@@ -119,18 +119,6 @@ https://www.gnu.org/licenses.
                 <ion-icon name="close-circle-outline"></ion-icon>
                 {{ 'Close' | translate }}
               </ion-button>
-              <ion-button (click)="json_editor_setmode('code')" color="medium" class="ion-margin-start">
-                <ion-img src="/assets/icon/json-code.svg" class="json-icon-medium"></ion-img>
-                {{ 'JSON' | translate }}
-              </ion-button>
-              <ion-button (click)="json_editor_setmode('tree')" color="medium">
-                <ion-icon name="reorder-four-outline"></ion-icon>
-                {{ 'Tree' | translate }}
-              </ion-button>
-              <ion-button (click)="json_editor_format()" color="medium">
-                <ion-icon name="color-wand-outline"></ion-icon>
-                {{ 'Format' | translate }}
-              </ion-button>
             </ion-col>
           </ion-row>
           <ion-row class="jrow">
@@ -209,6 +197,10 @@ https://www.gnu.org/licenses.
                     <ion-button [color]="searched[item.key]?.op == 'contains' ? 'primary' : 'light'" size="small"
                       (click)="set_search_item(item.key, 'contains')">
                       {{ 'in' | translate }}
+                    </ion-button>
+                    <ion-button [color]="searched[item.key]?.op == 'like' ? 'primary' : 'light'" size="small"
+                      (click)="set_search_item(item.key, 'like')">
+                      {{ 'A&rarr;' | translate }}
                     </ion-button>
                     <ion-button [color]="searched[item.key]?.op == 'eq' ? 'primary' : 'light'" size="small"
                       (click)="set_search_item(item.key, 'eq')">

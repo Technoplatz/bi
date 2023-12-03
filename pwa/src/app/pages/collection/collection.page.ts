@@ -476,11 +476,11 @@ export class CollectionPage implements OnInit {
   }
 
   json_editor_init() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.jeoptions = new JsonEditorOptions();
       this.jeoptions.modes = ["tree", "code", "text"]
       this.jeoptions.mode = "code";
-      this.jeoptions.mainMenuBar = false;
+      this.jeoptions.mainMenuBar = true;
       this.jeoptions.statusBar = false;
       this.jeoptions.navigationBar = true;
       this.jeoptions.enableSort = false;
@@ -597,16 +597,6 @@ export class CollectionPage implements OnInit {
 
   selection_changed(item_: string, s_: number) {
     this.selections_[item_][s_].value = !this.selections_[item_][s_].value;
-  }
-
-  json_editor_setmode(mode_: any) {
-    this.jeoptions.mode = mode_;
-    this.editor.setOptions(this.jeoptions);
-  }
-
-  json_editor_format() {
-    this.jeoptions.mode = 'code';
-    this.editor.setOptions(this.jeoptions);
   }
 
 }

@@ -8,6 +8,12 @@
       "maxLength": 10,
       "pattern": "^[0-9-]{10,10}$"
     },
+    "ord_date": {
+      "bsonType": "date",
+      "title": "Order Date",
+      "description": "Order date",
+      "dateOnly": true
+    },
     "ord_prd_no": {
       "bsonType": "string",
       "title": "Product ID",
@@ -15,6 +21,7 @@
       "minLength": 7,
       "maxLength": 16,
       "pattern": "^[A-Z0-9-]{7,16}$",
+      "caseType": "uppercase",
       "replacement": [
         {
           "find": "-",

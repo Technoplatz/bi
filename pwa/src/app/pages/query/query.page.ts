@@ -162,7 +162,7 @@ export class QueryPage implements OnInit {
       this.jeoptions.mode = "code";
       this.jeoptions.statusBar = false;
       this.jeoptions.navigationBar = false;
-      this.jeoptions.mainMenuBar = false;
+      this.jeoptions.mainMenuBar = true;
       this.jeoptions.enableSort = false;
       this.jeoptions.expandAll = false;
       resolve(true);
@@ -258,15 +258,4 @@ export class QueryPage implements OnInit {
       modal_.present();
     });
   }
-
-  json_editor_setmode(mode_: any) {
-    this.jeoptions.mode = mode_;
-    this.editor.setOptions(this.jeoptions);
-  }
-
-  json_editor_format() {
-    this.jeoptions.mode = 'code';
-    this.editor.setOptions(this.jeoptions);
-  }
-
 }
