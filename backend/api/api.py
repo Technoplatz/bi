@@ -712,7 +712,7 @@ class Misc:
         """
         docstring is in progress
         """
-        ip_ = Misc().get_client_ip_f()
+        ip_ = str(Misc().get_client_ip_f())
         return ip_ in API_ADMIN_IPS_
 
     def properties_cleaner_f(self, properties):
@@ -2741,7 +2741,7 @@ class Crud:
                 "jol_set": set__,
             })
 
-            html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {count_}.</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
+            html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {count_}.</p><p>Set:<br />{str(set__)}</p>"
             email_sent_ = Email().send_email_f({
                 "op": "job",
                 "personalizations": personalizations_,
@@ -6006,7 +6006,7 @@ API_S3_KEY_ = os.environ.get("API_S3_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
-API_ADMIN_IPS_ = get_docker_secret("admin_ips", default="").replace(" ", "").split(",")
+API_ADMIN_IPS_ = os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",")
 API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [
     True,
     "true",

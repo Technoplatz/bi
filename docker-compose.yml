@@ -412,6 +412,7 @@ services:
       - API_S3_KEY=${API_S3_KEY}
       - API_PERMISSIVE_TAGS=${API_PERMISSIVE_TAGS}
       - API_ADMIN_TAGS=${API_ADMIN_TAGS}
+      - API_ADMIN_IPS=${API_ADMIN_IPS}
       - API_DELETE_ALLOWED=${API_DELETE_ALLOWED}
       - API_CORS_ORIGINS=${API_CORS_ORIGINS}
       - NOTIFICATION_PUSH_URL=${NOTIFICATION_PUSH_URL}
@@ -429,7 +430,6 @@ services:
       - mongo_username
       - mongo_password
       - mongo_tls_keyfile_password
-      - admin_ips
 
   pwa:
     build:
@@ -528,5 +528,3 @@ secrets:
     file: ./.secret/.mongo_username
   mongo_tls_keyfile_password:
     file: ./.secret/.mongo_tls_keyfile_password
-  admin_ips:
-    file: ./.secret/.admin_ips
