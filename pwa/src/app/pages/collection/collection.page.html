@@ -137,7 +137,7 @@ https://www.gnu.org/licenses.
               <ion-col size="12">
                 <span *ngFor="let item of actions; let ac = index">
                   <ion-button *ngIf="item.enabled; actionhide" (click)="action(ac)">
-                    <ion-icon [name]="item?.icon" class="action-icon"></ion-icon>
+                    <ion-icon *ngIf="item?.icon" [name]="item?.icon" class="action-icon"></ion-icon>
                     {{ item.title | translate }}
                   </ion-button>
                   <ng-template #actionhide></ng-template>
@@ -302,7 +302,8 @@ https://www.gnu.org/licenses.
                 </ion-checkbox>
               </td>
               <td *ngIf="['_query','_job'].includes(id)" class="ion-text-center">
-                <ion-icon *ngIf="record?._approved; else notapproved" name="checkmark-sharp" class="bool-mark" color="success"></ion-icon>
+                <ion-icon *ngIf="record?._approved; else notapproved" name="checkmark-sharp" class="bool-mark"
+                  color="success"></ion-icon>
                 <ng-template #notapproved>
                   <ion-icon name="close-sharp" class="bool-mark" color="danger"></ion-icon>
                 </ng-template>
@@ -330,7 +331,8 @@ https://www.gnu.org/licenses.
                 </ng-template>
                 <ng-template #else2>
                   <span *ngIf="item_.value.bsonType=='bool'; else else3">
-                    <ion-icon *ngIf="record[item_.key]; else isfalse" name="checkmark-sharp" color="success" class="bool-mark"></ion-icon>
+                    <ion-icon *ngIf="record[item_.key]; else isfalse" name="checkmark-sharp" color="success"
+                      class="bool-mark"></ion-icon>
                     <ng-template #isfalse>
                       <ion-icon name="close-sharp" color="danger" class="bool-mark"></ion-icon>
                     </ng-template>

@@ -2512,8 +2512,9 @@ class Crud:
                     sheet_name=_id,
                     engine="xlsxwriter",
                     header=True,
-                    index=False,
+                    index=False
                 )
+
                 files_.append({"name": file_excel_, "type": "xlsx"})
                 count_ = len(df_raw_.index)
                 if count_ > 0:
@@ -2706,7 +2707,7 @@ class Crud:
                 raise PassException(err_)
 
             personalizations_ = []
-            get_users_from_tags_f_ = Misc().get_users_from_tags_f(["#Managers"])
+            get_users_from_tags_f_ = Misc().get_users_from_tags_f(["#JobAdmins"])
             if not get_users_from_tags_f_["result"]:
                 raise APIError(
                     f"personalizations error: {get_users_from_tags_f_['msg']}"
