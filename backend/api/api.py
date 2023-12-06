@@ -912,8 +912,9 @@ class Mongo:
         retry_writes_ = (
             "&retryWrites=true" if MONGO_RETRY_WRITES_ else "&retryWrites=false"
         )
+        tz_aware_ = "&tz_aware=true"
         timeout_ms_ = f"&timeoutMS={MONGO_TIMEOUT_MS_}"
-        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}{timeout_ms_}"
+        self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}{timeout_ms_}{tz_aware_}"
         self.client_ = MongoClient(self.connstr)
         self.db_ = self.client_[MONGO_DB_]
 
@@ -3433,6 +3434,7 @@ class Crud:
         """
         try:
             doc = obj["doc"]
+
             _id = ObjectId(doc["_id"]) if "_id" in doc else None
             match_ = (
                 {"_id": _id}
@@ -3476,6 +3478,7 @@ class Crud:
             doc_["_modified_by"] = (
                 user_["email"] if user_ and "email" in user_ else None
             )
+
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             Mongo().db_[collection_].update_one(
                 match_, {"$set": doc_, "$inc": {"_modified_count": 1}}
@@ -6021,7 +6024,7 @@ API_S3_KEY_ = os.environ.get("API_S3_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
-API_ADMIN_IPS_ = os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",")
+API_ADMIN_IPS_ = os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",") if os.environ.get("API_ADMIN_IPS") else []
 API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [
     True,
     "true",

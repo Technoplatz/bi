@@ -40,6 +40,7 @@ export const environment = {
   swu_interval_mins: 15,
   apiUrl: (window as any)["env"]["API_URL"],
   companyName: (window as any)["env"]["COMPANY_NAME"],
+  timeZone: (window as any)["env"]["TZ"],
   misc: {
     logo: "logo-electron",
     default_sort: '{"_modified_at": -1}',

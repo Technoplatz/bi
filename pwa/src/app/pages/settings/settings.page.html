@@ -98,7 +98,8 @@ https://www.gnu.org/licenses.
           <div *ngIf="otp_qr && otp_show">
             <qrcode [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'" [allowEmptyString]="true">
             </qrcode>
-            <ion-note slot="start" class="ion-margin-start">{{ 'Read QR code with your Authenticator App to generate a one-time password' | translate }}.</ion-note>
+            <ion-note slot="start" class="ion-margin-start">{{ 'Read QR code with your Authenticator App to generate a
+              one-time password' | translate }}.</ion-note>
             <div class="filler-8"></div>
           </div>
           <ion-button *ngIf="!otp_show" (click)="doOTP({ op: 'show' })" size="small" slot="end">
@@ -118,6 +119,11 @@ https://www.gnu.org/licenses.
           </ion-button>
         </ion-item>
         <ion-list-header>{{ 'System' | translate }}</ion-list-header>
+        <ion-item>
+          <ion-label position="fixed" class="ion-margin-end">{{ 'Time Zone' | translate }}
+          </ion-label>
+          {{ timeZone }}
+        </ion-item>
         <ion-item>
           <ion-label position="fixed" class="ion-margin-end">{{ 'Version' | translate }}
           </ion-label>

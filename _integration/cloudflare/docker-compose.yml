@@ -67,11 +67,11 @@ services:
       - CF_COUNTRIES=${CF_COUNTRIES}
       - CF_ZONEID=${CF_ZONEID}
       - CF_TOKEN=${CF_TOKEN}
+      - CF_ADMIN_IPS=${CF_ADMIN_IPS}
     secrets:
       - mongo_username
       - mongo_password
       - mongo_tls_keyfile_password
-      - admin_ips
     extra_hosts:
       - mongo0:${SUBNET_MONGO0_IPV4}
       - mongo1:${SUBNET_MONGO1_IPV4}
@@ -101,5 +101,3 @@ secrets:
     file: ./../../.secret/.mongo_username
   mongo_tls_keyfile_password:
     file: ./../../.secret/.mongo_tls_keyfile_password
-  admin_ips:
-    file: ./../../.secret/.admin_ips

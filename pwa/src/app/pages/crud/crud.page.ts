@@ -63,6 +63,7 @@ export class CrudPage implements OnInit {
   public pivotvalueops: any = environment.pivotvalueops;
   public loadingText: string = environment.misc.loadingText;
   public timeout: number = environment.misc.default_delay;
+  public timeZone = environment.timeZone;
   public selected_: any = [];
   public fieldsupd: any = [];
   public fields: any = [];

@@ -81,7 +81,7 @@
   "index": [["man_no"], ["man_odi_no", "man_odi_sub_no"], ["man_odi_no"], ["man_odi_sub_no"], ["man_file_no"]],
   "unique": [["man_no"]],
   "sort": {
-    "_created_at": -1
+    "_modified_at": -1
   },
   "parents": [
     {
@@ -144,7 +144,7 @@
       ],
       "autofill": true,
       "btntext": "Attached DNs",
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
       "notification": {
         "notify": false,
         "subject": "Logistics [Manifest Created]",
@@ -165,13 +165,6 @@
         {
           "key": "man_no",
           "op": "ne",
-          "value": null
-        }
-      ],
-      "conditions": [
-        {
-          "key": "man_closing_date",
-          "op": "eq",
           "value": null
         }
       ],
@@ -202,11 +195,10 @@
       "changes": [
         {
           "key": "man_closing_date",
-          "op": "ne",
+          "op": "nnull",
           "value": null
         }
       ],
-      "conditions": [],
       "targets": [
         {
           "collection": "delivery",
@@ -231,7 +223,7 @@
           ],
           "upsert": false,
           "notification": {
-            "notify": false,
+            "notify": true,
             "subject": "Logistics [Clearance Completed]",
             "body": "Hi,<br /><br />We would like to let you know that clearance of the attached manifest has been completed.",
             "collection": "delivery",
@@ -246,8 +238,105 @@
             ],
             "attachment": true,
             "push": true,
-            "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+            "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
           }
+        }
+      ]
+    },
+    {
+      "name": "rtd",
+      "enabled": true,
+      "operations": ["update"],
+      "changes": [
+        {
+          "key": "man_gov_approval_date",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_man_no",
+              "value": "man_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "dnn_status",
+              "op": "eq",
+              "value": "50-OnTheTouchpoint"
+            }
+          ],
+          "set": [
+            {
+              "key": "dnn_status",
+              "value": "60-ReadyToBeDelivered"
+            }
+          ],
+          "upsert": false,
+          "notification": {
+            "notify": true,
+            "subject": "Operation [DNs Ready TBD]",
+            "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
+            "collection": "delivery",
+            "key": "man_no",
+            "fields": "dnn_man_no,dnn_no,dnn_line_no,dnn_status,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+            "filter": [
+              {
+                "key": "dnn_man_no",
+                "op": "eq",
+                "value": "man_no"
+              },
+              {
+                "key": "dnn_status",
+                "op": "eq",
+                "value": "60-ReadyToBeDelivered"
+              }
+            ],
+            "attachment": true,
+            "push": true,
+            "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "rtd-rollback",
+      "enabled": true,
+      "operations": ["update"],
+      "changes": [
+        {
+          "key": "man_gov_approval_date",
+          "op": "null",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "delivery",
+          "match": [
+            {
+              "key": "dnn_man_no",
+              "value": "man_no"
+            }
+          ],
+          "filter": [
+            {
+              "key": "dnn_status",
+              "op": "eq",
+              "value": "60-ReadyToBeDelivered"
+            }
+          ],
+          "set": [
+            {
+              "key": "dnn_status",
+              "value": "50-OnTheTouchpoint"
+            }
+          ],
+          "upsert": false
         }
       ]
     },
@@ -258,11 +347,10 @@
       "changes": [
         {
           "key": "man_closing_date",
-          "op": "eq",
+          "op": "null",
           "value": null
         }
       ],
-      "conditions": [],
       "targets": [
         {
           "collection": "delivery",

@@ -47,6 +47,7 @@ import { Router } from "@angular/router";
 export class SettingsPage implements OnInit {
   public version = environment.appVersion;
   public release = environment.release;
+  public timeZone = environment.timeZone;
   public header: string = "SETTINGS";
   public subheader: string = "";
   public user: any = null;

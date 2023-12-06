@@ -263,7 +263,7 @@ https://www.gnu.org/licenses.
                                     <ng-template>
                                         <ion-datetime [id]="field.name"
                                             [presentation]="field.dateOnly ? 'date' : 'date-time'" [multiple]="false"
-                                            [value]="data_[field.name]?.substring(0, 19).replace(' ', 'T') + 'Z'"
+                                            [value]="data_[field.name]"
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
                                             [firstDayOfWeek]="1" [showDefaultButtons]="true"
                                             [disabled]="field.readonly || field.disabled"

@@ -40,6 +40,7 @@ export const environment = {
   swu_interval_mins: 15,
   apiUrl: "http://localhost:8443/api",
   companyName: "Acme Inc,",
+  timeZone: "Europe/Berlin",
   misc: {
     logo: "logo-electron",
     default_sort: '{"_modified_at": -1}',

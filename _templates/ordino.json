@@ -61,7 +61,7 @@
   "index": [["odi_no"], ["odi_sub_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_customs"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
-    "_created_at": -1
+    "_modified_at": -1
   },
   "parents": [
     {
@@ -235,7 +235,7 @@
           ],
           "upsert": false,
           "notification": {
-            "notify": false,
+            "notify": true,
             "subject": "Logistics [Ordino Arrived]",
             "body": "Hi,<br /><br />We would like to let you know that attached DNs have been arrived at customs.",
             "collection": "delivery",

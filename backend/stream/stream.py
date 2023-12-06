@@ -76,7 +76,7 @@ class Trigger:
         self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
         self.groupbys_ = ["sum", "count", "mean", "std", "var"]
-        self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_keyfile_password_}&retryWrites={mongo_retry_writes_}"
+        self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_keyfile_password_}&retryWrites={mongo_retry_writes_}&tz_aware=true"
         self.client = pymongo.MongoClient(self.connstr_)
         self.db_ = self.client[mongo_db_]
         self.counter_ = 0
@@ -697,10 +697,11 @@ class Trigger:
                     )
 
                 match_ = {"_id": _id}
-                conditions_filter_ = self.get_filtered_f(
+
+                filter_target_ = self.get_filtered_f(
                     {"match": target_changes_, "properties": source_properties_}
                 )
-                match_ = {**match_, **conditions_filter_}
+                match_ = {**match_, **filter_target_}
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
@@ -1162,6 +1163,10 @@ class Trigger:
                         PRINT_("!!! no operation provided")
                         continue
 
+                    fullDocument_ = (
+                        event_["fullDocument"] if "fullDocument" in event_ else None
+                    )
+
                     changed_ = (
                         event_["updateDescription"]["updatedFields"]
                         if "updateDescription" in event_
@@ -1169,15 +1174,9 @@ class Trigger:
                         and op_ in ["update", "replace"]
                         else None
                     )
-                    if changed_ is None:
-                        changed_ = (
-                            event_["fullDocument"]
-                            if "fullDocument" in event_ and op_ == "insert"
-                            else None
-                        )
-                        if changed_ is None:
-                            PRINT_("!!! no changed fields provided")
-                            continue
+                    if not changed_ and not fullDocument_:
+                        PRINT_("!!! no changed fields provided")
+                        continue
 
                     if source_collection_[:1] == "_":
                         PRINT_(f">>> system collection passed {source_collection_}")
@@ -1205,7 +1204,7 @@ class Trigger:
                         "id": _id,
                         "token": token_,
                         "op": op_,
-                        "changed": changed_,
+                        "changed": changed_
                     }
                     await asyncio.create_task(self.starter_changes_f(params_))
 

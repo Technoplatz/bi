@@ -104,9 +104,7 @@ class Cloudflare:
         self.token_ = os.environ.get("CF_TOKEN")
         self.cf_rule_name_ = os.environ.get("CF_RULE_NAME")
         self.cf_countries_ = os.environ.get("CF_COUNTRIES").replace(" ", "").split(",")
-        self.admin_ips_ = (
-            get_docker_secret("admin_ips", default="").replace(" ", "").split(",")
-        )
+        self.admin_ips_ = os.environ.get("CF_ADMIN_IPS").replace(" ", "").split(",") if os.environ.get("CF_ADMIN_IPS") else []
         self.cf_hosts_ = os.environ.get("CF_HOSTS").replace(" ", "").split(",")
         self.custom_phase_ = "http_request_firewall_custom"
         self.log_enabled_ = True
