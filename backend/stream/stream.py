@@ -48,6 +48,7 @@ from get_docker_secret import get_docker_secret
 from unidecode import unidecode
 import pymongo
 import requests
+import pandas as pd
 
 
 class AppException(BaseException):
@@ -1052,7 +1053,9 @@ class Trigger:
                                 }
                             )
                         )
-                        file_ = f"{API_TEMPFILE_PATH_}/stream-{self.get_timestamp_f()}.{type_}"
+                        ts_ = self.get_timestamp_f()
+                        file_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.{type_}"
+                        file_excel_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.xlsx"
                         ncollection_ += "_data"
                         command_ = f"mongoexport --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}' --quiet"
                         call(command_, shell=True)
@@ -1063,7 +1066,14 @@ class Trigger:
                                 raise PassException("no output generated")
                             lines_ = len(output_.readlines())
                             if lines_ and lines_ > 1:
-                                files_ = [{"filename": file_, "filetype": type_}]
+                                files_.append({"filename": file_, "filetype": type_})
+                                read_csv_file_ = pd.read_csv(file_)
+                                read_csv_file_.to_excel(
+                                    file_excel_, index=None, sheet_name=ncollection_, header=True
+                                )
+                                files_.append(
+                                    {"filename": file_excel_, "filetype": "xlsx"}
+                                )
                             else:
                                 raise PassException("no data records exported")
 
@@ -1204,7 +1214,7 @@ class Trigger:
                         "id": _id,
                         "token": token_,
                         "op": op_,
-                        "changed": changed_
+                        "changed": changed_,
                     }
                     await asyncio.create_task(self.starter_changes_f(params_))
 
