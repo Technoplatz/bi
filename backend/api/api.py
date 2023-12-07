@@ -1961,7 +1961,14 @@ class Crud:
                         elif typ == "bool":
                             fres_ = bool(value_)
                         elif typ == "date":
-                            fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
+                            fres_ = {
+                                "$gte": datetime.strptime(
+                                    f"{value_[:10]}T00:00:00", "%Y-%m-%dT%H:%M:%S"
+                                ),
+                                "$lte": datetime.strptime(
+                                    f"{value_[:10]}T23:59:59", "%Y-%m-%dT%H:%M:%S"
+                                ),
+                            }
                         else:
                             fres_ = (
                                 {"$regex": value_, "$options": "i"}
@@ -1976,7 +1983,14 @@ class Crud:
                         elif typ == "bool":
                             fres_ = bool(value_)
                         elif typ == "date":
-                            fres_ = datetime.strptime(value_[:10], "%Y-%m-%d")
+                            fres_ = {
+                                "$gte": datetime.strptime(
+                                    f"{value_[:10]}T00:00:00", "%Y-%m-%dT%H:%M:%S"
+                                ),
+                                "$lte": datetime.strptime(
+                                    f"{value_[:10]}T23:59:59", "%Y-%m-%dT%H:%M:%S"
+                                ),
+                            }
                         else:
                             fres_ = {"$eq": value_}
                     elif op_ in ["ne", "nc"]:
@@ -2023,7 +2037,11 @@ class Crud:
                         elif typ == "int":
                             fres_ = {"$gt": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {
+                                "$gt": datetime.strptime(
+                                    f"{value_[:10]}T00:00:00", "%Y-%m-%dT%H:%M:%S"
+                                )
+                            }
                         else:
                             fres_ = {"$gt": value_}
                     elif op_ == "gte":
@@ -2032,7 +2050,11 @@ class Crud:
                         elif typ == "int":
                             fres_ = {"$gte": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {
+                                "$gte": datetime.strptime(
+                                    f"{value_[:10]}T00:00:00", "%Y-%m-%dT%H:%M:%S"
+                                )
+                            }
                         else:
                             fres_ = {"$gte": value_}
                     elif op_ == "lt":
@@ -2041,7 +2063,11 @@ class Crud:
                         elif typ == "int":
                             fres_ = {"$lt": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {
+                                "$lt": datetime.strptime(
+                                    f"{value_[:10]}T00:00:00", "%Y-%m-%dT%H:%M:%S"
+                                )
+                            }
                         else:
                             fres_ = {"$lt": value_}
                     elif op_ == "lte":
@@ -2050,7 +2076,11 @@ class Crud:
                         elif typ == "int":
                             fres_ = {"$lte": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {
+                                "$lte": datetime.strptime(
+                                    f"{value_[:10]}T00:00:00", "%Y-%m-%dT%H:%M:%S"
+                                )
+                            }
                         else:
                             fres_ = {"$lte": value_}
                     elif op_ == "true":
@@ -2513,7 +2543,7 @@ class Crud:
                     sheet_name=_id,
                     engine="xlsxwriter",
                     header=True,
-                    index=False
+                    index=False,
                 )
 
                 files_.append({"name": file_excel_, "type": "xlsx"})
@@ -6024,7 +6054,11 @@ API_S3_KEY_ = os.environ.get("API_S3_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
-API_ADMIN_IPS_ = os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",") if os.environ.get("API_ADMIN_IPS") else []
+API_ADMIN_IPS_ = (
+    os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",")
+    if os.environ.get("API_ADMIN_IPS")
+    else []
+)
 API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [
     True,
     "true",
