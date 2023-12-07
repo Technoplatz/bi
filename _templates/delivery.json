@@ -227,23 +227,7 @@
         "XHR",
         "XHS",
         "XSP",
-        "OTH",
-        "Service",
-        "Desktop",
-        "Notebook",
-        "Option",
-        "Visual",
-        "Monitor",
-        "Tablet",
-        "Workstation_DT",
-        "Workstation_NB",
-        "SWA",
-        "SRW",
-        "VLS",
-        "CDM",
-        "SWR",
-        "NET",
-        "THS"
+        "OTH"
       ]
     },
     "dnn_length": {
@@ -290,7 +274,8 @@
       "maxLength": 16,
       "pattern": "^[A-Za-z-]{0,16}$",
       "readonly": true,
-      "enum": ["OK", "OK-Labeled", "OK-Skipped"]
+      "enum": ["OK", "OK-Labeled", "OK-Skipped", "CN-Canceled"],
+      "selection": true
     },
     "dnn_rtd_date": {
       "bsonType": "date",
@@ -525,7 +510,7 @@
   "actions": [
     {
       "id": "stby-to-open",
-      "title": "Stby To Open",
+      "title": "00-Standby → 00-Open",
       "enabled": true,
       "match": [
         {
@@ -541,7 +526,7 @@
         }
       ],
       "one_click": true,
-      "icon": "megaphone",
+      "icon": null,
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"],
@@ -561,56 +546,14 @@
       }
     },
     {
-      "id": "open-to-stby",
-      "title": "Open To Stby",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "00-Open"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "00-Standby"
-        }
-      ],
-      "one_click": true,
-      "icon": "time",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"],
-      "notification": {
-        "notify": true,
-        "subject": "Delivery [Returned to 00-Standby]",
-        "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs were changed from 00-Open to 00-Standby.",
-        "attachment": true,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "00-Standby"
-          }
-        ]
-      }
-    },
-    {
       "id": "rtd",
-      "title": "Ready",
+      "title": "Ready TBD",
       "enabled": true,
       "match": [
         {
           "key": "dnn_status",
           "op": "eq",
           "value": "50-OnTheTouchpoint"
-        },
-        {
-          "key": "dnn_labeled",
-          "op": "eq",
-          "value": true
         }
       ],
       "set": [
@@ -630,8 +573,8 @@
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "Delivery [60-ReadyToBeDelivered]",
-        "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs are now 60-ReadyToBeDelivered.",
+        "subject": "Operation [60-ReadyToBeDelivered]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_rtd_date",
         "filter": [
