@@ -2751,7 +2751,7 @@ class Crud:
 
             if len(ids_) > API_JOB_UPDATE_LIMIT_:
                 personalizations_.append({"email": ADMIN_EMAIL_, "name": ADMIN_NAME_})
-                html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)} [{API_JOB_UPDATE_LIMIT_}].</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
+                html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)} [{API_JOB_UPDATE_LIMIT_}].</p><p>{','.join(ids_)}</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
                 email_sent_ = Email().send_email_f(
                     {
                         "op": "job",
@@ -2785,7 +2785,7 @@ class Crud:
                 }
             )
 
-            html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {count_}.</p><p>Set:<br />{str(set__)}</p>"
+            html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {len(ids_)}.</p><p>{','.join(ids_)}</p><p>Set:<br />{str(set__)}</p>"
             email_sent_ = Email().send_email_f(
                 {
                     "op": "job",
