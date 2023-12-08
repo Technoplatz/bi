@@ -2943,7 +2943,7 @@ class Crud:
                     )
                 )
             else:
-                sort__ = input_["sort"] if "sort" in input_ and input_["sort"] else {"_modified_at": -1}
+                sort__ = structure_["sort"] if "sort" in structure_ and structure_["sort"] else {"_modified_at": -1}
                 aggregate_ = []
                 links_ = structure_["links"] if "links" in structure_ and len(structure_["links"]) > 0 else []
                 link_collections_ = []
