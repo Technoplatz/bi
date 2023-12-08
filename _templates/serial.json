@@ -83,7 +83,7 @@
   "required": ["ser_no", "ser_dnn_no", "ser_line_no", "ser_prd_no", "ser_sscc_no"],
   "index": [
     ["ser_is_in"],
-    ["ser_no"],
+    ["ser_is_synced"],
     ["ser_dnn_no"],
     ["ser_dnn_no", "ser_line_no"],
     ["ser_dnn_no", "ser_line_no", "ser_prd_no"],

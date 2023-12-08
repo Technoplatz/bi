@@ -514,8 +514,14 @@ export class CrudPage implements OnInit {
   }
 
   doGoLink(link_: any) {
-    this.tab = "link";
     this.link_ = link_;
+    this.link_text = "";
+    let j_ = 0;
+    this.data_["_link_" + link_.collection]?.length > 0 ? this.data_["_link_" + link_.collection].forEach((obj_: any) => {
+      this.link_text += (j_ > 0 ? "\n" : "") + obj_[link_.get];
+      j_++;
+      j_ === this.data_["_link_" + link_.collection].length ? this.tab = "link" : null;
+    }) : this.tab = "link";
   }
 
   get_linked() {

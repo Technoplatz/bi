@@ -86,6 +86,7 @@ export class CollectionPage implements OnInit {
   public multicheckbox: boolean = false;
   public collections_: any = [];
   public title_: any = [];
+  public links_: any = [];
   public is_initialized: boolean = false;
   public scan_: boolean = false;
   public actions: any = [];
@@ -194,6 +195,7 @@ export class CollectionPage implements OnInit {
               this.pager_ = this.page_;
               this.data = res.data;
               this.structure_ = res.structure;
+              this.links_ = res.structure.links ? res.structure.links : [];
               this.json_content_ = res.structure;
               this.actions = res.structure.actions;
               this.properties_ = res.structure.properties;

@@ -2927,7 +2927,6 @@ class Crud:
                     group__["_id"][item_] = f"${item_}"
                     project__[item_] = f"$_id.{item_}"
                     sort__[item_] = 1
-                sort__ = input_["sort"] if "sort" in input_ else {"_modified_at": -1}
                 group__["count"] = {"$sum": 1}
                 project__["count"] = "$count"
                 cursor_ = (
@@ -2944,19 +2943,57 @@ class Crud:
                     )
                 )
             else:
-                sort__ = {"_modified_at": -1}
-                cursor_ = (
-                    Mongo()
-                    .db_[collection_]
-                    .find(
-                        filter=get_filtered_,
-                        projection=projection_,
-                        sort=sort_,
-                        collation=collation_,
-                    )
-                    .skip(skip_)
-                    .limit(limit_)
-                )
+                sort__ = input_["sort"] if "sort" in input_ and input_["sort"] else {"_modified_at": -1}
+                aggregate_ = []
+                links_ = structure_["links"] if "links" in structure_ and len(structure_["links"]) > 0 else []
+                link_collections_ = []
+                for link_ in links_:
+                    link_collection_ = link_["collection"]
+                    link_get_ = link_["get"]
+                    fo__ = Mongo().db_["_collection"].find_one({"col_id": link_collection_})
+                    if not fo__:
+                        continue
+                    fo_structure_ = fo__["col_structure"]  if "col_structure" in fo__ else None
+                    if not fo_structure_:
+                        continue
+                    parents__ = fo_structure_["parents"] if "parents" in fo_structure_ and len(fo_structure_["parents"]) > 0 else None
+                    if not parents__:
+                        continue
+                    for parent__ in parents__:
+                        pcol_ = parent__["collection"] if "collection" in parent__ else None
+                        if not pcol_:
+                            continue
+                        if pcol_ != collection_id_:
+                            continue
+                        pmatches__ = parent__["match"] if "match" in parent__ and len(parent__["match"]) > 0 else None
+                        if not pmatches__:
+                            continue
+                        pipeline_match_ = []
+                        pipeline_project_ = {}
+                        let_ = {}
+                        for pmatch__ in pmatches__:
+                            let_[f"p_{pmatch__['key']}"] = f"${pmatch__['value']}"
+                            pipeline_match_.append({"$eq": [f"${pmatch__['key']}", f"$$p_{pmatch__['key']}"]})
+                        pipeline_project_[link_get_] = 1
+                        pipeline_project_["_id"] = 0
+                        if not pipeline_match_:
+                            continue
+                        lookup_ = {
+                            "from": f"{link_collection_}_data",
+                            "let": let_,
+                            "pipeline": [{ "$match": {"$expr": {"$and": pipeline_match_ }} },{ "$project": pipeline_project_ }],
+                            "as": f"_link_{link_collection_}"
+                        }
+                        aggregate_.append({"$lookup": lookup_})
+                        link_collections_.append(link_collection_)
+
+                aggregate_.append({"$match": get_filtered_})
+                aggregate_.append({"$sort": sort__})
+                aggregate_.append({"$limit": limit_})
+                if projection_:
+                    aggregate_.append({"$project": projection_})
+
+                cursor_ = Mongo().db_[collection_].aggregate(aggregate_)
 
             docs_ = (
                 json.loads(JSONEncoder().encode(list(cursor_)))[:limit_]
@@ -4414,7 +4451,10 @@ class Crud:
                 )
                 if get_notification_filtered_ and fields_ and attachment_:
                     type_ = "csv"
-                    file_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}.{type_}"
+                    beasefile_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}"
+                    file_ = f"{beasefile_}.{type_}"
+                    file_excel_ = f"{beasefile_}.xlsx"
+                    file_json_ = f"{beasefile_}.json"
                     query_ = json.dumps(
                         get_notification_filtered_,
                         default=json_util.default,
@@ -4433,7 +4473,10 @@ class Crud:
                             },
                         )
                     )
-                    files_ += [{"name": file_, "type": type_}]
+                    read_csv_file_ = pd.read_csv(file_)
+                    read_csv_file_.to_excel(file_excel_, index=None, sheet_name=collection_id_, header=True)
+                    read_csv_file_.to_json(file_json_,date_format="iso",orient="records",force_ascii=False)
+                    files_ += [{"name": file_, "type": type_},{"name": file_excel_, "type": "xlsx"},{"name": file_json_, "type": "json"}]
 
                 email_sent_ = Email().send_email_f(
                     {

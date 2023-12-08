@@ -263,7 +263,7 @@ https://www.gnu.org/licenses.
                                     <ng-template>
                                         <ion-datetime [id]="field.name"
                                             [presentation]="field.dateOnly ? 'date' : 'date-time'" [multiple]="false"
-                                            [value]="data_[field.name]"
+                                            [value]="field.dateOnly ? data_[field.name].substring(0,10) : data_[field.name].substring(0,19)"
                                             [showClearButton]="true" (ionChange)="doDateAssign($event, field.name)"
                                             [firstDayOfWeek]="1" [showDefaultButtons]="true"
                                             [disabled]="field.readonly || field.disabled"
@@ -314,8 +314,8 @@ https://www.gnu.org/licenses.
                             <ion-icon name="close-sharp"></ion-icon>
                         </ion-button>
                         <ng-template #locked>
-                            <ion-button *ngIf="field?.permanent" color="medium" (click)="unlock_field(field.name, index_)"
-                                fill="clear" class="nulla-button">
+                            <ion-button *ngIf="field?.permanent" color="medium"
+                                (click)="unlock_field(field.name, index_)" fill="clear" class="nulla-button">
                                 <ion-icon name="lock-closed-outline"></ion-icon>
                             </ion-button>
                         </ng-template>

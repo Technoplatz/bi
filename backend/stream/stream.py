@@ -74,7 +74,8 @@ class Trigger:
         """
         PRINT_(">>> init started")
         self.operations_ = ["insert", "update", "replace", "delete"]
-        self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
+        self.pipeline_ = [
+            {"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
         self.groupbys_ = ["sum", "count", "mean", "std", "var"]
         self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_keyfile_password_}&retryWrites={mongo_retry_writes_}&tz_aware=true"
@@ -109,8 +110,10 @@ class Trigger:
             and hasattr(exc_.__traceback__, "tb_lineno")
             else None
         )
-        name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
-        PRINT_(f"!!! worker exception type: {name_}, line: {line_no_}:", str(exc_))
+        name_ = type(exc_).__name__ if hasattr(
+            type(exc_), "__name__") else "Exception"
+        PRINT_(
+            f"!!! worker exception type: {name_}, line: {line_no_}:", str(exc_))
         return True
 
     def exception_reported_f(self, exc_):
@@ -123,7 +126,8 @@ class Trigger:
             and hasattr(exc_.__traceback__, "tb_lineno")
             else None
         )
-        name_ = type(exc_).__name__ if hasattr(type(exc_), "__name__") else "Exception"
+        name_ = type(exc_).__name__ if hasattr(
+            type(exc_), "__name__") else "Exception"
         PRINT_(f"!!! worker error type: {name_}, line: {line_no_}:", str(exc_))
         if notification_push_url_:
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
@@ -223,7 +227,8 @@ class Trigger:
             )
             for item_ in cursor_:
                 for trigger_ in item_["col_structure"]["triggers"]:
-                    enabled_ = "enabled" in trigger_ and trigger_["enabled"] is True
+                    enabled_ = "enabled" in trigger_ and trigger_[
+                        "enabled"] is True
                     if not enabled_:
                         continue
                     for cluster_ in trigger_["targets"]:
@@ -384,7 +389,8 @@ class Trigger:
                         elif typ == "int":
                             fres_ = {"$gt": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$gt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$gt": datetime.strptime(
+                                value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$gt": value_}
                     elif op_ == "gte":
@@ -393,7 +399,8 @@ class Trigger:
                         elif typ == "int":
                             fres_ = {"$gte": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$gte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$gte": datetime.strptime(
+                                value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$gte": value_}
                     elif op_ == "lt":
@@ -402,7 +409,8 @@ class Trigger:
                         elif typ == "int":
                             fres_ = {"$lt": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$lt": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$lt": datetime.strptime(
+                                value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$lt": value_}
                     elif op_ == "lte":
@@ -411,7 +419,8 @@ class Trigger:
                         elif typ == "int":
                             fres_ = {"$lte": int(value_)}
                         elif typ == "date":
-                            fres_ = {"$lte": datetime.strptime(value_[:10], "%Y-%m-%d")}
+                            fres_ = {"$lte": datetime.strptime(
+                                value_[:10], "%Y-%m-%d")}
                         else:
                             fres_ = {"$lte": value_}
                     elif op_ == "true":
@@ -547,7 +556,8 @@ class Trigger:
             server_.ehlo()
             server_.starttls()
             server_.login(SMTP_USERID_, SMTP_PASSWORD_)
-            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
+            files_ = msg["files"] if "files" in msg and len(
+                msg["files"]) > 0 else []
 
             recipients_, recipients_str_ = [], ""
             for recipient_ in msg["personalizations"]["to"]:
@@ -669,7 +679,8 @@ class Trigger:
             if trigger_targets_ == []:
                 raise PassException("!!! no trigger target found")
 
-            PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
+            PRINT_(
+                f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
 
             for target_ in trigger_targets_:
                 target_collection_id_ = target_["target"].lower()
@@ -692,7 +703,8 @@ class Trigger:
                     else None
                 )
                 if not target_changes_:
-                    PRINT_(f"no target changes defined {target_collection_id_}")
+                    PRINT_(
+                        f"no target changes defined {target_collection_id_}")
                     raise AppException(
                         f"no target changes defined {target_collection_id_}"
                     )
@@ -706,7 +718,8 @@ class Trigger:
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
-                    PRINT_(f"full document not found ({source_collection_}): {match_}")
+                    PRINT_(
+                        f"full document not found ({source_collection_}): {match_}")
                     continue
 
                 match_ = {}
@@ -802,13 +815,15 @@ class Trigger:
                             count1_ = doc_["count"] if "count" in doc_ else 0
 
                     if count0_ != count1_:
-                        PRINT_("!!! on changes all not completed", changes_filter0_)
+                        PRINT_("!!! on changes all not completed",
+                               changes_filter0_)
                         continue
 
                 filter_ = {}
                 if "filter" in target_ and len(target_["filter"]) > 0 and not upsert_:
                     filter_ = self.get_filtered_f(
-                        {"match": target_["filter"], "properties": target_properties_}
+                        {"match": target_["filter"],
+                            "properties": target_properties_}
                     )
                 match_ = {**match_, **filter_}
 
@@ -874,7 +889,8 @@ class Trigger:
                                         source_collection_, match_for_aggregate_
                                     )
                                 else:
-                                    set_[target_field_] = full_document_[chkgroup1_]
+                                    set_[target_field_] = full_document_[
+                                        chkgroup1_]
                             else:
                                 for part_ in parts_:
                                     part_ = part_.strip()
@@ -915,7 +931,8 @@ class Trigger:
                         else:
                             ln_ = 10 if len(value_) == 10 else 19
                             rgx_ = "%Y-%m-%d" if ln_ == 10 else "%Y-%m-%dT%H:%M:%S"
-                            set_[target_field_] = datetime.strptime(value_[:ln_], rgx_)
+                            set_[target_field_] = datetime.strptime(
+                                value_[:ln_], rgx_)
                     elif type_ == "number":
                         set_[target_field_] = float(value_) * 1
                     elif type_ == "enum":
@@ -949,9 +966,11 @@ class Trigger:
                 )
                 if notification_:
                     notify_ = (
-                        "notify" in notification_ and notification_["notify"] is True
+                        "notify" in notification_ and notification_[
+                            "notify"] is True
                     )
-                    push_ = "push" in notification_ and notification_["push"] is True
+                    push_ = "push" in notification_ and notification_[
+                        "push"] is True
                     attachment_ = (
                         "attachment" in notification_
                         and notification_["attachment"] is True
@@ -1031,7 +1050,8 @@ class Trigger:
                         {"col_id": ncollection_}
                     )
                     if not ndocument_:
-                        PRINT_("!!! notification collection not found", ncollection_)
+                        PRINT_("!!! notification collection not found",
+                               ncollection_)
                         continue
 
                     nproperties_ = (
@@ -1056,6 +1076,7 @@ class Trigger:
                         ts_ = self.get_timestamp_f()
                         file_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.{type_}"
                         file_excel_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.xlsx"
+                        file_json_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.json"
                         ncollection_ += "_data"
                         command_ = f"mongoexport --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}' --quiet"
                         call(command_, shell=True)
@@ -1066,7 +1087,8 @@ class Trigger:
                                 raise PassException("no output generated")
                             lines_ = len(output_.readlines())
                             if lines_ and lines_ > 1:
-                                files_.append({"filename": file_, "filetype": type_})
+                                files_.append(
+                                    {"filename": file_, "filetype": type_})
                                 read_csv_file_ = pd.read_csv(file_)
                                 read_csv_file_.to_excel(
                                     file_excel_, index=None, sheet_name=ncollection_, header=True
@@ -1074,12 +1096,18 @@ class Trigger:
                                 files_.append(
                                     {"filename": file_excel_, "filetype": "xlsx"}
                                 )
+                                read_csv_file_.to_json(
+                                    file_json_, date_format="iso", orient="records", force_ascii=False)
+                                files_.append(
+                                    {"filename": file_json_, "filetype": "json"}
+                                )
                             else:
                                 raise PassException("no data records exported")
 
                     if push_:
                         msg_ = json.dumps({"text": f"OK {keyf_}"})
-                        resp_ = requests.post(notification_push_url_, msg_, timeout=10)
+                        resp_ = requests.post(
+                            notification_push_url_, msg_, timeout=10)
                         if resp_.status_code != 200:
                             PRINT_("!!! push notification error", resp_)
                         res_ = str(resp_.content)
@@ -1137,7 +1165,8 @@ class Trigger:
                     if source_collection_ is None:
                         PRINT_("!!! no collection provided")
                         continue
-                    source_collection_id_ = source_collection_.replace("_data", "")
+                    source_collection_id_ = source_collection_.replace(
+                        "_data", "")
 
                     if source_collection_ == "_collection":
                         refresh_properties_f_ = self.refresh_properties_f()
@@ -1150,7 +1179,8 @@ class Trigger:
                         refresh_triggers_f_ = self.refresh_triggers_f()
                         if not refresh_triggers_f_["result"]:
                             PRINT_(
-                                ">>> triggers refresh error", refresh_triggers_f_["exc"]
+                                ">>> triggers refresh error", refresh_triggers_f_[
+                                    "exc"]
                             )
                             continue
                         PRINT_(">>> _collection updated and refreshed")
@@ -1189,7 +1219,8 @@ class Trigger:
                         continue
 
                     if source_collection_[:1] == "_":
-                        PRINT_(f">>> system collection passed {source_collection_}")
+                        PRINT_(
+                            f">>> system collection passed {source_collection_}")
                         continue
 
                     resume_token_ = changes_stream_.resume_token

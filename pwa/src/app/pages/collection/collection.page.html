@@ -265,6 +265,10 @@ https://www.gnu.org/licenses.
                   </div>
                 </div>
               </th>
+              <th *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right">
+                {{ 'Link' | translate }}<br />
+                <ion-button size="small" class="unfiltered-btn">[{{ link_.collection | translate }}]</ion-button>
+              </th>
               <th>
                 {{ 'Created At' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_created_at'}}</ion-button>
@@ -349,6 +353,9 @@ https://www.gnu.org/licenses.
                 <ng-template #else0>
                   {{ record[item_.key]?.toString() | translate }}
                 </ng-template>
+              </td>
+              <td *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right primary bold">
+                {{ record["_link_" + link_.collection]?.length }}
               </td>
               <td>
                 {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}

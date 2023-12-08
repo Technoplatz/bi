@@ -16,7 +16,7 @@
     }
   },
   "required": ["pay_dnn_no", "pay_date"],
-  "index": [["pay_dnn_no"], ["pay_date"]],
+  "index": [["pay_date"]],
   "unique": [["pay_dnn_no"]],
   "sort": {
     "_modified_at": -1

@@ -50,7 +50,7 @@
     "_modified_at": -1
   },
   "required": ["car_id", "car_acc_no", "car_name", "car_tax_no", "car_plate_no"],
-  "index": [["car_id"], ["car_acc_no"]],
+  "index": [["car_acc_no"]],
   "unique": [["car_id"]],
   "parents": [
     {

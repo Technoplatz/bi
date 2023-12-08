@@ -1,13 +1,5 @@
 {
   "properties": {
-    "inv_no": {
-      "bsonType": "string",
-      "title": "Invoice No",
-      "description": "Invoice No",
-      "minLength": 10,
-      "maxLength": 10,
-      "pattern": "^[0-9]{10,10}$"
-    },
     "inv_dnn_no": {
       "bsonType": "string",
       "title": "DN No",
@@ -15,10 +7,18 @@
       "minLength": 10,
       "maxLength": 16,
       "pattern": "^[0-9A-Z-]{10,16}$"
+    },
+    "inv_no": {
+      "bsonType": "string",
+      "title": "Invoice No",
+      "description": "Invoice No",
+      "minLength": 10,
+      "maxLength": 10,
+      "pattern": "^[0-9]{10,10}$"
     }
   },
   "required": ["inv_dnn_no", "inv_no"],
-  "index": [["inv_dnn_no"], ["inv_no"]],
+  "index": [["inv_no"]],
   "unique": [["inv_dnn_no"], ["inv_no", "inv_dnn_no"]],
   "sort": {
     "_modified_at": -1

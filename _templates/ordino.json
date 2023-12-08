@@ -58,7 +58,7 @@
     }
   },
   "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],
-  "index": [["odi_no"], ["odi_sub_no"], ["odi_no", "odi_sub_no"], ["odi_from"], ["odi_customs"]],
+  "index": [["odi_from"], ["odi_customs"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
     "_modified_at": -1
@@ -130,7 +130,7 @@
       "btntext": "Attached DNs",
       "_tags": ["#Managers", "#Technoplatz", "#Operation", "#Logistics"],
       "notification": {
-        "notify": false,
+        "notify": true,
         "subject": "Logistics [Ordino Created]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to ordino.",
         "attachment": true,
