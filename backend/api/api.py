@@ -2969,19 +2969,23 @@ class Crud:
                         if not pmatches__:
                             continue
                         pipeline_match_ = []
-                        pipeline_project_ = {}
                         let_ = {}
                         for pmatch__ in pmatches__:
                             let_[f"p_{pmatch__['key']}"] = f"${pmatch__['value']}"
                             pipeline_match_.append({"$eq": [f"${pmatch__['key']}", f"$$p_{pmatch__['key']}"]})
-                        pipeline_project_[link_get_] = 1
-                        pipeline_project_["_id"] = 0
+                        group_id_ = {}
+                        group_id_[link_get_] = f"${link_get_}"
                         if not pipeline_match_:
                             continue
                         lookup_ = {
                             "from": f"{link_collection_}_data",
                             "let": let_,
-                            "pipeline": [{ "$match": {"$expr": {"$and": pipeline_match_ }} },{ "$project": pipeline_project_ }],
+                            "pipeline": [
+                                { "$match": {"$expr": {"$and": pipeline_match_ }} },
+                                { "$group": { "_id": group_id_, "count": { "$sum": 1 }}},
+                                { "$replaceWith": { "$mergeObjects": ["$$ROOT", "$_id"]}},
+                                { "$unset": ["_id", "count"]},
+                            ],
                             "as": f"_link_{link_collection_}"
                         }
                         aggregate_.append({"$lookup": lookup_})
