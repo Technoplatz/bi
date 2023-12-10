@@ -141,7 +141,7 @@ https://www.gnu.org/licenses.
     <ng-template #norelation>
         <div *ngIf="tab=='link'; else nolink" class="ion-padding-bottom ion-margin-top">
             <ion-item class="ion-no-margin ion-margin-bottom full-width">
-                <div class="ion-margin-top ion-margin-bottom">
+                <div *ngIf="op==='insert'" class="ion-margin-top ion-margin-bottom">
                     <ion-button color="primary" size="default" (click)="get_linked()">
                         <ion-icon name="download-outline"></ion-icon>
                         <span *ngIf="reloading">{{ 'Running' | translate }}...</span>

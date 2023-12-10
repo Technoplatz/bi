@@ -49,19 +49,13 @@
       "title": "Arrival Date",
       "description": "Date of arrival",
       "dateOnly": true
-    },
-    "odi_closed": {
-      "bsonType": "bool",
-      "title": "Closed",
-      "description": "Ordino closed",
-      "default": false
     }
   },
   "required": ["odi_no", "odi_sub_no", "odi_date", "odi_from", "odi_customs"],
   "index": [["odi_from"], ["odi_customs"]],
   "unique": [["odi_no", "odi_sub_no"]],
   "sort": {
-    "_modified_at": -1
+    "_created_at": -1
   },
   "parents": [
     {
@@ -105,6 +99,8 @@
     {
       "collection": "delivery",
       "get": "dnn_no",
+      "sum": "dnn_amount",
+      "listed": true,
       "match": [
         {
           "key": "dnn_status",
@@ -127,11 +123,50 @@
         }
       ],
       "autofill": true,
-      "btntext": "Attached DNs",
+      "btntext": "+DNN",
       "_tags": ["#Managers", "#Technoplatz", "#Operation", "#Logistics"],
       "notification": {
         "notify": true,
-        "subject": "Logistics [Ordino Created]",
+        "subject": "Logistics [Ordino Generated with DNN]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to ordino.",
+        "attachment": true,
+        "key": "odi_sub_no",
+        "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "filter": []
+      }
+    },
+    {
+      "collection": "delivery",
+      "get": "dnn_bill_no",
+      "sum": "dnn_amount",
+      "listed": false,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "00-Open"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_odi_no",
+          "value": "odi_no"
+        },
+        {
+          "key": "dnn_odi_sub_no",
+          "value": "odi_sub_no"
+        },
+        {
+          "key": "dnn_status",
+          "value": "10-OnTheWay"
+        }
+      ],
+      "autofill": true,
+      "btntext": "+Invoice",
+      "_tags": ["#Managers", "#Technoplatz", "#Operation", "#Logistics"],
+      "notification": {
+        "notify": true,
+        "subject": "Logistics [Ordino Generated with INV]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to ordino.",
         "attachment": true,
         "key": "odi_sub_no",
@@ -156,13 +191,6 @@
           "key": "odi_sub_no",
           "op": "nnull",
           "value": null
-        }
-      ],
-      "conditions": [
-        {
-          "key": "odi_closed",
-          "op": "ne",
-          "value": true
         }
       ],
       "targets": [
@@ -198,13 +226,6 @@
           "key": "odi_arrived_date",
           "op": "nnull",
           "value": null
-        }
-      ],
-      "conditions": [
-        {
-          "key": "odi_closed",
-          "op": "ne",
-          "value": true
         }
       ],
       "targets": [
@@ -273,13 +294,6 @@
           "key": "odi_arrived_date",
           "op": "null",
           "value": null
-        }
-      ],
-      "conditions": [
-        {
-          "key": "odi_closed",
-          "op": "ne",
-          "value": true
         }
       ],
       "targets": [

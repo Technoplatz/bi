@@ -2948,8 +2948,12 @@ class Crud:
                 links_ = structure_["links"] if "links" in structure_ and len(structure_["links"]) > 0 else []
                 link_collections_ = []
                 for link_ in links_:
+                    link_listed_ = "listed" in link_ and link_["listed"] is True
+                    if not link_listed_:
+                        continue
                     link_collection_ = link_["collection"]
                     link_get_ = link_["get"]
+                    link_sum_ = link_["sum"] if "sum" in link_ and link_["sum"] is not None else None
                     fo__ = Mongo().db_["_collection"].find_one({"col_id": link_collection_})
                     if not fo__:
                         continue
@@ -2982,9 +2986,9 @@ class Crud:
                             "let": let_,
                             "pipeline": [
                                 { "$match": {"$expr": {"$and": pipeline_match_ }} },
-                                { "$group": { "_id": group_id_, "count": { "$sum": 1 }}},
+                                { "$group": { "_id": group_id_, "count": { "$sum": 1 }, "sum": { "$sum": f"${link_sum_}" if link_sum_ else 1 }}},
                                 { "$replaceWith": { "$mergeObjects": ["$$ROOT", "$_id"]}},
-                                { "$unset": ["_id", "count"]},
+                                { "$unset": ["_id"]},
                             ],
                             "as": f"_link_{link_collection_}"
                         }

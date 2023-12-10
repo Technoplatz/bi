@@ -78,6 +78,7 @@
   "Copy": "Kopyala",
   "Copy Headers": "Başlıkları Kopyala",
   "Copy URL": "Adresi Kopyala",
+  "Count [Sum]": "Adet [Toplam]",
   "Created At": "Kayıt Giriş",
   "Created By": "Kayıt Giren",
   "Crontab": "Zamanlama",
@@ -205,6 +206,8 @@
   "Open To Standby": "Açık'tan Standby'a",
   "Opening Date": "Açılış Tarihi",
   "Order No": "Sipariş No",
+  "Order Update": "Sipariş Güncelleme",
+  "Order Update Date": "Sipariş Güncelleme Tarihi",
   "Orders": "Siparişler",
   "Ordino": "Konşimento",
   "Ordino Date": "Konşimento Tarihi",
@@ -244,6 +247,7 @@
   "RTD Date": "Teslime Hazır Tarihi",
   "Read": "Okuma",
   "Read QR code with your Authenticator App to generate a one-time password": "Tek kullanımlık şifreler üretmek içim QR kodunu şifre üretici uygulama ile okutun",
+  "Ready TBD": "Teslime Hazır",
   "Ready To Be Delivered": "Teslime Hazır",
   "Record ID": "Kayıt No",
   "Refresh All": "Verileri Yenile",
@@ -386,6 +390,5 @@
   "update completed successfully": "kayıt başarıyla güncellendi",
   "user not found": "kullanıcı bulunamadı",
   "user session ended": "oturum sonlandırıldı",
-  "user session not found": "kullanıcı oturumu bulunamadı",
-  "Ready TBD": "Teslime Hazır"
+  "user session not found": "kullanıcı oturumu bulunamadı"
 }

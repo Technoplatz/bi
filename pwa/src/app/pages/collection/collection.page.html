@@ -46,8 +46,12 @@ https://www.gnu.org/licenses.
             <ion-col size="12" class="data-sq-container">
               <div (click)="import_modal()"
                 [class]="is_crud && importvis_ ? 'data-sq-button' : 'data-sq-button disabled'">
-                <ion-icon name="download-outline"></ion-icon><br /><ion-text color="primary">{{ 'Import File' |
+                <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text color="primary">{{ 'Import File' |
                   translate }}</ion-text>
+              </div>
+              <div (click)="refresh_data(0, true)" class="data-sq-button">
+                <ion-icon name="download-outline"></ion-icon><br />
+                <ion-text color="primary">{{ 'Download File' | translate }}</ion-text>
               </div>
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-outline"></ion-icon><br />
@@ -60,7 +64,7 @@ https://www.gnu.org/licenses.
                   <ion-text color="primary">{{ 'New Document' | translate }}</ion-text>
                 </div>
               </ng-template>
-              <div (click)="refresh_data(0)" class="data-sq-button">
+              <div (click)="refresh_data(0, false)" class="data-sq-button">
                 <ion-icon *ngIf="is_loaded" name="sync-circle-outline"></ion-icon>
                 <ion-spinner *ngIf="!is_loaded" name="lines-sharp"></ion-spinner>
                 <br />
@@ -266,8 +270,8 @@ https://www.gnu.org/licenses.
                 </div>
               </th>
               <th *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right">
-                {{ 'Link' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">[{{ link_.collection | translate }}]</ion-button>
+                {{ 'Count [Sum]' | translate }}<br />
+                <ion-button size="small" class="unfiltered-btn">Link: {{ link_.get | translate }}</ion-button>
               </th>
               <th>
                 {{ 'Created At' | translate }}<br />
@@ -355,7 +359,7 @@ https://www.gnu.org/licenses.
                 </ng-template>
               </td>
               <td *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right primary bold">
-                {{ record["_link_" + link_.collection]?.length }}
+                {{ record["_link_" + link_.collection ]?.count }} [{{ record["_link_" + link_.collection ].sum?.toFixed(2) }}]
               </td>
               <td>
                 {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
@@ -375,17 +379,17 @@ https://www.gnu.org/licenses.
             </tr>
           </table>
           <div *ngIf="data.length > 0; else norecs">
-            <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0)"
+            <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
               class="ion-no-padding ion-margin-end">
               <ion-icon name="play-skip-back"></ion-icon>
             </ion-button>
             <span *ngIf="pager_ > 10">
-              <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1)" class="ion-no-padding">
+              <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1, false)" class="ion-no-padding">
                 <ion-icon name="caret-back"></ion-icon>
               </ion-button>
             </span>
             <span *ngFor="let in of paget_">
-              <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in)"
+              <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
                 class="ion-no-padding">
                 <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
               </ion-button>
@@ -394,14 +398,15 @@ https://www.gnu.org/licenses.
               </ion-button>
             </span>
             <span *ngIf="pages_ > 10 && pager_ < pages_">
-              <ion-button size="small" fill="clear" (click)="refresh_data(pages_)" class="ion-no-padding">
+              <ion-button size="small" fill="clear" (click)="refresh_data(pages_, false)" class="ion-no-padding">
                 ...&nbsp;&nbsp;{{ pages_ }}
               </ion-button>
-              <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1)" class="ion-no-padding">
+              <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
                 <ion-icon name="caret-forward"></ion-icon>
               </ion-button>
             </span>
-            <ion-button size="small" fill="clear" (click)="refresh_data(0)" class="ion-no-padding ion-margin-start">
+            <ion-button size="small" fill="clear" (click)="refresh_data(0, false)"
+              class="ion-no-padding ion-margin-start">
               <ion-icon name="list-sharp"></ion-icon>
               {{ 'Pagination' | translate }} [<app-pagination></app-pagination>]
             </ion-button>

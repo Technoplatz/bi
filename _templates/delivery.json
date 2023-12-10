@@ -450,13 +450,7 @@
           "value": "odi_sub_no"
         }
       ],
-      "filter": [
-        {
-          "key": "odi_closed",
-          "op": "ne",
-          "value": true
-        }
-      ],
+      "filter": [],
       "get": ["odi_no", "odi_sub_no", "odi_customs"],
       "group": false
     },
@@ -504,6 +498,18 @@
         }
       ],
       "get": ["acc_no", "acc_name"],
+      "group": false
+    },
+    {
+      "collection": "shipment",
+      "match": [
+        {
+          "key": "dnn_wayb_id",
+          "value": "shp_id"
+        }
+      ],
+      "filter": [],
+      "get": [],
       "group": false
     }
   ],

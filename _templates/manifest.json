@@ -100,13 +100,8 @@
       "filter": [
         {
           "key": "odi_arrived_date",
-          "op": "ne",
+          "op": "nnull",
           "value": null
-        },
-        {
-          "key": "odi_closed",
-          "op": "ne",
-          "value": true
         }
       ]
     }
@@ -155,7 +150,36 @@
       }
     }
   ],
-  "actions": [],
+  "actions": [
+    {
+      "id": "closed",
+      "title": "Clearance Completed",
+      "enabled": true,
+      "match": [
+        {
+          "key": "man_opening_date",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "man_closing_date",
+          "op": "null",
+          "value": null
+        }
+      ],
+      "set": [
+        {
+          "key": "man_closing_date",
+          "value": "$CURRENT_DATE"
+        }
+      ],
+      "one_click": false,
+      "icon": "megaphone",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+    }
+  ],
   "triggers": [
     {
       "name": "relation",

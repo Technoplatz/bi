@@ -3,7 +3,8 @@
     "blo_status": {
       "bsonType": "string",
       "title": "Status",
-      "description": "Status"
+      "description": "Status",
+      "selection": true
     },
     "blo_territory": {
       "bsonType": "string",
@@ -364,6 +365,11 @@
       "bsonType": "string",
       "title": "Critical Status",
       "description": "Critical Status"
+    },
+    "blo_order_update_date": {
+      "bsonType": "date",
+      "title": "Order Update Date",
+      "description": "Order updated date"
     }
   },
   "required": [
@@ -384,7 +390,31 @@
     "_modified_at": -1
   },
   "parents": [],
-  "actions": [],
+  "actions": [
+    {
+      "id": "order-update",
+      "title": "Order Update",
+      "enabled": true,
+      "match": [
+        {
+          "key": "blo_net_value",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "set": [
+        {
+          "key": "blo_order_update_date",
+          "value": "$CURRENT_DATE"
+        }
+      ],
+      "one_click": true,
+      "icon": "cash-outline",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Technoplatz"]
+    }
+  ],
   "triggers": [
     {
       "name": "product",
@@ -459,6 +489,11 @@
           "key": "blo_line_qty",
           "op": "gt",
           "value": 0
+        },
+        {
+          "key": "blo_order_update_date",
+          "op": "nnull",
+          "value": null
         }
       ],
       "targets": [
@@ -474,23 +509,7 @@
               "value": "blo_prd_no"
             }
           ],
-          "filter": [
-            {
-              "key": "blo_status",
-              "op": "contains",
-              "value": "Order"
-            },
-            {
-              "key": "blo_net_value",
-              "op": "gt",
-              "value": 0
-            },
-            {
-              "key": "blo_line_qty",
-              "op": "gt",
-              "value": 0
-            }
-          ],
+          "filter": [],
           "set": [
             {
               "key": "ord_no",
@@ -519,5 +538,10 @@
     "enabled": true,
     "purge": true,
     "ignored": ["blo_dnn_item"]
+  },
+  "queries": {
+    "query": true,
+    "cronjob": false,
+    "updatables": []
   }
 }

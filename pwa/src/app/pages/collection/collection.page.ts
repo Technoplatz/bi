@@ -50,7 +50,7 @@ import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 export class CollectionPage implements OnInit {
   @ViewChild("editor", { static: false }) editor: any = new JsonEditorComponent();
   @ViewChild("searchfocus", { static: false }) searchfocus: any = [];
-  @ViewChild("svg") svg:any = ElementRef;
+  @ViewChild("svg") svg: any = ElementRef;
   private json_content_: any = null;
   private sweeped: any = [];
   private actionix: number = -1;
@@ -156,7 +156,7 @@ export class CollectionPage implements OnInit {
           this.actions = [];
           this.crud.get_collection(this.id).then((res: any) => {
             this.counters_ = res && res.counters ? res.counters : {};
-            this.refresh_data(0).then(() => { }).catch((error: any) => {
+            this.refresh_data(0, false).then(() => { }).catch((error: any) => {
               this.misc.doMessage(error, "error");
             }).finally(() => {
               this.is_initialized = true;
@@ -169,7 +169,24 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  refresh_data(page_: number) {
+  get_links(res: any) {
+    return new Promise((resolve, reject) => {
+      this.links_ = res.structure.links ? res.structure.links.filter((lnk_: any) => lnk_.listed === true) : [];
+      for (let l_: number = 0; l_ < this.links_.length; l_++) {
+        this.data.forEach((data_: any, index_: number) => {
+          this.data[index_]["_link_" + this.links_[l_].collection].count = 0;
+          this.data[index_]["_link_" + this.links_[l_].collection].sum = 0;
+          this.data[index_]["_link_" + this.links_[l_].collection].forEach((item_: any) => {
+            this.data[index_]["_link_" + this.links_[l_].collection].count += item_.count;
+            this.data[index_]["_link_" + this.links_[l_].collection].sum += item_.sum;
+          });
+        });
+      }
+      resolve(true);
+    });
+  }
+
+  refresh_data(page_: number, outfile_: boolean) {
     return new Promise((resolve, reject) => {
       this.is_loaded = this.is_selected = false;
       this.schemavis_ = false;
@@ -189,32 +206,33 @@ export class CollectionPage implements OnInit {
               sort: this.sort,
               page: this.page_,
               limit: this.limit_,
-              selections: this.selections_
+              selections: this.selections_,
+              outfile: outfile_
             }).then((res: any) => {
               this.selections_ = res.selected;
               this.pager_ = this.page_;
               this.data = res.data;
               this.structure_ = res.structure;
-              this.links_ = res.structure.links ? res.structure.links : [];
-              this.json_content_ = res.structure;
-              this.actions = res.structure.actions;
-              this.properties_ = res.structure.properties;
-              this.importvis_ = res.structure.import?.enabled;
-              this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
-              this.count = res.count;
-              this.multicheckbox = false;
-              this.multicheckbox ? this.multicheckbox = false : null;
-              this.selected = new Array(res.data.length).fill(false);
-              this.pages_ = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
-              const lmt = this.pages_ >= 10 ? 10 : this.pages_;
-              this.paget_ = new Array(lmt);
-              this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
-              this.searched === null ? this.init_search(true) : this.init_search(false);
-              for (let p = 0; p < this.paget_.length; p++) {
-                this.paget_[p] = this.page_start + p;
-              }
-              this.is_loaded = true;
-              resolve(true);
+              this.get_links(res).then(() => {
+                this.json_content_ = res.structure;
+                this.actions = res.structure.actions;
+                this.properties_ = res.structure.properties;
+                this.importvis_ = res.structure.import?.enabled;
+                this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
+                this.count = res.count;
+                this.multicheckbox = false;
+                this.multicheckbox ? this.multicheckbox = false : null;
+                this.selected = new Array(res.data.length).fill(false);
+                this.pages_ = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
+                const lmt = this.pages_ >= 10 ? 10 : this.pages_;
+                this.paget_ = new Array(lmt);
+                this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
+                this.searched === null ? this.init_search(true) : this.init_search(false);
+                for (let p = 0; p < this.paget_.length; p++) {
+                  this.paget_[p] = this.page_start + p;
+                }
+                resolve(true);
+              });
             }).catch((error: any) => {
               this.misc.doMessage(error, "error");
               reject(error);
@@ -224,6 +242,8 @@ export class CollectionPage implements OnInit {
                 Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
               }).catch((err_: any) => {
                 console.error("get_all", err_);
+              }).finally(() => {
+                this.is_loaded = true;
               });
             });
           });
@@ -271,7 +291,7 @@ export class CollectionPage implements OnInit {
                   doc: null,
                   is_crud: true
                 }).then(() => {
-                  this.refresh_data(0);
+                  this.refresh_data(0, false);
                 }).catch((res: any) => {
                   this.misc.doMessage(res && res.msg ? res.msg : res, "error");
                 }).finally(() => {
@@ -317,7 +337,7 @@ export class CollectionPage implements OnInit {
       });
       modal.onDidDismiss().then((res_: any) => {
         if (op === "action" || res_.data.modified || this.scan_) {
-          this.refresh_data(0);
+          this.refresh_data(0, false);
         }
       });
       return await modal.present();
@@ -353,7 +373,7 @@ export class CollectionPage implements OnInit {
   do_sort(key: string, d: number) {
     this.sort = {};
     this.sort[key] = d ? d * -1 : 1;
-    this.refresh_data(0);
+    this.refresh_data(0, false);
   }
 
   set_search(k_: string) {
@@ -387,7 +407,7 @@ export class CollectionPage implements OnInit {
             this.searched = null;
             this.sweeped[this.segment] = [];
             this.sort = {};
-            this.refresh_data(0).then(() => {
+            this.refresh_data(0, false).then(() => {
               resolve(true);
             }).catch((error: any) => {
               this.misc.doMessage(error, "error");
@@ -413,7 +433,7 @@ export class CollectionPage implements OnInit {
         this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
           this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
             this.storage.set("LSSELECTIONS_" + this.id, this.selections_).then(() => {
-              this.refresh_data(0);
+              this.refresh_data(0, false);
             });
           });
         });
@@ -441,7 +461,7 @@ export class CollectionPage implements OnInit {
       this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
         this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
           this.storage.set("LSSELECTIONS_" + this.id, this.selections_).then(() => {
-            this.refresh_data(0);
+            this.refresh_data(0, false);
           });
         });
       });
@@ -464,7 +484,7 @@ export class CollectionPage implements OnInit {
           this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
             this.storage.set("LSSEARCHED_" + this.id, this.searched).then(() => {
               this.storage.set("LSSELECTIONS_" + this.id, this.selections_).then(() => {
-                this.refresh_data(0);
+                this.refresh_data(0, false);
               });
             });
           });
@@ -499,7 +519,7 @@ export class CollectionPage implements OnInit {
   do_flashcard(item_: any) {
     this.filter_ = item_.view.data_filter;
     this.storage.set("LSFILTER_" + this.id, this.filter_).then(() => {
-      this.refresh_data(0).then(() => { }).catch((res: any) => {
+      this.refresh_data(0, false).then(() => { }).catch((res: any) => {
         this.misc.doMessage(res, "error");
       });
     });
@@ -515,7 +535,7 @@ export class CollectionPage implements OnInit {
         structure: this.json_content_
       }).then(() => {
         this.misc.doMessage("schema saved successfully", "success");
-        this.refresh_data(0).then(() => {
+        this.refresh_data(0, false).then(() => {
           this.schemavis_ = false;
         });
       }).catch((error: any) => {
@@ -531,7 +551,7 @@ export class CollectionPage implements OnInit {
   import_modal() {
     this.misc.import_modal(this.id).then(() => {
       this.misc.doMessage("file imported successfully", "success");
-      this.refresh_data(0).then(() => { });
+      this.refresh_data(0, false).then(() => { });
     }).catch((error: any) => {
       console.error(error);
     }).finally(() => { });
