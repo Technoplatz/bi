@@ -215,7 +215,7 @@
       },
       "notification": {
         "notify": true,
-        "subject": "Touchpoint [DNs Shipped]",
+        "subject": "Touchpoint [DNs Delivered]",
         "body": "Hi,<br /><br />We would like to let you know that the attached deliveries have been shipped successfully.",
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
         "attachment": true,

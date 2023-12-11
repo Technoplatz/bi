@@ -2646,7 +2646,7 @@ class Crud:
         count_, err_ = 0, None
         init_res_ = {"result": True, "count": count_, "err": err_}
         try:
-            _id = obj_["id"] if "id" in obj_ else None
+            _id = str(obj_["id"]) if "id" in obj_ else None
             if not _id:
                 raise APIError("no job defined")
 

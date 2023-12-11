@@ -48,10 +48,6 @@ https://www.gnu.org/licenses.
                 <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text color="primary">{{ 'Upload File' |
                   translate }}</ion-text>
               </div>
-              <!-- <div (click)="refresh_data(0, true)" class="data-sq-button">
-                <ion-icon name="download-outline"></ion-icon><br />
-                <ion-text color="primary">{{ 'Download File' | translate }}</ion-text>
-              </div> -->
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-outline"></ion-icon><br />
                 <ion-text color="primary">{{ 'Scan Barcode' | translate }}</ion-text>
@@ -419,7 +415,7 @@ https://www.gnu.org/licenses.
         </div>
         <ng-template #notinit>
           <div class="ion-margin-top">
-            {{ loadingText | translate }}...
+            {{ 'Loading' | translate }}...
           </div>
         </ng-template>
       </ion-col>
