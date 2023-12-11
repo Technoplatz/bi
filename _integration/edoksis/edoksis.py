@@ -195,7 +195,7 @@ class Misc:
         """
         docstring is in progress
         """
-        return datetime.now(pytz.timezone(TZ_))
+        return datetime.now()
 
     def exception_show_f(self, exc_):
         """
