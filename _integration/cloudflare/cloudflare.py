@@ -251,7 +251,7 @@ class Cloudflare:
                 Mongo().db_["_firewall"].update_many(
                     {"fwa_source_ip": doc_["_id"]},
                     {"$set": {"fwa_waf_sync_date": datetime.now(
-                        pytz.timezone(TZ_))}},
+                        pytz.timezone(self.tz_))}},
                 )
 
             result_ = True

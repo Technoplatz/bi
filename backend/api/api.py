@@ -438,7 +438,7 @@ class Misc:
         """
         docstring is in progress
         """
-        return datetime.now()
+        return pytz.timezone("UTC").localize(datetime.utcnow()).astimezone(pytz.timezone(TZ_))
 
     def s3_f(self, input_):
         """
