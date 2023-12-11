@@ -627,7 +627,7 @@ class Trigger:
                 self.repeater_ = 0
 
             source_collection_id_ = source_collection_.replace("_data", "")
-            changed_keys_ = list(changed_.keys())
+            changed_keys_ = list(changed_.keys()) if changed_ and changed_.keys() else None
 
             if not changed_keys_:
                 raise PassException(">>> passed, no changed keys")

@@ -4440,11 +4440,13 @@ class Crud:
                     get_filtered_[key_field_] = key_value_
 
                     if ref_field_ and num_fields_:
+
                         count_ = 1
                         if doc_[ref_field_] > datax_[ref_field_]:
                             doc_[ref_field_] = datax_[ref_field_]
                         if doc_[ref_field_] < 0:
                             doc_[ref_field_] = 0
+
                         ration_ = doc_[ref_field_] / datax_[ref_field_]
 
                         datanew_.pop("_id", None)
@@ -4469,6 +4471,7 @@ class Crud:
 
                         session_db_[collection_].insert_one(
                             datanew_, session=session_)
+
                         if ration_ < 1:
                             session_db_[collection_].update_one(
                                 get_filtered_,
