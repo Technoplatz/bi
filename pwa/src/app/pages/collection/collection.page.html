@@ -237,11 +237,16 @@ https://www.gnu.org/licenses.
                     </ion-button>
                   </div>
                   <div>
-                    <ion-input #searchfocus *ngIf="item.value.bsonType!='bool'"
+                    <!-- <ion-input #searchfocus *ngIf="item.value.bsonType!='bool'"
                       [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
                       [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
                       class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
-                    </ion-input>
+                    </ion-input> -->
+                    <ion-textarea #searchfocus *ngIf="item.value.bsonType!='bool'" cols="32"
+                      [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
+                      class="ion-no-padding search-area" placeholder="{{ 'Search' | translate }}" disabled="false"
+                      auto-grow="true">
+                    </ion-textarea>
                   </div>
                   <div>
                     <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">

@@ -1959,7 +1959,7 @@ class Crud:
             for mat_ in match_:
                 key_ = mat_["key"]
                 op_ = mat_["op"]
-                value_ = mat_["value"]
+                value_ = mat_["value"].strip()
                 if key_ and op_ and key_ in properties_:
                     fres_ = None
                     typ = (
@@ -2003,11 +2003,15 @@ class Crud:
                                 ),
                             }
                         else:
-                            fres_ = (
-                                {"$regex": value_, "$options": "i"}
-                                if value_
-                                else {"$regex": "", "$options": "i"}
-                            )
+                            multilines_ = value_.split("\n")
+                            if multilines_ and len(multilines_) > 1:
+                                fres_ = { "$in": multilines_ }
+                            else:
+                                fres_ = (
+                                    {"$regex": value_, "$options": "i"}
+                                    if value_
+                                    else {"$regex": "", "$options": "i"}
+                                )
                     elif op_ == "eq":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = float(value_)
@@ -2777,15 +2781,13 @@ class Crud:
             )
 
             if not cursor_:
-                err_ = "no record found to update [1]"
-                raise PassException(err_)
+                raise PassException("")
 
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             ids_ = [ObjectId(doc_["_id"]) for doc_ in data_]
 
             if len(ids_) == 0:
-                err_ = "no record found to update [2]"
-                raise PassException(err_)
+                raise PassException("")
 
             personalizations_ = []
 
@@ -2872,6 +2874,7 @@ class Crud:
             return init_res_
 
         except PassException as exc__:
+            init_res_["result"] = True
             init_res_["count"] = count_
             init_res_["schema"] = schema_
             init_res_["job"] = job_
@@ -3066,6 +3069,7 @@ class Crud:
 
                 aggregate_.append({"$match": get_filtered_})
                 aggregate_.append({"$sort": sort__})
+                aggregate_.append({"$skip": skip_})
                 aggregate_.append({"$limit": limit_})
                 if projection_:
                     aggregate_.append({"$project": projection_})

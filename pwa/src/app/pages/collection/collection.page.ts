@@ -103,15 +103,7 @@ export class CollectionPage implements OnInit {
   public flashcards_: any = [];
   public propkeys_: string = "";
   public is_copied: boolean = false;
-  public selections_: any = {}
-
-  @HostListener("document:keydown", ["$event"]) loginWithEnter(event: any) {
-    if (event.key === "Enter") {
-      if (this.searched && this.searched[this.key_]?.actived) {
-        this.search(this.key_, this.searched[this.key_]?.kw ? this.searched[this.key_]?.kw : null);
-      }
-    }
-  }
+  public selections_: any = {};
 
   constructor(
     private storage: Storage,
@@ -379,6 +371,7 @@ export class CollectionPage implements OnInit {
   set_search(k_: string) {
     setTimeout(() => {
       this.searchfocus?.setFocus();
+      this.searched[k_].kw = this.searched[k_]?.kw?.trim().replace(/^\s*\n/gm, "");
       this.key_ = k_;
     }, 500);
     for (let key_ in this.structure_.properties) {
