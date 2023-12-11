@@ -36,6 +36,7 @@ import re
 import asyncio
 import smtplib
 import json
+import pytz
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -149,7 +150,7 @@ class Trigger:
         """
         docstring is in progress
         """
-        return datetime.now()
+        return datetime.now(pytz.timezone(TZ_))
 
     def get_timestamp_f(self):
         """
@@ -1265,6 +1266,7 @@ class Trigger:
             self.exception_printed_f(exc_)
 
 
+TZ_ = os.environ.get("TZ")
 mongo_rs_ = os.environ.get("MONGO_RS")
 mongo_host0_ = os.environ.get("MONGO_HOST0")
 mongo_host1_ = os.environ.get("MONGO_HOST1")

@@ -52,6 +52,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=${TZ}
     ports:
       - "${HTTPS_PORT}:${HTTPS_PORT}"
       - "${TRAEFIK_PORT}:${TRAEFIK_PORT}"
@@ -77,6 +79,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
+      - TZ=${TZ}
       - MONGO_HOST0=${MONGO_HOST0}
       - MONGO_HOST1=${MONGO_HOST1}
       - MONGO_HOST2=${MONGO_HOST2}
@@ -120,6 +123,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
+      - TZ=${TZ}
       - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_initdb_root_username
       - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_initdb_root_password
       - MONGO_USERNAME_FILE=/run/secrets/mongo_username
@@ -162,6 +166,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
+      - TZ=${TZ}
       - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_initdb_root_username
       - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_initdb_root_password
       - MONGO_USERNAME_FILE=/run/secrets/mongo_username
@@ -202,6 +207,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
+      - TZ=${TZ}
       - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_initdb_root_username
       - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_initdb_root_password
       - MONGO_USERNAME_FILE=/run/secrets/mongo_username
@@ -243,6 +249,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
+      - TZ=${TZ}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_NAME=${ADMIN_NAME}
       - COMPANY_NAME=${COMPANY_NAME}
@@ -294,6 +301,7 @@ services:
     ports:
       - "${STREAM_PORT}:${HTTP_PORT}"
     environment:
+      - TZ=${TZ}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
       - MONGO_HOST0=${MONGO_HOST0}
@@ -357,6 +365,7 @@ services:
     ports:
       - "${API_CONTAINER_PORT}:${HTTP_PORT}"
     environment:
+      - TZ=${TZ}
       - COMPANY_NAME=${COMPANY_NAME}
       - FROM_EMAIL=${FROM_EMAIL}
       - ADMIN_NAME=${ADMIN_NAME}
@@ -467,6 +476,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
+      - TZ=${TZ}
       - WATCHTOWER_NOTIFICATIONS=slack
       - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER=${NOTIFICATION_IDENTIFIER}
       - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_PUSH_URL}

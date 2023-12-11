@@ -50,32 +50,27 @@ export class DashboardPage implements OnInit {
   constructor(
     private crud: Crud,
     public misc: Miscellaneous
-  ) {
-    this.crud.announcements.subscribe((res: any) => {
-      this.announcements_ = res && res.data ? res.data : [];
-    });
-  }
+  ) { }
 
   ngOnInit() {
-    this.crud.get_announcements();
+    this.announcements_ = [];
+    this.crud.get_announcements().then((res: any) => {
+      this.announcements_ = res.data ? res.data : [];
+    });
     this.crud.get_visuals(null).then((visuals_: any) => {
       this.visuals_ = visuals_.visuals;
-      for (let i: number = 0; i < this.visuals_.length; i++) {
-        this.visual(i);
+      for (let ix_: number = 0; ix_ < this.visuals_.length; ix_++) {
+        this.visuals_[ix_].is_loaded = false;
+        this.crud.get_visual(this.visuals_[ix_].id).then((visual_: any) => {
+          this.visuals_[ix_].data = visual_.visual.data;
+          this.visuals_[ix_].fields = visual_.visual.fields;
+          this.visuals_[ix_].count = visual_.visual.count;
+        }).catch((err_: any) => {
+          this.visuals_[ix_].error = err_;
+        }).finally(() => {
+          this.visuals_[ix_].is_loaded = true;
+        });
       }
-    });
-  }
-
-  visual(ix_: number) {
-    this.visuals_[ix_].is_loaded = false;
-    this.crud.get_visual(this.visuals_[ix_].id).then((visual_: any) => {
-      this.visuals_[ix_].data = visual_.visual.data;
-      this.visuals_[ix_].fields = visual_.visual.fields;
-      this.visuals_[ix_].count = visual_.visual.count;
-    }).catch((err_: any) => {
-      this.visuals_[ix_].error = err_;
-    }).finally(() => {
-      this.visuals_[ix_].is_loaded = true;
     });
   }
 

@@ -50,7 +50,6 @@ export class Crud {
   public collections = new BehaviorSubject<any>([]);
   public queries = new BehaviorSubject<any>([]);
   public visuals = new BehaviorSubject<any>([]);
-  public announcements = new BehaviorSubject<any>([]);
 
   constructor(
     private misc: Miscellaneous
@@ -295,7 +294,7 @@ export class Crud {
         op: "announcements",
         collection: "_announcement"
       }).then((res: any) => {
-        resolve(this.announcements.next(res));
+        resolve(res);
       }).catch((err: any) => {
         reject(err);
       });

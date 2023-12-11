@@ -41,6 +41,7 @@ import smtplib
 import hashlib
 import ast
 import subprocess
+import pytz
 from unidecode import unidecode
 from email import encoders
 from email.mime.base import MIMEBase
@@ -291,7 +292,8 @@ class Schedular:
                 },
             ]
             cursor_ = Mongo().db_["_firewall"].aggregate(agg_)
-            rules_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            rules_ = json.loads(JSONEncoder().encode(
+                list(cursor_))) if cursor_ else []
             for rule_ in rules_:
                 Mongo().db_["_firewall"].update_one(
                     {"_id": ObjectId(rule_["_id"])},
@@ -431,6 +433,12 @@ class Misc:
             "reminder",
             "masked",
         ]
+
+    def get_now_f(self):
+        """
+        docstring is in progress
+        """
+        return datetime.now(pytz.timezone(TZ_))
 
     def s3_f(self, input_):
         """
@@ -686,12 +694,6 @@ class Misc:
                 doc_[field_] = doc_[field_].strip()
         return doc_
 
-    def get_now_f(self):
-        """
-        docstring is in progress
-        """
-        return datetime.now()
-
     def get_client_ip_f(self):
         """
         docstring is in progress
@@ -745,7 +747,8 @@ class Misc:
                                 "null",
                             ]
                         else:
-                            dict_[field_] = [properties_property_[field_], "null"]
+                            dict_[field_] = [
+                                properties_property_[field_], "null"]
                     else:
                         dict_[field_] = properties_property_[field_]
             properties_new_[property_] = dict_
@@ -766,7 +769,8 @@ class Misc:
                 if member_["usr_id"] not in to_:
                     to_.append(member_["usr_id"])
                     personalizations_.append(
-                        {"email": member_["usr_id"], "name": member_["usr_name"]}
+                        {"email": member_["usr_id"],
+                            "name": member_["usr_name"]}
                     )
 
             return {"result": True, "personalizations": personalizations_}
@@ -961,7 +965,8 @@ class Iot:
                     "ser_in_date": {"$first": "$ser_in_date"},
                 }
             }
-            replacewith_ = {"$replaceWith": {"$mergeObjects": ["$$ROOT", "$_id"]}}
+            replacewith_ = {"$replaceWith": {
+                "$mergeObjects": ["$$ROOT", "$_id"]}}
             skip_ = {"$skip": limitn_ * (page_ - 1)}
             limit_ = {"$limit": limitn_}
             sort_ = {"$sort": {"ser_in_date": -1}}
@@ -978,7 +983,8 @@ class Iot:
                                 "$expr": {
                                     "$and": [
                                         {"$eq": ["$dnn_no", "$$p_ser_dnn_no"]},
-                                        {"$eq": ["$dnn_line_no", "$$p_ser_line_no"]},
+                                        {"$eq": ["$dnn_line_no",
+                                                 "$$p_ser_line_no"]},
                                     ]
                                 }
                             }
@@ -1018,7 +1024,8 @@ class Iot:
             aggregate_.append(unset_delivery_)
 
             cursor_ = Mongo().db_["serial_data"].aggregate(aggregate_)
-            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            docs_ = json.loads(JSONEncoder().encode(
+                list(cursor_))) if cursor_ else []
 
             return {"result": True, "payload": docs_, "msg": None, "status": 200}
 
@@ -1066,7 +1073,8 @@ class Iot:
             doc_["bar_mode"] = bar_mode_
             doc_["_modified_at"] = Misc().get_now_f()
             doc_["_modified_by"] = aut_id_
-            filter_ = {"bar_operation": bar_operation_, "bar_input": bar_input_}
+            filter_ = {"bar_operation": bar_operation_,
+                       "bar_input": bar_input_}
 
             read_ = Mongo().db_["barcode_data"].find_one(filter_)
             if not read_:
@@ -1086,16 +1094,19 @@ class Iot:
                 Mongo()
                 .db_["serial_data"]
                 .find_one(
-                    {"$or": [{"ser_dnn_no": bar_input_}, {"ser_sscc_no": bar_input_}]}
+                    {"$or": [{"ser_dnn_no": bar_input_},
+                             {"ser_sscc_no": bar_input_}]}
                 )
             )
             if find_one_:
                 ser_dnn_no_ = (
-                    find_one_["ser_dnn_no"] if "ser_dnn_no" in find_one_ else None
+                    find_one_[
+                        "ser_dnn_no"] if "ser_dnn_no" in find_one_ else None
                 )
                 if ser_dnn_no_:
                     delivery_ = (
-                        Mongo().db_["delivery_data"].find_one({"dnn_no": ser_dnn_no_})
+                        Mongo().db_["delivery_data"].find_one(
+                            {"dnn_no": ser_dnn_no_})
                     )
                     if delivery_:
                         aggregate_ = []
@@ -1122,7 +1133,8 @@ class Iot:
                         aggregate_.append(group_)
                         aggregate_.append(replacewith_)
                         aggregate_.append(sort_)
-                        cursor_ = Mongo().db_["serial_data"].aggregate(aggregate_)
+                        cursor_ = Mongo().db_[
+                            "serial_data"].aggregate(aggregate_)
                         payload_ = (
                             json.loads(JSONEncoder().encode(list(cursor_)))
                             if cursor_
@@ -1216,7 +1228,8 @@ class Crud:
             if "col_structure" not in cursor_:
                 raise APIError("structure not found")
 
-            structure_ = cursor_["col_structure"] if collection[:1] != "_" else cursor_
+            structure_ = cursor_[
+                "col_structure"] if collection[:1] != "_" else cursor_
             if "properties" not in structure_:
                 raise APIError("properties not found in structure")
             properties_ = structure_["properties"]
@@ -1276,7 +1289,8 @@ class Crud:
                                 and isinstance(doc_[k], str)
                                 and self.validate_iso8601_f(doc_[k])
                             ):
-                                document_[k] = datetime.strptime(doc_[k][:ln_], rgx_)
+                                document_[k] = datetime.strptime(
+                                    doc_[k][:ln_], rgx_)
                             else:
                                 document_[k] = (
                                     datetime.strptime(doc_[k][:ln_], rgx_)
@@ -1285,7 +1299,8 @@ class Crud:
                                 )
                         elif property_["bsonType"] == "string":
                             document_[k] = (
-                                str(doc_[k]) if doc_[k] is not None else doc_[k]
+                                str(doc_[k]) if doc_[
+                                    k] is not None else doc_[k]
                             )
                         elif property_["bsonType"] in [
                             "number",
@@ -1333,10 +1348,12 @@ class Crud:
             if not col_check_["result"]:
                 raise APIError(col_check_["msg"])
             collection__ = (
-                col_check_["collection"] if "collection" in col_check_ else None
+                col_check_[
+                    "collection"] if "collection" in col_check_ else None
             )
 
-            structure_ = collection__["col_structure"] if is_crud_ else collection__
+            structure_ = collection__[
+                "col_structure"] if is_crud_ else collection__
             if "properties" not in structure_:
                 raise APIError("properties not found in the structure")
             properties_ = structure_["properties"]
@@ -1439,10 +1456,12 @@ class Crud:
             for _id in sweeped_:
                 ids_.append(ObjectId(_id))
             if len(ids_) > 0:
-                get_filtered_ = {"$and": [get_filtered_, {"_id": {"$in": ids_}}]}
+                get_filtered_ = {
+                    "$and": [get_filtered_, {"_id": {"$in": ids_}}]}
 
             distinct_ = ""
-            cursora_ = Mongo().db_[f"{collection_}_data"].distinct(key_, get_filtered_)
+            cursora_ = Mongo().db_[f"{collection_}_data"].distinct(
+                key_, get_filtered_)
             if cursora_ and len(cursora_) > 0:
                 distinct_ = "\n".join(map(str, cursora_[:1024]))
 
@@ -1484,7 +1503,8 @@ class Crud:
         str_ = str_[:32]
         str_ = re.sub(" +", " ", str_)
         str_ = re.sub(
-            ".", lambda char_: exceptions_.get(char_.group(), char_.group()), str_
+            ".", lambda char_: exceptions_.get(
+                char_.group(), char_.group()), str_
         )
         return str_.lower().strip().encode("ascii", "ignore").decode("ascii")
 
@@ -1518,12 +1538,14 @@ class Crud:
             name_ = user_["usr_name"]
 
             collection__ = f"{collection_}_data"
-            find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
+            find_one_ = Mongo().db_["_collection"].find_one(
+                {"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
 
             col_structure_ = (
-                find_one_["col_structure"] if "col_structure" in find_one_ else None
+                find_one_[
+                    "col_structure"] if "col_structure" in find_one_ else None
             )
             if not col_structure_:
                 raise APIError("no structure found")
@@ -1548,7 +1570,8 @@ class Crud:
                     ):
                         defaults_[req_] = properties_[req_]["default"]
 
-            import_ = col_structure_["import"] if "import" in col_structure_ else None
+            import_ = col_structure_[
+                "import"] if "import" in col_structure_ else None
             if not import_:
                 raise APIError(f"no import rules defined for {collection_}")
             ignored_ = (
@@ -1556,7 +1579,8 @@ class Crud:
                 if "ignored" in import_ and len(import_["ignored"]) > 0
                 else []
             )
-            upsertable_ = "upsertable" in import_ and import_["upsertable"] is True
+            upsertable_ = "upsertable" in import_ and import_[
+                "upsertable"] is True
             purge_ = "purge" in import_ and import_["purge"] is True
             enabled_ = "enabled" in import_ and import_["enabled"] is True
             upsertables_ = (
@@ -1594,7 +1618,8 @@ class Crud:
                         raise APIError(
                             f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes"
                         )
-                    df_ = pd.read_csv(io.StringIO(decoded_), header=0, dtype="object")
+                    df_ = pd.read_csv(io.StringIO(decoded_),
+                                      header=0, dtype="object")
                 else:
                     raise APIError("file type is not supported")
 
@@ -1619,7 +1644,8 @@ class Crud:
                                 self.frame_convert_datetime_f
                             )
                         elif property_["bsonType"] == "bool":
-                            df_[column_] = df_[column_].apply(self.frame_convert_bool_f)
+                            df_[column_] = df_[column_].apply(
+                                self.frame_convert_bool_f)
                         elif property_["bsonType"] == "string":
                             df_[column_] = df_[column_].apply(
                                 self.frame_convert_string_f
@@ -1645,7 +1671,8 @@ class Crud:
                                             find_, replace_, regex=True
                                         )
                         elif property_["bsonType"] == "int":
-                            df_[column_] = df_[column_].apply(self.frame_convert_int_f)
+                            df_[column_] = df_[column_].apply(
+                                self.frame_convert_int_f)
                         elif property_["bsonType"] in ["number", "decimal"]:
                             df_[column_] = df_[column_].apply(
                                 self.frame_convert_number_f
@@ -1656,7 +1683,8 @@ class Crud:
                     if column_ != "_id":
                         columns_tobe_deleted_.append(column_)
                     else:
-                        df_[column_] = df_[column_].apply(self.frame_convert_objectid_f)
+                        df_[column_] = df_[column_].apply(
+                            self.frame_convert_objectid_f)
 
             if defaults_:
                 for key_, value_ in defaults_.items():
@@ -1733,7 +1761,8 @@ class Crud:
                     set_["_modified_at"] = get_now_f_
                     set_["_modified_by"] = email_
                     wrote_.append(
-                        pymongo.UpdateOne(filter_, {"$set": set_}, upsert=upserted_)
+                        pymongo.UpdateOne(
+                            filter_, {"$set": set_}, upsert=upserted_)
                     )
                 if not fieldsgiven_:
                     raise APIError("no upsertable fields provided")
@@ -1747,7 +1776,8 @@ class Crud:
                 )
                 Mongo().db_[collection__].delete_many({})
 
-            bulk_write_ = Mongo().db_[collection__].bulk_write(wrote_, ordered=False)
+            bulk_write_ = Mongo().db_[collection__].bulk_write(
+                wrote_, ordered=False)
             details_, content_ = bulk_write_.bulk_api_result, ""
 
             res_ = {
@@ -1847,7 +1877,8 @@ class Crud:
         """
         try:
             op_ = obj_["op"]
-            email_ = obj_["user"]["email"] if obj_ and obj_["user"] else "cronjob"
+            email_ = obj_["user"]["email"] if obj_ and obj_[
+                "user"] else "cronjob"
 
             dmp_id_ = (
                 f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}"
@@ -1856,14 +1887,16 @@ class Crud:
             )
             fn_ = f"{dmp_id_}.gz"
             type_ = "gzip"
-            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
+            fullpath_ = os.path.normpath(
+                os.path.join(API_MONGODUMP_PATH_, fn_))
             if not fullpath_.startswith(DUMP_PATH_):
                 raise APIError(f"file not allowed [restore] {fullpath_}")
 
             if op_ == "dumpu":
                 subprocess.call(
                     ["mongodump"]
-                    + Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_})
+                    + Misc().commands_f("mongodump",
+                                        {"type": type_, "loc": fullpath_})
                 )
                 size_ = os.path.getsize(fullpath_)
                 Mongo().db_["_dump"].insert_one(
@@ -2115,8 +2148,8 @@ class Crud:
             data_ = list(
                 Mongo()
                 .db_["_announcement"]
-                .find({"_tags": {"$elemMatch": {"$in": user_["_tags"]}}})
-                .limit(20)
+                .find(filter={"_tags": {"$elemMatch": {"$in": user_["_tags"]}}}, sort=[("ano_date", -1)])
+                .limit(50)
             )
             announcements_ = json.loads(JSONEncoder().encode(data_))
 
@@ -2136,7 +2169,8 @@ class Crud:
             user_ = obj["userindb"]
             structure_ = self.root_schemas_f("_collection")
             usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+                user_["_tags"] if "_tags" in user_ and len(
+                    user_["_tags"]) > 0 else []
             )
             collections_ = list(
                 Mongo()
@@ -2196,7 +2230,8 @@ class Crud:
             col_id_ = obj["collection"]
             data_ = {}
             usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+                user_["_tags"] if "_tags" in user_ and len(
+                    user_["_tags"]) > 0 else []
             )
 
             if (
@@ -2231,7 +2266,8 @@ class Crud:
                         break
 
             if permitted_:
-                data_ = Mongo().db_["_collection"].find_one({"col_id": col_id_})
+                data_ = Mongo().db_["_collection"].find_one(
+                    {"col_id": col_id_})
             else:
                 raise AuthError(f"no collection permission {col_id_}")
 
@@ -2270,7 +2306,8 @@ class Crud:
                 )
                 .limit(16)
             )
-            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            docs_ = json.loads(JSONEncoder().encode(
+                list(cursor_))) if cursor_ else []
             for item_ in docs_:
                 visuals_.append(
                     {
@@ -2317,7 +2354,8 @@ class Crud:
             if not cursor_:
                 raise APIError(f"visual not found {id_}")
 
-            query_f_ = self.query_f({"id": id_, "key": "visual", "userindb": user_})
+            query_f_ = self.query_f(
+                {"id": id_, "key": "visual", "userindb": user_})
             if not query_f_["result"]:
                 raise APIError(query_f_["msg"])
 
@@ -2380,7 +2418,8 @@ class Crud:
                 raise APIError("query schema not found")
 
             sched_ = "sched" in obj_ and obj_["sched"] is True
-            key_ = obj_["key"] if "key" in obj_ and obj_["key"] is not None else None
+            key_ = obj_["key"] if "key" in obj_ and obj_[
+                "key"] is not None else None
 
             if not request:
                 if key_ and key_ == SMTP_PASSWORD_:
@@ -2399,7 +2438,8 @@ class Crud:
             if not query_:
                 raise APIError("query not found")
 
-            enabled_ = "que_enabled" in query_ and query_["que_enabled"] is True
+            enabled_ = "que_enabled" in query_ and query_[
+                "que_enabled"] is True
             if not enabled_:
                 err_ = "query is not enabled"
                 raise PassException(err_)
@@ -2408,6 +2448,18 @@ class Crud:
             if not approved_:
                 err_ = "query needs to be approved by administrators"
                 raise PassException(err_)
+
+            que_id_ = query_["que_id"] if "que_id" in query_ and query_[
+                "que_id"] is not None else None
+            if not que_id_:
+                err_ = "query id was not defined"
+                raise PassException(err_)
+
+            _tags = (
+                query_["_tags"]
+                if "_tags" in query_ and len(query_["_tags"]) > 0
+                else API_PERMISSIVE_TAGS_
+            )
 
             if orig_ in ["api/crud", "visual"]:
                 user_ = obj_["userindb"] if "userindb" in obj_ else None
@@ -2435,19 +2487,22 @@ class Crud:
                 raise APIError("query collection not defined")
 
             collection_ = (
-                Mongo().db_["_collection"].find_one({"col_id": que_collection_id_})
+                Mongo().db_["_collection"].find_one(
+                    {"col_id": que_collection_id_})
             )
             if not collection_:
                 raise APIError("query collection not found")
 
             structure_ = (
-                collection_["col_structure"] if "col_structure" in collection_ else None
+                collection_[
+                    "col_structure"] if "col_structure" in collection_ else None
             )
             if not structure_:
                 raise APIError("collection structure not found")
 
             properties_ = (
-                structure_["properties"] if "properties" in structure_ else None
+                structure_[
+                    "properties"] if "properties" in structure_ else None
             )
             if not properties_:
                 raise APIError("properties not found in structure")
@@ -2460,7 +2515,8 @@ class Crud:
             if not que_aggregate_:
                 raise PassException("no query defined yet")
 
-            queries_ = structure_["queries"] if "queries" in structure_ else None
+            queries_ = structure_[
+                "queries"] if "queries" in structure_ else None
             if not queries_:
                 err_ = "queries not defined in the structure"
                 raise PassException(err_)
@@ -2470,7 +2526,8 @@ class Crud:
                 err_ = "query not allowed for the collection"
                 raise PassException(err_)
 
-            update_allowed_ = "cronjob" in queries_ and queries_["cronjob"] is True
+            update_allowed_ = "cronjob" in queries_ and queries_[
+                "cronjob"] is True
             updatables_ = (
                 queries_["updatables"]
                 if "updatables" in queries_ and len(queries_["updatables"]) > 0
@@ -2502,37 +2559,22 @@ class Crud:
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
-            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
+            cursor_ = Mongo().db_[
+                f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             count_ = len(data_)
 
             if sched_ and orig_ == "sched":
-                _tags = (
-                    query_["_tags"]
-                    if "_tags" in query_ and len(query_["_tags"]) > 0
-                    else API_PERMISSIVE_TAGS_
-                )
-                que_title_ = query_["que_title"] if "que_title" in query_ else _id
+
+                que_title_ = query_[
+                    "que_title"] if "que_title" in query_ else _id
+
                 que_message_body_ = (
                     query_["que_message_body"]
                     if "que_message_body" in query_
                     and query_["que_message_body"] is not None
                     else ""
                 )
-
-                users_ = (
-                    Mongo()
-                    .db_["_user"]
-                    .find(
-                        {"usr_enabled": True, "_tags": {"$elemMatch": {"$in": _tags}}}
-                    )
-                )
-                for member_ in users_:
-                    if member_["usr_id"] not in to_:
-                        to_.append(member_["usr_id"])
-                        personalizations_.append(
-                            {"email": member_["usr_id"], "name": member_["usr_name"]}
-                        )
 
                 df_raw_ = pd.DataFrame(data_).fillna("")
                 file_excel_ = (
@@ -2548,15 +2590,16 @@ class Crud:
 
                 files_.append({"name": file_excel_, "type": "xlsx"})
                 count_ = len(df_raw_.index)
+
                 if count_ > 0:
-                    email_sent_ = Email().send_email_f(
-                        {
-                            "personalizations": personalizations_,
-                            "html": que_message_body_,
-                            "subject": que_title_,
-                            "files": files_,
-                        }
-                    )
+                    email_sent_ = Email().send_email_f({
+                        "op": "query",
+                        "que_id": que_id_,
+                        "html": que_message_body_,
+                        "subject": que_title_,
+                        "files": files_,
+                        "tags": _tags
+                    })
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
@@ -2624,24 +2667,28 @@ class Crud:
             job_name_ = job_["job_name"] if "job_name" in job_ else _id
 
             collection_ = (
-                Mongo().db_["_collection"].find_one({"col_id": job_collection_id_})
+                Mongo().db_["_collection"].find_one(
+                    {"col_id": job_collection_id_})
             )
             if not collection_:
                 raise APIError("query collection not found")
 
             structure_ = (
-                collection_["col_structure"] if "col_structure" in collection_ else None
+                collection_[
+                    "col_structure"] if "col_structure" in collection_ else None
             )
             if not structure_:
                 raise APIError("collection structure not found")
 
             properties_ = (
-                structure_["properties"] if "properties" in structure_ else None
+                structure_[
+                    "properties"] if "properties" in structure_ else None
             )
             if not properties_:
                 raise APIError("properties not found in structure")
 
-            queries_ = structure_["queries"] if "queries" in structure_ else None
+            queries_ = structure_[
+                "queries"] if "queries" in structure_ else None
             if not queries_:
                 err_ = "queries not defined in the structure"
                 raise PassException(err_)
@@ -2659,7 +2706,8 @@ class Crud:
             if not job_aggregate_:
                 raise PassException("no job defined yet")
 
-            update_allowed_ = "cronjob" in queries_ and queries_["cronjob"] is True
+            update_allowed_ = "cronjob" in queries_ and queries_[
+                "cronjob"] is True
             updatables_ = (
                 queries_["updatables"]
                 if "updatables" in queries_ and len(queries_["updatables"]) > 0
@@ -2724,7 +2772,8 @@ class Crud:
 
             aggregate_update_.append({"$project": {"_id": "$_id"}})
             cursor_ = (
-                Mongo().db_[f"{job_collection_id_}_data"].aggregate(aggregate_update_)
+                Mongo().db_[f"{job_collection_id_}_data"].aggregate(
+                    aggregate_update_)
             )
             if not cursor_:
                 err_ = "no record found to update [1]"
@@ -2738,7 +2787,8 @@ class Crud:
                 raise PassException(err_)
 
             personalizations_ = []
-            get_users_from_tags_f_ = Misc().get_users_from_tags_f(["#JobAdmins"])
+            get_users_from_tags_f_ = Misc(
+            ).get_users_from_tags_f(["#JobAdmins"])
             if not get_users_from_tags_f_["result"]:
                 raise APIError(
                     f"personalizations error: {get_users_from_tags_f_['msg']}"
@@ -2750,7 +2800,8 @@ class Crud:
             )
 
             if len(ids_) > API_JOB_UPDATE_LIMIT_:
-                personalizations_.append({"email": ADMIN_EMAIL_, "name": ADMIN_NAME_})
+                personalizations_.append(
+                    {"email": ADMIN_EMAIL_, "name": ADMIN_NAME_})
                 html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)} [{API_JOB_UPDATE_LIMIT_}].</p><p>{','.join(ids_)}</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
                 email_sent_ = Email().send_email_f(
                     {
@@ -2866,7 +2917,8 @@ class Crud:
                 and not Auth().is_admin_f(user_)
                 and not is_crud_
             ):
-                raise AuthError(f"collection is not allowed to read: {collection_id_}")
+                raise AuthError(
+                    f"collection is not allowed to read: {collection_id_}")
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             collation_ = (
@@ -2880,11 +2932,13 @@ class Crud:
                 else self.root_schemas_f(f"{collection_id_}")
             )
             if not cursor_:
-                raise APIError(f"collection not found to read: {collection_id_}")
+                raise APIError(
+                    f"collection not found to read: {collection_id_}")
 
             structure_ = cursor_["col_structure"] if is_crud_ else cursor_
             properties_ = (
-                structure_["properties"] if "properties" in structure_ else None
+                structure_[
+                    "properties"] if "properties" in structure_ else None
             )
             if not properties_:
                 raise AuthError(f"properties not found {collection_id_}")
@@ -2901,7 +2955,8 @@ class Crud:
             if collection_id_ == "_query" and not (
                 Auth().is_manager_f(user_) or Auth().is_admin_f(user_)
             ):
-                get_filtered_["_tags"] = {"$elemMatch": {"$in": user_["_tags"]}}
+                get_filtered_["_tags"] = {
+                    "$elemMatch": {"$in": user_["_tags"]}}
 
             for property_ in selections_:
                 sel_ = []
@@ -2943,40 +2998,51 @@ class Crud:
                     )
                 )
             else:
-                sort__ = structure_["sort"] if "sort" in structure_ and structure_["sort"] else {"_modified_at": -1}
+                sort__ = structure_["sort"] if "sort" in structure_ and structure_[
+                    "sort"] else {"_modified_at": -1}
                 aggregate_ = []
-                links_ = structure_["links"] if "links" in structure_ and len(structure_["links"]) > 0 else []
+                links_ = structure_["links"] if "links" in structure_ and len(
+                    structure_["links"]) > 0 else []
                 link_collections_ = []
                 for link_ in links_:
-                    link_listed_ = "listed" in link_ and link_["listed"] is True
+                    link_listed_ = "listed" in link_ and link_[
+                        "listed"] is True
                     if not link_listed_:
                         continue
                     link_collection_ = link_["collection"]
                     link_get_ = link_["get"]
-                    link_sum_ = link_["sum"] if "sum" in link_ and link_["sum"] is not None else None
-                    fo__ = Mongo().db_["_collection"].find_one({"col_id": link_collection_})
+                    link_sum_ = link_["sum"] if "sum" in link_ and link_[
+                        "sum"] is not None else None
+                    fo__ = Mongo().db_["_collection"].find_one(
+                        {"col_id": link_collection_})
                     if not fo__:
                         continue
-                    fo_structure_ = fo__["col_structure"]  if "col_structure" in fo__ else None
+                    fo_structure_ = fo__[
+                        "col_structure"] if "col_structure" in fo__ else None
                     if not fo_structure_:
                         continue
-                    parents__ = fo_structure_["parents"] if "parents" in fo_structure_ and len(fo_structure_["parents"]) > 0 else None
+                    parents__ = fo_structure_["parents"] if "parents" in fo_structure_ and len(
+                        fo_structure_["parents"]) > 0 else None
                     if not parents__:
                         continue
                     for parent__ in parents__:
-                        pcol_ = parent__["collection"] if "collection" in parent__ else None
+                        pcol_ = parent__[
+                            "collection"] if "collection" in parent__ else None
                         if not pcol_:
                             continue
                         if pcol_ != collection_id_:
                             continue
-                        pmatches__ = parent__["match"] if "match" in parent__ and len(parent__["match"]) > 0 else None
+                        pmatches__ = parent__["match"] if "match" in parent__ and len(
+                            parent__["match"]) > 0 else None
                         if not pmatches__:
                             continue
                         pipeline_match_ = []
                         let_ = {}
                         for pmatch__ in pmatches__:
-                            let_[f"p_{pmatch__['key']}"] = f"${pmatch__['value']}"
-                            pipeline_match_.append({"$eq": [f"${pmatch__['key']}", f"$$p_{pmatch__['key']}"]})
+                            let_[
+                                f"p_{pmatch__['key']}"] = f"${pmatch__['value']}"
+                            pipeline_match_.append(
+                                {"$eq": [f"${pmatch__['key']}", f"$$p_{pmatch__['key']}"]})
                         group_id_ = {}
                         group_id_[link_get_] = f"${link_get_}"
                         if not pipeline_match_:
@@ -2985,10 +3051,12 @@ class Crud:
                             "from": f"{link_collection_}_data",
                             "let": let_,
                             "pipeline": [
-                                { "$match": {"$expr": {"$and": pipeline_match_ }} },
-                                { "$group": { "_id": group_id_, "count": { "$sum": 1 }, "sum": { "$sum": f"${link_sum_}" if link_sum_ else 1 }}},
-                                { "$replaceWith": { "$mergeObjects": ["$$ROOT", "$_id"]}},
-                                { "$unset": ["_id"]},
+                                {"$match": {"$expr": {"$and": pipeline_match_}}},
+                                {"$group": {"_id": group_id_, "count": {"$sum": 1}, "sum": {
+                                    "$sum": f"${link_sum_}" if link_sum_ else 1}}},
+                                {"$replaceWith": {
+                                    "$mergeObjects": ["$$ROOT", "$_id"]}},
+                                {"$unset": ["_id"]},
                             ],
                             "as": f"_link_{link_collection_}"
                         }
@@ -3129,12 +3197,14 @@ class Crud:
                     required_ = None
 
                 if properties_:
-                    validator_["$jsonSchema"].update({"properties": properties_})
+                    validator_["$jsonSchema"].update(
+                        {"properties": properties_})
 
                 if required_:
                     validator_["$jsonSchema"].update({"required": required_})
 
-                Mongo().db_.command({"collMod": collection_, "validator": validator_})
+                Mongo().db_.command(
+                    {"collMod": collection_, "validator": validator_})
                 Mongo().db_[collection_].drop_indexes()
 
                 if "index" in structure_ and len(structure_["index"]) > 0:
@@ -3220,12 +3290,14 @@ class Crud:
         docstring is in progress
         """
         try:
-            _id = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
+            _id = obj_["id"] if "id" in obj_ and obj_[
+                "id"] is not None else None
             if not _id:
                 raise APIError("job not provided")
 
             aggregate_ = (
-                obj_["aggregate"] if "aggregate" in obj_ and obj_["aggregate"] else None
+                obj_["aggregate"] if "aggregate" in obj_ and obj_[
+                    "aggregate"] else None
             )
             if not aggregate_:
                 raise APIError("no aggregation provided")
@@ -3243,12 +3315,14 @@ class Crud:
                 raise APIError("no collection provided")
 
             user_ = (
-                obj_["userindb"] if "userindb" in obj_ and obj_["userindb"] else None
+                obj_["userindb"] if "userindb" in obj_ and obj_[
+                    "userindb"] else None
             )
             if not user_:
                 raise AuthError("user not found")
             usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+                user_["_tags"] if "_tags" in user_ and len(
+                    user_["_tags"]) > 0 else []
             )
 
             if not Auth().is_admin_f(user_):
@@ -3285,7 +3359,8 @@ class Crud:
                 doc_["_approved_by"] = user_["usr_id"]
 
             Mongo().db_["_job"].update_one(
-                {"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {"_modified_count": 1}}
+                {"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {
+                    "_modified_count": 1}}
             )
 
             return {"result": True}
@@ -3307,7 +3382,8 @@ class Crud:
         docstring is in progress
         """
         try:
-            _id = obj_["id"] if "id" in obj_ and obj_["id"] is not None else None
+            _id = obj_["id"] if "id" in obj_ and obj_[
+                "id"] is not None else None
             if not _id:
                 raise APIError("query not found")
 
@@ -3325,18 +3401,21 @@ class Crud:
                 raise APIError("no collection provided")
 
             aggregate_ = (
-                obj_["aggregate"] if "aggregate" in obj_ and obj_["aggregate"] else None
+                obj_["aggregate"] if "aggregate" in obj_ and obj_[
+                    "aggregate"] else None
             )
             if not aggregate_:
                 raise APIError("no aggregation provided")
 
             user_ = (
-                obj_["userindb"] if "userindb" in obj_ and obj_["userindb"] else None
+                obj_["userindb"] if "userindb" in obj_ and obj_[
+                    "userindb"] else None
             )
             if not user_:
                 raise AuthError("user not found")
             usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+                user_["_tags"] if "_tags" in user_ and len(
+                    user_["_tags"]) > 0 else []
             )
 
             if not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
@@ -3372,7 +3451,8 @@ class Crud:
                 doc_["_approved_by"] = user_["usr_id"]
 
             Mongo().db_["_query"].update_one(
-                {"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {"_modified_count": 1}}
+                {"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {
+                    "_modified_count": 1}}
             )
 
             return {"result": True}
@@ -3419,7 +3499,8 @@ class Crud:
                 raise APIError("collection not found")
 
             properties_ = (
-                structure_["properties"] if "properties" in structure_ else None
+                structure_[
+                    "properties"] if "properties" in structure_ else None
             )
             if not properties_:
                 raise APIError("no properties found")
@@ -3430,7 +3511,8 @@ class Crud:
                 if str_ not in STRUCTURE_KEYS_ and str_ not in STRUCTURE_KEYS_OPTIN_
             ]
             if len(arr_) > 0:
-                raise APIError(f"some structure keys are invalid: {','.join(arr_)}")
+                raise APIError(
+                    f"some structure keys are invalid: {','.join(arr_)}")
 
             arr_ = [str_ for str_ in structure_ if str_ in STRUCTURE_KEYS_]
             if len(arr_) != len(STRUCTURE_KEYS_):
@@ -3467,12 +3549,14 @@ class Crud:
             for property_ in properties_:
                 prop_ = properties_[property_]
                 if (
-                    prop_["bsonType"] in ["int", "number", "float", "decimal", "string"]
+                    prop_["bsonType"] in ["int", "number",
+                                          "float", "decimal", "string"]
                     and "counter" in prop_
                     and prop_["counter"] is True
                 ):
                     counter_name_ = f"{property_.upper()}_COUNTER"
-                    find_one_ = Mongo().db_["_kv"].find_one({"kav_key": counter_name_})
+                    find_one_ = Mongo().db_["_kv"].find_one(
+                        {"kav_key": counter_name_})
                     if not find_one_:
                         initialno__ = (
                             "0"
@@ -3481,15 +3565,18 @@ class Crud:
                             else ""
                         )
                         initialas__ = (
-                            "string" if prop_["bsonType"] == "string" else "int"
+                            "string" if prop_[
+                                "bsonType"] == "string" else "int"
                         )
                         doc_ = {
                             "kav_key": counter_name_,
                             "kav_value": initialno__,
                             "kav_as": initialas__,
                         }
-                        doc_["_created_at"] = doc_["_modified_at"] = Misc().get_now_f()
-                        doc_["_created_by"] = doc_["_modified_by"] = user_["usr_id"]
+                        doc_["_created_at"] = doc_[
+                            "_modified_at"] = Misc().get_now_f()
+                        doc_["_created_by"] = doc_[
+                            "_modified_by"] = user_["usr_id"]
                         Mongo().db_["_kv"].insert_one(doc_)
 
             return {"result": True}
@@ -3621,7 +3708,8 @@ class Crud:
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
             doc_["_removed_at"] = Misc().get_now_f()
-            doc_["_removed_by"] = user_["email"] if user_ and "email" in user_ else None
+            doc_["_removed_by"] = user_[
+                "email"] if user_ and "email" in user_ else None
 
             Mongo().db_[collection_].delete_one(match_)
 
@@ -3678,7 +3766,8 @@ class Crud:
             if not Auth().is_admin_f(user_):
                 if op_ != "delete" or collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
                     if collection_id_ in PROTECTED_COLLS_:
-                        raise APIError("collection is protected for bulk processing")
+                        raise APIError(
+                            "collection is protected for bulk processing")
 
             if op_ == "delete" and collection_id_ == "_user":
                 raise APIError("user collection is protected to delete")
@@ -3696,9 +3785,11 @@ class Crud:
                 else self.root_schemas_f(f"{collection_id_}")
             )
             if structure__:
-                structure_ = structure__["col_structure"] if is_crud_ else structure__
+                structure_ = structure__[
+                    "col_structure"] if is_crud_ else structure__
             else:
-                raise APIError(f"collection structure not found: {collection_id_}")
+                raise APIError(
+                    f"collection structure not found: {collection_id_}")
             if not structure_:
                 raise APIError("structure not found")
 
@@ -3790,20 +3881,25 @@ class Crud:
             link_ = obj_["link"] if "link" in obj_ else None
             data_ = obj_["data"] if "data" in obj_ else None
             linked_ = (
-                obj_["linked"] if "linked" in obj_ and len(obj_["linked"]) > 0 else None
+                obj_["linked"] if "linked" in obj_ and len(
+                    obj_["linked"]) > 0 else None
             )
             user_ = obj_["user"] if "user" in obj_ else None
             col_id_ = link_["collection"] if "collection" in link_ else None
             get_ = link_["get"] if "get" in link_ else None
-            set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
+            set_ = link_["set"] if "set" in link_ and len(
+                link_["set"]) > 0 else None
             match_ = (
-                link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
+                link_["match"] if "match" in link_ and len(
+                    link_["match"]) > 0 else None
             )
             usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
             tags_ = (
-                link_["_tags"] if "_tags" in link_ and len(link_["_tags"]) > 0 else None
+                link_["_tags"] if "_tags" in link_ and len(
+                    link_["_tags"]) > 0 else None
             )
-            api_ = link_["api"] if "api" in link_ and link_["api"] is not None else None
+            api_ = link_["api"] if "api" in link_ and link_[
+                "api"] is not None else None
 
             if not source_:
                 raise APIError("source collection is missing")
@@ -3878,7 +3974,8 @@ class Crud:
             if count_ == 0:
                 raise AppException("no record found to get linked")
 
-            notification_ = link_["notification"] if "notification" in link_ else None
+            notification_ = link_[
+                "notification"] if "notification" in link_ else None
             notify_ = (
                 notification_
                 and "notify" in notification_
@@ -3900,7 +3997,8 @@ class Crud:
 
             if notify_:
                 subject_ = (
-                    notification_["subject"] if "subject" in notification_ else "Link"
+                    notification_[
+                        "subject"] if "subject" in notification_ else "Link"
                 )
                 body_ = (
                     notification_["body"]
@@ -3912,7 +4010,8 @@ class Crud:
                     if "key" in notification_ and notification_["key"] != ""
                     else None
                 )
-                keyf_ = data_[nkey_] if data_ and nkey_ and nkey_ in data_ else None
+                keyf_ = data_[
+                    nkey_] if data_ and nkey_ and nkey_ in data_ else None
                 if attachment_:
                     fields_ = (
                         str(notification_["fields"].replace(" ", ""))
@@ -3939,7 +4038,8 @@ class Crud:
                         },
                     )
                     subprocess.call(cmd_)
-                    files_ += [{"name": file_, "type": type_}] if attachment_ else []
+                    files_ += [{"name": file_, "type": type_}
+                               ] if attachment_ else []
                     subject_ += f" - {keyf_}" if keyf_ else ""
                     email_sent_ = Email().send_email_f(
                         {
@@ -3973,7 +4073,8 @@ class Crud:
         """
         files_, res_, json_ = [], {}, {}
         try:
-            id_ = api_["id"] if "id" in api_ and api_["id"] is not None else None
+            id_ = api_["id"] if "id" in api_ and api_[
+                "id"] is not None else None
             if not id_:
                 raise PassException("no action api id found")
 
@@ -4001,7 +4102,8 @@ class Crud:
                         json_["key"] = value_
                         json_["value"] = doc_[value_]
                 if not json_:
-                    raise PassException(f"no mapping values found in api {id_}")
+                    raise PassException(
+                        f"no mapping values found in api {id_}")
                 json_["ids"] = []
                 if ids_ and len(ids_) > 0:
                     json_["ids"] = ids_
@@ -4025,7 +4127,8 @@ class Crud:
                 else ""
             )
 
-            path_ = api_["path"] if "path" in api_ and api_["path"][:1] == "/" else None
+            path_ = api_["path"] if "path" in api_ and api_[
+                "path"][:1] == "/" else None
             if not path_:
                 raise PassException(f"invalid api path in {id_}")
 
@@ -4042,7 +4145,8 @@ class Crud:
                 raise APIError(msg_)
 
             files_ = (
-                res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
+                res_["files"] if "files" in res_ and len(
+                    res_["files"]) > 0 else None
             )
 
             res_ = {"result": True, "files": files_, "msg": msg_}
@@ -4116,7 +4220,8 @@ class Crud:
                 raise AppException(f"structure not found {collection_id_}")
 
             properties_ = (
-                structure_["properties"] if "properties" in structure_ else None
+                structure_[
+                    "properties"] if "properties" in structure_ else None
             )
             if not properties_:
                 raise AppException(f"properties not found {collection_id_}")
@@ -4151,7 +4256,8 @@ class Crud:
                 else None
             )
 
-            uniqueness_ = "uniqueness" in action_ and action_["uniqueness"] is True
+            uniqueness_ = "uniqueness" in action_ and action_[
+                "uniqueness"] is True
             unique_ = (
                 action_["unique"]
                 if "unique" in action_ and len(action_["unique"]) > 0
@@ -4197,7 +4303,8 @@ class Crud:
             )
 
             get_filtered_ = (
-                self.get_filtered_f({"match": match_, "properties": properties_})
+                self.get_filtered_f(
+                    {"match": match_, "properties": properties_})
                 if match_
                 else {}
             )
@@ -4317,7 +4424,8 @@ class Crud:
                         session_.abort_transaction()
                         raise AppException("no key value found")
 
-                    datanew_[key_field_] = f"{datanew_[key_field_]}{key_suffix_}"
+                    datanew_[
+                        key_field_] = f"{datanew_[key_field_]}{key_suffix_}"
 
                     for doc__ in doc_:
                         datanew_[doc__] = doc_[doc__]
@@ -4342,7 +4450,8 @@ class Crud:
                         datanew_["_created_at"] = docu_[
                             "_modified_at"
                         ] = Misc().get_now_f()
-                        datanew_["_created_by"] = docu_["_modified_by"] = email_
+                        datanew_["_created_by"] = docu_[
+                            "_modified_by"] = email_
                         datanew_["_resume_token"] = None
                         datanew_["_modified_count"] = 0
                         docu_.pop("_modified_count", None)
@@ -4354,9 +4463,11 @@ class Crud:
                                 docu_[num_field_] = dnf_ - doc_[num_field_]
                             else:
                                 datanew_[num_field_] = round(ration_ * dnf_, 3)
-                                docu_[num_field_] = round((1 - ration_) * dnf_, 3)
+                                docu_[num_field_] = round(
+                                    (1 - ration_) * dnf_, 3)
 
-                        session_db_[collection_].insert_one(datanew_, session=session_)
+                        session_db_[collection_].insert_one(
+                            datanew_, session=session_)
                         if ration_ < 1:
                             session_db_[collection_].update_one(
                                 get_filtered_,
@@ -4403,7 +4514,8 @@ class Crud:
 
                 if count_ == 0:
                     session_.abort_transaction()
-                    raise PassException("no rows affected due to match criteria")
+                    raise PassException(
+                        "no rows affected due to match criteria")
 
             if api_:
                 run_api_f_ = self.run_api_f(api_, doc_, ids_, email_)
@@ -4427,7 +4539,8 @@ class Crud:
                     else collection_
                 )
                 if notify_collection_ != collection_:
-                    get_properties_ = self.get_properties_f(notification_["collection"])
+                    get_properties_ = self.get_properties_f(
+                        notification_["collection"])
                     if not get_properties_["result"]:
                         raise AppException(get_properties_["msg"])
                     properties_ = get_properties_["properties"]
@@ -4482,9 +4595,12 @@ class Crud:
                         )
                     )
                     read_csv_file_ = pd.read_csv(file_)
-                    read_csv_file_.to_excel(file_excel_, index=None, sheet_name=collection_id_, header=True)
-                    read_csv_file_.to_json(file_json_,date_format="iso",orient="records",force_ascii=False)
-                    files_ += [{"name": file_, "type": type_},{"name": file_excel_, "type": "xlsx"},{"name": file_json_, "type": "json"}]
+                    read_csv_file_.to_excel(
+                        file_excel_, index=None, sheet_name=collection_id_, header=True)
+                    read_csv_file_.to_json(
+                        file_json_, date_format="iso", orient="records", force_ascii=False)
+                    files_ += [{"name": file_, "type": type_}, {"name": file_excel_,
+                                                                "type": "xlsx"}, {"name": file_json_, "type": "json"}]
 
                 email_sent_ = Email().send_email_f(
                     {
@@ -4705,13 +4821,15 @@ class Email:
         """
         try:
             op_ = msg["op"] if "op" in msg else None
-            files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
+            files_ = msg["files"] if "files" in msg and len(
+                msg["files"]) > 0 else []
             html_ = (
                 f"{msg['html']} {EMAIL_DISCLAIMER_HTML_}"
                 if "html" in msg
                 else EMAIL_DISCLAIMER_HTML_
             )
-            tags_ = msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
+            tags_ = msg["tags"] if "tags" in msg and len(
+                msg["tags"]) > 0 else None
             personalizations_ = (
                 msg["personalizations"] if "personalizations" in msg else []
             )
@@ -4734,6 +4852,8 @@ class Email:
 
             if subject_ is None:
                 raise APIError("subject is missing")
+
+            que_id_ = msg["que_id"] if "que_id" in msg else "query"
 
             if html_ is None or html_ == "":
                 raise APIError("email message is missing")
@@ -4767,7 +4887,8 @@ class Email:
 
             message_ = MIMEMultipart()
             message_["From"] = f"{unidecode(COMPANY_NAME_)} <{FROM_EMAIL_}>"
-            message_["Subject"] = unidecode(f"{EMAIL_SUBJECT_PREFIX_}{subject_}")
+            message_["Subject"] = unidecode(
+                f"{EMAIL_SUBJECT_PREFIX_}{subject_}")
             message_["To"] = ", ".join(to_)
             message_.attach(MIMEText(html_, "html"))
 
@@ -4800,7 +4921,25 @@ class Email:
             endpoint_.sendmail(FROM_EMAIL_, recipients_, message_.as_string())
             endpoint_.close()
 
+            if op_ == "query":
+                Mongo().db_["_announcement"].insert_one({
+                    "ano_id": Misc().get_timestamp_f(),
+                    "ano_que_id": que_id_,
+                    "ano_date": Misc().get_now_f(),
+                    "ano_subject": subject_,
+                    "ano_to": to_,
+                    "files": files_,
+                    "_tags": tags_,
+                    "_created_at": Misc().get_now_f(),
+                    "_created_by": "api",
+                    "_modified_at": Misc().get_now_f(),
+                    "_modified_by": "api"
+                })
+
             return {"result": True}
+
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
         except smtplib.SMTPResponseException as exc__:
             return Misc().notify_exception_f(f"smtp error: {exc__.smtp_error}")
@@ -5052,7 +5191,8 @@ class Auth:
         """
         docstring is in progress
         """
-        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+        tags_ = user_["_tags"] if "_tags" in user_ and len(
+            user_["_tags"]) > 0 else []
         in_admin_tags_ = any(tag_ in tags_ for tag_ in API_ADMIN_TAGS_)
         in_admin_ips_ = Misc().in_admin_ips_f()
         return in_admin_tags_ and in_admin_ips_
@@ -5061,8 +5201,10 @@ class Auth:
         """
         docstring is in progress
         """
-        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
-        in_permissive_tags_ = any(tag_ in tags_ for tag_ in API_PERMISSIVE_TAGS_)
+        tags_ = user_["_tags"] if "_tags" in user_ and len(
+            user_["_tags"]) > 0 else []
+        in_permissive_tags_ = any(
+            tag_ in tags_ for tag_ in API_PERMISSIVE_TAGS_)
         in_admin_ips_ = Misc().in_admin_ips_f()
         return in_permissive_tags_ and in_admin_ips_
 
@@ -5109,7 +5251,8 @@ class Auth:
 
             grant_ = f"tkn_grant_{operation_}"
             if not find_[grant_]:
-                raise AuthError(f"token is not allowed to perform {operation_}")
+                raise AuthError(
+                    f"token is not allowed to perform {operation_}")
 
             if (
                 qid_
@@ -5174,7 +5317,8 @@ class Auth:
 
             if str(aut_tfac_) != str(tfac_):
                 if aut_otp_secret_:
-                    validate_qr_f_ = OTP().validate_qr_f(email_, {"otp": tfac_})
+                    validate_qr_f_ = OTP().validate_qr_f(
+                        email_, {"otp": tfac_})
                     if not validate_qr_f_["result"]:
                         raise AuthError("invalid otp")
                 else:
@@ -5301,7 +5445,8 @@ class Auth:
             user_ = input_["user"]
             user_id_ = user_["usr_id"] if "usr_id" in user_ else None
             usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+                user_["_tags"] if "_tags" in user_ and len(
+                    user_["_tags"]) > 0 else []
             )
             collection_id_ = (
                 input_["collection"]
@@ -5376,7 +5521,8 @@ class Auth:
                         and permission_["per_insert"] is True
                     )
                     per_read_ = (
-                        "per_read" in permission_ and permission_["per_read"] is True
+                        "per_read" in permission_ and permission_[
+                            "per_read"] is True
                     )
                     per_update_ = (
                         "per_update" in permission_
@@ -5391,7 +5537,8 @@ class Auth:
                         and permission_["per_action"] is True
                     )
                     per_query_ = (
-                        "per_query" in permission_ and permission_["per_query"] is True
+                        "per_query" in permission_ and permission_[
+                            "per_query"] is True
                     )
                     if (
                         (op_ == "read" and per_read_)
@@ -5421,7 +5568,8 @@ class Auth:
                         break
 
             if not permit_:
-                raise AuthError(f"user is not allowed to {op_} {collection_id_}")
+                raise AuthError(
+                    f"user is not allowed to {op_} {collection_id_}")
 
             return {"result": True, "allowmatch": allowmatch_}
 
@@ -5444,7 +5592,8 @@ class Auth:
         try:
             ip_ = Misc().get_client_ip_f()
             tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+                user_["_tags"] if "_tags" in user_ and len(
+                    user_["_tags"]) > 0 else []
             )
             allowed_ = (
                 Mongo()
@@ -5512,14 +5661,16 @@ class Auth:
                         "$inc": {"_api_key_modified_count": 1},
                     },
                 )
-                response_ = {"api_key": api_key_, "_modified_at": Misc().get_now_f()}
+                response_ = {"api_key": api_key_,
+                             "_modified_at": Misc().get_now_f()}
             elif op_ == "apikeyget":
                 api_key_modified_at_ = (
                     auth_["_api_key_modified_at"]
                     if "_api_key_modified_at" in auth_
                     else None
                 )
-                api_key_ = auth_["aut_api_key"] if "aut_api_key" in auth_ else None
+                api_key_ = auth_[
+                    "aut_api_key"] if "aut_api_key" in auth_ else None
                 response_ = {
                     "api_key": api_key_,
                     "api_key_modified_at": api_key_modified_at_,
@@ -5640,15 +5791,18 @@ class Auth:
             )
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
-            user_ = user_validate_["user"] if "user" in user_validate_ else None
-            auth_ = user_validate_["auth"] if "auth" in user_validate_ else None
+            user_ = user_validate_[
+                "user"] if "user" in user_validate_ else None
+            auth_ = user_validate_[
+                "auth"] if "auth" in user_validate_ else None
 
             verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
             if not verify_otp_f_["result"]:
                 raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
-            locale_ = user_["usr_locale"] if "usr_locale" in user_ else DEFAULT_LOCALE_
+            locale_ = user_[
+                "usr_locale"] if "usr_locale" in user_ else DEFAULT_LOCALE_
             perm_ = Auth().is_manager_f(user_) or Auth().is_admin_f(user_)
             perma_ = Auth().is_admin_f(user_)
             payload_ = {
@@ -5792,7 +5946,8 @@ class Auth:
             claims_ = jwt_proc_f_["jwt"]
 
             usr_id_ = (
-                claims_["id"] if "id" in claims_ and claims_["id"] is not None else None
+                claims_["id"] if "id" in claims_ and claims_[
+                    "id"] is not None else None
             )
             if not usr_id_:
                 raise PassException("invalid user token")
@@ -5908,7 +6063,8 @@ class Auth:
         """
         try:
             api_key_ = (
-                Misc().clean_f(input_["api_key"]) if "api_key" in input_ else None
+                Misc().clean_f(input_["api_key"]
+                               ) if "api_key" in input_ else None
             )
             if not api_key_ or api_key_ is None:
                 raise AuthError("api key must be provided")
@@ -6072,6 +6228,7 @@ COMPANY_NAME_ = (
     if os.environ.get("COMPANY_NAME")
     else "Technoplatz BI"
 )
+TZ_ = os.environ.get("TZ")
 DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
@@ -6091,19 +6248,22 @@ API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_FW_TEMP_DURATION_MIN_ = int(os.environ.get("API_FW_TEMP_DURATION_MIN"))
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))
 API_MAX_CONTENT_LENGTH_MB_ = int(os.environ.get("API_MAX_CONTENT_LENGTH_MB"))
-API_DEFAULT_AGGREGATION_LIMIT_ = int(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
+API_DEFAULT_AGGREGATION_LIMIT_ = int(
+    os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
 API_DEFAULT_VISUAL_LIMIT_ = int(os.environ.get("API_DEFAULT_VISUAL_LIMIT"))
 API_QUERY_PAGE_SIZE_ = int(os.environ.get("API_QUERY_PAGE_SIZE"))
 API_SESSION_EXP_MINUTES_ = os.environ.get("API_SESSION_EXP_MINUTES")
 API_TEMPFILE_PATH_ = os.environ.get("API_TEMPFILE_PATH")
 API_MONGODUMP_PATH_ = os.environ.get("API_MONGODUMP_PATH")
 API_CORS_ORIGINS_ = os.environ.get("API_CORS_ORIGINS").strip().split(",")
-API_S3_ACTIVE_ = os.environ.get("API_S3_ACTIVE") in [True, "true", "True", "TRUE"]
+API_S3_ACTIVE_ = os.environ.get("API_S3_ACTIVE") in [
+    True, "true", "True", "TRUE"]
 API_S3_REGION_ = os.environ.get("API_S3_REGION")
 API_S3_KEY_ID_ = os.environ.get("API_S3_KEY_ID")
 API_S3_KEY_ = os.environ.get("API_S3_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
-API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
+API_PERMISSIVE_TAGS_ = os.environ.get(
+    "API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
 API_ADMIN_IPS_ = (
     os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",")
@@ -6137,7 +6297,8 @@ MONGO_TLS_CERT_KEYFILE_PASSWORD_ = get_docker_secret(
     "mongo_tls_keyfile_password", default=""
 )
 MONGO_DUMP_HOURS_ = (
-    os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
+    os.environ.get("MONGO_DUMP_HOURS") if os.environ.get(
+        "MONGO_DUMP_HOURS") else "23"
 )
 MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
@@ -6220,11 +6381,13 @@ def api_import_f():
     try:
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
-            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+            raise SessionError(
+                {"result": False, "msg": jwt_validate_f_["msg"]})
 
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise SessionError({"result": False, "msg": "invalid user session"})
+            raise SessionError(
+                {"result": False, "msg": "invalid user session"})
 
         form_ = request.form.to_dict(flat=True)
         if not form_:
@@ -6272,7 +6435,8 @@ def api_import_f():
             raise APIError(import_f_["msg"])
 
         count_ = (
-            import_f_["count"] if "count" in import_f_ and import_f_["count"] > 0 else 0
+            import_f_["count"] if "count" in import_f_ and import_f_[
+                "count"] > 0 else 0
         )
         msg_ = import_f_["msg"] if "msg" in import_f_ else None
 
@@ -6311,7 +6475,8 @@ def api_crud_f():
 
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
-            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+            raise SessionError(
+                {"result": False, "msg": jwt_validate_f_["msg"]})
 
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
@@ -6352,7 +6517,8 @@ def api_crud_f():
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
-                raise APIError({"result": False, "msg": "no document included"})
+                raise APIError(
+                    {"result": False, "msg": "no document included"})
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_)
@@ -6427,7 +6593,8 @@ def api_crud_f():
         response_ = make_response(
             json.dumps(res_, default=json_util.default, sort_keys=False)
         )
-        files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
+        files_ = res_["files"] if "files" in res_ and len(
+            res_["files"]) > 0 else None
 
         if (
             "result" in res_
@@ -6473,11 +6640,13 @@ def api_otp_f():
 
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
-            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+            raise SessionError(
+                {"result": False, "msg": jwt_validate_f_["msg"]})
 
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise SessionError({"result": False, "msg": "user session not found"})
+            raise SessionError(
+                {"result": False, "msg": "user session not found"})
         email_ = user_["email"] if "email" in user_ else None
 
         op_ = escape(request_["op"])
@@ -6534,10 +6703,13 @@ def api_auth_f():
             jwt_validate_f_ = Auth().jwt_validate_f()
             if not jwt_validate_f_["result"]:
                 raise SessionError(jwt_validate_f_["msg"])
-            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
-            user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+            auth_ = jwt_validate_f_[
+                "auth"] if "auth" in jwt_validate_f_ else None
+            user_ = jwt_validate_f_[
+                "user"] if "user" in jwt_validate_f_ else None
             if not auth_:
-                raise SessionError({"result": False, "msg": "no authentication"})
+                raise SessionError(
+                    {"result": False, "msg": "no authentication"})
 
         if op_ == "signup":
             res_ = Auth().signup_f()
@@ -6612,7 +6784,8 @@ def api_iot_f():
         if process_ == "scan":
             res_ = Iot().barcode_scan_f(aut_id_)
         elif process_ == "query":
-            searched_ = requestj_["searched"] if "searched" in requestj_ else None
+            searched_ = requestj_[
+                "searched"] if "searched" in requestj_ else None
             page_ = requestj_["page"] if "page" in requestj_ else 1
             res_ = Iot().iot_query_f(searched_, page_)
 
@@ -6705,18 +6878,21 @@ def api_post_f():
             raise APIError(collection_f_["msg"])
 
         collection_ = (
-            collection_f_["collection"] if "collection" in collection_f_ else None
+            collection_f_[
+                "collection"] if "collection" in collection_f_ else None
         )
         if not collection_:
             raise APIError("collection not found")
 
         structure_ = (
-            collection_["col_structure"] if "col_structure" in collection_ else None
+            collection_[
+                "col_structure"] if "col_structure" in collection_ else None
         )
         if not structure_:
             raise APIError(f"no structure found: {collection_}")
 
-        properties_ = structure_["properties"] if "properties" in structure_ else None
+        properties_ = structure_[
+            "properties"] if "properties" in structure_ else None
         if not properties_:
             raise APIError(f"no properties found: {collection_}")
 
@@ -6744,7 +6920,8 @@ def api_post_f():
             for item_ in body_:
                 cursor_ = session_db_[collection_data_].find(item_)
                 docs_ = (
-                    json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+                    json.loads(JSONEncoder().encode(
+                        list(cursor_))) if cursor_ else []
                 )
                 for doc_ in docs_:
                     output_.append(doc_)
@@ -6795,7 +6972,8 @@ def api_post_f():
                         session=session_,
                     )
                 elif operation_ == "insert":
-                    session_db_[collection_data_].insert_one(doc__, session=session_)
+                    session_db_[collection_data_].insert_one(
+                        doc__, session=session_)
                 elif operation_ == "delete":
                     session_db_[collection_data_].delete_many(
                         filter__, session=session_

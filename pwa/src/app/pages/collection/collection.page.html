@@ -44,15 +44,14 @@ https://www.gnu.org/licenses.
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div (click)="import_modal()"
-                [class]="is_crud && importvis_ ? 'data-sq-button' : 'data-sq-button disabled'">
-                <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text color="primary">{{ 'Import File' |
+              <div *ngIf="is_crud && importvis_" (click)="import_modal()" class="data-sq-button">
+                <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text color="primary">{{ 'Upload File' |
                   translate }}</ion-text>
               </div>
-              <div (click)="refresh_data(0, true)" class="data-sq-button">
+              <!-- <div (click)="refresh_data(0, true)" class="data-sq-button">
                 <ion-icon name="download-outline"></ion-icon><br />
                 <ion-text color="primary">{{ 'Download File' | translate }}</ion-text>
-              </div>
+              </div> -->
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
                 <ion-icon name="qr-code-outline"></ion-icon><br />
                 <ion-text color="primary">{{ 'Scan Barcode' | translate }}</ion-text>
@@ -163,7 +162,7 @@ https://www.gnu.org/licenses.
           <table class="data-table">
             <tr>
               <th>&nbsp;</th>
-              <th *ngIf="!['_log','_dump'].includes(id)">
+              <th *ngIf="!['_log','_dump','_announcement'].includes(id)">
                 <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="switch_select_data($event.detail.checked)"
                   mode="md">
                 </ion-checkbox>
@@ -304,7 +303,7 @@ https://www.gnu.org/licenses.
                   {{ ((pager_ - 1) * limit_) + i + 1}}
                 </ng-template>
               </td>
-              <td *ngIf="!['_log','_dump'].includes(id)" (click)="tdc($event, record)">
+              <td *ngIf="!['_log','_dump','_announcement'].includes(id)" (click)="tdc($event, record)">
                 <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
                   (ionChange)="set_select_data(i,$event)" mode="md">
                 </ion-checkbox>
@@ -359,7 +358,8 @@ https://www.gnu.org/licenses.
                 </ng-template>
               </td>
               <td *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right primary bold">
-                {{ record["_link_" + link_.collection ]?.count }} [{{ record["_link_" + link_.collection ].sum?.toFixed(2) }}]
+                {{ record["_link_" + link_.collection ]?.count }} [{{ record["_link_" + link_.collection
+                ].sum?.toFixed(2) }}]
               </td>
               <td>
                 {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}

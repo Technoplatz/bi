@@ -36,6 +36,7 @@ import json
 from functools import partial
 import uuid
 import base64
+import pytz
 from datetime import datetime
 from xml.etree import ElementTree
 from bson.objectid import ObjectId
@@ -87,6 +88,7 @@ app.config["CORS_HEADERS"] = [
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 CORS(app)
 
+TZ_ = os.environ.get("TZ")
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -193,7 +195,7 @@ class Misc:
         """
         docstring is in progress
         """
-        return datetime.now()
+        return datetime.now(pytz.timezone(TZ_))
 
     def exception_show_f(self, exc_):
         """

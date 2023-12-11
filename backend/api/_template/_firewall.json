@@ -15,7 +15,6 @@
       "minLength": 7,
       "maxLength": 17,
       "pattern": "^[0-9.-]{7,17}$",
-      "required": true,
       "masked": true
     },
     "fwa_type": {

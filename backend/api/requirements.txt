@@ -19,3 +19,4 @@ get-docker-secret
 boto3
 botocore
 unidecode
+pytz

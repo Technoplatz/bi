@@ -2,35 +2,38 @@
   "properties": {
     "ano_id": {
       "bsonType": "string",
-      "minLength": 3,
-      "maxLength": 64,
-      "pattern": "^[a-z0-9-]{3,64}$",
       "title": "ID",
       "description": "ID",
-      "default": "database-dump"
-    },
-    "ano_vie_id": {
-      "bsonType": "string",
       "minLength": 3,
       "maxLength": 64,
-      "pattern": "^[a-z0-9-]{3,64}$",
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "caseType": "lowercase"
+    },
+    "ano_que_id": {
+      "bsonType": "string",
       "title": "ID",
-      "description": "View ID"
-    },
-    "ano_vie_title": {
-      "bsonType": "string",
-      "minLength": 1,
+      "description": "Query ID",
+      "minLength": 3,
       "maxLength": 64,
-      "title": "Title",
-      "description": "View Title"
+      "pattern": "^[a-z0-9-_]{3,64}$",
+      "caseType": "lowercase"
     },
-    "ano_scope": {
+    "ano_date": {
+      "bsonType": "date",
+      "title": "Date",
+      "description": "Announcement date"
+    },
+    "ano_subject": {
       "bsonType": "string",
-      "title": "Type",
-      "description": "Type"
+      "title": "Subject",
+      "description": "Announcement subject",
+      "minLength": 1,
+      "maxLength": 64
     },
     "ano_to": {
       "bsonType": "array",
+      "title": "To",
+      "description": "To List",
       "uniqueItems": false,
       "minItems": 0,
       "maxItems": 256,
@@ -39,12 +42,12 @@
         "minLength": 0,
         "maxLength": 64
       },
-      "title": "To",
-      "description": "To List",
       "manualAdd": false
     },
     "_tags": {
       "bsonType": "array",
+      "title": "Tags",
+      "description": "Enter a tag #...",
       "uniqueItems": false,
       "minItems": 0,
       "maxItems": 256,
@@ -54,15 +57,13 @@
         "maxLength": 64,
         "pattern": "^[#@][a-zA-Z0-9]{2,64}$"
       },
-      "title": "Tags",
-      "description": "Enter a tag #...",
       "manualAdd": false
     }
   },
-  "required": ["ano_id", "ano_scope", "ano_vie_id", "ano_vie_title"],
-  "unique": ["ano_id"],
-  "index": [["ano_scope"], ["ano_vie_id"]],
+  "required": ["ano_id", "ano_que_id", "ano_date", "ano_subject"],
+  "unique": [["ano_id"]],
+  "index": [["ano_que_id"], ["ano_date"]],
   "sort": {
-    "_created_at": -1
+    "ano_date": -1
   }
 }

@@ -306,29 +306,39 @@ Sample boolean field;
 
 ### Links
 
+Links is used to create a parent-child relationship between two collections. Link section must be provided in the data structure of the parent collection.
+
 ```json
-[
-  {
-    "collection": "delivery",
-    "get": "dnn_no",
-    "match": [{ "key": "dnn_status", "op": "eq", "value": "00-Open" }],
-    "set": [
-      { "key": "dnn_odi_no", "value": "odi_no" },
-      { "key": "dnn_odi_sub_no", "value": "odi_sub_no" },
-      { "key": "dnn_status", "value": "10-OnTheWay" }
-    ],
-    "autofill": true,
-    "btntext": "Add DNs",
-    "_tags": ["#Managers", "#Technoplatz", "#Operation"],
-    "notification": {
-      "notify": true,
-      "subject": "Ordino Attached",
-      "body": "Email body in HTML",
-      "attachment": true,
-      "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name"
-    }
+"links": [{},{},...]
+```
+
+A sample link item;
+
+```json
+{
+  "collection": "delivery",
+  "get": "dnn_bill_no",
+  "sum": "dnn_amount",
+  "listed": true,
+  "match": [{ "key": "dnn_status", "op": "eq", "value": "00-Open" }],
+  "set": [
+    { "key": "dnn_odi_no", "value": "odi_no" },
+    { "key": "dnn_odi_sub_no", "value": "odi_sub_no" },
+    { "key": "dnn_status", "value": "10-OnTheWay" }
+  ],
+  "autofill": true,
+  "btntext": "+DNN",
+  "_tags": ["#Managers", "#Operation", "#Logistics"],
+  "notification": {
+    "notify": true,
+    "subject": "Logistics [New Ordino]",
+    "body": "Hi,<p>We would like to let you know that the attached documents have been linked to a new ordino by adding invoice numbers.</p>",
+    "attachment": true,
+    "key": "odi_sub_no",
+    "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+    "filter": []
   }
-]
+}
 ```
 
 ### Triggers

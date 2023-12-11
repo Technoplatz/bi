@@ -4,22 +4,19 @@
       "bsonType": "string",
       "title": "Type",
       "description": "Log type",
-      "enum": ["Info", "Error", "Warning", "Denied", "Announcement", "Automation"],
-      "required": true
+      "enum": ["Info", "Error", "Warning", "Denied", "Announcement", "Automation"]
     },
     "log_date": {
       "bsonType": "date",
       "title": "Date",
-      "description": "Log date",
-      "required": true
+      "description": "Log date"
     },
     "log_user_id": {
       "bsonType": "string",
       "minLength": 1,
       "maxLength": 64,
       "title": "User",
-      "description": "User id",
-      "required": true
+      "description": "User id"
     },
     "log_ip": {
       "bsonType": "string",
@@ -42,8 +39,7 @@
       "minLength": 1,
       "maxLength": 64,
       "title": "Operation",
-      "description": "Operation",
-      "required": true
+      "description": "Operation"
     },
     "log_document": {
       "bsonType": "string",

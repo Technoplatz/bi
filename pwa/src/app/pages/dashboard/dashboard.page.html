@@ -96,32 +96,27 @@ https://www.gnu.org/licenses.
         <h4>{{ 'Announcements' | translate }}</h4>
         <ion-grid *ngIf="announcements_?.length > 0; else noannouncement" class="ion-no-padding data-grid">
           <ion-row>
-            <ion-col size="2">
+            <ion-col size="3">
               <span class="column-title">{{ 'Date' | translate }}</span>
             </ion-col>
-            <ion-col size="2">
-              <span class="column-title">{{ 'Test' | translate }}/{{ 'Live' | translate }}</span>
+            <ion-col size="3">
+              <span class="column-title">{{ 'Query ID' | translate }}</span>
             </ion-col>
-            <ion-col size="2">
-              <span class="column-title">{{ 'Title' | translate }}</span>
+            <ion-col size="3">
+              <span class="column-title">{{ 'Subject' | translate }}</span>
             </ion-col>
-            <ion-col size="2">
-              <span class="column-title">{{ 'Announced By' | translate }}</span>
-            </ion-col>
-            <ion-col size="4">
+            <ion-col size="3">
               <span class="column-title">{{ 'Tags' | translate }}</span>
             </ion-col>
           </ion-row>
           <ion-row *ngFor="let item of announcements_; let a = index">
-            <ion-col size="2"> {{ item._created_at.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }} </ion-col>
-            <ion-col size="2"> {{ item.ano_scope | translate }}</ion-col>
-            <ion-col size="2"> {{ item.ano_vie_title }}</ion-col>
-            <ion-col size="2"> {{ item._created_by }} </ion-col>
-            <ion-col size="4"> {{ item._tags?.join(' ') }} </ion-col>
+            <ion-col size="3"> {{ item.ano_date.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm' }} </ion-col>
+            <ion-col size="3"> {{ item.ano_que_id }}</ion-col>
+            <ion-col size="3"> {{ item.ano_subject }}</ion-col>
+            <ion-col size="3"> {{ item._tags?.join(' ') }} </ion-col>
           </ion-row>
           <ion-row>
-            <ion-col size="12">{{ 'Last' | translate }} {{ announcements_.length }} {{ 'announcements' | translate
-              }}.</ion-col>
+            <ion-col size="12">{{ 'Recent Announcements' | translate }} [{{ announcements_.length }}]</ion-col>
           </ion-row>
           <div class="filler-16"></div>
           <ion-button size="small" (click)="misc.navi.next('admin/_announcement')">{{ 'Show All' | translate

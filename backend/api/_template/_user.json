@@ -7,7 +7,6 @@
       "description": "Email",
       "minLength": 0,
       "maxLength": 64,
-      "required": true,
       "placeholder": "Enter a business e-mail",
       "caseType": "lowercase"
     },
@@ -16,15 +15,13 @@
       "title": "Name",
       "description": "Full Name",
       "minLength": 3,
-      "maxLength": 64,
-      "required": true
+      "maxLength": 64
     },
     "usr_scope": {
       "bsonType": "string",
       "title": "Scope",
       "description": "User Scope",
       "enum": ["Internal", "External", "Administrator"],
-      "required": true,
       "default": "Internal"
     },
     "usr_enabled": {
@@ -37,7 +34,6 @@
       "title": "Locale",
       "description": "User locale",
       "enum": ["en", "de", "tr"],
-      "required": true,
       "default": "de"
     },
     "_tags": {

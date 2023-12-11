@@ -7,8 +7,7 @@
       "pattern": "^[a-z0-9-]{3,64}$",
       "title": "ID",
       "description": "Storage ID",
-      "permanent": true,
-      "required": true
+      "permanent": true
     },
     "sto_collection_id": {
       "bsonType": "string",
@@ -17,8 +16,7 @@
       "pattern": "^[a-z0-9-_]{3,64}$",
       "title": "Collection",
       "description": "Collection ID",
-      "collection": true,
-      "required": true
+      "collection": true
     },
     "sto_file": {
       "bsonType": "string",
@@ -26,8 +24,7 @@
       "maxLength": 64,
       "file": true,
       "title": "File",
-      "description": "File",
-      "required": true
+      "description": "File"
     }
   },
   "required": ["sto_id", "sto_collection_id", "sto_file"],

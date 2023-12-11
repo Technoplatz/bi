@@ -336,7 +336,7 @@ export class CollectionPage implements OnInit {
         }
       });
       modal.onDidDismiss().then((res_: any) => {
-        if (op === "action" || res_.data.modified || this.scan_) {
+        if (op === "action" || res_.data?.modified || this.scan_) {
           this.refresh_data(0, false);
         }
       });

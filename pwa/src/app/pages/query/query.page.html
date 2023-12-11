@@ -36,6 +36,7 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}</p>
         <h3>{{ subheader }}</h3>
+        <span *ngIf="_tags" class="bold primary">{{ _tags.join(',') }}</span>
         <div class="filler-10"></div>
         <!-- BUTTONS -->
         <ion-grid class="ion-no-padding">

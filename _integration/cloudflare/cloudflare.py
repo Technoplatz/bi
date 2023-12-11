@@ -3,6 +3,7 @@ import json
 import sys
 import os
 import pymongo
+import pytz
 from pymongo import MongoClient
 from datetime import datetime
 from flask import Flask, request, make_response
@@ -99,12 +100,16 @@ class Cloudflare:
         """
         docstring is in progress
         """
-        self.cf_active_ = os.environ.get("CF_ACTIVE") in [True, "true", "True", "TRUE"]
+        self.tz_ = os.environ.get("TZ")
+        self.cf_active_ = os.environ.get("CF_ACTIVE") in [
+            True, "true", "True", "TRUE"]
         self.cf_zone_id_ = os.environ.get("CF_ZONEID")
         self.token_ = os.environ.get("CF_TOKEN")
         self.cf_rule_name_ = os.environ.get("CF_RULE_NAME")
-        self.cf_countries_ = os.environ.get("CF_COUNTRIES").replace(" ", "").split(",")
-        self.admin_ips_ = os.environ.get("CF_ADMIN_IPS").replace(" ", "").split(",") if os.environ.get("CF_ADMIN_IPS") else []
+        self.cf_countries_ = os.environ.get(
+            "CF_COUNTRIES").replace(" ", "").split(",")
+        self.admin_ips_ = os.environ.get("CF_ADMIN_IPS").replace(
+            " ", "").split(",") if os.environ.get("CF_ADMIN_IPS") else []
         self.cf_hosts_ = os.environ.get("CF_HOSTS").replace(" ", "").split(",")
         self.custom_phase_ = "http_request_firewall_custom"
         self.log_enabled_ = True
@@ -197,7 +202,8 @@ class Cloudflare:
                     ]
                 )
             )
-            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
+            docs_ = json.loads(JSONEncoder().encode(
+                list(cursor_))) if cursor_ else []
             for doc_ in docs_:
                 client_ips_.append(doc_["_id"])
 
@@ -210,7 +216,8 @@ class Cloudflare:
                 raise APIException("no hosts found")
 
             ipsq_ = "{" + " ".join(f"{ip_}" for ip_ in ips_) + "}"
-            hosts_ = "{" + " ".join(f'"{host_}"' for host_ in self.cf_hosts_) + "}"
+            hosts_ = "{" + \
+                " ".join(f'"{host_}"' for host_ in self.cf_hosts_) + "}"
             countriesq_ = (
                 "{" + " ".join(f'"{country_}"' for country_ in self.cf_countries_) + "}"
             )
@@ -243,7 +250,8 @@ class Cloudflare:
             for doc_ in docs_:
                 Mongo().db_["_firewall"].update_many(
                     {"fwa_source_ip": doc_["_id"]},
-                    {"$set": {"fwa_waf_sync_date": datetime.now()}},
+                    {"$set": {"fwa_waf_sync_date": datetime.now(
+                        pytz.timezone(TZ_))}},
                 )
 
             result_ = True
