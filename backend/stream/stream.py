@@ -150,7 +150,7 @@ class Trigger:
         """
         docstring is in progress
         """
-        return datetime.now(pytz.timezone(TZ_))
+        return datetime.now()
 
     def get_timestamp_f(self):
         """

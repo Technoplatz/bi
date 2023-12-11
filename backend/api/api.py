@@ -438,7 +438,7 @@ class Misc:
         """
         docstring is in progress
         """
-        return datetime.now(pytz.timezone(TZ_))
+        return datetime.now()
 
     def s3_f(self, input_):
         """
