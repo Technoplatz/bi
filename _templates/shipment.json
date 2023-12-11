@@ -101,7 +101,7 @@
     }
   },
   "sort": {
-    "shp_id": -1
+    "shp_wayb_date": -1
   },
   "required": ["shp_id", "shp_date", "shp_acc_no", "shp_carrier_name", "shp_carrier_id", "shp_carrier_tax_no", "shp_vehicle_id"],
   "index": [["shp_acc_no"], ["shp_wayb_no"]],

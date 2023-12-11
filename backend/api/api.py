@@ -2766,7 +2766,7 @@ class Crud:
 
             aggregate_update_ = []
             for agg_ in job_aggregate_:
-                if "$project" in agg_ or "$set" in agg_ or "$unset" in agg_:
+                if "$project" in agg_ or "$get" in agg_ or "$set" in agg_ or "$unset" in agg_:
                     continue
                 aggregate_update_.append(agg_)
 
@@ -2775,6 +2775,7 @@ class Crud:
                 Mongo().db_[f"{job_collection_id_}_data"].aggregate(
                     aggregate_update_)
             )
+
             if not cursor_:
                 err_ = "no record found to update [1]"
                 raise PassException(err_)
@@ -2787,8 +2788,10 @@ class Crud:
                 raise PassException(err_)
 
             personalizations_ = []
+
             get_users_from_tags_f_ = Misc(
-            ).get_users_from_tags_f(["#JobAdmins"])
+            ).get_users_from_tags_f(["#JobAdmins", "#Administrators"])
+
             if not get_users_from_tags_f_["result"]:
                 raise APIError(
                     f"personalizations error: {get_users_from_tags_f_['msg']}"
@@ -2800,9 +2803,7 @@ class Crud:
             )
 
             if len(ids_) > API_JOB_UPDATE_LIMIT_:
-                personalizations_.append(
-                    {"email": ADMIN_EMAIL_, "name": ADMIN_NAME_})
-                html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)} [{API_JOB_UPDATE_LIMIT_}].</p><p>{','.join(ids_)}</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
+                html_ = f"<p>Hi,</p><p>The limit of the updated documents count has been exceeded for the job '{job_name_}'.<br />Possible affected number of documents: {len(ids_)} [{API_JOB_UPDATE_LIMIT_}].</p><p>Aggregation:<br />{str(aggregate_update_)}</p>"
                 email_sent_ = Email().send_email_f(
                     {
                         "op": "job",
@@ -2827,7 +2828,7 @@ class Crud:
 
             Mongo().db_["_joblog"].insert_one(
                 {
-                    "jol_id": _id,
+                    "jol_id": ObjectId(str(_id)),
                     "jol_name": job_name_,
                     "jol_run_date": Misc().get_now_f(),
                     "jol_count": count_,
@@ -2836,7 +2837,7 @@ class Crud:
                 }
             )
 
-            html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {len(ids_)}.</p><p>{','.join(ids_)}</p><p>Set:<br />{str(set__)}</p>"
+            html_ = f"<p>Hi,</p><p>The job '{job_name_}' was completed successfully.<br />Affected number of documents: {len(ids_)}.</p><p>Set:<br />{str(set__)}</p>"
             email_sent_ = Email().send_email_f(
                 {
                     "op": "job",
