@@ -1959,7 +1959,7 @@ class Crud:
             for mat_ in match_:
                 key_ = mat_["key"]
                 op_ = mat_["op"]
-                value_ = mat_["value"].strip()
+                value_ = mat_["value"]
                 if key_ and op_ and key_ in properties_:
                     fres_ = None
                     typ = (
@@ -2005,13 +2005,13 @@ class Crud:
                         else:
                             multilines_ = value_.split("\n")
                             if multilines_ and len(multilines_) > 1:
-                                fres_ = { "$in": multilines_ }
+                                fres_ = { "$in": multilines_[:32] }
                             else:
                                 fres_ = (
                                     {"$regex": value_, "$options": "i"}
                                     if value_
                                     else {"$regex": "", "$options": "i"}
-                                )
+                                    )
                     elif op_ == "eq":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = float(value_)
@@ -2930,6 +2930,7 @@ class Crud:
                 if user_ and "locale" in user_
                 else {"locale": DEFAULT_LOCALE_}
             )
+
             cursor_ = (
                 Mongo().db_["_collection"].find_one({"col_id": collection_id_})
                 if is_crud_

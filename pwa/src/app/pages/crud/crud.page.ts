@@ -581,6 +581,7 @@ export class CrudPage implements OnInit {
     let matchkeys_: any = [];
     const group_ = this.parent.group ? this.parent.group : false;
     this.parent.match.forEach((m: any) => matchkeys_.push(m.key));
+    console.log("*** filter_", filter_);
     if (this.parent.get && this.parent.get.length > 0) {
       this.reloading = true;
       for (let p = 0; p < this.parent.get.length; p++) {
