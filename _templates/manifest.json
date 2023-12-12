@@ -110,6 +110,8 @@
     {
       "collection": "delivery",
       "get": "dnn_no",
+      "sum": "dnn_amount",
+      "listed": true,
       "match": [
         {
           "key": "dnn_status",
@@ -152,7 +154,7 @@
   ],
   "actions": [
     {
-      "id": "closed",
+      "id": "completed",
       "title": "Clearance Completed",
       "enabled": true,
       "match": [
@@ -249,10 +251,10 @@
           "notification": {
             "notify": true,
             "subject": "Logistics [Clearance Completed]",
-            "body": "Hi,<br /><br />We would like to let you know that clearance of the attached manifest has been completed.",
+            "body": "Hi,<br /><br />We would like to let you know that the customs clearance of the attached manifest has been completed.",
             "collection": "delivery",
             "key": "man_no",
-            "fields": "dnn_man_no,dnn_no,dnn_line_no,dnn_status,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+            "fields": "dnn_man_no,dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_po_id,dnn_qty",
             "filter": [
               {
                 "key": "dnn_man_no",

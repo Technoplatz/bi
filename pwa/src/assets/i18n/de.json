@@ -396,6 +396,7 @@
   "test": "Test",
   "true": "Ja",
   "update completed successfully": "Aktualisierung erfolgreich abgeschlossen",
+  "user is not allowed to perform this operation": "der Benutzer darf diesen Vorgang nicht durchführen",
   "user not found": "Benutzer nicht gefunden",
   "user session ended": "Benutzersitzung beendet",
   "user session not found": "Benutzersitzung nicht gefunden"

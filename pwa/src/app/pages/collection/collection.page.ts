@@ -207,7 +207,7 @@ export class CollectionPage implements OnInit {
               this.structure_ = res.structure;
               this.get_links(res).then(() => {
                 this.json_content_ = res.structure;
-                this.actions = res.structure.actions;
+                this.actions = res.actions;
                 this.properties_ = res.structure.properties;
                 this.importvis_ = res.structure.import?.enabled;
                 this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;

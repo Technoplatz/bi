@@ -396,6 +396,7 @@
   "test": "Test",
   "true": "Evet",
   "update completed successfully": "kayıt başarıyla güncellendi",
+  "user is not allowed to perform this operation": "kullanıcının bu işlem için yetkisi yok",
   "user not found": "kullanıcı bulunamadı",
   "user session ended": "oturum sonlandırıldı",
   "user session not found": "kullanıcı oturumu bulunamadı"

@@ -2948,6 +2948,17 @@ class Crud:
             if not properties_:
                 raise AuthError(f"properties not found {collection_id_}")
 
+            user_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+            user_actions_ = []
+            actions_ = structure_["actions"] if "actions" in structure_ and len(structure_["actions"]) > 0 else []
+            if actions_:
+                for action_ in actions_:
+                    action_tags_ = action_["_tags"] if "_tags" in action_ and len(action_["_tags"]) > 0 else []
+                    if action_tags_ and user_tags_:
+                        found_ = [item_ for item_ in action_tags_ if item_ in user_tags_]
+                        if found_:
+                            user_actions_.append(action_)
+
             reconfig_ = (
                 cursor_["_reconfig_req"]
                 if "_reconfig_req" in cursor_ and cursor_["_reconfig_req"] is True
@@ -2961,7 +2972,7 @@ class Crud:
                 Auth().is_manager_f(user_) or Auth().is_admin_f(user_)
             ):
                 get_filtered_["_tags"] = {
-                    "$elemMatch": {"$in": user_["_tags"]}}
+                    "$elemMatch": {"$in": user_tags_}}
 
             for property_ in selections_:
                 sel_ = []
@@ -3145,6 +3156,7 @@ class Crud:
                 "reconfig": reconfig_,
                 "selections": selections_,
                 "selected": selected_,
+                "actions": user_actions_
             }
 
         except AuthError as exc__:
@@ -5578,7 +5590,7 @@ class Auth:
 
             if not permit_:
                 raise AuthError(
-                    f"user is not allowed to {op_} {collection_id_}")
+                    f"user is not allowed to perform this operation")
 
             return {"result": True, "allowmatch": allowmatch_}
 
