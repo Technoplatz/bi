@@ -1959,7 +1959,7 @@ class Crud:
             for mat_ in match_:
                 key_ = mat_["key"]
                 op_ = mat_["op"]
-                value_ = mat_["value"]
+                value_ = mat_["value"] if "value" in mat_ and mat_["value"] is not None else None
                 if key_ and op_ and key_ in properties_:
                     fres_ = None
                     typ = (
@@ -2003,15 +2003,15 @@ class Crud:
                                 ),
                             }
                         else:
-                            multilines_ = value_.split("\n")
+                            multilines_ = value_.split("\n") if value_ else None
                             if multilines_ and len(multilines_) > 1:
-                                fres_ = { "$in": multilines_[:32] }
+                                fres_ = {"$in": multilines_[:32]}
                             else:
                                 fres_ = (
                                     {"$regex": value_, "$options": "i"}
                                     if value_
                                     else {"$regex": "", "$options": "i"}
-                                    )
+                                )
                     elif op_ == "eq":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = float(value_)
@@ -4806,8 +4806,8 @@ class Crud:
 
             return {"result": True, "token": inserted_}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
         except AuthError as exc__:
             return Misc().auth_error_f(exc__)
@@ -5002,8 +5002,8 @@ class OTP:
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
         except AuthError as exc:
             return Misc().auth_error_f(exc)
