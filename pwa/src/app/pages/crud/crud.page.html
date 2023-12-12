@@ -306,7 +306,7 @@ https://www.gnu.org/licenses.
                         </div>
                         <ion-button *ngIf="field.parents && field.bsonType!='array'" size="small"
                             (click)="get_parent(field.parents)" class="parent-link-button">{{
-                            field.parents?.collection | translate }}x
+                            field.parents?.collection | translate }}
                         </ion-button>
                         <ion-button *ngIf="op=='insert' || (!field?.permanent && !field?.disabled); else locked"
                             color="medium" (click)="field_nulla(field.name)" fill="clear" class="nulla-button"
