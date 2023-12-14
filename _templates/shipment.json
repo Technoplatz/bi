@@ -147,8 +147,8 @@
       "filter": [
         {
           "key": "car_acc_no",
-          "op": "nnull",
-          "value": null
+          "op": "eq",
+          "value": "shp_acc_no"
         }
       ],
       "get": ["car_id", "car_name", "car_tax_no", "car_plate_no"]
@@ -177,7 +177,7 @@
         }
       ],
       "autofill": true,
-      "btntext": "delivery",
+      "btntext": "DNN",
       "api": {
         "id": "waybill-issue",
         "enabled": true,

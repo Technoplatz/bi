@@ -94,7 +94,7 @@ export class CrudPage implements OnInit {
   public counter: number = 0;
   public scan_result: string = "";
   private sweeped: any;
-  public link_text: any = null;
+  public link_text: string = "";
   public link_: any = {};
   public linked_: any = [];
   public date_format: string = "DD.MM.YYYY HH:mm";
@@ -163,6 +163,7 @@ export class CrudPage implements OnInit {
     this.actionix = this.shuttle.actionix;
     this.scan_ = this.shuttle.scan;
     this.links = this.shuttle.structure.links;
+    this.link_ = this.links ? this.links[0] : null;
     this.parents = this.structure__?.parents ? this.structure__.parents : [];
     this.actions = this.shuttle.actions && this.shuttle.actions.length > 0 ? this.shuttle.actions : [];
     this.isnoninteractive_ = this.actions[this.actionix]?.noninteractive === true ? true : false;
@@ -623,11 +624,14 @@ export class CrudPage implements OnInit {
     this.related = this.relatedx;
     this.related = this.related.filter((obj: any) => (obj[this.field_parents.get[0]] + obj[this.field_parents.get[1]] + obj[this.field_parents.get[2]]).toLowerCase().indexOf(e.toLowerCase()) > -1);
     if (this.related.length === 0 && this.scan_) {
-      this.parent.filter = e !== "" ? [{
-        key: this.parent.match[0].value,
-        op: "eq",
-        value: e
-      }] : [];
+      this.parent.filter = e !== "" ? () => {
+        [{
+          key: this.parent.match[0].value,
+          op: "eq",
+          value: e
+        }]
+      }
+        : [];
       this.get_parent(this.parent);
     }
   }

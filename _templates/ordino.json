@@ -123,12 +123,12 @@
         }
       ],
       "autofill": true,
-      "btntext": "+DNN",
+      "btntext": "DNN",
       "_tags": ["#Managers", "#Technoplatz", "#Operation", "#Logistics"],
       "notification": {
         "notify": true,
-        "subject": "Logistics [Ordino Generated with DNN]",
-        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to ordino.",
+        "subject": "Logistics [New Ordino]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to a new ordino by adding DN numbers.",
         "attachment": true,
         "key": "odi_sub_no",
         "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
@@ -162,12 +162,12 @@
         }
       ],
       "autofill": true,
-      "btntext": "+Invoice",
+      "btntext": "Invoice",
       "_tags": ["#Managers", "#Technoplatz", "#Operation", "#Logistics"],
       "notification": {
         "notify": true,
-        "subject": "Logistics [Ordino Generated with INV]",
-        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to ordino.",
+        "subject": "Logistics [New Ordino]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to a new ordino by adding invoice numbers.",
         "attachment": true,
         "key": "odi_sub_no",
         "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
@@ -175,7 +175,36 @@
       }
     }
   ],
-  "actions": [],
+  "actions": [
+    {
+      "id": "arrived",
+      "title": "Ordinos Arrived",
+      "enabled": true,
+      "match": [
+        {
+          "key": "odi_date",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "odi_arrived_date",
+          "op": "null",
+          "value": null
+        }
+      ],
+      "set": [
+        {
+          "key": "odi_arrived_date",
+          "value": "$CURRENT_DATE"
+        }
+      ],
+      "one_click": false,
+      "icon": "megaphone",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+    }
+  ],
   "triggers": [
     {
       "name": "_ordino_id",

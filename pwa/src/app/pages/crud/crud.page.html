@@ -173,11 +173,12 @@ https://www.gnu.org/licenses.
                     <ion-item *ngIf="['insert','update','link'].includes(op) && links?.length > 0">
                         <div class="ion-margin-top full-flex ion-margin-bottom">
                             <ion-button *ngFor="let item of links" (click)="doGoLink(item)" size="default" slot="end"
-                                [color]="link_text?.length > 0 ? 'success' : 'danger'">
+                                [color]="link_.btntext === item.btntext && link_text?.length > 0 ? 'success' : 'primary'">
                                 {{ translate.instant(item.btntext ? item.btntext :
-                                item?.collection) }} [{{link_.btntext === item.btntext && link_text?.length ?
-                                link_text.trim().split('\n').length :
-                                0}}]&nbsp;
+                                item?.collection) }}<span *ngIf="link_text">&nbsp;[{{link_.btntext === item.btntext &&
+                                    link_text?.length ?
+                                    link_text.trim().split('\n').length :
+                                    0}}]</span>&nbsp;
                                 <ion-icon
                                     *ngIf="link_.btntext === item.btntext && link_text?.length > 0; else nolinktext"
                                     name="checkmark-sharp"></ion-icon>
