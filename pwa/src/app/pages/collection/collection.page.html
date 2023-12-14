@@ -75,7 +75,7 @@ https://www.gnu.org/licenses.
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 <ion-text color="primary">{{ 'Clone Document' | translate }}</ion-text>
               </div>
-              <div (click)="multi_crud('delete')" [class]="perma_ ? 'data-sq-button' : 'data-sq-button disabled'">
+              <div *ngIf="perma_" (click)="multi_crud('delete')" class="data-sq-button">
                 <ion-icon name="trash-outline"></ion-icon>
                 <br />
                 <ion-text color="primary">{{ 'Delete Document' | translate }}</ion-text>
@@ -87,8 +87,7 @@ https://www.gnu.org/licenses.
                 <ion-text color="primary" *ngIf="!is_copied">{{ 'Copy Headers' | translate }}</ion-text>
                 <ion-text color="primary" *ngIf="is_copied">{{ 'Headers Copied' | translate }}</ion-text>
               </div>
-              <div *ngIf="is_crud" (click)="set_editor(true)"
-                [class]="perm_ ? 'data-sq-button' : 'data-sq-button disabled'">
+              <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000" #svg class="json-icon-large">
                   <title>json_scheme</title>
                   <rect fill="none" />
@@ -101,7 +100,6 @@ https://www.gnu.org/licenses.
             </ion-col>
           </ion-row>
         </ion-grid>
-
         <!-- SCHEMA -->
         <ion-grid *ngIf="is_crud && perm_ && schemavis_" class="actions-grid">
           <ion-row>

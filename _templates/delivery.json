@@ -46,15 +46,44 @@
       "default": "00-Standby",
       "selection": true
     },
-    "dnn_acc_no": {
+    "dnn_po_id": {
       "bsonType": "string",
-      "title": "Account No",
-      "description": "Account No",
-      "minLength": 9,
+      "title": "PO ID",
+      "description": "Purchase Order Id",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "dnn_qty": {
+      "bsonType": "number",
+      "title": "Quantity",
+      "description": "Quantity",
+      "default": 1
+    },
+    "dnn_prd_no": {
+      "bsonType": "string",
+      "title": "Product ID",
+      "description": "Product ID",
+      "minLength": 7,
       "maxLength": 16,
-      "pattern": "^[A-Z0-9-]{9,16}$",
-      "readonly": true,
-      "selection": true
+      "pattern": "^[A-Z0-9-]{7,16}$",
+      "replacement": [
+        {
+          "find": "-",
+          "replace": ""
+        },
+        {
+          "find": "_",
+          "replace": ""
+        }
+      ],
+      "caseType": "uppercase"
+    },
+    "dnn_prd_description": {
+      "bsonType": "string",
+      "title": "Description",
+      "description": "Product Description",
+      "minLength": 1,
+      "maxLength": 256
     },
     "dnn_acc_name": {
       "bsonType": "string",
@@ -62,6 +91,16 @@
       "description": "Account Name",
       "minLength": 1,
       "maxLength": 128,
+      "readonly": true,
+      "selection": true
+    },
+    "dnn_acc_no": {
+      "bsonType": "string",
+      "title": "Account No",
+      "description": "Account No",
+      "minLength": 9,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{9,16}$",
       "readonly": true,
       "selection": true
     },
@@ -119,13 +158,6 @@
       "description": "DN Date",
       "dateOnly": true
     },
-    "dnn_po_id": {
-      "bsonType": "string",
-      "title": "PO ID",
-      "description": "Purchase Order Id",
-      "minLength": 1,
-      "maxLength": 64
-    },
     "dnn_order_no": {
       "bsonType": "string",
       "title": "Order No",
@@ -140,38 +172,6 @@
       "description": "Business Unit Id",
       "readonly": true,
       "selection": true
-    },
-    "dnn_prd_no": {
-      "bsonType": "string",
-      "title": "Product ID",
-      "description": "Product ID",
-      "minLength": 7,
-      "maxLength": 16,
-      "pattern": "^[A-Z0-9-]{7,16}$",
-      "replacement": [
-        {
-          "find": "-",
-          "replace": ""
-        },
-        {
-          "find": "_",
-          "replace": ""
-        }
-      ],
-      "caseType": "uppercase"
-    },
-    "dnn_prd_description": {
-      "bsonType": "string",
-      "title": "Description",
-      "description": "Product Description",
-      "minLength": 1,
-      "maxLength": 256
-    },
-    "dnn_qty": {
-      "bsonType": "number",
-      "title": "Quantity",
-      "description": "Quantity",
-      "default": 1
     },
     "dnn_unit_price": {
       "bsonType": "number",
