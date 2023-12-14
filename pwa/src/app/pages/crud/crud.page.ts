@@ -257,7 +257,7 @@ export class CrudPage implements OnInit {
         const msg_ = this.op === "action" ? "form is not valid or action is not non-interactive" : "form is not valid";
         this.misc.doMessage(msg_, "error");
       } else {
-        this.linked_ = this.link_text ? this.link_text.split('\n').filter((e: any) => { return e }) : [];
+        this.linked_ = this.link_text ? this.link_text.trim().split('\n').filter((e: any) => { return e }) : [];
         this.modified = true;
         this.in_progress = true;
         this.crud.submit_f(this.data_, this.collection, this.structure__, this.crudForm, this._id, this.op, this.file, this.sweeped, this.filter, this.actionix, this.link_, this.linked_).then((res_: any) => {
@@ -515,7 +515,7 @@ export class CrudPage implements OnInit {
 
   doGoLink(link_: any) {
     this.link_ = link_;
-    this.link_text = "";
+    // this.link_text = "";
     let j_ = 0;
     this.data_["_link_" + link_.collection]?.length > 0 ? this.data_["_link_" + link_.collection].forEach((obj_: any) => {
       this.link_text += obj_[link_.get] ? (j_ > 0 ? "\n" : "") + obj_[link_.get] : "";

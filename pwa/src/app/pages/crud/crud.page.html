@@ -88,6 +88,11 @@ https://www.gnu.org/licenses.
                 <ion-button (click)="goTab('data')" color="medium">
                     <ion-icon name="arrow-back"></ion-icon>
                     {{ 'Back' | translate }} </ion-button>
+                <ion-button size="default" (click)="get_linked()">
+                    <ion-icon name="download-outline"></ion-icon>
+                    <span *ngIf="reloading">{{ 'Running' | translate }}...</span>
+                    <span *ngIf="!reloading">{{ 'Get Automatically' | translate }}</span>
+                </ion-button>
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -141,13 +146,6 @@ https://www.gnu.org/licenses.
     <ng-template #norelation>
         <div *ngIf="tab=='link'; else nolink" class="ion-padding-bottom ion-margin-top">
             <ion-item class="ion-no-margin ion-margin-bottom full-width">
-                <div *ngIf="op==='insert'" class="ion-margin-top ion-margin-bottom">
-                    <ion-button color="primary" size="default" (click)="get_linked()">
-                        <ion-icon name="download-outline"></ion-icon>
-                        <span *ngIf="reloading">{{ 'Running' | translate }}...</span>
-                        <span *ngIf="!reloading">{{ 'Get Automatically' | translate }}</span>
-                    </ion-button>
-                </div>
                 <ion-label position="stacked"><strong>{{ 'Get automatically, enter manually or paste' | translate
                         }}.</strong></ion-label>
                 <ion-textarea #linked_data id="linked_data" name="linked_data" cols="64" auto-grow="true"
@@ -174,10 +172,18 @@ https://www.gnu.org/licenses.
                     class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
                     <ion-item *ngIf="['insert','update','link'].includes(op) && links?.length > 0">
                         <div class="ion-margin-top full-flex ion-margin-bottom">
-                            <ion-button *ngFor="let item of links" (click)="doGoLink(item)" color="primary"
-                                size="default" slot="end">
+                            <ion-button *ngFor="let item of links" (click)="doGoLink(item)" size="default" slot="end"
+                                [color]="link_text?.length > 0 ? 'success' : 'danger'">
                                 {{ translate.instant(item.btntext ? item.btntext :
-                                item?.collection) }}&nbsp;<ion-icon name="arrow-forward-sharp"></ion-icon>
+                                item?.collection) }} [{{link_.btntext === item.btntext && link_text?.length ?
+                                link_text.trim().split('\n').length :
+                                0}}]&nbsp;
+                                <ion-icon
+                                    *ngIf="link_.btntext === item.btntext && link_text?.length > 0; else nolinktext"
+                                    name="checkmark-sharp"></ion-icon>
+                                <ng-template #nolinktext>
+                                    <ion-icon name="arrow-forward-sharp"></ion-icon>
+                                </ng-template>
                             </ion-button>
                         </div>
                     </ion-item>
@@ -231,7 +237,7 @@ https://www.gnu.org/licenses.
                                         (ionChange)="change_enum(field, $event.target.value)" [id]="field.name">
                                         <ion-select-option *ngFor="let item of filter_pipe_nulls(field.enum)"
                                             [value]="item">
-                                            {{ item | translate }}
+                                            {{ item }}
                                         </ion-select-option>
                                     </ion-select>
                                 </ng-template>
@@ -240,7 +246,7 @@ https://www.gnu.org/licenses.
                                         [required]="field.required" [(ngModel)]="data_[field.name]"
                                         [disabled]="field.readonly || field.disabled">
                                         <ion-select-option *ngFor="let item of properties_" [value]="item"
-                                            [id]="field.name"> {{ item | translate }}
+                                            [id]="field.name"> {{ item }}
                                         </ion-select-option>
                                     </ion-select>
                                 </ng-template>

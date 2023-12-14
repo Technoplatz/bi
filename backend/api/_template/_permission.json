@@ -6,7 +6,8 @@
       "description": "Enter a tag #...",
       "minLength": 3,
       "maxLength": 64,
-      "pattern": "^[#@][a-zA-Z0-9-]{3,64}$"
+      "pattern": "^[#@][a-zA-Z0-9-]{3,64}$",
+      "selection": true
     },
     "per_collection_id": {
       "bsonType": "string",
@@ -15,7 +16,8 @@
       "minLength": 3,
       "maxLength": 64,
       "pattern": "^[a-z0-9-_]{3,64}$",
-      "collection": true
+      "collection": true,
+      "selection": true
     },
     "per_is_active": {
       "bsonType": "bool",

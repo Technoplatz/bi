@@ -597,6 +597,7 @@ class Misc:
         file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
         line_ = exc_tb_.tb_lineno
         notification_str_ = f"CLIENT IP: {ip_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {notification_}"
+        PRINT_("!!! notification_str_", notification_str_)
         response_ = requests.post(
             NOTIFICATION_PUSH_URL_,
             json.dumps({"text": str(notification_str_)}),
@@ -1959,7 +1960,8 @@ class Crud:
             for mat_ in match_:
                 key_ = mat_["key"]
                 op_ = mat_["op"]
-                value_ = mat_["value"] if "value" in mat_ and mat_["value"] is not None else None
+                value_ = mat_["value"] if "value" in mat_ and mat_[
+                    "value"] is not None else None
                 if key_ and op_ and key_ in properties_:
                     fres_ = None
                     typ = (
@@ -2003,7 +2005,8 @@ class Crud:
                                 ),
                             }
                         else:
-                            multilines_ = value_.split("\n") if value_ else None
+                            multilines_ = value_.split(
+                                "\n") if value_ else None
                             if multilines_ and len(multilines_) > 1:
                                 fres_ = {"$in": multilines_[:32]}
                             else:
@@ -2647,7 +2650,7 @@ class Crud:
         """
         docstring is in progress
         """
-        count_, err_ = 0, None
+        count_, err_, job_ = 0, None, {}
         init_res_ = {"result": True, "count": count_, "err": err_}
         try:
             _id = str(obj_["id"]) if "id" in obj_ else None
@@ -2948,14 +2951,18 @@ class Crud:
             if not properties_:
                 raise AuthError(f"properties not found {collection_id_}")
 
-            user_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+            user_tags_ = user_["_tags"] if "_tags" in user_ and len(
+                user_["_tags"]) > 0 else []
             user_actions_ = []
-            actions_ = structure_["actions"] if "actions" in structure_ and len(structure_["actions"]) > 0 else []
+            actions_ = structure_["actions"] if "actions" in structure_ and len(
+                structure_["actions"]) > 0 else []
             if actions_:
                 for action_ in actions_:
-                    action_tags_ = action_["_tags"] if "_tags" in action_ and len(action_["_tags"]) > 0 else []
+                    action_tags_ = action_["_tags"] if "_tags" in action_ and len(
+                        action_["_tags"]) > 0 else []
                     if action_tags_ and user_tags_:
-                        found_ = [item_ for item_ in action_tags_ if item_ in user_tags_]
+                        found_ = [
+                            item_ for item_ in action_tags_ if item_ in user_tags_]
                         if found_:
                             user_actions_.append(action_)
 
@@ -3900,8 +3907,9 @@ class Crud:
             data_ = obj_["data"] if "data" in obj_ else None
             linked_ = (
                 obj_["linked"] if "linked" in obj_ and len(
-                    obj_["linked"]) > 0 else None
+                    obj_["linked"]) > 0 else []
             )
+            linked_count_ = len(linked_)
             user_ = obj_["user"] if "user" in obj_ else None
             col_id_ = link_["collection"] if "collection" in link_ else None
             get_ = link_["get"] if "get" in link_ else None
@@ -3984,6 +3992,10 @@ class Crud:
                 {"match": match_, "properties": target_properties_, "data": data_}
             )
             filter_ = {"$and": [filter0_, filter1_]}
+
+            checknum_ = Mongo().db_[collection_].count_documents(filter_)
+            if checknum_ < linked_count_:
+                raise AppException(f"records quantity [{checknum_}] does not match with processed [{linked_count_}]")
 
             update_many_ = (
                 Mongo().db_[collection_].update_many(filter_, {"$set": setc_})
@@ -4218,7 +4230,7 @@ class Crud:
             ids_ = []
             if match_ and len(match_) > 0:
                 for _id in match_:
-                    ids_.append(ObjectId(_id))
+                    ids_.append(ObjectId(str(_id)))
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
             schema_ = (
@@ -4655,11 +4667,11 @@ class Crud:
             }
 
         except pymongo.errors.PyMongoError as exc__:
-            session_.abort_transaction()
+            # session_.abort_transaction()
             return Misc().mongo_error_f(exc__)
 
         except AppException as exc__:
-            return Misc().app_exception_f(exc__)
+            return Misc().notify_exception_f(exc__)
 
         except PassException as exc__:
             return Misc().pass_exception_f(exc__)
@@ -4668,7 +4680,7 @@ class Crud:
             return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            session_.abort_transaction()
+            # session_.abort_transaction()
             return Misc().notify_exception_f(exc__)
 
         finally:
@@ -5582,6 +5594,7 @@ class Auth:
                             permission_["per_match"]
                             if "per_match" in permission_
                             and len(permission_["per_match"]) > 0
+                            and op_ != "action"
                             else None
                         )
                         if per_match_:

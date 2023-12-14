@@ -535,7 +535,7 @@
       "icon": null,
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"],
       "notification": {
         "notify": true,
         "subject": "Operation [DNs Uploaded]",
@@ -558,8 +558,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "eq",
-          "value": "50-OnTheTouchpoint"
+          "op": "in",
+          "value": "40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
         }
       ],
       "set": [
@@ -576,10 +576,10 @@
       "icon": "flag",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Touchpoint", "#Technoplatz"],
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
       "notification": {
         "notify": true,
-        "subject": "Operation [DNs Ready TBD Action]",
+        "subject": "Operation [DNs Ready TBD]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
         "attachment": true,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_rtd_date",
@@ -626,7 +626,7 @@
         "key_field": "dnn_no",
         "key_suffix": "-10",
         "ref_field": "dnn_qty",
-        "num_fields": ["dnn_qty", "dnn_gross_weight"],
+        "num_fields": ["dnn_qty", "dnn_amount", "dnn_gross_weight"],
         "set_field": "dnn_change",
         "set_value": "SP-Split"
       },
@@ -644,7 +644,7 @@
           }
         ]
       },
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"]
     },
     {
       "id": "customer-change",
@@ -694,7 +694,7 @@
           }
         ]
       },
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operations", "#Technoplatz"]
+      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"]
     }
   ],
   "links": [],
@@ -793,6 +793,6 @@
   "queries": {
     "query": true,
     "cronjob": true,
-    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_ship_type", "dnn_rtd_date"]
+    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_man_no", "dnn_ship_type", "dnn_rtd_date"]
   }
 }
