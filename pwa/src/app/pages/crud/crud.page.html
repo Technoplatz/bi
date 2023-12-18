@@ -332,7 +332,7 @@ https://www.gnu.org/licenses.
                         <div class="input-desc">{{ 'The latest scans' | translate }}</div>
                         <div class="flexbox-container">
                             <p class="scan-ok" *ngFor="let item of scanned_; let s = index">
-                                {{ item.input }}<br /><span>{{ item.date | date:'dd.MM.yyyy HH:mm:ss' }}</span>
+                                {{ item.input }}<br /><span>{{ item.date | date:'dd.MM.yyyy HH:mm:ss':'utc' }}</span>
                             </p>
                         </div>
                     </ion-item>
@@ -346,7 +346,7 @@ https://www.gnu.org/licenses.
                     <ion-item *ngIf="data_['_created_at']" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'Created At' | translate }}:</ion-label>
                         <ion-input class="ion-no-margin"
-                            [value]="data_['_created_at'] && data_['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
+                            [value]="data_['_created_at'] && data_['_created_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc'"
                             disabled id="_created_at">
                         </ion-input>
                     </ion-item>
@@ -359,7 +359,7 @@ https://www.gnu.org/licenses.
                     <ion-item *ngIf="data_['_modified_at']" lines="full" class="ion-no-margin">
                         <ion-label position="stacked">{{ 'Modified At' | translate }}:</ion-label>
                         <ion-input class="ion-no-margin"
-                            [value]="data_['_modified_at'] && data_['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss'"
+                            [value]="data_['_modified_at'] && data_['_modified_at']?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc'"
                             id="_modified_at" disabled>
                         </ion-input>
                     </ion-item>

@@ -317,10 +317,10 @@ https://www.gnu.org/licenses.
               <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex"
                 [class]="['number','decimal','float'].includes(item_.value.bsonType) ? 'align-right' : ''">
                 <span *ngIf="item_.value.bsonType=='date'; else else1">
-                  <span *ngIf="item_.value?.dateOnly; else nodateOnly">{{ record[item_.key] | date:'dd.MM.yyyy'
+                  <span *ngIf="item_.value?.dateOnly; else nodateOnly">{{ record[item_.key] | date:'dd.MM.yyyy':'utc'
                     }}</span>
                   <ng-template #nodateOnly>
-                    {{ record[item_.key] | date:'dd.MM.yyyy HH:mm:ss' }}
+                    {{ record[item_.key] | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
                   </ng-template>
                 </span>
                 <ng-template #else1>
@@ -361,13 +361,13 @@ https://www.gnu.org/licenses.
                 ].sum?.toFixed(2) }}]
               </td>
               <td>
-                {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
+                {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
               </td>
               <td>
                 {{ record._created_by }}
               </td>
               <td>
-                {{ record._modified_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss' }}
+                {{ record._modified_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
               </td>
               <td>
                 {{ record._modified_by }}
