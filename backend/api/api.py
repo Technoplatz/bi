@@ -3075,8 +3075,10 @@ class Crud:
                             "let": let_,
                             "pipeline": [
                                 {"$match": {"$expr": {"$and": pipeline_match_}}},
-                                {"$group": {"_id": group_id_, "count": {"$sum": 1}, "sum": {
-                                    "$sum": f"${link_sum_}" if link_sum_ else 1}}},
+                                {"$group": {
+                                    "_id": group_id_,
+                                    "count": {"$sum": 1},
+                                    "sum": {"$sum": f"${link_sum_}" if link_sum_ else 1}}},
                                 {"$replaceWith": {
                                     "$mergeObjects": ["$$ROOT", "$_id"]}},
                                 {"$unset": ["_id"]},

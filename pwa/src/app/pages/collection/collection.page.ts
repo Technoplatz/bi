@@ -169,7 +169,7 @@ export class CollectionPage implements OnInit {
           this.data[index_]["_link_" + this.links_[l_].collection].count = 0;
           this.data[index_]["_link_" + this.links_[l_].collection].sum = 0;
           this.data[index_]["_link_" + this.links_[l_].collection].forEach((item_: any) => {
-            this.data[index_]["_link_" + this.links_[l_].collection].count += item_.count;
+            this.data[index_]["_link_" + this.links_[l_].collection].count += 1;
             this.data[index_]["_link_" + this.links_[l_].collection].sum += item_.sum;
           });
         });
