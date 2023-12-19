@@ -2404,7 +2404,7 @@ class Crud:
             [],
             0,
             False,
-            None,
+            None
         )
         files_, personalizations_, to_, orig_ = [], [], [], None
         init_res_ = {
@@ -2555,9 +2555,10 @@ class Crud:
                         fields_.append(prj_)
                 aggregate_.append(agg_)
 
+            attach_excel_ = True
             attach_json_ = set_ and "json" in set_ and set_["json"] is True
-            attach_excel_ = set_ and "excel" in set_ and set_["excel"] is True
             attach_csv_ = set_ and "csv" in set_ and set_["csv"] is True
+            attach_html_ = set_ and "html" in set_ and set_["html"] is True
 
             if orig_ == "api/crud":
                 limit_ = (
@@ -2580,7 +2581,12 @@ class Crud:
                 que_title_ = query_[
                     "que_title"] if "que_title" in query_ else _id
 
-                que_message_body_ = (
+                html_ = "<style>\
+                        .etable { border-spacing: 0; border-collapse: collapse;} \
+                        .etable td,th { padding: 7px; border: 1px solid #999;} \
+                        </style>"
+
+                html_ += (
                     query_["que_message_body"]
                     if "que_message_body" in query_
                     and query_["que_message_body"] is not None
@@ -2589,6 +2595,10 @@ class Crud:
 
                 df_raw_ = pd.DataFrame(data_).fillna("")
                 count_ = len(df_raw_.index)
+
+                if attach_html_:
+                    html_ += f"<p>{df_raw_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
+                    html_ = f"<p>{html_}</p>"
 
                 if attach_excel_:
                     file_excel_ = (f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx")
@@ -2609,7 +2619,7 @@ class Crud:
                     email_sent_ = Email().send_email_f({
                         "op": "query",
                         "que_id": que_id_,
-                        "html": que_message_body_,
+                        "html": html_,
                         "subject": que_title_,
                         "files": files_,
                         "tags": _tags
