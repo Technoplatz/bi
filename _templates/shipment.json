@@ -217,8 +217,13 @@
         "notify": true,
         "subject": "Touchpoint [DNs Delivered]",
         "body": "Hi,<br /><br />We would like to let you know that the attached deliveries have been shipped successfully.",
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
+        "topics": "shp_wayb_no,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
+        "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
         "attachment": true,
+        "html": true,
+        "csv": false,
+        "excel": true,
+        "json": false,
         "filter": []
       },
       "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
@@ -265,9 +270,14 @@
       "download_by": "shp_wayb_no",
       "notification": {
         "notify": true,
+        "html": false,
+        "csv": false,
+        "excel": false,
+        "json": false,
         "subject": "Touchpoint [Waybill Downloaded]",
         "body": "Hi,<br /><br />We would like to let you know that the waybill of the attached deliveries has been donwloaded.",
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_wayb_no",
+        "topics": "shp_wayb_no,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
+        "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": []
       }
     }

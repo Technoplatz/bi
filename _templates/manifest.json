@@ -148,6 +148,10 @@
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been attached to manifest.",
         "key": "man_no",
         "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
         "fields": "dnn_no,dnn_line_no,dnn_man_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty"
       }
     }
@@ -256,7 +260,7 @@
       ]
     },
     {
-      "name": "closing",
+      "name": "clearance-completed",
       "enabled": true,
       "operations": ["update"],
       "changes": [
@@ -295,7 +299,8 @@
             "body": "Hi,<br /><br />We would like to let you know that the customs clearance of the attached manifest has been completed.",
             "collection": "delivery",
             "key": "man_no",
-            "fields": "dnn_man_no,dnn_no,dnn_line_no,dnn_status,dnn_acc_name,dnn_prd_no,dnn_po_id,dnn_qty",
+            "topics": "man_no,man_file_no,man_case_no",
+            "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
             "filter": [
               {
                 "key": "dnn_man_no",
@@ -304,6 +309,10 @@
               }
             ],
             "attachment": true,
+            "html": true,
+            "csv": false,
+            "excel": true,
+            "json": false,
             "push": true,
             "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
           }
@@ -362,7 +371,8 @@
             "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
             "collection": "delivery",
             "key": "man_no",
-            "fields": "dnn_man_no,dnn_no,dnn_line_no,dnn_status,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+            "topics": "man_no,man_file_no,man_case_no",
+            "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
             "filter": [
               {
                 "key": "dnn_man_no",
@@ -376,6 +386,10 @@
               }
             ],
             "attachment": true,
+            "html": true,
+            "csv": false,
+            "excel": true,
+            "json": false,
             "push": true,
             "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
           }

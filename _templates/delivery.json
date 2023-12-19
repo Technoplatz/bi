@@ -547,6 +547,10 @@
         "subject": "Operation [DNs Uploaded]",
         "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs were changed from 00-Standby to 00-Open.",
         "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": [
           {
@@ -588,6 +592,10 @@
         "subject": "Operation [DNs Ready TBD]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
         "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_rtd_date",
         "filter": [
           {
@@ -641,6 +649,10 @@
         "subject": "Operations [Delivery Split]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DN has been split.",
         "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_gross_weight,dnn_change",
         "filter": [
           {
@@ -691,6 +703,10 @@
         "subject": "Operations [Customer Change]",
         "body": "Hi,<br /><br />We would like to let you know that the customer of the attached DNs has been changed.",
         "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
         "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_change",
         "filter": [
           {

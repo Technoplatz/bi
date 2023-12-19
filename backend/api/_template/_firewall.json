@@ -90,8 +90,18 @@
         "subject": "Security [Firewall Updated]",
         "body": "Hi,<br /><br />We would like to let you know that the WAF has been updated.",
         "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
         "fields": "fwa_name,fwa_source_ip,fwa_type,fwa_enabled",
-        "filter": []
+        "filter": [
+          {
+            "key": "wfa_enabled",
+            "op": "ne",
+            "value": false
+          }
+        ]
       },
       "api": {
         "id": "waf",

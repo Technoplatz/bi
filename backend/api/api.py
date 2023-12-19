@@ -2535,6 +2535,7 @@ class Crud:
 
             update_allowed_ = "cronjob" in queries_ and queries_[
                 "cronjob"] is True
+
             updatables_ = (
                 queries_["updatables"]
                 if "updatables" in queries_ and len(queries_["updatables"]) > 0
@@ -2554,6 +2555,10 @@ class Crud:
                         fields_.append(prj_)
                 aggregate_.append(agg_)
 
+            attach_json_ = set_ and "json" in set_ and set_["json"] is True
+            attach_excel_ = set_ and "excel" in set_ and set_["excel"] is True
+            attach_csv_ = set_ and "csv" in set_ and set_["csv"] is True
+
             if orig_ == "api/crud":
                 limit_ = (
                     obj_["limit"]
@@ -2566,8 +2571,7 @@ class Crud:
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
-            cursor_ = Mongo().db_[
-                f"{que_collection_id_}_data"].aggregate(aggregate_)
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             count_ = len(data_)
 
@@ -2584,19 +2588,22 @@ class Crud:
                 )
 
                 df_raw_ = pd.DataFrame(data_).fillna("")
-                file_excel_ = (
-                    f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx"
-                )
-                df_raw_.to_excel(
-                    file_excel_,
-                    sheet_name=_id,
-                    engine="xlsxwriter",
-                    header=True,
-                    index=False,
-                )
-
-                files_.append({"name": file_excel_, "type": "xlsx"})
                 count_ = len(df_raw_.index)
+
+                if attach_excel_:
+                    file_excel_ = (f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx")
+                    df_raw_.to_excel(file_excel_,sheet_name=_id,engine="xlsxwriter",header=True,index=False)
+                    files_.append({"name": file_excel_, "type": "xlsx"})
+
+                if attach_json_:
+                    file_json_ = (f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.json")
+                    df_raw_.to_json(file_json_, date_format="iso", orient="records", force_ascii=False)
+                    files_.append({"name": file_json_, "type": "json"})
+
+                if attach_csv_:
+                    file_csv_ = (f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.csv")
+                    df_raw_.to_csv(file_csv_, encoding="utf-8", sep=";")
+                    files_.append({"name": file_csv_, "type": "csv"})
 
                 if count_ > 0:
                     email_sent_ = Email().send_email_f({
@@ -3932,6 +3939,11 @@ class Crud:
             if not source_:
                 raise APIError("source collection is missing")
 
+            get_properties_f_ = self.get_properties_f(source_)
+            if not get_properties_f_["result"]:
+                raise APIError("source collection properties is missing")
+            source_properties_ =  get_properties_f_["properties"]
+
             if not _id:
                 raise APIError("source document id is missing")
 
@@ -3965,8 +3977,8 @@ class Crud:
             get_properties_ = self.get_properties_f(col_id_)
             if not get_properties_["result"]:
                 raise APIError("collection properties is missing")
-            target_properties_ = get_properties_["properties"]
 
+            target_properties_ = get_properties_["properties"]
             collection_ = f"{col_id_}_data"
             source_id_ = f"_{source_}_id"
             setc_ = {}
@@ -3997,7 +4009,8 @@ class Crud:
 
             checknum_ = Mongo().db_[collection_].count_documents(filter_)
             if checknum_ < linked_count_:
-                raise AppException(f"records quantity [{checknum_}] does not match with processed [{linked_count_}]")
+                raise AppException(
+                    f"records quantity [{checknum_}] does not match with processed [{linked_count_}]")
 
             update_many_ = (
                 Mongo().db_[collection_].update_many(filter_, {"$set": setc_})
@@ -4013,11 +4026,14 @@ class Crud:
                 and "notify" in notification_
                 and notification_["notify"] is True
             )
-            attachment_ = (
-                notification_
-                and "attachment" in notification_
-                and notification_["attachment"] is True
-            )
+            attach_html_ = "html" in notification_ and notification_[
+                "html"] is True
+            attach_json_ = "json" in notification_ and notification_[
+                "json"] is True
+            attach_excel_ = "excel" in notification_ and notification_[
+                "excel"] is True
+            attach_csv_ = "csv" in notification_ and notification_[
+                "csv"] is True
 
             files_ = []
 
@@ -4044,18 +4060,19 @@ class Crud:
                 )
                 keyf_ = data_[
                     nkey_] if data_ and nkey_ and nkey_ in data_ else None
-                if attachment_:
+
+                if attach_html_ or attach_csv_ or attach_excel_ or attach_json_:
                     fields_ = (
                         str(notification_["fields"].replace(" ", ""))
                         if "fields" in notification_
                         else None
                     )
+                    topics_ = notification_["topics"].split(
+                        ",") if "topics" in notification_ else []
                     if not fields_:
                         raise AppException("no fields field found in link")
                     type_ = "csv"
-                    file_ = (
-                        f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
-                    )
+                    file_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
                     query_ = json.dumps(
                         filter0_, default=json_util.default, sort_keys=False
                     )
@@ -4070,8 +4087,32 @@ class Crud:
                         },
                     )
                     subprocess.call(cmd_)
-                    files_ += [{"name": file_, "type": type_}
-                               ] if attachment_ else []
+                    csv_file_ = pd.read_csv(file_)
+
+                    if attach_html_:
+                        html_ = "<style>\
+                            .etable { border-spacing: 0; border-collapse: collapse;} \
+                            .etable td,th { padding: 7px; border: 1px solid #999;} \
+                            </style>"
+                        for topic_ in topics_:
+                            html_ += \
+                                f"{source_properties_[topic_]['title'] if topic_ in source_properties_ and 'title' in source_properties_[topic_] else topic_}: \
+                                <strong>{data_[topic_] if topic_ in data_ else ''}</strong>\
+                                <br />"
+                        html_ += f"<p>{csv_file_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
+                        body_ += f"<p>{html_}</p>"
+
+                    if attach_csv_:
+                        files_.append({"name": file_, "type": type_})
+                    if attach_excel_:
+                        file_excel_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.xlsx"
+                        csv_file_.to_excel(file_excel_, index=None, sheet_name=collection_, header=True)
+                        files_.append({"name": file_excel_, "type": "xlsx"})
+                    if attach_json_:
+                        file_json_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.json"
+                        csv_file_.to_json(file_json_, date_format="iso", orient="records", force_ascii=False)
+                        files_.append({"name": file_json_, "type": "json"})
+
                     subject_ += f" - {keyf_}" if keyf_ else ""
                     email_sent_ = Email().send_email_f(
                         {
@@ -4582,10 +4623,6 @@ class Crud:
                     get_notification_filtered_ = self.get_filtered_f(
                         {"match": filter_, "properties": properties_, "data": doc_}
                     )
-                attachment_ = (
-                    "attachment" in notification_
-                    and notification_["attachment"] is True
-                )
                 subject_ = (
                     notification_["subject"]
                     if "subject" in notification_
@@ -4605,7 +4642,17 @@ class Crud:
                     if notification_ and "fields" in notification_
                     else None
                 )
-                if get_notification_filtered_ and fields_ and attachment_:
+                topics_ = notification_["topics"].split(
+                        ",") if "topics" in notification_ else []
+                attach_html_ = "html" in notification_ and notification_[
+                "html"] is True
+                attach_json_ = "json" in notification_ and notification_[
+                    "json"] is True
+                attach_excel_ = "excel" in notification_ and notification_[
+                    "excel"] is True
+                attach_csv_ = "csv" in notification_ and notification_[
+                    "csv"] is True
+                if get_notification_filtered_ and fields_ and (attach_json_ or attach_excel_ or attach_csv_):
                     type_ = "csv"
                     beasefile_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}"
                     file_ = f"{beasefile_}.{type_}"
@@ -4629,13 +4676,28 @@ class Crud:
                             },
                         )
                     )
-                    read_csv_file_ = pd.read_csv(file_)
-                    read_csv_file_.to_excel(
-                        file_excel_, index=None, sheet_name=collection_id_, header=True)
-                    read_csv_file_.to_json(
-                        file_json_, date_format="iso", orient="records", force_ascii=False)
-                    files_ += [{"name": file_, "type": type_}, {"name": file_excel_,
-                                                                "type": "xlsx"}, {"name": file_json_, "type": "json"}]
+                    csv_file_ = pd.read_csv(file_)
+                    if attach_html_:
+                        html_ = "<style>\
+                            .etable { border-spacing: 0; border-collapse: collapse;} \
+                            .etable td,th { padding: 7px; border: 1px solid #999;} \
+                            </style>"
+                        for topic_ in topics_:
+                            html_ += \
+                                f"{properties_[topic_]['title'] if topic_ in properties_ and 'title' in properties_[topic_] else topic_}: \
+                                <strong>{doc_[topic_] if topic_ in doc_ else ''}</strong>\
+                                <br />"
+                        html_ += f"<p>{csv_file_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
+                        body_ += f"<p>{html_}</p>"
+
+                    if attach_csv_:
+                        files_.append({"name": file_, "type": type_})
+                    if attach_excel_:
+                        csv_file_.to_excel(file_excel_, index=None, sheet_name=collection_id_, header=True)
+                        files_.append({"name": file_excel_, "type": "xlsx"})
+                    if attach_json_:
+                        csv_file_.to_json(file_json_, date_format="iso", orient="records", force_ascii=False)
+                        files_.append({"name": file_json_, "type": "json"})
 
                 email_sent_ = Email().send_email_f(
                     {
@@ -4669,7 +4731,6 @@ class Crud:
             }
 
         except pymongo.errors.PyMongoError as exc__:
-            # session_.abort_transaction()
             return Misc().mongo_error_f(exc__)
 
         except AppException as exc__:
@@ -4682,7 +4743,6 @@ class Crud:
             return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            # session_.abort_transaction()
             return Misc().notify_exception_f(exc__)
 
         finally:
@@ -6280,6 +6340,8 @@ EMAIL_SIGNIN_SUBJECT_ = "New Sign-in"
 EMAIL_UPLOADERR_SUBJECT_ = "File Upload Result"
 EMAIL_DEFAULT_SUBJECT_ = "Hello"
 EMAIL_SUBJECT_PREFIX_ = os.environ.get("EMAIL_SUBJECT_PREFIX")
+HTML_TABLE_MAX_ROWS_ = int(os.environ.get("HTML_TABLE_MAX_ROWS"))
+HTML_TABLE_MAX_COLS_ = int(os.environ.get("HTML_TABLE_MAX_COLS"))
 API_SCHEDULE_INTERVAL_MIN_ = os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_FW_TEMP_DURATION_MIN_ = int(os.environ.get("API_FW_TEMP_DURATION_MIN"))
 API_UPLOAD_LIMIT_BYTES_ = int(os.environ.get("API_UPLOAD_LIMIT_BYTES"))

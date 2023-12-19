@@ -550,7 +550,7 @@ class Trigger:
             SMTP_PASSWORD_ = get_docker_secret("smtp_password", default="")
             SMTP_TLS_PORT_ = int(str(os.environ.get("SMTP_TLS_PORT")))
             FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
-            disclaimer_ = f"<p>Sincerely,</p><p>{company_name_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {company_name_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p>"
+            disclaimer_ = f"<p>Sincerely,</p><p>{company_name_}</p><p>PLEASE DO NOT REPLY THIS EMAIL<br />--------------------------------<br />This email and its attachments transmitted with it may contain private, confidential or prohibited information. If you are not the intended recipient of this mail, you are hereby notified that storing, copying, using or forwarding of any part of the contents is strictly prohibited. Please completely delete it from your system and notify the sender. {company_name_} makes no warranty with regard to the accuracy or integrity of this mail and its transmission.</p><br /><br />"
             email_from_ = f"{unidecode(company_name_)} <{FROM_EMAIL_}>"
             html_ = f"{msg['html']} {disclaimer_}"
             server_ = smtplib.SMTP(SMTP_ENDPOINT_, SMTP_TLS_PORT_)
@@ -627,7 +627,8 @@ class Trigger:
                 self.repeater_ = 0
 
             source_collection_id_ = source_collection_.replace("_data", "")
-            changed_keys_ = list(changed_.keys()) if changed_ and changed_.keys() else None
+            changed_keys_ = list(
+                changed_.keys()) if changed_ and changed_.keys() else None
 
             if not changed_keys_:
                 raise PassException(">>> passed, no changed keys")
@@ -997,6 +998,8 @@ class Trigger:
                         if "fields" in notification_ and notification_["fields"] != ""
                         else None
                     )
+                    topics_ = notification_["topics"].split(
+                        ",") if "topics" in notification_ else []
                     nkey_ = (
                         notification_["key"]
                         if "key" in notification_ and notification_["key"] != ""
@@ -1013,6 +1016,15 @@ class Trigger:
                         if "_tags" in notification_ and len(notification_["_tags"]) > 0
                         else None
                     )
+                    attach_html_ = "html" in notification_ and notification_[
+                        "html"] is True
+                    attach_json_ = "json" in notification_ and notification_[
+                        "json"] is True
+                    attach_excel_ = "excel" in notification_ and notification_[
+                        "excel"] is True
+                    attach_csv_ = "csv" in notification_ and notification_[
+                        "csv"] is True
+
                     if not (
                         notify_
                         and subject_
@@ -1024,6 +1036,7 @@ class Trigger:
                         and tags_
                     ):
                         continue
+
                     keyf_ = full_document_[nkey_] if nkey_ else None
                     get_users_from_tags_f_ = self.get_users_from_tags_f(tags_)
                     if not get_users_from_tags_f_["result"]:
@@ -1088,20 +1101,32 @@ class Trigger:
                                 raise PassException("no output generated")
                             lines_ = len(output_.readlines())
                             if lines_ and lines_ > 1:
-                                files_.append(
-                                    {"filename": file_, "filetype": type_})
-                                read_csv_file_ = pd.read_csv(file_)
-                                read_csv_file_.to_excel(
-                                    file_excel_, index=None, sheet_name=ncollection_, header=True
-                                )
-                                files_.append(
-                                    {"filename": file_excel_, "filetype": "xlsx"}
-                                )
-                                read_csv_file_.to_json(
-                                    file_json_, date_format="iso", orient="records", force_ascii=False)
-                                files_.append(
-                                    {"filename": file_json_, "filetype": "json"}
-                                )
+                                csv_file_ = pd.read_csv(file_)
+                                if attach_csv_:
+                                    files_.append(
+                                        {"filename": file_, "filetype": type_})
+                                if attach_html_:
+                                    html_ = "<style>\
+                                        .etable { border-spacing: 0; border-collapse: collapse;} \
+                                        .etable td,th { padding: 7px; border: 1px solid #999;} \
+                                        </style>"
+                                    for topic_ in topics_:
+                                        html_ += \
+                                            f"{source_properties_[topic_]['title'] if topic_ in source_properties_ and 'title' in source_properties_[topic_] else topic_}: \
+                                            <strong>{full_document_[topic_] if topic_ in full_document_ else ''}</strong>\
+                                            <br />"
+                                    html_ += f"<p>{csv_file_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
+                                    body_ += f"<p>{html_}</p>"
+                                if attach_excel_:
+                                    csv_file_.to_excel(
+                                        file_excel_, index=None, sheet_name=ncollection_, header=True)
+                                    files_.append(
+                                        {"filename": file_excel_, "filetype": "xlsx"})
+                                if attach_json_:
+                                    csv_file_.to_json(
+                                        file_json_, date_format="iso", orient="records", force_ascii=False)
+                                    files_.append(
+                                        {"filename": file_json_, "filetype": "json"})
                             else:
                                 raise PassException("no data records exported")
 
@@ -1291,6 +1316,8 @@ mongo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_tls_ca_keyfile_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 notification_push_url_ = os.environ.get("NOTIFICATION_PUSH_URL")
 API_TEMPFILE_PATH_ = os.environ.get("API_TEMPFILE_PATH")
+HTML_TABLE_MAX_ROWS_ = int(os.environ.get("HTML_TABLE_MAX_ROWS"))
+HTML_TABLE_MAX_COLS_ = int(os.environ.get("HTML_TABLE_MAX_COLS"))
 REPEATER_LIMIT_ = 1000
 PRINT_ = partial(print, flush=True)
 
