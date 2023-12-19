@@ -180,6 +180,47 @@
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+    },
+    {
+      "id": "rtd",
+      "title": "Ready TBD",
+      "enabled": true,
+      "match": [
+        {
+          "key": "man_opening_date",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "man_closing_date",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "man_gov_approval_date",
+          "op": "null",
+          "value": null
+        }
+      ],
+      "set": [
+        {
+          "key": "man_gov_amount",
+          "value": 0
+        },
+        {
+          "key": "man_gov_purchase_date",
+          "value": "$CURRENT_DATE"
+        },
+        {
+          "key": "man_gov_approval_date",
+          "value": "$CURRENT_DATE"
+        }
+      ],
+      "one_click": false,
+      "icon": "flag",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
     }
   ],
   "triggers": [
@@ -308,6 +349,10 @@
             {
               "key": "dnn_label_info",
               "value": "OK-Labeled"
+            },
+            {
+              "key": "dnn_rtd_date",
+              "value": "$CURRENT_DATE"
             }
           ],
           "upsert": false,
