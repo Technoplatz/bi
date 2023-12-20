@@ -743,6 +743,7 @@ def multi_issue_f():
             notes_ = (
                 f"{shipment_[shipment_notes_field_]} "
                 if shipment_notes_field_ in shipment_
+                and shipment_[shipment_notes_field_] is not None
                 else ""
             )
 
