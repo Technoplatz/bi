@@ -2572,7 +2572,8 @@ class Crud:
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
-            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
+            cursor_ = Mongo().db_[
+                f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             count_ = len(data_)
 
@@ -2601,17 +2602,22 @@ class Crud:
                     html_ = f"<p>{html_}</p>"
 
                 if attach_excel_:
-                    file_excel_ = (f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx")
-                    df_raw_.to_excel(file_excel_,sheet_name=_id,engine="xlsxwriter",header=True,index=False)
+                    file_excel_ = (
+                        f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx")
+                    df_raw_.to_excel(file_excel_, sheet_name=_id,
+                                     engine="xlsxwriter", header=True, index=False)
                     files_.append({"name": file_excel_, "type": "xlsx"})
 
                 if attach_json_:
-                    file_json_ = (f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.json")
-                    df_raw_.to_json(file_json_, date_format="iso", orient="records", force_ascii=False)
+                    file_json_ = (
+                        f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.json")
+                    df_raw_.to_json(file_json_, date_format="iso",
+                                    orient="records", force_ascii=False)
                     files_.append({"name": file_json_, "type": "json"})
 
                 if attach_csv_:
-                    file_csv_ = (f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.csv")
+                    file_csv_ = (
+                        f"{API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.csv")
                     df_raw_.to_csv(file_csv_, encoding="utf-8", sep=";")
                     files_.append({"name": file_csv_, "type": "csv"})
 
@@ -3952,7 +3958,7 @@ class Crud:
             get_properties_f_ = self.get_properties_f(source_)
             if not get_properties_f_["result"]:
                 raise APIError("source collection properties is missing")
-            source_properties_ =  get_properties_f_["properties"]
+            source_properties_ = get_properties_f_["properties"]
 
             if not _id:
                 raise APIError("source document id is missing")
@@ -4107,7 +4113,7 @@ class Crud:
                         for topic_ in topics_:
                             html_ += \
                                 f"{source_properties_[topic_]['title'] if topic_ in source_properties_ and 'title' in source_properties_[topic_] else topic_}: \
-                                <strong>{data_[topic_] if topic_ in data_ else ''}</strong>\
+                                <strong>{data_[topic_] if topic_ in data_ and data_[topic_] is not None else ''}</strong>\
                                 <br />"
                         html_ += f"<p>{csv_file_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
                         body_ += f"<p>{html_}</p>"
@@ -4116,11 +4122,13 @@ class Crud:
                         files_.append({"name": file_, "type": type_})
                     if attach_excel_:
                         file_excel_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.xlsx"
-                        csv_file_.to_excel(file_excel_, index=None, sheet_name=collection_, header=True)
+                        csv_file_.to_excel(
+                            file_excel_, index=None, sheet_name=collection_, header=True)
                         files_.append({"name": file_excel_, "type": "xlsx"})
                     if attach_json_:
                         file_json_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.json"
-                        csv_file_.to_json(file_json_, date_format="iso", orient="records", force_ascii=False)
+                        csv_file_.to_json(
+                            file_json_, date_format="iso", orient="records", force_ascii=False)
                         files_.append({"name": file_json_, "type": "json"})
 
                     subject_ += f" - {keyf_}" if keyf_ else ""
@@ -4653,16 +4661,16 @@ class Crud:
                     else None
                 )
                 topics_ = notification_["topics"].split(
-                        ",") if "topics" in notification_ else []
+                    ",") if "topics" in notification_ else []
                 attach_html_ = "html" in notification_ and notification_[
-                "html"] is True
+                    "html"] is True
                 attach_json_ = "json" in notification_ and notification_[
                     "json"] is True
                 attach_excel_ = "excel" in notification_ and notification_[
                     "excel"] is True
                 attach_csv_ = "csv" in notification_ and notification_[
                     "csv"] is True
-                if get_notification_filtered_ and fields_ and (attach_json_ or attach_excel_ or attach_csv_):
+                if get_notification_filtered_ and fields_ and (attach_html_ or attach_json_ or attach_excel_ or attach_csv_):
                     type_ = "csv"
                     beasefile_ = f"{API_TEMPFILE_PATH_}/{action_id_}-{Misc().get_timestamp_f()}"
                     file_ = f"{beasefile_}.{type_}"
@@ -4687,6 +4695,7 @@ class Crud:
                         )
                     )
                     csv_file_ = pd.read_csv(file_)
+
                     if attach_html_:
                         html_ = "<style>\
                             .etable { border-spacing: 0; border-collapse: collapse;} \
@@ -4695,18 +4704,19 @@ class Crud:
                         for topic_ in topics_:
                             html_ += \
                                 f"{properties_[topic_]['title'] if topic_ in properties_ and 'title' in properties_[topic_] else topic_}: \
-                                <strong>{doc_[topic_] if topic_ in doc_ else ''}</strong>\
+                                <strong>{doc_[topic_] if topic_ in doc_ and doc_[topic_] is not None else ''}</strong>\
                                 <br />"
                         html_ += f"<p>{csv_file_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
                         body_ += f"<p>{html_}</p>"
-
                     if attach_csv_:
                         files_.append({"name": file_, "type": type_})
                     if attach_excel_:
-                        csv_file_.to_excel(file_excel_, index=None, sheet_name=collection_id_, header=True)
+                        csv_file_.to_excel(
+                            file_excel_, index=None, sheet_name=collection_id_, header=True)
                         files_.append({"name": file_excel_, "type": "xlsx"})
                     if attach_json_:
-                        csv_file_.to_json(file_json_, date_format="iso", orient="records", force_ascii=False)
+                        csv_file_.to_json(
+                            file_json_, date_format="iso", orient="records", force_ascii=False)
                         files_.append({"name": file_json_, "type": "json"})
 
                 email_sent_ = Email().send_email_f(

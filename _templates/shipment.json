@@ -217,16 +217,16 @@
         "notify": true,
         "subject": "Touchpoint [DNs Delivered]",
         "body": "Hi,<br /><br />We would like to let you know that the attached deliveries have been shipped successfully.",
-        "topics": "shp_wayb_no,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
-        "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "topics": "shp_id,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
+        "fields": "dnn_no,dnn_line_no,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
         "attachment": true,
         "html": true,
         "csv": false,
-        "excel": true,
+        "excel": false,
         "json": false,
         "filter": []
       },
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
     }
   ],
   "actions": [
@@ -247,7 +247,7 @@
       "icon": "cloud-download-outline",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
       "api": {
         "id": "waybill-download",
         "enabled": true,
@@ -269,15 +269,15 @@
       },
       "download_by": "shp_wayb_no",
       "notification": {
-        "notify": true,
+        "notify": false,
         "html": false,
         "csv": false,
-        "excel": false,
+        "excel": true,
         "json": false,
         "subject": "Touchpoint [Waybill Downloaded]",
         "body": "Hi,<br /><br />We would like to let you know that the waybill of the attached deliveries has been donwloaded.",
         "topics": "shp_wayb_no,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
-        "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "fields": "dnn_no,dnn_line_no,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": []
       }
     }
