@@ -24,7 +24,13 @@
       "title": "Description",
       "description": "Product Description",
       "minLength": 1,
-      "maxLength": 256
+      "maxLength": 256,
+      "replacement": [
+        {
+          "find": "'",
+          "replace": " "
+        }
+      ]
     },
     "prd_group": {
       "bsonType": "string",
@@ -33,49 +39,7 @@
       "minLength": 0,
       "maxLength": 32,
       "pattern": "^[A-Za-z&/ ]{0,32}$",
-      "enum": [
-        "CDT",
-        "CNB",
-        "CSP",
-        "DSK",
-        "DSW",
-        "FOC",
-        "IPH",
-        "IPP",
-        "LEP",
-        "LPT",
-        "MOB",
-        "MON",
-        "OPS",
-        "OPT",
-        "PAD",
-        "PCM",
-        "PNS",
-        "POP",
-        "PSV",
-        "PWS",
-        "SRV",
-        "STR",
-        "TRA",
-        "WSD",
-        "WSN",
-        "XHC",
-        "XHE",
-        "XHO",
-        "XHR",
-        "XHS",
-        "XSP",
-        "OTH",
-        "Service",
-        "Desktop",
-        "Notebook",
-        "Option",
-        "Visual",
-        "Monitor",
-        "Tablet",
-        "Workstation_DT",
-        "Workstation_NB"
-      ]
+      "caseType": "uppercase"
     },
     "prd_cpu": {
       "bsonType": "string",
@@ -147,6 +111,6 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["prd_cpu", "prd_os", "prd_memory_ob", "prd_memory_dimm", "prd_display", "prd_gpu", "prd_storage"]
+    "upsertables": ["prd_group", "prd_cpu", "prd_os", "prd_memory_ob", "prd_memory_dimm", "prd_display", "prd_gpu", "prd_storage"]
   }
 }

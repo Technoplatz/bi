@@ -300,7 +300,7 @@
             "collection": "delivery",
             "key": "man_no",
             "topics": "man_no,man_file_no,man_case_no",
-            "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
+            "fields": "dnn_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
             "filter": [
               {
                 "key": "dnn_man_no",
@@ -371,7 +371,7 @@
             "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
             "collection": "delivery",
             "key": "man_no",
-            "topics": "man_no,man_file_no,man_case_no",
+            "topics": "man_no",
             "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
             "filter": [
               {

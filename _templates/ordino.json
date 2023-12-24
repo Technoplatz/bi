@@ -40,8 +40,8 @@
     },
     "odi_date": {
       "bsonType": "date",
-      "title": "Ordino Date",
-      "description": "Ordino opening date",
+      "title": "ETA",
+      "description": "Estimated Arrival Date",
       "dateOnly": true
     },
     "odi_arrived_date": {
@@ -135,7 +135,7 @@
         "excel": true,
         "json": false,
         "key": "odi_sub_no",
-        "topics": "odi_no,odi_sub_no",
+        "topics": "odi_no,odi_sub_no,odi_from,odi_date",
         "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": []
       }
@@ -179,7 +179,7 @@
         "excel": true,
         "json": false,
         "key": "odi_sub_no",
-        "topics": "odi_no,odi_sub_no",
+        "topics": "odi_no,odi_sub_no,odi_from,odi_date",
         "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": []
       }

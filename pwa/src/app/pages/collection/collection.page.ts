@@ -30,7 +30,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild, ElementRef, HostListener } from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { ModalController, AlertController } from "@ionic/angular";
 import { Router } from "@angular/router";
 import { Storage } from "@ionic/storage";
@@ -62,6 +62,7 @@ export class CollectionPage implements OnInit {
   private segment = "data";
   private page_start: number = 1;
   private key_: any = null;
+  private record_: any = [];
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public header: string = "Collections";
   public subheader: string = "";
@@ -76,7 +77,6 @@ export class CollectionPage implements OnInit {
   public searched: any = null;
   public data: any = [];
   public selected: any = [];
-  public record_: any = [];
   public pages_: any = [];
   public limit_: number = environment.misc.limit;
   public page_: number = 1;

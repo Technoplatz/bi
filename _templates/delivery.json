@@ -114,8 +114,12 @@
         "XHS",
         "XSP",
         "OTH",
-        "CDM"
-      ]
+        "CDM",
+        "TBG",
+        "LBG",
+        "ACC"
+      ],
+      "caseType": "uppercase"
     },
     "dnn_prd_no": {
       "bsonType": "string",
@@ -141,7 +145,13 @@
       "title": "Description",
       "description": "Product Description",
       "minLength": 1,
-      "maxLength": 256
+      "maxLength": 256,
+      "replacement": [
+        {
+          "find": "'",
+          "replace": " "
+        }
+      ]
     },
     "dnn_acc_name": {
       "bsonType": "string",
@@ -186,9 +196,9 @@
       "bsonType": "string",
       "title": "Manifest No",
       "description": "Manifest number",
-      "minLength": 1,
+      "minLength": 0,
       "maxLength": 32,
-      "pattern": "^[A-Z0-9-]{1,32}$",
+      "pattern": "^[A-Z0-9-]{0,32}$",
       "caseType": "uppercase",
       "readonly": true
     },
@@ -275,7 +285,7 @@
       "maxLength": 16,
       "pattern": "^[A-Za-z-]{0,16}$",
       "readonly": true,
-      "enum": ["OK", "OK-Labeled", "OK-Skipped", "CN-Canceled"],
+      "enum": ["OK", "OK-Labeled", "OK-Skipped", "CN-Canceled", null],
       "selection": true
     },
     "dnn_entry_date": {
@@ -361,7 +371,7 @@
       "title": "Change",
       "description": "Change code",
       "readonly": true,
-      "enum": ["CC-Customer", "SP-Split"]
+      "enum": ["CC-Customer", "SP-Split", null]
     },
     "dnn_reminder": {
       "bsonType": "string",
@@ -472,12 +482,12 @@
         {
           "key": "man_odi_no",
           "op": "eq",
-          "value": "176-89477080"
+          "value": "dnn_odi_no"
         },
         {
           "key": "man_odi_sub_no",
           "op": "eq",
-          "value": "B293242"
+          "value": "dnn_odi_sub_no"
         }
       ],
       "get": ["man_no", "man_opening_date"],
@@ -541,7 +551,7 @@
       "icon": null,
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"],
       "notification": {
         "notify": true,
         "subject": "Operation [DNs Uploaded]",
@@ -586,7 +596,7 @@
       "icon": "flag",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
       "notification": {
         "notify": true,
         "subject": "Operation [DNs Ready TBD]",
@@ -662,7 +672,7 @@
           }
         ]
       },
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"]
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
     },
     {
       "id": "customer-change",
@@ -716,7 +726,7 @@
           }
         ]
       },
-      "_tags": ["#Managers", "#Administrators", "#Logistics", "#Operation", "#Technoplatz"]
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
     }
   ],
   "links": [],
@@ -760,21 +770,21 @@
     {
       "name": "Product updater",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": ["insert"],
       "changes": [
         {
           "key": "dnn_prd_no",
-          "op": "ne",
+          "op": "nnull",
           "value": null
         },
         {
           "key": "dnn_prd_description",
-          "op": "ne",
+          "op": "nnull",
           "value": null
         },
         {
           "key": "dnn_prd_group",
-          "op": "ne",
+          "op": "nnull",
           "value": null
         }
       ],

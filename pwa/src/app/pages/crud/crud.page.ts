@@ -604,7 +604,6 @@ export class CrudPage implements OnInit {
                 this.related[k].selected = true;
                 if (k === this.related.length - 1) {
                   this.relatedx = this.related;
-                  // this.relatedx = this.related = this.related.sort((a: any, b: any) => (a.selected ? -1 : 1));
                   this.reloading = false;
                 }
               }

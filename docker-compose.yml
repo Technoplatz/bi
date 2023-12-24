@@ -462,8 +462,6 @@ services:
       - TZ=${TZ}
       - API_URL=${API_URL}
       - COMPANY_NAME=${COMPANY_NAME}
-    env_file:
-      - .env${REF}
     links:
       - api
     networks:

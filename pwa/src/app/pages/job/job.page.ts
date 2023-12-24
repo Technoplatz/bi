@@ -200,9 +200,7 @@ export class JobPage implements OnInit {
   }
 
   run_job() {
-    this.refresh_data(true).then(() => {
-      console.log("*** jub run");
-    });
+    this.refresh_data(true).then(() => { });
   }
 
   edit_query() {
