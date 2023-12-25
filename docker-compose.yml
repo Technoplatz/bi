@@ -368,6 +368,7 @@ services:
       - "${API_CONTAINER_PORT}:${HTTP_PORT}"
     environment:
       - TZ=${TZ}
+      - DOMAIN=${DOMAIN}
       - COMPANY_NAME=${COMPANY_NAME}
       - FROM_EMAIL=${FROM_EMAIL}
       - ADMIN_NAME=${ADMIN_NAME}

@@ -296,7 +296,7 @@ https://www.gnu.org/licenses.
               (click)="['_query','_job'].includes(id) ? go_query_job(record, $event) : go_crud(record, 'update')"
               [class]="record['_reminder'] ? 'data-tr' : ''">
               <td [class]="record['_reminder'] ? 'danger align-right' : 'primary align-right'"
-                (click)="misc.show_note(record['_reminder'], record['_note'], $event)">
+                (click)="misc.show_note(record['_note'], $event)">
                 <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>
                 <ng-template #noreminder>
                   {{ ((pager_ - 1) * limit_) + i + 1}}

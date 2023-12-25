@@ -57,7 +57,7 @@ https://www.gnu.org/licenses.
                   </tr>
                   <tr *ngFor="let record_ of visual_.data; let i = index">
                     <td [class]="record_['_reminder'] ? 'danger align-right' : 'primary align-right'"
-                      (click)="misc.show_note(record_['_reminder'], record_['_note'], $event)">
+                      (click)="misc.show_note(record_['_note'], $event)">
                       <ion-icon *ngIf="record_['_reminder']; else noreminder" name="flag"></ion-icon>
                       <ng-template #noreminder>
                         {{ i + 1}}
@@ -73,7 +73,7 @@ https://www.gnu.org/licenses.
                   <div class="start">
                     <ion-button size="small" (click)="misc.navi.next('query/' + visual_.id)">
                       <ion-img src="/assets/icon/json-code.svg" class="json-icon-small"></ion-img>
-                    {{ 'Query' | translate }}
+                      {{ 'Query' | translate }}
                     </ion-button>
                   </div>
                   <div class="end">
@@ -96,24 +96,20 @@ https://www.gnu.org/licenses.
         <h4>{{ 'Announcements' | translate }}</h4>
         <ion-grid *ngIf="announcements_?.length > 0; else noannouncement" class="ion-no-padding data-grid">
           <ion-row>
-            <ion-col size="3">
+            <ion-col size="2">
               <span class="column-title">{{ 'Date' | translate }}</span>
-            </ion-col>
-            <ion-col size="3">
-              <span class="column-title">{{ 'Query ID' | translate }}</span>
             </ion-col>
             <ion-col size="3">
               <span class="column-title">{{ 'Subject' | translate }}</span>
             </ion-col>
-            <ion-col size="3">
+            <ion-col size="7">
               <span class="column-title">{{ 'Tags' | translate }}</span>
             </ion-col>
           </ion-row>
           <ion-row *ngFor="let item of announcements_; let a = index">
-            <ion-col size="3"> {{ item.ano_date.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm':'utc' }} </ion-col>
-            <ion-col size="3"> {{ item.ano_que_id }}</ion-col>
+            <ion-col size="2"> {{ item.ano_date.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm':'utc' }} </ion-col>
             <ion-col size="3"> {{ item.ano_subject }}</ion-col>
-            <ion-col size="3"> {{ item._tags?.join(' ') }} </ion-col>
+            <ion-col size="7"> {{ item._tags?.join(' ') }} </ion-col>
           </ion-row>
           <ion-row>
             <ion-col size="12">{{ 'Recent Announcements' | translate }} [{{ announcements_.length }}]</ion-col>

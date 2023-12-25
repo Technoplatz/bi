@@ -942,11 +942,11 @@ class Trigger:
                     else:
                         set_[target_field_] = value_
 
-                set_["_modified_at"] = self.get_now_f()
-                set_["_modified_by"] = "_automation"
+                set_["_trigged_at"] = self.get_now_f()
+                set_["_trigged_by"] = "_automation"
                 if upsert_ is True:
-                    set_["_created_at"] = set_["_modified_at"]
-                    set_["_created_by"] = set_["_modified_by"]
+                    set_["_created_at"] = self.get_now_f()
+                    set_["_created_by"] = "_automation"
 
                 set_["_resume_token"] = token_
                 update_many_ = self.db_[target_collection_].update_many(
@@ -1131,7 +1131,7 @@ class Trigger:
                                 raise PassException("no data records exported")
 
                     if push_:
-                        msg_ = json.dumps({"text": f"OK {keyf_}"})
+                        msg_ = json.dumps({"text": f"{subject_} {keyf_}"})
                         resp_ = requests.post(
                             notification_push_url_, msg_, timeout=10)
                         if resp_.status_code != 200:

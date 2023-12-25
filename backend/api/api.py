@@ -588,24 +588,31 @@ class Misc:
         """
         docstring is in progress
         """
-        if not NOTIFICATION_PUSH_URL_:
+        res_ = None
+        try:
+            if not NOTIFICATION_PUSH_URL_:
+                return True
+
+            ip_ = self.get_client_ip_f()
+            exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
+            file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
+            line_ = exc_tb_.tb_lineno
+            notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, DATE: {self.get_now_f()}, FILE: {file_}, LINE: {line_}, OBJ: {str(exc_obj_)}, EXCEPTION: {notification_}"
+            res_ = notification_str_
+            response_ = requests.post(
+                NOTIFICATION_PUSH_URL_,
+                json.dumps({"text": str(notification_str_)}),
+                timeout=10
+            )
+            if response_.status_code != 200:
+                res_ =  response_.content
+
+        except Exception as exc__:
+            res_ = str(exc__)
+
+        finally:
+            PRINT_("!!! TBACK", res_)
             return True
-
-        ip_ = self.get_client_ip_f()
-        exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
-        file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
-        line_ = exc_tb_.tb_lineno
-        notification_str_ = f"CLIENT IP: {ip_}, TYPE: {exc_type_}, FILE: {file_}, OBJ: {exc_obj_}, LINE: {line_}, EXCEPTION: {notification_}"
-        PRINT_("!!! notification_str_", notification_str_)
-        response_ = requests.post(
-            NOTIFICATION_PUSH_URL_,
-            json.dumps({"text": str(notification_str_)}),
-            timeout=10,
-        )
-        if response_.status_code != 200:
-            PRINT_("!!! Notification Error", response_.content)
-
-        return True
 
     def notify_exception_f(self, exc__):
         """
@@ -645,6 +652,7 @@ class Misc:
             nk_ = splt0_.split(" :: ")
             msg_ = nk_[2] if nk_ and len(nk_) > 1 else splt0_
 
+        self.post_notification_f(msg_)
         return {"result": False, "msg": msg_, "notify": False, "count": 0}
 
     def log_f(self, obj):
@@ -2991,11 +2999,11 @@ class Crud:
                     get_filtered_[property_] = {"$in": sel_}
 
             sort_ = (
-                list(input_["sort"].items())
+                input_["sort"]
                 if "sort" in input_ and input_["sort"]
-                else list(structure_["sort"].items())
+                else structure_["sort"]
                 if "sort" in structure_ and structure_["sort"]
-                else [("_modified_at", -1)]
+                else ("_modified_at", -1)
             )
 
             if group_:
@@ -3022,11 +3030,6 @@ class Crud:
                     )
                 )
             else:
-                sort__ = (
-                    structure_["sort"]
-                    if "sort" in structure_ and structure_["sort"]
-                    else {"_modified_at": -1}
-                )
                 aggregate_ = []
                 links_ = (
                     structure_["links"]
@@ -3119,7 +3122,7 @@ class Crud:
                         link_collections_.append(link_collection_)
 
                 aggregate_.append({"$match": get_filtered_})
-                aggregate_.append({"$sort": sort__})
+                aggregate_.append({"$sort": sort_})
                 aggregate_.append({"$skip": skip_})
                 aggregate_.append({"$limit": limit_})
                 if projection_:
@@ -6313,6 +6316,7 @@ COMPANY_NAME_ = (
     else "Technoplatz BI"
 )
 TZ_ = os.environ.get("TZ")
+DOMAIN_ = os.environ.get("DOMAIN")
 DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
 ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")

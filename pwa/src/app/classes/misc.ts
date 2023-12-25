@@ -284,11 +284,10 @@ export class Miscellaneous {
     });
   }
 
-  show_note(reminder_: string, note_: string, event_: any) {
+  show_note(note_: string, event_: any) {
     event_.stopPropagation();
     this.alert.create({
-      header: this.translate.instant("Reminder"),
-      subHeader: reminder_,
+      subHeader: this.translate.instant("Notes"),
       message: this.translate.instant(note_),
       buttons: [{
         text: this.translate.instant("Got It"),
