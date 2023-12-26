@@ -43,6 +43,28 @@
       "bsonType": "object",
       "title": "Aggregation",
       "description": "Query aggregation"
+    },
+    "job_run_count": {
+      "bsonType": "number",
+      "title": "Run",
+      "description": "Run Counter",
+      "default": 0
+    },
+    "job_run_date": {
+      "bsonType": "date",
+      "title": "Run Date",
+      "description": "Last run date"
+    },
+    "job_success_count": {
+      "bsonType": "number",
+      "title": "Success",
+      "description": "Success Counter",
+      "default": 0
+    },
+    "job_success_date": {
+      "bsonType": "date",
+      "title": "Success Date",
+      "description": "Last success date"
     }
   },
   "required": ["job_name", "job_collection_id"],

@@ -50,13 +50,25 @@ https://www.gnu.org/licenses.
               </div>
               <div (click)="refresh_data(false)" [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
                 <span *ngIf="!running_">
-                  <ion-icon name="play-sharp"></ion-icon><br />
-                  <ion-text color="primary">{{ 'Run Query' | translate }}</ion-text>
+                  <ion-icon name="sync-circle-outline"></ion-icon><br />
+                  <ion-text color="primary">{{ 'Refresh Query' | translate }}</ion-text>
                 </span>
                 <span *ngIf="running_">
                   <ion-spinner name="lines-sharp"></ion-spinner><br />
                   <ion-text color="primary">{{ 'Please Wait' | translate }}</ion-text>
                 </span>
+              </div>
+              <div (click)="do_announce('test')" class="data-sq-button">
+                <ion-icon *ngIf="!running_test_" name="megaphone-outline"></ion-icon>
+                <ion-spinner *ngIf="running_test_" name="lines-sharp"></ion-spinner>
+                <br />
+                <ion-text color="primary">{{ 'Announce Test' | translate }}</ion-text>
+              </div>
+              <div (click)="do_announce('live')" class="data-sq-button">
+                <ion-icon *ngIf="!running_live_" name="megaphone"></ion-icon>
+                <ion-spinner *ngIf="running_live_" name="lines-sharp"></ion-spinner>
+                <br />
+                <ion-text color="primary">{{ 'Announce Live' | translate }}</ion-text>
               </div>
               <div (click)="copy_url()" class="data-sq-button">
                 <ion-icon *ngIf="!is_url_copied" name="globe-outline"></ion-icon>

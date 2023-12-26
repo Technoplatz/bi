@@ -214,6 +214,44 @@ export class Miscellaneous {
     });
   }
 
+  validateOTP() {
+    return new Promise((resolve, reject) => {
+      this.alert.create({
+        cssClass: "my-custom-class",
+        subHeader: this.translate.instant("OTP Validation"),
+        message: this.translate.instant("Please enter your one-time password") + ":",
+        backdropDismiss: false,
+        inputs: [
+          {
+            name: "id",
+            value: null,
+            type: "number",
+            placeholder: this.translate.instant("OTP [000000]")
+          }
+        ],
+        buttons: [
+          {
+            text: this.translate.instant("Cancel"),
+            role: "cancel",
+            cssClass: "primary",
+            handler: () => {
+              reject();
+            }
+          }, {
+            text: this.translate.instant("OK"),
+            handler: (alertData: any) => {
+              resolve(alertData.id);
+            }
+          }
+        ]
+      }).then((alert: any) => {
+        alert.present();
+      }).catch((error_: any) => {
+        reject(error_);
+      });
+    });
+  }
+
   doMessage(msg: string, type: string) {
     type === "error" ? console.error("!!! err", msg) : null;
     this.toast.create({

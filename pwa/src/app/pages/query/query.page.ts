@@ -37,6 +37,7 @@ import { Storage } from "@ionic/storage";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
+import { TranslateService } from "@ngx-translate/core";
 import { environment } from "../../../environments/environment";
 import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
 import { CrudPage } from "../crud/crud.page";
@@ -72,6 +73,8 @@ export class QueryPage implements OnInit {
   public is_inprogress: boolean = false;
   public is_url_copied: boolean = false;
   public running_: boolean = false;
+  public running_test_: boolean = false;
+  public running_live_: boolean = false;
   public query_url_: string = "";
   public que_scheduled_cron_: string = "";
   public _tags: any = [];
@@ -90,7 +93,8 @@ export class QueryPage implements OnInit {
     private auth: Auth,
     private crud: Crud,
     private router: Router,
-    private modal: ModalController
+    private modal: ModalController,
+    private translate: TranslateService
   ) {
     this.auth.user.subscribe((res: any) => {
       this.user = res;
@@ -221,6 +225,37 @@ export class QueryPage implements OnInit {
       this.running_ = true;
       this.refresh_data(true).then(() => { }).finally(() => {
         this.running_ = false;
+      });
+    }
+  }
+
+  do_announce(type_: string) {
+    if (!this.running_test_ && !this.running_live_) {
+      this.running_test_ = type_ === "test" ? true : false;
+      this.running_live_ = type_ === "live" ? true : false;
+      this.misc.api_call("crud", {
+        op: "reqotp",
+        collection: "_query",
+        id: this.id
+      }).then(() => {
+        this.misc.validateOTP().then((otp_: any) => {
+          this.crud.announce(this.id, type_, otp_).then((res_: any) => {
+            if (res_?.err) {
+              this.misc.doMessage(this.translate.instant(res_.err), "error");
+            } else {
+              this.misc.doMessage(this.translate.instant(`${type_} announcement has made successfully`), "success");
+            }
+          }).catch((error: any) => {
+            this.misc.doMessage(error, "error");
+          }).finally(() => {
+            this.running_test_ = this.running_live_ = false;
+          });
+        });
+      }).catch((err_: any) => {
+        this.misc.doMessage(err_, "error");
+        this.running_test_ = this.running_live_ = false;
+      }).finally(() => {
+        this._saving = false;
       });
     }
   }

@@ -602,10 +602,10 @@ class Misc:
             response_ = requests.post(
                 NOTIFICATION_PUSH_URL_,
                 json.dumps({"text": str(notification_str_)}),
-                timeout=10
+                timeout=10,
             )
             if response_.status_code != 200:
-                res_ =  response_.content
+                res_ = response_.content
 
         except Exception as exc__:
             res_ = str(exc__)
@@ -2402,6 +2402,9 @@ class Crud:
 
             sched_ = "sched" in obj_ and obj_["sched"] is True
             key_ = obj_["key"] if "key" in obj_ and obj_["key"] is not None else None
+            type_ = (
+                obj_["type"] if "type" in obj_ and obj_["type"] is not None else "test"
+            )
 
             if not request:
                 if key_ and key_ == SMTP_PASSWORD_:
@@ -2411,6 +2414,8 @@ class Crud:
             else:
                 if key_ and key_ == "visual":
                     orig_ = "visual"
+                elif key_ and key_ == "announce":
+                    orig_ = "sched"
                 else:
                     orig_ = request.base_url.replace(request.host_url, "")
                     if orig_ not in ["api/crud", f"api/get/query/{_id}"]:
@@ -2440,7 +2445,9 @@ class Crud:
                 raise PassException(err_)
 
             _tags = (
-                query_["_tags"]
+                API_PERMISSIVE_TAGS_
+                if type_ == "test"
+                else query_["_tags"]
                 if "_tags" in query_ and len(query_["_tags"]) > 0
                 else API_PERMISSIVE_TAGS_
             )
@@ -2610,15 +2617,21 @@ class Crud:
                     if not email_sent_["result"]:
                         raise APIError(email_sent_["msg"])
 
-            return {
-                "result": True,
-                "query": query_,
-                "data": data_,
-                "count": count_,
-                "fields": fields_,
-                "schema": schema_,
-                "err": err_,
-            }
+            return (
+                {
+                    "result": True,
+                    "query": query_,
+                    "data": data_,
+                    "count": count_,
+                    "fields": fields_,
+                    "schema": schema_,
+                    "err": err_,
+                }
+                if key_ != "announce"
+                else {
+                    "result": True,
+                }
+            )
 
         except AuthError as exc__:
             return Misc().auth_error_f(exc__)
@@ -2666,6 +2679,14 @@ class Crud:
             job_ = Mongo().db_["_job"].find_one({"_id": ObjectId(_id)})
             if not job_:
                 raise APIError("job not found")
+
+            Mongo().db_["_job"].update_one(
+                {"_id": ObjectId(_id)},
+                {
+                    "$set": {"job_run_date": Misc().get_now_f()},
+                    "$inc": {"job_run_count": 1},
+                },
+            )
 
             job_collection_id_ = (
                 job_["job_collection_id"] if "job_collection_id" in job_ else None
@@ -2835,6 +2856,14 @@ class Crud:
                 .update_many({"_id": {"$in": ids_}}, {"$set": set__})
             )
             count_ = update_many_.matched_count
+
+            Mongo().db_["_job"].update_one(
+                {"_id": ObjectId(_id)},
+                {
+                    "$set": {"job_success_date": Misc().get_now_f()},
+                    "$inc": {"job_success_count": 1},
+                },
+            )
 
             Mongo().db_["_joblog"].insert_one(
                 {
@@ -4247,6 +4276,7 @@ class Crud:
         docstring is in progress
         """
         count_, files_, msg_ = 0, [], None
+        newdoc_, forex_ = {}, False
         split_id_ = Misc().get_timestamp_f()
         session_client_ = MongoClient(Mongo().connstr)
         session_db_ = session_client_[MONGO_DB_]
@@ -4564,7 +4594,6 @@ class Crud:
                             else 0
                         )
                 else:
-                    newdoc_, forex_ = {}, False
                     for set__ in set_:
                         if "key" in set__ and set__["key"] in doc_:
                             newdoc_[set__["key"]] = doc_[set__["key"]]
@@ -4726,7 +4755,12 @@ class Crud:
                     "collection": collection_,
                     "op": "action",
                     "user": email_,
-                    "document": {"doc": doc_, "match": match_},
+                    "document": {
+                        "doc": doc_,
+                        "newdoc": newdoc_ if newdoc_ else {},
+                        "match": match_,
+                        "filter": get_filtered_ if get_filtered_ else {},
+                    },
                 }
             )
             if not log_["result"]:
@@ -5266,8 +5300,8 @@ class OTP:
                 {
                     "op": "tfa",
                     "personalizations": [{"email": usr_id_, "name": name_}],
-                    "html": f"<p>Hi {name_},</p><p>Here's your backup two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>",
-                    "subject": "Account [2FA Code]",
+                    "html": f"<p>Hi {name_},</p><p>Here's your two-factor access code so that you can validate your account;</p><p><h1>{tfac_}</h1></p>",
+                    "subject": "Account [OTP]",
                 }
             )
             if not email_sent_["result"]:
@@ -5436,13 +5470,13 @@ class Auth:
 
             return {"result": True}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except AuthError as exc:
+        except AuthError as exc__:
             Misc().log_f(
                 {
                     "type": "Error",
@@ -5452,16 +5486,16 @@ class Auth:
                     "document": {
                         "otp_entered": tfac_,
                         "otp_expected": aut_tfac_,
-                        "exception": str(exc),
+                        "exception": str(exc__),
                         "_modified_at": Misc().get_now_f(),
                         "_modified_by": email_,
                     },
                 }
             )
-            return Misc().auth_error_f(exc)
+            return Misc().auth_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def checkup_f(self):
         """
@@ -6214,14 +6248,14 @@ class Auth:
 
             return {"result": True, "msg": "2FA required", "user": None}
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except AuthError as exc:
-            return Misc().auth_error_f(exc)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def signup_f(self):
         """
@@ -6294,17 +6328,17 @@ class Auth:
 
             return {"result": True, "qr": qr_, "user": None}
 
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except AuthError as exc:
-            return Misc().auth_error_f(exc)
+        except AuthError as exc__:
+            return Misc().auth_error_f(exc__)
 
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
 
 API_OUTPUT_ROWS_LIMIT_ = int(str(os.environ.get("API_OUTPUT_ROWS_LIMIT")))
@@ -6564,6 +6598,10 @@ def api_crud_f():
         if not user_:
             raise SessionError({"result": False, "msg": "user session ended"})
 
+        email_ = user_["usr_id"] if "usr_id" in user_ else None
+        if not email_:
+            raise SessionError({"result": False, "msg": "no session provided"})
+
         input_["user"] = user_
         input_["userindb"] = user_
         collection_ = input_["collection"] if "collection" in input_ else None
@@ -6608,13 +6646,17 @@ def api_crud_f():
             col_check_ = Crud().inner_collection_f(input_["collection"])
             if not col_check_["result"]:
                 raise APIError(col_check_)
+        elif op_ == "announce":
+            query_id_ = input_["id"] if "id" in input_ and input_["id"] else None
+            type_ = input_["type"] if "type" in input_ and input_["type"] else "test"
 
         if op_ in TFAC_OPS_:
-            tfac_ = input_["tfac"]
-            email_ = user_["usr_id"] if "usr_id" in user_ else None
+            tfac_ = input_["tfac"] if "tfac" in input_ and input_["tfac"] else None
+            if not tfac_:
+                raise AuthError({"result": False, "msg": "no otp provided"})
             verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, op_)
             if not verify_otp_f_["result"]:
-                raise APIError(verify_otp_f_)
+                raise AuthError(verify_otp_f_)
 
         if op_ == "read":
             res_ = Crud().read_f(input_)
@@ -6652,6 +6694,18 @@ def api_crud_f():
             res_ = Crud().visuals_f(input_)
         elif op_ == "visual":
             res_ = Crud().visual_f(input_)
+        elif op_ == "reqotp":
+            res_ = OTP().request_otp_f(email_)
+        elif op_ == "announce":
+            res_ = Crud().query_f(
+                {
+                    "id": query_id_,
+                    "key": "announce",
+                    "sched": True,
+                    "userindb": user_,
+                    "type": type_,
+                }
+            )
         else:
             raise APIError(f"invalid operation: {op_}")
 
@@ -6659,6 +6713,7 @@ def api_crud_f():
             raise APIError(res_)
 
     except APIError as exc__:
+        Misc().notify_exception_f(exc__)
         sc__, res_ = 400, ast.literal_eval(str(exc__))
 
     except AuthError as exc__:
@@ -6668,6 +6723,7 @@ def api_crud_f():
         sc__, res_ = 403, ast.literal_eval(str(exc__))
 
     except Exception as exc__:
+        Misc().notify_exception_f(exc__)
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
@@ -6697,68 +6753,68 @@ def api_crud_f():
         return response_
 
 
-@app.route("/api/otp", methods=["POST"])
-def api_otp_f():
-    """
-    docstring is in progress
-    """
-    sc__, res_ = 200, {}
-    try:
-        input_ = request.json
-        if not input_:
-            res_ = {"result": False, "msg": "input is missing"}
-            raise APIError(res_)
+# @app.route("/api/otp", methods=["POST"])
+# def api_otp_f():
+#     """
+#     docstring is in progress
+#     """
+#     sc__, res_ = 200, {}
+#     try:
+#         input_ = request.json
+#         if not input_:
+#             res_ = {"result": False, "msg": "input is missing"}
+#             raise APIError(res_)
 
-        request_ = input_["request"] if "request" in input_ else None
-        if not request_:
-            res_ = {"result": False, "msg": "no request provided"}
-            raise APIError(res_)
+#         request_ = input_["request"] if "request" in input_ else None
+#         if not request_:
+#             res_ = {"result": False, "msg": "no request provided"}
+#             raise APIError(res_)
 
-        if "op" not in request_:
-            res_ = {"result": False, "msg": "no operation found"}
-            raise APIError(res_)
+#         if "op" not in request_:
+#             res_ = {"result": False, "msg": "no operation found"}
+#             raise APIError(res_)
 
-        jwt_validate_f_ = Auth().jwt_validate_f()
-        if not jwt_validate_f_["result"]:
-            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+#         jwt_validate_f_ = Auth().jwt_validate_f()
+#         if not jwt_validate_f_["result"]:
+#             raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
 
-        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
-        if not user_:
-            raise SessionError({"result": False, "msg": "user session not found"})
-        email_ = user_["email"] if "email" in user_ else None
+#         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+#         if not user_:
+#             raise SessionError({"result": False, "msg": "user session not found"})
+#         email_ = user_["email"] if "email" in user_ else None
 
-        op_ = escape(request_["op"])
+#         op_ = escape(request_["op"])
 
-        if op_ == "reset":
-            res_ = OTP().reset_otp_f(email_)
-        elif op_ == "show":
-            res_ = OTP().show_otp_f(email_)
-        elif op_ == "request":
-            res_ = OTP().request_otp_f(email_)
-        elif op_ == "validate":
-            res_ = OTP().validate_qr_f(email_, request_)
-        else:
-            raise APIError(f"invalid operation: {op_}")
+#         if op_ == "reset":
+#             res_ = OTP().reset_otp_f(email_)
+#         elif op_ == "show":
+#             res_ = OTP().show_otp_f(email_)
+#         elif op_ == "request":
+#             res_ = OTP().request_otp_f(email_)
+#         elif op_ == "validate":
+#             res_ = OTP().validate_qr_f(email_, request_)
+#         else:
+#             raise APIError(f"invalid operation: {op_}")
 
-        if not res_["result"]:
-            raise APIError(res_)
+#         if not res_["result"]:
+#             raise APIError(res_)
 
-    except SessionError as exc__:
-        sc__, res_ = 403, ast.literal_eval(str(exc__))
+#     except SessionError as exc__:
+#         sc__, res_ = 403, ast.literal_eval(str(exc__))
 
-    except APIError as exc__:
-        sc__, res_ = 401, ast.literal_eval(str(exc__))
+#     except APIError as exc__:
+#         sc__, res_ = 401, ast.literal_eval(str(exc__))
 
-    except Exception as exc__:
-        sc__, res_ = 500, ast.literal_eval(str(exc__))
+#     except Exception as exc__:
+#         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
-    finally:
-        response_ = make_response(
-            json.dumps(res_, default=json_util.default, sort_keys=False)
-        )
-        response_.status_code = sc__
-        response_.mimetype = "application/json"
-        return response_
+#     finally:
+#         response_ = make_response(
+#             json.dumps(res_, default=json_util.default, sort_keys=False)
+#         )
+#         response_.status_code = sc__
+#         response_.mimetype = "application/json"
+#         return response_
 
 
 @app.route("/api/auth", methods=["POST"], endpoint="auth")

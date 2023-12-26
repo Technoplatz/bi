@@ -259,6 +259,20 @@ export class Crud {
     });
   }
 
+  get_otp(id_: any) {
+    return new Promise((resolve, reject) => {
+      this.misc.api_call("crud", {
+        op: "reqotp",
+        collection: "_query",
+        id: id_
+      }).then((res_: any) => {
+        resolve(res_);
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
   get_collection(id: string) {
     return new Promise((resolve, reject) => {
       this.misc.api_call("crud", {
@@ -280,6 +294,22 @@ export class Crud {
         collection: type_ === "job" ? "_job" : "_query",
         limit: limit_,
         run: run_
+      }).then((res: any) => {
+        resolve(res);
+      }).catch((err: any) => {
+        reject(err);
+      });
+    });
+  }
+
+  announce(id_: string, type_: string, otp_: number) {
+    return new Promise((resolve, reject) => {
+      this.misc.api_call("crud", {
+        id: id_,
+        op: "announce",
+        collection: "_query",
+        tfac: otp_,
+        type: type_
       }).then((res: any) => {
         resolve(res);
       }).catch((err: any) => {

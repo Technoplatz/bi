@@ -47,7 +47,7 @@
       "description": "Document",
       "textarea": true,
       "minLength": 0,
-      "maxLength": 2048
+      "maxLength": 4096
     }
   },
   "required": ["log_type", "log_date", "log_user_id", "log_operation"],
