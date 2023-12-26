@@ -238,7 +238,7 @@ export class QueryPage implements OnInit {
         collection: "_query",
         id: this.id
       }).then(() => {
-        this.misc.validateOTP().then((otp_: any) => {
+        this.misc.validateOTP(type_).then((otp_: any) => {
           this.crud.announce(this.id, type_, otp_).then((res_: any) => {
             if (res_?.err) {
               this.misc.doMessage(this.translate.instant(res_.err), "error");
@@ -250,6 +250,8 @@ export class QueryPage implements OnInit {
           }).finally(() => {
             this.running_test_ = this.running_live_ = false;
           });
+        }).catch(() => {
+          this.running_test_ = this.running_live_ = false;
         });
       }).catch((err_: any) => {
         this.misc.doMessage(err_, "error");

@@ -214,11 +214,11 @@ export class Miscellaneous {
     });
   }
 
-  validateOTP() {
+  validateOTP(type_: any) {
     return new Promise((resolve, reject) => {
       this.alert.create({
         cssClass: "my-custom-class",
-        subHeader: this.translate.instant("OTP Validation"),
+        subHeader: this.translate.instant("OTP Validation") + ` [${type_}]`,
         message: this.translate.instant("Please enter your one-time password") + ":",
         backdropDismiss: false,
         inputs: [
@@ -226,7 +226,8 @@ export class Miscellaneous {
             name: "id",
             value: null,
             type: "number",
-            placeholder: this.translate.instant("OTP [000000]")
+            cssClass: "token",
+            placeholder: "000000"
           }
         ],
         buttons: [
@@ -245,7 +246,11 @@ export class Miscellaneous {
           }
         ]
       }).then((alert: any) => {
-        alert.present();
+        alert.present().then(() => {
+          const fnput_: any = document.querySelector('ion-alert input');
+          fnput_.focus();
+          return;
+        });
       }).catch((error_: any) => {
         reject(error_);
       });
