@@ -140,19 +140,25 @@
         }
       ],
       "autofill": true,
-      "btntext": "Attached DNs",
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "btntext": "DNNs",
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"],
       "notification": {
-        "notify": false,
-        "subject": "Logistics [Manifest Created]",
-        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been attached to manifest.",
-        "key": "man_no",
+        "notify": true,
+        "subject": "Logistics [New Manifest]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been attached to a new manifest.",
         "attachment": true,
-        "html": false,
-        "csv": true,
+        "html": true,
+        "csv": false,
         "excel": true,
         "json": false,
-        "fields": "dnn_no,dnn_line_no,dnn_man_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty"
+        "key": "man_no",
+        "topics": "man_no,man_opening_date,man_odi_no,man_odi_sub_no",
+        "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "filter": [],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
       }
     }
   ],
