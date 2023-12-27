@@ -2403,7 +2403,7 @@ class Crud:
             sched_ = "sched" in obj_ and obj_["sched"] is True
             key_ = obj_["key"] if "key" in obj_ and obj_["key"] is not None else None
             type_ = (
-                obj_["type"] if "type" in obj_ and obj_["type"] is not None else "test"
+                obj_["type"] if "type" in obj_ and obj_["type"] is not None else "live"
             )
 
             if not request:
