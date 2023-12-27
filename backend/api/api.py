@@ -228,7 +228,7 @@ class Schedular:
                         day_of_week=day_of_week_,
                         id=id__,
                         replace_existing=True,
-                        args=[{"id": id__}],
+                        args=[{"id": id__, "run": True}],
                     )
                 elif source_ == "_query":
                     sched_.add_job(
@@ -246,6 +246,7 @@ class Schedular:
                                 "id": id__,
                                 "sched": True,
                                 "key": SMTP_PASSWORD_,
+                                "type": "live",
                             }
                         ],
                     )
@@ -485,6 +486,11 @@ class Misc:
         type_ = input_["type"] if "type" in input_ else None
         fields_ = input_["fields"] if "fields" in input_ else None
         query_ = input_["query"] if "query" in input_ else None
+        sort_ = (
+            input_["sort"]
+            if "sort" in input_ and input_["sort"]
+            else {"_modified_at": -1}
+        )
         loc_ = input_["loc"] if "loc" in input_ else None
         connstr_ = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}"
         commands_ = {
@@ -501,6 +507,7 @@ class Misc:
                 f"--type={type_}",
                 f"--fields={fields_}",
                 f"--query={query_}",
+                f"--sort={sort_}",
                 f"--out={file_}",
             ],
             "mongorestore": [
@@ -2402,8 +2409,11 @@ class Crud:
 
             sched_ = "sched" in obj_ and obj_["sched"] is True
             key_ = obj_["key"] if "key" in obj_ and obj_["key"] is not None else None
+
             type_ = (
-                obj_["type"] if "type" in obj_ and obj_["type"] is not None else "live"
+                obj_["type"]
+                if "type" in obj_ and obj_["type"] in ["live", "test"]
+                else "live"
             )
 
             if not request:
@@ -2446,7 +2456,7 @@ class Crud:
 
             _tags = (
                 API_PERMISSIVE_TAGS_
-                if type_ == "test"
+                if key_ == "announce" and type_ == "test"
                 else query_["_tags"]
                 if "_tags" in query_ and len(query_["_tags"]) > 0
                 else API_PERMISSIVE_TAGS_
@@ -4088,6 +4098,13 @@ class Crud:
                         if "fields" in notification_
                         else None
                     )
+                    nsort_ = (
+                        notification_["sort"]
+                        if notification_
+                        and "sort" in notification_
+                        and notification_["sort"]
+                        else {"_modified_at": -1}
+                    )
                     topics_ = (
                         notification_["topics"].split(",")
                         if "topics" in notification_
@@ -4107,6 +4124,7 @@ class Crud:
                         {
                             "query": query_,
                             "fields": fields_,
+                            "sort": nsort_,
                             "type": type_,
                             "file": file_,
                             "collection": collection_,
@@ -4664,6 +4682,15 @@ class Crud:
                     if notification_ and "fields" in notification_
                     else None
                 )
+                nsort_ = (
+                    notification_["sort"]
+                    if notification_
+                    and "sort" in notification_
+                    and notification_["sort"]
+                    else structure_["sort"]
+                    if "sort" in structure_ and structure_["sort"]
+                    else {"_modified_at": -1}
+                )
                 topics_ = (
                     notification_["topics"].split(",")
                     if "topics" in notification_
@@ -4699,6 +4726,7 @@ class Crud:
                             {
                                 "query": query_,
                                 "fields": fields_,
+                                "sort": nsort_,
                                 "type": type_,
                                 "file": file_,
                                 "collection": notify_collection_,

@@ -37,6 +37,7 @@ from functools import partial
 import uuid
 import base64
 import pytz
+import time
 from datetime import datetime
 from xml.etree import ElementTree
 from bson.objectid import ObjectId
@@ -117,6 +118,7 @@ EDOKSIS_USER_ = os.environ.get("EDOKSIS_USER")
 EDOKSIS_PASSWORD_ = os.environ.get("EDOKSIS_PASSWORD")
 EDOKSIS_VKN_ = os.environ.get("EDOKSIS_VKN")
 EDOKSIS_XML_SIZE_ = int(os.environ.get("EDOKSIS_XML_SIZE"))
+EDOKSIS_ISSUE_DELAY_ = int(os.environ.get("EDOKSIS_ISSUE_DELAY"))
 CUSTOMIZATION_ID_ = os.environ.get("CUSTOMIZATION_ID")
 UBL_VERSION_ID_ = os.environ.get("UBL_VERSION_ID")
 ADVICE_TYPE_CODE_ = os.environ.get("ADVICE_TYPE_CODE")
@@ -948,6 +950,7 @@ def multi_issue_f():
 
         files_ = []
         if not err_:
+            time.sleep(EDOKSIS_ISSUE_DELAY_)
             get_waybill_f_ = Edoksis().get_waybill_f(
                 {
                     "shipment_ettn_field": shipment_ettn_field_,

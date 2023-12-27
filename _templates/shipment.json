@@ -224,7 +224,11 @@
         "csv": false,
         "excel": false,
         "json": false,
-        "filter": []
+        "filter": [],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
       },
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
     }
@@ -278,7 +282,11 @@
         "body": "Hi,<br /><br />We would like to let you know that the waybill of the attached deliveries has been donwloaded.",
         "topics": "shp_wayb_no,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
         "fields": "dnn_no,dnn_line_no,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
-        "filter": []
+        "filter": [],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
       }
     }
   ],

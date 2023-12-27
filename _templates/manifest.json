@@ -308,6 +308,10 @@
                 "value": "man_no"
               }
             ],
+            "sort": {
+              "dnn_no": 1,
+              "dnn_line_no": 1
+            },
             "attachment": true,
             "html": true,
             "csv": false,
@@ -385,6 +389,10 @@
                 "value": "60-ReadyToBeDelivered"
               }
             ],
+            "sort": {
+              "dnn_no": 1,
+              "dnn_line_no": 1
+            },
             "attachment": true,
             "html": true,
             "csv": false,
