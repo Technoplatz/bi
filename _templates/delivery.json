@@ -200,7 +200,7 @@
       "maxLength": 32,
       "pattern": "^[A-Z0-9-]{0,32}$",
       "caseType": "uppercase",
-      "readonly": true
+      "permanent": true
     },
     "dnn_ship_type": {
       "bsonType": "string",
@@ -568,13 +568,17 @@
             "op": "eq",
             "value": "00-Open"
           }
-        ]
+        ],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
       }
     },
     {
       "id": "rtd",
       "title": "Ready TBD",
-      "enabled": true,
+      "enabled": false,
       "match": [
         {
           "key": "dnn_status",
@@ -613,7 +617,11 @@
             "op": "eq",
             "value": "60-ReadyToBeDelivered"
           }
-        ]
+        ],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
       }
     },
     {
@@ -670,7 +678,11 @@
             "op": "in",
             "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
           }
-        ]
+        ],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
       },
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
     },
@@ -724,7 +736,11 @@
             "op": "in",
             "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
           }
-        ]
+        ],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
       },
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
     }

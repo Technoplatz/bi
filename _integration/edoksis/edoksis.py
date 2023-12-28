@@ -126,6 +126,7 @@ IDENTIFICATION_SCHEME_ = os.environ.get("IDENTIFICATION_SCHEME")
 PROFILE_ID_ = os.environ.get("PROFILE_ID")
 EDOKSIS_URL_ = os.environ.get("EDOKSIS_URL")
 EDOKSIS_TIMEOUT_SECONDS_ = int(str(os.environ.get("EDOKSIS_TIMEOUT_SECONDS")))
+EDOKSIS_REPLACEMETS_ = ["&", "'", '"']
 SUPPLIER_NAME_ = os.environ.get("SUPPLIER_NAME")
 SUPPLIER_STREET_NAME_ = os.environ.get("SUPPLIER_STREET_NAME")
 SUPPLIER_BUILDING_NUMBER_ = os.environ.get("SUPPLIER_BUILDING_NUMBER")
@@ -759,6 +760,10 @@ def multi_issue_f():
                 item_name_ = (
                     f"{delivery_no_} {delivery_product_no_} {delivery_product_desc_}"
                 )
+
+                for replaced_ in EDOKSIS_REPLACEMETS_:
+                    item_name_ = item_name_.replace(replaced_, "")
+
                 item_name_ = item_name_[:256]
                 note_ = ""
                 unit_code_ = "NIU"

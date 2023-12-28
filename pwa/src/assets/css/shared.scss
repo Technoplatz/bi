@@ -1874,7 +1874,7 @@ json-editor .jsoneditor {
 .search-area {
   margin-top: 8px !important;
   margin-bottom: 0px !important;
-  padding-bottom: 8px;
+  padding-bottom: 0px;
 }
 
 .setmode-grid {
@@ -2479,6 +2479,14 @@ app-chart {
 .chart-target-container {
   font-weight: bold;
   color: var(--ion-color-primary);
+}
+
+.no-data-matched {
+  width: 100%;
+  white-space: wrap !important;
+  margin-top: 5px;
+  line-height: normal;
+  padding-right: 16px;
 }
 
 .hdr {

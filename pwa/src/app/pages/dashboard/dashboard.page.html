@@ -46,7 +46,7 @@ https://www.gnu.org/licenses.
               <div *ngIf="visual_?.error">
                 {{ visual_.error.msg }}
               </div>
-              <div *ngIf="visual_.data?.length > 0" class="visual-table">
+              <div *ngIf="visual_.data?.length > 0; else novisual" class="visual-table">
                 <table class="data-table">
                   <tr>
                     <th></th>
@@ -81,6 +81,11 @@ https://www.gnu.org/licenses.
                   </div>
                 </div>
               </div>
+              <ng-template #novisual>
+                <div class="no-data-matched">
+                  {{ 'NO DATA MATCHING THE CRITERIA FOUND' | translate }}.
+                </div>
+              </ng-template>
             </div>
             <ng-template #notvisloaded>
               <div class="ion-margin-top">

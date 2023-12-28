@@ -3957,7 +3957,9 @@ class Crud:
             link_ = obj_["link"] if "link" in obj_ else None
             data_ = obj_["data"] if "data" in obj_ else None
             linked_ = (
-                obj_["linked"] if "linked" in obj_ and len(obj_["linked"]) > 0 else []
+                list(set(obj_["linked"]))
+                if "linked" in obj_ and len(obj_["linked"]) > 0
+                else []
             )
             linked_count_ = len(linked_)
             user_ = obj_["user"] if "user" in obj_ else None
@@ -4073,7 +4075,7 @@ class Crud:
             if api_:
                 run_api_f_ = self.run_api_f(api_, data_, [_id], usr_id_)
                 if not run_api_f_["result"]:
-                    raise AppException(run_api_f_["msg"])
+                    raise AppException(run_api_f_)
                 files_ += run_api_f_["files"]
 
             if notify_:
@@ -5555,7 +5557,7 @@ class Auth:
         """
         try:
             pat = re.compile(
-                r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*.-_?&]{8,32}$"
+                r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,32}$"
             )
             if not re.search(pat, password_):
                 raise APIError("Invalid password")
@@ -6400,7 +6402,9 @@ API_SCHEDULE_INTERVAL_MIN_ = int(str(os.environ.get("API_SCHEDULE_INTERVAL_MIN")
 API_FW_TEMP_DURATION_MIN_ = int(str(os.environ.get("API_FW_TEMP_DURATION_MIN")))
 API_UPLOAD_LIMIT_BYTES_ = int(str(os.environ.get("API_UPLOAD_LIMIT_BYTES")))
 API_MAX_CONTENT_LENGTH_MB_ = int(str(os.environ.get("API_MAX_CONTENT_LENGTH_MB")))
-API_DEFAULT_AGGREGATION_LIMIT_ = int(str(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT")))
+API_DEFAULT_AGGREGATION_LIMIT_ = int(
+    str(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
+)
 API_DEFAULT_VISUAL_LIMIT_ = int(str(os.environ.get("API_DEFAULT_VISUAL_LIMIT")))
 API_QUERY_PAGE_SIZE_ = int(str(os.environ.get("API_QUERY_PAGE_SIZE")))
 API_SESSION_EXP_MINUTES_ = int(str(os.environ.get("API_SESSION_EXP_MINUTES")))

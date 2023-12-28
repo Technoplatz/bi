@@ -343,4 +343,8 @@ export class Miscellaneous {
     });
   }
 
+  unique_array(value_: any, index_: number, self_: any) {
+    return self_.indexOf(value_) === index_;
+  }
+
 }

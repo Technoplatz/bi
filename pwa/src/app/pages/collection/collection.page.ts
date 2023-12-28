@@ -579,15 +579,19 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  copy_headers() {
+  copy(cpd_: any, event_: any, indx_: number) {
+    event_.stopPropagation();
     this.is_copied = false;
-    this.misc.copy_to_clipboard(this.propkeys_).then(() => {
+    this.data[indx_].is_copied = false;
+    this.misc.copy_to_clipboard(cpd_).then(() => {
       this.is_copied = true;
+      this.data[indx_].is_copied = true;
     }).catch((error: any) => {
       console.error("copy_headers", error);
     }).finally(() => {
       setTimeout(() => {
         this.is_copied = false;
+        this.data[indx_].is_copied = false;
       }, 1000);
     });
   }

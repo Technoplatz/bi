@@ -80,12 +80,12 @@ https://www.gnu.org/licenses.
                 <br />
                 <ion-text color="primary">{{ 'Delete Document' | translate }}</ion-text>
               </div>
-              <div (click)="copy_headers()" class="data-sq-button">
+              <div (click)="copy(propkeys_, $event, -1)" class="data-sq-button">
                 <ion-icon *ngIf="!is_copied" name="browsers-sharp"></ion-icon>
                 <ion-icon *ngIf="is_copied" name="checkmark-sharp"></ion-icon>
                 <br />
                 <ion-text color="primary" *ngIf="!is_copied">{{ 'Copy Headers' | translate }}</ion-text>
-                <ion-text color="primary" *ngIf="is_copied">{{ 'Headers Copied' | translate }}</ion-text>
+                <ion-text color="primary" *ngIf="is_copied">{{ 'Successfully Copied' | translate }}</ion-text>
               </div>
               <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000" #svg class="json-icon-large">
@@ -224,28 +224,37 @@ https://www.gnu.org/licenses.
                       &#9724;
                     </ion-button>
                   </div>
-                  <div *ngIf="item.value.bsonType=='bool'">
-                    <ion-button [color]="searched[item.key]?.op == 'true' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'true')">
-                      <ion-icon name="checkbox-sharp" color="success"></ion-icon>
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'false' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'false')">
-                      <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
-                    </ion-button>
-                  </div>
-                  <div>
-                    <!-- <ion-input #searchfocus *ngIf="item.value.bsonType!='bool'"
-                      [type]="item.value.bsonType!='string' ? item.value.bsonType : 'text'" size="32"
-                      [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
-                      class="ion-no-padding search-input" placeholder="{{ 'Search' | translate }}" disabled="false">
-                    </ion-input> -->
-                    <ion-textarea #searchfocus *ngIf="item.value.bsonType!='bool'" cols="32"
-                      [(ngModel)]="searched[item.key].kw" [ngModelOptions]="{standalone: true}"
-                      class="ion-no-padding search-area" placeholder="{{ 'Search' | translate }}" disabled="false"
-                      auto-grow="true">
+                  <div *ngIf="!['bool','date'].includes(item.value.bsonType) && !item.value.selection; else boolordate">
+                    <ion-textarea #searchfocus cols="32" [(ngModel)]="searched[item.key].kw"
+                      [ngModelOptions]="{standalone: true}" class="ion-no-padding search-area"
+                      placeholder="{{ 'Search' | translate }}" disabled="false" auto-grow="true">
                     </ion-textarea>
                   </div>
+                  <ng-template #boolordate>
+                    <div *ngIf="item.value.bsonType=='bool'">
+                      <ion-button [color]="searched[item.key]?.op == 'true' ? 'primary' : 'light'" size="small"
+                        (click)="set_search_item(item.key, 'true')">
+                        <ion-icon name="checkbox-sharp" color="success"></ion-icon>
+                      </ion-button>
+                      <ion-button [color]="searched[item.key]?.op == 'false' ? 'primary' : 'light'" size="small"
+                        (click)="set_search_item(item.key, 'false')">
+                        <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
+                      </ion-button>
+                    </div>
+                    <div *ngIf="item.value.bsonType=='date'">
+                      <ion-input type="date" [(ngModel)]="searched[item.key].kw"
+                        class="ion-no-padding search-area"></ion-input>
+                    </div>
+                    <div *ngIf="item.value.selection" class="search-selection">
+                      <ul>
+                        <li *ngFor="let item_ of selections_[item.key]; let s_ = index"
+                          (click)="selection_changed(item.key, s_)">
+                          <ion-checkbox [(ngModel)]="selections_[item.key][s_].value" disabled>
+                          </ion-checkbox> {{ item_.id | translate }}
+                        </li>
+                      </ul>
+                    </div>
+                  </ng-template>
                   <div>
                     <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
                       <ion-icon name="search"></ion-icon>
@@ -255,15 +264,6 @@ https://www.gnu.org/licenses.
                       <ion-icon name="close-circle-outline"></ion-icon>
                       {{ 'Clear' | translate }}
                     </ion-button>
-                  </div>
-                  <div *ngIf="item.value.selection" class="search-selection">
-                    <ul>
-                      <li *ngFor="let item_ of selections_[item.key]; let s_ = index"
-                        (click)="selection_changed(item.key, s_)">
-                        <ion-checkbox [(ngModel)]="selections_[item.key][s_].value" disabled>
-                        </ion-checkbox> {{ item_.id | translate }}
-                      </li>
-                    </ul>
                   </div>
                 </div>
               </th>
@@ -357,8 +357,14 @@ https://www.gnu.org/licenses.
                 </ng-template>
               </td>
               <td *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right primary bold">
-                {{ record["_link_" + link_.collection ]?.count }} [{{ record["_link_" + link_.collection
-                ].sum?.toFixed(2) }}]
+                <span *ngIf="record['is_copied']; else nocopied">{{
+                  'copied' | translate }}&nbsp;<ion-icon name="checkmark-sharp"></ion-icon></span>
+                <ng-template #nocopied>
+                  <span (click)="copy(record['_link_' + link_.collection].count, $event, i)">{{ record["_link_" +
+                    link_.collection ]?.count }}</span>&nbsp;
+                  <span (click)="copy(record['_link_' + link_.collection].sum?.toFixed(2), $event, i)">[{{
+                    record["_link_" + link_.collection].sum?.toFixed(2) }}]</span>
+                </ng-template>
               </td>
               <td>
                 {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc' }}

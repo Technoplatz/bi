@@ -118,9 +118,6 @@ export class CrudPage implements OnInit {
         }).catch((error: any) => {
           this.misc.doMessage(error, "error");
         });
-      } else {
-        this.crudForm.get(event.target.name)?.setValue(this.input_.replace(/NAVIGATEPREVIOUS|NAVIGATENEXT|UNIDENTIFIED|NULL|CUT|COPY|SHIFT|TAB|CAPSLOCK|METAV|ARROWDOWN|ARROWUP|ARROWLEFT|ARROWRIGHT|BACKSPACE/gi, "").toUpperCase());
-        this.submit_f();
       }
     } else {
       this.input_ += event.key;
