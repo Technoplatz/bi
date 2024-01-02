@@ -361,8 +361,7 @@ https://www.gnu.org/licenses.
                   'copied' | translate }}&nbsp;<ion-icon name="checkmark-sharp"></ion-icon></span>
                 <ng-template #nocopied>
                   <span (click)="copy(record['_link_' + link_.collection].count, $event, i)">{{ record["_link_" +
-                    link_.collection ]?.count }}</span>&nbsp;
-                  <span (click)="copy(record['_link_' + link_.collection].sum?.toFixed(2), $event, i)">[{{
+                    link_.collection ]?.count }}</span>&nbsp;<span (click)="copy(record['_link_' + link_.collection].sum?.toFixed(2), $event, i)">[{{
                     record["_link_" + link_.collection].sum?.toFixed(2) }}]</span>
                 </ng-template>
               </td>

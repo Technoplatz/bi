@@ -33,6 +33,7 @@ https://www.gnu.org/licenses.
 import { Component, OnInit } from "@angular/core";
 import { Crud } from "../../classes/crud";
 import { Miscellaneous } from "../../classes/misc";
+import { Auth } from "../../classes/auth";
 import { environment } from "../../../environments/environment";
 
 @Component({
@@ -46,11 +47,17 @@ export class DashboardPage implements OnInit {
   public loadingText: string = environment.misc.loadingText;
   public flashsizes_: any = environment.flashsizes;
   public visuals_: any = [];
+  public perm_: boolean = false;
 
   constructor(
     private crud: Crud,
-    public misc: Miscellaneous
-  ) { }
+    public misc: Miscellaneous,
+    private auth: Auth
+  ) {
+    this.auth.user.subscribe((res: any) => {
+      this.perm_ = res && res.perm;
+    });
+  }
 
   ngOnInit() {
     this.announcements_ = [];

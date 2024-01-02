@@ -5557,7 +5557,7 @@ class Auth:
         """
         try:
             pat = re.compile(
-                r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{8,32}$"
+                r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z0-9@$!#%*.-_?&]{8,32}$"
             )
             if not re.search(pat, password_):
                 raise APIError("Invalid password")
