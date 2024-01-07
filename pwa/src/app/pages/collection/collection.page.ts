@@ -582,16 +582,16 @@ export class CollectionPage implements OnInit {
   copy(cpd_: any, event_: any, indx_: number) {
     event_.stopPropagation();
     this.is_copied = false;
-    this.data[indx_].is_copied = false;
+    indx_ >= 0 ? this.data[indx_].is_copied = false : null;
     this.misc.copy_to_clipboard(cpd_).then(() => {
       this.is_copied = true;
-      this.data[indx_].is_copied = true;
+      indx_ >= 0 ? this.data[indx_].is_copied = true : null;
     }).catch((error: any) => {
       console.error("copy_headers", error);
     }).finally(() => {
       setTimeout(() => {
         this.is_copied = false;
-        this.data[indx_].is_copied = false;
+        indx_ >= 0 ? this.data[indx_].is_copied = false : null;
       }, 1000);
     });
   }

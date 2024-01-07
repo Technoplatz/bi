@@ -786,7 +786,7 @@
     {
       "name": "Product updater",
       "enabled": true,
-      "operations": ["insert"],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "dnn_prd_no",
@@ -835,12 +835,12 @@
   ],
   "import": {
     "enabled": true,
-    "upsertable": false,
-    "upsertables": []
+    "upsertable": true,
+    "upsertables": ["dnn_prd_group"]
   },
   "queries": {
     "query": true,
     "cronjob": true,
-    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_man_no", "dnn_ship_type", "dnn_rtd_date"]
+    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_man_no", "dnn_ship_type", "dnn_rtd_date", "dnn_prd_group"]
   }
 }

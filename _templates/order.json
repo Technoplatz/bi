@@ -45,13 +45,15 @@
   "index": [["ord_no"], ["ord_prd_no"]],
   "unique": [["ord_no", "ord_prd_no"]],
   "sort": {
-    "_modified_at": -1
+    "_created_at": -1
   },
   "parents": [],
   "actions": [],
   "triggers": [],
   "links": [],
   "import": {
-    "enabled": true
+    "enabled": true,
+    "upsertable": true,
+    "upsertables": ["ord_date"]
   }
 }

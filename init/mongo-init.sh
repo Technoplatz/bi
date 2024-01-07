@@ -62,23 +62,23 @@ if [[ ! $selfsignedreplace = true && -f $MONGO_TLS_CA_KEYFILE && -s $MONGO_TLS_C
     fi
 fi
 
-echo "step 1: Generating mongo-ca.crt and mongo-ca.key to build mongo-ca.pem to sign client certificates..."
+echo "step 1: Generating CA..."
 openssl req -nodes -newkey rsa:4096 -out mongo-ca.crt -new -x509 -keyout mongo-ca.key -passout pass:$mongotlscertkeyfilepassword -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST0/emailAddress=$ADMIN_EMAIL"
 cat mongo-ca.key mongo-ca.crt >$MONGO_TLS_CA_KEYFILE
 echo "✔ mongo-ca.key generated sucessfully."
 echo
 
-echo "step 2: Generating mongo0.csr and mongo0.key together as a client certificate request..."
+echo "step 2: Generating mongo0 CSR..."
 openssl req -nodes -newkey rsa:4096 -sha256 -keyout $MONGO_HOST0.key -out $MONGO_HOST0.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST0/emailAddress=$ADMIN_EMAIL"
 echo "✔ mongo0.csr generated sucessfully."
 echo
 
-echo "step 3: Signing the mongo0.csr with mongo-ca.key to create mongo0.crt..."
+echo "step 3: Generating mongo0 CRT..."
 openssl x509 -req -in $MONGO_HOST0.csr -CA $MONGO_TLS_CA_KEYFILE -CAkey mongo-ca.key -passin pass:$mongotlscertkeyfilepassword -set_serial 00 -out $MONGO_HOST0.crt
 echo "✔ mongo0.crt generated sucessfully."
 echo
 
-echo "step 4: Combining key and crt as pem..."
+echo "step 4: Generating PEM..."
 cat $MONGO_HOST0.key $MONGO_HOST0.crt >$MONGO_TLS_CERT_KEYFILE
 echo "✔ mongo-ca.pem and mongo0.pem generated sucessfully."
 echo
@@ -87,6 +87,7 @@ echo "step 5: Cleaning key's csr's and crt's..."
 rm -rf *.key
 rm -rf *.csr
 rm -rf *.crt
+
 echo "✔ step 5 completed sucessfully."
 echo "✔ all steps OK."
 echo
