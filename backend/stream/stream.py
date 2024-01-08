@@ -662,8 +662,7 @@ class Trigger:
                 list(changed_.keys()) if changed_ and changed_.keys() else None
             )
 
-            if not changed_keys_ and op_ != "insert":
-                PRINT_(f"\n>!!! no changed keys [{source_collection_id_}]", op_)
+            if not changed_keys_:
                 raise PassException(">>> passed, no changed keys")
 
             trigger_targets_ = [
@@ -674,9 +673,8 @@ class Trigger:
                 and [
                     ma_
                     for ma_ in tg_["changes"]
-                    # if
-                    # ma_["key"] in changed_keys_ and
-                    if (
+                    if ma_["key"] in changed_keys_
+                    and (
                         (
                             ma_["op"].lower() == "eq"
                             and changed_[ma_["key"]] == ma_["value"]
@@ -712,11 +710,10 @@ class Trigger:
                     )
                 ]
             ]
-
             if trigger_targets_ == []:
                 raise PassException("!!! no trigger target found")
 
-            # PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
+            PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
 
             for target_ in trigger_targets_:
                 target_collection_id_ = target_["target"].lower()
@@ -727,7 +724,7 @@ class Trigger:
                     else None
                 )
 
-                # PRINT_(">>> target found", target_collection_id_)
+                PRINT_(">>> target found", target_collection_id_)
                 if target_properties_ is None:
                     raise AppException(
                         f"no target properties found {target_collection_id_}"
@@ -753,7 +750,7 @@ class Trigger:
 
                 full_document_ = self.db_[source_collection_].find_one(match_)
                 if not full_document_:
-                    # PRINT_(f"full document not found ({source_collection_}): {match_}")
+                    PRINT_(f"full document not found ({source_collection_}): {match_}")
                     continue
 
                 match_ = {}
@@ -970,31 +967,26 @@ class Trigger:
                     else:
                         set_[target_field_] = value_
 
-                if op_ == "insert":
-                    upsert_ = True
-
                 set_["_trigged_at"] = self.get_now_f()
                 set_["_trigged_by"] = "_automation"
-
                 if upsert_ is True:
                     set_["_created_at"] = self.get_now_f()
                     set_["_created_by"] = "_automation"
 
                 set_["_resume_token"] = token_
-
                 update_many_ = self.db_[target_collection_].update_many(
                     match_, {"$set": set_}, upsert=upsert_
                 )
                 count_ = update_many_.matched_count
-                # PRINT_(
-                #     ">>> updated :)",
-                #     {
-                #         "coll": target_collection_,
-                #         "match": match_,
-                #         "set": set_,
-                #         "count": count_,
-                #     },
-                # )
+                PRINT_(
+                    ">>> updated :)",
+                    {
+                        "coll": target_collection_,
+                        "match": match_,
+                        "set": set_,
+                        "count": count_,
+                    },
+                )
 
                 notification_ = (
                     target_["notification"] if "notification" in target_ else None
@@ -1267,7 +1259,6 @@ class Trigger:
                         else None
                     )
                     if source_properties_ is None:
-                        # PRINT_(f"!!! no source properties [{source_collection_id_}]")
                         continue
 
                     op_ = (
@@ -1292,7 +1283,7 @@ class Trigger:
                         else None
                     )
                     if not changed_ and not fullDocument_:
-                        # PRINT_(f"!!! no changed fields provided [{source_collection_id_} - {op_} - {self.get_now_f()}]")
+                        PRINT_("!!! no changed fields provided")
                         continue
 
                     if source_collection_[:1] == "_":
@@ -1313,7 +1304,6 @@ class Trigger:
                     )
 
                     if _id is None:
-                        PRINT_(f">>> id is null [{source_collection_}]")
                         continue
 
                     params_ = {
@@ -1322,7 +1312,7 @@ class Trigger:
                         "id": _id,
                         "token": token_,
                         "op": op_,
-                        "changed": changed_ if op_ != "insert" else fullDocument_,
+                        "changed": changed_,
                     }
                     await asyncio.create_task(self.starter_changes_f(params_))
 

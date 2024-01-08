@@ -419,16 +419,16 @@
     {
       "name": "product",
       "enabled": true,
-      "operations": ["insert"],
+      "operations": ["insert", "update"],
       "changes": [
         {
           "key": "blo_prd_no",
-          "op": "ne",
+          "op": "nnull",
           "value": null
         },
         {
           "key": "blo_prd_description",
-          "op": "ne",
+          "op": "nnull",
           "value": null
         }
       ],
@@ -467,17 +467,17 @@
       "changes": [
         {
           "key": "blo_status",
-          "op": "nnull",
+          "op": "ne",
           "value": null
         },
         {
           "key": "blo_order_no",
-          "op": "nnull",
+          "op": "ne",
           "value": null
         },
         {
           "key": "blo_prd_no",
-          "op": "nnull",
+          "op": "ne",
           "value": null
         },
         {
@@ -489,11 +489,6 @@
           "key": "blo_line_qty",
           "op": "gt",
           "value": 0
-        },
-        {
-          "key": "blo_order_update_date",
-          "op": "nnull",
-          "value": null
         }
       ],
       "targets": [
@@ -516,12 +511,12 @@
               "value": "blo_order_no"
             },
             {
-              "key": "ord_date",
-              "value": "blo_sales_order_created_date"
-            },
-            {
               "key": "ord_prd_no",
               "value": "blo_prd_no"
+            },
+            {
+              "key": "ord_date",
+              "value": "blo_sales_order_created_date"
             },
             {
               "key": "ord_unit_price",
