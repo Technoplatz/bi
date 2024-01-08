@@ -57,9 +57,9 @@ https://www.gnu.org/licenses.
                     </th>
                   </tr>
                   <tr *ngFor="let record_ of visual_.data; let i = index">
-                    <td [class]="record_['_reminder'] ? 'danger align-right' : 'primary align-right'"
+                    <td [class]="record_['_note'] ? 'danger align-right' : 'primary align-right'"
                       (click)="misc.show_note(record_['_note'], $event)">
-                      <ion-icon *ngIf="record_['_reminder']; else noreminder" name="flag"></ion-icon>
+                      <ion-icon *ngIf="record_['_note']; else noreminder" name="flag"></ion-icon>
                       <ng-template #noreminder>
                         {{ i + 1}}
                       </ng-template>

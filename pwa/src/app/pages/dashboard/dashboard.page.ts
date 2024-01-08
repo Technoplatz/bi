@@ -64,6 +64,9 @@ export class DashboardPage implements OnInit {
     this.crud.get_announcements().then((res: any) => {
       this.announcements_ = res.data ? res.data.slice(0, 20) : [];
     });
+  }
+
+  ionViewDidEnter() {
     this.crud.get_visuals(null).then((visuals_: any) => {
       this.visuals_ = visuals_.visuals;
       for (let ix_: number = 0; ix_ < this.visuals_.length; ix_++) {

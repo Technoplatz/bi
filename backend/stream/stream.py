@@ -713,7 +713,7 @@ class Trigger:
             if trigger_targets_ == []:
                 raise PassException("!!! no trigger target found")
 
-            PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
+            # PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
 
             for target_ in trigger_targets_:
                 target_collection_id_ = target_["target"].lower()
@@ -967,11 +967,18 @@ class Trigger:
                     else:
                         set_[target_field_] = value_
 
+                if op_ == "insert":
+                    set_["_created_at"] = self.get_now_f()
+                    set_["_created_by"] = "_automation"
+                    if "_id" in set_:
+                        set_.pop("_id", None)
+                        upsert_ = True
+
                 set_["_trigged_at"] = self.get_now_f()
                 set_["_trigged_by"] = "_automation"
                 if upsert_ is True:
-                    set_["_created_at"] = self.get_now_f()
-                    set_["_created_by"] = "_automation"
+                    set_["_modified_at"] = self.get_now_f()
+                    set_["_modified_by"] = "_automation"
 
                 set_["_resume_token"] = token_
                 update_many_ = self.db_[target_collection_].update_many(
@@ -1305,6 +1312,9 @@ class Trigger:
 
                     if _id is None:
                         continue
+
+                    if op_ == "insert":
+                        changed_ = fullDocument_
 
                     params_ = {
                         "collection": source_collection_,

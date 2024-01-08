@@ -39,7 +39,8 @@
       "minLength": 0,
       "maxLength": 32,
       "pattern": "^[A-Za-z&/ ]{0,32}$",
-      "caseType": "uppercase"
+      "caseType": "uppercase",
+      "selection": true
     },
     "prd_cpu": {
       "bsonType": "string",

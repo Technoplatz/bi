@@ -27,7 +27,8 @@
       "minLength": 3,
       "maxLength": 16,
       "pattern": "^[A-Za-z-]{3,16}$",
-      "readonly": true
+      "readonly": true,
+      "selection": true
     },
     "odi_customs": {
       "bsonType": "string",
@@ -36,7 +37,8 @@
       "minLength": 3,
       "maxLength": 16,
       "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{3,16}$",
-      "readonly": true
+      "readonly": true,
+      "selection": true
     },
     "odi_date": {
       "bsonType": "date",
@@ -104,8 +106,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "eq",
-          "value": "00-Open"
+          "op": "in",
+          "value": "00-Open,10-OnTheWay"
         }
       ],
       "set": [
@@ -152,8 +154,8 @@
       "match": [
         {
           "key": "dnn_status",
-          "op": "eq",
-          "value": "00-Open"
+          "op": "in",
+          "value": "00-Open,10-OnTheWay"
         }
       ],
       "set": [
@@ -178,8 +180,8 @@
         "subject": "Logistics [New Ordino]",
         "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to a new ordino by adding invoice numbers.",
         "attachment": true,
-        "html": false,
-        "csv": true,
+        "html": true,
+        "csv": false,
         "excel": true,
         "json": false,
         "key": "odi_sub_no",
