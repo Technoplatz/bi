@@ -430,6 +430,16 @@
           "key": "blo_prd_description",
           "op": "nnull",
           "value": null
+        },
+        {
+          "key": "blo_prd_group",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blo_brand",
+          "op": "nnull",
+          "value": null
         }
       ],
       "targets": [
@@ -454,9 +464,13 @@
             {
               "key": "prd_group",
               "value": "blo_prd_group"
+            },
+            {
+              "key": "prd_family",
+              "value": "blo_brand"
             }
           ],
-          "upsert": false
+          "upsert": true
         }
       ]
     },

@@ -103,6 +103,8 @@ export class CollectionPage implements OnInit {
   public flashcards_: any = [];
   public propkeys_: string = "";
   public is_copied: boolean = false;
+  public colvis_activated_: boolean = false;
+  public colvis_: any = {};
   public selections_: any = {};
 
   constructor(
@@ -139,22 +141,26 @@ export class CollectionPage implements OnInit {
 
   ionViewDidEnter() {
     this.is_initialized = false;
+    this.colvis_activated_ = false;
     this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
       this.limit_ = LSPAGINATION * 1;
-      this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
-        this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
-          this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-          LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
-          this.actions = [];
-          this.crud.get_collection(this.id).then((res: any) => {
-            this.counters_ = res && res.counters ? res.counters : {};
-            this.refresh_data(0, false).then(() => { }).catch((error: any) => {
+      this.storage.get("LSCOLVIS_" + this.id).then((LSCOLVIS_: any) => {
+        this.colvis_ = LSCOLVIS_ ? LSCOLVIS_ : {};
+        this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
+          this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
+            this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+            LSSEARCHED_ ? this.searched = LSSEARCHED_ : null;
+            this.actions = [];
+            this.crud.get_collection(this.id).then((res: any) => {
+              this.counters_ = res && res.counters ? res.counters : {};
+              this.refresh_data(0, false).then(() => { }).catch((error: any) => {
+                this.misc.doMessage(error, "error");
+              }).finally(() => {
+                this.is_initialized = true;
+              });
+            }).catch((error: any) => {
               this.misc.doMessage(error, "error");
-            }).finally(() => {
-              this.is_initialized = true;
             });
-          }).catch((error: any) => {
-            this.misc.doMessage(error, "error");
           });
         });
       });
@@ -185,57 +191,60 @@ export class CollectionPage implements OnInit {
       this.storage.get("LSSEARCHED_" + this.id).then((LSSEARCHED_: any) => {
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
           this.storage.get("LSSELECTIONS_" + this.id).then((LSSELECTIONS_: any) => {
-            this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
-            this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
-            this.selections_ = LSSELECTIONS_ ? LSSELECTIONS_ : {};
-            this.count = 0;
-            this.page_ = page_ === 0 ? 1 : page_;
-            this.misc.api_call("crud", {
-              op: "read",
-              collection: this.id,
-              projection: null,
-              match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
-              sort: this.sort,
-              page: this.page_,
-              limit: this.limit_,
-              selections: this.selections_,
-              outfile: outfile_
-            }).then((res: any) => {
-              this.selections_ = res.selected;
-              this.pager_ = this.page_;
-              this.data = res.data;
-              this.structure_ = res.structure;
-              this.get_links(res).then(() => {
-                this.json_content_ = res.structure;
-                this.actions = res.actions;
-                this.properties_ = res.structure.properties;
-                this.importvis_ = res.structure.import?.enabled;
-                this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
-                this.count = res.count;
-                this.multicheckbox = false;
-                this.multicheckbox ? this.multicheckbox = false : null;
-                this.selected = new Array(res.data.length).fill(false);
-                this.pages_ = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
-                const lmt = this.pages_ >= 10 ? 10 : this.pages_;
-                this.paget_ = new Array(lmt);
-                this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
-                this.searched === null ? this.init_search(true) : this.init_search(false);
-                for (let p = 0; p < this.paget_.length; p++) {
-                  this.paget_[p] = this.page_start + p;
-                }
-                resolve(true);
-              });
-            }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-              reject(error);
-            }).finally(() => {
-              this.crud.get_all().then(() => {
-                this.propkeys_ = "";
-                Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
-              }).catch((err_: any) => {
-                console.error("get_all", err_);
+            this.storage.get("LSCOLVIS_" + this.id).then((LSCOLVIS_: any) => {
+              this.colvis_ = LSCOLVIS_ ? LSCOLVIS_ : {};
+              this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
+              this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
+              this.selections_ = LSSELECTIONS_ ? LSSELECTIONS_ : {};
+              this.count = 0;
+              this.page_ = page_ === 0 ? 1 : page_;
+              this.misc.api_call("crud", {
+                op: "read",
+                collection: this.id,
+                projection: null,
+                match: this.filter_ && this.filter_.length > 0 ? this.filter_ : [],
+                sort: this.sort,
+                page: this.page_,
+                limit: this.limit_,
+                selections: this.selections_,
+                outfile: outfile_
+              }).then((res: any) => {
+                this.selections_ = res.selected;
+                this.pager_ = this.page_;
+                this.data = res.data;
+                this.structure_ = res.structure;
+                this.get_links(res).then(() => {
+                  this.json_content_ = res.structure;
+                  this.actions = res.actions;
+                  this.properties_ = res.structure.properties;
+                  this.importvis_ = res.structure.import?.enabled;
+                  this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
+                  this.count = res.count;
+                  this.multicheckbox = false;
+                  this.multicheckbox ? this.multicheckbox = false : null;
+                  this.selected = new Array(res.data.length).fill(false);
+                  this.pages_ = this.count > 0 ? Math.ceil(this.count / this.limit_) : environment.misc.default_page;
+                  const lmt = this.pages_ >= 10 ? 10 : this.pages_;
+                  this.paget_ = new Array(lmt);
+                  this.page_start = this.page_ > 10 ? this.page_ - 10 + 1 : 1;
+                  this.searched === null ? this.init_search(true) : this.init_search(false);
+                  for (let p = 0; p < this.paget_.length; p++) {
+                    this.paget_[p] = this.page_start + p;
+                  }
+                  resolve(true);
+                });
+              }).catch((error: any) => {
+                this.misc.doMessage(error, "error");
+                reject(error);
               }).finally(() => {
-                this.is_loaded = true;
+                this.crud.get_all().then(() => {
+                  this.propkeys_ = "";
+                  Object.keys(this.properties_).forEach((key_: string) => { this.propkeys_ += `${key_}\t`; });
+                }).catch((err_: any) => {
+                  console.error("get_all", err_);
+                }).finally(() => {
+                  this.is_loaded = true;
+                });
               });
             });
           });
@@ -369,6 +378,7 @@ export class CollectionPage implements OnInit {
   }
 
   set_search(k_: string) {
+    this.colvis_activated_ = false;
     setTimeout(() => {
       this.searchfocus?.setFocus();
       this.searched[k_].kw = this.searched[k_]?.kw?.trim().replace(/^\s*\n/gm, "");
@@ -616,6 +626,35 @@ export class CollectionPage implements OnInit {
 
   selection_changed(item_: string, s_: number) {
     this.selections_[item_][s_].value = !this.selections_[item_][s_].value;
+  }
+
+  colvis_activate() {
+    this.colvis_activated_ = !this.colvis_activated_;
+    for (let key_ in this.structure_.properties) {
+      this.searched[key_].actived = false;
+    }
+  }
+
+  set_colvis_item(key_: string) {
+    this.colvis_[key_] = !this.colvis_[key_];
+  }
+
+  set_colvis() {
+    this.storage.set("LSCOLVIS_" + this.id, this.colvis_).then(() => {
+      this.colvis_activated_ = false;
+      this.refresh_data(0, false);
+    });
+  }
+
+  colvis_allon() {
+    this.colvis_ = {};
+  }
+
+  colvis_alloff() {
+    this.colvis_ = {};
+    for (let key_ in this.structure_.properties) {
+      this.colvis_[key_] = true;
+    }
   }
 
 }

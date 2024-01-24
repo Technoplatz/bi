@@ -42,6 +42,14 @@
       "caseType": "uppercase",
       "selection": true
     },
+    "prd_family": {
+      "bsonType": "string",
+      "title": "Family",
+      "description": "Family name",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-_ ]{1,64}$"
+    },
     "prd_cpu": {
       "bsonType": "string",
       "title": "CPU",
@@ -100,7 +108,7 @@
     }
   },
   "required": ["prd_no", "prd_description", "prd_group"],
-  "index": [["prd_group"]],
+  "index": [["prd_group"], ["prd_family"]],
   "unique": [["prd_no"]],
   "sort": {
     "_modified_at": -1
@@ -112,6 +120,16 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["prd_group", "prd_cpu", "prd_os", "prd_memory_ob", "prd_memory_dimm", "prd_display", "prd_gpu", "prd_storage"]
+    "upsertables": [
+      "prd_group",
+      "prd_family",
+      "prd_cpu",
+      "prd_os",
+      "prd_memory_ob",
+      "prd_memory_dimm",
+      "prd_display",
+      "prd_gpu",
+      "prd_storage"
+    ]
   }
 }

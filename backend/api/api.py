@@ -881,9 +881,13 @@ class Misc:
         docstring is in progress
         """
         try:
-            data_ = data_.strip()
-            data_ = escape(data_) if isinstance(data_, str) else data_
-            return bleach.clean(data_) if data_ else None
+            if not data_:
+                return None
+
+            if isinstance(data_, str):
+                data_ = escape(data_.strip())
+
+            return bleach.clean(data_)
 
         except Exception as exc__:
             return Misc().notify_exception_f(exc__)
@@ -2799,8 +2803,11 @@ class Crud:
                 err_ = "no set found in the job"
                 raise PassException(err_)
 
+            """
+            job must be run manually
+            """
             if not run_:
-                raise PassException("job must be run manually")
+                raise PassException("")
 
             aggregate_update_ = []
             for agg_ in job_aggregate_:
@@ -2830,7 +2837,7 @@ class Crud:
             personalizations_ = []
 
             get_users_from_tags_f_ = Misc().get_users_from_tags_f(
-                ["#JobAdmins", "#Administrators"]
+                ["#JobAdmins"]
             )
 
             if not get_users_from_tags_f_["result"]:

@@ -18,6 +18,44 @@
       "pattern": "^[0-9]{1,4}$",
       "permanent": true
     },
+    "dnn_prd_no": {
+      "bsonType": "string",
+      "title": "Product ID",
+      "description": "Product ID",
+      "minLength": 7,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{7,16}$",
+      "replacement": [
+        {
+          "find": "-",
+          "replace": ""
+        },
+        {
+          "find": "_",
+          "replace": ""
+        }
+      ],
+      "caseType": "uppercase"
+    },
+    "dnn_prd_description": {
+      "bsonType": "string",
+      "title": "Description",
+      "description": "Product Description",
+      "minLength": 1,
+      "maxLength": 256,
+      "replacement": [
+        {
+          "find": "'",
+          "replace": " "
+        }
+      ]
+    },
+    "dnn_qty": {
+      "bsonType": "number",
+      "title": "Quantity",
+      "description": "Quantity",
+      "default": 1
+    },
     "dnn_status": {
       "bsonType": "string",
       "title": "Status",
@@ -53,11 +91,59 @@
       "minLength": 1,
       "maxLength": 64
     },
-    "dnn_qty": {
+    "dnn_man_no": {
+      "bsonType": "string",
+      "title": "Manifest No",
+      "description": "Manifest number",
+      "minLength": 0,
+      "maxLength": 32,
+      "pattern": "^[A-Z0-9-]{0,32}$",
+      "caseType": "uppercase",
+      "permanent": true
+    },
+    "dnn_odi_no": {
+      "bsonType": "string",
+      "title": "Ordino No",
+      "description": "Primary ordino number",
+      "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
+      "minLength": 1,
+      "maxLength": 20,
+      "caseType": "uppercase",
+      "readonly": true
+    },
+    "dnn_odi_sub_no": {
+      "bsonType": "string",
+      "title": "Ordino Sub No",
+      "description": "Secondary ordino number",
+      "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
+      "minLength": 1,
+      "maxLength": 20,
+      "caseType": "uppercase",
+      "readonly": true
+    },
+    "dnn_width": {
       "bsonType": "number",
-      "title": "Quantity",
-      "description": "Quantity",
-      "default": 1
+      "title": "Width",
+      "description": "Width",
+      "default": 0
+    },
+    "dnn_length": {
+      "bsonType": "number",
+      "title": "Length",
+      "description": "Length",
+      "default": 0
+    },
+    "dnn_height": {
+      "bsonType": "number",
+      "title": "Height",
+      "description": "Height",
+      "default": 0
+    },
+    "dnn_gross_weight": {
+      "bsonType": "number",
+      "title": "Gross Weight",
+      "description": "Gross Weight",
+      "default": 0
     },
     "dnn_unit_price": {
       "bsonType": "number",
@@ -117,41 +203,10 @@
         "CDM",
         "TBG",
         "LBG",
-        "ACC"
+        "ACC",
+        "AVR"
       ],
       "caseType": "uppercase"
-    },
-    "dnn_prd_no": {
-      "bsonType": "string",
-      "title": "Product ID",
-      "description": "Product ID",
-      "minLength": 7,
-      "maxLength": 16,
-      "pattern": "^[A-Z0-9-]{7,16}$",
-      "replacement": [
-        {
-          "find": "-",
-          "replace": ""
-        },
-        {
-          "find": "_",
-          "replace": ""
-        }
-      ],
-      "caseType": "uppercase"
-    },
-    "dnn_prd_description": {
-      "bsonType": "string",
-      "title": "Description",
-      "description": "Product Description",
-      "minLength": 1,
-      "maxLength": 256,
-      "replacement": [
-        {
-          "find": "'",
-          "replace": " "
-        }
-      ]
     },
     "dnn_acc_name": {
       "bsonType": "string",
@@ -171,36 +226,6 @@
       "pattern": "^[A-Z0-9-]{9,16}$",
       "readonly": true,
       "selection": true
-    },
-    "dnn_odi_no": {
-      "bsonType": "string",
-      "title": "Ordino No",
-      "description": "Primary ordino number",
-      "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
-      "minLength": 1,
-      "maxLength": 20,
-      "caseType": "uppercase",
-      "readonly": true
-    },
-    "dnn_odi_sub_no": {
-      "bsonType": "string",
-      "title": "Ordino Sub No",
-      "description": "Secondary ordino number",
-      "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
-      "minLength": 1,
-      "maxLength": 20,
-      "caseType": "uppercase",
-      "readonly": true
-    },
-    "dnn_man_no": {
-      "bsonType": "string",
-      "title": "Manifest No",
-      "description": "Manifest number",
-      "minLength": 0,
-      "maxLength": 32,
-      "pattern": "^[A-Z0-9-]{0,32}$",
-      "caseType": "uppercase",
-      "permanent": true
     },
     "dnn_ship_type": {
       "bsonType": "string",
@@ -240,30 +265,6 @@
       "description": "Business Unit Id",
       "readonly": true,
       "selection": true
-    },
-    "dnn_length": {
-      "bsonType": "number",
-      "title": "Length",
-      "description": "Length",
-      "default": 0
-    },
-    "dnn_width": {
-      "bsonType": "number",
-      "title": "Width",
-      "description": "Width",
-      "default": 0
-    },
-    "dnn_height": {
-      "bsonType": "number",
-      "title": "Height",
-      "description": "Height",
-      "default": 0
-    },
-    "dnn_gross_weight": {
-      "bsonType": "number",
-      "title": "Gross Weight",
-      "description": "Gross Weight",
-      "default": 0
     },
     "dnn_eta_date": {
       "bsonType": "date",

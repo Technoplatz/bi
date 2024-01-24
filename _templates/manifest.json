@@ -156,6 +156,7 @@
         "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": [],
         "sort": {
+          "dnn_acc_name": 1,
           "dnn_no": 1,
           "dnn_line_no": 1
         }
@@ -315,6 +316,7 @@
               }
             ],
             "sort": {
+              "dnn_acc_name": 1,
               "dnn_no": 1,
               "dnn_line_no": 1
             },
@@ -396,6 +398,7 @@
               }
             ],
             "sort": {
+              "dnn_acc_name": 1,
               "dnn_no": 1,
               "dnn_line_no": 1
             },

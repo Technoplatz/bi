@@ -35,7 +35,7 @@ https://www.gnu.org/licenses.
     <ion-row>
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
-        <h3><span *ngIf="title_">{{ title_ | translate | titlecase }}&nbsp;</span>[{{ subheader }}]</h3>
+        <h3>[{{ subheader }}]</h3>
         <span *ngIf="is_loaded" class="bold primary">{{ count }} {{ count > 1 ? ('documents' | translate)
           : ('document' | translate) }} {{ (filter_?.length > 0 ? 'filtered' : 'found') | translate }}.</span><span
           *ngIf="!is_loaded" class="bold primary">{{
@@ -155,7 +155,38 @@ https://www.gnu.org/licenses.
 
           <table class="data-table">
             <tr>
-              <th>&nbsp;</th>
+              <th class="no-padding">
+                <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin" (click)="colvis_activate()">
+                  <ion-icon name="settings-outline"></ion-icon>
+                </ion-button>
+                <div *ngIf="colvis_activated_" class="colvis-box">
+                  <div>
+                    <ion-button size="small" (click)="colvis_activate()" fill="clear" class="ion-no-padding">
+                      {{ 'Column Visibility' | translate }}
+                    </ion-button><br />
+                    <ion-button size="small" (click)="colvis_allon()" fill="clear" class="ion-no-padding text-underlined">
+                      {{ 'All On' | translate }}
+                    </ion-button>&nbsp;
+                    <ion-button size="small" (click)="colvis_alloff()" fill="clear" class="ion-no-padding text-underlined">
+                      {{ 'All Off' | translate }}
+                    </ion-button>
+                  </div>
+                  <div class="filler-4"></div>
+                  <ion-button size="small" (click)="set_colvis()">
+                    {{ 'Save' | translate }}
+                  </ion-button>
+                  <ion-button size="small" (click)="colvis_activate()" color="light">
+                    {{ 'Cancel' | translate }}
+                  </ion-button>
+                  <div class="filler-8"></div>
+                  <div *ngFor="let item of properties_ | keyvalue : orderByIndex">
+                    <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin"
+                      (click)="set_colvis_item(item.key)">
+                      <ion-icon [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"></ion-icon> {{ item.value.title | translate }}
+                    </ion-button>
+                  </div>
+                </div>
+              </th>
               <th *ngIf="!['_log','_dump','_announcement'].includes(id)">
                 <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="switch_select_data($event.detail.checked)"
                   mode="md">
@@ -166,7 +197,8 @@ https://www.gnu.org/licenses.
                 <ion-button size="small" class="unfiltered-btn">{{'_approved'}}</ion-button>
               </th>
               <!-- DATA LIST HEADER -->
-              <th *ngFor="let item of properties_ | keyvalue : orderByIndex">
+              <th *ngFor="let item of properties_ | keyvalue : orderByIndex"
+                [style]="colvis_ == {} || colvis_[item.key] ? 'display: none;' : ''">
                 <div
                   [class]="['number','decimal','float'].includes(item.value.bsonType) ? 'align-right' : 'align-left'">
                   {{ item.value.title | translate }}<br />
@@ -178,6 +210,8 @@ https://www.gnu.org/licenses.
                 </div>
                 <!-- SEARCH BOX -->
                 <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
+                  <div>{{ item.key | translate }}</div>
+                  <div class="filler-8"></div>
                   <ion-button color="light" size="small" (click)="do_sort(item.key, -1)">
                     <ion-icon name="arrow-down"></ion-icon>
                   </ion-button>
@@ -287,15 +321,11 @@ https://www.gnu.org/licenses.
                 {{ 'Modified By' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_modified_by'}}</ion-button>
               </th>
-              <th>
-                {{ 'Document ID' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_id'}}</ion-button>
-              </th>
             </tr>
             <tr *ngFor="let record of data; let i = index"
               (click)="['_query','_job'].includes(id) ? go_query_job(record, $event) : go_crud(record, 'update')"
               [class]="record['_reminder'] ? 'data-tr' : ''">
-              <td [class]="record['_reminder'] ? 'danger align-right' : 'primary align-right'"
+              <td [class]="record['_reminder'] ? 'danger' : 'primary'"
                 (click)="misc.show_note(record['_note'], $event)">
                 <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>
                 <ng-template #noreminder>
@@ -315,7 +345,8 @@ https://www.gnu.org/licenses.
                 </ng-template>
               </td>
               <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex"
-                [class]="['number','decimal','float'].includes(item_.value.bsonType) ? 'align-right' : ''">
+                [class]="['number','decimal','float'].includes(item_.value.bsonType) ? 'align-right' : ''"
+                [style]="colvis_ == {} || colvis_[item_.key] ? 'display: none;' : ''">
                 <span *ngIf="item_.value.bsonType=='date'; else else1">
                   <span *ngIf="item_.value?.dateOnly; else nodateOnly">{{ record[item_.key] | date:'dd.MM.yyyy':'utc'
                     }}</span>
@@ -345,8 +376,7 @@ https://www.gnu.org/licenses.
                   </span>
                 </ng-template>
                 <ng-template #else3>
-                  <span
-                    *ngIf="['number','decimal','float'].includes(item_.value.bsonType) && ['.'].includes(record[item_.key]?.toString()); else else4">{{
+                  <span *ngIf="['number','decimal','float'].includes(item_.value.bsonType); else else4">{{
                     record[item_.key]?.toFixed(item_.value.decimals ? item_.value.decimals : 0) }}</span>
                 </ng-template>
                 <ng-template #else4>
@@ -361,7 +391,8 @@ https://www.gnu.org/licenses.
                   'copied' | translate }}&nbsp;<ion-icon name="checkmark-sharp"></ion-icon></span>
                 <ng-template #nocopied>
                   <span (click)="copy(record['_link_' + link_.collection].count, $event, i)">{{ record["_link_" +
-                    link_.collection ]?.count }}</span>&nbsp;<span (click)="copy(record['_link_' + link_.collection].sum?.toFixed(2), $event, i)">[{{
+                    link_.collection ]?.count }}</span>&nbsp;<span
+                    (click)="copy(record['_link_' + link_.collection].sum?.toFixed(2), $event, i)">[{{
                     record["_link_" + link_.collection].sum?.toFixed(2) }}]</span>
                 </ng-template>
               </td>
@@ -376,9 +407,6 @@ https://www.gnu.org/licenses.
               </td>
               <td>
                 {{ record._modified_by }}
-              </td>
-              <td>
-                {{ record._id }}
               </td>
             </tr>
           </table>
