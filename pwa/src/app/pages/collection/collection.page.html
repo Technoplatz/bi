@@ -161,13 +161,13 @@ https://www.gnu.org/licenses.
                 </ion-button>
                 <div *ngIf="colvis_activated_" class="colvis-box">
                   <div>
-                    <ion-button size="small" (click)="colvis_activate()" fill="clear" class="ion-no-padding">
-                      {{ 'Column Visibility' | translate }}
-                    </ion-button><br />
-                    <ion-button size="small" (click)="colvis_allon()" fill="clear" class="ion-no-padding text-underlined">
+                    <div>{{ 'Column Visibility' | translate }}</div>
+                    <ion-button size="small" (click)="colvis_allon()" fill="clear"
+                      class="ion-no-padding text-underlined">
                       {{ 'All On' | translate }}
                     </ion-button>&nbsp;
-                    <ion-button size="small" (click)="colvis_alloff()" fill="clear" class="ion-no-padding text-underlined">
+                    <ion-button size="small" (click)="colvis_alloff()" fill="clear"
+                      class="ion-no-padding text-underlined">
                       {{ 'All Off' | translate }}
                     </ion-button>
                   </div>
@@ -182,7 +182,8 @@ https://www.gnu.org/licenses.
                   <div *ngFor="let item of properties_ | keyvalue : orderByIndex">
                     <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin"
                       (click)="set_colvis_item(item.key)">
-                      <ion-icon [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"></ion-icon> {{ item.value.title | translate }}
+                      <ion-icon [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"></ion-icon> {{ item.value.title |
+                      translate }}
                     </ion-button>
                   </div>
                 </div>
