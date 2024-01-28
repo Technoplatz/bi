@@ -354,8 +354,8 @@
           "filter": [
             {
               "key": "dnn_status",
-              "op": "eq",
-              "value": "50-OnTheTouchpoint"
+              "op": "in",
+              "value": "40-ClearanceCompleted,50-OnTheTouchpoint"
             }
           ],
           "set": [

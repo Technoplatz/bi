@@ -156,18 +156,19 @@ https://www.gnu.org/licenses.
           <table class="data-table">
             <tr>
               <th class="no-padding">
-                <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin" (click)="colvis_activate()">
+                <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin colvis-button"
+                  (click)="colvis_activate()">
                   <ion-icon name="settings-outline"></ion-icon>
                 </ion-button>
                 <div *ngIf="colvis_activated_" class="colvis-box">
                   <div>
                     <div>{{ 'Column Visibility' | translate }}</div>
                     <ion-button size="small" (click)="colvis_allon()" fill="clear"
-                      class="ion-no-padding text-underlined">
+                      class="ion-no-padding ion-no-margin text-underlined">
                       {{ 'All On' | translate }}
                     </ion-button>&nbsp;
                     <ion-button size="small" (click)="colvis_alloff()" fill="clear"
-                      class="ion-no-padding text-underlined">
+                      class="ion-no-padding ion-no-margin text-underlined">
                       {{ 'All Off' | translate }}
                     </ion-button>
                   </div>
@@ -183,7 +184,15 @@ https://www.gnu.org/licenses.
                     <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin"
                       (click)="set_colvis_item(item.key)">
                       <ion-icon [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"></ion-icon> {{ item.value.title |
-                      translate }}
+                      translate }}&nbsp;&nbsp;[{{ item.key}}]
+                    </ion-button>
+                  </div>
+                  ---
+                  <div *ngFor="let item of fixedcols_">
+                    <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin"
+                      (click)="set_colvis_item(item.key)">
+                      <ion-icon [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"></ion-icon> {{ item.title |
+                      translate }}&nbsp;&nbsp;[{{ item.key}}]
                     </ion-button>
                   </div>
                 </div>
@@ -306,21 +315,25 @@ https://www.gnu.org/licenses.
                 {{ 'Count [Sum]' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">Link: {{ link_.get | translate }}</ion-button>
               </th>
-              <th>
+              <th [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
                 {{ 'Created At' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_created_at'}}</ion-button>
               </th>
-              <th>
+              <th [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
                 {{ 'Created By' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_created_by'}}</ion-button>
               </th>
-              <th>
+              <th [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
                 {{ 'Modified At' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_modified_at'}}</ion-button>
               </th>
-              <th>
+              <th [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
                 {{ 'Modified By' | translate }}<br />
                 <ion-button size="small" class="unfiltered-btn">{{'_modified_by'}}</ion-button>
+              </th>
+              <th [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
+                {{ 'ID' }}<br />
+                <ion-button size="small" class="unfiltered-btn">{{'_id'}}</ion-button>
               </th>
             </tr>
             <tr *ngFor="let record of data; let i = index"
@@ -397,17 +410,20 @@ https://www.gnu.org/licenses.
                     record["_link_" + link_.collection].sum?.toFixed(2) }}]</span>
                 </ng-template>
               </td>
-              <td>
+              <td [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
                 {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
               </td>
-              <td>
+              <td [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
                 {{ record._created_by }}
               </td>
-              <td>
+              <td [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
                 {{ record._modified_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
               </td>
-              <td>
+              <td [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
                 {{ record._modified_by }}
+              </td>
+              <td [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
+                {{ record._id }}
               </td>
             </tr>
           </table>

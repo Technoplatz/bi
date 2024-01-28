@@ -106,6 +106,13 @@ export class CollectionPage implements OnInit {
   public colvis_activated_: boolean = false;
   public colvis_: any = {};
   public selections_: any = {};
+  public fixedcols_: any = [
+    { "key": "_created_at", "title": "Created At" },
+    { "key": "_created_by", "title": "Created By" },
+    { "key": "_modified_at", "title": "Modified At" },
+    { "key": "_modified_by", "title": "Modified By" },
+    { "key": "_id", "title": "ID" }
+  ]
 
   constructor(
     private storage: Storage,

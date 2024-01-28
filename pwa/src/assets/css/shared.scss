@@ -2000,9 +2000,15 @@ json-editor .jsoneditor {
 }
 
 .colvis-box {
-  margin-top: 10px !important;
+  width: 280px;
+  margin-top: 15px !important;
   max-height: 40vh;
   overflow-y: scroll;
+}
+
+.colvis-button {
+  padding: 0px !important;
+  margin-top: -18px !important;
 }
 
 .search-box ion-button {

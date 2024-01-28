@@ -91,6 +91,25 @@
       "minLength": 1,
       "maxLength": 64
     },
+    "dnn_acc_name": {
+      "bsonType": "string",
+      "title": "Account Name",
+      "description": "Account Name",
+      "minLength": 1,
+      "maxLength": 128,
+      "readonly": true,
+      "selection": true
+    },
+    "dnn_acc_no": {
+      "bsonType": "string",
+      "title": "Account No",
+      "description": "Account No",
+      "minLength": 9,
+      "maxLength": 16,
+      "pattern": "^[A-Z0-9-]{9,16}$",
+      "readonly": true,
+      "selection": true
+    },
     "dnn_man_no": {
       "bsonType": "string",
       "title": "Manifest No",
@@ -207,25 +226,6 @@
         "AVR"
       ],
       "caseType": "uppercase"
-    },
-    "dnn_acc_name": {
-      "bsonType": "string",
-      "title": "Account Name",
-      "description": "Account Name",
-      "minLength": 1,
-      "maxLength": 128,
-      "readonly": true,
-      "selection": true
-    },
-    "dnn_acc_no": {
-      "bsonType": "string",
-      "title": "Account No",
-      "description": "Account No",
-      "minLength": 9,
-      "maxLength": 16,
-      "pattern": "^[A-Z0-9-]{9,16}$",
-      "readonly": true,
-      "selection": true
     },
     "dnn_ship_type": {
       "bsonType": "string",
