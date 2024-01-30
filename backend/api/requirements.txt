@@ -20,3 +20,4 @@ boto3
 botocore
 unidecode
 pytz
+asyncio

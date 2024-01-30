@@ -2836,9 +2836,7 @@ class Crud:
 
             personalizations_ = []
 
-            get_users_from_tags_f_ = Misc().get_users_from_tags_f(
-                ["#JobAdmins"]
-            )
+            get_users_from_tags_f_ = Misc().get_users_from_tags_f(["#JobAdmins"])
 
             if not get_users_from_tags_f_["result"]:
                 raise APIError(

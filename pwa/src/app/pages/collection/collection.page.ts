@@ -104,6 +104,7 @@ export class CollectionPage implements OnInit {
   public propkeys_: string = "";
   public is_copied: boolean = false;
   public colvis_activated_: boolean = false;
+  public colvised_: boolean = false;
   public colvis_: any = {};
   public selections_: any = {};
   public fixedcols_: any = [
@@ -200,6 +201,10 @@ export class CollectionPage implements OnInit {
           this.storage.get("LSSELECTIONS_" + this.id).then((LSSELECTIONS_: any) => {
             this.storage.get("LSCOLVIS_" + this.id).then((LSCOLVIS_: any) => {
               this.colvis_ = LSCOLVIS_ ? LSCOLVIS_ : {};
+              this.colvised_ = false;
+              Object.keys(this.colvis_).forEach(key_ => {
+                this.colvis_[key_] === true ? this.colvised_ = true : null;
+              });
               this.searched = LSSEARCHED_ ? LSSEARCHED_ : null;
               this.filter_ = LSFILTER_ && LSFILTER_.length > 0 ? LSFILTER_ : [];
               this.selections_ = LSSELECTIONS_ ? LSSELECTIONS_ : {};

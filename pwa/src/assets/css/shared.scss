@@ -1222,8 +1222,8 @@ sup {
   --padding-start: 0px;
   --padding-end: 0px;
   --border-width: 0px !important;
-  margin-bottom: -2px;
   margin-right: 0px !important;
+  margin-top: -8px;
 }
 
 .filtered-btn {
@@ -1990,7 +1990,6 @@ json-editor .jsoneditor {
   width: 240px;
   height: auto;
   margin-left: -8px;
-  margin-top: 6px;
   border: 2px solid var(--ion-color-primary);
   z-index: 999999 !important;
   background-color: #fff;
@@ -2000,7 +1999,7 @@ json-editor .jsoneditor {
 }
 
 .colvis-box {
-  width: 280px;
+  width: 320px;
   margin-top: 15px !important;
   max-height: 40vh;
   overflow-y: scroll;
@@ -2008,7 +2007,7 @@ json-editor .jsoneditor {
 
 .colvis-button {
   padding: 0px !important;
-  margin-top: -18px !important;
+  margin-top: -10px !important;
 }
 
 .search-box ion-button {
@@ -2156,6 +2155,10 @@ json-editor .jsoneditor {
   max-width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.data-table th {
+  padding-bottom: 0px !important;
 }
 
 .data-table th {

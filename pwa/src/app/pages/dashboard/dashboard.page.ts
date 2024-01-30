@@ -62,7 +62,7 @@ export class DashboardPage implements OnInit {
   ngOnInit() {
     this.announcements_ = [];
     this.crud.get_announcements().then((res: any) => {
-      this.announcements_ = res.data ? res.data.slice(0, 20) : [];
+      this.announcements_ = res.data ? res.data.slice(0, 15) : [];
     });
   }
 

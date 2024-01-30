@@ -756,7 +756,8 @@ class Trigger:
                 match_ = {}
                 match_for_aggregate_ = {}
                 target_matches_ = target_["match"]
-                upsert_ = target_["upsert"]
+                upsert_ = "upsert" in target_ and target_["upsert"] is True
+                modified_ = "modified" in target_ and target_["modified"] is True
 
                 for item_ in target_matches_:
                     key__ = item_["key"] if "key" in item_ else None
@@ -969,16 +970,17 @@ class Trigger:
 
                 if op_ == "insert":
                     set_["_created_at"] = self.get_now_f()
-                    set_["_created_by"] = "_automation"
+                    set_["_created_by"] = "_trigger"
                     if "_id" in set_:
                         set_.pop("_id", None)
                         upsert_ = True
 
                 set_["_trigged_at"] = self.get_now_f()
-                set_["_trigged_by"] = "_automation"
-                if upsert_ is True:
+                set_["_trigged_by"] = "_trigger"
+
+                if upsert_ is True or modified_ is True:
                     set_["_modified_at"] = self.get_now_f()
-                    set_["_modified_by"] = "_automation"
+                    set_["_modified_by"] = "_trigger"
 
                 set_["_resume_token"] = token_
                 update_many_ = self.db_[target_collection_].update_many(

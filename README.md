@@ -346,56 +346,41 @@ A sample link item;
 ```json
 [
   {
-    "name": "Amount updater",
-    "enabled": true,
-    "operations": ["update", "insert"],
-    "changes": [
-      { "key": "dnn_qty", "op": "gte", "value": 0 },
-      { "key": "dnn_unit_price", "op": "gte", "value": 0 }
-    ],
-    "targets": [
-      {
-        "collection": "delivery",
-        "match": [{ "key": "_id", "value": "_id", "prefixes": ["16K"] }],
-        "filter": [{ "key": "dnn_status", "op": "ne", "value": "70-Delivered" }],
-        "set": [{ "key": "dnn_amount", "value": "dnn_qty * dnn_unit_price" }],
-        "upsert": false
-      },
-      {
-        "collection": "manifest",
-        "match": [{ "key": "man_no", "value": "dnn_man_no" }],
-        "filter": [{ "key": "man_status", "op": "eq", "value": "10-OnCustomsProcess" }],
-        "set": [{ "key": "man_amount", "value": "sum(dnn_amount)" }],
-        "upsert": false
-      }
-    ]
-  }
-]
-```
-
-```json
-[
-  {
-    "name": "Closed",
+    "name": "ordino-arrived",
     "enabled": true,
     "operations": ["update"],
-    "changes": [{ "key": "man_closed", "op": "eq", "value": true }],
+    "changes": [{ "key": "odi_arrived_date", "op": "nnull", "value": null }],
     "targets": [
       {
         "collection": "delivery",
-        "match": [{ "key": "dnn_man_no", "value": "man_no" }],
-        "filter": [{ "key": "dnn_status", "op": "in", "value": "30-OnCustomsProcess,40-ClearanceCompleted" }],
-        "set": [{ "key": "dnn_status", "value": "40-ClearanceCompleted" }],
+        "match": [
+          { "key": "dnn_odi_no", "value": "odi_no" },
+          { "key": "dnn_odi_sub_no", "value": "odi_sub_no" }
+        ],
+        "filter": [{ "key": "dnn_status", "op": "eq", "value": "10-OnTheWay" }],
+        "set": [{ "key": "dnn_status", "value": "20-OnCustoms" }],
         "upsert": false,
+        "modified": true,
         "notification": {
           "notify": true,
-          "subject": "Customs clearance completed",
-          "body": "Hi,<br /><br />Manifest has been closed.",
+          "subject": "Logistics [Ordino Arrived]",
+          "body": "Hi,<br /><br />We would like to let you know that attached DNs have been arrived at customs.",
           "collection": "delivery",
-          "key": "man_no",
-          "fields": "dnn_no,dnn_line_no,dnn_man_no",
-          "filter": [{ "key": "dnn_man_no", "op": "eq", "value": "man_no" }],
-          "attachment": true
+          "topics": "odi_no,odi_sub_no",
+          "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+          "key": "odi_sub_no",
+          "filter": [
+            { "key": "dnn_odi_no", "op": "eq", "value": "odi_no" },
+            { "key": "dnn_odi_sub_no", "op": "eq", "value": "odi_sub_no" },
+            { "key": "dnn_status", "op": "eq", "value": "20-OnCustoms" }
+          ],
+          "sort": { "dnn_acc_name": 1, "dnn_no": 1, "dnn_line_no": 1 },
+          "attachment": true,
+          "html": true,
+          "csv": false,
+          "excel": true,
+          "json": false,
+          "_tags": ["#Logistics", "#Operation"]
         }
       }
     ]

@@ -158,7 +158,8 @@ https://www.gnu.org/licenses.
               <th class="no-padding">
                 <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin colvis-button"
                   (click)="colvis_activate()">
-                  <ion-icon name="settings-outline"></ion-icon>
+                  <ion-icon *ngIf="colvised_" name="eye-off"></ion-icon>
+                  <ion-icon *ngIf="!colvised_" name="eye-outline"></ion-icon>
                 </ion-button>
                 <div *ngIf="colvis_activated_" class="colvis-box">
                   <div>
@@ -210,11 +211,11 @@ https://www.gnu.org/licenses.
               <th *ngFor="let item of properties_ | keyvalue : orderByIndex"
                 [style]="colvis_ == {} || colvis_[item.key] ? 'display: none;' : ''">
                 <div
-                  [class]="['number','decimal','float'].includes(item.value.bsonType) ? 'align-right' : 'align-left'">
+                  [class]="['number','decimal','float'].includes(item.value.bsonType) ? 'align-right clicked-item' : 'align-left clicked-item'"
+                  (click)="set_search(item.key)">
                   {{ item.value.title | translate }}<br />
                   <ion-button size="small" fill="clear"
-                    [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'"
-                    (click)="set_search(item.key)">{{
+                    [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'">{{
                     item.key }}<ion-icon name="caret-down"></ion-icon>
                   </ion-button>
                 </div>

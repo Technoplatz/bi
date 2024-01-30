@@ -88,7 +88,7 @@ https://www.gnu.org/licenses.
 
         <!-- RECENT ANNOUNCEMENTS -->
         <div class="filler-10"></div>
-        <h4>{{ 'Announcements' | translate }}</h4>
+        <h4>{{ 'Recent Announcements' | translate }}</h4>
         <ion-grid *ngIf="announcements_?.length > 0; else noannouncement" class="ion-no-padding data-grid">
           <ion-row>
             <ion-col size="2">
@@ -105,9 +105,6 @@ https://www.gnu.org/licenses.
             <ion-col size="2"> {{ item.ano_date.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm':'utc' }} </ion-col>
             <ion-col size="3"> {{ item.ano_subject }}</ion-col>
             <ion-col size="7"> {{ item._tags?.join(' ') }} </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col size="12">{{ 'Recent Announcements' | translate }} [{{ announcements_.length }}]</ion-col>
           </ion-row>
           <div class="filler-16"></div>
           <ion-button size="small" (click)="misc.navi.next('admin/_announcement')">{{ 'Show All' | translate
