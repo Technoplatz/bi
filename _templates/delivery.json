@@ -744,6 +744,55 @@
         }
       },
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
+    },
+    {
+      "id": "notes",
+      "title": "Notes",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_reminder",
+          "value": null
+        },
+        {
+          "key": "dnn_note",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "icon": "flag",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "notification": {
+        "notify": true,
+        "subject": "Operation [Note Added]",
+        "body": "Hi,<br /><br />We would like to let you know that some notes have been added to the attached DNs.",
+        "attachment": true,
+        "html": true,
+        "csv": false,
+        "excel": true,
+        "json": false,
+        "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_qty,dnn_reminder,dnn_note",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "in",
+            "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
+          }
+        ],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
+      }
     }
   ],
   "links": [],

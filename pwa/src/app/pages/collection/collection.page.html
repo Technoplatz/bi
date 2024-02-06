@@ -45,7 +45,7 @@ https://www.gnu.org/licenses.
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
               <div *ngIf="is_crud && importvis_" (click)="import_modal()" class="data-sq-button">
-                <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text color="primary">{{ 'Upload File' |
+                <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text color="primary">{{ 'File Upload' |
                   translate }}</ion-text>
               </div>
               <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
@@ -56,7 +56,7 @@ https://www.gnu.org/licenses.
                 <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
                   class="data-sq-button">
                   <ion-icon name="add-circle-outline"></ion-icon><br />
-                  <ion-text color="primary">{{ 'New Document' | translate }}</ion-text>
+                  <ion-text color="primary">{{ 'New Record' | translate }}</ion-text>
                 </div>
               </ng-template>
               <div (click)="refresh_data(0, false)" class="data-sq-button">
@@ -73,12 +73,12 @@ https://www.gnu.org/licenses.
               </div>
               <div (click)="multi_crud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
-                <ion-text color="primary">{{ 'Clone Document' | translate }}</ion-text>
+                <ion-text color="primary">{{ 'Clone Record' | translate }}</ion-text>
               </div>
               <div *ngIf="perma_" (click)="multi_crud('delete')" class="data-sq-button">
                 <ion-icon name="trash-outline"></ion-icon>
                 <br />
-                <ion-text color="primary">{{ 'Delete Document' | translate }}</ion-text>
+                <ion-text color="primary">{{ 'Delete Record' | translate }}</ion-text>
               </div>
               <div (click)="copy(propkeys_, $event, -1)" class="data-sq-button">
                 <ion-icon *ngIf="!is_copied" name="browsers-sharp"></ion-icon>

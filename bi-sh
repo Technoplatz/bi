@@ -101,19 +101,19 @@ function pruneBI() {
 function startBI() {
     echo -e "\nStarting containers..."
     mkdir -p .secret
-    if [[ ! -f .secret/.mongo_tls_keyfile_password ]]; then
+    if [ ! -f .secret/.mongo_tls_keyfile_password ]; then
         echo -n $(openssl rand -hex 10) >.secret/.mongo_tls_keyfile_password
     fi
-    if [[ ! -f .secret/.mongo_username ]]; then
+    if [ ! -f .secret/.mongo_username ]; then
         echo -n "root" >.secret/.mongo_username
     fi
-    if [[ ! -f .secret/.mongo_password ]]; then
+    if [ ! -f .secret/.mongo_password ]; then
         echo -n $(openssl rand -hex 10) >.secret/.mongo_password
     fi
-    if [[ ! -f .secret/.mongo_initdb_root_username ]]; then
+    if [ ! -f .secret/.mongo_initdb_root_username ]; then
         echo -n "root" >.secret/.mongo_initdb_root_username
     fi
-    if [[ ! -f .secret/.mongo_initdb_root_password ]]; then
+    if [ ! -f .secret/.mongo_initdb_root_password ]; then
         echo -n $(openssl rand -hex 10) >.secret/.mongo_initdb_root_password
     fi
     env docker compose --project-name $PRJNAME --env-file $DOTENV -f $DCYML --compatibility up --detach --no-build
@@ -187,11 +187,14 @@ LOGTAIL=20
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
 IXCFDIR="_integration/cloudflare"
 IXEDOKSISDIR="_integration/edoksis"
-DOTENV=".env"
-if [[ -f .env-dev0 ]]; then
-    DOTENV=".env-dev0"
-fi
 IXDOTENV=".env"
+DOTENV=".env"
+if [ -f .env-dev ]; then
+    DOTENV=".env-dev"
+fi
+
+# UNSET ENV INITIALLY
+unset $(grep -v '^#' $DOTENV | sed -E 's/(.*)=.*/\1/' | xargs)
 
 case $1 in
 "init")
