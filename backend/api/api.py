@@ -3185,7 +3185,7 @@ class Crud:
                 prop_ = properties_[property_]
                 if "reminder" in prop_ and prop_["reminder"] is True:
                     for ix_, doc_ in enumerate(docs_):
-                        if property_ in doc_ and doc_[property_] is not None:
+                        if property_ in doc_ and doc_[property_] is not None and str(doc_[property_]) != "":
                             docs_[ix_]["_reminder"] = True
                             docs_[ix_]["_note"] = (
                                 f"{docs_[ix_]['_note']}<br />{doc_[property_]}"

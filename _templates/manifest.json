@@ -215,10 +215,6 @@
       ],
       "set": [
         {
-          "key": "man_gov_amount",
-          "value": 0
-        },
-        {
           "key": "man_gov_purchase_date",
           "value": "$CURRENT_DATE"
         },
