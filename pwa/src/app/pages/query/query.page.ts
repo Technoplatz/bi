@@ -82,6 +82,7 @@ export class QueryPage implements OnInit {
   private menu: string = "";
   private submenu: string = "";
   private query_: any = {};
+  public perm_: boolean = false;
   public perma_: boolean = false;
   private schema_: any = {};
   public json_content_: any = null;
@@ -98,6 +99,7 @@ export class QueryPage implements OnInit {
   ) {
     this.auth.user.subscribe((res: any) => {
       this.user = res;
+      this.perm_ = res.perm;
       this.perma_ = res.perma;
     });
     this.crud.collections.subscribe((res: any) => {
