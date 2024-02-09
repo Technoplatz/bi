@@ -3536,8 +3536,8 @@ class Crud:
 
             approved_ = "approved" in obj_ and obj_["approved"] is True
             if approved_:
-                if not Auth().is_admin_f(user_):
-                    raise AuthError("no permission to approve")
+                if not Auth().is_manager_f(user_):
+                    raise AuthError("no permission to approve query")
 
                 doc_["_approved"] = True
                 doc_["_approved_at"] = Misc().get_now_f()
