@@ -107,6 +107,7 @@ export class CollectionPage implements OnInit {
   public colvised_: boolean = false;
   public colvis_: any = {};
   public selections_: any = {};
+  public pagination_: any = [];
   public fixedcols_: any = [
     { "key": "_created_at", "title": "Created At" },
     { "key": "_created_by", "title": "Created By" },
@@ -150,7 +151,7 @@ export class CollectionPage implements OnInit {
   ionViewDidEnter() {
     this.is_initialized = false;
     this.colvis_activated_ = false;
-    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
+    this.storage.get("LSPAGINATION_" + this.id).then((LSPAGINATION: any) => {
       this.limit_ = LSPAGINATION * 1;
       this.storage.get("LSCOLVIS_" + this.id).then((LSCOLVIS_: any) => {
         this.colvis_ = LSCOLVIS_ ? LSCOLVIS_ : {};
@@ -230,6 +231,7 @@ export class CollectionPage implements OnInit {
                   this.actions = res.actions;
                   this.properties_ = res.structure.properties;
                   this.importvis_ = res.structure.import?.enabled;
+                  this.pagination_ = res.structure.pagination ? res.structure.pagination : [];
                   this.scan_ = true ? Object.keys(this.properties_).filter((key: any) => this.properties_[key].scan).length > 0 : false;
                   this.count = res.count;
                   this.multicheckbox = false;

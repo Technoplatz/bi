@@ -6490,6 +6490,7 @@ STRUCTURE_KEYS_ = [
     "actions",
     "triggers",
     "import",
+    "pagination"
 ]
 STRUCTURE_KEYS_OPTIN_ = ["queries"]
 PROP_KEYS_ = ["bsonType", "title", "description"]

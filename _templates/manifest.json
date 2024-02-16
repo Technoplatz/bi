@@ -493,7 +493,9 @@
     }
   ],
   "import": {
-    "enabled": false
+    "enabled": true,
+    "upsertable": true,
+    "upsertables": ["man_gov_amount"]
   },
   "queries": {
     "query": true,

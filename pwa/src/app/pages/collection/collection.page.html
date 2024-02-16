@@ -458,7 +458,7 @@ https://www.gnu.org/licenses.
             <ion-button size="small" fill="clear" (click)="refresh_data(0, false)"
               class="ion-no-padding ion-margin-start">
               <ion-icon name="list-sharp"></ion-icon>
-              {{ 'Pagination' | translate }} [<app-pagination></app-pagination>]
+              {{ 'Pagination' | translate }} [<app-pagination [pagination_]="pagination_" [id_]="id"></app-pagination>]
             </ion-button>
           </div>
           <ng-template #norecs>
