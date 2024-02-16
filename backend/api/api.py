@@ -2947,7 +2947,7 @@ class Crud:
         """
         try:
             user_ = input_["user"]
-            limit_ = input_["limit"]
+            limit_ = input_["limit"] if "limit" in input_ and input_["limit"] > 0 else 50
             page_ = input_["page"]
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]

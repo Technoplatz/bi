@@ -152,7 +152,7 @@ export class CollectionPage implements OnInit {
     this.is_initialized = false;
     this.colvis_activated_ = false;
     this.storage.get("LSPAGINATION_" + this.id).then((LSPAGINATION: any) => {
-      this.limit_ = LSPAGINATION * 1;
+      this.limit_ = LSPAGINATION ? LSPAGINATION * 1 : 50;
       this.storage.get("LSCOLVIS_" + this.id).then((LSCOLVIS_: any) => {
         this.colvis_ = LSCOLVIS_ ? LSCOLVIS_ : {};
         this.storage.get("LSFILTER_" + this.id).then((LSFILTER_: any) => {
