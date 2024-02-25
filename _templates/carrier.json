@@ -49,6 +49,7 @@
   "sort": {
     "_modified_at": -1
   },
+  "pagination": [25, 50, 100],
   "required": ["car_id", "car_acc_no", "car_name", "car_tax_no", "car_plate_no"],
   "index": [["car_acc_no"]],
   "unique": [["car_id"]],

@@ -91,19 +91,12 @@ services:
       - SUPPLIER_EMAIL=${SUPPLIER_EMAIL}
       - SUPPLIER_TAX_OFFICE=${SUPPLIER_TAX_OFFICE}
       - SUPPLIER_TAX_NO=${SUPPLIER_TAX_NO}
-    env_file:
-      - .env
     secrets:
       - mongo_username
       - mongo_password
       - mongo_tls_keyfile_password
-    extra_hosts:
-      - mongo0:${SUBNET_MONGO0_IPV4}
-      - mongo1:${SUBNET_MONGO1_IPV4}
-      - mongo2:${SUBNET_MONGO2_IPV4}
     networks:
-      network0:
-        ipv4_address: ${SUBNET_EDOKSIS_IPV4}
+      - network0
 
 volumes:
   bi-cert-volume:
@@ -119,8 +112,6 @@ networks:
     external: true
     ipam:
       driver: default
-      config:
-        - subnet: ${SUBNET}
 
 secrets:
   mongo_password:

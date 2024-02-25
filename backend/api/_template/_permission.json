@@ -114,5 +114,6 @@
   ],
   "sort": {
     "_modified_at": -1
-  }
+  },
+  "pagination": [25, 50, 100]
 }

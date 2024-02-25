@@ -65,5 +65,6 @@
   "index": [["ano_que_id"], ["ano_date"]],
   "sort": {
     "ano_date": -1
-  }
+  },
+  "pagination": [25, 50, 100]
 }

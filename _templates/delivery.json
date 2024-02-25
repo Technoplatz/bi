@@ -336,7 +336,7 @@
       "title": "Vehicle Plate",
       "description": "Vehicle plate number",
       "placeholder": "Vehicle plate number",
-      "minLength": 1,
+      "minLength": 0,
       "maxLength": 16,
       "caseType": "uppercase",
       "permanent": true
@@ -436,6 +436,7 @@
     "dnn_no": 1,
     "dnn_line_no": 1
   },
+  "pagination": [25, 50, 100, 500, 1000],
   "parents": [
     {
       "collection": "business",
@@ -568,55 +569,6 @@
             "key": "dnn_status",
             "op": "eq",
             "value": "00-Open"
-          }
-        ],
-        "sort": {
-          "dnn_no": 1,
-          "dnn_line_no": 1
-        }
-      }
-    },
-    {
-      "id": "rtd",
-      "title": "Ready TBD",
-      "enabled": false,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "in",
-          "value": "40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "60-ReadyToBeDelivered"
-        },
-        {
-          "key": "dnn_rtd_date",
-          "value": "$CURRENT_DATE"
-        }
-      ],
-      "one_click": false,
-      "icon": "flag",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
-      "notification": {
-        "notify": true,
-        "subject": "Operation [DNs Ready TBD]",
-        "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
-        "attachment": true,
-        "html": false,
-        "csv": true,
-        "excel": true,
-        "json": false,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_rtd_date",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "60-ReadyToBeDelivered"
           }
         ],
         "sort": {
@@ -891,6 +843,16 @@
   "queries": {
     "query": true,
     "cronjob": true,
-    "updatables": ["dnn_labeled", "dnn_label_info", "dnn_status", "dnn_man_no", "dnn_ship_type", "dnn_rtd_date", "dnn_prd_group"]
+    "updatables": [
+      "dnn_labeled",
+      "dnn_label_info",
+      "dnn_status",
+      "dnn_man_no",
+      "dnn_ship_type",
+      "dnn_rtd_date",
+      "dnn_prd_group",
+      "dnn_note",
+      "dnn_wayb_no"
+    ]
   }
 }

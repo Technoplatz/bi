@@ -28,5 +28,6 @@
   "unique": [["dmp_id"], ["dmp_file"]],
   "sort": {
     "_created_at": -1
-  }
+  },
+  "pagination": [25, 50, 100]
 }

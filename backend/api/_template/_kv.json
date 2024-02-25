@@ -27,5 +27,6 @@
   "unique": [["kav_key", "kav_as", "kav_value"]],
   "sort": {
     "_created_at": -1
-  }
+  },
+  "pagination": [25, 50, 100]
 }

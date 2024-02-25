@@ -195,7 +195,7 @@ class Trigger:
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc_:
-            PRINT_("!!! refresher mongo error")
+            PRINT_("!!! refresher mongo error", str(exc_))
             return {"result": False, "msg": str(exc_)}
 
         except AppException as exc_:

@@ -46,5 +46,6 @@
   "triggers": [],
   "views": {},
   "sort": { "zzz_string": 1 },
+  "pagination": [25, 50, 100],
   "fetchers": []
 }

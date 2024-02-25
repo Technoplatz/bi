@@ -57,5 +57,6 @@
   "sort": {
     "col_priority": 1,
     "col_title": 1
-  }
+  },
+  "pagination": [25, 50, 100]
 }

@@ -69,12 +69,12 @@ function initBI() {
 
 function updateBI() {
     echo "Updating..."
-    docker compose --project-name $PRJNAME -f $DCYML pull
-    if [[ -f $IXCFDIR/$DCYML ]]; then
-        env docker compose --project-name $PRJNAME -f $IXCFDIR/$DCYML pull
+    docker compose --project-name $PRNAME --file $DCYML pull
+    if [[ -f $INTGCFDIR/$DCYML ]]; then
+        env docker compose --project-name $PRNAME --file $INTGCFDIR/$DCYML pull
     fi
-    if [[ -f $IXEDOKSISDIR/$DCYML ]]; then
-        env docker compose --project-name $PRJNAME -f $IXEDOKSISDIR/$DCYML pull
+    if [[ -f $INTGEDOKSISDIR/$DCYML ]]; then
+        env docker compose --project-name $PRNAME --file $INTGEDOKSISDIR/$DCYML pull
     fi
     if [ $? -eq 0 ]; then
         echo -e "✔ The latest version received successfully."
@@ -90,7 +90,7 @@ function pruneBI() {
     echo -e "Cleaning..."
     docker system prune --force $1
     if [ $? -eq 0 ]; then
-        echo "✔ Dangling and unused resources successfully removed."
+        echo -e "\n✔ Dangling and unused resources successfully removed."
     else
         echo -e "✘ Sorry! Process was terminated ($?)."
         return 0
@@ -101,14 +101,13 @@ function pruneBI() {
 function startBI() {
     echo -e "\nStarting containers..."
     mkdir -p .secret
-    if [ ! -f .secret/.mongo_tls_keyfile_password ]; then
-        echo -n $(openssl rand -hex 10) >.secret/.mongo_tls_keyfile_password
-    fi
     if [ ! -f .secret/.mongo_username ]; then
         echo -n "root" >.secret/.mongo_username
+        echo -e "\nUsername set."
     fi
     if [ ! -f .secret/.mongo_password ]; then
         echo -n $(openssl rand -hex 10) >.secret/.mongo_password
+        echo -e "\nPassword set."
     fi
     if [ ! -f .secret/.mongo_initdb_root_username ]; then
         echo -n "root" >.secret/.mongo_initdb_root_username
@@ -116,7 +115,10 @@ function startBI() {
     if [ ! -f .secret/.mongo_initdb_root_password ]; then
         echo -n $(openssl rand -hex 10) >.secret/.mongo_initdb_root_password
     fi
-    env docker compose --project-name $PRJNAME --env-file $DOTENV -f $DCYML --compatibility up --detach --no-build
+    if [ ! -f .secret/.mongo_tls_keyfile_password ]; then
+        echo -n $(openssl rand -hex 10) >.secret/.mongo_tls_keyfile_password
+    fi
+    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML --compatibility up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
         docker cp init:/cert/mongo0.pem .secret/mongo0.pem
@@ -126,11 +128,23 @@ function startBI() {
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
     fi
-    if [[ -f $IXCFDIR/$DCYML ]]; then
-        env docker compose --project-name $PRJNAME --env-file $IXCFDIR/$IXDOTENV -f $IXCFDIR/$DCYML --compatibility up --detach --no-build
+    if [ -f $INTGCFDIR/$DCYML ]; then
+        docker compose --project-name $PRNAME --env-file $INTGCFDIR/$DOTENV --file $INTGCFDIR/$DCYML --compatibility up --detach --no-build
     fi
-    if [[ -f $IXEDOKSISDIR/$DCYML ]]; then
-        env docker compose --project-name $PRJNAME --env-file $IXEDOKSISDIR/$IXDOTENV -f $IXEDOKSISDIR/$DCYML --compatibility up --detach --no-build
+    if [ -f $INTGEDOKSISDIR/$DCYML ]; then
+        docker compose --project-name $PRNAME --env-file $INTGEDOKSISDIR/$DOTENV --file $INTGEDOKSISDIR/$DCYML --compatibility up --detach --no-build
+    fi
+    return 1
+}
+
+function downBI() {
+    echo -e "Removing $PRNAME containers...\n"
+    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML down
+    if [ -f $INTGCFDIR/$DCYML ]; then
+        docker compose --project-name $PRNAME --env-file $INTGCFDIR/$DOTENV --file $INTGCFDIR/$DCYML down
+    fi
+    if [ -f $INTGEDOKSISDIR/$DCYML ]; then
+        docker compose --project-name $PRNAME --env-file $INTGEDOKSISDIR/$DOTENV --file $INTGEDOKSISDIR/$DCYML down
     fi
     return 1
 }
@@ -168,7 +182,7 @@ function logsBI() {
 }
 
 function buildBI() {
-    docker compose --env-file $DOTENV -f $DCYML build $1 $2
+    docker compose --env-file $DOTENV --file $DCYML build $1 $2
     if [ $? -ne 0 ]; then
         echo -e "\n✘ Sorry! An error occured."
         return 0
@@ -179,18 +193,22 @@ function buildBI() {
 }
 
 # ENV VARIABLES
+PRNAME="technoplatz-bi"
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
-DCYML="docker-compose.yml"
-PRJNAME="technoplatz-bi"
 LOGTAIL=20
+DCYML="docker-compose.yml"
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
-IXCFDIR="_integration/cloudflare"
-IXEDOKSISDIR="_integration/edoksis"
-IXDOTENV=".env"
+INTGCFDIR="_integration/cloudflare"
+INTGEDOKSISDIR="_integration/edoksis"
+
 DOTENV=".env"
 if [ -f .env-dev ]; then
     DOTENV=".env-dev"
+fi
+if [ ! -f .env-dev ]; then
+    echo -e "✘ Sorry. env not found.\n"
+    exit
 fi
 
 # UNSET ENV INITIALLY
@@ -205,6 +223,9 @@ case $1 in
     ;;
 "stop")
     stopBI
+    ;;
+"down")
+    downBI
     ;;
 "prune")
     pruneBI "$2"

@@ -21,6 +21,7 @@
   "sort": {
     "bun_id": 1
   },
+  "pagination": [25, 50, 100],
   "parents": [],
   "links": [],
   "actions": [],

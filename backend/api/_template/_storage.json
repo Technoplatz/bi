@@ -32,5 +32,6 @@
   "index": [["sto_id"], ["sto_collection_id"]],
   "sort": {
     "_modified_at": -1
-  }
+  },
+  "pagination": [25, 50, 100]
 }

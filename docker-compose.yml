@@ -55,12 +55,11 @@ services:
     environment:
       - TZ=${TZ}
     ports:
-      - "${HTTPS_PORT}:${HTTPS_PORT}"
-      - "${TRAEFIK_PORT}:${TRAEFIK_PORT}"
       - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${HTTPS_PORT}:${HTTPS_PORT}"
+      - "${TRAEFIK_CONTAINER_PORT}:${TRAEFIK_CONTAINER_PORT}"
     networks:
-      network0:
-        ipv4_address: ${SUBNET_TRAEFIK_IPV4}
+      - network0
 
   init:
     build:
@@ -70,6 +69,7 @@ services:
     container_name: init
     hostname: init
     labels:
+      - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - bi-cert-volume:/cert
@@ -96,8 +96,7 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
     networks:
-      network0:
-        ipv4_address: ${SUBNET_INIT_IPV4}
+      - network0
     secrets:
       - mongo_tls_keyfile_password
 
@@ -107,11 +106,12 @@ services:
     hostname: ${MONGO_HOST0}
     restart: always
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${SUBNET_MONGO0_IPV4}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST0}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
       init:
         condition: service_completed_successfully
     labels:
+      - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     ports:
       - "${MONGO_PORT0}:${MONGO_PORT0}"
@@ -129,14 +129,13 @@ services:
       - MONGO_USERNAME_FILE=/run/secrets/mongo_username
       - MONGO_PASSWORD_FILE=/run/secrets/mongo_password
       - MONGO_INITDB_DATABASE=${MONGO_DB}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO0_IPV4} --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
       - mongo1
       - mongo2
     networks:
-      network0:
-        ipv4_address: ${SUBNET_MONGO0_IPV4}
+      - network0
     secrets:
       - mongo_initdb_root_username
       - mongo_initdb_root_password
@@ -150,11 +149,12 @@ services:
     hostname: ${MONGO_HOST1}
     restart: always
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${SUBNET_MONGO1_IPV4}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST1}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
       init:
         condition: service_completed_successfully
     labels:
+      - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     ports:
       - "${MONGO_PORT1}:${MONGO_PORT0}"
@@ -172,12 +172,11 @@ services:
       - MONGO_USERNAME_FILE=/run/secrets/mongo_username
       - MONGO_PASSWORD_FILE=/run/secrets/mongo_password
       - MONGO_INITDB_DATABASE=${MONGO_DB}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO1_IPV4} --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
-      network0:
-        ipv4_address: ${SUBNET_MONGO1_IPV4}
+      - network0
     secrets:
       - mongo_initdb_root_username
       - mongo_initdb_root_password
@@ -191,11 +190,12 @@ services:
     hostname: ${MONGO_HOST2}
     restart: always
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${SUBNET_MONGO2_IPV4}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST2}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
       init:
         condition: service_completed_successfully
     labels:
+      - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     ports:
       - "${MONGO_PORT2}:${MONGO_PORT0}"
@@ -213,12 +213,11 @@ services:
       - MONGO_USERNAME_FILE=/run/secrets/mongo_username
       - MONGO_PASSWORD_FILE=/run/secrets/mongo_password
       - MONGO_INITDB_DATABASE=${MONGO_DB}
-    command: "/usr/bin/mongod --bind_ip ${SUBNET_MONGO2_IPV4} --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
-      network0:
-        ipv4_address: ${SUBNET_MONGO2_IPV4}
+      - network0
     secrets:
       - mongo_initdb_root_username
       - mongo_initdb_root_password
@@ -241,6 +240,7 @@ services:
       mongo2:
         condition: service_healthy
     labels:
+      - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - bi-cert-volume:/cert
@@ -273,8 +273,7 @@ services:
       - mongo1
       - mongo2
     networks:
-      network0:
-        ipv4_address: ${SUBNET_REPLICASET_IPV4}
+      - network0
     secrets:
       - mongo_username
       - mongo_password
@@ -292,6 +291,7 @@ services:
     hostname: stream
     restart: always
     labels:
+      - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLE}
     volumes:
       - bi-cert-volume:/cert
@@ -299,7 +299,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "${STREAM_PORT}:${HTTP_PORT}"
+      - "${STREAM_CONTAINER_PORT}:${STREAM_CONTAINER_PORT}"
     environment:
       - TZ=${TZ}
       - MONGO_DB=${MONGO_DB}
@@ -328,13 +328,8 @@ services:
       - HTML_TABLE_MAX_COLS=${HTML_TABLE_MAX_COLS}
     links:
       - replicaset
-    extra_hosts:
-      - mongo0:${SUBNET_MONGO0_IPV4}
-      - mongo1:${SUBNET_MONGO1_IPV4}
-      - mongo2:${SUBNET_MONGO2_IPV4}
     networks:
-      network0:
-        ipv4_address: ${SUBNET_STREAM_IPV4}
+      - network0
     secrets:
       - mongo_username
       - mongo_password
@@ -424,13 +419,8 @@ services:
       - HTML_TABLE_MAX_COLS=${HTML_TABLE_MAX_COLS}
     links:
       - replicaset
-    extra_hosts:
-      - mongo0:${SUBNET_MONGO0_IPV4}
-      - mongo1:${SUBNET_MONGO1_IPV4}
-      - mongo2:${SUBNET_MONGO2_IPV4}
     networks:
-      network0:
-        ipv4_address: ${SUBNET_API_IPV4}
+      - network0
     secrets:
       - mongo_username
       - mongo_password
@@ -466,14 +456,15 @@ services:
     links:
       - api
     networks:
-      network0:
-        ipv4_address: ${SUBNET_PWA_IPV4}
+      - network0
 
   watchtower:
     image: containrrr/watchtower:latest
     container_name: watchtower
     hostname: watchtower
     restart: always
+    labels:
+      - traefik.enable=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/timezone:/etc/timezone:ro
@@ -489,8 +480,7 @@ services:
     links:
       - traefik
     networks:
-      network0:
-        ipv4_address: ${SUBNET_WATCHTOWER_IPV4}
+      - network0
 
 volumes:
   bi-mongo0-volume:
@@ -517,8 +507,6 @@ networks:
     name: network0
     ipam:
       driver: default
-      config:
-        - subnet: ${SUBNET}
 
 secrets:
   mongo_initdb_root_password:
