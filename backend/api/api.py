@@ -1748,7 +1748,10 @@ class Crud:
                     for upsertable__ in upsertables_:
                         if upsertable__ in doc_ and doc_[upsertable__] is not None:
                             fieldsgiven_ = True
-                            set_[upsertable__] = doc_[upsertable__]
+                            if doc_[upsertable__].lower() == "null":
+                                set_[upsertable__] = None
+                            else:
+                                set_[upsertable__] = doc_[upsertable__]
                     if not set_:
                         continue
                     set_["_modified_at"] = get_now_f_

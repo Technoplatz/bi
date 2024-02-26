@@ -46,9 +46,9 @@
       "bsonType": "string",
       "title": "Family",
       "description": "Family name",
-      "minLength": 1,
+      "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-_ ]{1,64}$"
+      "pattern": "^[A-Za-z0-9-_/ ]{0,64}$"
     },
     "prd_cpu": {
       "bsonType": "string",
@@ -113,6 +113,7 @@
   "sort": {
     "_modified_at": -1
   },
+  "pagination": [25, 50, 100],
   "parents": [],
   "actions": [],
   "links": [],

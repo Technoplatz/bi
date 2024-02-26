@@ -47,6 +47,7 @@
   "sort": {
     "_created_at": -1
   },
+  "pagination": [25, 50, 100],
   "parents": [],
   "actions": [],
   "triggers": [],
@@ -54,6 +55,6 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["ord_date"]
+    "upsertables": ["ord_date", "ord_prd_no", "ord_unit_price"]
   }
 }
