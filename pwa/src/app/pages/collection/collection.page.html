@@ -35,11 +35,11 @@ https://www.gnu.org/licenses.
     <ion-row>
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
-        <h3>[{{ subheader }}]</h3>
+        <h3>[{{ subheader }}]&nbsp;</h3>
         <span *ngIf="is_loaded" class="bold primary">{{ count }} {{ count > 1 ? ('documents' | translate)
           : ('document' | translate) }} {{ (filter_?.length > 0 ? 'filtered' : 'found') | translate }}.</span><span
           *ngIf="!is_loaded" class="bold primary">{{
-          loadingText | translate }}...</span>
+          loadingText | translate }}...&nbsp;</span>
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">

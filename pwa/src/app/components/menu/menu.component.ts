@@ -74,7 +74,9 @@ export class MenuComponent implements OnInit {
   }
 
   sign_out() {
-    this.auth.sign_out().then(() => { }).catch((error: any) => {
+    this.auth.sign_out().then(() => {
+      console.log("signed out");
+    }).catch((error: any) => {
       console.error("signout error", error.msg);
     });
   }

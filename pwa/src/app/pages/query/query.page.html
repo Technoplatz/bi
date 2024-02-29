@@ -34,9 +34,9 @@ https://www.gnu.org/licenses.
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
-        <p class="hdr">{{ header | translate }}</p>
-        <h3>{{ subheader }}</h3>
-        <span *ngIf="_tags" class="bold primary">{{ _tags.join(" ") }}</span>
+        <p class="hdr">{{ header | translate }}&nbsp;</p>
+        <h3>{{ subheader }}&nbsp;</h3>
+        <span *ngIf="_tags" class="bold primary">{{ _tags.join(" ") }}&nbsp;</span>
         <div class="filler-10"></div>
         <!-- BUTTONS -->
         <ion-grid class="ion-no-padding">
@@ -85,7 +85,7 @@ https://www.gnu.org/licenses.
                     d="M5,3H7V5H5v5a2,2,0,0,1-2,2,2,2,0,0,1,2,2v5H7v2H5c-1.07-.27-2-.9-2-2V15a2,2,0,0,0-2-2H0V11H1A2,2,0,0,0,3,9V5A2,2,0,0,1,5,3M19,3a2,2,0,0,1,2,2V9a2,2,0,0,0,2,2h1v2H23a2,2,0,0,0-2,2v4a2,2,0,0,1-2,2H17V19h2V14a2,2,0,0,1,2-2,2,2,0,0,1-2-2V5H17V3h2M12,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1M8,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1m8,0a1,1,0,1,1-1,1A1,1,0,0,1,16,15Z" />
                 </svg>
                 <br />
-                <ion-text color="primary">{{ 'Edit Query' | translate }}</ion-text>
+                <ion-text color="primary">{{ 'Edit JSON' | translate }}</ion-text>
               </div>
               <div (click)="edit_query()" class="data-sq-button">
                 <div class="ion-no-padding">

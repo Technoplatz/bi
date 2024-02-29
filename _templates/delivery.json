@@ -124,8 +124,8 @@
       "bsonType": "string",
       "title": "Ordino No",
       "description": "Primary ordino number",
-      "pattern": "^[\\p{L}0-9A-Z-_./ ]{1,20}$",
-      "minLength": 1,
+      "pattern": "^[\\p{L}0-9A-Z-_./ ]{0,20}$",
+      "minLength": 0,
       "maxLength": 20,
       "caseType": "uppercase",
       "readonly": true
@@ -134,8 +134,8 @@
       "bsonType": "string",
       "title": "Ordino Sub No",
       "description": "Secondary ordino number",
-      "pattern": "^[\\p{L}0-9A-Z-_/ ]{1,20}$",
-      "minLength": 1,
+      "pattern": "^[\\p{L}0-9A-Z-_/ ]{0,20}$",
+      "minLength": 0,
       "maxLength": 20,
       "caseType": "uppercase",
       "readonly": true
@@ -184,47 +184,8 @@
       "title": "Group",
       "description": "Product Group",
       "minLength": 0,
-      "maxLength": 32,
-      "pattern": "^[A-Za-z&/ ]{0,32}$",
-      "enum": [
-        "CDT",
-        "CNB",
-        "CSP",
-        "DSK",
-        "DSW",
-        "FOC",
-        "IPH",
-        "IPP",
-        "LEP",
-        "LPT",
-        "MOB",
-        "MON",
-        "OPS",
-        "OPT",
-        "PAD",
-        "PCM",
-        "PNS",
-        "POP",
-        "PSV",
-        "PWS",
-        "SRV",
-        "STR",
-        "TRA",
-        "WSD",
-        "WSN",
-        "XHC",
-        "XHE",
-        "XHO",
-        "XHR",
-        "XHS",
-        "XSP",
-        "OTH",
-        "CDM",
-        "TBG",
-        "LBG",
-        "ACC",
-        "AVR"
-      ],
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9&-/ ]{0,64}$",
       "caseType": "uppercase"
     },
     "dnn_ship_type": {
@@ -578,6 +539,59 @@
       }
     },
     {
+      "id": "way-to-open",
+      "title": "Cancel Ordino",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "eq",
+          "value": "10-OnTheWay"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "00-Open"
+        },
+        {
+          "key": "dnn_odi_no",
+          "value": null
+        },
+        {
+          "key": "dnn_odi_sub_no",
+          "value": null
+        }
+      ],
+      "one_click": false,
+      "icon": null,
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"],
+      "notification": {
+        "notify": true,
+        "subject": "Operation [Ordino Cancelled]",
+        "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs were changed from 10-OnTheWay to 00-Open.",
+        "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "00-Open"
+          }
+        ],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
+      }
+    },
+    {
       "id": "split",
       "title": "Line Split",
       "enabled": true,
@@ -696,6 +710,55 @@
         }
       },
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
+    },
+    {
+      "id": "rtd",
+      "title": "Ready TBD",
+      "enabled": true,
+      "match": [
+        {
+          "key": "dnn_status",
+          "op": "in",
+          "value": "50-OnTheTouchpoint,60-ReadyToBeDelivered"
+        }
+      ],
+      "set": [
+        {
+          "key": "dnn_status",
+          "value": "60-ReadyToBeDelivered"
+        },
+        {
+          "key": "dnn_rtd_date",
+          "value": "$CURRENT_DATE"
+        }
+      ],
+      "one_click": false,
+      "icon": "timer",
+      "uniqueness": false,
+      "unique": [],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "notification": {
+        "notify": true,
+        "subject": "Operation [DNs Ready TBD]",
+        "body": "Hi,<br /><br />We would like to let you know that the attached DNs are ready to be delivered.",
+        "attachment": true,
+        "html": false,
+        "csv": true,
+        "excel": true,
+        "json": false,
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_rtd_date",
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "60-ReadyToBeDelivered"
+          }
+        ],
+        "sort": {
+          "dnn_no": 1,
+          "dnn_line_no": 1
+        }
+      }
     },
     {
       "id": "notes",

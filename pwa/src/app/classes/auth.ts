@@ -54,9 +54,12 @@ export class Auth {
   }
 
   setUserOut() {
-    this.storage.remove("LSUSERMETA").then(() => {
-      this.user.next(null);
+    return new Promise((resolve, reject) => {
       window.location.replace("/");
+      this.storage.remove("LSUSERMETA").then(() => {
+        this.user.next(null);
+        resolve(true);
+      });
     });
   }
 
@@ -170,18 +173,19 @@ export class Auth {
 
   sign_out() {
     return new Promise((resolve, reject) => {
-      this.setUserOut();
-      this.misc.api_call("auth", JSON.stringify({
-        op: "signout"
-      })).then((res: any) => {
-        if (res && res.result) {
-          resolve(true);
-        } else {
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
+      this.setUserOut().then(() => {
+        this.misc.api_call("auth", JSON.stringify({
+          op: "signout"
+        })).then((res: any) => {
+          if (res && res.result) {
+            resolve(true);
+          } else {
+            reject(res.msg);
+          }
+        }).catch((res: any) => {
+          this.misc.doMessage(res, "error");
+          reject(res);
+        });
       });
     });
   }
@@ -192,8 +196,9 @@ export class Auth {
         if (LSUSERMETA && LSUSERMETA?.token) {
           resolve(true);
         } else {
-          this.setUserOut();
-          reject("session closed");
+          this.setUserOut().then(() => {
+            reject("session closed");
+          });
         }
       });
     });
@@ -220,8 +225,9 @@ export class Auth {
       creds.op = "forgot";
       this.misc.api_call("otp", JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
-          this.setUserOut();
-          resolve(true);
+          this.setUserOut().then(() => {
+            resolve(true);
+          });
         } else {
           reject(res.msg);
         }
