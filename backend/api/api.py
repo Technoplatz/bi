@@ -6791,68 +6791,68 @@ def api_crud_f():
         return response_
 
 
-# @app.route("/api/otp", methods=["POST"])
-# def api_otp_f():
-#     """
-#     docstring is in progress
-#     """
-#     sc__, res_ = 200, {}
-#     try:
-#         input_ = request.json
-#         if not input_:
-#             res_ = {"result": False, "msg": "input is missing"}
-#             raise APIError(res_)
+@app.route("/api/otp", methods=["POST"])
+def api_otp_f():
+    """
+    docstring is in progress
+    """
+    sc__, res_ = 200, {}
+    try:
+        input_ = request.json
+        if not input_:
+            res_ = {"result": False, "msg": "input is missing"}
+            raise APIError(res_)
 
-#         request_ = input_["request"] if "request" in input_ else None
-#         if not request_:
-#             res_ = {"result": False, "msg": "no request provided"}
-#             raise APIError(res_)
+        request_ = input_["request"] if "request" in input_ else None
+        if not request_:
+            res_ = {"result": False, "msg": "no request provided"}
+            raise APIError(res_)
 
-#         if "op" not in request_:
-#             res_ = {"result": False, "msg": "no operation found"}
-#             raise APIError(res_)
+        if "op" not in request_:
+            res_ = {"result": False, "msg": "no operation found"}
+            raise APIError(res_)
 
-#         jwt_validate_f_ = Auth().jwt_validate_f()
-#         if not jwt_validate_f_["result"]:
-#             raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
+        jwt_validate_f_ = Auth().jwt_validate_f()
+        if not jwt_validate_f_["result"]:
+            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
 
-#         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
-#         if not user_:
-#             raise SessionError({"result": False, "msg": "user session not found"})
-#         email_ = user_["email"] if "email" in user_ else None
+        user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+        if not user_:
+            raise SessionError({"result": False, "msg": "user session not found"})
+        email_ = user_["email"] if "email" in user_ else None
 
-#         op_ = escape(request_["op"])
+        op_ = escape(request_["op"])
 
-#         if op_ == "reset":
-#             res_ = OTP().reset_otp_f(email_)
-#         elif op_ == "show":
-#             res_ = OTP().show_otp_f(email_)
-#         elif op_ == "request":
-#             res_ = OTP().request_otp_f(email_)
-#         elif op_ == "validate":
-#             res_ = OTP().validate_qr_f(email_, request_)
-#         else:
-#             raise APIError(f"invalid operation: {op_}")
+        if op_ == "reset":
+            res_ = OTP().reset_otp_f(email_)
+        elif op_ == "show":
+            res_ = OTP().show_otp_f(email_)
+        elif op_ == "request":
+            res_ = OTP().request_otp_f(email_)
+        elif op_ == "validate":
+            res_ = OTP().validate_qr_f(email_, request_)
+        else:
+            raise APIError(f"invalid operation: {op_}")
 
-#         if not res_["result"]:
-#             raise APIError(res_)
+        if not res_["result"]:
+            raise APIError(res_)
 
-#     except SessionError as exc__:
-#         sc__, res_ = 403, ast.literal_eval(str(exc__))
+    except SessionError as exc__:
+        sc__, res_ = 403, ast.literal_eval(str(exc__))
 
-#     except APIError as exc__:
-#         sc__, res_ = 401, ast.literal_eval(str(exc__))
+    except APIError as exc__:
+        sc__, res_ = 401, ast.literal_eval(str(exc__))
 
-#     except Exception as exc__:
-#         sc__, res_ = 500, ast.literal_eval(str(exc__))
+    except Exception as exc__:
+        sc__, res_ = 500, ast.literal_eval(str(exc__))
 
-#     finally:
-#         response_ = make_response(
-#             json.dumps(res_, default=json_util.default, sort_keys=False)
-#         )
-#         response_.status_code = sc__
-#         response_.mimetype = "application/json"
-#         return response_
+    finally:
+        response_ = make_response(
+            json.dumps(res_, default=json_util.default, sort_keys=False)
+        )
+        response_.status_code = sc__
+        response_.mimetype = "application/json"
+        return response_
 
 
 @app.route("/api/auth", methods=["POST"], endpoint="auth")

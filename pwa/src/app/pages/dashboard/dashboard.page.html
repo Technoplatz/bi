@@ -41,8 +41,8 @@ https://www.gnu.org/licenses.
         <div class="filler-10"></div>
         <div class="visual-container">
           <div *ngFor="let visual_ of visuals_; let a = index" class="visual-item" [style]="flashsizes_[visual_.size]">
-            <h6>{{ visual_.title }} <ion-icon *ngIf="perm_" name="list-circle-outline" class="visual-icon clicked-item"
-                (click)="misc.navi.next('query/' + visual_.id)" color="primary"></ion-icon></h6>
+            <h6>{{ visual_.title }} <ion-icon *ngIf="perm_" name="create-sharp" class="visual-icon clicked-item"
+                (click)="misc.navi.next('query/' + visual_.id)" color="dark"></ion-icon></h6>
             <div *ngIf="visual_?.is_loaded; else notvisloaded">
               <div *ngIf="visual_?.error">
                 {{ visual_.error.msg }}
