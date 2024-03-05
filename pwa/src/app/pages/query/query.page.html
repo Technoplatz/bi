@@ -36,7 +36,8 @@ https://www.gnu.org/licenses.
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
         <h3>{{ subheader }}&nbsp;</h3>
-        <span *ngIf="_tags" class="bold primary">{{ _tags.join(" ") }}&nbsp;</span>
+        <span *ngIf="_tags" class="bold primary">{{ _tags.join(" ") }}</span><span *ngIf="que_scheduled_cron_"
+          class="bold primary">&nbsp;&nbsp;[{{ que_scheduled_cron_ }}]</span>
         <div class="filler-10"></div>
         <!-- BUTTONS -->
         <ion-grid class="ion-no-padding">
@@ -127,6 +128,7 @@ https://www.gnu.org/licenses.
 
         <!-- CRUD GRID SECTION -->
         <div *ngIf="data_.length > 0; else nodata">
+          <div *ngIf="pivot_" [innerHtml]="pivot_"></div>
           <table class="data-table">
             <tr>
               <th></th>

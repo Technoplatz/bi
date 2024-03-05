@@ -199,9 +199,11 @@ class Schedular:
                 scheduled_cron_ = (
                     query_["que_scheduled_cron"]
                     if source_ == "_query" and "que_scheduled_cron" in query_
-                    else query_["job_scheduled_cron"]
-                    if source_ == "_job" and "job_scheduled_cron" in query_
-                    else None
+                    else (
+                        query_["job_scheduled_cron"]
+                        if source_ == "_job" and "job_scheduled_cron" in query_
+                        else None
+                    )
                 )
 
                 if not croniter.is_valid(scheduled_cron_):
@@ -458,10 +460,15 @@ class Misc:
                 aws_secret_access_key=API_S3_KEY_,
             )
             try:
-                s3_.download_file(API_S3_BUCKET_NAME_, object_, localfile_) if op_ in [
-                    "dumpr",
-                    "dumpd",
-                ] else s3_.upload_file(localfile_, API_S3_BUCKET_NAME_, object_)
+                (
+                    s3_.download_file(API_S3_BUCKET_NAME_, object_, localfile_)
+                    if op_
+                    in [
+                        "dumpr",
+                        "dumpd",
+                    ]
+                    else s3_.upload_file(localfile_, API_S3_BUCKET_NAME_, object_)
+                )
             except botocore.exceptions.ClientError as exc__:
                 msg_ = str(exc__)
                 if exc__.response["Error"]["Code"] == "404":
@@ -716,9 +723,11 @@ class Misc:
         return (
             "0.0.0.0"
             if not request
-            else request.headers["cf-connecting-ip"]
-            if "cf-connecting-ip" in request.headers
-            else request.access_route[-1]
+            else (
+                request.headers["cf-connecting-ip"]
+                if "cf-connecting-ip" in request.headers
+                else request.access_route[-1]
+            )
         )
 
     def get_except_underdashes(self):
@@ -832,15 +841,23 @@ class Misc:
                 setto__ = (
                     datetime.strptime(kav_value_[:10], "%Y-%m-%d")
                     if kav_as_ == "date"
-                    else bool(kav_value_)
-                    if kav_as_ == "bool"
-                    else float(kav_value_)
-                    if kav_as_ in ["float", "number", "decimal"]
-                    else int(kav_value_)
-                    if kav_as_ == "int"
-                    else str(kav_value_)
-                    if kav_as_ == "string"
-                    else str(kav_value_)
+                    else (
+                        bool(kav_value_)
+                        if kav_as_ == "bool"
+                        else (
+                            float(kav_value_)
+                            if kav_as_ in ["float", "number", "decimal"]
+                            else (
+                                int(kav_value_)
+                                if kav_as_ == "int"
+                                else (
+                                    str(kav_value_)
+                                    if kav_as_ == "string"
+                                    else str(kav_value_)
+                                )
+                            )
+                        )
+                    )
                 )
             elif setto_[:1] == "=":
                 decimals_ = (
@@ -1789,9 +1806,9 @@ class Crud:
                         content_ += f"{str(werrs_['errInfo'])}"
                     content_ += "\n"
                 stats_ += f"<br />FAILED: {str(len(details_['writeErrors']))}<br />"
-            res_[
-                "msg"
-            ] = "Sorry! We have just e-mailed you the error details about this upload."
+            res_["msg"] = (
+                "Sorry! We have just e-mailed you the error details about this upload."
+            )
 
         except APIError as exc__:
             content_, details_ = str(exc__), {}
@@ -2050,15 +2067,19 @@ class Crud:
                         )
                         if op_ == "in":
                             fres_ = {
-                                "$in": list_
-                                if typ != "number"
-                                else list(map(float, list_))
+                                "$in": (
+                                    list_
+                                    if typ != "number"
+                                    else list(map(float, list_))
+                                )
                             }
                         else:
                             fres_ = {
-                                "$nin": list_
-                                if typ != "number"
-                                else list(map(float, list_))
+                                "$nin": (
+                                    list_
+                                    if typ != "number"
+                                    else list(map(float, list_))
+                                )
                             }
                     elif op_ == "gt":
                         if typ in ["number", "decimal", "float"]:
@@ -2309,9 +2330,11 @@ class Crud:
                         "id": item_["_id"],
                         "title": item_["que_title"],
                         "collection": item_["que_collection_id"],
-                        "size": item_["que_flashcard_size"]
-                        if "que_flashcard_size" in item_
-                        else "M",
+                        "size": (
+                            item_["que_flashcard_size"]
+                            if "que_flashcard_size" in item_
+                            else "M"
+                        ),
                     }
                 )
 
@@ -2357,9 +2380,11 @@ class Crud:
                 "id": id_,
                 "title": cursor_["que_title"],
                 "collection": cursor_["que_collection_id"],
-                "size": cursor_["que_flashcard_size"]
-                if "que_flashcard_size" in cursor_
-                else "M",
+                "size": (
+                    cursor_["que_flashcard_size"]
+                    if "que_flashcard_size" in cursor_
+                    else "M"
+                ),
                 "count": query_f_["count"],
                 "data": query_f_["data"],
                 "fields": query_f_["fields"],
@@ -2384,11 +2409,12 @@ class Crud:
         """
         docstring is in progress
         """
-        schema_, query_, data_, fields_, count_, permitted_, err_ = (
+        schema_, query_, data_, fields_, pivot_, count_, permitted_, err_ = (
             {},
             {},
             [],
             [],
+            "",
             0,
             False,
             None,
@@ -2398,6 +2424,7 @@ class Crud:
             "result": True,
             "query": query_,
             "data": data_,
+            "pivot": pivot_,
             "count": count_,
             "fields": fields_,
             "err": err_,
@@ -2461,9 +2488,11 @@ class Crud:
             _tags = (
                 API_PERMISSIVE_TAGS_
                 if key_ == "announce" and type_ == "test"
-                else query_["_tags"]
-                if "_tags" in query_ and len(query_["_tags"]) > 0
-                else API_PERMISSIVE_TAGS_
+                else (
+                    query_["_tags"]
+                    if "_tags" in query_ and len(query_["_tags"]) > 0
+                    else API_PERMISSIVE_TAGS_
+                )
             )
 
             if orig_ in ["api/crud", "visual"]:
@@ -2552,6 +2581,13 @@ class Crud:
             attach_json_ = set_ and "json" in set_ and set_["json"] is True
             attach_csv_ = set_ and "csv" in set_ and set_["csv"] is True
             attach_html_ = set_ and "html" in set_ and set_["html"] is True
+            attach_pivot_ = (
+                set_
+                and "pivot" in set_
+                and set_["pivot"]
+                and "enabled" in set_["pivot"]
+                and set_["pivot"]["enabled"] is True
+            )
 
             if orig_ == "api/crud":
                 limit_ = (
@@ -2568,6 +2604,44 @@ class Crud:
             cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             count_ = len(data_)
+            pd.options.display.float_format = '{:,.2f}'.format
+            df_raw_ = pd.DataFrame(data_).fillna("") if data_ else None
+
+            pivot_ = ""
+            if attach_pivot_:
+                pivot_ = set_["pivot"]
+                pivot_values_ = (
+                    pivot_["values"]
+                    if "values" in pivot_ and len(pivot_["values"]) > 0
+                    else []
+                )
+                pivot_index_ = (
+                    pivot_["index"]
+                    if "index" in pivot_ and len(pivot_["index"]) > 0
+                    else []
+                )
+                pivot_columns_ = (
+                    pivot_["columns"]
+                    if "columns" in pivot_ and len(pivot_["columns"]) > 0
+                    else []
+                )
+                pivot_aggfunc_ = pivot_["aggfunc"] if "aggfunc" in pivot_ else None
+                pivot_stack_ = "stack" in pivot_ and pivot_["stack"] is True
+
+                if pivot_values_ and pivot_index_ and pivot_columns_ and pivot_aggfunc_:
+                    pivot_ = pd.pivot_table(
+                        df_raw_,
+                        values=pivot_values_,
+                        index=pivot_index_,
+                        columns=pivot_columns_,
+                        aggfunc=pivot_aggfunc_,
+                        fill_value=0,
+                    )
+                    if pivot_stack_:
+                        pivot_ = pivot_.stack()
+                    pivot_ = pivot_.to_html(
+                        table_id="pivot-table", classes="pivot-class"
+                    ).replace(".0<", "<").replace(".00<", "<")
 
             if sched_ and orig_ == "sched":
                 que_title_ = query_["que_title"] if "que_title" in query_ else _id
@@ -2575,6 +2649,9 @@ class Crud:
                 html_ = "<style>\
                         .etable { border-spacing: 0; border-collapse: collapse;} \
                         .etable td,th { padding: 7px; border: 1px solid #999;} \
+                        .pivot-class { max-width: 90%; margin-top: 16px; border-collapse: collapse;} \
+                        .pivot-class td, .pivot-class th { padding: 5px; padding-left: 10px; padding-right: 10px; border: 1px solid #aaa; text-align: center;} \
+                        .pivot-class th:first-child { text-align: left !important;} \
                         </style>"
 
                 html_ += (
@@ -2584,8 +2661,10 @@ class Crud:
                     else ""
                 )
 
-                df_raw_ = pd.DataFrame(data_).fillna("")
                 count_ = len(df_raw_.index)
+
+                if attach_pivot_:
+                    html_ += f"<p>{pivot_}</p>"
 
                 if attach_html_:
                     html_ += f"<p>{df_raw_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
@@ -2636,6 +2715,7 @@ class Crud:
                     "result": True,
                     "query": query_,
                     "data": data_,
+                    "pivot": pivot_,
                     "count": count_,
                     "fields": fields_,
                     "schema": schema_,
@@ -2656,12 +2736,14 @@ class Crud:
         except pymongo.errors.PyMongoError as exc__:
             init_res_["result"] = False
             init_res_["schema"] = {}
+            init_res_["pivot"] = ""
             init_res_["query"], init_res_["fields"] = [], []
             init_res_["err"] = str(exc__)
             return init_res_
 
         except PassException as exc__:
             init_res_["schema"] = schema_
+            init_res_["pivot"] = ""
             init_res_["query"] = query_
             init_res_["err"] = str(exc__)
             return init_res_
@@ -2669,6 +2751,7 @@ class Crud:
         except Exception as exc__:
             init_res_["result"] = False
             init_res_["schema"] = {}
+            init_res_["pivot"] = ""
             init_res_["query"] = query_
             init_res_["err"] = str(exc__)
             return init_res_
@@ -2947,7 +3030,9 @@ class Crud:
         """
         try:
             user_ = input_["user"]
-            limit_ = input_["limit"] if "limit" in input_ and input_["limit"] > 0 else 50
+            limit_ = (
+                input_["limit"] if "limit" in input_ and input_["limit"] > 0 else 50
+            )
             page_ = input_["page"]
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]
@@ -3045,9 +3130,11 @@ class Crud:
             sort_ = (
                 input_["sort"]
                 if "sort" in input_ and input_["sort"]
-                else structure_["sort"]
-                if "sort" in structure_ and structure_["sort"]
-                else ("_modified_at", -1)
+                else (
+                    structure_["sort"]
+                    if "sort" in structure_ and structure_["sort"]
+                    else ("_modified_at", -1)
+                )
             )
 
             if group_:
@@ -3185,7 +3272,11 @@ class Crud:
                 prop_ = properties_[property_]
                 if "reminder" in prop_ and prop_["reminder"] is True:
                     for ix_, doc_ in enumerate(docs_):
-                        if property_ in doc_ and doc_[property_] is not None and str(doc_[property_]) != "":
+                        if (
+                            property_ in doc_
+                            and doc_[property_] is not None
+                            and str(doc_[property_]) != ""
+                        ):
                             docs_[ix_]["_reminder"] = True
                             docs_[ix_]["_note"] = (
                                 f"{docs_[ix_]['_note']}<br />{doc_[property_]}"
@@ -3686,11 +3777,13 @@ class Crud:
             match_ = (
                 {"_id": _id}
                 if _id
-                else obj["match"]
-                if "match" in obj and obj["match"] is not None and len(obj["match"]) > 0
-                else obj["filter"]
-                if "filter" in obj
-                else None
+                else (
+                    obj["match"]
+                    if "match" in obj
+                    and obj["match"] is not None
+                    and len(obj["match"]) > 0
+                    else obj["filter"] if "filter" in obj else None
+                )
             )
             link_ = obj["link"] if "link" in obj and obj["link"] is not None else None
             linked_ = (
@@ -4575,9 +4668,9 @@ class Crud:
                         ration_ = doc_[ref_field_] / datax_[ref_field_]
 
                         datanew_.pop("_id", None)
-                        datanew_["_created_at"] = docu_[
-                            "_modified_at"
-                        ] = Misc().get_now_f()
+                        datanew_["_created_at"] = docu_["_modified_at"] = (
+                            Misc().get_now_f()
+                        )
                         datanew_["_created_by"] = docu_["_modified_by"] = email_
                         datanew_["_resume_token"] = None
                         datanew_["_modified_count"] = 0
@@ -4685,18 +4778,22 @@ class Crud:
                     if "fields" in notification_
                     and str(type(notification_["fields"])) == "<class 'list'>"
                     and len(notification_["fields"]) > 0
-                    else notification_["fields"].replace(" ", "")
-                    if notification_ and "fields" in notification_
-                    else None
+                    else (
+                        notification_["fields"].replace(" ", "")
+                        if notification_ and "fields" in notification_
+                        else None
+                    )
                 )
                 nsort_ = (
                     notification_["sort"]
                     if notification_
                     and "sort" in notification_
                     and notification_["sort"]
-                    else structure_["sort"]
-                    if "sort" in structure_ and structure_["sort"]
-                    else {"_modified_at": -1}
+                    else (
+                        structure_["sort"]
+                        if "sort" in structure_ and structure_["sort"]
+                        else {"_modified_at": -1}
+                    )
                 )
                 topics_ = (
                     notification_["topics"].split(",")
@@ -5010,15 +5107,23 @@ class Email:
                 subject_ = (
                     EMAIL_UPLOADERR_SUBJECT_
                     if op_ in ["uploaderr", "importerr"]
-                    else EMAIL_SIGNIN_SUBJECT_
-                    if op_ == "signin"
-                    else EMAIL_TFA_SUBJECT_
-                    if op_ == "tfa"
-                    else EMAIL_SIGNUP_SUBJECT_
-                    if op_ == "signup"
-                    else msg["subject"]
-                    if msg["subject"]
-                    else EMAIL_DEFAULT_SUBJECT_
+                    else (
+                        EMAIL_SIGNIN_SUBJECT_
+                        if op_ == "signin"
+                        else (
+                            EMAIL_TFA_SUBJECT_
+                            if op_ == "tfa"
+                            else (
+                                EMAIL_SIGNUP_SUBJECT_
+                                if op_ == "signup"
+                                else (
+                                    msg["subject"]
+                                    if msg["subject"]
+                                    else EMAIL_DEFAULT_SUBJECT_
+                                )
+                            )
+                        )
+                    )
                 )
 
             if subject_ is None:
@@ -6490,7 +6595,7 @@ STRUCTURE_KEYS_ = [
     "actions",
     "triggers",
     "import",
-    "pagination"
+    "pagination",
 ]
 STRUCTURE_KEYS_OPTIN_ = ["queries"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
@@ -6782,9 +6887,9 @@ def api_crud_f():
             )
             response_ = make_response(send_file(path_))
             response_.status_code = sc__
-            response_.headers[
-                "Content-Type"
-            ] = f"application/octet-stream; filename={fname_}"
+            response_.headers["Content-Type"] = (
+                f"application/octet-stream; filename={fname_}"
+            )
             return response_
 
         response_.status_code = sc__

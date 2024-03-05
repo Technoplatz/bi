@@ -87,6 +87,7 @@ export class QueryPage implements OnInit {
   private schema_: any = {};
   public json_content_: any = null;
   public col_: string = "";
+  public pivot_: string = "";
 
   constructor(
     public misc: Miscellaneous,
@@ -134,6 +135,7 @@ export class QueryPage implements OnInit {
       this.schemavis_ = false;
       this.crud.get_query_job("query", this.id, this.limit_, run_).then((res: any) => {
         if (res.query && res.data) {
+          this.pivot_ = res.pivot !== "" ? res.pivot : null;
           this.schema_ = res.schema;
           this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
           this._tags = res.query?._tags;

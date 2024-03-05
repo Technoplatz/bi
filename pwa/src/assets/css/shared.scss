@@ -613,60 +613,23 @@ form ion-item ion-label {
   gap: 8px;
 }
 
-.pivot {
-  align-content: flex-start;
-  overflow: hidden;
-  width: 100% !important;
+.pivot-class {
+  max-width: 90%;
+  margin-top: 16px;
+  border-collapse: collapse;
 }
 
-.pivot .dataframe {
-  background-color: #f3f3f3;
-  width: 100% !important;
-}
-
-.pivot .dataframe td,
-.pivot .dataframe th {
-  padding: 12px;
-  border: 1px solid var(--ion-color-white);
+.pivot-class td,
+.pivot-class th {
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 1px solid #aaa;
   text-align: center;
 }
 
-.pivot-grid ion-list,
-.pivot-grid ion-reorder-group {
-  width: 100%;
-}
-
-.pivot-grid ion-list ion-button:last-child {
-  padding-right: 16px;
-}
-
-.pivot-grid ion-row:first-child {
-  border-bottom: 1px dotted var(--ion-color-medium);
-}
-
-.pivot-grid ion-row:first-child ion-label {
-  padding-left: 8px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  font-weight: 600;
-}
-
-.pivot-grid ion-item {
-  padding: 0px;
-  --min-height: 36px;
-}
-
-.pivot-grid ion-item ion-label {
-  padding-left: 8px;
-  font-weight: 600;
-}
-
-.pivot-grid ion-col {
-  border-right: 1px dotted var(--ion-color-medium);
-}
-
-.pivot-grid ion-col:last-child {
-  border-right: none;
+.pivot-class th:first-child {
+  text-align: left !important;
 }
 
 .chart_dash {
