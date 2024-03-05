@@ -2409,7 +2409,7 @@ class Crud:
         """
         docstring is in progress
         """
-        schema_, query_, data_, fields_, pivot_, count_, permitted_, err_ = (
+        schema_, query_, data_, fields_, pivot_html_, count_, permitted_, err_ = (
             {},
             {},
             [],
@@ -2424,7 +2424,7 @@ class Crud:
             "result": True,
             "query": query_,
             "data": data_,
-            "pivot": pivot_,
+            "pivot": pivot_html_,
             "count": count_,
             "fields": fields_,
             "err": err_,
@@ -2581,12 +2581,11 @@ class Crud:
             attach_json_ = set_ and "json" in set_ and set_["json"] is True
             attach_csv_ = set_ and "csv" in set_ and set_["csv"] is True
             attach_html_ = set_ and "html" in set_ and set_["html"] is True
-            attach_pivot_ = (
+            attach_pivots_ = (
                 set_
                 and "pivot" in set_
                 and set_["pivot"]
-                and "enabled" in set_["pivot"]
-                and set_["pivot"]["enabled"] is True
+                and len(set_["pivot"]) > 0
             )
 
             if orig_ == "api/crud":
@@ -2604,67 +2603,78 @@ class Crud:
             cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             count_ = len(data_)
-            pd.options.display.float_format = '{:,.2f}'.format
+            pd.options.display.float_format = "{:,.2f}".format
             df_raw_ = pd.DataFrame(data_).fillna("") if data_ else None
 
-            pivot_ = ""
-            if attach_pivot_:
-                pivot_ = set_["pivot"]
-                pivot_values_ = (
-                    pivot_["values"]
-                    if "values" in pivot_ and len(pivot_["values"]) > 0
-                    else []
-                )
-                pivot_index_ = (
-                    pivot_["index"]
-                    if "index" in pivot_ and len(pivot_["index"]) > 0
-                    else []
-                )
-                pivot_columns_ = (
-                    pivot_["columns"]
-                    if "columns" in pivot_ and len(pivot_["columns"]) > 0
-                    else []
-                )
-                pivot_aggfunc_ = pivot_["aggfunc"] if "aggfunc" in pivot_ else None
-                pivot_stack_ = "stack" in pivot_ and pivot_["stack"] is True
+            html_ = "<style>\
+                .etable { border-spacing: 0; border-collapse: collapse;} \
+                .etable td,th { padding: 7px; border: 1px solid #999;} \
+                .pivot-class { max-width: 90%; margin-top: 16px; border-collapse: collapse;} \
+                .pivot-class td, .pivot-class th { padding: 5px; padding-left: 10px; padding-right: 10px; border: 1px solid #aaa; text-align: center;} \
+                .pivot-class th:first-child { text-align: left !important;} \
+                </style>"
 
-                if pivot_values_ and pivot_index_ and pivot_columns_ and pivot_aggfunc_:
-                    pivot_ = pd.pivot_table(
+            html_ += (
+                query_["que_message_body"]
+                if "que_message_body" in query_
+                and query_["que_message_body"] is not None
+                else ""
+            )
+
+            if attach_pivots_:
+                pivots_ = set_["pivot"]
+                for pivot_ in pivots_:
+                    if not ("enabled" in pivot_ and pivot_["enabled"] is True):
+                        continue
+                    pivot_values_ = (
+                        pivot_["values"]
+                        if "values" in pivot_ and len(pivot_["values"]) > 0
+                        else []
+                    )
+                    pivot_index_ = (
+                        pivot_["index"]
+                        if "index" in pivot_ and len(pivot_["index"]) > 0
+                        else []
+                    )
+                    pivot_columns_ = (
+                        pivot_["columns"]
+                        if "columns" in pivot_ and len(pivot_["columns"]) > 0
+                        else []
+                    )
+                    pivot_aggfunc_ = pivot_["aggfunc"] if "aggfunc" in pivot_ else None
+                    pivot_stack_ = "stack" in pivot_ and pivot_["stack"] is True
+                    pivot_margins_ = "margins" in pivot_ and pivot_["margins"] is True
+
+                    if not (pivot_values_ and pivot_index_ and pivot_columns_ and pivot_aggfunc_):
+                        continue
+
+                    pivot_table_ = pd.pivot_table(
                         df_raw_,
                         values=pivot_values_,
                         index=pivot_index_,
                         columns=pivot_columns_,
                         aggfunc=pivot_aggfunc_,
                         fill_value=0,
+                        margins=pivot_margins_,
+                        margins_name="Total",
+                        dropna=False,
                     )
+
                     if pivot_stack_:
-                        pivot_ = pivot_.stack()
-                    pivot_ = pivot_.to_html(
-                        table_id="pivot-table", classes="pivot-class"
-                    ).replace(".0<", "<").replace(".00<", "<")
+                        pivot_table_ = pivot_table_.stack()
+
+                    phtml_ = (
+                        pivot_table_.to_html(table_id="pivot-table", classes="pivot-class")
+                        .replace(".0<", "<")
+                        .replace(".00<", "<")
+                    )
+                    pivot_html_ += phtml_
+                    html_ += f"<p>{phtml_}</p>"
 
             if sched_ and orig_ == "sched":
                 que_title_ = query_["que_title"] if "que_title" in query_ else _id
 
-                html_ = "<style>\
-                        .etable { border-spacing: 0; border-collapse: collapse;} \
-                        .etable td,th { padding: 7px; border: 1px solid #999;} \
-                        .pivot-class { max-width: 90%; margin-top: 16px; border-collapse: collapse;} \
-                        .pivot-class td, .pivot-class th { padding: 5px; padding-left: 10px; padding-right: 10px; border: 1px solid #aaa; text-align: center;} \
-                        .pivot-class th:first-child { text-align: left !important;} \
-                        </style>"
-
-                html_ += (
-                    query_["que_message_body"]
-                    if "que_message_body" in query_
-                    and query_["que_message_body"] is not None
-                    else ""
-                )
-
                 count_ = len(df_raw_.index)
-
-                if attach_pivot_:
-                    html_ += f"<p>{pivot_}</p>"
 
                 if attach_html_:
                     html_ += f"<p>{df_raw_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
@@ -2715,7 +2725,7 @@ class Crud:
                     "result": True,
                     "query": query_,
                     "data": data_,
-                    "pivot": pivot_,
+                    "pivot": pivot_html_,
                     "count": count_,
                     "fields": fields_,
                     "schema": schema_,
