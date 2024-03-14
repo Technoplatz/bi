@@ -1,7 +1,7 @@
 """
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2024 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -2600,10 +2600,10 @@ class Crud:
             else:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
+            pd.options.display.float_format = "{:,.2f}".format
             cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
             count_ = len(data_)
-            pd.options.display.float_format = "{:,.2f}".format
             df_raw_ = pd.DataFrame(data_).fillna("") if data_ else None
 
             html_ = "<style>\
@@ -2626,6 +2626,7 @@ class Crud:
                 for pivot_ in pivots_:
                     if not ("enabled" in pivot_ and pivot_["enabled"] is True):
                         continue
+
                     pivot_values_ = (
                         pivot_["values"]
                         if "values" in pivot_ and len(pivot_["values"]) > 0
@@ -2659,6 +2660,7 @@ class Crud:
                         margins_name="Total",
                         dropna=False,
                     )
+                    # .pipe(lambda s: s.set_axis(s.columns.map('_'.join), axis=1))
 
                     if pivot_stack_:
                         pivot_table_ = pivot_table_.stack()
@@ -6670,7 +6672,7 @@ def api_import_f():
 
         process_ = (
             form_["process"]
-            if "process" in form_ and form_["process"] in ["insert", "update"]
+            if "process" in form_ and form_["process"] in ["insert", "update", "upsert"]
             else "insert"
         )
         collection_ = form_["collection"]
