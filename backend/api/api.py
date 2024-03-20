@@ -2895,7 +2895,7 @@ class Crud:
                 set__[item_] = value_
 
             if not set__:
-                err_ = "no set found in the job"
+                err_ = "no updateable field found in set"
                 raise PassException(err_)
 
             """

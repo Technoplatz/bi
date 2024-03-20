@@ -1068,6 +1068,11 @@ class Trigger:
                     attach_csv_ = (
                         "csv" in notification_ and notification_["csv"] is True
                     )
+                    note_ = (
+                        notification_["note"]
+                        if "note" in notification_ and notification_["note"] != ""
+                        else None
+                    )
 
                     if not (
                         notify_
@@ -1160,7 +1165,8 @@ class Trigger:
                                             <strong>{full_document_[topic_] if topic_ in full_document_ else ''}</strong>\
                                             <br />"
                                     html_ += f"<p>{csv_file_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
-                                    body_ += f"<p>{html_}</p>"
+                                    body_ += f"<p>{html_.replace('NaN', '')}</p>"
+
                                 if attach_excel_:
                                     csv_file_.to_excel(
                                         file_excel_,
@@ -1184,13 +1190,15 @@ class Trigger:
                             else:
                                 raise PassException("no data records exported")
 
+                    if note_:
+                        body_ += f"<p><strong>NOTE:<br />{note_}</strong></p>"
+
                     if push_:
                         msg_ = json.dumps({"text": f"{subject_} {keyf_}"})
                         resp_ = requests.post(notification_push_url_, msg_, timeout=10)
                         if resp_.status_code != 200:
                             PRINT_("!!! push notification error", resp_)
                         res_ = str(resp_.content)
-                        PRINT_("res_", res_)
 
                     msg_ = {
                         "files": files_,

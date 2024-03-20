@@ -346,40 +346,66 @@ A sample link item;
 ```json
 [
   {
-    "name": "ordino-arrived",
+    "name": "clearance-completed",
     "enabled": true,
     "operations": ["update"],
-    "changes": [{ "key": "odi_arrived_date", "op": "nnull", "value": null }],
+    "changes": [
+      {
+        "key": "man_closing_date",
+        "op": "nnull",
+        "value": null
+      }
+    ],
     "targets": [
       {
         "collection": "delivery",
         "match": [
-          { "key": "dnn_odi_no", "value": "odi_no" },
-          { "key": "dnn_odi_sub_no", "value": "odi_sub_no" }
+          {
+            "key": "dnn_man_no",
+            "value": "man_no"
+          }
         ],
-        "filter": [{ "key": "dnn_status", "op": "eq", "value": "10-OnTheWay" }],
-        "set": [{ "key": "dnn_status", "value": "20-OnCustoms" }],
+        "filter": [
+          {
+            "key": "dnn_status",
+            "op": "eq",
+            "value": "30-OnCustomsProcess"
+          }
+        ],
+        "set": [
+          {
+            "key": "dnn_status",
+            "value": "40-ClearanceCompleted"
+          }
+        ],
         "upsert": false,
-        "modified": true,
         "notification": {
           "notify": true,
-          "subject": "Logistics [Ordino Arrived]",
-          "body": "Hi,<br /><br />We would like to let you know that attached DNs have been arrived at customs.",
+          "subject": "Logistics [Clearance Completed]",
+          "body": "Hi,<br /><br />We would like to let you know that the customs clearance of the attached manifest has been completed.",
           "collection": "delivery",
-          "topics": "odi_no,odi_sub_no",
-          "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-          "key": "odi_sub_no",
+          "key": "man_no",
+          "topics": "man_no,man_file_no,man_case_no",
+          "fields": "dnn_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
           "filter": [
-            { "key": "dnn_odi_no", "op": "eq", "value": "odi_no" },
-            { "key": "dnn_odi_sub_no", "op": "eq", "value": "odi_sub_no" },
-            { "key": "dnn_status", "op": "eq", "value": "20-OnCustoms" }
+            {
+              "key": "dnn_man_no",
+              "op": "eq",
+              "value": "man_no"
+            }
           ],
-          "sort": { "dnn_acc_name": 1, "dnn_no": 1, "dnn_line_no": 1 },
+          "sort": {
+            "dnn_acc_name": 1,
+            "dnn_no": 1,
+            "dnn_line_no": 1
+          },
           "attachment": true,
           "html": true,
           "csv": false,
           "excel": true,
           "json": false,
+          "push": true,
+          "note": "Please find the notes attached",
           "_tags": ["#Logistics", "#Operation"]
         }
       }

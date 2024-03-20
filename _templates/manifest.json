@@ -56,6 +56,12 @@
       "dateOnly": true,
       "permanent": true
     },
+    "man_gov_approval_date": {
+      "bsonType": "date",
+      "title": "Approval Date",
+      "description": "Approval date",
+      "dateOnly": true
+    },
     "man_gov_amount": {
       "bsonType": "number",
       "title": "Amount",
@@ -63,18 +69,6 @@
       "default": 0,
       "decimals": 2,
       "disabled": false
-    },
-    "man_gov_purchase_date": {
-      "bsonType": "date",
-      "title": "Purchase Date",
-      "description": "Purchasing date",
-      "dateOnly": true
-    },
-    "man_gov_approval_date": {
-      "bsonType": "date",
-      "title": "Approval Date",
-      "description": "Approval date",
-      "dateOnly": true
     }
   },
   "required": ["man_no", "man_odi_no", "man_odi_sub_no", "man_opening_date", "man_file_no", "man_case_no"],
@@ -83,6 +77,7 @@
   "sort": {
     "_modified_at": -1
   },
+  "pagination": [25, 50, 100, 200],
   "parents": [
     {
       "collection": "ordino",
@@ -215,10 +210,6 @@
       ],
       "set": [
         {
-          "key": "man_gov_purchase_date",
-          "value": "$CURRENT_DATE"
-        },
-        {
           "key": "man_gov_approval_date",
           "value": "$CURRENT_DATE"
         }
@@ -303,7 +294,7 @@
             "collection": "delivery",
             "key": "man_no",
             "topics": "man_no,man_file_no,man_case_no",
-            "fields": "dnn_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
+            "fields": "dnn_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty,dnn_note",
             "filter": [
               {
                 "key": "dnn_man_no",
@@ -322,6 +313,7 @@
             "excel": true,
             "json": false,
             "push": true,
+            "note": "",
             "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
           }
         }
@@ -380,7 +372,7 @@
             "collection": "delivery",
             "key": "man_no",
             "topics": "man_no",
-            "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty",
+            "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_po_id,dnn_prd_no,dnn_qty,dnn_note",
             "filter": [
               {
                 "key": "dnn_man_no",

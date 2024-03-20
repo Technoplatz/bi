@@ -123,7 +123,7 @@
           "value": true
         }
       ],
-      "get": ["acc_no", "acc_name"]
+      "get": ["acc_no", "acc_nick_name"]
     },
     {
       "collection": "carrier",
@@ -149,7 +149,7 @@
         {
           "key": "car_acc_no",
           "op": "eq",
-          "value": "shp_acc_no"
+          "value": "1214983834"
         }
       ],
       "get": ["car_id", "car_name", "car_tax_no", "car_plate_no"]

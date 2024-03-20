@@ -377,6 +377,7 @@
   "index": [
     ["dnn_no"],
     ["dnn_acc_no"],
+    ["dnn_acc_no", "dnn_acc_name"],
     ["dnn_acc_name"],
     ["dnn_status"],
     ["dnn_status", "dnn_no", "dnn_line_no"],
@@ -465,7 +466,7 @@
         },
         {
           "key": "dnn_acc_name",
-          "value": "acc_name",
+          "value": "acc_nick_name",
           "exclude": true
         }
       ],
@@ -476,7 +477,7 @@
           "value": true
         }
       ],
-      "get": ["acc_no", "acc_name"],
+      "get": ["acc_no", "acc_nick_name"],
       "group": false
     },
     {
@@ -915,7 +916,8 @@
       "dnn_rtd_date",
       "dnn_prd_group",
       "dnn_note",
-      "dnn_wayb_no"
+      "dnn_wayb_no",
+      "dnn_acc_name"
     ]
   }
 }

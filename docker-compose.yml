@@ -101,7 +101,7 @@ services:
       - mongo_tls_keyfile_password
 
   mongo0:
-    image: mongo:latest
+    image: mongo:${MONGO_VERSION}
     container_name: mongo0
     hostname: ${MONGO_HOST0}
     restart: always
@@ -144,7 +144,7 @@ services:
       - mongo_tls_keyfile_password
 
   mongo1:
-    image: mongo:latest
+    image: mongo:${MONGO_VERSION}
     container_name: mongo1
     hostname: ${MONGO_HOST1}
     restart: always
@@ -185,7 +185,7 @@ services:
       - mongo_tls_keyfile_password
 
   mongo2:
-    image: mongo:latest
+    image: mongo:${MONGO_VERSION}
     container_name: mongo2
     hostname: ${MONGO_HOST2}
     restart: always
