@@ -76,6 +76,7 @@
   ],
   "unique": [["job_name"]],
   "sort": {
+    "job_enabled": -1,
     "_modified_at": -1
   },
   "pagination": [25, 50, 100],
