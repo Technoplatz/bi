@@ -50,6 +50,7 @@ export class AppComponent implements OnInit {
   public user_: any = null;
   public net_: boolean = true;
   private paginations_ = environment.paginations;
+  public companyName = environment.companyName;
 
   constructor(
     private translate: TranslateService,
@@ -60,6 +61,7 @@ export class AppComponent implements OnInit {
     private storage: Storage,
     private su: Su
   ) {
+    document.title = this.companyName ? this.companyName : "BI";
     // auth
     this.auth.user.subscribe((user_: any) => {
       this.user_ = user_;

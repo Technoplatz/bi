@@ -433,6 +433,7 @@ class Misc:
             "query",
             "selection",
             "reminder",
+            "note",
             "masked",
         ]
 
