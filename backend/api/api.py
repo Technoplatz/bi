@@ -3851,6 +3851,7 @@ class Crud:
             if is_crud_ and link_ and linked_:
                 link_f_ = self.link_f(
                     {
+                        "op": "update",
                         "source": collection_id_,
                         "_id": str(_id),
                         "link": link_,
@@ -4086,6 +4087,7 @@ class Crud:
             source_ = obj_["source"] if "source" in obj_ else None
             _id = obj_["_id"] if "_id" in obj_ else None
             link_ = obj_["link"] if "link" in obj_ else None
+            op_ = obj_["op"] if "op" in obj_ else "insert"
             data_ = obj_["data"] if "data" in obj_ else None
             linked_ = (
                 list(set(obj_["linked"]))
@@ -4093,6 +4095,10 @@ class Crud:
                 else []
             )
             linked_count_ = len(linked_)
+
+            if op_ == "insert" and linked_count_ == 0:
+                raise APIError("no linked data provided")
+
             user_ = obj_["user"] if "user" in obj_ else None
             col_id_ = link_["collection"] if "collection" in link_ else None
             get_ = link_["get"] if "get" in link_ else None
@@ -5081,6 +5087,7 @@ class Crud:
                 if link_ and linked_:
                     link_f_ = self.link_f(
                         {
+                            "op": "insert",
                             "source": collection_id_,
                             "_id": str(_id),
                             "link": link_,
@@ -5091,6 +5098,8 @@ class Crud:
                     )
                     if not link_f_["result"]:
                         raise APIError(link_f_["msg"])
+                else:
+                    raise APIError("no linked data provided")
 
             log_ = Misc().log_f(
                 {
