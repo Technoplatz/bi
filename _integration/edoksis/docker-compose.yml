@@ -30,7 +30,6 @@
 # https://www.gnu.org/licenses.
 #
 
-version: "3.9"
 services:
   edoksis:
     build:

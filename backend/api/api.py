@@ -2609,7 +2609,7 @@ class Crud:
             count_ = len(data_)
             df_raw_ = pd.DataFrame(data_).fillna("") if data_ else None
 
-            if not df_raw_ or count_ == 0:
+            if df_raw_ is None or count_ == 0:
                 err_ = "no records were matched with the query"
                 raise PassException(err_)
 
