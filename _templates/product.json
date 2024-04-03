@@ -105,6 +105,12 @@
       "minLength": 0,
       "maxLength": 64,
       "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+    },
+    "prd_lte": {
+      "bsonType": "bool",
+      "title": "LTE",
+      "description": "Has LTE",
+      "default": false
     }
   },
   "required": ["prd_no", "prd_description", "prd_group"],
@@ -130,7 +136,8 @@
       "prd_memory_dimm",
       "prd_display",
       "prd_gpu",
-      "prd_storage"
+      "prd_storage",
+      "prd_lte"
     ]
   }
 }

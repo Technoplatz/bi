@@ -2602,10 +2602,16 @@ class Crud:
                 aggregate_.append({"$limit": API_DEFAULT_AGGREGATION_LIMIT_})
 
             pd.options.display.float_format = "{:,.2f}".format
+
             cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
+
             count_ = len(data_)
             df_raw_ = pd.DataFrame(data_).fillna("") if data_ else None
+
+            if not df_raw_ or count_ == 0:
+                err_ = "no records were matched with the query"
+                raise PassException(err_)
 
             html_ = "<style>\
                 .etable { border-spacing: 0; border-collapse: collapse;} \
@@ -2661,7 +2667,6 @@ class Crud:
                         margins_name="Total",
                         dropna=False,
                     )
-                    # .pipe(lambda s: s.set_axis(s.columns.map('_'.join), axis=1))
 
                     if pivot_stack_:
                         pivot_table_ = pivot_table_.stack()
@@ -2737,6 +2742,7 @@ class Crud:
                 if key_ != "announce"
                 else {
                     "result": True,
+                    "err": err_,
                 }
             )
 
@@ -3783,6 +3789,11 @@ class Crud:
         """
         docstring is in progress
         """
+        session_client_ = MongoClient(Mongo().connstr)
+        session_db_ = session_client_[MONGO_DB_]
+        session_ = session_client_.start_session()
+        session_.start_transaction()
+
         try:
             doc = obj["doc"]
 
@@ -3833,8 +3844,8 @@ class Crud:
             )
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            Mongo().db_[collection_].update_one(
-                match_, {"$set": doc_, "$inc": {"_modified_count": 1}}
+            session_db_[collection_].update_one(
+                match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, session=session_
             )
 
             if is_crud_ and link_ and linked_:
@@ -3863,19 +3874,28 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
+            session_.commit_transaction()
+
             return {"result": True}
 
         except pymongo.errors.PyMongoError as exc:
+            session_.abort_transaction()
             return Misc().mongo_error_f(exc)
 
         except AppException as exc:
+            session_.abort_transaction()
             return Misc().app_exception_f(exc)
 
         except APIError as exc:
+            session_.abort_transaction()
             return Misc().notify_exception_f(exc)
 
         except Exception as exc:
+            session_.abort_transaction()
             return Misc().notify_exception_f(exc)
+
+        finally:
+            session_client_.close()
 
     def remove_f(self, obj):
         """
@@ -4157,10 +4177,11 @@ class Crud:
             )
             filter_ = {"$and": [filter0_, filter1_]}
 
-            checknum_ = Mongo().db_[collection_].count_documents(filter_)
-            if checknum_ < linked_count_:
-                raise AppException(
-                    f"records quantity [{checknum_}] does not match with processed [{linked_count_}]"
+            checknum_ = len(Mongo().db_[collection_].distinct(get_, filter_))
+
+            if checknum_ != linked_count_:
+                raise APIError(
+                    f"records found [{checknum_}] does not match with requested [{linked_count_}]"
                 )
 
             update_many_ = (
@@ -4940,6 +4961,11 @@ class Crud:
         """
         docstring is in progress
         """
+        session_client_ = MongoClient(Mongo().connstr)
+        session_db_ = session_client_[MONGO_DB_]
+        session_ = session_client_.start_session()
+        session_.start_transaction()
+
         try:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
@@ -5007,7 +5033,7 @@ class Crud:
 
             doc_ = Misc().set_strip_doc_f(doc_)
 
-            insert_one_ = Mongo().db_[collection_].insert_one(doc_)
+            insert_one_ = session_db_[collection_].insert_one(doc_, session=session_)
             _id = insert_one_.inserted_id
 
             if collection_id_ == "_collection":
@@ -5078,19 +5104,28 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
+            session_.commit_transaction()
+
             return {"result": True, "token": inserted_}
 
         except pymongo.errors.PyMongoError as exc__:
+            session_.abort_transaction()
             return Misc().mongo_error_f(exc__)
 
         except AuthError as exc__:
+            session_.abort_transaction()
             return Misc().auth_error_f(exc__)
 
         except APIError as exc__:
+            session_.abort_transaction()
             return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
+            session_.abort_transaction()
             return Misc().notify_exception_f(exc__)
+
+        finally:
+            session_client_.close()
 
 
 class Email:

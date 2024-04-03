@@ -73,6 +73,15 @@
       "pattern": "^[A-Z0-9-]{0,15}$",
       "caseType": "uppercase"
     },
+    "ser_record_no": {
+      "bsonType": "string",
+      "title": "File No",
+      "description": "File number",
+      "minLength": 0,
+      "maxLength": 15,
+      "pattern": "^[A-Z0-9-]{0,15}$",
+      "caseType": "uppercase"
+    },
     "ser_is_synced": {
       "bsonType": "bool",
       "title": "Synced?",
@@ -97,6 +106,7 @@
   "sort": {
     "ser_in_date": -1
   },
+  "pagination": [25, 50, 100],
   "parents": [],
   "links": [],
   "actions": [],
@@ -104,6 +114,6 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["ser_label_no", "ser_sscc_no"]
+    "upsertables": ["ser_label_no", "ser_sscc_no", "ser_record_no"]
   }
 }

@@ -36,6 +36,12 @@
       "maxLength": 256,
       "caseType": "capitalize"
     },
+    "col_enabled": {
+      "bsonType": "bool",
+      "title": "Enabled?",
+      "description": "Enabled or not",
+      "default": true
+    },
     "col_priority": {
       "bsonType": "number",
       "title": "Priority",
@@ -52,9 +58,10 @@
     }
   },
   "required": ["col_id", "col_title", "col_prefix"],
-  "index": [["col_id"], ["col_prefix"], ["col_priority"]],
+  "index": [["col_id"], ["col_prefix"], ["col_priority"], ["col_enabled"]],
   "unique": [["col_id"]],
   "sort": {
+    "col_enabled": -1,
     "col_priority": 1,
     "col_title": 1
   },

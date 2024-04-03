@@ -1,0 +1,703 @@
+{
+  "properties": {
+    "blo_country": {
+      "bsonType": "string",
+      "title": "Country",
+      "description": "Country"
+    },
+    "blo_territory": {
+      "bsonType": "string",
+      "title": "Territory",
+      "description": "Territory"
+    },
+    "blo_market": {
+      "bsonType": "string",
+      "title": "Market",
+      "description": "Market"
+    },
+    "blo_customer_name": {
+      "bsonType": "string",
+      "title": "Customer Name",
+      "description": "Customer Name"
+    },
+    "blo_ch": {
+      "bsonType": "number",
+      "title": "Ch",
+      "description": "Ch"
+    },
+    "blo_order_type": {
+      "bsonType": "string",
+      "title": "Order Type",
+      "description": "Order Type"
+    },
+    "blo_order_no": {
+      "bsonType": "string",
+      "title": "Order No",
+      "description": "Order No"
+    },
+    "blo_sales_order_item": {
+      "bsonType": "number",
+      "title": "Line No",
+      "description": "Line No"
+    },
+    "blo_customer_po": {
+      "bsonType": "string",
+      "title": "PO No",
+      "description": "PO No"
+    },
+    "blo_cdf": {
+      "bsonType": "string",
+      "title": "CDF",
+      "description": "CDF"
+    },
+    "blo_prd_no": {
+      "bsonType": "string",
+      "title": "Part Number",
+      "description": "Part Number"
+    },
+    "blo_mtm": {
+      "bsonType": "string",
+      "title": "MTM",
+      "description": "MTM"
+    },
+    "blo_topsell_flag": {
+      "bsonType": "string",
+      "title": "Topsell Flag",
+      "description": "Topsell Flag"
+    },
+    "blo_line_qty": {
+      "bsonType": "number",
+      "title": "Qty",
+      "description": "Qty"
+    },
+    "blo_unit_price": {
+      "bsonType": "number",
+      "title": "Unit Price",
+      "description": "Unit Price"
+    },
+    "blo_net_value": {
+      "bsonType": "number",
+      "title": "Local Revenue",
+      "description": "Local Revenue"
+    },
+    "blo_currency": {
+      "bsonType": "string",
+      "title": "Currency",
+      "description": "Currency"
+    },
+    "blo_del_block": {
+      "bsonType": "string",
+      "title": "Del_Block",
+      "description": "Del_Block"
+    },
+    "blo_bill_block": {
+      "bsonType": "string",
+      "title": "Bill_Block",
+      "description": "Bill_Block"
+    },
+    "blo_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status"
+    },
+    "blo_days_in_status": {
+      "bsonType": "number",
+      "title": "Days in Status",
+      "description": "Days in Status"
+    },
+    "blo_purchase_date": {
+      "bsonType": "date",
+      "title": "Purchase Date",
+      "description": "Purchase Date",
+      "dateOnly": true
+    },
+    "blo_sales_order_created_date": {
+      "bsonType": "date",
+      "title": "Order Entry Date",
+      "description": "Order Entry Date",
+      "dateOnly": true
+    },
+    "blo_crad": {
+      "bsonType": "date",
+      "title": "CRAD",
+      "description": "CRAD",
+      "dateOnly": true
+    },
+    "blo_csd": {
+      "bsonType": "date",
+      "title": "CSD",
+      "description": "CSD",
+      "dateOnly": true
+    },
+    "blo_eta": {
+      "bsonType": "date",
+      "title": "ETA",
+      "description": "ETA",
+      "dateOnly": true
+    },
+    "blo_mad": {
+      "bsonType": "date",
+      "title": "MAD",
+      "description": "MAD",
+      "dateOnly": true
+    },
+    "blo_rsd": {
+      "bsonType": "date",
+      "title": "RSD",
+      "description": "RSD",
+      "dateOnly": true
+    },
+    "blo_opsd": {
+      "bsonType": "date",
+      "title": "OPSD",
+      "description": "OPSD",
+      "dateOnly": true
+    },
+    "blo_drop_date": {
+      "bsonType": "date",
+      "title": "Drop Date",
+      "description": "Drop Date",
+      "dateOnly": true
+    },
+    "blo_psd": {
+      "bsonType": "date",
+      "title": "PSD",
+      "description": "PSD",
+      "dateOnly": true
+    },
+    "blo_psd_in_48h": {
+      "bsonType": "string",
+      "title": "PSD in 48h",
+      "description": "PSD in 48h"
+    },
+    "blo_fpsd_provided": {
+      "bsonType": "date",
+      "title": "FPSD Provided",
+      "description": "FPSD Provided",
+      "dateOnly": true
+    },
+    "blo_add_leadtime": {
+      "bsonType": "number",
+      "title": "ADD Leadtime",
+      "description": "ADD Leadtime"
+    },
+    "blo_add_leadtime_category": {
+      "bsonType": "string",
+      "title": "ADD Leadtime Category",
+      "description": "ADD Leadtime Category"
+    },
+    "blo_asd": {
+      "bsonType": "date",
+      "title": "ASD",
+      "description": "ASD",
+      "dateOnly": true
+    },
+    "blo_pod": {
+      "bsonType": "date",
+      "title": "POD",
+      "description": "POD",
+      "dateOnly": true
+    },
+    "blo_cancel_date": {
+      "bsonType": "date",
+      "title": "Cancel Date",
+      "description": "Cancel Date",
+      "dateOnly": true
+    },
+    "blo_rejection_reason": {
+      "bsonType": "string",
+      "title": "Rejection Reason",
+      "description": "Rejection Reason"
+    },
+    "blo_high_lev_item": {
+      "bsonType": "number",
+      "title": "High Lev Item",
+      "description": "High Lev Item"
+    },
+    "blo_foe_flag": {
+      "bsonType": "string",
+      "title": "FOE Flag",
+      "description": "FOE Flag"
+    },
+    "blo_sla_type": {
+      "bsonType": "string",
+      "title": "SLA Type",
+      "description": "SLA Type"
+    },
+    "blo_dnn_no": {
+      "bsonType": "string",
+      "title": "MFG DN",
+      "description": "MFG DN"
+    },
+    "blo_mfg_locn": {
+      "bsonType": "string",
+      "title": "Mfg Locn",
+      "description": "Mfg Locn"
+    },
+    "blo_mfg_sales_ordno": {
+      "bsonType": "string",
+      "title": "Mfg Sales Ordno",
+      "description": "Mfg Sales Ordno"
+    },
+    "blo_mfg_status": {
+      "bsonType": "string",
+      "title": "MFG Status",
+      "description": "MFG Status"
+    },
+    "blo_p_pono": {
+      "bsonType": "string",
+      "title": "P Pono",
+      "description": "P Pono"
+    },
+    "blo_invoice_no": {
+      "bsonType": "string",
+      "title": "Invoice Number",
+      "description": "Invoice Number"
+    },
+    "blo_ship_point": {
+      "bsonType": "string",
+      "title": "Ship Point",
+      "description": "Ship Point"
+    },
+    "blo_special_bid": {
+      "bsonType": "string",
+      "title": "Special Bid Reference Number",
+      "description": "Special Bid Reference Number"
+    },
+    "blo_order_method": {
+      "bsonType": "string",
+      "title": "Order Method",
+      "description": "Order Method"
+    },
+    "blo_custno_ship_to": {
+      "bsonType": "string",
+      "title": "Custno Shipto",
+      "description": "Custno Shipto"
+    },
+    "blo_sold_to_num": {
+      "bsonType": "string",
+      "title": "Custno Soldto",
+      "description": "Custno Soldto"
+    },
+    "blo_tzone_sold_to": {
+      "bsonType": "string",
+      "title": "TZone SoldTo",
+      "description": "TZone SoldTo"
+    },
+    "blo_tzone_ship_to": {
+      "bsonType": "string",
+      "title": "TZone ShipTo",
+      "description": "TZone ShipTo"
+    },
+    "blo_hub_dn": {
+      "bsonType": "string",
+      "title": "HUB DN",
+      "description": "HUB DN"
+    },
+    "blo_sales_org": {
+      "bsonType": "string",
+      "title": "SalesOrg",
+      "description": "SalesOrg"
+    },
+    "blo_region": {
+      "bsonType": "string",
+      "title": "Region",
+      "description": "Region"
+    },
+    "blo_route_to_market_desc": {
+      "bsonType": "string",
+      "title": "Route to market description",
+      "description": "Route to market description"
+    },
+    "blo_prd_description": {
+      "bsonType": "string",
+      "title": "Part Desc",
+      "description": "Part Desc"
+    },
+    "blo_user_id": {
+      "bsonType": "string",
+      "title": "Userid",
+      "description": "Userid"
+    },
+    "blo_brand": {
+      "bsonType": "string",
+      "title": "Brand",
+      "description": "Brand"
+    },
+    "blo_sub_name": {
+      "bsonType": "string",
+      "title": "Subname",
+      "description": "Subname"
+    },
+    "blo_division": {
+      "bsonType": "number",
+      "title": "Division",
+      "description": "Division"
+    },
+    "blo_order_reason": {
+      "bsonType": "string",
+      "title": "Order Reason",
+      "description": "Order Reason"
+    },
+    "blo_end_user": {
+      "bsonType": "string",
+      "title": "Enduser",
+      "description": "Enduser"
+    },
+    "blo_ga_name": {
+      "bsonType": "string",
+      "title": "GA Name",
+      "description": "GA Name"
+    },
+    "blo_legacy": {
+      "bsonType": "string",
+      "title": "Legacy",
+      "description": "Legacy"
+    },
+    "blo_payment_term": {
+      "bsonType": "string",
+      "title": "Payment Term",
+      "description": "Payment Term"
+    },
+    "blo_usd_net_value": {
+      "bsonType": "number",
+      "title": "Dollar Revenue",
+      "description": "Dollar Revenue"
+    },
+    "blo_rep_date": {
+      "bsonType": "date",
+      "title": "Repdate",
+      "description": "Repdate",
+      "dateOnly": true
+    },
+    "blo_shipping_cond": {
+      "bsonType": "string",
+      "title": "Shipping Cond",
+      "description": "Shipping Cond"
+    },
+    "blo_method_of_transport": {
+      "bsonType": "string",
+      "title": "Method of Transport",
+      "description": "Method of Transport"
+    },
+    "blo_route": {
+      "bsonType": "string",
+      "title": "Route",
+      "description": "Route"
+    },
+    "blo_firm_unfirm_flag": {
+      "bsonType": "string",
+      "title": "FIRM_UNFIRM_FLAG",
+      "description": "FIRM_UNFIRM_FLAG"
+    },
+    "blo_credit_block": {
+      "bsonType": "string",
+      "title": "Credit Block",
+      "description": "Credit Block"
+    },
+    "blo_number_of_prd_changes": {
+      "bsonType": "number",
+      "title": "NUMBER_OF_PSD_CHANGES",
+      "description": "NUMBER_OF_PSD_CHANGES"
+    },
+    "blo_number_of_fsd_changes": {
+      "bsonType": "number",
+      "title": "NUMBER_OF_FSD_CHANGES",
+      "description": "NUMBER_OF_FSD_CHANGES"
+    },
+    "blo_first_psd": {
+      "bsonType": "date",
+      "title": "First PSD",
+      "description": "First PSD",
+      "dateOnly": true
+    },
+    "blo_mfg": {
+      "bsonType": "string",
+      "title": "mfg",
+      "description": "mfg"
+    },
+    "blo_dnn_item": {
+      "bsonType": "string",
+      "title": "DN_ITEM",
+      "description": "DN_ITEM"
+    },
+    "blo_delivery_group": {
+      "bsonType": "number",
+      "title": "DELIVERY_GROUP",
+      "description": "DELIVERY_GROUP"
+    },
+    "blo_tied": {
+      "bsonType": "string",
+      "title": "mfg",
+      "description": "mfg"
+    },
+    "blo_gln_no": {
+      "bsonType": "string",
+      "title": "mfg",
+      "description": "mfg"
+    },
+    "blo_deliv_priority": {
+      "bsonType": "number",
+      "title": "mfg",
+      "description": "mfg"
+    },
+    "blo_drop_ship": {
+      "bsonType": "string",
+      "title": "mfg",
+      "description": "mfg"
+    },
+    "blo_solution_id": {
+      "bsonType": "string",
+      "title": "mfg",
+      "description": "mfg"
+    },
+    "blo_sales_office": {
+      "bsonType": "string",
+      "title": "mfg",
+      "description": "mfg"
+    },
+    "blo_order_qty": {
+      "bsonType": "string",
+      "title": "Order qty",
+      "description": "Order qty"
+    },
+    "blo_end_customer": {
+      "bsonType": "string",
+      "title": "End Customer",
+      "description": "End Customer"
+    },
+    "blo_lerom": {
+      "bsonType": "string",
+      "title": "LEROM",
+      "description": "LEROM"
+    },
+    "blo_t2_crm_id": {
+      "bsonType": "string",
+      "title": "T2 CRM ID",
+      "description": "T2 CRM ID"
+    },
+    "blo_t2_name": {
+      "bsonType": "string",
+      "title": "T2 NAME",
+      "description": "T2 NAME"
+    },
+    "blo_unreleased_ageing": {
+      "bsonType": "number",
+      "title": "UnReleased Ageing",
+      "description": "UnReleased Ageing"
+    },
+    "blo_released_ageing": {
+      "bsonType": "number",
+      "title": "Released Ageing",
+      "description": "Released Ageing"
+    },
+    "PSD Ageing": {
+      "bsonType": "number",
+      "title": "PSD Ageing",
+      "description": "PSD Ageing"
+    },
+    "blo_header_comments": {
+      "bsonType": "string",
+      "title": "Header comments",
+      "description": "Header comments"
+    },
+    "blo_cust_invoice_num": {
+      "bsonType": "string",
+      "title": "Cust Invoice Num",
+      "description": "Cust Invoice Num"
+    },
+    "blo_sold_to_address": {
+      "bsonType": "string",
+      "title": "SoldToAddress",
+      "description": "SoldToAddress"
+    },
+    "blo_ship_to_address": {
+      "bsonType": "string",
+      "title": "ShipToAddress",
+      "description": "ShipToAddress"
+    },
+    "blo_fax_number": {
+      "bsonType": "string",
+      "title": "Fax number",
+      "description": "Fax number"
+    },
+    "blo_customer_group": {
+      "bsonType": "string",
+      "title": "Customer group",
+      "description": "Customer group"
+    },
+    "blo_business_segment": {
+      "bsonType": "string",
+      "title": "Business segment",
+      "description": "Business segment"
+    },
+    "blo_family_code": {
+      "bsonType": "string",
+      "title": "Family code",
+      "description": "Family code"
+    },
+    "blo_market_segment": {
+      "bsonType": "string",
+      "title": "Market segment",
+      "description": "Market segment"
+    },
+    "blo_customer_segment": {
+      "bsonType": "string",
+      "title": "Customer Segment",
+      "description": "Customer Segment"
+    }
+  },
+  "required": [
+    "blo_order_no",
+    "blo_sales_order_item",
+    "blo_sales_order_created_date",
+    "blo_sold_to_num",
+    "blo_prd_no",
+    "blo_net_value",
+    "blo_order_qty",
+    "blo_line_qty",
+    "blo_customer_po",
+    "blo_status"
+  ],
+  "index": [["blo_status"]],
+  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_dnn_no", "blo_dnn_item"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "pagination": [25, 50, 100],
+  "parents": [],
+  "actions": [],
+  "triggers": [
+    {
+      "name": "product",
+      "enabled": true,
+      "operations": ["insert", "update"],
+      "changes": [
+        {
+          "key": "blo_prd_no",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blo_prd_description",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blo_brand",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "product",
+          "match": [
+            {
+              "key": "prd_no",
+              "value": "blo_prd_no"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "prd_no",
+              "value": "blo_prd_no"
+            },
+            {
+              "key": "prd_description",
+              "value": "blo_prd_description"
+            },
+            {
+              "key": "prd_group",
+              "value": "TBD"
+            },
+            {
+              "key": "prd_family",
+              "value": "blo_brand"
+            }
+          ],
+          "upsert": true
+        }
+      ]
+    },
+    {
+      "name": "order",
+      "enabled": true,
+      "operations": ["update", "insert"],
+      "changes": [
+        {
+          "key": "blo_status",
+          "op": "ne",
+          "value": null
+        },
+        {
+          "key": "blo_order_no",
+          "op": "ne",
+          "value": null
+        },
+        {
+          "key": "blo_prd_no",
+          "op": "ne",
+          "value": null
+        },
+        {
+          "key": "blo_net_value",
+          "op": "gt",
+          "value": 0
+        },
+        {
+          "key": "blo_line_qty",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "targets": [
+        {
+          "collection": "order",
+          "match": [
+            {
+              "key": "ord_no",
+              "value": "blo_order_no"
+            },
+            {
+              "key": "ord_prd_no",
+              "value": "blo_prd_no"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "ord_no",
+              "value": "blo_order_no"
+            },
+            {
+              "key": "ord_prd_no",
+              "value": "blo_prd_no"
+            },
+            {
+              "key": "ord_date",
+              "value": "blo_sales_order_created_date"
+            },
+            {
+              "key": "ord_unit_price",
+              "value": "blo_net_value / blo_line_qty"
+            }
+          ],
+          "upsert": true
+        }
+      ]
+    }
+  ],
+  "links": [],
+  "import": {
+    "enabled": true,
+    "purge": true,
+    "ignored": []
+  },
+  "queries": {
+    "query": true,
+    "cronjob": false,
+    "updatables": []
+  }
+}

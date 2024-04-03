@@ -389,32 +389,9 @@
   "sort": {
     "_modified_at": -1
   },
+  "pagination": [25, 50, 100],
   "parents": [],
-  "actions": [
-    {
-      "id": "order-update",
-      "title": "Order Update",
-      "enabled": true,
-      "match": [
-        {
-          "key": "blo_net_value",
-          "op": "gt",
-          "value": 0
-        }
-      ],
-      "set": [
-        {
-          "key": "blo_order_update_date",
-          "value": "$CURRENT_DATE"
-        }
-      ],
-      "one_click": true,
-      "icon": "cash-outline",
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Technoplatz"]
-    }
-  ],
+  "actions": [],
   "triggers": [
     {
       "name": "product",
