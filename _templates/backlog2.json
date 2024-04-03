@@ -15,12 +15,12 @@
       "title": "Market",
       "description": "Market"
     },
-    "blo_customer_name": {
+    "blo_sold_to_name": {
       "bsonType": "string",
       "title": "Customer Name",
       "description": "Customer Name"
     },
-    "blo_ch": {
+    "blo_dist_channel": {
       "bsonType": "number",
       "title": "Ch",
       "description": "Ch"
@@ -322,7 +322,8 @@
     "blo_brand": {
       "bsonType": "string",
       "title": "Brand",
-      "description": "Brand"
+      "description": "Brand",
+      "selection": true
     },
     "blo_sub_name": {
       "bsonType": "string",
@@ -375,7 +376,7 @@
       "title": "Shipping Cond",
       "description": "Shipping Cond"
     },
-    "blo_method_of_transport": {
+    "blo_mot": {
       "bsonType": "string",
       "title": "Method of Transport",
       "description": "Method of Transport"
@@ -418,8 +419,8 @@
     },
     "blo_dnn_item": {
       "bsonType": "string",
-      "title": "DN_ITEM",
-      "description": "DN_ITEM"
+      "title": "LENOVO_DN_ITEM",
+      "description": "LENOVO_DN_ITEM"
     },
     "blo_delivery_group": {
       "bsonType": "number",
@@ -560,7 +561,7 @@
     "blo_status"
   ],
   "index": [["blo_status"]],
-  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_dnn_no", "blo_dnn_item"]],
+  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_prd_no", "blo_dnn_no", "blo_dnn_item"]],
   "sort": {
     "_modified_at": -1
   },
@@ -691,6 +692,7 @@
   ],
   "links": [],
   "import": {
+    "sumnum": false,
     "enabled": true,
     "purge": true,
     "ignored": []

@@ -1598,6 +1598,7 @@ class Crud:
             upsertable_ = "upsertable" in import_ and import_["upsertable"] is True
             purge_ = "purge" in import_ and import_["purge"] is True
             enabled_ = "enabled" in import_ and import_["enabled"] is True
+            sumnum_ = "sumnum" in import_ and import_["sumnum"] is True
             upsertables_ = (
                 import_["upsertables"]
                 if "upsertables" in import_ and len(import_["upsertables"]) > 0
@@ -1728,15 +1729,16 @@ class Crud:
                 if uql_ == uqlz_:
                     break
 
-            df_ = df_.groupby(
-                list(
-                    df_.select_dtypes(
-                        exclude=["float", "int", "float64", "int64"]
-                    ).columns
-                ),
-                as_index=False,
-                dropna=False,
-            ).sum()
+            if sumnum_:
+                df_ = df_.groupby(
+                    list(
+                        df_.select_dtypes(
+                            exclude=["float", "int", "float64", "int64"]
+                        ).columns
+                    ),
+                    as_index=False,
+                    dropna=False,
+                ).sum()
             df_.replace(
                 [np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True
             )
