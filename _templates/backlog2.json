@@ -692,9 +692,9 @@
   ],
   "links": [],
   "import": {
-    "sumnum": false,
     "enabled": true,
     "purge": true,
+    "sumnum": false,
     "ignored": []
   },
   "queries": {

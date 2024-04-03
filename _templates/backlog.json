@@ -385,7 +385,7 @@
     "blo_status"
   ],
   "index": [["blo_status"]],
-  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_dnn_no", "blo_dnn_item"]],
+  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_prd_no", "blo_dnn_no", "blo_dnn_item"]],
   "sort": {
     "_modified_at": -1
   },
@@ -523,6 +523,7 @@
   "import": {
     "enabled": true,
     "purge": true,
+    "sumnum": false,
     "ignored": ["blo_dnn_item"]
   },
   "queries": {
