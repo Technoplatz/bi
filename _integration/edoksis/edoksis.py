@@ -1,7 +1,7 @@
 """
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2024 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -44,7 +44,6 @@ from bson.objectid import ObjectId
 import requests
 from pymongo import MongoClient, ReturnDocument
 import pymongo
-from get_docker_secret import get_docker_secret
 from flask import Flask, request, make_response
 from markupsafe import escape
 from flask_cors import CORS
@@ -99,11 +98,9 @@ MONGO_PORT1_ = int(os.environ.get("MONGO_PORT1"))
 MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
 MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-MONGO_USERNAME_ = get_docker_secret("MONGO_USERNAME", default="")
-MONGO_PASSWORD_ = get_docker_secret("MONGO_PASSWORD", default="")
-MONGO_TLS_CERT_KEYFILE_PASSWORD_ = get_docker_secret(
-    "MONGO_TLS_CERT_KEYFILE_PASSWORD", default=""
-)
+MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
+MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
 MONGO_TLS_ = str(os.environ.get("MONGO_TLS")).lower() == "true"
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
@@ -142,7 +139,9 @@ SUPPLIER_FAX_ = os.environ.get("SUPPLIER_FAX")
 SUPPLIER_EMAIL_ = os.environ.get("SUPPLIER_EMAIL")
 SUPPLIER_TAX_OFFICE_ = os.environ.get("SUPPLIER_TAX_OFFICE")
 SUPPLIER_TAX_NO_ = os.environ.get("SUPPLIER_TAX_NO")
+
 PRINT_ = partial(print, flush=True)
+PRINT_("*** STARTED", EDOKSIS_VKN_)
 
 
 class Mongo:
@@ -381,9 +380,11 @@ def download_f():
         if ok_:
             res_ = {
                 "result": True,
-                "msg": "edoksis waybill received"
-                if files_
-                else "waybill not found in edoksis",
+                "msg": (
+                    "edoksis waybill received"
+                    if files_
+                    else "waybill not found in edoksis"
+                ),
                 "files": files_,
             }
         else:

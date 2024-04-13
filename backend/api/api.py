@@ -4098,6 +4098,9 @@ class Crud:
             )
             linked_count_ = len(linked_)
 
+            if not link_:
+                raise APIError("no link provided")
+
             if op_ == "insert" and linked_count_ == 0:
                 raise APIError("no linked data provided")
 
@@ -4969,11 +4972,6 @@ class Crud:
         """
         docstring is in progress
         """
-        session_client_ = MongoClient(Mongo().connstr)
-        session_db_ = session_client_[MONGO_DB_]
-        session_ = session_client_.start_session()
-        session_.start_transaction()
-
         try:
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
@@ -4985,7 +4983,10 @@ class Crud:
 
             if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
                 if collection_id_ in PROTECTED_COLLS_:
-                    raise APIError("collection is protected to add")
+                    raise APIError("collection is protected")
+
+            if link_ and not linked_:
+                raise APIError("no linked items entered")
 
             if "_id" in doc_:
                 doc_.pop("_id", None)
@@ -5041,7 +5042,7 @@ class Crud:
 
             doc_ = Misc().set_strip_doc_f(doc_)
 
-            insert_one_ = session_db_[collection_].insert_one(doc_, session=session_)
+            insert_one_ = Mongo().db_[collection_].insert_one(doc_)
             _id = insert_one_.inserted_id
 
             if collection_id_ == "_collection":
@@ -5100,8 +5101,6 @@ class Crud:
                     )
                     if not link_f_["result"]:
                         raise APIError(link_f_["msg"])
-                else:
-                    raise APIError("no linked data provided")
 
             log_ = Misc().log_f(
                 {
@@ -5115,28 +5114,19 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            session_.commit_transaction()
-
             return {"result": True, "token": inserted_}
 
         except pymongo.errors.PyMongoError as exc__:
-            session_.abort_transaction()
             return Misc().mongo_error_f(exc__)
 
         except AuthError as exc__:
-            session_.abort_transaction()
             return Misc().auth_error_f(exc__)
 
         except APIError as exc__:
-            session_.abort_transaction()
             return Misc().notify_exception_f(exc__)
 
         except Exception as exc__:
-            session_.abort_transaction()
             return Misc().notify_exception_f(exc__)
-
-        finally:
-            session_client_.close()
 
 
 class Email:
@@ -5962,58 +5952,6 @@ class Auth:
         except Exception as exc__:
             return Misc().notify_exception_f(exc__)
 
-    def account_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            user_ = input_["user"] if "user" in input_ else None
-            auth_ = input_["auth"] if "auth" in input_ else None
-            email_ = user_["email"] if "email" in user_ else None
-            op_ = input_["op"]
-
-            response_ = {}
-            api_key_ = None
-
-            if op_ == "apikeygen":
-                api_key_ = secrets.token_hex(16)
-                Mongo().db_["_auth"].update_one(
-                    {"aut_id": email_},
-                    {
-                        "$set": {
-                            "aut_api_key": api_key_,
-                            "_api_key_modified_at": Misc().get_now_f(),
-                            "_api_key_modified_by": email_,
-                        },
-                        "$inc": {"_api_key_modified_count": 1},
-                    },
-                )
-                response_ = {"api_key": api_key_, "_modified_at": Misc().get_now_f()}
-            elif op_ == "apikeyget":
-                api_key_modified_at_ = (
-                    auth_["_api_key_modified_at"]
-                    if "_api_key_modified_at" in auth_
-                    else None
-                )
-                api_key_ = auth_["aut_api_key"] if "aut_api_key" in auth_ else None
-                response_ = {
-                    "api_key": api_key_,
-                    "api_key_modified_at": api_key_modified_at_,
-                }
-            else:
-                raise APIError("operation not supported " + op_)
-
-            return {"result": True, "user": response_}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
-
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
-
     def forgot_f(self):
         """
         docstring is in progress
@@ -6378,54 +6316,6 @@ class Auth:
         except Exception as exc__:
             return Misc().notify_exception_f(exc__)
 
-    def user_validate_by_api_key_f(self, input_):
-        """
-        docstring is in progress
-        """
-        try:
-            api_key_ = (
-                Misc().clean_f(input_["api_key"]) if "api_key" in input_ else None
-            )
-            if not api_key_ or api_key_ is None:
-                raise AuthError("api key must be provided")
-
-            auth_ = Mongo().db_["_auth"].find_one({"aut_api_key": api_key_})
-            if not auth_:
-                raise AuthError("user is not authenticated")
-            user_id_ = auth_["aut_id"]
-
-            user_ = (
-                Mongo()
-                .db_["_user"]
-                .find_one(
-                    {
-                        "usr_id": user_id_,
-                        "usr_enabled": True,
-                        "usr_scope": {"$in": ["Internal", "Administrator"]},
-                    }
-                )
-            )
-            if not user_:
-                raise APIError("user not found to validate")
-
-            firewall_ = self.firewall_f(user_)
-            if not firewall_["result"]:
-                raise APIError(firewall_["msg"])
-
-            return {"result": True, "user": user_, "auth": auth_}
-
-        except pymongo.errors.PyMongoError as exc:
-            return Misc().mongo_error_f(exc)
-
-        except APIError as exc:
-            return Misc().notify_exception_f(exc)
-
-        except AuthError as exc:
-            return Misc().auth_error_f(exc)
-
-        except Exception as exc:
-            return Misc().notify_exception_f(exc)
-
     def signin_f(self):
         """
         docstring is in progress
@@ -6613,17 +6503,15 @@ MONGO_PORT1_ = int(os.environ.get("MONGO_PORT1"))
 MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
 MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-MONGO_USERNAME_ = get_docker_secret("mongo_username", default="")
-MONGO_PASSWORD_ = get_docker_secret("mongo_password", default="")
-MONGO_TLS_CERT_KEYFILE_PASSWORD_ = get_docker_secret(
-    "mongo_tls_keyfile_password", default=""
-)
+MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
+MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
 MONGO_DUMP_HOURS_ = (
     os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
 )
 MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [
     True,
     "true",
@@ -7035,15 +6923,6 @@ def api_auth_f():
 
         user_, auth_ = None, None
 
-        if op_ in ["signout", "apikeygen", "apikeyget"]:
-            jwt_validate_f_ = Auth().jwt_validate_f()
-            if not jwt_validate_f_["result"]:
-                raise SessionError(jwt_validate_f_["msg"])
-            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
-            user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
-            if not auth_:
-                raise SessionError({"result": False, "msg": "no authentication"})
-
         if op_ == "signup":
             res_ = Auth().signup_f()
         elif op_ == "signin":
@@ -7051,15 +6930,18 @@ def api_auth_f():
         elif op_ == "tfac":
             res_ = Auth().tfac_f()
         elif op_ == "signout":
+            jwt_validate_f_ = Auth().jwt_validate_f()
+            if not jwt_validate_f_["result"]:
+                raise SessionError(jwt_validate_f_["msg"])
+            auth_ = jwt_validate_f_["auth"] if "auth" in jwt_validate_f_ else None
+            user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
+            if not auth_:
+                raise SessionError({"result": False, "msg": "no authentication"})
             res_ = Auth().signout_f(auth_)
         elif op_ == "forgot":
             res_ = Auth().forgot_f()
         elif op_ == "reset":
             res_ = Auth().reset_f()
-        elif op_ in ["apikeygen", "apikeyget"]:
-            input_["user"] = user_
-            input_["auth"] = auth_
-            res_ = Auth().account_f(input_)
         else:
             raise APIError({"result": False, "msg": "operation not supported"})
 

@@ -113,29 +113,6 @@ export class SettingsPage implements OnInit {
     });
   }
 
-  doAccount(req_: string) {
-    return new Promise((resolve) => {
-      this.is_processing_account = true;
-      this.auth.Account(req_).then((res: any) => {
-        if (["apikeygen", "apikeyget"].includes(req_)) {
-          this.accountf_api_key = res && res.user && res.user.api_key ? res.user.api_key : null;
-          this.accountf_api_key_date = res && res.user && res.user.api_key_modified_at ? res.user.api_key_modified_at.$date : null;
-          req_ === "apikeygen" ? this.doApiKeyEnabled() : null;
-          this.user.api_key = this.accountf_api_key;
-          this.storage.set("LSUSERMETA", this.user).then(() => { });
-        }
-        resolve(true);
-      }).catch((error: any) => {
-        this.qr_exists = false;
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        setTimeout(() => {
-          this.is_processing_account = false;
-        }, 1000);
-      });
-    });
-  }
-
   doApiKeyEnabled() {
     if (!this.is_api_key_enabled) {
       this.is_api_key_enabled = true;

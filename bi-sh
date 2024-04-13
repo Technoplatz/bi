@@ -3,7 +3,7 @@
 #
 # Technoplatz BI
 #
-# Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+# Copyright (C) 2019-2024 Technoplatz IT Solutions GmbH, Mustafa Mat
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -45,6 +45,7 @@ function helpBI() {
     echo "./bi-sh init"
     echo "./bi-sh start"
     echo "./bi-sh stop"
+    echo "./bi-sh down"
     echo "./bi-sh update"
     echo "./bi-sh prune [--all]"
     echo "./bi-sh logs api|pwa|init|replicaset|stream [last n rows]"
@@ -68,21 +69,10 @@ function initBI() {
 }
 
 function updateBI() {
-    echo "Updating..."
+    echo -e "Updating core...\n"
     docker compose --project-name $PRNAME --file $DCYML pull
-    if [[ -f $INTGCFDIR/$DCYML ]]; then
-        env docker compose --project-name $PRNAME --file $INTGCFDIR/$DCYML pull
-    fi
-    if [[ -f $INTGEDOKSISDIR/$DCYML ]]; then
-        env docker compose --project-name $PRNAME --file $INTGEDOKSISDIR/$DCYML pull
-    fi
-    if [ $? -eq 0 ]; then
-        echo -e "✔ The latest version received successfully."
-        startBI
-    else
-        echo -e "✘ Sorry! Process was terminated ($?)."
-        return 0
-    fi
+    echo -e "Updating integration...\n"
+    docker compose --project-name $PRNAME --file $DCINTGYML pull
     return 1
 }
 
@@ -99,53 +89,32 @@ function pruneBI() {
 }
 
 function startBI() {
-    echo -e "\nStarting containers..."
+    echo -e "Starting core containers...\n"
     mkdir -p .secret
-    if [ ! -f .secret/.mongo_username ]; then
-        echo -n "root" >.secret/.mongo_username
-        echo -e "\nUsername set."
-    fi
-    if [ ! -f .secret/.mongo_password ]; then
-        echo -n $(openssl rand -hex 10) >.secret/.mongo_password
-        echo -e "\nPassword set."
-    fi
-    if [ ! -f .secret/.mongo_initdb_root_username ]; then
-        echo -n "root" >.secret/.mongo_initdb_root_username
-    fi
-    if [ ! -f .secret/.mongo_initdb_root_password ]; then
-        echo -n $(openssl rand -hex 10) >.secret/.mongo_initdb_root_password
-    fi
-    if [ ! -f .secret/.mongo_tls_keyfile_password ]; then
-        echo -n $(openssl rand -hex 10) >.secret/.mongo_tls_keyfile_password
-    fi
     docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML --compatibility up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
         docker cp init:/cert/mongo0.pem .secret/mongo0.pem
         docker cp init:/cert/mongo-ca.pem .secret/mongo-ca.pem
-        echo -e "\n✔ Platform is up and running."
+        echo -e "\n✔ Platform core is up and running.\n"
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
     fi
-    if [ -f $INTGCFDIR/$DCYML ]; then
-        docker compose --project-name $PRNAME --env-file $INTGCFDIR/$DOTENV --file $INTGCFDIR/$DCYML --compatibility up --detach --no-build
-    fi
-    if [ -f $INTGEDOKSISDIR/$DCYML ]; then
-        docker compose --project-name $PRNAME --env-file $INTGEDOKSISDIR/$DOTENV --file $INTGEDOKSISDIR/$DCYML --compatibility up --detach --no-build
+    echo -e "Starting integration containers...\n"
+    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCINTGYML --compatibility up --detach --no-build
+    if [ $? -eq 0 ]; then
+        echo -e "\n✔ Platform integration is up and running."
+    else
+        echo -e "\n✘ Sorry! Process was terminated ($?)."
+        return 0
     fi
     return 1
 }
 
 function downBI() {
-    echo -e "Removing $PRNAME containers...\n"
+    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCINTGYML down
     docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML down
-    if [ -f $INTGCFDIR/$DCYML ]; then
-        docker compose --project-name $PRNAME --env-file $INTGCFDIR/$DOTENV --file $INTGCFDIR/$DCYML down
-    fi
-    if [ -f $INTGEDOKSISDIR/$DCYML ]; then
-        docker compose --project-name $PRNAME --env-file $INTGEDOKSISDIR/$DOTENV --file $INTGEDOKSISDIR/$DCYML down
-    fi
     return 1
 }
 
@@ -169,7 +138,6 @@ function stopBI() {
 function logsBI() {
     if [ ! $1 ]; then
         echo "✘ Sorry! You need to provide a docker service ID."
-        echo "Command should be given like ./bi-sh logs api|pwa|init|replicaset"
         return 0
     fi
     TAIL=$LOGTAIL
@@ -182,7 +150,12 @@ function logsBI() {
 }
 
 function buildBI() {
-    docker compose --env-file $DOTENV --file $DCYML build $1 $2
+    str=$1
+    if [ "${str:0:13}" = "_integration/" ]; then
+        docker compose --env-file $DOTENV --file $DCINTGYML build "${str:13}"
+    else
+        docker compose --env-file $DOTENV --file $DCYML build $1
+    fi
     if [ $? -ne 0 ]; then
         echo -e "\n✘ Sorry! An error occured."
         return 0
@@ -192,22 +165,20 @@ function buildBI() {
     return 1
 }
 
-# ENV VARIABLES
 PRNAME="technoplatz-bi"
 COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 LOGTAIL=20
 DCYML="docker-compose.yml"
+DCINTGYML="docker-compose-integration.yml"
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
-INTGCFDIR="_integration/cloudflare"
-INTGEDOKSISDIR="_integration/edoksis"
 
 DOTENV=".env"
 if [ -f .env-dev ]; then
     DOTENV=".env-dev"
 fi
-if [ ! -f .env-dev ]; then
-    echo -e "✘ Sorry. env not found.\n"
+if [ ! -f $DOTENV ]; then
+    echo -e "✘ Sorry! $DOTENV file not found.\n"
     exit
 fi
 

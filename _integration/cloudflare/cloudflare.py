@@ -1,3 +1,35 @@
+"""
+Technoplatz BI
+
+Copyright (C) 2019-2024 Technoplatz IT Solutions GmbH, Mustafa Mat
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see https://www.gnu.org/licenses.
+
+If your software can interact with users remotely through a computer
+network, you should also make sure that it provides a way for users to
+get its source.  For example, if your program is a web application, its
+interface could display a "Source" link that leads users to an archive
+of the code.  There are many ways you could offer source, and different
+solutions will be better for different programs; see section 13 for the
+specific requirements.
+
+You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU AGPL, see
+https://www.gnu.org/licenses.
+"""
+
 import requests
 import json
 import sys
@@ -8,7 +40,6 @@ from pymongo import MongoClient
 from datetime import datetime
 from flask import Flask, request, make_response
 from flask_cors import CORS
-from get_docker_secret import get_docker_secret
 from functools import partial
 
 
@@ -50,11 +81,9 @@ class Mongo:
         MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
         MONGO_DB_ = os.environ.get("MONGO_DB")
         MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
-        MONGO_USERNAME_ = get_docker_secret("MONGO_USERNAME", default="")
-        MONGO_PASSWORD_ = get_docker_secret("MONGO_PASSWORD", default="")
-        MONGO_TLS_CERT_KEYFILE_PASSWORD_ = get_docker_secret(
-            "MONGO_TLS_CERT_KEYFILE_PASSWORD", default=""
-        )
+        MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
+        MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
+        MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
         MONGO_TLS_ = str(os.environ.get("MONGO_TLS")).lower() == "true"
         MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
         MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
@@ -108,8 +137,8 @@ class Cloudflare:
         self.cf_rule_name_ = os.environ.get("CF_RULE_NAME")
         self.cf_countries_ = os.environ.get(
             "CF_COUNTRIES").replace(" ", "").split(",")
-        self.admin_ips_ = os.environ.get("CF_ADMIN_IPS").replace(
-            " ", "").split(",") if os.environ.get("CF_ADMIN_IPS") else []
+        self.admin_ips_ = os.environ.get("API_ADMIN_IPS").replace(
+            " ", "").split(",") if os.environ.get("API_ADMIN_IPS") else []
         self.cf_hosts_ = os.environ.get("CF_HOSTS").replace(" ", "").split(",")
         self.custom_phase_ = "http_request_firewall_custom"
         self.log_enabled_ = True
@@ -273,6 +302,7 @@ class Cloudflare:
 
 
 PRINT_ = partial(print, flush=True)
+PRINT_("*** STARTED", os.environ.get("CF_ZONEID"))
 
 app = Flask(__name__)
 app.config["CORS_SUPPORTS_CREDENTIALS"] = True

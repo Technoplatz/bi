@@ -1,7 +1,7 @@
 """
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2024 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -1362,13 +1362,11 @@ mongo_port1_ = int(os.environ.get("MONGO_PORT1"))
 mongo_port2_ = int(os.environ.get("MONGO_PORT2"))
 mongo_db_ = os.environ.get("MONGO_DB")
 mngo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
-mongo_username_ = get_docker_secret("mongo_username", default="")
-mongo_password_ = get_docker_secret("mongo_password", default="")
-mongo_tls_cert_keyfile_password_ = get_docker_secret(
-    "mongo_tls_keyfile_password", default=""
-)
+mongo_username_ = os.environ.get("MONGO_USERNAME")
+mongo_password_ = os.environ.get("MONGO_PASSWORD")
 mongo_tls_ = os.environ.get("MONGO_TLS")
 mongo_tls_cert_keyfile_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
+mongo_tls_cert_keyfile_password_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
 mongo_tls_allow_invalid_certificates_ = os.environ.get(
     "MONGO_TLS_ALLOW_INVALID_CERTIFICATES"
 )

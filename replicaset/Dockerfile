@@ -33,6 +33,6 @@
 FROM mongo:latest
 RUN apt-get update && apt-get upgrade -y && apt-get install -y jq
 WORKDIR /app
-COPY mongo-replicaset.sh .
-RUN chmod +x mongo-replicaset.sh
-CMD [ "bash", "-c", "/app/mongo-replicaset.sh"]
+COPY bi-replicaset.sh .
+RUN chmod +x bi-replicaset.sh
+CMD [ "bash", "-c", "/app/bi-replicaset.sh"]

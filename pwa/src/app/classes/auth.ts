@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright (C) 2019-2024 Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -125,23 +125,6 @@ export class Auth {
     return new Promise((resolve, reject) => {
       creds.op = "reset";
       this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
-        if (res && res.result) {
-          resolve(true);
-        } else {
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
-    });
-  }
-
-  Account(op: any) {
-    return new Promise((resolve, reject) => {
-      this.misc.api_call("auth", JSON.stringify({
-        op: op
-      })).then((res: any) => {
         if (res && res.result) {
           resolve(true);
         } else {

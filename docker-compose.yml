@@ -93,11 +93,10 @@ services:
       - MONGO_CERTS_REPLACE=${MONGO_CERTS_REPLACE}
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
+      - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
       - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
     networks:
       - network0
-    secrets:
-      - mongo_tls_keyfile_password
 
   mongo0:
     image: mongo:${MONGO_VERSION}
@@ -123,24 +122,18 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_initdb_root_username
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_initdb_root_password
-      - MONGO_USERNAME_FILE=/run/secrets/mongo_username
-      - MONGO_PASSWORD_FILE=/run/secrets/mongo_password
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
       - MONGO_INITDB_DATABASE=${MONGO_DB}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
       - mongo1
       - mongo2
     networks:
       - network0
-    secrets:
-      - mongo_initdb_root_username
-      - mongo_initdb_root_password
-      - mongo_username
-      - mongo_password
-      - mongo_tls_keyfile_password
 
   mongo1:
     image: mongo:${MONGO_VERSION}
@@ -166,22 +159,16 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_initdb_root_username
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_initdb_root_password
-      - MONGO_USERNAME_FILE=/run/secrets/mongo_username
-      - MONGO_PASSWORD_FILE=/run/secrets/mongo_password
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
       - MONGO_INITDB_DATABASE=${MONGO_DB}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
       - network0
-    secrets:
-      - mongo_initdb_root_username
-      - mongo_initdb_root_password
-      - mongo_username
-      - mongo_password
-      - mongo_tls_keyfile_password
 
   mongo2:
     image: mongo:${MONGO_VERSION}
@@ -207,22 +194,16 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
-      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_initdb_root_username
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_initdb_root_password
-      - MONGO_USERNAME_FILE=/run/secrets/mongo_username
-      - MONGO_PASSWORD_FILE=/run/secrets/mongo_password
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
       - MONGO_INITDB_DATABASE=${MONGO_DB}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword /run/secrets/mongo_tls_keyfile_password --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
     links:
       - init
     networks:
       - network0
-    secrets:
-      - mongo_initdb_root_username
-      - mongo_initdb_root_password
-      - mongo_username
-      - mongo_password
-      - mongo_tls_keyfile_password
 
   replicaset:
     build:
@@ -255,6 +236,8 @@ services:
       - DEFAULT_LOCALE=${DEFAULT_LOCALE}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_HOST0=${MONGO_HOST0}
       - MONGO_HOST1=${MONGO_HOST1}
       - MONGO_HOST2=${MONGO_HOST2}
@@ -265,6 +248,7 @@ services:
       - MONGO_TLS=${MONGO_TLS}
       - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
+      - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
     links:
@@ -273,10 +257,6 @@ services:
       - mongo2
     networks:
       - network0
-    secrets:
-      - mongo_username
-      - mongo_password
-      - mongo_tls_keyfile_password
 
   stream:
     build:
@@ -303,6 +283,8 @@ services:
       - TZ=${TZ}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_HOST0=${MONGO_HOST0}
       - MONGO_HOST1=${MONGO_HOST1}
       - MONGO_HOST2=${MONGO_HOST2}
@@ -329,10 +311,6 @@ services:
       - replicaset
     networks:
       - network0
-    secrets:
-      - mongo_username
-      - mongo_password
-      - mongo_tls_keyfile_password
 
   api:
     build:
@@ -370,6 +348,8 @@ services:
       - DEFAULT_LOCALE=${DEFAULT_LOCALE}
       - MONGO_DB=${MONGO_DB}
       - MONGO_AUTH_DB=${MONGO_AUTH_DB}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
       - MONGO_HOST0=${MONGO_HOST0}
       - MONGO_HOST1=${MONGO_HOST1}
       - MONGO_HOST2=${MONGO_HOST2}
@@ -420,10 +400,6 @@ services:
       - replicaset
     networks:
       - network0
-    secrets:
-      - mongo_username
-      - mongo_password
-      - mongo_tls_keyfile_password
 
   pwa:
     build:
@@ -506,15 +482,3 @@ networks:
     name: network0
     ipam:
       driver: default
-
-secrets:
-  mongo_initdb_root_password:
-    file: ./.secret/.mongo_initdb_root_password
-  mongo_initdb_root_username:
-    file: ./.secret/.mongo_initdb_root_username
-  mongo_password:
-    file: ./.secret/.mongo_password
-  mongo_username:
-    file: ./.secret/.mongo_username
-  mongo_tls_keyfile_password:
-    file: ./.secret/.mongo_tls_keyfile_password

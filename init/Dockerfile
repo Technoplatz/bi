@@ -33,6 +33,6 @@
 FROM bash:latest
 RUN apk update
 RUN apk add openssl
-COPY mongo-init.sh /
-RUN chmod +x /mongo-init.sh
-CMD ["bash", "/mongo-init.sh"]
+COPY bi-init.sh /
+RUN chmod +x /bi-init.sh
+CMD ["bash", "/bi-init.sh"]

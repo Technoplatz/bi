@@ -38,17 +38,13 @@ apitempfilepath=$API_TEMPFILE_PATH
 selfsigned=$MONGO_SELF_SIGNED_CERTS
 selfsignedreplace=$MONGO_CERTS_REPLACE
 
-echo "step 0: Clearing the $apitempfilepath directory..."
-rm -rf $apitempfilepath/*
+echo "step-0: Initiating $apitempfilepath..."
 mkdir -p $apitempfilepath
-touch $apitempfilepath/_init.txt
-echo "step 0: $apitempfilepath is initiated."
-
-mongotlscertkeyfilepassword=$(</run/secrets/mongo_tls_keyfile_password)
+rm -rf $apitempfilepath/*
+echo "$apitempfilepath was initiated sucessfully."
 
 if [[ ! $selfsigned = true ]]; then
-    echo "Certificate generation skipped."
-    echo "Parameter MONGO_SELF_SIGNED_CERTS is $selfsigned"
+    echo "Certificate generation was skipped."
     exit 0
 fi
 
@@ -57,37 +53,24 @@ cacontent=$(cat $MONGO_TLS_CA_KEYFILE)
 if [[ ! $selfsignedreplace = true && -f $MONGO_TLS_CA_KEYFILE && -s $MONGO_TLS_CA_KEYFILE && -f $MONGO_TLS_CERT_KEYFILE && -s $MONGO_TLS_CERT_KEYFILE ]]; then
     if [[ "$cacontent" == *"-----BEGIN PRIVATE KEY-----"* && "$cacontent" == *"-----END CERTIFICATE-----"* && "$certcontent" == *"-----BEGIN PRIVATE KEY-----"* && "$certcontent" == *"-----END CERTIFICATE-----"* ]]; then
         echo "Certificate generation skipped."
-        echo "As far as MONGO_CERTS_REPLACE is $selfsignedreplace"
+        echo "MONGO_CERTS_REPLACE is $selfsignedreplace"
         exit 0
     fi
 fi
 
-echo "step 1: Generating CA..."
-openssl req -nodes -newkey rsa:4096 -out mongo-ca.crt -new -x509 -keyout mongo-ca.key -passout pass:$mongotlscertkeyfilepassword -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST0/emailAddress=$ADMIN_EMAIL"
-cat mongo-ca.key mongo-ca.crt >$MONGO_TLS_CA_KEYFILE
-echo "✔ mongo-ca.key generated sucessfully."
+echo "Step-1: Generating $MONGO_TLS_CA_KEYFILE..."
+openssl req -nodes -newkey rsa:4096 -out mongo-ca.crt -new -x509 -keyout mongo-ca.key -passout pass:$MONGO_TLS_CERT_KEYFILE_PASSWORD -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST0/emailAddress=$ADMIN_EMAIL"
+cat mongo-ca.key mongo-ca.crt > $MONGO_TLS_CA_KEYFILE
+echo "✔ $MONGO_TLS_CA_KEYFILE generated sucessfully."
 echo
 
-echo "step 2: Generating mongo0 CSR..."
+echo "Step-2: Generating $MONGO_TLS_CERT_KEYFILE..."
 openssl req -nodes -newkey rsa:4096 -sha256 -keyout $MONGO_HOST0.key -out $MONGO_HOST0.csr -subj "/C=$COUNTRY_CODE/ST=$STATE_NAME/L=$CITY_NAME/O=$COMPANY_NAME/OU=$DEPARTMENT_NAME/CN=$MONGO_HOST0/emailAddress=$ADMIN_EMAIL"
-echo "✔ mongo0.csr generated sucessfully."
+openssl x509 -req -in $MONGO_HOST0.csr -CA $MONGO_TLS_CA_KEYFILE -CAkey mongo-ca.key -passin pass:$MONGO_TLS_CERT_KEYFILE_PASSWORD -set_serial 00 -out $MONGO_HOST0.crt
+cat $MONGO_HOST0.key $MONGO_HOST0.crt > $MONGO_TLS_CERT_KEYFILE
+rm -rf *.key *.csr *.crt
+echo "✔ $MONGO_TLS_CERT_KEYFILE generated sucessfully."
 echo
 
-echo "step 3: Generating mongo0 CRT..."
-openssl x509 -req -in $MONGO_HOST0.csr -CA $MONGO_TLS_CA_KEYFILE -CAkey mongo-ca.key -passin pass:$mongotlscertkeyfilepassword -set_serial 00 -out $MONGO_HOST0.crt
-echo "✔ mongo0.crt generated sucessfully."
-echo
-
-echo "step 4: Generating PEM..."
-cat $MONGO_HOST0.key $MONGO_HOST0.crt >$MONGO_TLS_CERT_KEYFILE
-echo "✔ mongo-ca.pem and mongo0.pem generated sucessfully."
-echo
-
-echo "step 5: Cleaning key's csr's and crt's..."
-rm -rf *.key
-rm -rf *.csr
-rm -rf *.crt
-
-echo "✔ step 5 completed sucessfully."
-echo "✔ all steps OK."
+echo "✔ Initialization OK."
 echo

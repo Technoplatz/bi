@@ -3,7 +3,6 @@ flask-cors
 pymongo[tls]
 uuid
 requests
-get-docker-secret
 python-dotenv
 markupsafe
 pytz
