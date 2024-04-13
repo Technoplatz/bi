@@ -71,8 +71,10 @@ function initBI() {
 function updateBI() {
     echo -e "Updating core...\n"
     docker compose --project-name $PRNAME --file $DCYML pull
-    echo -e "Updating integration...\n"
-    docker compose --project-name $PRNAME --file $DCINTGYML pull
+    if [[ -f $DCINTGYML ]]; then
+        echo -e "Updating integration...\n"
+        docker compose --project-name $PRNAME --file $DCINTGYML pull
+    fi
     return 1
 }
 
@@ -90,30 +92,33 @@ function pruneBI() {
 
 function startBI() {
     echo -e "Starting core containers...\n"
-    mkdir -p .secret
     docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML --compatibility up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
-        docker cp init:/cert/mongo0.pem .secret/mongo0.pem
-        docker cp init:/cert/mongo-ca.pem .secret/mongo-ca.pem
+        docker cp init:/cert/mongo0.pem mongo0.pem
+        docker cp init:/cert/mongo-ca.pem mongo-ca.pem
         echo -e "\n✔ Platform core is up and running.\n"
     else
         echo -e "\n✘ Sorry! Process was terminated ($?)."
         return 0
     fi
-    echo -e "Starting integration containers...\n"
-    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCINTGYML --compatibility up --detach --no-build
-    if [ $? -eq 0 ]; then
-        echo -e "\n✔ Platform integration is up and running."
-    else
-        echo -e "\n✘ Sorry! Process was terminated ($?)."
-        return 0
+    if [[ -f $DCINTGYML ]]; then
+        echo -e "Starting integration containers...\n"
+        docker compose --project-name $PRNAME --env-file $DOTENV --file $DCINTGYML --compatibility up --detach --no-build
+        if [ $? -eq 0 ]; then
+            echo -e "\n✔ Platform integration is up and running."
+        else
+            echo -e "\n✘ Sorry! Process was terminated ($?)."
+            return 0
+        fi
     fi
     return 1
 }
 
 function downBI() {
-    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCINTGYML down
+    if [[ -f $DCINTGYML ]]; then
+        docker compose --project-name $PRNAME --env-file $DOTENV --file $DCINTGYML down
+    fi
     docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML down
     return 1
 }

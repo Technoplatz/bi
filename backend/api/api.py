@@ -605,28 +605,26 @@ class Misc:
         """
         res_ = None
         try:
-            if not NOTIFICATION_PUSH_URL_:
-                return True
-
             ip_ = self.get_client_ip_f()
             exc_type_, exc_obj_, exc_tb_ = sys.exc_info()
             file_ = os.path.split(exc_tb_.tb_frame.f_code.co_filename)[1]
             line_ = exc_tb_.tb_lineno
             notification_str_ = f"IP: {ip_}, DOMAIN: {DOMAIN_}, DATE: {self.get_now_f()}, FILE: {file_}, LINE: {line_}, OBJ: {str(exc_obj_)}, EXCEPTION: {notification_}"
             res_ = notification_str_
-            response_ = requests.post(
-                NOTIFICATION_PUSH_URL_,
-                json.dumps({"text": str(notification_str_)}),
-                timeout=10,
-            )
-            if response_.status_code != 200:
-                res_ = response_.content
+            if NOTIFICATION_PUSH_URL_:
+                response_ = requests.post(
+                    NOTIFICATION_PUSH_URL_,
+                    json.dumps({"text": str(notification_str_)}),
+                    timeout=10,
+                )
+                if response_.status_code != 200:
+                    res_ = response_.content
+                    PRINT_("!!! TBACK", res_)
 
         except Exception as exc__:
             res_ = str(exc__)
 
         finally:
-            PRINT_("!!! TBACK", res_)
             return True
 
     def notify_exception_f(self, exc__):
@@ -3791,11 +3789,6 @@ class Crud:
         """
         docstring is in progress
         """
-        session_client_ = MongoClient(Mongo().connstr)
-        session_db_ = session_client_[MONGO_DB_]
-        session_ = session_client_.start_session()
-        session_.start_transaction()
-
         try:
             doc = obj["doc"]
 
@@ -3846,9 +3839,7 @@ class Crud:
             )
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            session_db_[collection_].update_one(
-                match_, {"$set": doc_, "$inc": {"_modified_count": 1}}, session=session_
-            )
+            Mongo().db_[collection_].update_one(match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
             if is_crud_ and link_ and linked_:
                 link_f_ = self.link_f(
@@ -3877,28 +3868,19 @@ class Crud:
             if not log_["result"]:
                 raise APIError(log_["msg"])
 
-            session_.commit_transaction()
-
             return {"result": True}
 
-        except pymongo.errors.PyMongoError as exc:
-            session_.abort_transaction()
-            return Misc().mongo_error_f(exc)
+        except pymongo.errors.PyMongoError as exc__:
+            return Misc().mongo_error_f(exc__)
 
-        except AppException as exc:
-            session_.abort_transaction()
-            return Misc().app_exception_f(exc)
+        except AppException as exc__:
+            return Misc().app_exception_f(exc__)
 
-        except APIError as exc:
-            session_.abort_transaction()
-            return Misc().notify_exception_f(exc)
+        except APIError as exc__:
+            return Misc().notify_exception_f(exc__)
 
-        except Exception as exc:
-            session_.abort_transaction()
-            return Misc().notify_exception_f(exc)
-
-        finally:
-            session_client_.close()
+        except Exception as exc__:
+            return Misc().notify_exception_f(exc__)
 
     def remove_f(self, obj):
         """
@@ -4191,7 +4173,7 @@ class Crud:
             checknum_ = len(Mongo().db_[collection_].distinct(get_, filter_))
 
             if checknum_ != linked_count_:
-                raise APIError(
+                raise AppException(
                     f"records found [{checknum_}] does not match with requested [{linked_count_}]"
                 )
 
@@ -4218,7 +4200,7 @@ class Crud:
             if api_:
                 run_api_f_ = self.run_api_f(api_, data_, [_id], usr_id_)
                 if not run_api_f_["result"]:
-                    raise AppException(run_api_f_)
+                    raise APIError(run_api_f_["msg"])
                 files_ += run_api_f_["files"]
 
             if notify_:
@@ -4420,7 +4402,8 @@ class Crud:
             res_ = {"result": True, "files": files_, "msg": msg_}
 
         except pymongo.errors.PyMongoError as exc__:
-            res_ = Misc().mongo_error_f(exc__)
+            Misc().mongo_error_f(exc__)
+            res_ = {"result": True, "files": files_, "msg": str(exc__)}
 
         except PassException as exc__:
             res_ = {"result": True, "files": files_, "msg": str(exc__)}
@@ -4782,7 +4765,7 @@ class Crud:
             if api_:
                 run_api_f_ = self.run_api_f(api_, doc_, ids_, email_)
                 if not run_api_f_["result"]:
-                    raise AppException(run_api_f_["msg"])
+                    raise APIError(run_api_f_["msg"])
                 msg_ = run_api_f_["msg"] if "msg" in run_api_f_ else None
                 files_ += (
                     run_api_f_["files"]
@@ -5100,6 +5083,7 @@ class Crud:
                         }
                     )
                     if not link_f_["result"]:
+                        delete_one_ = Mongo().db_[collection_].delete_one({"_id": _id})
                         raise APIError(link_f_["msg"])
 
             log_ = Misc().log_f(
