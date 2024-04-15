@@ -135,7 +135,7 @@
         }
       ],
       "autofill": true,
-      "btntext": "DNNs",
+      "btntext": "DNN",
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"],
       "notification": {
         "notify": true,

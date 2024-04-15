@@ -253,6 +253,8 @@ class Trigger:
                                 else [],
                                 "upsert": "upsert" in cluster_
                                 and cluster_["upsert"] is True,
+                                "modified": "modified" in cluster_
+                                and cluster_["modified"] is True,
                                 "notification": cluster_["notification"]
                                 if "notification" in cluster_
                                 else None,
@@ -713,8 +715,6 @@ class Trigger:
             if trigger_targets_ == []:
                 raise PassException("!!! no trigger target found")
 
-            # PRINT_(f"\n>>> change detected [{source_collection_id_}]", op_, changed_)
-
             for target_ in trigger_targets_:
                 target_collection_id_ = target_["target"].lower()
                 target_collection_ = f"{target_collection_id_}_data"
@@ -978,7 +978,7 @@ class Trigger:
                 set_["_trigged_at"] = self.get_now_f()
                 set_["_trigged_by"] = "_trigger"
 
-                if upsert_ is True or modified_ is True:
+                if upsert_ or modified_:
                     set_["_modified_at"] = self.get_now_f()
                     set_["_modified_by"] = "_trigger"
 
@@ -988,7 +988,7 @@ class Trigger:
                 )
                 count_ = update_many_.matched_count
                 PRINT_(
-                    ">>> updated :)",
+                    ">>> updated",
                     {
                         "coll": target_collection_,
                         "match": match_,

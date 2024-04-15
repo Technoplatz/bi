@@ -21,3 +21,4 @@ botocore
 unidecode
 pytz
 asyncio
+gevent

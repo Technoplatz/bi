@@ -41,6 +41,7 @@ from datetime import datetime
 from flask import Flask, request, make_response
 from flask_cors import CORS
 from functools import partial
+from gevent.pywsgi import WSGIServer
 
 
 class APIException(BaseException):
@@ -83,7 +84,9 @@ class Mongo:
         MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
         MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
         MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
-        MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
+        MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get(
+            "MONGO_TLS_CERT_KEYFILE_PASSWORD"
+        )
         MONGO_TLS_ = str(os.environ.get("MONGO_TLS")).lower() == "true"
         MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
         MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
@@ -130,15 +133,16 @@ class Cloudflare:
         docstring is in progress
         """
         self.tz_ = os.environ.get("TZ")
-        self.cf_active_ = os.environ.get("CF_ACTIVE") in [
-            True, "true", "True", "TRUE"]
+        self.cf_active_ = os.environ.get("CF_ACTIVE") in [True, "true", "True", "TRUE"]
         self.cf_zone_id_ = os.environ.get("CF_ZONEID")
         self.token_ = os.environ.get("CF_TOKEN")
         self.cf_rule_name_ = os.environ.get("CF_RULE_NAME")
-        self.cf_countries_ = os.environ.get(
-            "CF_COUNTRIES").replace(" ", "").split(",")
-        self.admin_ips_ = os.environ.get("API_ADMIN_IPS").replace(
-            " ", "").split(",") if os.environ.get("API_ADMIN_IPS") else []
+        self.cf_countries_ = os.environ.get("CF_COUNTRIES").replace(" ", "").split(",")
+        self.admin_ips_ = (
+            os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",")
+            if os.environ.get("API_ADMIN_IPS")
+            else []
+        )
         self.cf_hosts_ = os.environ.get("CF_HOSTS").replace(" ", "").split(",")
         self.custom_phase_ = "http_request_firewall_custom"
         self.log_enabled_ = True
@@ -231,8 +235,7 @@ class Cloudflare:
                     ]
                 )
             )
-            docs_ = json.loads(JSONEncoder().encode(
-                list(cursor_))) if cursor_ else []
+            docs_ = json.loads(JSONEncoder().encode(list(cursor_))) if cursor_ else []
             for doc_ in docs_:
                 client_ips_.append(doc_["_id"])
 
@@ -245,8 +248,7 @@ class Cloudflare:
                 raise APIException("no hosts found")
 
             ipsq_ = "{" + " ".join(f"{ip_}" for ip_ in ips_) + "}"
-            hosts_ = "{" + \
-                " ".join(f'"{host_}"' for host_ in self.cf_hosts_) + "}"
+            hosts_ = "{" + " ".join(f'"{host_}"' for host_ in self.cf_hosts_) + "}"
             countriesq_ = (
                 "{" + " ".join(f'"{country_}"' for country_ in self.cf_countries_) + "}"
             )
@@ -279,7 +281,7 @@ class Cloudflare:
             for doc_ in docs_:
                 Mongo().db_["_firewall"].update_many(
                     {"fwa_source_ip": doc_["_id"]},
-                    {"$set": {"fwa_waf_sync_date": datetime.now()}}
+                    {"$set": {"fwa_waf_sync_date": datetime.now()}},
                 )
 
             result_ = True
@@ -345,4 +347,5 @@ def waf_f():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80, debug=False)
+    http_server = WSGIServer(("0.0.0.0", 80), app)
+    http_server.serve_forever()

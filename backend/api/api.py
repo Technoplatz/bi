@@ -70,6 +70,7 @@ import requests
 from croniter import croniter
 from get_docker_secret import get_docker_secret
 from apscheduler.schedulers.background import BackgroundScheduler
+from gevent.pywsgi import WSGIServer
 
 
 class APIError(BaseException):
@@ -7296,4 +7297,5 @@ def api_get_query(id_):
 
 if __name__ == "__main__":
     Schedular().main_f()
-    app.run(host="0.0.0.0", port=80, debug=False)
+    http_server = WSGIServer(("0.0.0.0", 80), app)
+    http_server.serve_forever()

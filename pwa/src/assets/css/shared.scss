@@ -1849,8 +1849,11 @@ json-editor .jsoneditor {
 
 .search-area {
   margin-top: 8px !important;
-  margin-bottom: 0px !important;
-  padding-bottom: 0px;
+}
+
+.search-actions {
+  padding-top: 5px;
+  border-top: 1px solid var(--ion-color-light);
 }
 
 .setmode-grid {

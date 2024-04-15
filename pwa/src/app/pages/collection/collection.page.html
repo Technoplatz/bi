@@ -272,7 +272,7 @@ https://www.gnu.org/licenses.
                   <div *ngIf="!['bool','date'].includes(item.value.bsonType) && !item.value.selection; else boolordate">
                     <ion-textarea #searchfocus cols="32" [(ngModel)]="searched[item.key].kw"
                       [ngModelOptions]="{standalone: true}" class="ion-no-padding search-area"
-                      placeholder="{{ 'Search' | translate }}" disabled="false" auto-grow="true">
+                      placeholder="{{ 'Search' | translate }}" disabled="false" rows="1" auto-grow="true">
                     </ion-textarea>
                   </div>
                   <ng-template #boolordate>
@@ -300,7 +300,7 @@ https://www.gnu.org/licenses.
                       </ul>
                     </div>
                   </ng-template>
-                  <div>
+                  <div class="search-actions">
                     <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
                       <ion-icon name="search"></ion-icon>
                       {{ 'Search' | translate }}

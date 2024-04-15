@@ -47,6 +47,7 @@ import pymongo
 from flask import Flask, request, make_response
 from markupsafe import escape
 from flask_cors import CORS
+from gevent.pywsgi import WSGIServer
 
 
 class APIError(BaseException):
@@ -752,6 +753,7 @@ def multi_issue_f():
             )
 
             despatch_lines_ = ""
+            notesdns_ = []
             line_id_ = 0
             for delivery_ in deliveries_:
                 delivery_qty_ = delivery_[delivery_qty_field_]
@@ -769,8 +771,10 @@ def multi_issue_f():
                 note_ = ""
                 unit_code_ = "NIU"
                 line_id_ += 1
-                notes_ += f"{delivery_no_} "
+                notesdns_.append(delivery_no_)
                 despatch_lines_ += f"<tem:DespatchLine><tem:ID>{line_id_}</tem:ID><tem:DeliveredQuantity>{delivery_qty_}</tem:DeliveredQuantity><tem:DeliveredQuantityUnitCode>{unit_code_}</tem:DeliveredQuantityUnitCode><tem:LineID>{shipment_id_}</tem:LineID><tem:ItemName>{item_name_}</tem:ItemName><tem:Note><tem:string>{note_}</tem:string></tem:Note></tem:DespatchLine>"
+
+            notes_ += ",".join(list(set(notesdns_)))
 
             request_xml_ = f"""
             <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
@@ -1004,4 +1008,5 @@ def multi_issue_f():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80, debug=False)
+    http_server = WSGIServer(("0.0.0.0", 80), app)
+    http_server.serve_forever()
