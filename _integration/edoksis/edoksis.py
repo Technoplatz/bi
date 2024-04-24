@@ -774,7 +774,7 @@ def multi_issue_f():
                 notesdns_.append(delivery_no_)
                 despatch_lines_ += f"<tem:DespatchLine><tem:ID>{line_id_}</tem:ID><tem:DeliveredQuantity>{delivery_qty_}</tem:DeliveredQuantity><tem:DeliveredQuantityUnitCode>{unit_code_}</tem:DeliveredQuantityUnitCode><tem:LineID>{shipment_id_}</tem:LineID><tem:ItemName>{item_name_}</tem:ItemName><tem:Note><tem:string>{note_}</tem:string></tem:Note></tem:DespatchLine>"
 
-            notes_ += ",".join(list(set(notesdns_)))
+            notes_ += ", ".join(list(set(notesdns_)))
 
             request_xml_ = f"""
             <soap:Envelope xmlns:soap ="http://www.w3.org/2003/05/soap-envelope" xmlns:tem="http://tempuri.org/">
