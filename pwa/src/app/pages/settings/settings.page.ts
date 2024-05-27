@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright ©Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General private License as published by
@@ -233,7 +233,6 @@ export class SettingsPage implements OnInit {
   }
 
   set_pagination(event: any) {
-    console.log(event.target.value);
     const val_ = event.target.value;
     this.storage.set("LSPAGINATION", val_).then(() => {
       this.pagination_ = val_;

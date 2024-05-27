@@ -4695,9 +4695,6 @@ class Crud:
                         session_db_[collection_].insert_one(datanew_, session=session_)
 
                         if ration_ < 1:
-                            # session_db_[collection_].update_one(
-                            #     get_filtered_, {"$set": docu_, "$inc": {"_modified_count": 1}},
-                            #     session=session_)
                             session_db_[collection_].update_one(
                                 {"_id": ObjectId(data_["_id"])}, {"$set": docu_, "$inc": {"_modified_count": 1}},
                                 session=session_)

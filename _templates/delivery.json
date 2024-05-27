@@ -639,7 +639,7 @@
         "csv": true,
         "excel": true,
         "json": false,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_gross_weight,dnn_change",
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_width,dnn_length,dnn_height,dnn_gross_weight,dnn_unit_price,dnn_amount,dnn_change",
         "filter": [
           {
             "key": "dnn_status",
@@ -697,7 +697,7 @@
         "csv": true,
         "excel": true,
         "json": false,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_change",
+        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_width,dnn_length,dnn_height,dnn_gross_weight,dnn_unit_price,dnn_amount,dnn_change",
         "filter": [
           {
             "key": "dnn_status",

@@ -1,7 +1,7 @@
 /*
 Technoplatz BI
 
-Copyright (C) 2019-2023 Technoplatz IT Solutions GmbH, Mustafa Mat
+Copyright ©Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -74,9 +74,7 @@ export class MenuComponent implements OnInit {
   }
 
   sign_out() {
-    this.auth.sign_out().then(() => {
-      console.log("signed out");
-    }).catch((error: any) => {
+    this.auth.sign_out().then(() => { }).catch((error: any) => {
       console.error("signout error", error.msg);
     });
   }
