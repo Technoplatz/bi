@@ -43,6 +43,9 @@ services:
       - bi-cert-volume:/cert
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+    labels:
+      - traefik.enable=false
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     ports:
       - "8802:80"
     environment:
@@ -82,6 +85,9 @@ services:
       - bi-storage-volume:${API_TEMPFILE_PATH}
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+    labels:
+      - traefik.enable=false
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     ports:
       - "8801:80"
     environment:

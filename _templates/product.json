@@ -64,7 +64,7 @@
       "description": "Operation system",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,64}$"
     },
     "prd_memory_ob": {
       "bsonType": "string",
@@ -78,6 +78,14 @@
       "bsonType": "string",
       "title": "DIMM Memory",
       "description": "DIMM Memory",
+      "minLength": 0,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+    },
+    "prd_memory": {
+      "bsonType": "string",
+      "title": "Memory",
+      "description": "Memory",
       "minLength": 0,
       "maxLength": 64,
       "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
@@ -96,7 +104,7 @@
       "description": "Graphics card",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,64}$"
     },
     "prd_storage": {
       "bsonType": "string",
@@ -132,6 +140,7 @@
       "prd_family",
       "prd_cpu",
       "prd_os",
+      "prd_memory",
       "prd_memory_ob",
       "prd_memory_dimm",
       "prd_display",

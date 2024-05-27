@@ -13,10 +13,18 @@
       "title": "Payment Date",
       "description": "Payment date",
       "dateOnly": true
+    },
+    "pay_transfer_id": {
+      "bsonType": "string",
+      "title": "Transfer ID",
+      "description": "Payment transfer ID",
+      "minLength": 0,
+      "maxLength": 23,
+      "pattern": "^[0-9]{0,23}$"
     }
   },
   "required": ["pay_dnn_no", "pay_date"],
-  "index": [["pay_date"]],
+  "index": [["pay_date"], ["pay_transfer_id"]],
   "unique": [["pay_dnn_no"]],
   "sort": {
     "_modified_at": -1
@@ -28,6 +36,7 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["pay_date"]
-  }
+    "upsertables": ["pay_date", "pay_transfer_id"]
+  },
+  "pagination": [25, 50, 100]
 }

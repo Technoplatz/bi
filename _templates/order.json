@@ -39,6 +39,11 @@
       "description": "Unit Price",
       "default": 0,
       "decimals": 2
+    },
+    "ord_crm_contract_no": {
+      "bsonType": "string",
+      "title": "CRM Contract No",
+      "description": "CRM Contract No"
     }
   },
   "required": ["ord_no", "ord_prd_no", "ord_unit_price"],
@@ -55,6 +60,6 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["ord_date", "ord_prd_no", "ord_unit_price"]
+    "upsertables": ["ord_date", "ord_prd_no", "ord_unit_price", "ord_crm_contract_no"]
   }
 }

@@ -512,6 +512,10 @@
             {
               "key": "ord_unit_price",
               "value": "blo_net_value / blo_line_qty"
+            },
+            {
+              "key": "ord_crm_contract_no",
+              "value": "blo_crm_contract_no"
             }
           ],
           "upsert": true
