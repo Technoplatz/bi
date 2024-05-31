@@ -1549,17 +1549,7 @@ class Crud:
         """
         docstring is in progress
         """
-        content_, stats_, res_, details_, files_, filename_, upsertable_, df_, name_ = (
-            "",
-            "",
-            None,
-            {},
-            [],
-            "",
-            False,
-            None,
-            "",
-        )
+        content_, stats_, res_, details_, files_, filename_, upsertable_, df_, name_ = ("", "", None, {}, [], "", False, None, "")
         try:
             form_ = obj["form"]
             file_ = obj["file"]
@@ -1575,57 +1565,36 @@ class Crud:
             name_ = user_["usr_name"]
 
             collection__ = f"{collection_}_data"
-            find_one_ = Mongo().db_["_collection"].find_one(
-                {"col_id": collection_})
+            find_one_ = Mongo().db_["_collection"].find_one({"col_id": collection_})
             if not find_one_:
                 raise APIError(f"collection not found {collection_}")
 
-            col_structure_ = (
-                find_one_[
-                    "col_structure"] if "col_structure" in find_one_ else None
-            )
+            col_structure_ = find_one_["col_structure"] if "col_structure" in find_one_ else None
             if not col_structure_:
                 raise APIError("no structure found")
 
             get_properties_ = self.get_properties_f(collection_)
             if not get_properties_["result"]:
                 raise APIError(get_properties_["msg"])
-            properties_ = get_properties_["properties"]
 
+            properties_ = get_properties_["properties"]
             defaults_ = {}
-            required_ = (
-                col_structure_["required"]
-                if "required" in col_structure_ and len(col_structure_["required"]) > 0
-                else []
-            )
+            required_ = col_structure_["required"] if "required" in col_structure_ and len(col_structure_["required"]) > 0 else []
             if required_:
                 for req_ in required_:
-                    if (
-                        req_ in properties_
-                        and "default" in properties_[req_]
-                        and properties_[req_]["default"] is not None
-                    ):
+                    if req_ in properties_ and "default" in properties_[req_] and properties_[req_]["default"] is not None:
                         defaults_[req_] = properties_[req_]["default"]
 
-            import_ = col_structure_[
-                "import"] if "import" in col_structure_ else None
+            import_ = col_structure_["import"] if "import" in col_structure_ else None
             if not import_:
                 raise APIError(f"no import rules defined for {collection_}")
-            ignored_ = (
-                import_["ignored"]
-                if "ignored" in import_ and len(import_["ignored"]) > 0
-                else []
-            )
-            upsertable_ = "upsertable" in import_ and import_[
-                "upsertable"] is True
+
+            ignored_ = import_["ignored"] if "ignored" in import_ and len(import_["ignored"]) > 0 else []
+            upsertable_ = "upsertable" in import_ and import_["upsertable"] is True
             purge_ = "purge" in import_ and import_["purge"] is True
             enabled_ = "enabled" in import_ and import_["enabled"] is True
             sumnum_ = "sumnum" in import_ and import_["sumnum"] is True
-            upsertables_ = (
-                import_["upsertables"]
-                if "upsertables" in import_ and len(import_["upsertables"]) > 0
-                else []
-            )
+            upsertables_ = import_["upsertables"] if "upsertables" in import_ and len(import_["upsertables"]) > 0 else []
 
             if not enabled_:
                 raise APIError("collection is not enabled to import")
@@ -1638,9 +1607,8 @@ class Crud:
                 ]:
                     filesize_ = file_.tell()
                     if filesize_ > API_UPLOAD_LIMIT_BYTES_:
-                        raise APIError(
-                            f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes"
-                        )
+                        raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
+
                     file_.seek(0, os.SEEK_END)
                     df_ = pd.read_excel(
                         file_,
@@ -1653,11 +1621,8 @@ class Crud:
                     decoded_ = file_.read().decode("utf-8")
                     filesize_ = file_.content_length
                     if filesize_ > API_UPLOAD_LIMIT_BYTES_:
-                        raise APIError(
-                            f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes"
-                        )
-                    df_ = pd.read_csv(io.StringIO(decoded_),
-                                      header=0, dtype="object")
+                        raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
+                    df_ = pd.read_csv(io.StringIO(decoded_), header=0, dtype="object")
                 else:
                     raise APIError("file type is not supported")
 
@@ -1668,9 +1633,7 @@ class Crud:
                 df_ = None
                 raise APIError(dferr_)
 
-            df_ = df_.rename(
-                lambda column_: self.convert_column_name_f(column_), axis="columns"
-            )
+            df_ = df_.rename(lambda column_: self.convert_column_name_f(column_), axis="columns")
 
             columns_tobe_deleted_ = []
             for column_ in df_.columns:
@@ -1678,51 +1641,28 @@ class Crud:
                     property_ = properties_[column_]
                     if "bsonType" in property_:
                         if property_["bsonType"] == "date":
-                            df_[column_] = df_[column_].apply(
-                                self.frame_convert_datetime_f
-                            )
+                            df_[column_] = df_[column_].apply(self.frame_convert_datetime_f)
                         elif property_["bsonType"] == "bool":
-                            df_[column_] = df_[column_].apply(
-                                self.frame_convert_bool_f)
+                            df_[column_] = df_[column_].apply(self.frame_convert_bool_f)
                         elif property_["bsonType"] == "string":
-                            df_[column_] = df_[column_].apply(
-                                self.frame_convert_string_f
-                            )
-                            if (
-                                "replacement" in property_
-                                and len(property_["replacement"]) > 0
-                            ):
+                            df_[column_] = df_[column_].apply(self.frame_convert_string_f)
+                            if ("replacement" in property_ and len(property_["replacement"]) > 0):
                                 for repl_ in property_["replacement"]:
-                                    find_ = (
-                                        repl_["find"]
-                                        if "find" in repl_ and repl_["find"] is not None
-                                        else None
-                                    )
-                                    replace_ = (
-                                        repl_["replace"]
-                                        if "replace" in repl_
-                                        and repl_["replace"] is not None
-                                        else ""
-                                    )
+                                    find_ = (repl_["find"] if "find" in repl_ and repl_["find"] is not None else None)
+                                    replace_ = (repl_["replace"] if "replace" in repl_ and repl_["replace"] is not None else "")
                                     if find_ and replace_ is not None:
-                                        df_[column_] = df_[column_].str.replace(
-                                            find_, replace_, regex=True
-                                        )
+                                        df_[column_] = df_[column_].str.replace(find_, replace_, regex=True)
                         elif property_["bsonType"] == "int":
-                            df_[column_] = df_[column_].apply(
-                                self.frame_convert_int_f)
+                            df_[column_] = df_[column_].apply(self.frame_convert_int_f)
                         elif property_["bsonType"] in ["number", "decimal"]:
-                            df_[column_] = df_[column_].apply(
-                                self.frame_convert_number_f
-                            )
+                            df_[column_] = df_[column_].apply(self.frame_convert_number_f)
                     else:
                         columns_tobe_deleted_.append(column_)
                 else:
                     if column_ != "_id":
                         columns_tobe_deleted_.append(column_)
                     else:
-                        df_[column_] = df_[column_].apply(
-                            self.frame_convert_objectid_f)
+                        df_[column_] = df_[column_].apply(self.frame_convert_objectid_f)
 
             if defaults_:
                 for key_, value_ in defaults_.items():
@@ -1741,11 +1681,7 @@ class Crud:
                 df_.drop(columns_tobe_deleted_, axis=1, inplace=True)
 
             uniques_ = []
-            unique_ = (
-                col_structure_["unique"]
-                if "unique" in col_structure_ and len(col_structure_["unique"]) > 0
-                else []
-            )
+            unique_ = (col_structure_["unique"] if "unique" in col_structure_ and len(col_structure_["unique"]) > 0 else [])
             for uq_ in unique_:
                 uql_, uqlz_ = len(uq_), 0
                 for uq__ in uq_:
@@ -1757,17 +1693,11 @@ class Crud:
 
             if sumnum_:
                 df_ = df_.groupby(
-                    list(
-                        df_.select_dtypes(
-                            exclude=["float", "int", "float64", "int64"]
-                        ).columns
-                    ),
+                    list(df_.select_dtypes(exclude=["float", "int", "float64", "int64"]).columns),
                     as_index=False,
                     dropna=False,
                 ).sum()
-            df_.replace(
-                [np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True
-            )
+            df_.replace([np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True)
             df_["_created_at"] = df_["_modified_at"] = Misc().get_now_f()
             df_["_created_by"] = df_["_modified_by"] = email_
             df_["_modified_count"] = 0
@@ -1799,10 +1729,8 @@ class Crud:
                         continue
                     set_["_modified_at"] = get_now_f_
                     set_["_modified_by"] = email_
-                    wrote_.append(
-                        pymongo.UpdateOne(
-                            filter_, {"$set": set_}, upsert=upserted_)
-                    )
+                    wrote_.append(pymongo.UpdateOne(filter_, {"$set": set_}, upsert=upserted_))
+
                 if not fieldsgiven_:
                     raise APIError("no upsertable fields provided")
             else:
@@ -1815,15 +1743,10 @@ class Crud:
                 )
                 Mongo().db_[collection__].delete_many({})
 
-            bulk_write_ = Mongo().db_[collection__].bulk_write(
-                wrote_, ordered=False)
+            bulk_write_ = Mongo().db_[collection__].bulk_write(wrote_, ordered=False)
             details_, content_ = bulk_write_.bulk_api_result, ""
 
-            res_ = {
-                "result": True,
-                "count": count_,
-                "msg": "file was imported successfully",
-            }
+            res_ = {"result": True, "count": count_, "msg": "file was imported successfully", }
 
         except pymongo.errors.PyMongoError as exc__:
             res_ = Misc().mongo_error_f(exc__)
@@ -1852,35 +1775,13 @@ class Crud:
         finally:
             if df_ is not None:
                 stats_ += f"<br /><br />ROW COUNT: {str(len(df_))}<br />"
-                stats_ += (
-                    f"<br />INSERTED: {str(details_['nInserted'])}"
-                    if "nInserted" in details_
-                    else ""
-                )
-                stats_ += (
-                    f"<br />UPSERTED: {str(details_['nUpserted'])}"
-                    if "nUpserted" in details_
-                    else ""
-                )
-                stats_ += (
-                    f"<br />MATCHED: {str(details_['nMatched'])}"
-                    if "nMatched" in details_
-                    else ""
-                )
-                stats_ += (
-                    f"<br />MODIFIED: {str(details_['nModified'])}"
-                    if "nModified" in details_
-                    else ""
-                )
-                stats_ += (
-                    f"<br />REMOVED: {str(details_['nRemoved'])}"
-                    if "nRemoved" in details_
-                    else ""
-                )
+                stats_ += (f"<br />INSERTED: {str(details_['nInserted'])}" if "nInserted" in details_ else "")
+                stats_ += (f"<br />UPSERTED: {str(details_['nUpserted'])}" if "nUpserted" in details_ else "")
+                stats_ += (f"<br />MATCHED: {str(details_['nMatched'])}" if "nMatched" in details_ else "")
+                stats_ += (f"<br />MODIFIED: {str(details_['nModified'])}" if "nModified" in details_ else "")
+                stats_ += (f"<br />REMOVED: {str(details_['nRemoved'])}" if "nRemoved" in details_ else "")
                 filename_ = f"imported-{collection_}-{Misc().get_timestamp_f()}.txt"
-                fullpath_ = os.path.normpath(
-                    os.path.join(API_TEMPFILE_PATH_, filename_)
-                )
+                fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
                 if not fullpath_.startswith(TEMP_PATH_):
                     raise APIError(f"file not allowed [import] {fullpath_}")
                 with open(fullpath_, "w", encoding="utf-8") as file_:
@@ -1895,18 +1796,15 @@ class Crud:
             else:
                 stats_ += f"<br /><br />{dferr_}.<br />" if dferr_ != "" else ""
 
-            Email().send_email_f(
-                {
-                    "personalizations": [
-                        {"email": email_, "name": name_},
-                        {"email": ADMIN_EMAIL_, "name": ADMIN_NAME_},
-                    ],
-                    "op": "importerr",
-                    "html": f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}{stats_}",
-                    "subject": "Management [Data Upload Result]",
-                    "files": files_,
-                }
-            )
+            Email().send_email_f({
+                "personalizations": [{"email": email_, "name": name_}, {"email": ADMIN_EMAIL_, "name": ADMIN_NAME_}],
+                "op": "importerr",
+                "flag": True,
+                "html":
+                f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}{stats_}",
+                "subject": "Management [Data Upload Result]",
+                "files": files_
+            })
 
             return res_
 
@@ -1916,14 +1814,8 @@ class Crud:
         """
         try:
             op_ = obj_["op"]
-            email_ = obj_["user"]["email"] if obj_ and obj_[
-                "user"] else "cronjob"
-
-            dmp_id_ = (
-                f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}"
-                if op_ == "dumpu"
-                else Misc().clean_f(obj_["dumpid"])
-            )
+            email_ = obj_["user"]["email"] if obj_ and obj_["user"] else "cronjob"
+            dmp_id_ = (f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}" if op_ == "dumpu" else Misc().clean_f(obj_["dumpid"]))
             fn_ = f"{dmp_id_}.gz"
             type_ = "gzip"
             fullpath_ = os.path.normpath(
@@ -1998,18 +1890,10 @@ class Crud:
             for mat_ in match_:
                 key_ = mat_["key"]
                 op_ = mat_["op"]
-                value_ = (
-                    mat_["value"]
-                    if "value" in mat_ and mat_["value"] is not None
-                    else None
-                )
+                value_ = (mat_["value"] if "value" in mat_ and mat_["value"] is not None else None)
                 if key_ and op_ and key_ in properties_:
                     fres_ = None
-                    typ = (
-                        properties_[key_]["bsonType"]
-                        if key_ in properties_
-                        else "string"
-                    )
+                    typ = (properties_[key_]["bsonType"] if key_ in properties_ else "string")
                     if data_ and value_ in data_ and data_[value_] is not None:
                         value_ = data_[value_]
                     if op_ == "null" or (op_ == "eq" and value_ is None):
@@ -3362,7 +3246,7 @@ class Crud:
                         if (
                             property_ in doc_
                             and doc_[property_] is not None
-                            and str(doc_[property_]) != ""
+                            and len(str(doc_[property_])) > 0
                         ):
                             docs_[ix_]["_reminder"] = True
                             docs_[ix_]["_note"] = (
@@ -4648,8 +4532,7 @@ class Crud:
                     datanew_ = Mongo().db_[collection_].find_one({"_id": ObjectId(data_["_id"])})
                     datax_ = datanew_.copy()
 
-                    key_value_ = datanew_[key_field_] if key_field_ in datanew_ and datanew_[
-                        key_field_] is not None else None
+                    key_value_ = datanew_[key_field_] if key_field_ in datanew_ and datanew_[key_field_] is not None else None
                     if not key_value_:
                         session_.abort_transaction()
                         raise AppException("no key value found")
@@ -4850,9 +4733,7 @@ class Crud:
             collection_id_ = obj["collection"]
             doc_ = obj["doc"]
             link_ = obj["link"] if "link" in obj and obj["link"] is not None else None
-            linked_ = (
-                obj["linked"] if "linked" in obj and obj["linked"] is not None else None
-            )
+            linked_ = obj["linked"] if "linked" in obj and obj["linked"] is not None else None
 
             if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
                 if collection_id_ in PROTECTED_COLLS_:
@@ -4903,6 +4784,7 @@ class Crud:
                 )
                 if not jwt_proc_f_["result"]:
                     raise AuthError(jwt_proc_f_["msg"])
+
                 doc_["tkn_copy_count"] = 0
                 doc_["tkn_token"] = inserted_ = jwt_proc_f_["jwt"]
                 doc_["tkn_secret"] = secret_
@@ -5006,10 +4888,11 @@ class Email:
         try:
             op_ = msg["op"] if "op" in msg else None
             files_ = msg["files"] if "files" in msg and len(msg["files"]) > 0 else []
-            html_ = (f"{msg['html']} {EMAIL_DISCLAIMER_HTML_}" if "html" in msg else EMAIL_DISCLAIMER_HTML_)
+            html_ = f"{msg['html']} {EMAIL_DISCLAIMER_HTML_}" if "html" in msg else EMAIL_DISCLAIMER_HTML_
             tags_ = msg["tags"] if "tags" in msg and len(msg["tags"]) > 0 else None
-            personalizations_ = (msg["personalizations"] if "personalizations" in msg else [])
+            personalizations_ = msg["personalizations"] if "personalizations" in msg else []
             subject_ = msg["subject"] if "subject" in msg else None
+            flag_ = "flag" in msg and msg["flag"] is True
 
             if subject_ is None:
                 subject_ = (
@@ -5017,18 +4900,11 @@ class Email:
                     if op_ in ["uploaderr", "importerr"]
                     else (
                         EMAIL_SIGNIN_SUBJECT_
-                        if op_ == "signin"
-                        else (
-                            EMAIL_TFA_SUBJECT_
-                            if op_ == "tfa"
+                        if op_ == "signin" else (
+                            EMAIL_TFA_SUBJECT_ if op_ == "tfa"
                             else (
                                 EMAIL_SIGNUP_SUBJECT_
-                                if op_ == "signup"
-                                else (
-                                    msg["subject"]
-                                    if msg["subject"]
-                                    else EMAIL_DEFAULT_SUBJECT_
-                                )
+                                if op_ == "signup" else (msg["subject"] if msg["subject"] else EMAIL_DEFAULT_SUBJECT_)
                             )
                         )
                     )
@@ -5065,9 +4941,14 @@ class Email:
 
             message_ = MIMEMultipart()
             message_["From"] = f"{unidecode(COMPANY_NAME_)} <{FROM_EMAIL_}>"
-            message_["Subject"] = unidecode(
-                f"{EMAIL_SUBJECT_PREFIX_}{subject_}")
+            message_["Subject"] = unidecode(f"{EMAIL_SUBJECT_PREFIX_}{subject_}")
             message_["To"] = ", ".join(to_)
+
+            if flag_:
+                message_["X-Priority"] = "2"
+                message_["X-Message-Flag"] = "Follow up"
+                message_["Importance"] = "High"
+
             message_.attach(MIMEText(html_, "html"))
 
             for file_ in files_:
@@ -5139,9 +5020,7 @@ class OTP:
                 raise AuthError("account not found to reset otp")
 
             aut_otp_secret_ = pyotp.random_base32()
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
-                name=email_, issuer_name="Technoplatz-BI"
-            )
+            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="Technoplatz-BI")
 
             Mongo().db_["_auth"].update_one(
                 {"aut_id": email_},
@@ -5181,9 +5060,7 @@ class OTP:
             if not auth_:
                 raise AuthError("account not found")
 
-            aut_otp_secret_ = (
-                auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
-            )
+            aut_otp_secret_ = auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ else None
             if not aut_otp_secret_:
                 raise AuthError("otp secret is missing")
 
@@ -5192,9 +5069,7 @@ class OTP:
                 raise AuthError("otp is missing")
 
             totp_ = pyotp.TOTP(aut_otp_secret_)
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
-                name=email_, issuer_name="BI"
-            )
+            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=email_, issuer_name="BI")
 
             validated_ = False
 
@@ -5358,8 +5233,7 @@ class Auth:
         """
         docstring is in progress
         """
-        tags_ = user_["_tags"] if "_tags" in user_ and len(
-            user_["_tags"]) > 0 else []
+        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
         in_admin_tags_ = any(tag_ in tags_ for tag_ in API_ADMIN_TAGS_)
         in_admin_ips_ = Misc().in_admin_ips_f()
         return in_admin_tags_ and in_admin_ips_
@@ -5368,10 +5242,8 @@ class Auth:
         """
         docstring is in progress
         """
-        tags_ = user_["_tags"] if "_tags" in user_ and len(
-            user_["_tags"]) > 0 else []
-        in_permissive_tags_ = any(
-            tag_ in tags_ for tag_ in API_PERMISSIVE_TAGS_)
+        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+        in_permissive_tags_ = any(tag_ in tags_ for tag_ in API_PERMISSIVE_TAGS_)
         in_admin_ips_ = Misc().in_admin_ips_f()
         return in_permissive_tags_ and in_admin_ips_
 
@@ -5382,20 +5254,12 @@ class Auth:
         try:
             ip_ = Misc().get_client_ip_f()
             token__ = re.split(" ", bearer_)
-            token_ = (
-                token__[1]
-                if token__ and len(token__) > 0 and token__[0].lower() == "bearer"
-                else None
-            )
+            token_ = token__[1] if token__ and len(token__) > 0 and token__[0].lower() == "bearer" else None
             if not token_:
                 raise AuthError("token not found")
 
             header_ = jwt.get_unverified_header(token_)
-            token_finder_ = (
-                header_["finder"]
-                if "finder" in header_ and header_["finder"] is not None
-                else None
-            )
+            token_finder_ = header_["finder"] if "finder" in header_ and header_["finder"] is not None else None
             if not token_finder_:
                 raise AuthError("please use an api access token")
 
@@ -5409,33 +5273,23 @@ class Auth:
             jwt_secret_ = find_["tkn_secret"]
 
             options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
-            jwt_proc_f_ = Misc().jwt_proc_f(
-                "decode", token_, jwt_secret_, options_, None
-            )
+            jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
 
             if not jwt_proc_f_["result"]:
                 raise AuthError(jwt_proc_f_["msg"])
 
             grant_ = f"tkn_grant_{operation_}"
             if not find_[grant_]:
-                raise AuthError(
-                    f"token is not allowed to perform {operation_}")
+                raise AuthError(f"token is not allowed to perform {operation_}")
 
-            if (
-                qid_
-                and "tkn_allowed_queries" in find_
-                and len(find_["tkn_allowed_queries"]) > 0
-            ):
+            if (qid_ and "tkn_allowed_queries" in find_ and len(find_["tkn_allowed_queries"]) > 0):
                 if qid_ not in find_["tkn_allowed_queries"]:
                     raise AuthError(f"token is not allowed to read {qid_}")
 
             if not (
                 "tkn_allowed_ips" in find_
                 and len(find_["tkn_allowed_ips"]) > 0
-                and (
-                    ip_ in find_["tkn_allowed_ips"]
-                    or "0.0.0.0" in find_["tkn_allowed_ips"]
-                )
+                and (ip_ in find_["tkn_allowed_ips"] or "0.0.0.0" in find_["tkn_allowed_ips"])
             ):
                 raise AuthError(f"IP is not allowed to do {operation_}")
 
@@ -5469,16 +5323,8 @@ class Auth:
             if not re.search(compile_, str(tfac_)):
                 raise AuthError("invalid otp format")
 
-            aut_otp_secret_ = (
-                auth_["aut_otp_secret"]
-                if "aut_otp_secret" in auth_ and auth_["aut_otp_secret"] is not None
-                else None
-            )
-            aut_tfac_ = (
-                auth_["aut_tfac"]
-                if "aut_tfac" in auth_ and auth_["aut_tfac"] is not None
-                else None
-            )
+            aut_otp_secret_ = auth_["aut_otp_secret"] if "aut_otp_secret" in auth_ and auth_["aut_otp_secret"] is not None else None
+            aut_tfac_ = auth_["aut_tfac"] if "aut_tfac" in auth_ and auth_["aut_tfac"] is not None else None
             if not aut_tfac_:
                 raise AuthError("otp not provided")
 
@@ -5561,15 +5407,13 @@ class Auth:
         docstring is in progress
         """
         try:
-            pat = re.compile(
-                r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z0-9@$!#%*.-_?&]{8,32}$"
-            )
+            pat = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z0-9@$!#%*.-_?&]{8,32}$")
             if not re.search(pat, password_):
                 raise APIError("Invalid password")
+
             salt_ = os.urandom(32) if salted_ is None else salted_
-            key_ = hashlib.pbkdf2_hmac(
-                "sha512", password_.encode("utf-8"), salt_, 101010, dklen=128
-            )
+            key_ = hashlib.pbkdf2_hmac("sha512", password_.encode("utf-8"), salt_, 101010, dklen=128)
+
             return {"result": True, "salt": salt_, "key": key_}
 
         except APIError as exc:
@@ -5611,30 +5455,13 @@ class Auth:
         try:
             user_ = input_["user"]
             user_id_ = user_["usr_id"] if "usr_id" in user_ else None
-            usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(
-                    user_["_tags"]) > 0 else []
-            )
-            collection_id_ = (
-                input_["collection"]
-                if "collection" in input_ and input_["collection"] is not None
-                else None
-            )
+            usr_tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+            collection_id_ = input_["collection"] if "collection" in input_ and input_["collection"] is not None else None
             op_ = input_["op"] if "op" in input_ else None
             adminops_ = ["dumpu", "dumpr"]
             read_permissive_colls_ = ["_collection", "_query", "_announcement"]
-            read_permissive_ops_ = [
-                "read",
-                "query",
-                "savequery",
-                "savejob",
-                "queries",
-                "collection",
-                "collections",
-                "announcements",
-                "visuals",
-                "visual",
-            ]
+            read_permissive_ops_ = ["read", "query", "savequery", "savejob", "queries",
+                                    "collection", "collections", "announcements", "visuals", "visual", ]
             insert_permissive_ops_ = ["clone"]
             is_crud_ = collection_id_ and collection_id_[:1] != "_"
             allowmatch_ = []
@@ -5712,12 +5539,7 @@ class Auth:
                         or (op_ in ["savequery", "savejob"] and per_query_)
                         or (op_ == "insert" and per_insert_ and per_read_)
                         or (op_ == "import" and per_insert_ and per_read_)
-                        or (
-                            op_ == "upsert"
-                            and per_insert_
-                            and per_update_
-                            and per_read_
-                        )
+                        or (op_ == "upsert" and per_insert_ and per_update_ and per_read_)
                         or (op_ == "update" and per_update_ and per_read_)
                         or (op_ == "action" and per_action_ and per_read_)
                         or (op_ == "clone" and per_insert_ and per_read_)
@@ -5759,10 +5581,7 @@ class Auth:
         """
         try:
             ip_ = Misc().get_client_ip_f()
-            tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(
-                    user_["_tags"]) > 0 else []
-            )
+            tags_ = (user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else [])
             allowed_ = (
                 Mongo()
                 .db_["_firewall"]
@@ -5900,23 +5719,19 @@ class Auth:
             password_ = Misc().clean_f(input_["password"])
             tfac_ = Misc().clean_f(input_["tfac"])
 
-            user_validate_ = self.user_validate_by_auth_f(
-                {"userid": email_, "password": password_}
-            )
+            user_validate_ = self.user_validate_by_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
-            user_ = user_validate_[
-                "user"] if "user" in user_validate_ else None
-            auth_ = user_validate_[
-                "auth"] if "auth" in user_validate_ else None
+
+            user_ = user_validate_["user"] if "user" in user_validate_ else None
+            auth_ = user_validate_["auth"] if "auth" in user_validate_ else None
 
             verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, "signin")
             if not verify_otp_f_["result"]:
                 raise AuthError(verify_otp_f_["msg"])
 
             usr_name_ = user_["usr_name"]
-            locale_ = user_[
-                "usr_locale"] if "usr_locale" in user_ else DEFAULT_LOCALE_
+            locale_ = user_["usr_locale"] if "usr_locale" in user_ else DEFAULT_LOCALE_
             perm_ = Auth().is_manager_f(user_) or Auth().is_admin_f(user_)
             perma_ = Auth().is_admin_f(user_)
             payload_ = {
@@ -6052,17 +5867,12 @@ class Auth:
             )
 
             options_ = {"iss": "Technoplatz", "aud": "api", "sub": "bi"}
-            jwt_proc_f_ = Misc().jwt_proc_f(
-                "decode", token_, jwt_secret_, options_, None
-            )
+            jwt_proc_f_ = Misc().jwt_proc_f("decode", token_, jwt_secret_, options_, None)
             if not jwt_proc_f_["result"]:
                 raise PassException(jwt_proc_f_["msg"])
-            claims_ = jwt_proc_f_["jwt"]
 
-            usr_id_ = (
-                claims_["id"] if "id" in claims_ and claims_[
-                    "id"] is not None else None
-            )
+            claims_ = jwt_proc_f_["jwt"]
+            usr_id_ = claims_["id"] if "id" in claims_ and claims_["id"] is not None else None
             if not usr_id_:
                 raise PassException("invalid user token")
 
@@ -6133,16 +5943,8 @@ class Auth:
             if not firewall_f_["result"]:
                 raise AuthError(firewall_f_["msg"])
 
-            aut_salt_ = (
-                auth_["aut_salt"].strip()
-                if "aut_salt" in auth_ and auth_["aut_salt"] is not None
-                else None
-            )
-            aut_key_ = (
-                auth_["aut_key"].strip()
-                if "aut_key" in auth_ and auth_["aut_key"] is not None
-                else None
-            )
+            aut_salt_ = auth_["aut_salt"].strip() if "aut_salt" in auth_ and auth_["aut_salt"] is not None else None
+            aut_key_ = auth_["aut_key"].strip() if "aut_key" in auth_ and auth_["aut_key"] is not None else None
             if not aut_salt_ or not aut_key_:
                 raise AuthError("please set a new password")
 
@@ -6154,11 +5956,7 @@ class Auth:
             if new_key_ != aut_key_:
                 raise AuthError("invalid email or password")
 
-            user_["aut_api_key"] = (
-                auth_["aut_api_key"]
-                if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None
-                else None
-            )
+            user_["aut_api_key"] = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
 
             return {"result": True, "user": user_, "auth": auth_}
 
@@ -6180,9 +5978,7 @@ class Auth:
             email_ = Misc().clean_f(input_["email"])
             password_ = Misc().clean_f(input_["password"])
 
-            user_validate_ = self.user_validate_by_auth_f(
-                {"userid": email_, "password": password_}
-            )
+            user_validate_ = self.user_validate_by_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
                 raise AuthError(user_validate_["msg"])
 
@@ -6244,9 +6040,7 @@ class Auth:
             key_ = hash_f_["key"]
 
             aut_otp_secret_ = pyotp.random_base32()
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(
-                name=user_id_, issuer_name="Technoplatz-BI"
-            )
+            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=user_id_, issuer_name="Technoplatz-BI")
             api_key_ = secrets.token_hex(16)
 
             Mongo().db_["_auth"].insert_one(
@@ -6288,11 +6082,7 @@ class Auth:
 API_OUTPUT_ROWS_LIMIT_ = int(str(os.environ.get("API_OUTPUT_ROWS_LIMIT")))
 API_JOB_UPDATE_LIMIT_ = int(str(os.environ.get("API_JOB_UPDATE_LIMIT")))
 NOTIFICATION_PUSH_URL_ = os.environ.get("NOTIFICATION_PUSH_URL")
-COMPANY_NAME_ = (
-    os.environ.get("COMPANY_NAME")
-    if os.environ.get("COMPANY_NAME")
-    else "Technoplatz BI"
-)
+COMPANY_NAME_ = os.environ.get("COMPANY_NAME") if os.environ.get("COMPANY_NAME") else "Technoplatz BI"
 TZ_ = os.environ.get("TZ")
 DOMAIN_ = os.environ.get("DOMAIN")
 DEFAULT_LOCALE_ = os.environ.get("DEFAULT_LOCALE")
@@ -6312,49 +6102,27 @@ EMAIL_DEFAULT_SUBJECT_ = "Hello"
 EMAIL_SUBJECT_PREFIX_ = os.environ.get("EMAIL_SUBJECT_PREFIX")
 HTML_TABLE_MAX_ROWS_ = int(str(os.environ.get("HTML_TABLE_MAX_ROWS")))
 HTML_TABLE_MAX_COLS_ = int(str(os.environ.get("HTML_TABLE_MAX_COLS")))
-API_SCHEDULE_INTERVAL_MIN_ = int(
-    str(os.environ.get("API_SCHEDULE_INTERVAL_MIN")))
-API_FW_TEMP_DURATION_MIN_ = int(
-    str(os.environ.get("API_FW_TEMP_DURATION_MIN")))
+API_SCHEDULE_INTERVAL_MIN_ = int(str(os.environ.get("API_SCHEDULE_INTERVAL_MIN")))
+API_FW_TEMP_DURATION_MIN_ = int(str(os.environ.get("API_FW_TEMP_DURATION_MIN")))
 API_UPLOAD_LIMIT_BYTES_ = int(str(os.environ.get("API_UPLOAD_LIMIT_BYTES")))
-API_MAX_CONTENT_LENGTH_MB_ = int(
-    str(os.environ.get("API_MAX_CONTENT_LENGTH_MB")))
-API_DEFAULT_AGGREGATION_LIMIT_ = int(
-    str(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT"))
-)
-API_DEFAULT_VISUAL_LIMIT_ = int(
-    str(os.environ.get("API_DEFAULT_VISUAL_LIMIT")))
+API_MAX_CONTENT_LENGTH_MB_ = int(str(os.environ.get("API_MAX_CONTENT_LENGTH_MB")))
+API_DEFAULT_AGGREGATION_LIMIT_ = int(str(os.environ.get("API_DEFAULT_AGGREGATION_LIMIT")))
+API_DEFAULT_VISUAL_LIMIT_ = int(str(os.environ.get("API_DEFAULT_VISUAL_LIMIT")))
 API_QUERY_PAGE_SIZE_ = int(str(os.environ.get("API_QUERY_PAGE_SIZE")))
 API_SESSION_EXP_MINUTES_ = int(str(os.environ.get("API_SESSION_EXP_MINUTES")))
 API_TEMPFILE_PATH_ = os.environ.get("API_TEMPFILE_PATH")
 API_MONGODUMP_PATH_ = os.environ.get("API_MONGODUMP_PATH")
 API_CORS_ORIGINS_ = os.environ.get("API_CORS_ORIGINS").strip().split(",")
-API_S3_ACTIVE_ = os.environ.get("API_S3_ACTIVE") in [
-    True, "true", "True", "TRUE"]
+API_S3_ACTIVE_ = os.environ.get("API_S3_ACTIVE") in [True, "true", "True", "TRUE"]
 API_S3_REGION_ = os.environ.get("API_S3_REGION")
 API_S3_KEY_ID_ = os.environ.get("API_S3_KEY_ID")
 API_S3_KEY_ = os.environ.get("API_S3_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
-API_PERMISSIVE_TAGS_ = os.environ.get(
-    "API_PERMISSIVE_TAGS").replace(" ", "").split(",")
+API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
-API_ADMIN_IPS_ = (
-    os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",")
-    if os.environ.get("API_ADMIN_IPS")
-    else []
-)
-API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [
-    True,
-    "true",
-    "True",
-    "TRUE",
-]
-RESTAPI_ENABLED_ = os.environ.get("RESTAPI_ENABLED") in [
-    True,
-    "true",
-    "True",
-    "TRUE",
-]
+API_ADMIN_IPS_ = os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",") if os.environ.get("API_ADMIN_IPS") else []
+API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [True, "true", "True", "TRUE"]
+RESTAPI_ENABLED_ = os.environ.get("RESTAPI_ENABLED") in [True, "true", "True", "TRUE"]
 MONGO_RS_ = os.environ.get("MONGO_RS")
 MONGO_HOST0_ = os.environ.get("MONGO_HOST0")
 MONGO_HOST1_ = os.environ.get("MONGO_HOST1")
@@ -6366,47 +6134,20 @@ MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
 MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
 MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
-MONGO_DUMP_HOURS_ = (
-    os.environ.get("MONGO_DUMP_HOURS") if os.environ.get(
-        "MONGO_DUMP_HOURS") else "23"
-)
+MONGO_DUMP_HOURS_ = os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
 MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
-MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get(
-    "MONGO_TLS_CERT_KEYFILE_PASSWORD")
-MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [
-    True,
-    "true",
-    "True",
-    "TRUE",
-]
-MONGO_TIMEOUT_MS_ = (
-    int(os.environ.get("MONGO_TIMEOUT_MS"))
-    if os.environ.get("MONGO_TIMEOUT_MS")
-    and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0
-    else 10000
-)
-PREVIEW_ROWS_ = (
-    int(os.environ.get("PREVIEW_ROWS"))
-    if os.environ.get("PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0
-    else 10
-)
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
+MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
+MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get(
+    "MONGO_TIMEOUT_MS") and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0 else 10000
+PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get(
+    "PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
 PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
-STRUCTURE_KEYS_ = [
-    "properties",
-    "unique",
-    "index",
-    "required",
-    "sort",
-    "parents",
-    "links",
-    "actions",
-    "triggers",
-    "import",
-    "pagination",
-]
+STRUCTURE_KEYS_ = ["properties", "unique", "index", "required", "sort",
+                   "parents", "links", "actions", "triggers", "import", "pagination"]
 STRUCTURE_KEYS_OPTIN_ = ["queries"]
 PROP_KEYS_ = ["bsonType", "title", "description"]
 TEMP_PATH_ = "/temp"
@@ -6419,26 +6160,8 @@ app.config["CORS_SUPPORTS_CREDENTIALS"] = True
 app.config["MAX_CONTENT_LENGTH"] = API_MAX_CONTENT_LENGTH_MB_ * 1024 * 1024
 app.config["CORS_ORIGINS"] = API_CORS_ORIGINS_
 app.config["UPLOAD_FOLDER"] = API_TEMPFILE_PATH_
-app.config["CORS_HEADERS"] = [
-    "Content-Type",
-    "Origin",
-    "Authorization",
-    "X-Requested-With",
-    "Accept",
-    "X-Auth",
-]
-app.config["UPLOAD_EXTENSIONS"] = [
-    "pdf",
-    "png",
-    "jpg",
-    "jpeg",
-    "xlsx",
-    "xls",
-    "doc",
-    "docx",
-    "csv",
-    "txt",
-]
+app.config["CORS_HEADERS"] = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "X-Auth"]
+app.config["UPLOAD_EXTENSIONS"] = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 app.json_encoder = JSONEncoder
 CORS(app)
 
@@ -6459,8 +6182,7 @@ def api_import_f():
 
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
-            raise SessionError(
-                {"result": False, "msg": "invalid user session"})
+            raise SessionError({"result": False, "msg": "invalid user session"})
 
         form_ = request.form.to_dict(flat=True)
         if not form_:
@@ -6470,11 +6192,7 @@ def api_import_f():
         if not file_:
             raise APIError("no file received")
 
-        process_ = (
-            form_["process"]
-            if "process" in form_ and form_["process"] in ["insert", "update", "upsert"]
-            else "insert"
-        )
+        process_ = form_["process"] if "process" in form_ and form_["process"] in ["insert", "update", "upsert"] else "insert"
         collection_ = form_["collection"]
         col_check_ = Crud().inner_collection_f(collection_)
         if not col_check_["result"]:
@@ -6507,13 +6225,10 @@ def api_import_f():
         if not import_f_["result"]:
             raise APIError(import_f_["msg"])
 
-        count_ = (
-            import_f_["count"] if "count" in import_f_ and import_f_[
-                "count"] > 0 else 0
-        )
+        count_ = import_f_["count"] if "count" in import_f_ and import_f_["count"] > 0 else 0
         msg_ = import_f_["msg"] if "msg" in import_f_ else None
-
         hdr_ = {"Content-Type": "application/json; charset=utf-8"}
+
         return (
             json.dumps(
                 {"result": import_f_["result"], "count": count_, "msg": msg_},
@@ -6548,9 +6263,7 @@ def api_crud_f():
 
         jwt_validate_f_ = Auth().jwt_validate_f()
         if not jwt_validate_f_["result"]:
-            raise SessionError(
-                {"result": False, "msg": jwt_validate_f_["msg"]})
-
+            raise SessionError({"result": False, "msg": jwt_validate_f_["msg"]})
         user_ = jwt_validate_f_["user"] if "user" in jwt_validate_f_ else None
         if not user_:
             raise SessionError({"result": False, "msg": "user session ended"})
@@ -6562,13 +6275,7 @@ def api_crud_f():
         input_["user"] = user_
         input_["userindb"] = user_
         collection_ = input_["collection"] if "collection" in input_ else None
-        match_ = (
-            input_["match"]
-            if "match" in input_
-            and input_["match"] is not None
-            and len(input_["match"]) > 0
-            else []
-        )
+        match_ = input_["match"] if "match" in input_ and input_["match"] is not None and len(input_["match"]) > 0 else []
         allowmatch_ = []
 
         permission_f_ = Auth().permission_f(
@@ -6582,11 +6289,7 @@ def api_crud_f():
         if not permission_f_["result"]:
             raise AuthError(permission_f_)
 
-        allowmatch_ = (
-            permission_f_["allowmatch"]
-            if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0
-            else []
-        )
+        allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
 
         if op_ in ["read", "update", "upsert", "delete", "action"]:
             match_ += allowmatch_
@@ -6594,8 +6297,7 @@ def api_crud_f():
 
         if op_ in ["update", "upsert", "insert", "action"]:
             if "doc" not in input_:
-                raise APIError(
-                    {"result": False, "msg": "no document included"})
+                raise APIError({"result": False, "msg": "no document included"})
             decode_ = Crud().decode_crud_input_f(input_)
             if not decode_["result"]:
                 raise APIError(decode_)
@@ -6605,14 +6307,11 @@ def api_crud_f():
             if not col_check_["result"]:
                 raise APIError(col_check_)
         elif op_ == "announce":
-            query_id_ = input_[
-                "id"] if "id" in input_ and input_["id"] else None
-            type_ = input_["type"] if "type" in input_ and input_[
-                "type"] else "test"
+            query_id_ = input_["id"] if "id" in input_ and input_["id"] else None
+            type_ = input_["type"] if "type" in input_ and input_["type"] else "test"
 
         if op_ in TFAC_OPS_:
-            tfac_ = input_["tfac"] if "tfac" in input_ and input_[
-                "tfac"] else None
+            tfac_ = input_["tfac"] if "tfac" in input_ and input_["tfac"] else None
             if not tfac_:
                 raise AuthError({"result": False, "msg": "no otp provided"})
             verify_otp_f_ = Auth().verify_otp_f(email_, tfac_, op_)
@@ -6658,15 +6357,7 @@ def api_crud_f():
         elif op_ == "reqotp":
             res_ = OTP().request_otp_f(email_)
         elif op_ == "announce":
-            res_ = Crud().query_f(
-                {
-                    "id": query_id_,
-                    "key": "announce",
-                    "sched": True,
-                    "userindb": user_,
-                    "type": type_,
-                }
-            )
+            res_ = Crud().query_f({"id": query_id_, "key": "announce", "sched": True, "userindb": user_, "type": type_})
         else:
             raise APIError(f"invalid operation: {op_}")
 
@@ -6688,27 +6379,15 @@ def api_crud_f():
         sc__, res_ = 500, ast.literal_eval(str(exc__))
 
     finally:
-        response_ = make_response(
-            json.dumps(res_, default=json_util.default, sort_keys=False)
-        )
-        files_ = res_["files"] if "files" in res_ and len(
-            res_["files"]) > 0 else None
+        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+        files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
 
-        if (
-            "result" in res_
-            and res_["result"] is True
-            and op_ in ["dumpd", "action"]
-            and files_
-        ):
+        if "result" in res_ and res_["result"] is True and op_ in ["dumpd", "action"] and files_:
             path_ = files_[0]["name"].strip().lower()
-            fname_ = path_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(
-                f"{API_MONGODUMP_PATH_}/", ""
-            )
+            fname_ = path_.replace(f"{API_TEMPFILE_PATH_}/", "").replace(f"{API_MONGODUMP_PATH_}/", "")
             response_ = make_response(send_file(path_))
             response_.status_code = sc__
-            response_.headers["Content-Type"] = (
-                f"application/octet-stream; filename={fname_}"
-            )
+            response_.headers["Content-Type"] = (f"application/octet-stream; filename={fname_}")
             return response_
 
         response_.status_code = sc__
