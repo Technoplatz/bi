@@ -6,8 +6,8 @@
       "description": "Shipment ID",
       "placeholder": "Automatically assigned",
       "minLength": 14,
-      "maxLength": 14,
-      "pattern": "^[0-9]{14,14}$",
+      "maxLength": 16,
+      "pattern": "^[0-9-]{14,16}$",
       "timestamp": true,
       "permanent": true
     },
@@ -149,7 +149,7 @@
         {
           "key": "car_acc_no",
           "op": "eq",
-          "value": "1214983834"
+          "value": "shp_acc_no"
         }
       ],
       "get": ["car_id", "car_name", "car_tax_no", "car_plate_no"]
@@ -247,8 +247,8 @@
         }
       ],
       "set": [],
-      "noninteractive": true,
       "one_click": false,
+      "noninteractive": true,
       "icon": "cloud-download-outline",
       "uniqueness": false,
       "unique": [],

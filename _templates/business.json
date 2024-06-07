@@ -12,7 +12,7 @@
       "description": "Unit Name",
       "minLength": 1,
       "maxLength": 16,
-      "pattern": "^[A-Za-z]{1,16}$"
+      "pattern": "^[A-Za-z ]{1,16}$"
     }
   },
   "required": ["bun_id", "bun_name"],
@@ -21,7 +21,7 @@
   "sort": {
     "bun_id": 1
   },
-  "pagination": [25, 50, 100],
+  "pagination": [25, 50],
   "parents": [],
   "links": [],
   "actions": [],

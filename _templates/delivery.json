@@ -496,7 +496,7 @@
   "actions": [
     {
       "id": "stby-to-open",
-      "title": "00-Standby → 00-Open",
+      "title": "STANDBY TO OPEN",
       "enabled": true,
       "match": [
         {
@@ -512,7 +512,7 @@
         }
       ],
       "one_click": true,
-      "icon": null,
+      "icon": "play",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"],
@@ -540,61 +540,8 @@
       }
     },
     {
-      "id": "way-to-open",
-      "title": "Cancel Ordino",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "eq",
-          "value": "10-OnTheWay"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_status",
-          "value": "00-Open"
-        },
-        {
-          "key": "dnn_odi_no",
-          "value": null
-        },
-        {
-          "key": "dnn_odi_sub_no",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "icon": null,
-      "uniqueness": false,
-      "unique": [],
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"],
-      "notification": {
-        "notify": true,
-        "subject": "Operation [Ordino Cancelled]",
-        "body": "Hi,<br /><br />We would like to let you know that statuses of the attached DNs were changed from 10-OnTheWay to 00-Open.",
-        "attachment": true,
-        "html": false,
-        "csv": true,
-        "excel": true,
-        "json": false,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "eq",
-            "value": "00-Open"
-          }
-        ],
-        "sort": {
-          "dnn_no": 1,
-          "dnn_line_no": 1
-        }
-      }
-    },
-    {
       "id": "split",
-      "title": "Line Split",
+      "title": "SPLIT",
       "enabled": true,
       "match": [
         {
@@ -655,66 +602,8 @@
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
     },
     {
-      "id": "customer-change",
-      "title": "Customer Change",
-      "enabled": true,
-      "match": [
-        {
-          "key": "dnn_status",
-          "op": "in",
-          "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
-        }
-      ],
-      "set": [
-        {
-          "key": "dnn_acc_no",
-          "value": null
-        },
-        {
-          "key": "dnn_acc_name",
-          "value": null
-        }
-      ],
-      "one_click": false,
-      "icon": "business",
-      "uniqueness": true,
-      "unique": ["dnn_no"],
-      "split": {
-        "enabled": true,
-        "key_field": "dnn_no",
-        "key_suffix": "-20",
-        "ref_field": null,
-        "num_fields": [],
-        "set_field": "dnn_change",
-        "set_value": "CC-Customer"
-      },
-      "notification": {
-        "notify": true,
-        "subject": "Operations [Customer Change]",
-        "body": "Hi,<br /><br />We would like to let you know that the customer of the attached DNs has been changed.",
-        "attachment": true,
-        "html": false,
-        "csv": true,
-        "excel": true,
-        "json": false,
-        "fields": "dnn_no,dnn_line_no,dnn_status,dnn_bill_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty,dnn_width,dnn_length,dnn_height,dnn_gross_weight,dnn_unit_price,dnn_amount,dnn_change",
-        "filter": [
-          {
-            "key": "dnn_status",
-            "op": "in",
-            "value": "20-OnCustoms,30-OnCustomsProcess,40-ClearanceCompleted,50-OnTheTouchpoint,60-ReadyToBeDelivered"
-          }
-        ],
-        "sort": {
-          "dnn_no": 1,
-          "dnn_line_no": 1
-        }
-      },
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
-    },
-    {
       "id": "rtd",
-      "title": "Ready TBD",
+      "title": "READY TBD",
       "enabled": true,
       "match": [
         {
@@ -734,7 +623,7 @@
         }
       ],
       "one_click": false,
-      "icon": "timer",
+      "icon": "flag",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
@@ -763,7 +652,7 @@
     },
     {
       "id": "notes",
-      "title": "Notes",
+      "title": "ADD NOTE",
       "enabled": true,
       "match": [
         {
@@ -783,7 +672,7 @@
         }
       ],
       "one_click": false,
-      "icon": "flag",
+      "icon": "create",
       "uniqueness": false,
       "unique": [],
       "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
