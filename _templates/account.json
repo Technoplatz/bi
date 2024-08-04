@@ -65,7 +65,7 @@
       "bsonType": "string",
       "title": "Shipping Address ID",
       "description": "Shipping Address ID",
-      "minLength": 8,
+      "minLength": 0,
       "maxLength": 16
     },
     "acc_ship_to_country": {
@@ -114,14 +114,14 @@
       "bsonType": "string",
       "title": "Billing Address ID",
       "description": "Billing Address ID",
-      "minLength": 8,
+      "minLength": 0,
       "maxLength": 16
     },
     "acc_bill_to_country": {
       "bsonType": "string",
       "title": "Billing Country",
       "description": "Bill to Country",
-      "minLength": 2,
+      "minLength": 0,
       "maxLength": 16
     },
     "acc_tax_no": {
@@ -187,6 +187,7 @@
   "sort": {
     "_modified_at": -1
   },
+  "pagination": [25, 50, 100],
   "links": [],
   "triggers": [],
   "import": {}

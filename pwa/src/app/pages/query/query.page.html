@@ -107,7 +107,7 @@ https://www.gnu.org/licenses.
                 <span *ngIf="!_saving">&nbsp;{{ 'Save' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>
               </ion-button>
-              <ion-button *ngIf="perm_ || perma_" (click)="save_query_json_f(true)">
+              <ion-button *ngIf="permqa_" (click)="save_query_json_f(true)">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
                 <span *ngIf="!_saving">{{ 'Approve' | translate }}</span>
                 <span *ngIf="_saving">{{ 'In Progress' | translate }}...</span>

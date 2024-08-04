@@ -3466,34 +3466,28 @@ class Crud:
             if not job_collection_id_:
                 raise APIError("no collection provided")
 
-            user_ = (
-                obj_["userindb"] if "userindb" in obj_ and obj_[
-                    "userindb"] else None
-            )
+            user_ = obj_["userindb"] if "userindb" in obj_ and obj_["userindb"] else None
             if not user_:
                 raise AuthError("user not found")
             usr_tags_ = (
-                user_["_tags"] if "_tags" in user_ and len(
-                    user_["_tags"]) > 0 else []
-            )
+                user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else [])
 
             if not Auth().is_admin_f(user_):
                 raise AuthError("no permission to save job")
 
-            if not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
-                permission_ = (
-                    Mongo()
-                    .db_["_permission"]
-                    .find_one(
-                        {
-                            "per_collection_id": job_collection_id_,
-                            "per_is_active": True,
-                            "per_query": True,
-                        }
-                    )
+            permission_ = (
+                Mongo()
+                .db_["_permission"]
+                .find_one(
+                    {
+                        "per_collection_id": job_collection_id_,
+                        "per_is_active": True,
+                        "per_query": True,
+                    }
                 )
-                if not permission_:
-                    raise AuthError("no permission to save job")
+            )
+            if not permission_:
+                raise AuthError("no permission to save job")
 
             doc_ = {
                 "job_aggregate": aggregate_,
@@ -3570,7 +3564,7 @@ class Crud:
                     user_["_tags"]) > 0 else []
             )
 
-            if not Auth().is_manager_f(user_) and not Auth().is_admin_f(user_):
+            if not Auth().is_qadmin_f(user_):
                 permission_ = (
                     Mongo()
                     .db_["_permission"]
@@ -5188,6 +5182,14 @@ class Auth:
         in_admin_ips_ = Misc().in_admin_ips_f()
         return in_permissive_tags_ and in_admin_ips_
 
+    def is_qadmin_f(self, user_):
+        """
+        docstring is in progress
+        """
+        tags_ = user_["_tags"] if "_tags" in user_ and len(user_["_tags"]) > 0 else []
+        in_qadmin_tags_ = any(tag_ in tags_ for tag_ in API_QADMIN_TAGS_)
+        return in_qadmin_tags_
+
     def access_validate_by_api_token_f(self, bearer_, operation_, qid_):
         """
         docstring is in progress
@@ -5675,17 +5677,19 @@ class Auth:
             locale_ = user_["usr_locale"] if "usr_locale" in user_ else DEFAULT_LOCALE_
             perm_ = Auth().is_manager_f(user_) or Auth().is_admin_f(user_)
             perma_ = Auth().is_admin_f(user_)
+            permqa_ = Auth().is_qadmin_f(user_)
+
             payload_ = {
                 "iss": "Technoplatz",
                 "aud": "api",
                 "sub": "bi",
-                "exp": Misc().get_now_f()
-                + timedelta(minutes=int(API_SESSION_EXP_MINUTES_)),
+                "exp": Misc().get_now_f() + timedelta(minutes=int(API_SESSION_EXP_MINUTES_)),
                 "iat": Misc().get_now_f(),
                 "id": email_,
                 "name": usr_name_,
                 "perm": perm_,
                 "perma": perma_,
+                "perma": permqa_
             }
             secret_ = pyotp.random_base32()
             jwt_proc_f_ = Misc().jwt_proc_f("encode", None, secret_, payload_, None)

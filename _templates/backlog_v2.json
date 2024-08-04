@@ -63,7 +63,8 @@
     "blo_topsell_flag": {
       "bsonType": "string",
       "title": "Topsell Flag",
-      "description": "Topsell Flag"
+      "description": "Topsell Flag",
+      "minLength": 0
     },
     "blo_line_qty": {
       "bsonType": "number",
@@ -88,17 +89,20 @@
     "blo_del_block": {
       "bsonType": "string",
       "title": "Del_Block",
-      "description": "Del_Block"
+      "description": "Del_Block",
+      "minLength": 0
     },
     "blo_bill_block": {
       "bsonType": "string",
       "title": "Bill_Block",
-      "description": "Bill_Block"
+      "description": "Bill_Block",
+      "minLength": 0
     },
     "blo_status": {
       "bsonType": "string",
       "title": "Status",
-      "description": "Status"
+      "description": "Status",
+      "selection": true
     },
     "blo_days_in_status": {
       "bsonType": "number",
@@ -207,7 +211,8 @@
     "blo_rejection_reason": {
       "bsonType": "string",
       "title": "Rejection Reason",
-      "description": "Rejection Reason"
+      "description": "Rejection Reason",
+      "minLength": 0
     },
     "blo_high_lev_item": {
       "bsonType": "number",
@@ -217,7 +222,8 @@
     "blo_foe_flag": {
       "bsonType": "string",
       "title": "FOE Flag",
-      "description": "FOE Flag"
+      "description": "FOE Flag",
+      "minLength": 0
     },
     "blo_sla_type": {
       "bsonType": "string",
@@ -227,7 +233,8 @@
     "blo_dnn_no": {
       "bsonType": "string",
       "title": "MFG DN",
-      "description": "MFG DN"
+      "description": "MFG DN",
+      "minLength": 0
     },
     "blo_mfg_locn": {
       "bsonType": "string",
@@ -252,7 +259,8 @@
     "blo_invoice_no": {
       "bsonType": "string",
       "title": "Invoice Number",
-      "description": "Invoice Number"
+      "description": "Invoice Number",
+      "minLength": 0
     },
     "blo_ship_point": {
       "bsonType": "string",
@@ -292,7 +300,8 @@
     "blo_hub_dn": {
       "bsonType": "string",
       "title": "HUB DN",
-      "description": "HUB DN"
+      "description": "HUB DN",
+      "minLength": 0
     },
     "blo_sales_org": {
       "bsonType": "string",
@@ -338,7 +347,8 @@
     "blo_order_reason": {
       "bsonType": "string",
       "title": "Order Reason",
-      "description": "Order Reason"
+      "description": "Order Reason",
+      "minLength": 0
     },
     "blo_end_user": {
       "bsonType": "string",
@@ -348,12 +358,14 @@
     "blo_ga_name": {
       "bsonType": "string",
       "title": "GA Name",
-      "description": "GA Name"
+      "description": "GA Name",
+      "minLength": 0
     },
     "blo_legacy": {
       "bsonType": "string",
       "title": "Legacy",
-      "description": "Legacy"
+      "description": "Legacy",
+      "minLength": 0
     },
     "blo_payment_term": {
       "bsonType": "string",
@@ -394,7 +406,8 @@
     "blo_credit_block": {
       "bsonType": "string",
       "title": "Credit Block",
-      "description": "Credit Block"
+      "description": "Credit Block",
+      "minLength": 0
     },
     "blo_number_of_prd_changes": {
       "bsonType": "number",
@@ -415,12 +428,14 @@
     "blo_mfg": {
       "bsonType": "string",
       "title": "mfg",
-      "description": "mfg"
+      "description": "mfg",
+      "minLength": 0
     },
     "blo_dnn_item": {
       "bsonType": "string",
       "title": "LENOVO_DN_ITEM",
-      "description": "LENOVO_DN_ITEM"
+      "description": "LENOVO_DN_ITEM",
+      "minLength": 0
     },
     "blo_delivery_group": {
       "bsonType": "number",
@@ -435,7 +450,8 @@
     "blo_gln_no": {
       "bsonType": "string",
       "title": "mfg",
-      "description": "mfg"
+      "description": "mfg",
+      "minLength": 0
     },
     "blo_deliv_priority": {
       "bsonType": "number",
@@ -445,12 +461,14 @@
     "blo_drop_ship": {
       "bsonType": "string",
       "title": "mfg",
-      "description": "mfg"
+      "description": "mfg",
+      "minLength": 0
     },
     "blo_solution_id": {
       "bsonType": "string",
       "title": "mfg",
-      "description": "mfg"
+      "description": "mfg",
+      "minLength": 0
     },
     "blo_sales_office": {
       "bsonType": "string",
@@ -458,7 +476,7 @@
       "description": "mfg"
     },
     "blo_order_qty": {
-      "bsonType": "string",
+      "bsonType": "number",
       "title": "Order qty",
       "description": "Order qty"
     },
@@ -470,7 +488,8 @@
     "blo_lerom": {
       "bsonType": "string",
       "title": "LEROM",
-      "description": "LEROM"
+      "description": "LEROM",
+      "minLength": 0
     },
     "blo_t2_crm_id": {
       "bsonType": "string",
@@ -500,12 +519,14 @@
     "blo_header_comments": {
       "bsonType": "string",
       "title": "Header comments",
-      "description": "Header comments"
+      "description": "Header comments",
+      "minLength": 0
     },
     "blo_cust_invoice_num": {
       "bsonType": "string",
       "title": "Cust Invoice Num",
-      "description": "Cust Invoice Num"
+      "description": "Cust Invoice Num",
+      "minLength": 0
     },
     "blo_sold_to_address": {
       "bsonType": "string",
@@ -520,12 +541,14 @@
     "blo_fax_number": {
       "bsonType": "string",
       "title": "Fax number",
-      "description": "Fax number"
+      "description": "Fax number",
+      "minLength": 0
     },
     "blo_customer_group": {
       "bsonType": "string",
       "title": "Customer group",
-      "description": "Customer group"
+      "description": "Customer group",
+      "minLength": 0
     },
     "blo_business_segment": {
       "bsonType": "string",
@@ -535,7 +558,8 @@
     "blo_family_code": {
       "bsonType": "string",
       "title": "Family code",
-      "description": "Family code"
+      "description": "Family code",
+      "minLength": 0
     },
     "blo_market_segment": {
       "bsonType": "string",

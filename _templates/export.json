@@ -1,0 +1,130 @@
+{
+  "properties": {
+    "exp_id": {
+      "bsonType": "number",
+      "title": "Id",
+      "description": "id",
+      "placeholder": "",
+      "width": 70
+    },
+    "exp_dnn_no": {
+      "bsonType": "string",
+      "title": "DN No",
+      "description": "DN No",
+      "placeholder": "",
+      "width": 110
+    },
+    "exp_line_no": {
+      "bsonType": "number",
+      "title": "Line No",
+      "description": "id",
+      "placeholder": "",
+      "width": 110
+    },
+    "exp_spc": {
+      "bsonType": "string",
+      "title": "Spc",
+      "description": "id",
+      "placeholder": "",
+      "width": 120
+    },
+    "exp_description": {
+      "bsonType": "string",
+      "title": "Desc",
+      "description": "id",
+      "placeholder": "",
+      "width": 280
+    },
+    "exp_ship_qty": {
+      "bsonType": "number",
+      "title": "Qty",
+      "description": "id",
+      "placeholder": "",
+      "width": 110
+    },
+    "exp_party": {
+      "bsonType": "number",
+      "title": "Party",
+      "description": "id",
+      "placeholder": "",
+      "width": 90
+    },
+    "exp_invoice_no": {
+      "bsonType": "string",
+      "title": "Invoice No",
+      "description": "id",
+      "placeholder": "",
+      "width": 140
+    },
+    "exp_invoice_date": {
+      "bsonType": "date",
+      "title": "Invoice Date",
+      "description": "id",
+      "placeholder": "",
+      "dateOnly": true,
+      "width": 140
+    },
+    "exp_unit_price": {
+      "bsonType": "number",
+      "title": "Unit Price",
+      "description": "id",
+      "placeholder": "",
+      "width": 120
+    },
+    "exp_qty": {
+      "bsonType": "number",
+      "title": "Qty",
+      "description": "id",
+      "placeholder": "",
+      "width": 80
+    },
+    "exp_amount": {
+      "bsonType": "number",
+      "title": "Amount",
+      "description": "id",
+      "placeholder": "",
+      "width": 120
+    },
+    "exp_price": {
+      "bsonType": "number",
+      "title": "Price",
+      "description": "id",
+      "placeholder": "",
+      "width": 90
+    },
+    "exp_consigment_no": {
+      "bsonType": "string",
+      "title": "Consigment No",
+      "description": "id",
+      "placeholder": "",
+      "width": 160
+    },
+    "exp_manifest_no": {
+      "bsonType": "string",
+      "title": "Manifest No",
+      "description": "id",
+      "placeholder": "",
+      "width": 140
+    },
+    "exp_opening_date": {
+      "bsonType": "date",
+      "title": "Opening Date",
+      "description": "id",
+      "placeholder": "",
+      "dateOnly": true,
+      "width": 150
+    }
+  },
+  "required": ["exp_id"],
+  "index": [],
+  "unique": [["exp_id"]],
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "sort": {
+    "exp_id": 1
+  },
+  "pagination": [25, 50, 100],
+  "import": {}
+}

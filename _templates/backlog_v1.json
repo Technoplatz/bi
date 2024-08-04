@@ -54,12 +54,14 @@
     "blo_crm_contract_no": {
       "bsonType": "string",
       "title": "CRM Contract No",
-      "description": "CRM Contract No"
+      "description": "CRM Contract No",
+      "minLength": 0
     },
     "blo_gln": {
       "bsonType": "string",
       "title": "GLN",
-      "description": "GLN"
+      "description": "GLN",
+      "minLength": 0
     },
     "blo_dist_channel": {
       "bsonType": "string",
@@ -171,17 +173,20 @@
     "blo_dnn_no": {
       "bsonType": "string",
       "title": "DNN No",
-      "description": "DNN No"
+      "description": "DNN No",
+      "minLength": 0
     },
     "blo_dnn_item": {
       "bsonType": "string",
       "title": "DNN Item",
-      "description": "DNN Item"
+      "description": "DNN Item",
+      "minLength": 0
     },
     "blo_billing": {
       "bsonType": "string",
       "title": "Billing",
-      "description": "Billing"
+      "description": "Billing",
+      "minLength": 0
     },
     "blo_route": {
       "bsonType": "string",
@@ -201,12 +206,14 @@
     "blo_header_block": {
       "bsonType": "string",
       "title": "Header Block",
-      "description": "Header Block"
+      "description": "Header Block",
+      "minLength": 0
     },
     "blo_item_block": {
       "bsonType": "string",
       "title": "Item Block",
-      "description": "Item Block"
+      "description": "Item Block",
+      "minLength": 0
     },
     "blo_credit": {
       "bsonType": "string",
@@ -343,17 +350,20 @@
     "blo_item_billing_block": {
       "bsonType": "string",
       "title": "Item Billing Block",
-      "description": "Item Billing Block"
+      "description": "Item Billing Block",
+      "minLength": 0
     },
     "blo_lts_status": {
       "bsonType": "string",
       "title": "LTS Status",
-      "description": "LTS Status"
+      "description": "LTS Status",
+      "minLength": 0
     },
     "blo_lts_message": {
       "bsonType": "string",
       "title": "LTS Message",
-      "description": "LTS Message"
+      "description": "LTS Message",
+      "minLength": 0
     },
     "blo_lts_status_date": {
       "bsonType": "date",
@@ -364,7 +374,8 @@
     "blo_critical_status": {
       "bsonType": "string",
       "title": "Critical Status",
-      "description": "Critical Status"
+      "description": "Critical Status",
+      "minLength": 0
     },
     "blo_order_update_date": {
       "bsonType": "date",
@@ -384,19 +395,39 @@
     "blo_customer_po",
     "blo_status"
   ],
-  "index": [["blo_status"]],
-  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_prd_no", "blo_dnn_no", "blo_dnn_item"]],
+  "index": [
+    [
+      "blo_status"
+    ]
+  ],
+  "unique": [
+    [
+      "blo_status",
+      "blo_order_no",
+      "blo_sales_order_item",
+      "blo_prd_no",
+      "blo_dnn_no",
+      "blo_dnn_item"
+    ]
+  ],
   "sort": {
     "_modified_at": -1
   },
-  "pagination": [25, 50, 100],
+  "pagination": [
+    25,
+    50,
+    100
+  ],
   "parents": [],
   "actions": [],
   "triggers": [
     {
       "name": "product",
       "enabled": true,
-      "operations": ["insert", "update"],
+      "operations": [
+        "insert",
+        "update"
+      ],
       "changes": [
         {
           "key": "blo_prd_no",
@@ -454,7 +485,10 @@
     {
       "name": "order",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
           "key": "blo_status",
@@ -528,7 +562,9 @@
     "enabled": true,
     "purge": true,
     "sumnum": false,
-    "ignored": ["blo_dnn_item"]
+    "ignored": [
+      "blo_dnn_item"
+    ]
   },
   "queries": {
     "query": true,
