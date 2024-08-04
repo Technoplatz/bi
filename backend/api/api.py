@@ -3589,17 +3589,14 @@ class Crud:
 
             approved_ = "approved" in obj_ and obj_["approved"] is True
             if approved_:
-                if not Auth().is_manager_f(user_):
+                if not Auth().is_qadmin_f(user_):
                     raise AuthError("no permission to approve query")
 
                 doc_["_approved"] = True
                 doc_["_approved_at"] = Misc().get_now_f()
                 doc_["_approved_by"] = user_["usr_id"]
 
-            Mongo().db_["_query"].update_one(
-                {"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {
-                    "_modified_count": 1}}
-            )
+            Mongo().db_["_query"].update_one({"_id": ObjectId(_id)}, {"$set": doc_, "$inc": {"_modified_count": 1}})
 
             return {"result": True}
 
@@ -5689,7 +5686,7 @@ class Auth:
                 "name": usr_name_,
                 "perm": perm_,
                 "perma": perma_,
-                "perma": permqa_
+                "permqa": permqa_
             }
             secret_ = pyotp.random_base32()
             jwt_proc_f_ = Misc().jwt_proc_f("encode", None, secret_, payload_, None)
@@ -5727,6 +5724,7 @@ class Auth:
                 "email": email_,
                 "perm": perm_,
                 "perma": perma_,
+                "permqa": permqa_,
                 "api_key": api_key_,
                 "ip": ip_,
                 "locale": locale_,
@@ -5742,6 +5740,8 @@ class Auth:
                         "_signedin_at": Misc().get_now_f(),
                         "ip": ip_,
                         "perm": perm_,
+                        "perma": perma_,
+                        "permqa": permqa_,
                     },
                 }
             )
@@ -6065,6 +6065,7 @@ API_S3_KEY_ = os.environ.get("API_S3_KEY")
 API_S3_BUCKET_NAME_ = os.environ.get("API_S3_BUCKET_NAME")
 API_PERMISSIVE_TAGS_ = os.environ.get("API_PERMISSIVE_TAGS").replace(" ", "").split(",")
 API_ADMIN_TAGS_ = os.environ.get("API_ADMIN_TAGS").replace(" ", "").split(",")
+API_QADMIN_TAGS_ = os.environ.get("API_QADMIN_TAGS").replace(" ", "").split(",")
 API_ADMIN_IPS_ = os.environ.get("API_ADMIN_IPS").replace(" ", "").split(",") if os.environ.get("API_ADMIN_IPS") else []
 API_DELETE_ALLOWED_ = os.environ.get("API_DELETE_ALLOWED") in [True, "true", "True", "TRUE"]
 RESTAPI_ENABLED_ = os.environ.get("RESTAPI_ENABLED") in [True, "true", "True", "TRUE"]

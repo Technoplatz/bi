@@ -195,7 +195,7 @@ export class QueryPage implements OnInit {
         aggregate: this.aggregate_,
         approved: approved_
       }).then(() => {
-        this.misc.doMessage("query saved successfully", "success");
+        this.misc.doMessage(approved_ ? "query approved successfully" : "query saved successfully", "success");
         this.refresh_data(false).then(() => {
           this.schemavis_ = false;
         });
@@ -218,7 +218,7 @@ export class QueryPage implements OnInit {
     this.misc.copy_to_clipboard(this.query_url_).then(() => {
       this.is_url_copied = true;
     }).catch((error: any) => {
-      console.error("*** copy error", error);
+      console.error("copy error", error);
     }).finally(() => {
       setTimeout(() => {
         this.is_url_copied = false;
