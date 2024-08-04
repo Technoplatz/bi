@@ -37,8 +37,8 @@
       "title": "Group",
       "description": "Product Group",
       "minLength": 0,
-      "maxLength": 32,
-      "pattern": "^[A-Za-z&/ ]{0,32}$",
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9&-/ ]{0,64}$",
       "caseType": "uppercase",
       "selection": true
     },
@@ -72,7 +72,7 @@
       "description": "On board memory",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,64}$"
     },
     "prd_memory_dimm": {
       "bsonType": "string",
@@ -80,39 +80,39 @@
       "description": "DIMM Memory",
       "minLength": 0,
       "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,64}$"
     },
     "prd_memory": {
       "bsonType": "string",
       "title": "Memory",
       "description": "Memory",
       "minLength": 0,
-      "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,128}$"
     },
     "prd_display": {
       "bsonType": "string",
       "title": "Display",
       "description": "Display type",
       "minLength": 0,
-      "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,128}$"
     },
     "prd_gpu": {
       "bsonType": "string",
       "title": "Graphics",
       "description": "Graphics card",
       "minLength": 0,
-      "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,64}$"
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,128}$"
     },
     "prd_storage": {
       "bsonType": "string",
       "title": "Storage",
       "description": "Storage",
       "minLength": 0,
-      "maxLength": 64,
-      "pattern": "^[A-Za-z0-9-+_.(%)/ ]{0,64}$"
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,128}$"
     },
     "prd_lte": {
       "bsonType": "bool",

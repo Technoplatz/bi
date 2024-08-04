@@ -107,6 +107,7 @@
       "get": "dnn_no",
       "sum": "dnn_amount",
       "listed": true,
+      "forced": true,
       "match": [
         {
           "key": "dnn_status",

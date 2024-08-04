@@ -71,6 +71,7 @@ from croniter import croniter
 from get_docker_secret import get_docker_secret
 from apscheduler.schedulers.background import BackgroundScheduler
 from gevent.pywsgi import WSGIServer
+from werkzeug.utils import secure_filename
 
 
 class APIError(BaseException):
@@ -744,39 +745,41 @@ class Misc:
         ip_ = str(Misc().get_client_ip_f())
         return ip_ in API_ADMIN_IPS_
 
-    def properties_cleaner_f(self, properties):
+    def properties_cleaner_f(self, properties_, required_):
         """
         docstring is in progress
         """
         properties_new_ = {}
-        for property_ in properties:
+        for property_ in properties_:
             dict_ = {}
-            properties_property_ = properties[property_]
+            properties_property_ = properties_[property_]
             for field_ in properties_property_:
                 if field_ not in self.xtra_props_:
                     if field_ == "items":
                         items_ = properties_property_["items"]
                         if "properties" in items_:
                             items_properties_ = items_["properties"]
-                            properties_new__ = self.properties_cleaner_f(
-                                items_properties_
-                            )
-                            properties_property_["items"][
-                                "properties"
-                            ] = properties_new__
+                            properties_new__ = self.properties_cleaner_f(items_properties_, required_)
+                            properties_property_["items"]["properties"] = properties_new__
                     if field_ == "bsonType":
-                        if properties_property_[field_] == "object":
-                            dict_[field_] = [
-                                properties_property_[field_],
-                                "array",
-                                "null",
-                            ]
+                        if required_ and property_ in required_:
+                            dict_[field_] = properties_property_[field_]
                         else:
-                            dict_[field_] = [
-                                properties_property_[field_], "null"]
+                            if properties_property_[field_] == "object":
+                                dict_[field_] = [properties_property_[field_], "array", "null"]
+                            elif properties_property_[field_] == "string":
+                                if ("minLength" in properties_property_ and properties_property_["minLength"] == 0) or \
+                                        ("pattern" in properties_property_ and "{0," in properties_property_["pattern"]):
+                                    dict_[field_] = ["string", "null"]
+                                else:
+                                    dict_[field_] = properties_property_[field_]
+                            else:
+                                dict_[field_] = [properties_property_[field_], "null"]
                     else:
                         dict_[field_] = properties_property_[field_]
+
             properties_new_[property_] = dict_
+
         return properties_new_
 
     def get_users_from_tags_f(self, tags_):
@@ -1549,13 +1552,15 @@ class Crud:
         """
         docstring is in progress
         """
-        content_, stats_, res_, details_, files_, filename_, upsertable_, df_, name_ = ("", "", None, {}, [], "", False, None, "")
+        content_, stats_, res_, details_, files_, filename_, filetype_, upsertable_, df_, name_ = (
+            "", "", None, {}, [], "", "xlsx", False, None, "")
         try:
             form_ = obj["form"]
             file_ = obj["file"]
             collection_ = obj["collection"]
-            upserted_ = "process" in obj and obj["process"] == "upsert"
-            updated_ = "process" in obj and obj["process"] == "update"
+            method_ = obj["process"] if "process" in obj and obj["process"] is not None else "insert"
+            upserted_ = method_ == "upsert"
+            updated_ = method_ == "update"
             email_ = form_["email"]
             mimetype_ = file_.content_type
 
@@ -1608,16 +1613,10 @@ class Crud:
                     filesize_ = file_.tell()
                     if filesize_ > API_UPLOAD_LIMIT_BYTES_:
                         raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
-
                     file_.seek(0, os.SEEK_END)
-                    df_ = pd.read_excel(
-                        file_,
-                        sheet_name=collection_,
-                        header=0,
-                        engine="openpyxl",
-                        dtype="object",
-                    )
+                    df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")
                 elif mimetype_ == "text/csv":
+                    filetype_ = "txt"
                     decoded_ = file_.read().decode("utf-8")
                     filesize_ = file_.content_length
                     if filesize_ > API_UPLOAD_LIMIT_BYTES_:
@@ -1697,6 +1696,7 @@ class Crud:
                     as_index=False,
                     dropna=False,
                 ).sum()
+
             df_.replace([np.nan, pd.NaT, "nan", "NaN", "nat", "NaT"], None, inplace=True)
             df_["_created_at"] = df_["_modified_at"] = Misc().get_now_f()
             df_["_created_by"] = df_["_modified_by"] = email_
@@ -1784,15 +1784,19 @@ class Crud:
                 fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
                 if not fullpath_.startswith(TEMP_PATH_):
                     raise APIError(f"file not allowed [import] {fullpath_}")
-                with open(fullpath_, "w", encoding="utf-8") as file_:
-                    file_.write(
+                with open(fullpath_, "w", encoding="utf-8") as logfile_:
+                    logfile_.write(
                         stats_.replace("<br />", "\n")
                         + "\n\n-----BEGIN ERROR LIST-----\n"
                         + content_
                         + "-----END ERROR LIST-----"
                     )
-                file_.close()
+                logfile_.close()
                 files_.append({"name": fullpath_, "type": "txt"})
+                file_.seek(0)
+                fullpathf_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, secure_filename(file_.filename)))
+                file_.save(fullpathf_)
+                files_.append({"name": fullpathf_, "type": filetype_})
             else:
                 stats_ += f"<br /><br />{dferr_}.<br />" if dferr_ != "" else ""
 
@@ -1801,7 +1805,7 @@ class Crud:
                 "op": "importerr",
                 "flag": True,
                 "html":
-                f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}{stats_}",
+                f"Hi,<br /><br />Here's the data file upload result;<br /><br />MIME TYPE: {mimetype_}<br />TARGET COLLECTION: {collection_}<br />METHOD: {method_}{stats_}",
                 "subject": "Management [Data Upload Result]",
                 "files": files_
             })
@@ -1818,17 +1822,12 @@ class Crud:
             dmp_id_ = (f"dump-{MONGO_DB_}-{Misc().get_timestamp_f()}" if op_ == "dumpu" else Misc().clean_f(obj_["dumpid"]))
             fn_ = f"{dmp_id_}.gz"
             type_ = "gzip"
-            fullpath_ = os.path.normpath(
-                os.path.join(API_MONGODUMP_PATH_, fn_))
+            fullpath_ = os.path.normpath(os.path.join(API_MONGODUMP_PATH_, fn_))
             if not fullpath_.startswith(DUMP_PATH_):
                 raise APIError(f"file not allowed [restore] {fullpath_}")
 
             if op_ == "dumpu":
-                subprocess.call(
-                    ["mongodump"]
-                    + Misc().commands_f("mongodump",
-                                        {"type": type_, "loc": fullpath_})
-                )
+                subprocess.call(["mongodump"] + Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_}))
                 size_ = os.path.getsize(fullpath_)
                 Mongo().db_["_dump"].insert_one(
                     {
@@ -3337,40 +3336,29 @@ class Crud:
             structure_ = obj["structure"]
             collection_ = obj["collection"]
 
-            if (
-                collection_ in Mongo().db_.list_collection_names()
-                and "properties" in structure_
-            ):
+            if collection_ in Mongo().db_.list_collection_names() and "properties" in structure_:
                 properties_ = structure_["properties"]
-                properties_ = Misc().properties_cleaner_f(properties_)
+                required_ = structure_["required"] if "required" in structure_ and len(structure_["required"]) > 0 else None
+                properties_ = Misc().properties_cleaner_f(properties_, required_)
 
-                if (
-                    "required" in structure_
-                    and structure_["required"]
-                    and len(structure_["required"]) > 0
-                ):
+                if required_:
                     break_ = False
                     err_ = None
-                    for req_ in structure_["required"]:
+                    for req_ in required_:
                         if req_ not in properties_:
                             break_ = True
                             err_ = f"{req_} is required but not found in the structure"
                             break
                     if break_:
                         raise APIError(err_)
-                    required_ = structure_["required"]
-                else:
-                    required_ = None
 
                 if properties_:
-                    validator_["$jsonSchema"].update(
-                        {"properties": properties_})
+                    validator_["$jsonSchema"].update({"properties": properties_})
 
                 if required_:
                     validator_["$jsonSchema"].update({"required": required_})
 
-                Mongo().db_.command(
-                    {"collMod": collection_, "validator": validator_})
+                Mongo().db_.command({"collMod": collection_, "validator": validator_})
                 Mongo().db_[collection_].drop_indexes()
 
                 if "index" in structure_ and len(structure_["index"]) > 0:
@@ -3395,9 +3383,7 @@ class Crud:
                         if break_:
                             raise APIError(err_)
                         ix_name_ = f"ix_{collection_}{ix_name_}"
-                        Mongo().db_[collection_].create_index(
-                            ixs, unique=False, name=ix_name_
-                        )
+                        Mongo().db_[collection_].create_index(ixs, unique=False, name=ix_name_)
 
                 if "unique" in structure_ and len(structure_["unique"]) > 0:
                     break_ = False
@@ -4049,11 +4035,7 @@ class Crud:
             link_ = obj_["link"] if "link" in obj_ else None
             op_ = obj_["op"] if "op" in obj_ else "insert"
             data_ = obj_["data"] if "data" in obj_ else None
-            linked_ = (
-                list(set(obj_["linked"]))
-                if "linked" in obj_ and len(obj_["linked"]) > 0
-                else []
-            )
+            linked_ = list(set(obj_["linked"])) if "linked" in obj_ and len(obj_["linked"]) > 0 else []
             linked_count_ = len(linked_)
 
             if not link_:
@@ -4065,19 +4047,12 @@ class Crud:
             user_ = obj_["user"] if "user" in obj_ else None
             col_id_ = link_["collection"] if "collection" in link_ else None
             get_ = link_["get"] if "get" in link_ else None
-            set_ = link_["set"] if "set" in link_ and len(
-                link_["set"]) > 0 else None
-            match_ = (
-                link_["match"] if "match" in link_ and len(
-                    link_["match"]) > 0 else None
-            )
+            set_ = link_["set"] if "set" in link_ and len(link_["set"]) > 0 else None
+            match_ = link_["match"] if "match" in link_ and len(link_["match"]) > 0 else None
             usr_id_ = user_["usr_id"] if "usr_id" in user_ else None
-            tags_ = (
-                link_["_tags"] if "_tags" in link_ and len(
-                    link_["_tags"]) > 0 else None
-            )
-            api_ = link_["api"] if "api" in link_ and link_[
-                "api"] is not None else None
+            tags_ = link_["_tags"] if "_tags" in link_ and len(link_["_tags"]) > 0 else None
+            api_ = link_["api"] if "api" in link_ and link_["api"] is not None else None
+            forced_ = "forced" in link_ and link_["forced"] is True
 
             if not source_:
                 raise APIError("source collection is missing")
@@ -4145,41 +4120,25 @@ class Crud:
 
             filter0_ = {}
             filter0_[get_] = {"$in": linked_}
-            filter1_ = self.get_filtered_f(
-                {"match": match_, "properties": target_properties_, "data": data_}
-            )
+            filter1_ = self.get_filtered_f({"match": match_, "properties": target_properties_, "data": data_})
             filter_ = {"$and": [filter0_, filter1_]}
 
             checknum_ = len(Mongo().db_[collection_].distinct(get_, filter_))
 
-            if checknum_ != linked_count_:
-                raise AppException(
-                    f"records found [{checknum_}] does not match with requested [{linked_count_}]"
-                )
+            if linked_count_ > 0 and checknum_ != linked_count_:
+                raise AppException(f"found [{checknum_}] does not match requested [{linked_count_}]")
 
-            update_many_ = (
-                Mongo().db_[collection_].update_many(filter_, {"$set": setc_})
-            )
+            update_many_ = Mongo().db_[collection_].update_many(filter_, {"$set": setc_})
             count_ = update_many_.matched_count
             if count_ == 0:
                 raise AppException("no record found to get linked")
 
-            notification_ = link_[
-                "notification"] if "notification" in link_ else None
-            notify_ = (
-                notification_
-                and "notify" in notification_
-                and notification_["notify"] is True
-            )
-            attach_html_ = "html" in notification_ and notification_[
-                "html"] is True
-            attach_json_ = "json" in notification_ and notification_[
-                "json"] is True
-            attach_excel_ = "excel" in notification_ and notification_[
-                "excel"] is True
-            attach_csv_ = "csv" in notification_ and notification_[
-                "csv"] is True
-
+            notification_ = link_["notification"] if "notification" in link_ else None
+            notify_ = notification_ and "notify" in notification_ and notification_["notify"] is True
+            attach_html_ = "html" in notification_ and notification_["html"] is True
+            attach_json_ = "json" in notification_ and notification_["json"] is True
+            attach_excel_ = "excel" in notification_ and notification_["excel"] is True
+            attach_csv_ = "csv" in notification_ and notification_["csv"] is True
             files_ = []
 
             if api_:
@@ -4189,22 +4148,11 @@ class Crud:
                 files_ += run_api_f_["files"]
 
             if notify_:
-                subject_ = (
-                    notification_[
-                        "subject"] if "subject" in notification_ else "Link"
-                )
-                body_ = (
-                    notification_["body"]
-                    if "body" in notification_
-                    else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
-                )
-                nkey_ = (
-                    notification_["key"]
-                    if "key" in notification_ and notification_["key"] != ""
-                    else None
-                )
-                keyf_ = data_[
-                    nkey_] if data_ and nkey_ and nkey_ in data_ else None
+                subject_ = notification_["subject"] if "subject" in notification_ else "Link"
+                body_ = notification_[
+                    "body"] if "body" in notification_ else "<p>Hi,</p><p>Link completed successfully.</p><p><h1></h1></p>"
+                nkey_ = notification_["key"] if "key" in notification_ and notification_["key"] != "" else None
+                keyf_ = data_[nkey_] if data_ and nkey_ and nkey_ in data_ else None
 
                 if attach_html_ or attach_csv_ or attach_excel_ or attach_json_:
                     fields_ = (
@@ -4219,20 +4167,12 @@ class Crud:
                         and notification_["sort"]
                         else {"_modified_at": -1}
                     )
-                    topics_ = (
-                        notification_["topics"].split(",")
-                        if "topics" in notification_
-                        else []
-                    )
+                    topics_ = notification_["topics"].split(",") if "topics" in notification_ else []
                     if not fields_:
                         raise AppException("no fields field found in link")
                     type_ = "csv"
-                    file_ = (
-                        f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
-                    )
-                    query_ = json.dumps(
-                        filter0_, default=json_util.default, sort_keys=False
-                    )
+                    file_ = f"{API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
+                    query_ = json.dumps(filter0_, default=json_util.default, sort_keys=False)
                     cmd_ = ["mongoexport"] + Misc().commands_f(
                         "mongoexport",
                         {
@@ -4734,12 +4674,13 @@ class Crud:
             doc_ = obj["doc"]
             link_ = obj["link"] if "link" in obj and obj["link"] is not None else None
             linked_ = obj["linked"] if "linked" in obj and obj["linked"] is not None else None
+            forced_ = link_ and "forced" in link_ and link_["forced"] is True
 
             if collection_id_ not in PROTECTED_INSDEL_EXC_COLLS_:
                 if collection_id_ in PROTECTED_COLLS_:
                     raise APIError("collection is protected")
 
-            if link_ and not linked_:
+            if forced_ and not linked_:
                 raise APIError("no linked items entered")
 
             if "_id" in doc_:
@@ -4957,7 +4898,7 @@ class Email:
                     raise APIError("file not defined")
                 fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, filename_))
                 if not fullpath_.startswith(TEMP_PATH_):
-                    raise APIError("file not allowed [email]")
+                    raise APIError("file path not allowed [email]")
                 with open(fullpath_, "rb") as attachment_:
                     part_ = MIMEBase("application", "octet-stream")
                     part_.set_payload(attachment_.read())

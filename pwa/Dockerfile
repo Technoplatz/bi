@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 #
 
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 WORKDIR /app
 RUN npm cache clean --force
 RUN npm install -g npm

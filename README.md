@@ -1,4 +1,4 @@
-# Technoplatz BI
+# Technoplatz BI - Community Edition
 
 Table of contents;
 
@@ -10,7 +10,7 @@ Table of contents;
 
 ## Platform
 
-Technoplatz BI community edition is an open source, multi-container, JSON-driven no-code data application and data sharing platform designed to empower business professionals build their own unique solution. It offers a pragmatic and optimised way to meet the key requirements of critical business processes by considering that each company has its own unique conditions;
+Technoplatz BI Community Edition is an open source, multi-container, JSON-driven no-code data application and data sharing platform designed to empower business professionals build their own unique solution. It offers a pragmatic and optimised way to meet the key requirements of critical business processes by considering that each company has its own unique conditions;
 
 - Data Application
 - BI-Directional Data Sharing
@@ -319,24 +319,31 @@ A sample link item;
   "collection": "delivery",
   "get": "dnn_bill_no",
   "sum": "dnn_amount",
-  "listed": true,
-  "match": [{ "key": "dnn_status", "op": "eq", "value": "00-Open" }],
+  "listed": false,
+  "forced": true,
+  "match": [{ "key": "dnn_status", "op": "in", "value": "00-Open,10-OnTheWay" }],
   "set": [
     { "key": "dnn_odi_no", "value": "odi_no" },
     { "key": "dnn_odi_sub_no", "value": "odi_sub_no" },
     { "key": "dnn_status", "value": "10-OnTheWay" }
   ],
   "autofill": true,
-  "btntext": "+DNN",
-  "_tags": ["#Managers", "#Operation", "#Logistics"],
+  "btntext": "Invoice",
+  "_tags": ["#Managers", "#Technoplatz", "#Operation", "#Logistics"],
   "notification": {
     "notify": true,
     "subject": "Logistics [New Ordino]",
-    "body": "Hi,<p>We would like to let you know that the attached documents have been linked to a new ordino by adding invoice numbers.</p>",
+    "body": "Hi,<br /><br />We would like to let you know that the attached DNs have been linked to a new ordino by adding invoice numbers.",
     "attachment": true,
+    "html": true,
+    "csv": false,
+    "excel": true,
+    "json": false,
     "key": "odi_sub_no",
-    "fields": "dnn_no,dnn_line_no,dnn_odi_no,dnn_odi_sub_no,dnn_acc_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
-    "filter": []
+    "topics": "odi_no,odi_sub_no,odi_from,odi_date",
+    "fields": "dnn_no,dnn_line_no,dnn_acc_name,dnn_prd_no,dnn_prd_description,dnn_qty",
+    "filter": [],
+    "sort": { "dnn_acc_name": 1, "dnn_no": 1, "dnn_line_no": 1 }
   }
 }
 ```
@@ -466,13 +473,5 @@ Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konk
 Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
 
 Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen.
-
-## Author
-
-Mustafa Mat\
-<sup>Geschäftsführer, MD</sup>\
-Senior Analist Developer\
-Data Sciences, Statistics B.Sc.\
-[@mustafamat](https://www.github.com/mustafamat)
 
 --

@@ -28,7 +28,7 @@
 # if any, to sign a "copyright disclaimer" for the program, if necessary.
 # For more information on this, and how to apply and follow the GNU AGPL, see
 # https://www.gnu.org/licenses.
-# 
+#
 
 FROM python:3.11-slim
 RUN DEBIAN_FRONTEND=noninteractive
@@ -40,6 +40,6 @@ RUN apt-get update
 RUN apt-get install -y mongodb-org-tools
 WORKDIR /app
 COPY . /app
-RUN echo "python3 -m pip install --upgrade pip" > /run_module.sh
+RUN echo "python3 -m pip install --upgrade pip" >/run_module.sh
 RUN pip install -r requirements.txt
 CMD ["python3", "stream.py"]
