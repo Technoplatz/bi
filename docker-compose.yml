@@ -102,6 +102,7 @@ services:
     image: mongo:${MONGO_VERSION}
     container_name: mongo0
     hostname: ${MONGO_HOST0}
+    cpus: ${MONGO_CPUS}
     restart: always
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST0}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
@@ -139,6 +140,7 @@ services:
     image: mongo:${MONGO_VERSION}
     container_name: mongo1
     hostname: ${MONGO_HOST1}
+    cpus: ${MONGO_CPUS}
     restart: always
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST1}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
@@ -174,6 +176,7 @@ services:
     image: mongo:${MONGO_VERSION}
     container_name: mongo2
     hostname: ${MONGO_HOST2}
+    cpus: ${MONGO_CPUS}
     restart: always
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST2}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
@@ -251,6 +254,8 @@ services:
       - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
+      - MONGO_READPREF=${MONGO_READPREF}
+      - MONGO_CPUS=${MONGO_CPUS}
     links:
       - mongo0
       - mongo1
@@ -297,6 +302,8 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
+      - MONGO_READPREF=${MONGO_READPREF}
+      - MONGO_CPUS=${MONGO_CPUS}
       - SMTP_ENDPOINT=${SMTP_ENDPOINT}
       - SMTP_USERID=${SMTP_USERID}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
@@ -363,6 +370,8 @@ services:
       - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
+      - MONGO_READPREF=${MONGO_READPREF}
+      - MONGO_CPUS=${MONGO_CPUS}
       - MONGO_TIMEOUT_MS=${MONGO_TIMEOUT_MS}
       - SMTP_ENDPOINT=${SMTP_ENDPOINT}
       - SMTP_USERID=${SMTP_USERID}

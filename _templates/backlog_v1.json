@@ -9,47 +9,56 @@
     "blo_territory": {
       "bsonType": "string",
       "title": "Territory",
-      "description": "Territory"
+      "description": "Territory",
+      "minLength": 0
     },
     "blo_market": {
       "bsonType": "string",
       "title": "Market",
-      "description": "Market"
+      "description": "Market",
+      "minLength": 0
     },
     "blo_region": {
       "bsonType": "string",
       "title": "Region",
-      "description": "Region"
+      "description": "Region",
+      "minLength": 0
     },
     "blo_sub_region": {
       "bsonType": "string",
       "title": "Sub Region",
-      "description": "Sub region"
+      "description": "Sub region",
+      "minLength": 0
     },
     "blo_country": {
       "bsonType": "string",
       "title": "Country",
-      "description": "Country"
+      "description": "Country",
+      "minLength": 0
     },
     "blo_brand": {
       "bsonType": "string",
       "title": "Brand",
-      "description": "Brand"
+      "description": "Brand",
+      "minLength": 0
     },
     "blo_sub_brand": {
       "bsonType": "string",
       "title": "Sub Brand",
-      "description": "Sub brand"
+      "description": "Sub brand",
+      "minLength": 0
     },
     "blo_prd_group": {
       "bsonType": "string",
       "title": "Group",
-      "description": "Group"
+      "description": "Group",
+      "minLength": 0
     },
     "blo_sales_segment": {
       "bsonType": "string",
       "title": "Sales Segment",
-      "description": "Sales Segment"
+      "description": "Sales Segment",
+      "minLength": 0
     },
     "blo_crm_contract_no": {
       "bsonType": "string",
@@ -66,17 +75,20 @@
     "blo_dist_channel": {
       "bsonType": "string",
       "title": "Dist Channel",
-      "description": "Dist Channel"
+      "description": "Dist Channel",
+      "minLength": 0
     },
     "blo_family": {
       "bsonType": "string",
       "title": "Family",
-      "description": "Family"
+      "description": "Family",
+      "minLength": 0
     },
     "blo_market_name": {
       "bsonType": "string",
       "title": "Market Name",
-      "description": "Market Name"
+      "description": "Market Name",
+      "minLength": 0
     },
     "blo_prd_no": {
       "bsonType": "string",
@@ -86,7 +98,8 @@
     "blo_machine_type": {
       "bsonType": "string",
       "title": "Machine Type",
-      "description": "Machine Type"
+      "description": "Machine Type",
+      "minLength": 0
     },
     "blo_order_no": {
       "bsonType": "string",
@@ -108,17 +121,20 @@
     "blo_psd_comment": {
       "bsonType": "string",
       "title": "PSD Comment",
-      "description": "PSD Comment"
+      "description": "PSD Comment",
+      "minLength": 0
     },
     "blo_psd_reason_code": {
       "bsonType": "string",
       "title": "PSD Reason Code",
-      "description": "PSD Reason Code"
+      "description": "PSD Reason Code",
+      "minLength": 0
     },
     "blo_prd_description": {
       "bsonType": "string",
       "title": "Product Description",
-      "description": "Product Description"
+      "description": "Product Description",
+      "minLength": 0
     },
     "blo_customer_po": {
       "bsonType": "string",
@@ -133,42 +149,50 @@
     "blo_mfg_po": {
       "bsonType": "string",
       "title": "MFG PO",
-      "description": "MFG PO"
+      "description": "MFG PO",
+      "minLength": 0
     },
     "blo_mfg_po_item": {
       "bsonType": "string",
       "title": "MFG PO Item",
-      "description": "MFG PO Item"
+      "description": "MFG PO Item",
+      "minLength": 0
     },
     "blo_mfg_sales_order": {
       "bsonType": "string",
       "title": "MFG Sales Order",
-      "description": "MFG Sales Order"
+      "description": "MFG Sales Order",
+      "minLength": 0
     },
     "blo_mfg_sales_order_item": {
       "bsonType": "string",
       "title": "MFG Sales Order Item",
-      "description": "MFG Sales Order Item"
+      "description": "MFG Sales Order Item",
+      "minLength": 0
     },
     "blo_site": {
       "bsonType": "string",
       "title": "Site",
-      "description": "Site"
+      "description": "Site",
+      "minLength": 0
     },
     "blo_shipping_point": {
       "bsonType": "string",
       "title": "Shipping Point",
-      "description": "Shipping Point"
+      "description": "Shipping Point",
+      "minLength": 0
     },
     "blo_mot": {
       "bsonType": "string",
       "title": "MOT",
-      "description": "MOT"
+      "description": "MOT",
+      "minLength": 0
     },
     "blo_sales_order_sc": {
       "bsonType": "string",
       "title": "Sales Order SC",
-      "description": "Sales Order SC"
+      "description": "Sales Order SC",
+      "minLength": 0
     },
     "blo_dnn_no": {
       "bsonType": "string",
@@ -191,17 +215,20 @@
     "blo_route": {
       "bsonType": "string",
       "title": "Route",
-      "description": "Route"
+      "description": "Route",
+      "minLength": 0
     },
     "blo_transit_time": {
       "bsonType": "string",
       "title": "Transit Time",
-      "description": "Transit Time"
+      "description": "Transit Time",
+      "minLength": 0
     },
     "blo_priority_code": {
       "bsonType": "string",
       "title": "Priority Code",
-      "description": "Priority Code"
+      "description": "Priority Code",
+      "minLength": 0
     },
     "blo_header_block": {
       "bsonType": "string",
@@ -218,7 +245,8 @@
     "blo_credit": {
       "bsonType": "string",
       "title": "Credit",
-      "description": "Credit"
+      "description": "Credit",
+      "minLength": 0
     },
     "blo_sold_to_num": {
       "bsonType": "string",
@@ -228,27 +256,32 @@
     "blo_sold_to_name": {
       "bsonType": "string",
       "title": "Sold To Name",
-      "description": "Sold To Name"
+      "description": "Sold To Name",
+      "minLength": 0
     },
     "blo_end_customer_id": {
       "bsonType": "string",
       "title": "End Customer ID",
-      "description": "End Customer ID"
+      "description": "End Customer ID",
+      "minLength": 0
     },
     "blo_end_customer_name": {
       "bsonType": "string",
       "title": "End Customer Name",
-      "description": "End Customer Name"
+      "description": "End Customer Name",
+      "minLength": 0
     },
     "blo_ship_to_num": {
       "bsonType": "string",
       "title": "Ship To Num",
-      "description": "Ship To Num"
+      "description": "Ship To Num",
+      "minLength": 0
     },
     "blo_ship_to_name": {
       "bsonType": "string",
       "title": "Ship To Name",
-      "description": "Ship To Name"
+      "description": "Ship To Name",
+      "minLength": 0
     },
     "blo_sales_order_created_date": {
       "bsonType": "date",
@@ -294,7 +327,8 @@
     "blo_quarter": {
       "bsonType": "string",
       "title": "Quarter",
-      "description": "Quarter"
+      "description": "Quarter",
+      "minLength": 0
     },
     "blo_order_qty": {
       "bsonType": "number",
@@ -309,7 +343,8 @@
     "blo_local_currency": {
       "bsonType": "string",
       "title": "Local Currency",
-      "description": "Local Currency"
+      "description": "Local Currency",
+      "minLength": 0
     },
     "blo_net_value": {
       "bsonType": "number",
@@ -330,22 +365,26 @@
     "blo_status_detail": {
       "bsonType": "string",
       "title": "Status Detail",
-      "description": "Status Detail"
+      "description": "Status Detail",
+      "minLength": 0
     },
     "blo_hierarchy": {
       "bsonType": "string",
       "title": "Hierarchy",
-      "description": "Hierarchy"
+      "description": "Hierarchy",
+      "minLength": 0
     },
     "blo_sales_office": {
       "bsonType": "string",
       "title": "Sales Office",
-      "description": "Sales Office"
+      "description": "Sales Office",
+      "minLength": 0
     },
     "blo_sales_order_type": {
       "bsonType": "string",
       "title": "Sales Order Type",
-      "description": "Sales Order Type"
+      "description": "Sales Order Type",
+      "minLength": 0
     },
     "blo_item_billing_block": {
       "bsonType": "string",
@@ -395,39 +434,19 @@
     "blo_customer_po",
     "blo_status"
   ],
-  "index": [
-    [
-      "blo_status"
-    ]
-  ],
-  "unique": [
-    [
-      "blo_status",
-      "blo_order_no",
-      "blo_sales_order_item",
-      "blo_prd_no",
-      "blo_dnn_no",
-      "blo_dnn_item"
-    ]
-  ],
+  "index": [["blo_status"]],
+  "unique": [["blo_status", "blo_order_no", "blo_sales_order_item", "blo_prd_no", "blo_dnn_no", "blo_dnn_item"]],
   "sort": {
     "_modified_at": -1
   },
-  "pagination": [
-    25,
-    50,
-    100
-  ],
+  "pagination": [25, 50, 100],
   "parents": [],
   "actions": [],
   "triggers": [
     {
       "name": "product",
       "enabled": true,
-      "operations": [
-        "insert",
-        "update"
-      ],
+      "operations": ["insert", "update"],
       "changes": [
         {
           "key": "blo_prd_no",
@@ -485,10 +504,7 @@
     {
       "name": "order",
       "enabled": true,
-      "operations": [
-        "update",
-        "insert"
-      ],
+      "operations": ["update", "insert"],
       "changes": [
         {
           "key": "blo_status",
@@ -562,9 +578,7 @@
     "enabled": true,
     "purge": true,
     "sumnum": false,
-    "ignored": [
-      "blo_dnn_item"
-    ]
+    "ignored": ["blo_dnn_item"]
   },
   "queries": {
     "query": true,

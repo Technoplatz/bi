@@ -3,22 +3,26 @@
     "blo_country": {
       "bsonType": "string",
       "title": "Country",
-      "description": "Country"
+      "description": "Country",
+      "minLength": 0
     },
     "blo_territory": {
       "bsonType": "string",
       "title": "Territory",
-      "description": "Territory"
+      "description": "Territory",
+      "minLength": 0
     },
     "blo_market": {
       "bsonType": "string",
       "title": "Market",
-      "description": "Market"
+      "description": "Market",
+      "minLength": 0
     },
     "blo_sold_to_name": {
       "bsonType": "string",
       "title": "Customer Name",
-      "description": "Customer Name"
+      "description": "Customer Name",
+      "minLength": 0
     },
     "blo_dist_channel": {
       "bsonType": "number",
@@ -28,7 +32,8 @@
     "blo_order_type": {
       "bsonType": "string",
       "title": "Order Type",
-      "description": "Order Type"
+      "description": "Order Type",
+      "minLength": 0
     },
     "blo_order_no": {
       "bsonType": "string",
@@ -48,7 +53,8 @@
     "blo_cdf": {
       "bsonType": "string",
       "title": "CDF",
-      "description": "CDF"
+      "description": "CDF",
+      "minLength": 0
     },
     "blo_prd_no": {
       "bsonType": "string",
@@ -58,7 +64,8 @@
     "blo_mtm": {
       "bsonType": "string",
       "title": "MTM",
-      "description": "MTM"
+      "description": "MTM",
+      "minLength": 0
     },
     "blo_topsell_flag": {
       "bsonType": "string",
@@ -84,7 +91,8 @@
     "blo_currency": {
       "bsonType": "string",
       "title": "Currency",
-      "description": "Currency"
+      "description": "Currency",
+      "minLength": 0
     },
     "blo_del_block": {
       "bsonType": "string",
@@ -172,7 +180,8 @@
     "blo_psd_in_48h": {
       "bsonType": "string",
       "title": "PSD in 48h",
-      "description": "PSD in 48h"
+      "description": "PSD in 48h",
+      "minLength": 0
     },
     "blo_fpsd_provided": {
       "bsonType": "date",
@@ -188,7 +197,8 @@
     "blo_add_leadtime_category": {
       "bsonType": "string",
       "title": "ADD Leadtime Category",
-      "description": "ADD Leadtime Category"
+      "description": "ADD Leadtime Category",
+      "minLength": 0
     },
     "blo_asd": {
       "bsonType": "date",
@@ -228,7 +238,8 @@
     "blo_sla_type": {
       "bsonType": "string",
       "title": "SLA Type",
-      "description": "SLA Type"
+      "description": "SLA Type",
+      "minLength": 0
     },
     "blo_dnn_no": {
       "bsonType": "string",
@@ -239,22 +250,26 @@
     "blo_mfg_locn": {
       "bsonType": "string",
       "title": "Mfg Locn",
-      "description": "Mfg Locn"
+      "description": "Mfg Locn",
+      "minLength": 0
     },
     "blo_mfg_sales_ordno": {
       "bsonType": "string",
       "title": "Mfg Sales Ordno",
-      "description": "Mfg Sales Ordno"
+      "description": "Mfg Sales Ordno",
+      "minLength": 0
     },
     "blo_mfg_status": {
       "bsonType": "string",
       "title": "MFG Status",
-      "description": "MFG Status"
+      "description": "MFG Status",
+      "minLength": 0
     },
     "blo_p_pono": {
       "bsonType": "string",
       "title": "P Pono",
-      "description": "P Pono"
+      "description": "P Pono",
+      "minLength": 0
     },
     "blo_invoice_no": {
       "bsonType": "string",
@@ -265,22 +280,26 @@
     "blo_ship_point": {
       "bsonType": "string",
       "title": "Ship Point",
-      "description": "Ship Point"
+      "description": "Ship Point",
+      "minLength": 0
     },
     "blo_special_bid": {
       "bsonType": "string",
       "title": "Special Bid Reference Number",
-      "description": "Special Bid Reference Number"
+      "description": "Special Bid Reference Number",
+      "minLength": 0
     },
     "blo_order_method": {
       "bsonType": "string",
       "title": "Order Method",
-      "description": "Order Method"
+      "description": "Order Method",
+      "minLength": 0
     },
     "blo_custno_ship_to": {
       "bsonType": "string",
       "title": "Custno Shipto",
-      "description": "Custno Shipto"
+      "description": "Custno Shipto",
+      "minLength": 0
     },
     "blo_sold_to_num": {
       "bsonType": "string",
@@ -290,12 +309,14 @@
     "blo_tzone_sold_to": {
       "bsonType": "string",
       "title": "TZone SoldTo",
-      "description": "TZone SoldTo"
+      "description": "TZone SoldTo",
+      "minLength": 0
     },
     "blo_tzone_ship_to": {
       "bsonType": "string",
       "title": "TZone ShipTo",
-      "description": "TZone ShipTo"
+      "description": "TZone ShipTo",
+      "minLength": 0
     },
     "blo_hub_dn": {
       "bsonType": "string",
@@ -306,38 +327,45 @@
     "blo_sales_org": {
       "bsonType": "string",
       "title": "SalesOrg",
-      "description": "SalesOrg"
+      "description": "SalesOrg",
+      "minLength": 0
     },
     "blo_region": {
       "bsonType": "string",
       "title": "Region",
-      "description": "Region"
+      "description": "Region",
+      "minLength": 0
     },
     "blo_route_to_market_desc": {
       "bsonType": "string",
       "title": "Route to market description",
-      "description": "Route to market description"
+      "description": "Route to market description",
+      "minLength": 0
     },
     "blo_prd_description": {
       "bsonType": "string",
       "title": "Part Desc",
-      "description": "Part Desc"
+      "description": "Part Desc",
+      "minLength": 0
     },
     "blo_user_id": {
       "bsonType": "string",
       "title": "Userid",
-      "description": "Userid"
+      "description": "Userid",
+      "minLength": 0
     },
     "blo_brand": {
       "bsonType": "string",
       "title": "Brand",
       "description": "Brand",
-      "selection": true
+      "selection": true,
+      "minLength": 0
     },
     "blo_sub_name": {
       "bsonType": "string",
       "title": "Subname",
-      "description": "Subname"
+      "description": "Subname",
+      "minLength": 0
     },
     "blo_division": {
       "bsonType": "number",
@@ -353,7 +381,8 @@
     "blo_end_user": {
       "bsonType": "string",
       "title": "Enduser",
-      "description": "Enduser"
+      "description": "Enduser",
+      "minLength": 0
     },
     "blo_ga_name": {
       "bsonType": "string",
@@ -370,7 +399,8 @@
     "blo_payment_term": {
       "bsonType": "string",
       "title": "Payment Term",
-      "description": "Payment Term"
+      "description": "Payment Term",
+      "minLength": 0
     },
     "blo_usd_net_value": {
       "bsonType": "number",
@@ -386,22 +416,26 @@
     "blo_shipping_cond": {
       "bsonType": "string",
       "title": "Shipping Cond",
-      "description": "Shipping Cond"
+      "description": "Shipping Cond",
+      "minLength": 0
     },
     "blo_mot": {
       "bsonType": "string",
       "title": "Method of Transport",
-      "description": "Method of Transport"
+      "description": "Method of Transport",
+      "minLength": 0
     },
     "blo_route": {
       "bsonType": "string",
       "title": "Route",
-      "description": "Route"
+      "description": "Route",
+      "minLength": 0
     },
     "blo_firm_unfirm_flag": {
       "bsonType": "string",
       "title": "FIRM_UNFIRM_FLAG",
-      "description": "FIRM_UNFIRM_FLAG"
+      "description": "FIRM_UNFIRM_FLAG",
+      "minLength": 0
     },
     "blo_credit_block": {
       "bsonType": "string",
@@ -445,7 +479,8 @@
     "blo_tied": {
       "bsonType": "string",
       "title": "mfg",
-      "description": "mfg"
+      "description": "mfg",
+      "minLength": 0
     },
     "blo_gln_no": {
       "bsonType": "string",
@@ -473,7 +508,8 @@
     "blo_sales_office": {
       "bsonType": "string",
       "title": "mfg",
-      "description": "mfg"
+      "description": "mfg",
+      "minLength": 0
     },
     "blo_order_qty": {
       "bsonType": "number",
@@ -483,7 +519,8 @@
     "blo_end_customer": {
       "bsonType": "string",
       "title": "End Customer",
-      "description": "End Customer"
+      "description": "End Customer",
+      "minLength": 0
     },
     "blo_lerom": {
       "bsonType": "string",
@@ -494,12 +531,14 @@
     "blo_t2_crm_id": {
       "bsonType": "string",
       "title": "T2 CRM ID",
-      "description": "T2 CRM ID"
+      "description": "T2 CRM ID",
+      "minLength": 0
     },
     "blo_t2_name": {
       "bsonType": "string",
       "title": "T2 NAME",
-      "description": "T2 NAME"
+      "description": "T2 NAME",
+      "minLength": 0
     },
     "blo_unreleased_ageing": {
       "bsonType": "number",
@@ -531,12 +570,14 @@
     "blo_sold_to_address": {
       "bsonType": "string",
       "title": "SoldToAddress",
-      "description": "SoldToAddress"
+      "description": "SoldToAddress",
+      "minLength": 0
     },
     "blo_ship_to_address": {
       "bsonType": "string",
       "title": "ShipToAddress",
-      "description": "ShipToAddress"
+      "description": "ShipToAddress",
+      "minLength": 0
     },
     "blo_fax_number": {
       "bsonType": "string",
@@ -553,7 +594,8 @@
     "blo_business_segment": {
       "bsonType": "string",
       "title": "Business segment",
-      "description": "Business segment"
+      "description": "Business segment",
+      "minLength": 0
     },
     "blo_family_code": {
       "bsonType": "string",
@@ -564,12 +606,14 @@
     "blo_market_segment": {
       "bsonType": "string",
       "title": "Market segment",
-      "description": "Market segment"
+      "description": "Market segment",
+      "minLength": 0
     },
     "blo_customer_segment": {
       "bsonType": "string",
       "title": "Customer Segment",
-      "description": "Customer Segment"
+      "description": "Customer Segment",
+      "minLength": 0
     }
   },
   "required": [

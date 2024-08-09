@@ -141,8 +141,7 @@ export const environment = {
     { "id": "_firewall", "title": "Firewall", "description": "IP Firewall" },
     { "id": "_token", "title": "API Tokens", "description": "Access tokens of built-in API functions." },
     { "id": "_dump", "title": "DB Backup", "description": "Dump and Restore." },
-    { "id": "_log", "title": "Logs", "description": "Transaction logs in detail" },
-    { "id": "_kv", "title": "Key-Value", "description": "Basic environment variables defined as KEY:VALUE pairs." }
+    { "id": "_log", "title": "Logs", "description": "Transaction logs in detail" }
   ],
   themes: [
     { "name": "Rot", "color": "#AA0000" },

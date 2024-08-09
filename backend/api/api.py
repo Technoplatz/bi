@@ -50,7 +50,6 @@ from email.mime.text import MIMEText
 from functools import partial
 from random import randint
 from datetime import datetime, timedelta
-from pymongo import MongoClient
 import boto3
 import botocore
 import pymongo
@@ -926,15 +925,14 @@ class Mongo:
         docstring is in progress
         """
         self.mongo_appname_ = "api"
-        self.mongo_readpref_primary_ = "primary"
-        self.mongo_readpref_secondary_ = "secondary"
+        self.mongo_readpref_ = MONGO_READPREF_
         auth_source_ = f"authSource={MONGO_AUTH_DB_}" if MONGO_AUTH_DB_ else ""
         replicaset_ = (
             f"&replicaSet={MONGO_RS_}" if MONGO_RS_ and MONGO_RS_ is not None else ""
         )
         read_preference_primary_ = (
-            f"&readPreference={self.mongo_readpref_primary_}"
-            if self.mongo_readpref_primary_
+            f"&readPreference={self.mongo_readpref_}"
+            if self.mongo_readpref_
             else ""
         )
         appname_ = f"&appname={self.mongo_appname_}" if self.mongo_appname_ else ""
@@ -959,7 +957,7 @@ class Mongo:
         tz_aware_ = "&tz_aware=true"
         timeout_ms_ = f"&timeoutMS={MONGO_TIMEOUT_MS_}"
         self.connstr = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}{retry_writes_}{timeout_ms_}{tz_aware_}"
-        self.client_ = MongoClient(self.connstr)
+        self.client_ = pymongo.MongoClient(self.connstr)
         self.db_ = self.client_[MONGO_DB_]
 
 
@@ -2532,8 +2530,7 @@ class Crud:
 
             pd.options.display.float_format = "{:,.2f}".format
 
-            cursor_ = Mongo().db_[
-                f"{que_collection_id_}_data"].aggregate(aggregate_)
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].with_options(read_preference=pymongo.ReadPreference.SECONDARY).aggregate(aggregate_)
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
 
             count_ = len(data_)
@@ -2863,10 +2860,7 @@ class Crud:
                 aggregate_update_.append(agg_)
 
             aggregate_update_.append({"$project": {"_id": "$_id"}})
-            cursor_ = (
-                Mongo().db_[f"{job_collection_id_}_data"].aggregate(
-                    aggregate_update_)
-            )
+            cursor_ = Mongo().db_[f"{job_collection_id_}_data"].aggregate(aggregate_update_)
 
             if not cursor_:
                 raise PassException("")
@@ -3872,9 +3866,7 @@ class Crud:
 
             if collection_ == "_collection":
                 col_id_ = doc_["col_id"]
-                Mongo().db_[f"{col_id_}_data"].aggregate(
-                    [{"$match": {}}, {"$out": f"{col_id_}_data_removed"}]
-                )
+                Mongo().db_[f"{col_id_}_data"].aggregate([{"$match": {}}, {"$out": f"{col_id_}_data_removed"}])
                 Mongo().db_[f"{col_id_}_data"].drop()
 
             return {"result": True}
@@ -3988,9 +3980,7 @@ class Crud:
                     Mongo().db_[f"{collection_id_}_bin"].insert_one(doc)
                     if collection_ == "_collection":
                         suffix_ = Misc().get_timestamp_f()
-                        Mongo().db_[f"{col_id_}_data"].aggregate(
-                            [{"$match": {}}, {"$out": f"{col_id_}_data_bin_{suffix_}"}]
-                        )
+                        Mongo().db_[f"{col_id_}_data"].aggregate([{"$match": {}}, {"$out": f"{col_id_}_data_bin_{suffix_}"}])
                         Mongo().db_[f"{col_id_}_data"].drop()
 
                 log_ = Misc().log_f(
@@ -4346,7 +4336,7 @@ class Crud:
         count_, files_, msg_ = 0, [], None
         newdoc_, forex_ = {}, False
         split_id_ = Misc().get_timestamp_f()
-        session_client_ = MongoClient(Mongo().connstr)
+        session_client_ = pymongo.MongoClient(Mongo().connstr)
         session_db_ = session_client_[MONGO_DB_]
         session_ = session_client_.start_session()
 
@@ -4438,8 +4428,7 @@ class Crud:
                 group_ = {}
                 for uq_ in unique_:
                     group_[uq_] = f"${uq_}"
-                uniques_ = list(Mongo().db_[collection_].aggregate(
-                    [{"$match": get_filtered_}, {"$group": {"_id": group_, "count": {"$sum": 1}}}]))
+                uniques_ = list(Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": group_, "count": {"$sum": 1}}}]))
                 if uniques_ and len(uniques_) > 1:
                     raise AppException(f"{(','.join(unique_))} must be unique in selection")
 
@@ -6085,9 +6074,10 @@ MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
+MONGO_READPREF_ = os.environ.get("MONGO_READPREF")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get(
-    "MONGO_TIMEOUT_MS") and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0 else 10000
+    "MONGO_TIMEOUT_MS") and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0 else 90000
 PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get(
     "PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
 PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
@@ -6501,8 +6491,7 @@ def api_iot_f():
         if process_ == "scan":
             res_ = Iot().barcode_scan_f(aut_id_)
         elif process_ == "query":
-            searched_ = requestj_[
-                "searched"] if "searched" in requestj_ else None
+            searched_ = requestj_["searched"] if "searched" in requestj_ else None
             page_ = requestj_["page"] if "page" in requestj_ else 1
             res_ = Iot().iot_query_f(searched_, page_)
 
@@ -6628,7 +6617,7 @@ def api_post_f():
         output_ = []
         count_ = 0
 
-        session_client_ = MongoClient(Mongo().connstr)
+        session_client_ = pymongo.MongoClient(Mongo().connstr)
         session_db_ = session_client_[MONGO_DB_]
         session_ = session_client_.start_session()
         session_.start_transaction()
