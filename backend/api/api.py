@@ -53,6 +53,7 @@ from datetime import datetime, timedelta
 import boto3
 import botocore
 import pymongo
+from pymongo.read_concern import ReadConcern
 import bson
 from bson import json_util
 from bson.objectid import ObjectId
@@ -2509,19 +2510,10 @@ class Crud:
             attach_json_ = set_ and "json" in set_ and set_["json"] is True
             attach_csv_ = set_ and "csv" in set_ and set_["csv"] is True
             attach_html_ = set_ and "html" in set_ and set_["html"] is True
-            attach_pivots_ = (
-                set_
-                and "pivot" in set_
-                and set_["pivot"]
-                and len(set_["pivot"]) > 0
-            )
+            attach_pivots_ = set_ and "pivot" in set_ and set_["pivot"] and len(set_["pivot"]) > 0
 
             if orig_ == "api/crud":
-                limit_ = (
-                    obj_["limit"]
-                    if "limit" in obj_ and obj_["limit"] > 0
-                    else API_QUERY_PAGE_SIZE_
-                )
+                limit_ = obj_["limit"] if "limit" in obj_ and obj_["limit"] > 0 else API_QUERY_PAGE_SIZE_
                 aggregate_.append({"$limit": limit_})
             elif orig_ == "visual":
                 aggregate_.append({"$limit": API_DEFAULT_VISUAL_LIMIT_})
@@ -2530,7 +2522,13 @@ class Crud:
 
             pd.options.display.float_format = "{:,.2f}".format
 
-            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].with_options(read_preference=pymongo.ReadPreference.SECONDARY).aggregate(aggregate_)
+            # PRIMARY FETCH
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
+
+            # SECONDARY FETCH OPTIONAL
+            # collection_secondary_ = Mongo().db_.get_collection(f"{que_collection_id_}_data", read_preference=pymongo.ReadPreference.SECONDARY, read_concern=ReadConcern("majority"))
+            # cursor_ = collection_secondary_.aggregate(aggregate_)
+
             data_ = json.loads(JSONEncoder().encode(list(cursor_)))
 
             count_ = len(data_)
@@ -4428,7 +4426,8 @@ class Crud:
                 group_ = {}
                 for uq_ in unique_:
                     group_[uq_] = f"${uq_}"
-                uniques_ = list(Mongo().db_[collection_].aggregate([{"$match": get_filtered_}, {"$group": {"_id": group_, "count": {"$sum": 1}}}]))
+                uniques_ = list(Mongo().db_[collection_].aggregate(
+                    [{"$match": get_filtered_}, {"$group": {"_id": group_, "count": {"$sum": 1}}}]))
                 if uniques_ and len(uniques_) > 1:
                     raise AppException(f"{(','.join(unique_))} must be unique in selection")
 
