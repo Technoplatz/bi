@@ -192,7 +192,12 @@
       "bsonType": "string",
       "title": "Ship Type",
       "description": "Shipping type",
-      "enum": ["Air", "Sea", "Truck", "Other"],
+      "enum": [
+        "Air",
+        "Sea",
+        "Truck",
+        "Other"
+      ],
       "minLength": 0,
       "maxLength": 8,
       "pattern": "^[A-Za-z]{0,8}$",
@@ -247,7 +252,13 @@
       "maxLength": 16,
       "pattern": "^[A-Za-z-]{0,16}$",
       "readonly": true,
-      "enum": ["OK", "OK-Labeled", "OK-Skipped", "CN-Canceled", null],
+      "enum": [
+        "OK",
+        "OK-Labeled",
+        "OK-Skipped",
+        "CN-Canceled",
+        null
+      ],
       "selection": true
     },
     "dnn_entry_date": {
@@ -333,7 +344,11 @@
       "title": "Change",
       "description": "Change code",
       "readonly": true,
-      "enum": ["CC-Customer", "SP-Split", null]
+      "enum": [
+        "CC-Customer",
+        "SP-Split",
+        null
+      ]
     },
     "dnn_reminder": {
       "bsonType": "string",
@@ -342,7 +357,16 @@
       "placeholder": "Message for others to get notified",
       "minLength": 0,
       "maxLength": 8,
-      "enum": ["On-hold", "Awaiting", "Missing", "Test", "Damaged", "Lost", "Approved", null],
+      "enum": [
+        "On-hold",
+        "Awaiting",
+        "Missing",
+        "Test",
+        "Damaged",
+        "Lost",
+        "Approved",
+        null
+      ],
       "reminder": true,
       "selection": true
     },
@@ -375,30 +399,98 @@
     "dnn_amount"
   ],
   "index": [
-    ["dnn_no"],
-    ["dnn_acc_no"],
-    ["dnn_acc_no", "dnn_acc_name"],
-    ["dnn_acc_name"],
-    ["dnn_status"],
-    ["dnn_status", "dnn_no", "dnn_line_no"],
-    ["dnn_status", "dnn_date"],
-    ["dnn_status", "dnn_prd_group"],
-    ["dnn_no", "dnn_line_no", "dnn_prd_group"],
-    ["dnn_no", "dnn_prd_group"],
-    ["dnn_man_no"],
-    ["dnn_odi_no", "dnn_odi_sub_no"],
-    ["dnn_order_no", "dnn_prd_no"],
-    ["dnn_order_no", "dnn_prd_no", "dnn_qty"],
-    ["dnn_acc_no", "dnn_status"],
-    ["dnn_ship_type"]
+    [
+      "dnn_no"
+    ],
+    [
+      "dnn_acc_no"
+    ],
+    [
+      "dnn_acc_no",
+      "dnn_acc_name"
+    ],
+    [
+      "dnn_acc_name"
+    ],
+    [
+      "dnn_status"
+    ],
+    [
+      "dnn_status",
+      "dnn_no",
+      "dnn_line_no"
+    ],
+    [
+      "dnn_status",
+      "dnn_date"
+    ],
+    [
+      "dnn_status",
+      "dnn_prd_group"
+    ],
+    [
+      "dnn_no",
+      "dnn_line_no",
+      "dnn_prd_group"
+    ],
+    [
+      "dnn_no",
+      "dnn_prd_group"
+    ],
+    [
+      "dnn_man_no"
+    ],
+    [
+      "dnn_bu_id"
+    ],
+    [
+      "dnn_prd_no"
+    ],
+    [
+      "dnn_odi_no",
+      "dnn_odi_sub_no"
+    ],
+    [
+      "dnn_order_no",
+      "dnn_prd_no"
+    ],
+    [
+      "dnn_status",
+      "dnn_order_no",
+      "dnn_prd_no",
+      "dnn_qty"
+    ],
+    [
+      "dnn_order_no",
+      "dnn_prd_no",
+      "dnn_qty"
+    ],
+    [
+      "dnn_acc_no",
+      "dnn_status"
+    ],
+    [
+      "dnn_ship_type"
+    ]
   ],
-  "unique": [["dnn_no", "dnn_line_no"]],
+  "unique": [
+    [
+      "dnn_no",
+      "dnn_line_no"
+    ]
+  ],
   "sort": {
     "_modified_at": -1,
     "dnn_no": 1,
     "dnn_line_no": 1
   },
-  "pagination": [25, 50, 100, 500, 1000],
+  "pagination": [
+    25,
+    50,
+    100,
+    500,
+    1000
+  ],
   "parents": [
     {
       "collection": "business",
@@ -415,7 +507,10 @@
           "value": 0
         }
       ],
-      "get": ["bun_id", "bun_name"],
+      "get": [
+        "bun_id",
+        "bun_name"
+      ],
       "group": false
     },
     {
@@ -431,7 +526,11 @@
         }
       ],
       "filter": [],
-      "get": ["odi_no", "odi_sub_no", "odi_customs"],
+      "get": [
+        "odi_no",
+        "odi_sub_no",
+        "odi_customs"
+      ],
       "group": false
     },
     {
@@ -454,7 +553,10 @@
           "value": "dnn_odi_sub_no"
         }
       ],
-      "get": ["man_no", "man_opening_date"],
+      "get": [
+        "man_no",
+        "man_opening_date"
+      ],
       "group": false
     },
     {
@@ -477,7 +579,10 @@
           "value": true
         }
       ],
-      "get": ["acc_no", "acc_nick_name"],
+      "get": [
+        "acc_no",
+        "acc_nick_name"
+      ],
       "group": false
     },
     {
@@ -515,7 +620,12 @@
       "icon": "play",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"],
+      "_tags": [
+        "#Managers",
+        "#Logistics",
+        "#Operation",
+        "#Technoplatz"
+      ],
       "notification": {
         "notify": true,
         "subject": "Operation [DNs Uploaded]",
@@ -567,13 +677,19 @@
       "one_click": false,
       "icon": "git-branch",
       "uniqueness": true,
-      "unique": ["dnn_no"],
+      "unique": [
+        "dnn_no"
+      ],
       "split": {
         "enabled": true,
         "key_field": "dnn_no",
         "key_suffix": "-10",
         "ref_field": "dnn_qty",
-        "num_fields": ["dnn_qty", "dnn_amount", "dnn_gross_weight"],
+        "num_fields": [
+          "dnn_qty",
+          "dnn_amount",
+          "dnn_gross_weight"
+        ],
         "set_field": "dnn_change",
         "set_value": "SP-Split"
       },
@@ -599,7 +715,12 @@
           "dnn_line_no": 1
         }
       },
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Technoplatz"]
+      "_tags": [
+        "#Managers",
+        "#Logistics",
+        "#Operation",
+        "#Technoplatz"
+      ]
     },
     {
       "id": "rtd",
@@ -626,7 +747,13 @@
       "icon": "flag",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "_tags": [
+        "#Managers",
+        "#Logistics",
+        "#Operation",
+        "#Touchpoint",
+        "#Technoplatz"
+      ],
       "notification": {
         "notify": true,
         "subject": "Operation [DNs Ready TBD]",
@@ -675,7 +802,13 @@
       "icon": "create",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "_tags": [
+        "#Managers",
+        "#Logistics",
+        "#Operation",
+        "#Touchpoint",
+        "#Technoplatz"
+      ],
       "notification": {
         "notify": true,
         "subject": "Operation [Note Added]",
@@ -705,7 +838,10 @@
     {
       "name": "Amounts updater",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
           "key": "dnn_qty",
@@ -741,7 +877,10 @@
     {
       "name": "Product updater",
       "enabled": true,
-      "operations": ["update", "insert"],
+      "operations": [
+        "update",
+        "insert"
+      ],
       "changes": [
         {
           "key": "dnn_prd_no",
@@ -791,7 +930,9 @@
   "import": {
     "enabled": true,
     "upsertable": true,
-    "upsertables": ["dnn_prd_group"]
+    "upsertables": [
+      "dnn_prd_group"
+    ]
   },
   "queries": {
     "query": true,

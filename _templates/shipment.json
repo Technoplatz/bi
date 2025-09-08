@@ -150,6 +150,11 @@
           "key": "car_acc_no",
           "op": "eq",
           "value": "shp_acc_no"
+        },
+        {
+          "key": "car_type",
+          "op": "eq",
+          "value": "Permanent"
         }
       ],
       "get": ["car_id", "car_name", "car_tax_no", "car_plate_no"]

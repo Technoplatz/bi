@@ -1558,7 +1558,7 @@ class Crud:
             file_ = obj["file"]
             collection_ = obj["collection"]
             method_ = obj["process"] if "process" in obj and obj["process"] is not None else "insert"
-            upserted_ = method_ == "upsert"
+            upserted_ = False
             updated_ = method_ == "update"
             email_ = form_["email"]
             mimetype_ = file_.content_type
@@ -5467,7 +5467,6 @@ class Auth:
                         or (op_ in ["savequery", "savejob"] and per_query_)
                         or (op_ == "insert" and per_insert_ and per_read_)
                         or (op_ == "import" and per_insert_ and per_read_)
-                        or (op_ == "upsert" and per_insert_ and per_update_ and per_read_)
                         or (op_ == "update" and per_update_ and per_read_)
                         or (op_ == "action" and per_action_ and per_read_)
                         or (op_ == "clone" and per_insert_ and per_read_)
@@ -6127,7 +6126,7 @@ def api_import_f():
         if not file_:
             raise APIError("no file received")
 
-        process_ = form_["process"] if "process" in form_ and form_["process"] in ["insert", "update", "upsert"] else "insert"
+        process_ = form_["process"] if "process" in form_ and form_["process"] in ["insert", "update"] else "insert"
         collection_ = form_["collection"]
         col_check_ = Crud().inner_collection_f(collection_)
         if not col_check_["result"]:
@@ -6226,11 +6225,11 @@ def api_crud_f():
 
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
 
-        if op_ in ["read", "update", "upsert", "delete", "action"]:
+        if op_ in ["read", "update", "delete", "action"]:
             match_ += allowmatch_
             input_["match"] = match_
 
-        if op_ in ["update", "upsert", "insert", "action"]:
+        if op_ in ["update", "insert", "action"]:
             if "doc" not in input_:
                 raise APIError({"result": False, "msg": "no document included"})
             decode_ = Crud().decode_crud_input_f(input_)
@@ -6326,6 +6325,7 @@ def api_crud_f():
             return response_
 
         response_.status_code = sc__
+        response_.mimetype = "application/json"
         return response_
 
 
@@ -6551,7 +6551,7 @@ def api_post_f():
         if not rh_collection_:
             raise APIError("no collection provided in header")
 
-        if operation_ not in ["read", "insert", "update", "upsert", "delete"]:
+        if operation_ not in ["read", "insert", "update", "delete"]:
             raise APIError("invalid operation")
 
         x_api_token_ = (
@@ -6633,9 +6633,9 @@ def api_post_f():
                     count_ += 1
                     if count_ >= int(API_OUTPUT_ROWS_LIMIT_):
                         break
-        elif operation_ in ["insert", "update", "upsert", "delete"]:
+        elif operation_ in ["insert", "update", "delete"]:
             filter_ = {}
-            if operation_ in ["update", "upsert", "delete"]:
+            if operation_ in ["update", "delete"]:
                 if len(unique_) > 0:
                     for uq_ in unique_:
                         for uq__ in uq_:
@@ -6646,7 +6646,7 @@ def api_post_f():
                     )
             for ix_, item_ in enumerate(body_):
                 filter__ = {}
-                if operation_ in ["update", "upsert", "delete"]:
+                if operation_ in ["update", "delete"]:
                     for key_ in filter_:
                         if key_ in item_ and item_[key_] is not None:
                             filter__[key_] = item_[key_]
@@ -6660,16 +6660,9 @@ def api_post_f():
                 doc__ = decode_crud_doc_f_["doc"]
                 doc__["_modified_at"] = Misc().get_now_f()
                 doc__["_modified_by"] = "API"
-                if operation_ in ["insert", "upsert"]:
+                if operation_ in ["insert"]:
                     doc__["_created_at"] = Misc().get_now_f()
                     doc__["_created_by"] = "API"
-                if operation_ == "upsert":
-                    session_db_[collection_data_].update_many(
-                        filter__,
-                        {"$set": doc__, "$inc": {"_modified_count": 1}},
-                        upsert=True,
-                        session=session_,
-                    )
                 if operation_ == "update":
                     session_db_[collection_data_].update_many(
                         filter__,

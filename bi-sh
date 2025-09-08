@@ -35,14 +35,13 @@
 cat <<EOF
 
 Technoplatz BI
-Copyright 2019-$(date +'%Y'), Technoplatz IT Solutions GmbH
+Copyright 2021-$(date +'%Y'), Technoplatz IT Solutions GmbH
 https://bi.technoplatz.com
 
 EOF
 
 function helpBI() {
     echo "Available commands:"
-    echo "./bi-sh init"
     echo "./bi-sh start"
     echo "./bi-sh stop"
     echo "./bi-sh down"
@@ -51,21 +50,6 @@ function helpBI() {
     echo "./bi-sh logs api|pwa|init|replicaset|stream [last n rows]"
     echo "./bi-sh build [api|pwa|init|replicaset|stream] [--no-cache]"
     echo "./bi-sh help"
-}
-
-function initBI() {
-    echo "Initializing..."
-    if [[ -f $DOTENV ]]; then
-        echo -e "! $DOTENV already exists."
-        cp $DOTENV $DOTENV.bak.$(date '+%Y%m%d%H%M%S')
-    fi
-    if [[ -f $DCYML ]]; then
-        echo -e "! $DCYML already exists."
-        cp $DCYML $DCYML.bak.$(date '+%Y%m%d%H%M%S')
-    fi
-    curl -Ls -o $DOTENV --create-dirs $RAWREPO/$DOTENV
-    curl -Ls -o $DCYML --create-dirs $RAWREPO/$DCYML
-    return 1
 }
 
 function updateBI() {
@@ -191,9 +175,6 @@ fi
 unset $(grep -v '^#' $DOTENV | sed -E 's/(.*)=.*/\1/' | xargs)
 
 case $1 in
-"init")
-    initBI
-    ;;
 "start")
     startBI
     ;;

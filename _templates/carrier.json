@@ -44,6 +44,13 @@
       "maxLength": 11,
       "pattern": "^[A-Z0-9-]{10,11}$",
       "readonly": true
+    },
+    "car_type": {
+      "bsonType": "string",
+      "title": "Type",
+      "description": "Carrier Type",
+      "enum": ["Permanent", "Temporary"],
+      "default": "Permanent"
     }
   },
   "sort": {

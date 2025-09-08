@@ -111,8 +111,8 @@
       "title": "Storage",
       "description": "Storage",
       "minLength": 0,
-      "maxLength": 128,
-      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,128}$"
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9-+_.,(%)/ ]{0,256}$"
     },
     "prd_lte": {
       "bsonType": "bool",

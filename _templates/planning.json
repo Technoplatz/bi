@@ -1,0 +1,36 @@
+{
+  "properties": {
+    "pln_dnn_no": {
+      "bsonType": "string",
+      "title": "DN No",
+      "description": "Delivery no",
+      "minLength": 10,
+      "maxLength": 16,
+      "pattern": "^[0-9A-Z-]{10,16}$"
+    },
+    "pln_note": {
+      "bsonType": "string",
+      "title": "Plan Note",
+      "description": "Plan Note",
+      "minLength": 0,
+      "maxLength": 128,
+      "pattern": "^[\\w|\\w$|\\W\\w|\\w\\W]{0,256}$"
+    }
+  },
+  "required": ["pln_dnn_no", "pln_note"],
+  "index": [],
+  "unique": [["pln_dnn_no"]],
+  "sort": {
+    "_modified_at": -1
+  },
+  "pagination": [25, 50, 100],
+  "parents": [],
+  "links": [],
+  "actions": [],
+  "triggers": [],
+  "import": {
+    "enabled": true,
+    "upsertable": true,
+    "upsertables": ["pln_no", "pln_note"]
+  }
+}

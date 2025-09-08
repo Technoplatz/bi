@@ -134,8 +134,8 @@ You have to delete any edited configuration files manually.
 Run the following command to get the platform script from the official repository and start containers by keeping them up and running in the background. Technoplatz BI restarts automatically when the platform is rebooted.
 
 ```bash
-curl -Lso ~/technoplatz-bi/bi-sh --create-dirs \
-"https://raw.githubusercontent.com/Technoplatz/bi/main/bi-sh" \
+curl -Lso ~/technoplatz-bi/#1 --create-dirs \
+"https://raw.githubusercontent.com/Technoplatz/bi/main/{bi-sh,docker-compose.yml,.env,README.md,LICENSE}" \
 && sudo chmod +x ~/technoplatz-bi/bi-sh \
 && cd ~/technoplatz-bi
 ```

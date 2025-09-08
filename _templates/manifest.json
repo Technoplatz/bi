@@ -112,7 +112,7 @@
         {
           "key": "dnn_status",
           "op": "in",
-          "value": "20-OnCustoms"
+          "value": "20-OnCustoms,30-OnCustomsProcess"
         },
         {
           "key": "dnn_odi_no",
