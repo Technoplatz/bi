@@ -22,7 +22,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY . .
-RUN npx ng build --configuration production
+RUN npm run build -- --configuration production
 
 FROM nginx:1.28-alpine
 RUN rm -rf /usr/share/nginx/html/*
