@@ -34,6 +34,9 @@ import os
 import sys
 import re
 import ast
+import html
+import time
+from collections import deque
 import asyncio
 import smtplib
 import json
@@ -83,14 +86,15 @@ class Trigger:
         self.db_ = self.client[mongo_db_]
         self.counter_ = 0
         self.repeater_ = 0
+        self.guard_ = {}
 
         refresh_properties_f_ = self.refresh_properties_f()
         if not refresh_properties_f_["result"]:
-            raise AppException(refresh_properties_f_["exc"])
+            raise AppException(refresh_properties_f_.get("msg"))
 
         refresh_triggers_f_ = self.refresh_triggers_f()
         if not refresh_triggers_f_["result"]:
-            raise AppException(refresh_triggers_f_["exc"])
+            raise AppException(refresh_triggers_f_.get("msg"))
 
         PRINT_(">>> init ended")
 
@@ -160,8 +164,79 @@ class Trigger:
                 row_[column_] = str(value_) if isinstance(value_, ObjectId) else value_
             rows_.append(row_)
         frame_ = pd.DataFrame(rows_, columns=columns_)
-        frame_.to_csv(file_, index=False, date_format="%Y-%m-%dT%H:%M:%S")
+        self.neutralize_cells_f(frame_).to_csv(file_, index=False, date_format="%Y-%m-%dT%H:%M:%S")
         return frame_
+
+    def neutralize_cells_f(self, frame_):
+        """
+        M-3: text cells that spreadsheet clients would treat as formulas get an apostrophe prefix
+        """
+        out_ = frame_.copy()
+        for column_ in out_.columns:
+            if out_[column_].dtype == object:
+                out_[column_] = out_[column_].map(
+                    lambda v_: ("'" + v_) if isinstance(v_, str) and v_[:1] in ("=", "+", "-", "@", "\t", "\r") else v_
+                )
+        return out_
+
+    def loop_guard_f(self, collection_, _id):
+        """
+        M-4: true while the document stays under TRIGGER_LOOP_LIMIT_ trigger runs per minute
+        """
+        key_ = (collection_, str(_id))
+        now_ = time.monotonic()
+        hits_ = self.guard_.setdefault(key_, deque())
+        while hits_ and now_ - hits_[0] > 60:
+            hits_.popleft()
+        if len(hits_) >= TRIGGER_LOOP_LIMIT_:
+            return False
+        hits_.append(now_)
+        if len(self.guard_) > 10000:
+            for k_ in [k_ for k_, q_ in self.guard_.items() if not q_ or now_ - q_[-1] > 60]:
+                self.guard_.pop(k_, None)
+        return True
+
+    def load_resume_token_f(self):
+        """
+        M-4: the last processed change stream token, persisted in _kv so a restart resumes
+        instead of dropping the events that happened while the service was down
+        """
+        try:
+            doc_ = self.db_["_kv"].find_one({"kav_key": RESUME_TOKEN_KEY_})
+            return doc_["kav_value"] if doc_ and doc_.get("kav_value") else None
+        except Exception as exc_:
+            self.exception_printed_f(exc_)
+            return None
+
+    def save_resume_token_f(self, token_):
+        """
+        stores the change stream token before an event is processed (at-most-once per event)
+        """
+        try:
+            if token_:
+                self.db_["_kv"].update_one(
+                    {"kav_key": RESUME_TOKEN_KEY_},
+                    {"$set": {"kav_value": token_, "_modified_at": self.get_now_f(), "_modified_by": "_stream"}},
+                    upsert=True,
+                )
+        except Exception as exc_:
+            self.exception_printed_f(exc_)
+
+    def open_stream_f(self):
+        """
+        opens the change stream after the stored token, or from now when the token is unknown
+        """
+        resume_after_ = self.load_resume_token_f()
+        if resume_after_:
+            try:
+                stream_ = self.db_.watch(self.pipeline_, resume_after=resume_after_)
+                stream_.try_next()
+                PRINT_(">>> change stream resumed from stored token")
+                return stream_
+            except pymongo.errors.PyMongoError as exc_:
+                PRINT_("!!! stored resume token rejected, starting from now:", str(exc_)[:200])
+                self.save_resume_token_f(None)
+        return self.db_.watch(self.pipeline_)
 
     def safe_eval_f(self, expr_):
         """
@@ -384,7 +459,7 @@ class Trigger:
                         array_.append(array2_)
                     elif op_ == "like":
                         if typ == "string":
-                            fres_ = {"$regex": f"^{value_}", "$options": "i"}
+                            fres_ = {"$regex": f"^{re.escape(str(value_)[:256])}", "$options": "i"}
                     elif op_ == "contains":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = float(value_)
@@ -407,7 +482,7 @@ class Trigger:
                                 fres_ = {"$in": multilines_[:32]}
                             else:
                                 fres_ = (
-                                    {"$regex": value_, "$options": "i"}
+                                    {"$regex": re.escape(str(value_)[:256]), "$options": "i"}
                                     if value_
                                     else {"$regex": "", "$options": "i"}
                                 )
@@ -444,7 +519,7 @@ class Trigger:
                             }
                         else:
                             fres_ = (
-                                {"$not": {"$regex": value_, "$options": "i"}}
+                                {"$not": {"$regex": re.escape(str(value_)[:256]), "$options": "i"}}
                                 if value_
                                 else {"$not": {"$regex": "", "$options": "i"}}
                             )
@@ -719,6 +794,12 @@ class Trigger:
             if self.repeater_ == REPEATER_LIMIT_:
                 PRINT_("counter_", self.counter_, source_collection_)
                 self.repeater_ = 0
+
+            # M-4: a document that keeps re-triggering (self-referencing or mutually recursive
+            # triggers) is dropped once it exceeds TRIGGER_LOOP_LIMIT_ runs per minute
+            if not self.loop_guard_f(source_collection_, _id):
+                PRINT_("!!! trigger loop guard: skipping", source_collection_, str(_id))
+                return {"result": False, "msg": "trigger loop guard"}
 
             source_collection_id_ = source_collection_.replace("_data", "")
             changed_keys_ = (
@@ -1221,13 +1302,13 @@ class Trigger:
                                         </style>"
                                     for topic_ in topics_:
                                         html_ += f"{source_properties_[topic_]['title'] if topic_ in source_properties_ and 'title' in source_properties_[topic_] else topic_}: \
-                                            <strong>{full_document_[topic_] if topic_ in full_document_ else ''}</strong>\
+                                            <strong>{html.escape(str(full_document_[topic_])) if topic_ in full_document_ else ''}</strong>\
                                             <br />"
                                     html_ += f"<p>{csv_file_.to_html(index=False, max_rows=HTML_TABLE_MAX_ROWS_, max_cols=HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
                                     body_ += f"<p>{html_.replace('NaN', '')}</p>"
 
                                 if attach_excel_:
-                                    csv_file_.to_excel(
+                                    self.neutralize_cells_f(csv_file_).to_excel(
                                         file_excel_,
                                         index=None,
                                         sheet_name=ncollection_,
@@ -1301,8 +1382,9 @@ class Trigger:
             PRINT_(">>> change stream started")
             resume_token_ = None
 
-            with self.db_.watch(self.pipeline_) as changes_stream_:
+            with self.open_stream_f() as changes_stream_:
                 for event_ in changes_stream_:
+                    self.save_resume_token_f(changes_stream_.resume_token)
                     source_collection_ = (
                         event_["ns"]["coll"]
                         if "ns" in event_ and "coll" in event_["ns"]
@@ -1318,13 +1400,13 @@ class Trigger:
                         if not refresh_properties_f_["result"]:
                             PRINT_(
                                 ">>> properties refresh error",
-                                refresh_properties_f_["exc"],
+                                refresh_properties_f_.get("msg"),
                             )
                             continue
                         refresh_triggers_f_ = self.refresh_triggers_f()
                         if not refresh_triggers_f_["result"]:
                             PRINT_(
-                                ">>> triggers refresh error", refresh_triggers_f_["exc"]
+                                ">>> triggers refresh error", refresh_triggers_f_.get("msg")
                             )
                             continue
                         PRINT_(">>> _collection updated and refreshed")
@@ -1437,6 +1519,8 @@ API_TEMPFILE_PATH_ = os.environ.get("API_TEMPFILE_PATH")
 HTML_TABLE_MAX_ROWS_ = int(os.environ.get("HTML_TABLE_MAX_ROWS"))
 HTML_TABLE_MAX_COLS_ = int(os.environ.get("HTML_TABLE_MAX_COLS"))
 REPEATER_LIMIT_ = 1000
+TRIGGER_LOOP_LIMIT_ = int(os.environ.get("TRIGGER_LOOP_LIMIT") or 50)
+RESUME_TOKEN_KEY_ = "_stream_resume_token"
 PRINT_ = partial(print, flush=True)
 
 if __name__ == "__main__":

@@ -217,3 +217,39 @@ def test_health_reports_database_state(api, monkeypatch):
     with api.app.test_client() as client:
         response = client.get("/api/health")
     assert response.status_code == 503 and response.get_json()["db"] is False
+
+
+# ---------------------------------------------------------------- medium findings: regex escaping, cell neutralising, loop guard
+def test_regex_fragment_is_escaped_and_capped(api):
+    misc = api.Misc()
+    assert misc.regex_fragment_f("a.b*(c") == r"a\.b\*\(c"
+    assert len(misc.regex_fragment_f("x" * 1000)) == 256
+
+
+def test_filter_builder_escapes_client_values(api):
+    from bi.crud import Crud
+    props = {"name": {"bsonType": "string"}}
+    like = Crud().get_filtered_f({"match": [{"key": "name", "op": "like", "value": "(a+)+$"}], "properties": props})
+    assert like == {"$and": [{"name": {"$regex": "^" + r"\(a\+\)\+\$", "$options": "i"}}]}
+    contains = Crud().get_filtered_f({"match": [{"key": "name", "op": "contains", "value": ".*"}], "properties": props})
+    assert contains["$and"][0]["name"]["$regex"] == r"\.\*"
+
+
+def test_neutralize_cells(api):
+    import pandas as pd
+    frame = pd.DataFrame({"t": ["=SUM(A1)", "+1", "-x", "@cmd", "safe", None], "n": [1, 2, 3, 4, 5, 6]})
+    out = api.Misc().neutralize_cells_f(frame)
+    assert out["t"].tolist()[:5] == ["'=SUM(A1)", "'+1", "'-x", "'@cmd", "safe"]
+    assert out["n"].tolist() == [1, 2, 3, 4, 5, 6]
+    assert frame["t"].tolist()[0] == "=SUM(A1)"  # original untouched
+
+
+def test_stream_loop_guard(stream):
+    class T(stream.Trigger):
+        def __init__(self):
+            self.guard_ = {}
+    trigger = T()
+    results = [trigger.loop_guard_f("zz_data", "id1") for _ in range(stream.TRIGGER_LOOP_LIMIT_ + 5)]
+    assert results[:stream.TRIGGER_LOOP_LIMIT_] == [True] * stream.TRIGGER_LOOP_LIMIT_
+    assert results[stream.TRIGGER_LOOP_LIMIT_:] == [False] * 5
+    assert trigger.loop_guard_f("zz_data", "id2") is True

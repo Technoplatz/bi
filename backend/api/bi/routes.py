@@ -692,7 +692,7 @@ def api_post_f():
                 "collection": rh_collection_,
                 "op": f"API {operation_}",
                 "user": "API",
-                "document": body_,
+                "document": {"items": len(body_), "keys": sorted({str(k_) for item_ in body_ if isinstance(item_, dict) for k_ in item_.keys()})},
             }
         )
         if not log_["result"]:

@@ -149,5 +149,10 @@ TEMP_PATH_ = "/temp"
 DUMP_PATH_ = "/mongodump"
 PRINT_ = partial(print, flush=True)
 TFAC_OPS_ = ["announce"]
+# M-2: ceilings for client-driven reads
+API_READ_MAX_LIMIT_ = int(os.environ.get("API_READ_MAX_LIMIT")) if os.environ.get("API_READ_MAX_LIMIT") else 500
+API_READ_MAX_PAGE_ = int(os.environ.get("API_READ_MAX_PAGE")) if os.environ.get("API_READ_MAX_PAGE") else 10000
+API_QUERY_MAX_TIME_MS_ = int(os.environ.get("API_QUERY_MAX_TIME_MS")) if os.environ.get("API_QUERY_MAX_TIME_MS") else 20000
+API_FILTER_VALUE_MAX_LEN_ = 256
 UPLOAD_EXTENSIONS_ = ["pdf", "png", "jpg", "jpeg", "xlsx", "xls", "doc", "docx", "csv", "txt"]
 CORS_HEADERS_ = ["Content-Type", "Origin", "Authorization", "X-Requested-With", "Accept", "X-Auth"]

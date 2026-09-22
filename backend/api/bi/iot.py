@@ -63,8 +63,8 @@ class Iot:
             match_ = {
                 "$match": {
                     "$or": [
-                        {"ser_dnn_no": {"$regex": searched_, "$options": "i"}},
-                        {"ser_sscc_no": {"$regex": searched_, "$options": "i"}},
+                        {"ser_dnn_no": {"$regex": Misc().regex_fragment_f(searched_), "$options": "i"}},
+                        {"ser_sscc_no": {"$regex": Misc().regex_fragment_f(searched_), "$options": "i"}},
                     ]
                 }
             }

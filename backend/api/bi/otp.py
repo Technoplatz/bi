@@ -146,7 +146,6 @@ class OTP:
                     "op": "validate-otp",
                     "user": email_,
                     "document": {
-                        "otp": otp_,
                         "success": validated_,
                         "ip": Misc().get_client_ip_f(),
                         "_modified_at": Misc().get_now_f(),

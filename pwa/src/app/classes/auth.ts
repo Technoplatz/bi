@@ -54,10 +54,14 @@ export class Auth {
   }
 
   setUserOut() {
+    // clear the stored session first; the redirect would otherwise abort the IndexedDB delete
     return new Promise((resolve, reject) => {
-      window.location.replace("/");
       this.storage.remove("LSUSERMETA").then(() => {
         this.user.next(null);
+        window.location.replace("/");
+        resolve(true);
+      }).catch(() => {
+        window.location.replace("/");
         resolve(true);
       });
     });
@@ -155,20 +159,17 @@ export class Auth {
   }
 
   sign_out() {
+    // invalidate the server session while the token is still available, then clear and redirect
     return new Promise((resolve, reject) => {
-      this.setUserOut().then(() => {
-        this.misc.api_call("auth", JSON.stringify({
-          op: "signout"
-        })).then((res: any) => {
-          if (res && res.result) {
-            resolve(true);
-          } else {
-            reject(res.msg);
-          }
-        }).catch((res: any) => {
-          this.misc.doMessage(res, "error");
-          reject(res);
+      this.misc.api_call("auth", JSON.stringify({
+        op: "signout"
+      })).then((res: any) => {
+        this.setUserOut().then(() => {
+          res && res.result ? resolve(true) : reject(res?.msg);
         });
+      }).catch((res: any) => {
+        this.misc.doMessage(res, "error");
+        this.setUserOut().then(() => reject(res));
       });
     });
   }

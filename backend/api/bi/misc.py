@@ -416,6 +416,26 @@ class Misc:
             dt_ = dt_.replace(tzinfo=None)
         return (datetime.now() - dt_).total_seconds() / 60
 
+    def regex_fragment_f(self, value_):
+        """
+        M-2: client values used inside $regex are escaped and length-capped so they can neither
+        change the pattern nor build catastrophic expressions
+        """
+        return re.escape(str(value_)[:cfg.API_FILTER_VALUE_MAX_LEN_])
+
+    def neutralize_cells_f(self, frame_):
+        """
+        M-3: spreadsheet clients interpret cells starting with = + - @ or a tab/cr as formulas;
+        returns a copy of the frame where such text cells are prefixed with an apostrophe
+        """
+        out_ = frame_.copy()
+        for column_ in out_.columns:
+            if out_[column_].dtype == object:
+                out_[column_] = out_[column_].map(
+                    lambda v_: ("'" + v_) if isinstance(v_, str) and v_[:1] in ("=", "+", "-", "@", "\t", "\r") else v_
+                )
+        return out_
+
     def scan_forbidden_ops_f(self, node_):
         """
         returns the first forbidden mongodb operator found anywhere in node_, else None

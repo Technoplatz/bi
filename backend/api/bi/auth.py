@@ -209,7 +209,6 @@ class Auth:
                     "op": op_,
                     "user": email_,
                     "document": {
-                        "otp_entered": tfac_,
                         "exception": str(exc__),
                         "_modified_at": Misc().get_now_f(),
                         "_modified_by": email_,
@@ -609,7 +608,7 @@ class Auth:
                 {
                     "$set": {
                         "aut_jwt_secret": secret_,
-                        "aut_jwt_token": token_,
+                        "aut_jwt_token": None,
                         "aut_tfac": None,
                         "aut_verified": True,
                         "aut_api_key": api_key_,

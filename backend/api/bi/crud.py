@@ -35,6 +35,7 @@ Collections, documents, queries, jobs, links, actions, imports and dumps.
 import os
 import io
 import re
+import html
 import json
 import subprocess
 from datetime import datetime, timedelta
@@ -761,7 +762,7 @@ class Crud:
         projection_ = {column_: 1 for column_ in columns_}
         cursor_ = Mongo().db_[collection_].find(filter_ or {}, projection_).sort(sort_list_)
         frame_ = self.frame_from_docs_f(cursor_, columns_)
-        frame_.to_csv(file_, index=False, date_format="%Y-%m-%dT%H:%M:%S")
+        Misc().neutralize_cells_f(frame_).to_csv(file_, index=False, date_format="%Y-%m-%dT%H:%M:%S")
         return frame_
 
     def get_filtered_f(self, obj):
@@ -799,7 +800,7 @@ class Crud:
                         array_.append(array2_)
                     elif op_ == "like":
                         if typ == "string":
-                            fres_ = {"$regex": f"^{value_}", "$options": "i"}
+                            fres_ = {"$regex": f"^{Misc().regex_fragment_f(value_)}", "$options": "i"}
                     elif op_ == "contains":
                         if typ in ["number", "decimal", "float"]:
                             fres_ = float(value_)
@@ -823,7 +824,7 @@ class Crud:
                                 fres_ = {"$in": multilines_[:32]}
                             else:
                                 fres_ = (
-                                    {"$regex": value_, "$options": "i"}
+                                    {"$regex": Misc().regex_fragment_f(value_), "$options": "i"}
                                     if value_
                                     else {"$regex": "", "$options": "i"}
                                 )
@@ -860,7 +861,7 @@ class Crud:
                             }
                         else:
                             fres_ = (
-                                {"$not": {"$regex": value_, "$options": "i"}}
+                                {"$not": {"$regex": Misc().regex_fragment_f(value_), "$options": "i"}}
                                 if value_
                                 else {"$not": {"$regex": "", "$options": "i"}}
                             )
@@ -1094,6 +1095,15 @@ class Crud:
             if permitted_:
                 data_ = Mongo().db_["_collection"].find_one(
                     {"col_id": col_id_})
+                # M-8: plain users get the parts the client needs, not trigger and api definitions
+                if data_ and "col_structure" in data_ and not (Auth().is_manager_f(user_) or Auth().is_admin_f(user_)):
+                    structure_ = data_["col_structure"]
+                    structure_.pop("triggers", None)
+                    for key_ in ("links", "actions"):
+                        for item_ in structure_.get(key_, []) or []:
+                            if isinstance(item_, dict):
+                                item_.pop("api", None)
+                                item_.pop("notification", None)
             else:
                 raise AuthError(f"no collection permission {col_id_}")
 
@@ -1417,7 +1427,7 @@ class Crud:
             pd.options.display.float_format = "{:,.2f}".format
 
             # PRIMARY FETCH
-            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_)
+            cursor_ = Mongo().db_[f"{que_collection_id_}_data"].aggregate(aggregate_, maxTimeMS=cfg.API_QUERY_MAX_TIME_MS_)
 
             # SECONDARY FETCH OPTIONAL
             # collection_secondary_ = Mongo().db_.get_collection(f"{que_collection_id_}_data", read_preference=pymongo.ReadPreference.SECONDARY, read_concern=ReadConcern("majority"))
@@ -1514,7 +1524,7 @@ class Crud:
 
                 if attach_excel_:
                     file_excel_ = f"{cfg.API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.xlsx"
-                    df_raw_.to_excel(
+                    Misc().neutralize_cells_f(df_raw_).to_excel(
                         file_excel_,
                         sheet_name=_id,
                         engine="xlsxwriter",
@@ -1535,7 +1545,7 @@ class Crud:
 
                 if attach_csv_:
                     file_csv_ = f"{cfg.API_TEMPFILE_PATH_}/query-{_id}-{Misc().get_timestamp_f()}.csv"
-                    df_raw_.to_csv(file_csv_, encoding="utf-8", sep=";")
+                    Misc().neutralize_cells_f(df_raw_).to_csv(file_csv_, encoding="utf-8", sep=";")
                     files_.append({"name": file_csv_, "type": "csv"})
 
                 if count_ > 0:
@@ -1881,11 +1891,8 @@ class Crud:
         """
         try:
             user_ = input_["user"]
-            limit_ = (
-                input_["limit"] if "limit" in input_ and input_[
-                    "limit"] > 0 else 50
-            )
-            page_ = input_["page"]
+            limit_ = min(int(input_["limit"]) if "limit" in input_ and input_["limit"] and int(input_["limit"]) > 0 else 50, cfg.API_READ_MAX_LIMIT_)
+            page_ = min(max(int(input_["page"]) if "page" in input_ and input_["page"] else 1, 1), cfg.API_READ_MAX_PAGE_)
             collection_id_ = input_["collection"]
             projection_ = input_["projection"]
             group_ = "group" in input_ and input_["group"] is True
@@ -1976,6 +1983,9 @@ class Crud:
                 get_filtered_["_tags"] = {"$elemMatch": {"$in": user_tags_}}
 
             for property_ in selections_:
+                # M-1: only real, non-system properties may narrow the filter
+                if not isinstance(property_, str) or property_.startswith("_") or property_ not in properties_:
+                    continue
                 sel_ = []
                 for item_ in selections_[property_]:
                     if item_["value"] is True:
@@ -2119,14 +2129,14 @@ class Crud:
                 if projection_:
                     aggregate_.append({"$project": projection_})
 
-                cursor_ = Mongo().db_[collection_].aggregate(aggregate_)
+                cursor_ = Mongo().db_[collection_].aggregate(aggregate_, maxTimeMS=cfg.API_QUERY_MAX_TIME_MS_)
 
             docs_ = (
                 json.loads(JSONEncoder().encode(list(cursor_)))[:limit_]
                 if cursor_
                 else []
             )
-            count_ = Mongo().db_[collection_].count_documents(get_filtered_)
+            count_ = Mongo().db_[collection_].count_documents(get_filtered_, maxTimeMS=cfg.API_QUERY_MAX_TIME_MS_)
 
             for property_ in properties_:
                 prop_ = properties_[property_]
@@ -2139,9 +2149,9 @@ class Crud:
                         ):
                             docs_[ix_]["_reminder"] = True
                             docs_[ix_]["_note"] = (
-                                f"{docs_[ix_]['_note']}<br />{doc_[property_]}"
+                                f"{docs_[ix_]['_note']}<br />{html.escape(str(doc_[property_]))}"
                                 if "_note" in docs_[ix_] and docs_[ix_]["_note"] != ""
-                                else doc_[property_]
+                                else html.escape(str(doc_[property_]))
                             )
                 if "selection" in prop_ and prop_["selection"] is True:
                     selected_[property_] = []
@@ -3150,7 +3160,7 @@ class Crud:
                             </style>"
                         for topic_ in topics_:
                             html_ += f"{source_properties_[topic_]['title'] if topic_ in source_properties_ and 'title' in source_properties_[topic_] else topic_}: \
-                                <strong>{data_[topic_] if topic_ in data_ and data_[topic_] is not None else ''}</strong>\
+                                <strong>{html.escape(str(data_[topic_])) if topic_ in data_ and data_[topic_] is not None else ''}</strong>\
                                 <br />"
                         html_ += f"<p>{csv_file_.to_html(index=False, max_rows=cfg.HTML_TABLE_MAX_ROWS_, max_cols=cfg.HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
                         body_ += f"<p>{html_}</p>"
@@ -3161,7 +3171,7 @@ class Crud:
                         file_excel_ = (
                             f"{cfg.API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.xlsx"
                         )
-                        csv_file_.to_excel(
+                        Misc().neutralize_cells_f(csv_file_).to_excel(
                             file_excel_, index=None, sheet_name=collection_, header=True
                         )
                         files_.append({"name": file_excel_, "type": "xlsx"})
@@ -3564,13 +3574,13 @@ class Crud:
                     if attach_html_:
                         html_ = "<style> .etable { border-spacing: 0; border-collapse: collapse;} .etable td,th { padding: 7px; border: 1px solid #999;} </style>"
                         for topic_ in topics_:
-                            html_ += f"{properties_[topic_]['title'] if topic_ in properties_ and 'title' in properties_[topic_] else topic_}: <strong>{doc_[topic_] if topic_ in doc_ and doc_[topic_] is not None else ''}</strong><br />"
+                            html_ += f"{properties_[topic_]['title'] if topic_ in properties_ and 'title' in properties_[topic_] else topic_}: <strong>{html.escape(str(doc_[topic_])) if topic_ in doc_ and doc_[topic_] is not None else ''}</strong><br />"
                         html_ += f"<p>{csv_file_.to_html(index=False, max_rows=cfg.HTML_TABLE_MAX_ROWS_, max_cols=cfg.HTML_TABLE_MAX_COLS_, border=1, justify='left', classes='etable')}</p>"
                         body_ += f"<p>{html_}</p>"
                     if attach_csv_:
                         files_.append({"name": file_, "type": type_})
                     if attach_excel_:
-                        csv_file_.to_excel(file_excel_, index=None, sheet_name=collection_id_, header=True, )
+                        Misc().neutralize_cells_f(csv_file_).to_excel(file_excel_, index=None, sheet_name=collection_id_, header=True, )
                         files_.append({"name": file_excel_, "type": "xlsx"})
                     if attach_json_:
                         csv_file_.to_json(file_json_, date_format="iso", orient="records", force_ascii=False, )
