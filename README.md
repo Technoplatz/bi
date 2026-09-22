@@ -135,9 +135,10 @@ Run the following command to get the platform script from the official repositor
 
 ```bash
 curl -Lso ~/technoplatz-bi/#1 --create-dirs \
-"https://raw.githubusercontent.com/Technoplatz/bi/main/{bi-sh,docker-compose.yml,.env,README.md,LICENSE}" \
+"https://raw.githubusercontent.com/Technoplatz/bi/main/{bi-sh,docker-compose.yml,.env.example,README.md,LICENSE}" \
 && sudo chmod +x ~/technoplatz-bi/bi-sh \
-&& cd ~/technoplatz-bi
+&& cd ~/technoplatz-bi \
+&& cp -n .env.example .env
 ```
 
 ```bash

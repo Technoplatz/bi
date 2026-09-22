@@ -34,6 +34,9 @@ docker-compose.yml.bak*
 cert/
 .mongo
 *.env*
+.env
+.env.*
+!.env.example
 *copy.*
 mobile/
 /tsconfig.json
@@ -188,3 +191,4 @@ dmypy.json
 
 # security review reports (confidential)
 .pen/
+._*

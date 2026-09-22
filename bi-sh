@@ -167,7 +167,8 @@ if [ -f .env-dev ]; then
     DOTENV=".env-dev"
 fi
 if [ ! -f $DOTENV ]; then
-    echo -e "✘ Sorry! $DOTENV file not found.\n"
+    echo -e "✘ Sorry! $DOTENV file not found."
+    echo -e "  Create it from the template first:  cp .env.example .env\n"
     exit
 fi
 
