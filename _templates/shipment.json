@@ -150,11 +150,6 @@
           "key": "car_acc_no",
           "op": "eq",
           "value": "shp_acc_no"
-        },
-        {
-          "key": "car_type",
-          "op": "eq",
-          "value": "Permanent"
         }
       ],
       "get": ["car_id", "car_name", "car_tax_no", "car_plate_no"]
@@ -224,11 +219,11 @@
         "subject": "Touchpoint [DNs Delivered]",
         "body": "Hi,<br /><br />We would like to let you know that the attached deliveries have been shipped successfully.",
         "topics": "shp_id,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
-        "fields": "dnn_no,dnn_line_no,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "fields": "dnn_wayb_no,dnn_no,dnn_line_no,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
         "attachment": true,
         "html": true,
         "csv": false,
-        "excel": false,
+        "excel": true,
         "json": false,
         "filter": [],
         "sort": {
@@ -236,7 +231,7 @@
           "dnn_line_no": 1
         }
       },
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"]
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz", "#CatchAll"]
     }
   ],
   "actions": [
@@ -257,7 +252,7 @@
       "icon": "cloud-download-outline",
       "uniqueness": false,
       "unique": [],
-      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz"],
+      "_tags": ["#Managers", "#Logistics", "#Operation", "#Touchpoint", "#Technoplatz", "#CatchAll"],
       "api": {
         "id": "waybill-download",
         "enabled": true,
@@ -279,15 +274,15 @@
       },
       "download_by": "shp_wayb_no",
       "notification": {
-        "notify": false,
-        "html": false,
+        "notify": true,
+        "html": true,
         "csv": false,
         "excel": true,
         "json": false,
         "subject": "Touchpoint [Waybill Downloaded]",
         "body": "Hi,<br /><br />We would like to let you know that the waybill of the attached deliveries has been donwloaded.",
         "topics": "shp_wayb_no,shp_acc_no,shp_carrier_name,shp_carrier_tax_no,shp_vehicle_id,shp_date",
-        "fields": "dnn_no,dnn_line_no,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
+        "fields": "dnn_wayb_no,dnn_no,dnn_line_no,dnn_po_id,dnn_prd_no,dnn_prd_description,dnn_qty",
         "filter": [],
         "sort": {
           "dnn_no": 1,

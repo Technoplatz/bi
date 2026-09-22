@@ -1,0 +1,1859 @@
+{
+  "properties": {
+    "blm_so": {
+      "bsonType": "string",
+      "title": "SO",
+      "description": "SO",
+      "minLength": 0
+    },
+    "blm_so_item": {
+      "bsonType": "string",
+      "title": "SO Item",
+      "description": "SO Item",
+      "minLength": 0
+    },
+    "blm_dnn_no": {
+      "bsonType": "string",
+      "title": "DNN No",
+      "description": "DNN No",
+      "minLength": 0
+    },
+    "blm_dnn_item": {
+      "bsonType": "string",
+      "title": "DNN Item",
+      "description": "DNN Item",
+      "minLength": 0
+    },
+    "blm_status": {
+      "bsonType": "string",
+      "title": "Status",
+      "description": "Status",
+      "selection": true
+    },
+    "blm_so_and_so_item": {
+      "bsonType": "string",
+      "title": "SO and SO Item",
+      "description": "SO and SO Item",
+      "minLength": 0
+    },
+    "blm_material": {
+      "bsonType": "string",
+      "title": "Material",
+      "description": "Material",
+      "minLength": 0
+    },
+    "blm_material_description": {
+      "bsonType": "string",
+      "title": "Material Description",
+      "description": "Material Description",
+      "minLength": 0
+    },
+    "blm_order_qty": {
+      "bsonType": "number",
+      "title": "Order Qty",
+      "description": "Order Qty"
+    },
+    "blm_line_qty": {
+      "bsonType": "number",
+      "title": "Line Qty",
+      "description": "Line Qty"
+    },
+    "blm_item_net_value": {
+      "bsonType": "number",
+      "title": "Item Net Value",
+      "description": "Item Net Value"
+    },
+    "blm_intercompany_billing": {
+      "bsonType": "string",
+      "title": "Intercompany Billing",
+      "description": "Intercompany Billing",
+      "minLength": 0
+    },
+    "blm_intercompany_billing_item": {
+      "bsonType": "string",
+      "title": "Intercompany Billing Item",
+      "description": "Intercompany Billing Item",
+      "minLength": 0
+    },
+    "blm_billing": {
+      "bsonType": "string",
+      "title": "Billing",
+      "description": "Billing",
+      "minLength": 0
+    },
+    "blm_billing_item": {
+      "bsonType": "string",
+      "title": "Billing Item",
+      "description": "Billing Item",
+      "minLength": 0
+    },
+    "blm_commercial_invoice": {
+      "bsonType": "string",
+      "title": "Commercial Invoice",
+      "description": "Commercial Invoice",
+      "minLength": 0
+    },
+    "blm_sto": {
+      "bsonType": "string",
+      "title": "STO",
+      "description": "STO",
+      "minLength": 0
+    },
+    "blm_sto_item": {
+      "bsonType": "string",
+      "title": "STO Item",
+      "description": "STO Item",
+      "minLength": 0
+    },
+    "blm_sto_delivery": {
+      "bsonType": "string",
+      "title": "STO Delivery",
+      "description": "STO Delivery",
+      "minLength": 0
+    },
+    "blm_sto_delivery_item": {
+      "bsonType": "string",
+      "title": "STO Delivery Item",
+      "description": "STO Delivery Item",
+      "minLength": 0
+    },
+    "blm_sto_billing": {
+      "bsonType": "string",
+      "title": "STO Billing",
+      "description": "STO Billing",
+      "minLength": 0
+    },
+    "blm_sto_intercompany_billing_item": {
+      "bsonType": "string",
+      "title": "STO Intercompany Billing Item",
+      "description": "STO Intercompany Billing Item",
+      "minLength": 0
+    },
+    "blm_po": {
+      "bsonType": "string",
+      "title": "PO",
+      "description": "PO",
+      "minLength": 0
+    },
+    "blm_po_item": {
+      "bsonType": "string",
+      "title": "PO Item",
+      "description": "PO Item",
+      "minLength": 0
+    },
+    "blm_mfg_so": {
+      "bsonType": "string",
+      "title": "MFG SO",
+      "description": "MFG SO",
+      "minLength": 0
+    },
+    "blm_mfg_so_item": {
+      "bsonType": "string",
+      "title": "MFG SO Item",
+      "description": "MFG SO Item",
+      "minLength": 0
+    },
+    "blm_ship_year": {
+      "bsonType": "string",
+      "title": "Ship Year",
+      "description": "Ship Year",
+      "minLength": 0
+    },
+    "blm_marketing_name": {
+      "bsonType": "string",
+      "title": "Marketing Name",
+      "description": "Marketing Name",
+      "minLength": 0
+    },
+    "blm_pmd_brand": {
+      "bsonType": "string",
+      "title": "PMD Brand",
+      "description": "PMD Brand",
+      "minLength": 0
+    },
+    "blm_franchise": {
+      "bsonType": "string",
+      "title": "Franchise",
+      "description": "Franchise",
+      "minLength": 0
+    },
+    "blm_device_type": {
+      "bsonType": "string",
+      "title": "Device Type",
+      "description": "Device Type",
+      "minLength": 0
+    },
+    "blm_product_type": {
+      "bsonType": "string",
+      "title": "Product Type",
+      "description": "Product Type",
+      "minLength": 0
+    },
+    "blm_sd_so_route": {
+      "bsonType": "string",
+      "title": "S&D SO Route",
+      "description": "S&D SO Route",
+      "minLength": 0
+    },
+    "blm_mfg_so_and_mfg_so_item": {
+      "bsonType": "string",
+      "title": "MFG SO and MFG SO Item",
+      "description": "MFG SO and MFG SO Item",
+      "minLength": 0
+    },
+    "blm_sd_so_route_carrier_name": {
+      "bsonType": "string",
+      "title": "S&D SO Route Carrier Name",
+      "description": "S&D SO Route Carrier Name",
+      "minLength": 0
+    },
+    "blm_fixed_sab_line_qty": {
+      "bsonType": "string",
+      "title": "Fixed SAB Line Qty",
+      "description": "Fixed SAB Line Qty",
+      "minLength": 0
+    },
+    "blm_fixed_sab_flag": {
+      "bsonType": "string",
+      "title": "Fixed SAB Flag",
+      "description": "Fixed SAB Flag",
+      "minLength": 0
+    },
+    "blm_sab_in_quarter_bucket": {
+      "bsonType": "string",
+      "title": "SAB in Quarter Bucket",
+      "description": "SAB in Quarter Bucket",
+      "minLength": 0
+    },
+    "blm_so_deleted_flag": {
+      "bsonType": "string",
+      "title": "SO Deleted Flag",
+      "description": "SO Deleted Flag",
+      "minLength": 0
+    },
+    "blm_mfg_dn": {
+      "bsonType": "string",
+      "title": "MFG DN",
+      "description": "MFG DN",
+      "minLength": 0
+    },
+    "blm_mfg_dn_item": {
+      "bsonType": "string",
+      "title": "MFG DN Item",
+      "description": "MFG DN Item",
+      "minLength": 0
+    },
+    "blm_mfg_billing": {
+      "bsonType": "string",
+      "title": "MFG Billing",
+      "description": "MFG Billing",
+      "minLength": 0
+    },
+    "blm_mfg_billing_item": {
+      "bsonType": "string",
+      "title": "MFG Billing Item",
+      "description": "MFG Billing Item",
+      "minLength": 0
+    },
+    "blm_reroute_indicator": {
+      "bsonType": "string",
+      "title": "Reroute Indicator",
+      "description": "Reroute Indicator",
+      "minLength": 0
+    },
+    "blm_profit_center": {
+      "bsonType": "string",
+      "title": "Profit Center",
+      "description": "Profit Center",
+      "minLength": 0
+    },
+    "blm_item_category": {
+      "bsonType": "string",
+      "title": "Item Category",
+      "description": "Item Category",
+      "minLength": 0
+    },
+    "blm_mfg_po": {
+      "bsonType": "string",
+      "title": "MFG PO",
+      "description": "MFG PO",
+      "minLength": 0
+    },
+    "blm_item_category_group": {
+      "bsonType": "string",
+      "title": "Item Category Group",
+      "description": "Item Category Group",
+      "minLength": 0
+    },
+    "blm_product_long_description": {
+      "bsonType": "string",
+      "title": "Product Long Description",
+      "description": "Product Long Description",
+      "minLength": 0
+    },
+    "blm_mfg_po_item": {
+      "bsonType": "string",
+      "title": "MFG PO Item",
+      "description": "MFG PO Item",
+      "minLength": 0
+    },
+    "blm_manual_replenishment_so": {
+      "bsonType": "string",
+      "title": "Manual Replenishment SO",
+      "description": "Manual Replenishment SO",
+      "minLength": 0
+    },
+    "blm_manual_replenishment_so_item": {
+      "bsonType": "string",
+      "title": "Manual Replenishment SO Item",
+      "description": "Manual Replenishment SO Item",
+      "minLength": 0
+    },
+    "blm_mfg_po2": {
+      "bsonType": "string",
+      "title": "MFG PO2",
+      "description": "MFG PO2",
+      "minLength": 0
+    },
+    "blm_mfg_po2_item": {
+      "bsonType": "string",
+      "title": "MFG PO2 Item",
+      "description": "MFG PO2 Item",
+      "minLength": 0
+    },
+    "blm_mfg_return_so": {
+      "bsonType": "string",
+      "title": "MFG Return SO",
+      "description": "MFG Return SO",
+      "minLength": 0
+    },
+    "blm_return_so": {
+      "bsonType": "string",
+      "title": "Return SO",
+      "description": "Return SO",
+      "minLength": 0
+    },
+    "blm_credit_memo_request": {
+      "bsonType": "string",
+      "title": "Credit Memo Request",
+      "description": "Credit Memo Request",
+      "minLength": 0
+    },
+    "blm_debit_memo_request": {
+      "bsonType": "string",
+      "title": "Debit Memo Request",
+      "description": "Debit Memo Request",
+      "minLength": 0
+    },
+    "blm_geo": {
+      "bsonType": "string",
+      "title": "Geo",
+      "description": "Geo",
+      "minLength": 0
+    },
+    "blm_sub_geo": {
+      "bsonType": "string",
+      "title": "Sub Geo",
+      "description": "Sub Geo",
+      "minLength": 0
+    },
+    "blm_region": {
+      "bsonType": "string",
+      "title": "Region",
+      "description": "Region",
+      "minLength": 0
+    },
+    "blm_sub_region": {
+      "bsonType": "string",
+      "title": "Sub Region",
+      "description": "Sub Region",
+      "minLength": 0
+    },
+    "blm_territory": {
+      "bsonType": "string",
+      "title": "Territory",
+      "description": "Territory",
+      "minLength": 0
+    },
+    "blm_management_area_code": {
+      "bsonType": "string",
+      "title": "Management Area Code",
+      "description": "Management Area Code",
+      "minLength": 0
+    },
+    "blm_management_area_description": {
+      "bsonType": "string",
+      "title": "Management Area Description",
+      "description": "Management Area Description",
+      "minLength": 0
+    },
+    "blm_customer_type": {
+      "bsonType": "string",
+      "title": "Customer Type",
+      "description": "Customer Type",
+      "minLength": 0
+    },
+    "blm_customer_type_description": {
+      "bsonType": "string",
+      "title": "Customer Type Description",
+      "description": "Customer Type Description",
+      "minLength": 0
+    },
+    "blm_customer_group": {
+      "bsonType": "string",
+      "title": "Customer Group",
+      "description": "Customer Group",
+      "minLength": 0
+    },
+    "blm_site": {
+      "bsonType": "string",
+      "title": "Site",
+      "description": "Site",
+      "minLength": 0
+    },
+    "blm_site_name": {
+      "bsonType": "string",
+      "title": "Site Name",
+      "description": "Site Name",
+      "minLength": 0
+    },
+    "blm_site_type": {
+      "bsonType": "string",
+      "title": "Site Type",
+      "description": "Site Type",
+      "minLength": 0
+    },
+    "blm_product_hierarchy": {
+      "bsonType": "string",
+      "title": "Product Hierarchy",
+      "description": "Product Hierarchy",
+      "minLength": 0
+    },
+    "blm_product_category": {
+      "bsonType": "string",
+      "title": "Product Category",
+      "description": "Product Category",
+      "minLength": 0
+    },
+    "blm_series": {
+      "bsonType": "string",
+      "title": "Series",
+      "description": "Series",
+      "minLength": 0
+    },
+    "blm_family": {
+      "bsonType": "string",
+      "title": "Family",
+      "description": "Family",
+      "minLength": 0
+    },
+    "blm_product_stage": {
+      "bsonType": "string",
+      "title": "Product Stage",
+      "description": "Product Stage",
+      "minLength": 0
+    },
+    "blm_product_group": {
+      "bsonType": "string",
+      "title": "Product Group",
+      "description": "Product Group",
+      "minLength": 0
+    },
+    "blm_brand": {
+      "bsonType": "string",
+      "title": "Brand",
+      "description": "Brand",
+      "minLength": 0
+    },
+    "blm_material_category": {
+      "bsonType": "string",
+      "title": "Material Category",
+      "description": "Material Category",
+      "minLength": 0
+    },
+    "blm_product_name": {
+      "bsonType": "string",
+      "title": "Product Name",
+      "description": "Product Name",
+      "minLength": 0
+    },
+    "blm_xcvr": {
+      "bsonType": "string",
+      "title": "XCVR",
+      "description": "XCVR",
+      "minLength": 0
+    },
+    "blm_charger": {
+      "bsonType": "string",
+      "title": "Charger",
+      "description": "Charger",
+      "minLength": 0
+    },
+    "blm_apc_code": {
+      "bsonType": "string",
+      "title": "APC Code",
+      "description": "APC Code",
+      "minLength": 0
+    },
+    "blm_apc_code_description": {
+      "bsonType": "string",
+      "title": "APC Code Description",
+      "description": "APC Code Description",
+      "minLength": 0
+    },
+    "blm_segment_code": {
+      "bsonType": "string",
+      "title": "Segment Code",
+      "description": "Segment Code",
+      "minLength": 0
+    },
+    "blm_segment_code_desc": {
+      "bsonType": "string",
+      "title": "Segment Code Desc",
+      "description": "Segment Code Desc",
+      "minLength": 0
+    },
+    "blm_color": {
+      "bsonType": "string",
+      "title": "Color",
+      "description": "Color",
+      "minLength": 0
+    },
+    "blm_design_category": {
+      "bsonType": "string",
+      "title": "Design Category",
+      "description": "Design Category",
+      "minLength": 0
+    },
+    "blm_item_status": {
+      "bsonType": "string",
+      "title": "Item Status",
+      "description": "Item Status",
+      "minLength": 0
+    },
+    "blm_order_management": {
+      "bsonType": "string",
+      "title": "Order Management",
+      "description": "Order Management",
+      "minLength": 0
+    },
+    "blm_order_week": {
+      "bsonType": "string",
+      "title": "Order Week",
+      "description": "Order Week",
+      "minLength": 0
+    },
+    "blm_order_month": {
+      "bsonType": "number",
+      "title": "Order Month",
+      "description": "Order Month"
+    },
+    "blm_order_quarter": {
+      "bsonType": "string",
+      "title": "Order Quarter",
+      "description": "Order Quarter",
+      "minLength": 0
+    },
+    "blm_milestone": {
+      "bsonType": "string",
+      "title": "Milestone",
+      "description": "Milestone",
+      "minLength": 0
+    },
+    "blm_sub_status": {
+      "bsonType": "string",
+      "title": "Sub Status",
+      "description": "Sub Status",
+      "minLength": 0
+    },
+    "blm_credit_status": {
+      "bsonType": "string",
+      "title": "Credit Status",
+      "description": "Credit Status",
+      "minLength": 0
+    },
+    "blm_order_change": {
+      "bsonType": "string",
+      "title": "Order Change",
+      "description": "Order Change",
+      "minLength": 0
+    },
+    "blm_flag_risk": {
+      "bsonType": "string",
+      "title": "Flag Risk",
+      "description": "Flag Risk",
+      "minLength": 0
+    },
+    "blm_reduced_qty": {
+      "bsonType": "number",
+      "title": "Reduced Qty",
+      "description": "Reduced Qty"
+    },
+    "blm_material_and_key_account": {
+      "bsonType": "string",
+      "title": "Material and Key Account",
+      "description": "Material and Key Account",
+      "minLength": 0
+    },
+    "blm_available_credit_amount": {
+      "bsonType": "string",
+      "title": "Available Credit Amount",
+      "description": "Available Credit Amount",
+      "minLength": 0
+    },
+    "blm_stop_release": {
+      "bsonType": "string",
+      "title": "Stop Release",
+      "description": "Stop Release",
+      "minLength": 0
+    },
+    "blm_stop_ship": {
+      "bsonType": "string",
+      "title": "Stop Ship",
+      "description": "Stop Ship",
+      "minLength": 0
+    },
+    "blm_ship_early": {
+      "bsonType": "string",
+      "title": "Ship Early",
+      "description": "Ship Early",
+      "minLength": 0
+    },
+    "blm_item_delivery_block": {
+      "bsonType": "string",
+      "title": "Item Delivery Block",
+      "description": "Item Delivery Block",
+      "minLength": 0
+    },
+    "blm_header_delivery_block": {
+      "bsonType": "string",
+      "title": "Header Delivery Block",
+      "description": "Header Delivery Block",
+      "minLength": 0
+    },
+    "blm_item_billing_block": {
+      "bsonType": "string",
+      "title": "Item Billing Block",
+      "description": "Item Billing Block",
+      "minLength": 0
+    },
+    "blm_header_billing_block": {
+      "bsonType": "string",
+      "title": "Header Billing Block",
+      "description": "Header Billing Block",
+      "minLength": 0
+    },
+    "blm_item_delivery_block_description": {
+      "bsonType": "string",
+      "title": "Item Delivery Block Description",
+      "description": "Item Delivery Block Description",
+      "minLength": 0
+    },
+    "blm_header_delivery_block_description": {
+      "bsonType": "string",
+      "title": "Header Delivery Block Description",
+      "description": "Header Delivery Block Description",
+      "minLength": 0
+    },
+    "blm_item_billing_block_description": {
+      "bsonType": "string",
+      "title": "Item Billing Block Description",
+      "description": "Item Billing Block Description",
+      "minLength": 0
+    },
+    "blm_header_billing_block_description": {
+      "bsonType": "string",
+      "title": "Header Billing Block Description",
+      "description": "Header Billing Block Description",
+      "minLength": 0
+    },
+    "blm_order_blocks": {
+      "bsonType": "string",
+      "title": "Order Blocks",
+      "description": "Order Blocks",
+      "minLength": 0
+    },
+    "blm_so_type": {
+      "bsonType": "string",
+      "title": "SO Type",
+      "description": "SO Type",
+      "minLength": 0
+    },
+    "blm_so_type_description": {
+      "bsonType": "string",
+      "title": "SO Type Description",
+      "description": "SO Type Description",
+      "minLength": 0
+    },
+    "blm_b2b_order_indicator": {
+      "bsonType": "string",
+      "title": "B2B Order Indicator",
+      "description": "B2B Order Indicator",
+      "minLength": 0
+    },
+    "blm_b2c_order_indicator": {
+      "bsonType": "string",
+      "title": "B2C Order Indicator",
+      "description": "B2C Order Indicator",
+      "minLength": 0
+    },
+    "blm_order_type": {
+      "bsonType": "string",
+      "title": "Order Type",
+      "description": "Order Type",
+      "minLength": 0
+    },
+    "blm_sales_org": {
+      "bsonType": "string",
+      "title": "Sales Org",
+      "description": "Sales Org",
+      "minLength": 0
+    },
+    "blm_distribution_channel": {
+      "bsonType": "string",
+      "title": "Distribution Channel",
+      "description": "Distribution Channel",
+      "minLength": 0
+    },
+    "blm_division": {
+      "bsonType": "string",
+      "title": "Division",
+      "description": "Division",
+      "minLength": 0
+    },
+    "blm_sales_office": {
+      "bsonType": "string",
+      "title": "Sales Office",
+      "description": "Sales Office",
+      "minLength": 0
+    },
+    "blm_sales_channel": {
+      "bsonType": "string",
+      "title": "Sales Channel",
+      "description": "Sales Channel",
+      "minLength": 0
+    },
+    "blm_plant": {
+      "bsonType": "string",
+      "title": "Plant",
+      "description": "Plant",
+      "minLength": 0
+    },
+    "blm_plant_description": {
+      "bsonType": "string",
+      "title": "Plant Description",
+      "description": "Plant Description",
+      "minLength": 0
+    },
+    "blm_shipping_point": {
+      "bsonType": "string",
+      "title": "Shipping Point",
+      "description": "Shipping Point",
+      "minLength": 0
+    },
+    "blm_shipping_point_description": {
+      "bsonType": "string",
+      "title": "Shipping Point Description",
+      "description": "Shipping Point Description",
+      "minLength": 0
+    },
+    "blm_priority": {
+      "bsonType": "string",
+      "title": "Priority",
+      "description": "Priority",
+      "minLength": 0
+    },
+    "blm_delivery_group": {
+      "bsonType": "string",
+      "title": "Delivery Group",
+      "description": "Delivery Group",
+      "minLength": 0
+    },
+    "blm_end_customer_number": {
+      "bsonType": "string",
+      "title": "End Customer Number",
+      "description": "End Customer Number",
+      "minLength": 0
+    },
+    "blm_end_customer_name": {
+      "bsonType": "string",
+      "title": "End Customer Name",
+      "description": "End Customer Name",
+      "minLength": 0
+    },
+    "blm_key_account": {
+      "bsonType": "string",
+      "title": "Key Account",
+      "description": "Key Account",
+      "minLength": 0
+    },
+    "blm_key_account_name": {
+      "bsonType": "string",
+      "title": "Key Account Name",
+      "description": "Key Account Name",
+      "minLength": 0
+    },
+    "blm_sold_to_number": {
+      "bsonType": "string",
+      "title": "Sold To Number",
+      "description": "Sold To Number",
+      "minLength": 0
+    },
+    "blm_sold_to_country": {
+      "bsonType": "string",
+      "title": "Sold To Country",
+      "description": "Sold To Country",
+      "minLength": 0
+    },
+    "blm_sold_to_name": {
+      "bsonType": "string",
+      "title": "Sold To Name",
+      "description": "Sold To Name",
+      "minLength": 0
+    },
+    "blm_ship_to_number": {
+      "bsonType": "string",
+      "title": "Ship To Number",
+      "description": "Ship To Number",
+      "minLength": 0
+    },
+    "blm_ship_to_country": {
+      "bsonType": "string",
+      "title": "Ship To Country",
+      "description": "Ship To Country",
+      "minLength": 0
+    },
+    "blm_ship_to_city": {
+      "bsonType": "string",
+      "title": "Ship To City",
+      "description": "Ship To City",
+      "minLength": 0
+    },
+    "blm_ship_to_street": {
+      "bsonType": "string",
+      "title": "Ship To Street",
+      "description": "Ship To Street",
+      "minLength": 0
+    },
+    "blm_ship_to_postal_code": {
+      "bsonType": "string",
+      "title": "Ship To Postal Code",
+      "description": "Ship To Postal Code",
+      "minLength": 0
+    },
+    "blm_ship_to_region": {
+      "bsonType": "string",
+      "title": "Ship To Region",
+      "description": "Ship To Region",
+      "minLength": 0
+    },
+    "blm_ship_to_name": {
+      "bsonType": "string",
+      "title": "Ship To Name",
+      "description": "Ship To Name",
+      "minLength": 0
+    },
+    "blm_ultimate_country": {
+      "bsonType": "string",
+      "title": "Ultimate Country",
+      "description": "Ultimate Country",
+      "minLength": 0
+    },
+    "blm_destination_country": {
+      "bsonType": "string",
+      "title": "Destination Country",
+      "description": "Destination Country",
+      "minLength": 0
+    },
+    "blm_bill_to_number": {
+      "bsonType": "string",
+      "title": "Bill To Number",
+      "description": "Bill To Number",
+      "minLength": 0
+    },
+    "blm_bill_to_name": {
+      "bsonType": "string",
+      "title": "Bill To Name",
+      "description": "Bill To Name",
+      "minLength": 0
+    },
+    "blm_customer_po_number": {
+      "bsonType": "string",
+      "title": "Customer Purchase Order Number",
+      "description": "Customer Purchase Order Number",
+      "minLength": 0
+    },
+    "blm_customer_po_item": {
+      "bsonType": "string",
+      "title": "Customer Purchase Order Item",
+      "description": "Customer Purchase Order Item",
+      "minLength": 0
+    },
+    "blm_customer_po_type": {
+      "bsonType": "string",
+      "title": "Customer Purchase Order Type",
+      "description": "Customer Purchase Order Type",
+      "minLength": 0
+    },
+    "blm_order_reason": {
+      "bsonType": "string",
+      "title": "Order Reason",
+      "description": "Order Reason",
+      "minLength": 0
+    },
+    "blm_order_reason_description": {
+      "bsonType": "string",
+      "title": "Order Reason Description",
+      "description": "Order Reason Description",
+      "minLength": 0
+    },
+    "blm_rejection_reason": {
+      "bsonType": "string",
+      "title": "Rejection Reason",
+      "description": "Rejection Reason",
+      "minLength": 0
+    },
+    "blm_rejection_reason_description": {
+      "bsonType": "string",
+      "title": "Rejection Reason Description",
+      "description": "Rejection Reason Description",
+      "minLength": 0
+    },
+    "blm_price_list_type": {
+      "bsonType": "string",
+      "title": "Price List Type",
+      "description": "Price List Type",
+      "minLength": 0
+    },
+    "blm_price_list_type_description": {
+      "bsonType": "string",
+      "title": "Price List Type Description",
+      "description": "Price List Type Description",
+      "minLength": 0
+    },
+    "blm_item_list_price": {
+      "bsonType": "number",
+      "title": "Item List Price",
+      "description": "Item List Price"
+    },
+    "blm_item_net_price": {
+      "bsonType": "number",
+      "title": "Item Net Price",
+      "description": "Item Net Price"
+    },
+    "blm_item_tax": {
+      "bsonType": "number",
+      "title": "Item Tax",
+      "description": "Item Tax"
+    },
+    "blm_item_tax_usd": {
+      "bsonType": "number",
+      "title": "Item Tax USD",
+      "description": "Item Tax USD"
+    },
+    "blm_so_item_amount": {
+      "bsonType": "number",
+      "title": "SO Item Amount",
+      "description": "SO Item Amount"
+    },
+    "blm_item_net_value_usd": {
+      "bsonType": "number",
+      "title": "Item Net Value USD",
+      "description": "Item Net Value USD"
+    },
+    "blm_pricing_date": {
+      "bsonType": "date",
+      "title": "Pricing Date",
+      "description": "Pricing Date",
+      "dateOnly": true
+    },
+    "blm_doc_currency": {
+      "bsonType": "string",
+      "title": "Doc Currency",
+      "description": "Doc Currency",
+      "minLength": 0
+    },
+    "blm_exchange_rate": {
+      "bsonType": "number",
+      "title": "Exchange Rate",
+      "description": "Exchange Rate"
+    },
+    "blm_payment_term": {
+      "bsonType": "string",
+      "title": "Payment Term",
+      "description": "Payment Term",
+      "minLength": 0
+    },
+    "blm_payment_term_description": {
+      "bsonType": "string",
+      "title": "Payment Term Description",
+      "description": "Payment Term Description",
+      "minLength": 0
+    },
+    "blm_incoterm1": {
+      "bsonType": "string",
+      "title": "Incoterm1",
+      "description": "Incoterm1",
+      "minLength": 0
+    },
+    "blm_incoterm2": {
+      "bsonType": "string",
+      "title": "Incoterm2",
+      "description": "Incoterm2",
+      "minLength": 0
+    },
+    "blm_crad": {
+      "bsonType": "date",
+      "title": "CRAD",
+      "description": "CRAD",
+      "dateOnly": true
+    },
+    "blm_crad_week": {
+      "bsonType": "string",
+      "title": "CRAD Week",
+      "description": "CRAD Week",
+      "minLength": 0
+    },
+    "blm_crad_month": {
+      "bsonType": "number",
+      "title": "CRAD Month",
+      "description": "CRAD Month"
+    },
+    "blm_crad_quarter": {
+      "bsonType": "string",
+      "title": "CRAD Quarter",
+      "description": "CRAD Quarter",
+      "minLength": 0
+    },
+    "blm_crsd": {
+      "bsonType": "date",
+      "title": "CRSD",
+      "description": "CRSD",
+      "dateOnly": true
+    },
+    "blm_crsd_week": {
+      "bsonType": "string",
+      "title": "CRSD Week",
+      "description": "CRSD Week",
+      "minLength": 0
+    },
+    "blm_crsd_month": {
+      "bsonType": "number",
+      "title": "CRSD Month",
+      "description": "CRSD Month"
+    },
+    "blm_crsd_quarter": {
+      "bsonType": "string",
+      "title": "CRSD Quarter",
+      "description": "CRSD Quarter",
+      "minLength": 0
+    },
+    "blm_original_crsd": {
+      "bsonType": "date",
+      "title": "Original CRSD",
+      "description": "Original CRSD",
+      "dateOnly": true
+    },
+    "blm_original_crsd_week": {
+      "bsonType": "string",
+      "title": "Original CRSD Week",
+      "description": "Original CRSD Week",
+      "minLength": 0
+    },
+    "blm_original_crsd_month": {
+      "bsonType": "string",
+      "title": "Original CRSD Month",
+      "description": "Original CRSD Month"
+    },
+    "blm_original_crsd_quarter": {
+      "bsonType": "string",
+      "title": "Original CRSD Quarter",
+      "description": "Original CRSD Quarter",
+      "minLength": 0
+    },
+    "blm_crsd_change_days": {
+      "bsonType": "number",
+      "title": "CRSD Change Days",
+      "description": "CRSD Change Days"
+    },
+    "blm_so_create_date": {
+      "bsonType": "date",
+      "title": "SO Create Date",
+      "description": "SO Create Date",
+      "dateOnly": true
+    },
+    "blm_so_create_time": {
+      "bsonType": "string",
+      "title": "SO Create Time",
+      "description": "SO Create Time",
+      "minLength": 0
+    },
+    "blm_so_create_by": {
+      "bsonType": "string",
+      "title": "SO Create By",
+      "description": "SO Create By",
+      "minLength": 0
+    },
+    "blm_order_receipt_date": {
+      "bsonType": "date",
+      "title": "Order Receipt Date",
+      "description": "Order Receipt Date",
+      "dateOnly": true
+    },
+    "blm_credit_release_date": {
+      "bsonType": "string",
+      "title": "Credit Release Date",
+      "description": "Credit Release Date",
+      "minLength": 0
+    },
+    "blm_order_release_date": {
+      "bsonType": "date",
+      "title": "Order Release Date",
+      "description": "Order Release Date",
+      "dateOnly": true
+    },
+    "blm_po_create_date": {
+      "bsonType": "date",
+      "title": "PO Create Date",
+      "description": "PO Create Date",
+      "dateOnly": true
+    },
+    "blm_pr_number": {
+      "bsonType": "string",
+      "title": "PR Number",
+      "description": "PR Number",
+      "minLength": 0
+    },
+    "blm_pr_line": {
+      "bsonType": "string",
+      "title": "PR Line",
+      "description": "PR Line",
+      "minLength": 0
+    },
+    "blm_sto_vendor": {
+      "bsonType": "string",
+      "title": "STO Vendor",
+      "description": "STO Vendor",
+      "minLength": 0
+    },
+    "blm_sto_vendor_name": {
+      "bsonType": "string",
+      "title": "STO Vendor Name",
+      "description": "STO Vendor Name",
+      "minLength": 0
+    },
+    "blm_po_vendor": {
+      "bsonType": "string",
+      "title": "PO Vendor",
+      "description": "PO Vendor",
+      "minLength": 0
+    },
+    "blm_po_vendor_name": {
+      "bsonType": "string",
+      "title": "PO Vendor Name",
+      "description": "PO Vendor Name",
+      "minLength": 0
+    },
+    "blm_mfg_po_vendor": {
+      "bsonType": "string",
+      "title": "MFG PO Vendor",
+      "description": "MFG PO Vendor",
+      "minLength": 0
+    },
+    "blm_mfg_po_vendor_name": {
+      "bsonType": "string",
+      "title": "MFG PO Vendor Name",
+      "description": "MFG PO Vendor Name",
+      "minLength": 0
+    },
+    "blm_mfg_po2_vendor": {
+      "bsonType": "string",
+      "title": "MFG PO2 Vendor",
+      "description": "MFG PO2 Vendor",
+      "minLength": 0
+    },
+    "blm_mfg_po2_vendor_name": {
+      "bsonType": "string",
+      "title": "MFG PO2 Vendor Name",
+      "description": "MFG PO2 Vendor Name",
+      "minLength": 0
+    },
+    "blm_dc_po_gr_date": {
+      "bsonType": "string",
+      "title": "DC PO GR Date",
+      "description": "DC PO GR Date",
+      "minLength": 0
+    },
+    "blm_dc_po_gr_qty": {
+      "bsonType": "string",
+      "title": "DC PO GR Qty",
+      "description": "DC PO GR Qty",
+      "minLength": 0
+    },
+    "blm_dc_po_in_transit_qty": {
+      "bsonType": "string",
+      "title": "DC PO In Transit Qty",
+      "description": "DC PO In Transit Qty",
+      "minLength": 0
+    },
+    "blm_flex_po_date": {
+      "bsonType": "string",
+      "title": "Flex PO Date",
+      "description": "Flex PO Date",
+      "minLength": 0
+    },
+    "blm_flex_po_qty": {
+      "bsonType": "string",
+      "title": "Flex PO Qty",
+      "description": "Flex PO Qty",
+      "minLength": 0
+    },
+    "blm_flex_po_received_qty": {
+      "bsonType": "string",
+      "title": "Flex PO Received Qty",
+      "description": "Flex PO Received Qty",
+      "minLength": 0
+    },
+    "blm_flex_po_open_qty": {
+      "bsonType": "string",
+      "title": "Flex PO Open Qty",
+      "description": "Flex PO Open Qty",
+      "minLength": 0
+    },
+    "blm_mfg_so_create_date": {
+      "bsonType": "date",
+      "title": "MFG SO Create Date",
+      "description": "MFG SO Create Date",
+      "dateOnly": true
+    },
+    "blm_mfg_so_create_time": {
+      "bsonType": "string",
+      "title": "MFG SO Create Time",
+      "description": "MFG SO Create Time",
+      "minLength": 0
+    },
+    "blm_mfg_dn_create_date": {
+      "bsonType": "date",
+      "title": "MFG DN Create Date",
+      "description": "MFG DN Create Date",
+      "dateOnly": true
+    },
+    "blm_mfg_ship_date": {
+      "bsonType": "date",
+      "title": "MFG Ship Date",
+      "description": "MFG Ship Date",
+      "dateOnly": true
+    },
+    "blm_mfg_ship_week": {
+      "bsonType": "string",
+      "title": "MFG Ship Week",
+      "description": "MFG Ship Week",
+      "minLength": 0
+    },
+    "blm_mfg_ship_month": {
+      "bsonType": "number",
+      "title": "MFG Ship Month",
+      "description": "MFG Ship Month"
+    },
+    "blm_mfg_ship_quarter": {
+      "bsonType": "string",
+      "title": "MFG Ship Quarter",
+      "description": "MFG Ship Quarter",
+      "minLength": 0
+    },
+    "blm_mfg_plant": {
+      "bsonType": "string",
+      "title": "MFG Plant",
+      "description": "MFG Plant",
+      "minLength": 0
+    },
+    "blm_mfg_so_route": {
+      "bsonType": "string",
+      "title": "MFG SO Route",
+      "description": "MFG SO Route",
+      "minLength": 0
+    },
+    "blm_mfg_so_sales_org": {
+      "bsonType": "string",
+      "title": "MFG SO Sales Org",
+      "description": "MFG SO Sales Org",
+      "minLength": 0
+    },
+    "blm_dn_create_date": {
+      "bsonType": "date",
+      "title": "DN Create Date",
+      "description": "DN Create Date",
+      "dateOnly": true
+    },
+    "blm_coo": {
+      "bsonType": "string",
+      "title": "COO",
+      "description": "COO",
+      "minLength": 0
+    },
+    "blm_delivery_route": {
+      "bsonType": "string",
+      "title": "Delivery Route",
+      "description": "Delivery Route",
+      "minLength": 0
+    },
+    "blm_shipping_condition": {
+      "bsonType": "string",
+      "title": "Shipping Condition",
+      "description": "Shipping Condition",
+      "minLength": 0
+    },
+    "blm_shipping_type": {
+      "bsonType": "string",
+      "title": "Shipping Type",
+      "description": "Shipping Type",
+      "minLength": 0
+    },
+    "blm_transit_time": {
+      "bsonType": "number",
+      "title": "Transit Time",
+      "description": "Transit Time"
+    },
+    "blm_storage_location": {
+      "bsonType": "string",
+      "title": "Storage Location",
+      "description": "Storage Location",
+      "minLength": 0
+    },
+    "blm_ship_date": {
+      "bsonType": "date",
+      "title": "Ship Date",
+      "description": "Ship Date",
+      "dateOnly": true
+    },
+    "blm_ship_week": {
+      "bsonType": "string",
+      "title": "Ship Week",
+      "description": "Ship Week",
+      "minLength": 0
+    },
+    "blm_ship_month": {
+      "bsonType": "string",
+      "title": "Ship Month",
+      "description": "Ship Month",
+      "minLength": 0
+    },
+    "blm_ship_quarter": {
+      "bsonType": "string",
+      "title": "Ship Quarter",
+      "description": "Ship Quarter",
+      "minLength": 0
+    },
+    "blm_main_carrier": {
+      "bsonType": "string",
+      "title": "Main Carrier",
+      "description": "Main Carrier",
+      "minLength": 0
+    },
+    "blm_main_carrier_name": {
+      "bsonType": "string",
+      "title": "Main Carrier Name",
+      "description": "Main Carrier Name",
+      "minLength": 0
+    },
+    "blm_second_carrier": {
+      "bsonType": "string",
+      "title": "Second Carrier",
+      "description": "Second Carrier",
+      "minLength": 0
+    },
+    "blm_second_carrier_name": {
+      "bsonType": "string",
+      "title": "Second Carrier Name",
+      "description": "Second Carrier Name",
+      "minLength": 0
+    },
+    "blm_hawb": {
+      "bsonType": "string",
+      "title": "HAWB",
+      "description": "HAWB",
+      "minLength": 0
+    },
+    "blm_bol": {
+      "bsonType": "string",
+      "title": "BOL",
+      "description": "BOL",
+      "minLength": 0
+    },
+    "blm_tracking_number": {
+      "bsonType": "string",
+      "title": "Tracking Number",
+      "description": "Tracking Number",
+      "minLength": 0
+    },
+    "blm_local_carrier_eta": {
+      "bsonType": "string",
+      "title": "Local Carrier ETA",
+      "description": "Local Carrier ETA",
+      "minLength": 0
+    },
+    "blm_local_carrier_eta_timezone": {
+      "bsonType": "string",
+      "title": "Local Carrier ETA Timezone",
+      "description": "Local Carrier ETA Timezone",
+      "minLength": 0
+    },
+    "blm_eta": {
+      "bsonType": "string",
+      "title": "ETA",
+      "description": "ETA",
+      "minLength": 0
+    },
+    "blm_local_pod": {
+      "bsonType": "date",
+      "title": "Local POD",
+      "description": "Local POD",
+      "dateOnly": true
+    },
+    "blm_local_pod_quarter": {
+      "bsonType": "string",
+      "title": "Local POD Quarter",
+      "description": "Local POD Quarter",
+      "minLength": 0
+    },
+    "blm_local_pod_timezone": {
+      "bsonType": "string",
+      "title": "Local POD Timezone",
+      "description": "Local POD Timezone",
+      "minLength": 0
+    },
+    "blm_pod": {
+      "bsonType": "date",
+      "title": "POD",
+      "description": "POD",
+      "dateOnly": true
+    },
+    "blm_pod_update_date": {
+      "bsonType": "date",
+      "title": "POD Update Date",
+      "description": "POD Update Date",
+      "dateOnly": true
+    },
+    "blm_pod_update_time": {
+      "bsonType": "string",
+      "title": "POD Update Time",
+      "description": "POD Update Time",
+      "minLength": 0
+    },
+    "blm_pod_reason_code": {
+      "bsonType": "string",
+      "title": "POD Reason Code",
+      "description": "POD Reason Code",
+      "minLength": 0
+    },
+    "blm_pod_reason_description": {
+      "bsonType": "string",
+      "title": "POD Reason Description",
+      "description": "POD Reason Description",
+      "minLength": 0
+    },
+    "blm_last_logistic_milestone": {
+      "bsonType": "string",
+      "title": "Last Logistic Milestone",
+      "description": "Last Logistic Milestone",
+      "minLength": 0
+    },
+    "blm_custom_packing_list": {
+      "bsonType": "string",
+      "title": "Custom Packing List",
+      "description": "Custom Packing List",
+      "minLength": 0
+    },
+    "blm_pedimento": {
+      "bsonType": "string",
+      "title": "Pedimento",
+      "description": "Pedimento",
+      "minLength": 0
+    },
+    "blm_pedimento_date": {
+      "bsonType": "string",
+      "title": "Pedimento Date",
+      "description": "Pedimento Date",
+      "minLength": 0
+    },
+    "blm_pedimento_week": {
+      "bsonType": "string",
+      "title": "Pedimento Week",
+      "description": "Pedimento Week",
+      "minLength": 0
+    },
+    "blm_commercial_invoice_date": {
+      "bsonType": "string",
+      "title": "Commercial Invoice Date",
+      "description": "Commercial Invoice Date",
+      "minLength": 0
+    },
+    "blm_billing_date": {
+      "bsonType": "date",
+      "title": "Billing Date",
+      "description": "Billing Date",
+      "dateOnly": true
+    },
+    "blm_nf_document_number": {
+      "bsonType": "string",
+      "title": "NF Document Number",
+      "description": "NF Document Number",
+      "minLength": 0
+    },
+    "blm_nf_item_number": {
+      "bsonType": "string",
+      "title": "NF Item Number",
+      "description": "NF Item Number",
+      "minLength": 0
+    },
+    "blm_nf_type": {
+      "bsonType": "string",
+      "title": "NF Type",
+      "description": "NF Type",
+      "minLength": 0
+    },
+    "blm_nine_digit_document_number": {
+      "bsonType": "string",
+      "title": "Nine-Digit Document Number",
+      "description": "Nine-Digit Document Number",
+      "minLength": 0
+    },
+    "blm_nf_series": {
+      "bsonType": "string",
+      "title": "NF Series",
+      "description": "NF Series",
+      "minLength": 0
+    },
+    "blm_nf_posting_date": {
+      "bsonType": "string",
+      "title": "NF Posting Date",
+      "description": "NF Posting Date",
+      "minLength": 0
+    },
+    "blm_nf_document_status": {
+      "bsonType": "string",
+      "title": "NF Document Status",
+      "description": "NF Document Status",
+      "minLength": 0
+    },
+    "blm_nf_week": {
+      "bsonType": "string",
+      "title": "NF Week",
+      "description": "NF Week",
+      "minLength": 0
+    },
+    "blm_nf_month": {
+      "bsonType": "string",
+      "title": "NF Month",
+      "description": "NF Month",
+      "minLength": 0
+    },
+    "blm_nf_quarter": {
+      "bsonType": "string",
+      "title": "NF Quarter",
+      "description": "NF Quarter",
+      "minLength": 0
+    },
+    "blm_pod_close_indicator": {
+      "bsonType": "string",
+      "title": "POD Close Indicator",
+      "description": "POD Close Indicator",
+      "minLength": 0
+    },
+    "blm_order_close_status_indicator": {
+      "bsonType": "string",
+      "title": "Order Close Status Indicator",
+      "description": "Order Close Status Indicator",
+      "minLength": 0
+    },
+    "blm_open_qty": {
+      "bsonType": "number",
+      "title": "Open Qty",
+      "description": "Open Qty"
+    },
+    "blm_pgi_qty": {
+      "bsonType": "number",
+      "title": "PGI Qty",
+      "description": "PGI Qty"
+    },
+    "blm_ship_in_transit_qty": {
+      "bsonType": "number",
+      "title": "Ship In Transit Qty",
+      "description": "Ship In Transit Qty"
+    },
+    "blm_current_week_ship_plan_qty": {
+      "bsonType": "number",
+      "title": "Current Week Ship Plan Qty",
+      "description": "Current Week Ship Plan Qty"
+    },
+    "blm_total_ship_plan_qty": {
+      "bsonType": "number",
+      "title": "Total Ship Plan Qty",
+      "description": "Total Ship Plan Qty"
+    },
+    "blm_total_ship_plan_vs_order_qty": {
+      "bsonType": "number",
+      "title": "Total Ship Plan VS Order Qty",
+      "description": "Total Ship Plan VS Order Qty"
+    },
+    "blm_first_psd": {
+      "bsonType": "string",
+      "title": "First PSD",
+      "description": "First PSD",
+      "minLength": 0
+    },
+    "blm_last_ssd": {
+      "bsonType": "string",
+      "title": "Last SSD",
+      "description": "Last SSD",
+      "minLength": 0
+    },
+    "blm_ssd_week": {
+      "bsonType": "string",
+      "title": "SSD Week",
+      "description": "SSD Week",
+      "minLength": 0
+    },
+    "blm_tier2_psd_late_reason": {
+      "bsonType": "string",
+      "title": "Tier2 PSD Late Reason",
+      "description": "Tier2 PSD Late Reason",
+      "minLength": 0
+    },
+    "blm_tier1_psd_late_reason": {
+      "bsonType": "string",
+      "title": "Tier1 PSD Late Reason",
+      "description": "Tier1 PSD Late Reason",
+      "minLength": 0
+    },
+    "blm_psd_comments": {
+      "bsonType": "string",
+      "title": "PSD Comments",
+      "description": "PSD Comments",
+      "minLength": 0
+    },
+    "blm_psd_upload_date": {
+      "bsonType": "date",
+      "title": "PSD Upload Date",
+      "description": "PSD Upload Date",
+      "dateOnly": true
+    },
+    "blm_psd_upload_user": {
+      "bsonType": "string",
+      "title": "PSD Upload User",
+      "description": "PSD Upload User",
+      "minLength": 0
+    },
+    "blm_system_update_psd_timestamp": {
+      "bsonType": "date",
+      "title": "System Update PSD Timestamp",
+      "description": "System Update PSD Timestamp",
+      "dateOnly": true
+    },
+    "blm_green_light": {
+      "bsonType": "string",
+      "title": "Green Light",
+      "description": "Green Light",
+      "minLength": 0
+    },
+    "blm_order_update_date": {
+      "bsonType": "date",
+      "title": "Order Update Date",
+      "description": "Order updated date"
+    }
+  },
+  "required": [
+    "blm_so",
+    "blm_so_item",
+    "blm_material",
+    "blm_order_qty",
+    "blm_line_qty",
+    "blm_item_net_value",
+    "blm_customer_po_number",
+    "blm_status",
+    "blm_sold_to_number",
+    "blm_so_create_date"
+  ],
+  "index": [
+    [
+      "blm_status"
+    ],
+    [
+      "blm_so",
+      "blm_material",
+      "blm_line_qty"
+    ]
+  ],
+  "unique": [
+    [
+      "blm_status",
+      "blm_so",
+      "blm_so_item",
+      "blm_material",
+      "blm_dnn_no",
+      "blm_dnn_item"
+    ]
+  ],
+  "sort": {
+    "_modified_at": -1
+  },
+  "pagination": [
+    25,
+    50,
+    100
+  ],
+  "parents": [],
+  "actions": [],
+  "triggers": [
+    {
+      "name": "product",
+      "enabled": true,
+      "operations": [
+        "insert",
+        "update"
+      ],
+      "changes": [
+        {
+          "key": "blm_material",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blm_material_description",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blm_product_group",
+          "op": "nnull",
+          "value": null
+        },
+        {
+          "key": "blm_brand",
+          "op": "nnull",
+          "value": null
+        }
+      ],
+      "targets": [
+        {
+          "collection": "product",
+          "match": [
+            {
+              "key": "prd_no",
+              "value": "blm_material"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "prd_no",
+              "value": "blm_material"
+            },
+            {
+              "key": "prd_description",
+              "value": "blm_material_description"
+            },
+            {
+              "key": "prd_group",
+              "value": "blm_product_group"
+            },
+            {
+              "key": "prd_family",
+              "value": "blm_brand"
+            }
+          ],
+          "upsert": true
+        }
+      ]
+    },
+    {
+      "name": "order",
+      "enabled": true,
+      "operations": [
+        "update",
+        "insert"
+      ],
+      "changes": [
+        {
+          "key": "blm_status",
+          "op": "ne",
+          "value": null
+        },
+        {
+          "key": "blm_so",
+          "op": "ne",
+          "value": null
+        },
+        {
+          "key": "blm_material",
+          "op": "ne",
+          "value": null
+        },
+        {
+          "key": "blm_item_net_value",
+          "op": "gt",
+          "value": 0
+        },
+        {
+          "key": "blm_line_qty",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "targets": [
+        {
+          "collection": "order",
+          "match": [
+            {
+              "key": "ord_no",
+              "value": "blm_so"
+            },
+            {
+              "key": "ord_prd_no",
+              "value": "blm_material"
+            }
+          ],
+          "filter": [],
+          "set": [
+            {
+              "key": "ord_no",
+              "value": "blm_so"
+            },
+            {
+              "key": "ord_prd_no",
+              "value": "blm_material"
+            },
+            {
+              "key": "ord_date",
+              "value": "blm_so_create_date"
+            },
+            {
+              "key": "ord_unit_price",
+              "value": "blm_item_net_value / blm_line_qty"
+            },
+            {
+              "key": "ord_crm_contract_no",
+              "value": "blm_customer_po_number"
+            },
+            {
+              "key": "ord_bu_segment",
+              "value": "blm_segment_code"
+            }
+          ],
+          "upsert": true
+        }
+      ]
+    }
+  ],
+  "links": [],
+  "import": {
+    "enabled": true,
+    "purge": true,
+    "sumnum": false
+  },
+  "queries": {
+    "query": true,
+    "cronjob": false,
+    "updatables": []
+  }
+}

@@ -69,6 +69,12 @@
       "default": 0,
       "decimals": 2,
       "disabled": false
+    },
+    "man_matched": {
+      "bsonType": "bool",
+      "title": "Matched",
+      "description": "Matching process status",
+      "default": false
     }
   },
   "required": ["man_no", "man_odi_no", "man_odi_sub_no", "man_opening_date", "man_file_no", "man_case_no"],
