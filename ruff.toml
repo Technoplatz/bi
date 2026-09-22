@@ -1,0 +1,14 @@
+# Phase 0 gate: only hard errors. Style rules are enabled once api.py is split into a package.
+target-version = "py313"
+line-length = 160
+extend-exclude = ["pwa", "__*", ".venv", "node_modules"]
+
+[lint]
+select = ["E9", "F63", "F7", "F82", "F401"]
+ignore = []
+
+[lint.per-file-ignores]
+# the legacy modules import a few names for side effects or future use
+"backend/api/api.py" = ["F401"]
+"backend/stream/stream.py" = ["F401"]
+"_integration/**/*.py" = ["F401"]

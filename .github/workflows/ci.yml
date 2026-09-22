@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - dev0
+      - main
+  pull_request:
+    branches:
+      - dev0
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Lint, compile and test the python services
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            backend/api/requirements.txt
+            backend/stream/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/api/requirements.txt -r backend/stream/requirements.txt
+          pip install -r _integration/edoksis/requirements.txt -r _integration/cloudflare/requirements.txt
+          pip install ruff pytest
+
+      - name: Lint (syntax errors and undefined names only, the legacy style is not enforced yet)
+        run: ruff check backend _integration
+
+      - name: Compile every module
+        run: python -W error::SyntaxError -m compileall -q backend/api/api.py backend/stream/stream.py _integration/edoksis/edoksis.py _integration/cloudflare/cloudflare.py
+
+      - name: Unit tests
+        run: pytest -q backend/tests
+
+  compose:
+    name: Validate compose files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Render both compose files with the env template
+        run: |
+          cp .env.example .env
+          docker compose -f docker-compose.yml config --quiet
+          docker compose -f docker-compose-integration.yml config --quiet

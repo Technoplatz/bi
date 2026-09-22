@@ -11,6 +11,8 @@ start-dev.sh
 .secret*
 *.pem
 test*
+!backend/tests/
+!backend/tests/**
 TUTORIALS.md
 ISO.md
 README.md
