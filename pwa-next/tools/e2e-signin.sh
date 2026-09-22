@@ -16,6 +16,17 @@ TOOLS="$PWD/pwa-next/tools"
 MSH="docker exec mongo0 mongosh mongodb://$MONGO_USERNAME:$MONGO_PASSWORD@mongo0:27017/$MONGO_DB?authSource=$MONGO_AUTH_DB --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval"
 rm -f "$TOOLS/otp.txt" "$TOOLS/otp-requested.txt"
 
+# wait until the api and the frontend answer; the api needs a few seconds after a restart
+wait_for() {
+  for i in $(seq 1 60); do
+    if [ "$(curl -s -o /dev/null -w '%{http_code}' "$1")" = "200" ]; then return 0; fi
+    sleep 1
+  done
+  echo "not ready after 60s: $1"; exit 1
+}
+wait_for "$API/health"
+wait_for "$URL"
+
 CLIENT_IP=$(curl -s -o /dev/null -X POST -H 'Content-Type: application/json' -d '{"op":"signin","email":"x@x.invalid","password":"x"}' "$API/auth"; docker logs --tail 1 api 2>&1 | awk '{print $1}')
 $MSH "db.getCollection('_user').deleteOne({usr_id:'$USER_ID'}); db.getCollection('_auth').deleteOne({aut_id:'$USER_ID'});
 db.getCollection('_user').insertOne({usr_id:'$USER_ID', usr_name:'E2E Browser', usr_enabled:true, usr_scope:'Internal', usr_locale:'en', _tags:['#Managers'], _created_at:new Date(), _modified_at:new Date()});

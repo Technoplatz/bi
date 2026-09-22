@@ -72,6 +72,10 @@ try {
     req.onerror = () => res(null);
   }));
   step(`session stored in IndexedDB (${meta ? meta.join(",") : "none"})`, !!meta && meta.includes("token"));
+  // let the dashboard finish its own requests before the tour reloads it; a fetch aborted by the
+  // navigation is otherwise reported as an HttpErrorResponse with status 0
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(1000);
   // tour: every ported route must render content without page errors or console errors
   const firstCollection = await page.evaluate(() => [...document.querySelectorAll("app-menu p")].map((p) => p.textContent.trim())[0]);
   const collections = await page.evaluate(() => fetch("/assets/env.js").then(() => null));
