@@ -99,6 +99,25 @@ try {
     step(`${route} -> ${info.url} "${info.text}"${errors.length ? " ERRORS: " + errors.join(" | ") : ""}`, errors.length === 0 && info.text.length > 0);
     if (errors.length) failed = true;
   }
+  // schema editor: the text view must show the schema with CodeMirror's own layout applied
+  if (colId) {
+    const before = logs.length;
+    await page.goto(new URL(`/collection/${colId}`, url).href, { waitUntil: "networkidle" });
+    await page.waitForTimeout(1500);
+    await page.getByText(/Edit Schema|Schema bearbeiten|Şema/i).first().click();
+    await page.waitForSelector("json-editor .cm-content", { timeout: 10000 }).catch(() => null);
+    await page.waitForTimeout(1500);
+    const schema = await page.evaluate(() => {
+      const content = document.querySelector("json-editor .cm-content");
+      const scroller = document.querySelector("json-editor .cm-scroller");
+      const host = document.querySelector("json-editor");
+      return { text: content?.textContent.slice(0, 40) ?? "", flex: scroller ? getComputedStyle(scroller).display : "", height: host ? Math.round(host.getBoundingClientRect().height) : 0, top: content ? Math.round(content.getBoundingClientRect().top - scroller.getBoundingClientRect().top) : -1 };
+    });
+    const errors = logs.slice(before).filter((l) => l.startsWith("[pageerror]") || l.startsWith("[console.error]"));
+    const ok = schema.text.includes("properties") && schema.flex === "flex" && schema.height > 300 && schema.height < 2000 && schema.top === 0 && errors.length === 0;
+    step(`schema editor on ${colId} shows the schema (${JSON.stringify(schema)})${errors.length ? " ERRORS: " + errors.join(" | ") : ""}`, ok);
+    if (!ok) failed = true;
+  }
   // record editor modal: open "new record" on a data collection and expect the crud form
   if (colId) {
     const before = logs.length;

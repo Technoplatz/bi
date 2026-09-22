@@ -19,6 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { createJSONEditor, Mode } from "vanilla-jsoneditor";
+import { EditorView } from "@codemirror/view";
 
 /**
  * Options object with the same shape the pages used with the previous editor library,
@@ -42,7 +43,7 @@ export class JsonEditorOptions {
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: "json-editor",
   template: `<div #host class="json-editor-host"></div>`,
-  styles: [`:host { display: block; } .json-editor-host { min-height: 320px; height: 100%; }`]
+  styles: [`:host { display: block; } .json-editor-host { height: 100%; }`]
 })
 export class JsonEditorComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() options: JsonEditorOptions = new JsonEditorOptions();
@@ -51,8 +52,21 @@ export class JsonEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
   @ViewChild("host", { static: true }) host!: ElementRef<HTMLDivElement>;
   private editor: any = null;
   private lastEmitted: string | null = null;
+  private observer: MutationObserver | null = null;
 
   ngAfterViewInit() {
+    // CodeMirror mounts its stylesheet into the nearest shadow root the editor is slotted into, here
+    // an Ionic layout component, where it cannot style the light DOM editor. Re-root every text
+    // mode editor to the document; the observer catches the ones created on a mode switch.
+    const reroot = () => {
+      const dom = this.host.nativeElement.querySelector(".cm-editor") as HTMLElement | null;
+      const view = dom && EditorView.findFromDOM(dom);
+      if (view && view.root !== document) {
+        view.setRoot(document);
+      }
+    };
+    this.observer = new MutationObserver(reroot);
+    this.observer.observe(this.host.nativeElement, { childList: true, subtree: true });
     this.editor = createJSONEditor({
       target: this.host.nativeElement,
       props: {
@@ -94,6 +108,8 @@ export class JsonEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
   }
 
   ngOnDestroy() {
+    this.observer?.disconnect();
+    this.observer = null;
     this.editor?.destroy();
     this.editor = null;
   }

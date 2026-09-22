@@ -1787,44 +1787,27 @@ svg {
   fill: var(--ion-color-primary) !important;
 }
 
+/* schema editor (vanilla-jsoneditor): the editor fills its container, so the container needs a
+   fixed height; the theme variables give it the app palette and the monospace size */
 json-editor {
   display: block;
-  height: 100%;
+  height: calc(90vh - 210px);
+  min-height: 320px;
+  margin-top: 8px;
+  border: 1px solid var(--ion-color-medium);
+  --jse-theme-color: var(--ion-color-primary);
+  --jse-theme-color-highlight: var(--ion-color-primary-tint);
+  --jse-font-size-mono: 13px;
+  --jse-font-family-mono: source-code-pro, monospace, consolas, menlo, monaco, "Ubuntu Mono";
+}
+
+/* the global svg fill would paint the editor icons in the menu colour */
+json-editor svg {
+  fill: currentColor !important;
 }
 
 .jrow {
   padding-bottom: 8px;
-}
-
-json-editor > div {
-  margin-top: 8px;
-  height: 100%;
-  width: 99.5% !important;
-}
-
-json-editor .jsoneditor {
-  min-height: calc(90vh - 210px);
-  border: 1px solid var(--ion-color-medium);
-}
-
-.jsoneditor-menu {
-  background-color: var(--ion-color-primary);
-  border: 1px solid var(--ion-color-primary);
-}
-
-.jsoneditor-value.jsoneditor-object {
-  color: var(--ion-color-white);
-}
-
-.jsoneditor-value.jsoneditor-array {
-  color: var(--ion-color-success);
-}
-
-.ace_editor,
-.jsoneditor-tree {
-  font-family: source-code-pro, monospace, consolas, menlo, monaco, Ubuntu Mono;
-  font-size: 13px !important;
-  font-weight: 600;
 }
 
 .notification-button ion-label {
