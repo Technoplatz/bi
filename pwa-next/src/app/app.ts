@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { Router } from "@angular/router";
 import { IonApp, IonRouterOutlet, IonSplitPane } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
@@ -32,6 +32,8 @@ import { ToolsComponent } from "./components/tools/tools.component";
 import { SignPage } from "./pages/sign/sign.page";
 
 @Component({
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: "app-root",
   imports: [IonApp, IonSplitPane, IonRouterOutlet, MenuComponent, ToolsComponent],
   templateUrl: "./app.html",

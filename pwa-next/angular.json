@@ -67,7 +67,10 @@
               "src/styles.scss"
             ],
             "serviceWorker": "ngsw-config.json",
-            "outputPath": "dist/bi-pwa"
+            "outputPath": "dist/bi-pwa",
+            "polyfills": [
+              "zone.js"
+            ]
           },
           "configurations": {
             "production": {

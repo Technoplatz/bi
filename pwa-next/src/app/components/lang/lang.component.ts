@@ -1,8 +1,10 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 
 @Component({
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: "app-lang",
   template: `
     <div class="flex-container">

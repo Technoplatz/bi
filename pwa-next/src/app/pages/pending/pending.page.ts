@@ -1,9 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { IonButton, IonContent, IonIcon } from "@ionic/angular";
 import { TranslatePipe } from "@ngx-translate/core";
 import { Miscellaneous } from "../../classes/misc";
 
 @Component({
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: "app-pending",
   imports: [IonContent, IonButton, IonIcon, TranslatePipe],
   template: `

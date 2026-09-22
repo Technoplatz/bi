@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { IonButton, IonHeader, IonIcon, IonItem, IonLabel, IonList, IonToolbar } from "@ionic/angular";
 import { TranslatePipe } from "@ngx-translate/core";
 import { Subscription } from "rxjs";
@@ -8,6 +8,8 @@ import { Auth } from "../../classes/auth";
 import { Crud } from "../../classes/crud";
 
 @Component({
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: "app-menu",
   imports: [IonHeader, IonToolbar, IonList, IonItem, IonLabel, IonButton, IonIcon, TranslatePipe],
   templateUrl: "./menu.component.html",

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
-import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from "@angular/core";
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from "@angular/forms";
 import { IonButton, IonCheckbox, IonCol, IonContent, IonGrid, IonIcon, IonInput, IonItem, IonLabel, IonRow, IonSpinner } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
@@ -26,6 +26,8 @@ import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 
 @Component({
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: "app-sign",
   imports: [ReactiveFormsModule, IonContent, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonInput, IonButton, IonSpinner, IonIcon, IonCheckbox, TranslatePipe],
   templateUrl: "./sign.page.html",

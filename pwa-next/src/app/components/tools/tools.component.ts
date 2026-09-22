@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { IonButton, IonIcon, IonLabel } from "@ionic/angular";
 import { TranslatePipe } from "@ngx-translate/core";
 import { Subscription } from "rxjs";
@@ -6,6 +6,8 @@ import { Miscellaneous } from "../../classes/misc";
 import { Auth } from "../../classes/auth";
 
 @Component({
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: "app-tools",
   imports: [IonButton, IonIcon, IonLabel, TranslatePipe],
   template: `
