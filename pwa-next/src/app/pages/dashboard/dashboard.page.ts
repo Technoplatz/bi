@@ -57,6 +57,8 @@ export class DashboardPage implements OnInit {
     this.announcements_ = [];
     this.crud.get_announcements().then((res: any) => {
       this.announcements_ = res.data ? res.data.slice(0, 15) : [];
+    }).catch((err_: any) => {
+      console.warn("announcements not loaded", err_);
     });
   }
 
@@ -75,6 +77,8 @@ export class DashboardPage implements OnInit {
           this.visuals_[ix_].is_loaded = true;
         });
       }
+    }).catch((err_: any) => {
+      console.warn("visuals not loaded", err_);
     });
   }
 
