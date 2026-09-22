@@ -1,0 +1,13 @@
+<ion-content class="ion-no-padding">
+  <div class="console-right">
+    <h6>{{ 'PAGE NOT FOUND' | translate }}!</h6>
+    <h1>{{ '404' | translate }}</h1>
+    {{ 'Please check the address and try again or go to dashboard' | translate }}.
+    <p>
+      <ion-button (click)="misc.navi.next('dashboard')">
+        {{ 'Go to Dashboard' | translate }}
+      </ion-button>
+    </p>
+  </div>
+</ion-content>
+<app-inner-footer></app-inner-footer>

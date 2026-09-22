@@ -42,16 +42,15 @@ export const adminResolver: ResolveFn<boolean> = async () => {
   return !!meta?.perm;
 };
 
-// pages are ported one by one; unported paths lead to the "not yet available" page until then
 export const routes: Routes = [
   { path: "", loadComponent: () => import("./pages/home/home.page").then((m) => m.HomePage), resolve: { user: userResolver } },
-  { path: "dashboard", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: userResolver } },
-  { path: "settings/account", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: userResolver } },
-  { path: "settings/profile-settings", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: userResolver } },
-  { path: "collection/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: userResolver } },
-  { path: "query/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: userResolver } },
-  { path: "job/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: userResolver } },
-  { path: "admin/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: adminResolver } },
-  { path: "404", canActivate: [sessionGuard], loadComponent: () => import("./pages/pending/pending.page").then((m) => m.PendingPage), resolve: { user: userResolver } },
+  { path: "dashboard", canActivate: [sessionGuard], loadComponent: () => import("./pages/dashboard/dashboard.page").then((m) => m.DashboardPage), resolve: { user: userResolver } },
+  { path: "settings/account", canActivate: [sessionGuard], loadComponent: () => import("./pages/settings/settings.page").then((m) => m.SettingsPage), resolve: { user: userResolver } },
+  { path: "settings/profile-settings", canActivate: [sessionGuard], loadComponent: () => import("./pages/settings/settings.page").then((m) => m.SettingsPage), resolve: { user: userResolver } },
+  { path: "collection/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/collection/collection.page").then((m) => m.CollectionPage), resolve: { user: userResolver } },
+  { path: "query/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/query/query.page").then((m) => m.QueryPage), resolve: { user: userResolver } },
+  { path: "job/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/job/job.page").then((m) => m.JobPage), resolve: { user: userResolver } },
+  { path: "admin/:p", canActivate: [sessionGuard], loadComponent: () => import("./pages/collection/collection.page").then((m) => m.CollectionPage), resolve: { user: adminResolver } },
+  { path: "404", canActivate: [sessionGuard], loadComponent: () => import("./pages/_404/_404.page").then((m) => m._404Page), resolve: { user: userResolver } },
   { path: "**", redirectTo: "404", pathMatch: "full" }
 ];

@@ -30,6 +30,7 @@ import { Su } from "./classes/su";
 import { MenuComponent } from "./components/menu/menu.component";
 import { ToolsComponent } from "./components/tools/tools.component";
 import { SignPage } from "./pages/sign/sign.page";
+import { CrudPage } from "./pages/crud/crud.page";
 
 @Component({
   // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
@@ -55,6 +56,7 @@ export class App implements OnInit {
   ) {
     document.title = this.companyName ? this.companyName : "BI";
     this.misc.register_modal("sign", SignPage);
+    this.misc.register_modal("crud", CrudPage);
     this.auth.user.subscribe((user_: any) => {
       this.user_ = user_;
     });

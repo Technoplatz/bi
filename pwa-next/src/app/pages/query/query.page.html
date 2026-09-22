@@ -1,0 +1,213 @@
+<ion-content class="ion-no-padding">
+  <ion-grid class="ion-no-padding ion-no-border">
+    <ion-row>
+      <ion-col class="console-right">
+        <p class="hdr">{{ header | translate }}&nbsp;</p>
+        <h3>{{ subheader }}&nbsp;</h3>
+        @if (_tags) {
+          <span class="bold primary">{{ _tags.join(' ') }}</span>
+        }
+        @if (que_scheduled_cron_) {
+          <span class="bold primary">&nbsp;&nbsp;[{{ que_scheduled_cron_ }}]</span>
+        }
+        &nbsp;
+        <div class="filler-10"></div>
+        <!-- BUTTONS -->
+        <ion-grid class="ion-no-padding">
+          <ion-row class="sub-menu-row sq-menu-row">
+            <ion-col size="12" class="data-sq-container">
+              <div (click)="misc.navi.next('admin/_query')" class="data-sq-button">
+                <div class="ion-no-padding">
+                  <ion-icon name="arrow-back-sharp"></ion-icon><br />
+                  <ion-text color="primary">{{ 'Back-To List' | translate }}</ion-text>
+                </div>
+              </div>
+              <div
+                (click)="refresh_data(false)"
+                [class]="running_ ? 'data-sq-button' : 'data-sq-button'"
+              >
+                @if (!running_) {
+                  <span>
+                    <ion-icon name="sync-circle-outline"></ion-icon><br />
+                    <ion-text color="primary">{{ 'Refresh Query' | translate }}</ion-text>
+                  </span>
+                }
+                @if (running_) {
+                  <span>
+                    <ion-spinner name="lines-sharp"></ion-spinner><br />
+                    <ion-text color="primary">{{ 'Please Wait' | translate }}</ion-text>
+                  </span>
+                }
+              </div>
+              <div (click)="do_announce('test')" class="data-sq-button">
+                @if (!running_test_) {
+                  <ion-icon name="megaphone-outline"></ion-icon>
+                }
+                @if (running_test_) {
+                  <ion-spinner name="lines-sharp"></ion-spinner>
+                }
+                <br />
+                <ion-text color="primary">{{ 'Announce Test' | translate }}</ion-text>
+              </div>
+              <div (click)="do_announce('live')" class="data-sq-button">
+                @if (!running_live_) {
+                  <ion-icon name="megaphone"></ion-icon>
+                }
+                @if (running_live_) {
+                  <ion-spinner name="lines-sharp"></ion-spinner>
+                }
+                <br />
+                <ion-text color="primary">{{ 'Announce Live' | translate }}</ion-text>
+              </div>
+              <div (click)="copy_url()" class="data-sq-button">
+                @if (!is_url_copied) {
+                  <ion-icon name="globe-outline"></ion-icon>
+                }
+                @if (is_url_copied) {
+                  <ion-icon name="checkmark-sharp"></ion-icon>
+                }
+                <br />
+                @if (!is_url_copied) {
+                  <ion-text color="primary">{{ 'Copy URL' | translate }}</ion-text>
+                }
+                @if (is_url_copied) {
+                  <ion-text color="primary">{{ 'URL Copied' | translate }}</ion-text>
+                }
+              </div>
+              <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
+                <svg
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="#000"
+                  #svg
+                  class="json-icon-large"
+                >
+                  <title>json_scheme</title>
+                  <rect fill="none" />
+                  <path
+                    d="M5,3H7V5H5v5a2,2,0,0,1-2,2,2,2,0,0,1,2,2v5H7v2H5c-1.07-.27-2-.9-2-2V15a2,2,0,0,0-2-2H0V11H1A2,2,0,0,0,3,9V5A2,2,0,0,1,5,3M19,3a2,2,0,0,1,2,2V9a2,2,0,0,0,2,2h1v2H23a2,2,0,0,0-2,2v4a2,2,0,0,1-2,2H17V19h2V14a2,2,0,0,1,2-2,2,2,0,0,1-2-2V5H17V3h2M12,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1M8,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1m8,0a1,1,0,1,1-1,1A1,1,0,0,1,16,15Z"
+                  />
+                </svg>
+                <br />
+                <ion-text color="primary">{{ 'Edit JSON' | translate }}</ion-text>
+              </div>
+              <div (click)="edit_query()" class="data-sq-button">
+                <div class="ion-no-padding">
+                  <ion-icon name="settings-outline"></ion-icon><br />
+                  <ion-text color="primary">{{ 'Query Settings' | translate }}</ion-text>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <!-- SCHEMA -->
+        @if (schemavis_) {
+          <ion-grid class="actions-grid">
+            <ion-row>
+              <ion-col size="12">
+                <ion-button (click)="save_query_json_f(false)">
+                  <ion-icon name="cloud-upload-outline"></ion-icon>
+                  @if (!_saving) {
+                    <span>&nbsp;{{ 'Save' | translate }}</span>
+                  }
+                  @if (_saving) {
+                    <span>{{ 'In Progress' | translate }}...</span>
+                  }
+                </ion-button>
+                @if (permqa_) {
+                  <ion-button (click)="save_query_json_f(true)">
+                    <ion-icon name="checkmark-circle-outline"></ion-icon>
+                    @if (!_saving) {
+                      <span>{{ 'Approve' | translate }}</span>
+                    }
+                    @if (_saving) {
+                      <span>{{ 'In Progress' | translate }}...</span>
+                    }
+                  </ion-button>
+                }
+                <ion-button (click)="set_editor(false)" color="medium">
+                  <ion-icon name="close-circle-outline"></ion-icon>
+                  {{ 'Close' | translate }}
+                </ion-button>
+              </ion-col>
+            </ion-row>
+            <ion-row class="jrow">
+              <ion-col size="12">
+                <json-editor
+                  id="aggregate"
+                  [options]="jeoptions"
+                  [data]="aggregate_"
+                  (change)="json_changed($event)"
+                  #editor
+                  id="editor"
+                ></json-editor>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        }
+
+        <!-- CRUD GRID SECTION -->
+        @if (data_.length > 0) {
+          <div>
+            @if (pivot_) {
+              <div [innerHtml]="pivot_"></div>
+            }
+            <table class="data-table">
+              <tr>
+                <th></th>
+                @for (item_ of fields_; track item_) {
+                  <th>
+                    {{ item_ }}
+                  </th>
+                }
+              </tr>
+              @for (record_ of data_; track record_; let i = $index) {
+                <tr>
+                  <td
+                    [class]="record_['_note'] ? 'danger align-right' : 'primary align-right'"
+                    (click)="misc.show_note(record_['_note'], $event)"
+                  >
+                    @if (record_['_note']) {
+                      <ion-icon name="flag"></ion-icon>
+                    } @else {
+                      {{ i + 1 }}
+                    }
+                  </td>
+                  @for (item_ of fields_; track item_) {
+                    <td>
+                      {{ record_[item_]?.toString() | translate }}
+                    </td>
+                  }
+                </tr>
+              }
+            </table>
+            @if (data_.length >= limit_) {
+              <span>
+                {{ 'The first' | translate }} {{ limit_ }}
+                {{ 'records are displayed' | translate }}.
+              </span>
+            } @else {
+              {{ data_.length }} {{ 'records displayed' | translate }}.
+            }
+          </div>
+        } @else {
+          @if (!running_) {
+            <div class="ion-margin-top">
+              <h6>{{ 'No data matching the criteria found' | translate }}.</h6>
+              {{ 'You can edit the query or get help from the Administrators' | translate }}.
+            </div>
+          } @else {
+            <div class="ion-margin-top">
+              <h6>{{ loadingText | translate }}...</h6>
+              {{ 'Please wait while the data is retrieved' | translate }}.
+            </div>
+          }
+        }
+
+        <!-- NO DATA FOUND FOR QUERY -->
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+<app-inner-footer></app-inner-footer>

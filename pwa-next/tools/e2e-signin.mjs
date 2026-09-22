@@ -8,7 +8,16 @@ const [url, email, password] = process.argv.slice(2);
 const browser = await chromium.launch({ args: ["--no-sandbox"] });
 const page = await browser.newPage();
 const logs = [];
-page.on("console", (m) => { logs.push(`[console.${m.type()}] ${m.text()}`.slice(0, 300)); });
+page.on("console", async (m) => {
+  if (!["error", "warning"].includes(m.type())) return;
+  // resolve error objects to their message and first stack frames; the production bundle minifies class names
+  const parts = [];
+  for (const arg of m.args()) {
+    try { parts.push(await arg.evaluate((v) => v instanceof Error ? `${v.message} @ ${(v.stack || "").split("\n").slice(1, 3).join(" ").trim()}` : String(v))); }
+    catch { parts.push("?"); }
+  }
+  logs.push(`[console.${m.type()}] ${parts.join(" ") || m.text()}`.slice(0, 600));
+});
 page.on("pageerror", (e) => logs.push(`[pageerror] ${e.message}`.slice(0, 300)));
 page.on("response", (r) => { if (r.url().includes("/api/")) logs.push(`[api ${r.status()}] ${r.request().postData()?.slice(0, 60) ?? ""}`); });
 
@@ -46,6 +55,43 @@ try {
     req.onerror = () => res(null);
   }));
   step(`session stored in IndexedDB (${meta ? meta.join(",") : "none"})`, !!meta && meta.includes("token"));
+  // tour: every ported route must render content without page errors or console errors
+  const firstCollection = await page.evaluate(() => [...document.querySelectorAll("app-menu p")].map((p) => p.textContent.trim())[0]);
+  const collections = await page.evaluate(() => fetch("/assets/env.js").then(() => null));
+  const routes = ["/dashboard", "/admin/_collection", "/admin/_query", "/admin/_job", "/admin/_user", "/settings/account", "/settings/profile-settings", "/404"];
+  const colId = await page.evaluate(async () => {
+    const meta = await new Promise((res) => { const r = indexedDB.open("__bidb"); r.onsuccess = () => { const db = r.result; const g = db.transaction(db.objectStoreNames[0]).objectStore(db.objectStoreNames[0]).get("LSUSERMETA"); g.onsuccess = () => res(g.result); g.onerror = () => res(null); }; r.onerror = () => res(null); });
+    const env = window.env || {};
+    const r = await fetch(env.API_URL + "/crud", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + meta.token, "X-Api-Key": meta.api_key }, body: JSON.stringify({ op: "collections", collection: "_collection" }) });
+    const j = await r.json(); return j?.data?.[0]?.col_id ?? null;
+  });
+  if (colId) routes.splice(1, 0, `/collection/${colId}`);
+  for (const route of routes) {
+    const before = logs.length;
+    await page.goto(new URL(route, url).href, { waitUntil: "networkidle" });
+    await page.waitForTimeout(2500);
+    const info = await page.evaluate(() => {
+      const content = document.querySelector("ion-router-outlet ion-content, ion-router-outlet");
+      return { text: (content?.innerText || "").replace(/\s+/g, " ").trim().slice(0, 70), spinners: document.querySelectorAll("ion-spinner").length, url: location.pathname };
+    });
+    const errors = logs.slice(before).filter((l) => l.startsWith("[pageerror]") || l.startsWith("[console.error]"));
+    step(`${route} -> ${info.url} "${info.text}"${errors.length ? " ERRORS: " + errors.join(" | ") : ""}`, errors.length === 0 && info.text.length > 0);
+    if (errors.length) failed = true;
+  }
+  // record editor modal: open "new record" on a data collection and expect the crud form
+  if (colId) {
+    const before = logs.length;
+    await page.goto(new URL(`/collection/${colId}`, url).href, { waitUntil: "networkidle" });
+    await page.waitForTimeout(2000);
+    await page.getByText(/Neuer Datensatz|New Record|Yeni Kayıt/).first().click();
+    await page.waitForSelector("app-crud form, app-crud ion-content", { timeout: 10000 });
+    const crud = await page.evaluate(() => ({ inputs: document.querySelectorAll("app-crud ion-input, app-crud ion-select, app-crud ion-textarea, app-crud ion-checkbox").length, kov: document.querySelectorAll("app-crud app-kov").length }));
+    const errors = logs.slice(before).filter((l) => l.startsWith("[pageerror]") || l.startsWith("[console.error]"));
+    step(`crud modal opened for ${colId} with ${crud.inputs} inputs${errors.length ? " ERRORS: " + errors.join(" | ") : ""}`, crud.inputs > 0 && errors.length === 0);
+    if (errors.length) failed = true;
+    await page.evaluate(() => document.querySelector("ion-modal")?.dismiss());
+    await page.waitForTimeout(800);
+  }
   await page.getByText(/Sign Out|Abmelden|Çıkış/).first().click();
   await page.waitForURL((u) => !u.pathname.startsWith("/dashboard"), { timeout: 10000 });
   step("signed out", true);
