@@ -2552,10 +2552,43 @@ app-chart {
   font-weight: 600;
 }
 
-/* Ionic 9 compatibility for the legacy <ion-item><ion-label position="stacked"><ion-input> markup */
-ion-item ion-input,
-ion-item ion-textarea,
-ion-item ion-select {
+/* form controls carry their own stacked label (Ionic 7+ syntax); .field-label is the slotted label,
+   .field-label-static the same label above a group of controls that cannot own it (dates, arrays) */
+.field-label {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+}
+
+.field-label-static {
+  font-size: 12px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.field-stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+ion-checkbox.checkbox-label-placement-stacked {
+  margin-top: 6px;
+  margin-bottom: 6px !important;
+}
+
+ion-checkbox.checkbox-label-placement-stacked::part(label) {
+  margin-bottom: 6px;
+}
+
+ion-select.select-label-placement-stacked {
+  min-height: 56px !important;
+  margin-top: 0 !important;
+  --padding-bottom: 0 !important;
+}
+
+ion-item ion-input:not(.input-label-placement-stacked),
+ion-item ion-textarea:not(.textarea-label-placement-stacked),
+ion-item ion-select:not(.select-label-placement-stacked) {
   min-height: auto;
 }
 

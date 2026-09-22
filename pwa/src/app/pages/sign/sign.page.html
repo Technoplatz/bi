@@ -18,20 +18,16 @@
             <h3>{{ 'Reset Password' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Password' | translate }} [{{ '8+ [Aa9!]' |
-                translate }}]<sup>
-                    <ion-icon name="star"></ion-icon>
-                </sup></ion-label>
             <ion-input #tfacfocus formControlName="password" type="password"
                 placeholder="{{ '8+ [Aa9!]' | translate }}" class="ion-no-padding" required
-                [value]="email">
+                [value]="email" labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'Password' | translate }} [{{ '8+ [Aa9!]' | translate }}]<sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'One Time Password' | translate }}:
-            </ion-label>
             <ion-input class="ion-no-padding ion-margin-top token" formControlName="tfac" type="text"
-                required minlength="6" maxlength="6" size="8" autofocus="true" required="true" autocomplete="off">
+                required minlength="6" maxlength="6" size="8" autofocus="true" required="true" autocomplete="off" labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'One Time Password' | translate }}:</div>
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
@@ -49,27 +45,21 @@
             <h3>{{ 'Sign up' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'E-mail' | translate }} [{{ 'User ID' | translate }}] <sup>
-                    <ion-icon name="star"></ion-icon>
-                </sup></ion-label>
             <ion-input #emailfocussignup class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required placeholder="{{ 'Business E-mail' | translate }}">
+                autocorrect="off" required placeholder="{{ 'Business E-mail' | translate }}" labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'E-mail' | translate }} [{{ 'User ID' | translate }}] <sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Name' | translate }} <sup>
-                    <ion-icon name="star"></ion-icon>
-                </sup></ion-label>
             <ion-input #namefocus class="ion-no-padding" formControlName="name" type="text" spellcheck="false"
-                autocorrect="off" required placeholder="{{ 'Name and Surname' | translate }}">
+                autocorrect="off" required placeholder="{{ 'Name and Surname' | translate }}" labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'Name' | translate }} <sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Password' | translate }} <sup>
-                    <ion-icon name="star"></ion-icon>
-                </sup></ion-label>
             <ion-input #passwordfocus formControlName="password" type="password"
-                placeholder="{{ '8+ characters; a-Z,0-9,sign' | translate }}" required>
+                placeholder="{{ '8+ characters; a-Z,0-9,sign' | translate }}" required labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'Password' | translate }} <sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
@@ -87,21 +77,15 @@
             <h3>{{ 'Sign in' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'E-mail' | translate }} <sup>
-                    <ion-icon name="star"></ion-icon>
-                </sup>
-            </ion-label>
             <ion-input #emailfocussignin class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required [value]="email" placeholder="{{ 'Business e-mail' | translate}}">
+                autocorrect="off" required [value]="email" placeholder="{{ 'Business e-mail' | translate}}" labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'E-mail' | translate }} <sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'Password' | translate }} <sup>
-                    <ion-icon name="star"></ion-icon>
-                </sup>
-            </ion-label>
             <ion-input #passwordfocus formControlName="password" type="password" required
-                placeholder="{{ 'User password' | translate}}">
+                placeholder="{{ 'User password' | translate}}" labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'Password' | translate }} <sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
@@ -127,10 +111,9 @@
             <h3>{{ '2F Authentication' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
-            <ion-label position="stacked">{{ 'One Time Password' | translate }}:
-            </ion-label>
             <ion-input #tfacfocus class="ion-no-padding token" formControlName="tfac" type="text" required minlength="6"
-                maxlength="6" size="8" autofocus="true" required="true">
+                maxlength="6" size="8" autofocus="true" required="true" labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'One Time Password' | translate }}:</div>
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
@@ -154,10 +137,9 @@
             <h3>{{ 'Reset Password' | translate }}</h3>
         </ion-item>
         <ion-item lines="full" class="ion-margin-top">
-            <ion-label position="stacked">{{ 'E-mail' | translate }}
-            </ion-label>
             <ion-input #emailfocus class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" placeholder="{{ 'Business e-mail' | translate}}" required>
+                autocorrect="off" placeholder="{{ 'Business e-mail' | translate}}" required labelPlacement="stacked">
+                <div slot="label" class="field-label">{{ 'E-mail' | translate }}</div>
             </ion-input>
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">

@@ -169,11 +169,6 @@
     @if (tab == 'link') {
       <div class="ion-padding-bottom ion-margin-top">
         <ion-item class="ion-no-margin ion-margin-bottom full-width">
-          <ion-label position="stacked"
-            ><strong
-              >{{ 'Get automatically, enter manually or paste' | translate }}.</strong
-            ></ion-label
-          >
           <ion-textarea
             #linked_data
             id="linked_data"
@@ -187,8 +182,8 @@
             autofocus="true"
             maxlength="512"
             counterFormatter="customCounterFormatter"
-            [(ngModel)]="link_text"
-          >
+            [(ngModel)]="link_text" labelPlacement="stacked">
+              <div slot="label" class="field-label"><strong >{{ 'Get automatically, enter manually or paste' | translate }}.</strong ></div>
           </ion-textarea>
         </ion-item>
         {{ 'The maximum number of lines allowed is' | translate }} {{ link_limit_ }}.
@@ -216,6 +211,15 @@
         </ul>
       }
       <form [formGroup]="crudForm" enctype="multipart/form-data">
+        <ng-template #fieldLabel let-field="field">
+          {{ field.title | translate }}:
+          @if (field.required) {
+            <sup><ion-icon name="star" color="danger"></ion-icon></sup>
+          }
+          @if (!crudForm.controls[field.name].valid && crudForm.controls[field.name].dirty) {
+            <span class="danger">&nbsp;<strong>[{{ 'INVALID' | translate }}]</strong></span>
+          }
+        </ng-template>
         @if (fieldsupd && fieldsupd.length > 0) {
           <ion-list class="ion-no-padding ion-margin-bottom crud-form-list" [class]="visible">
             @if (['insert', 'update', 'link'].includes(op) && links?.length > 0) {
@@ -255,23 +259,6 @@
             }
             @for (field of fieldsupd; track field; let index_ = $index) {
               <ion-item lines="full" class="ion-no-margin full-width">
-                <ion-label position="stacked">
-                  {{ field.title | translate }}:
-                  @if (field.required) {
-                    <sup>
-                      <ion-icon name="star" color="danger"></ion-icon>
-                    </sup>
-                  }
-                  @if (!crudForm.controls[field.name].valid) {
-                    <span>
-                      @if (crudForm.controls[field.name].dirty) {
-                        <span class="danger"
-                          >&nbsp;<strong>[{{ 'INVALID' | translate }}]</strong></span
-                        >
-                      }
-                    </span>
-                  }
-                </ion-label>
                 @if (field.bsonType == 'string') {
                   <div class="full-width">
                     @if (!field.file) {
@@ -308,7 +295,9 @@
                                 [name]="field.name"
                                 [id]="field.name"
                                 (ionChange)="doTextManipulate($event, field)"
+                                labelPlacement="stacked"
                               >
+                                <div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                               </ion-input>
                             } @else {
                               <ion-textarea
@@ -334,7 +323,9 @@
                                 [required]="field.required"
                                 spellcheck="false"
                                 debounce="500"
+                                labelPlacement="stacked"
                               >
+                                <div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                               </ion-textarea>
                             }
                           </div>
@@ -349,7 +340,9 @@
                               [(ngModel)]="data_[field.name]"
                               auto-grow="true"
                               [id]="field.name"
+                              labelPlacement="stacked"
                             >
+                              <div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                             </ion-input>
                           } @else {
                             @if (field.enum) {
@@ -368,9 +361,11 @@
                                 [value]="data_[field.name]"
                                 (ionChange)="change_enum(field, $event.target.value)"
                                 [id]="field.name"
+                                labelPlacement="stacked"
                               >
+                                <div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                                 @for (item of filter_pipe_nulls(field.enum); track item) {
-                                  <ion-select-option [value]="item">
+                                  <ion-select-option [value]="item" labelPlacement="stacked"><div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                                     {{ item }}
                                   </ion-select-option>
                                 }
@@ -382,9 +377,11 @@
                                   [required]="field.required"
                                   [(ngModel)]="data_[field.name]"
                                   [disabled]="field.readonly || field.disabled"
+                                  labelPlacement="stacked"
                                 >
+                                  <div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                                   @for (item of properties_; track item) {
-                                    <ion-select-option [value]="item" [id]="field.name">
+                                    <ion-select-option [value]="item" [id]="field.name" labelPlacement="stacked"><div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                                       {{ item }}
                                     </ion-select-option>
                                   }
@@ -409,13 +406,17 @@
                                 ? field.description
                                 : ('' | translate)
                           "
+                          labelPlacement="stacked"
                         >
+                          <div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                         </ion-input>
                       </div>
                     }
                   </div>
                 }
                 @if (field.bsonType == 'date') {
+                  <div class="field-stack">
+                    <div class="field-label field-label-static"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                   <div class="datetime-class">
                     @if (data_[field.name]) {
                       <div>
@@ -459,6 +460,7 @@
                       </ion-button>
                     }
                   </div>
+                  </div>
                 }
                 @if (['int', 'number', 'decimal', 'float'].includes(field.bsonType)) {
                   <ion-input
@@ -476,7 +478,9 @@
                     [disabled]="field.disabled"
                     [readonly]="field.readonly"
                     [id]="field.name"
+                    labelPlacement="stacked"
                   >
+                    <div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                   </ion-input>
                 }
                 @if (field.bsonType == 'bool') {
@@ -485,18 +489,20 @@
                     [(ngModel)]="data_[field.name]"
                     [disabled]="field.disabled"
                     [id]="field.name"
-                    labelPlacement="end"
-                    justify="start"
+                    labelPlacement="stacked"
+                    alignment="start"
                   >
+                    <span class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></span>
                   </ion-checkbox>
                 }
                 @if (field.bsonType == 'object') {
                   <div class="full-width">
-                    <ion-input value="object is protected" [readonly]="true"></ion-input>
+                    <ion-input value="object is protected" [readonly]="true" labelPlacement="stacked"><div slot="label" class="field-label"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div></ion-input>
                   </div>
                 }
                 @if (field.bsonType == 'array') {
                   <div class="full-width">
+                    <div class="field-label field-label-static"><ng-container *ngTemplateOutlet="fieldLabel; context: { field: field }"></ng-container></div>
                     @if (field?.manualAdd) {
                       <ion-input
                         name="arrayitem"
@@ -561,7 +567,8 @@
             }
             @if (scan_) {
               <ion-item lines="none">
-                <ion-label position="stacked">{{ 'Scan History' }}</ion-label>
+                <div class="field-stack">
+                <div class="field-label field-label-static">{{ 'Scan History' | translate }}</div>
                 <div class="input-desc">{{ 'The latest scans' | translate }}</div>
                 <div class="flexbox-container">
                   @for (item of scanned_; track item; let s = $index) {
@@ -572,6 +579,7 @@
                     </p>
                   }
                 </div>
+                </div>
               </ion-item>
             }
           </ion-list>
@@ -580,20 +588,18 @@
           <ion-list class="ion-no-padding crud-form-list">
             @if (data_['_id'] && collection != '_token') {
               <ion-item lines="full" class="ion-no-margin">
-                <ion-label position="stacked">{{ 'Document ID' | translate }}:</ion-label>
                 <ion-input
                   class="ion-no-padding"
                   type="text"
                   [value]="data_['_id']"
                   id="_id"
-                  disabled
-                >
+                  disabled labelPlacement="stacked">
+                    <div slot="label" class="field-label">{{ 'Document ID' | translate }}:</div>
                 </ion-input>
               </ion-item>
             }
             @if (data_['_created_at']) {
               <ion-item lines="full" class="ion-no-margin">
-                <ion-label position="stacked">{{ 'Created At' | translate }}:</ion-label>
                 <ion-input
                   class="ion-no-margin"
                   [value]="
@@ -601,27 +607,25 @@
                       | date: 'dd.MM.yyyy HH:mm:ss' : 'utc'
                   "
                   disabled
-                  id="_created_at"
-                >
+                  id="_created_at" labelPlacement="stacked">
+                    <div slot="label" class="field-label">{{ 'Created At' | translate }}:</div>
                 </ion-input>
               </ion-item>
             }
             @if (data_['_created_by']) {
               <ion-item lines="full" class="ion-no-margin">
-                <ion-label position="stacked">{{ 'Created By' | translate }}:</ion-label>
                 <ion-input
                   class="ion-no-padding"
                   type="text"
                   [value]="data_['_created_by']"
                   id="_created_by"
-                  disabled
-                >
+                  disabled labelPlacement="stacked">
+                    <div slot="label" class="field-label">{{ 'Created By' | translate }}:</div>
                 </ion-input>
               </ion-item>
             }
             @if (data_['_modified_at']) {
               <ion-item lines="full" class="ion-no-margin">
-                <ion-label position="stacked">{{ 'Modified At' | translate }}:</ion-label>
                 <ion-input
                   class="ion-no-margin"
                   [value]="
@@ -629,21 +633,20 @@
                       | date: 'dd.MM.yyyy HH:mm:ss' : 'utc'
                   "
                   id="_modified_at"
-                  disabled
-                >
+                  disabled labelPlacement="stacked">
+                    <div slot="label" class="field-label">{{ 'Modified At' | translate }}:</div>
                 </ion-input>
               </ion-item>
             }
             @if (data_['_modified_by']) {
               <ion-item lines="full" class="ion-no-margin">
-                <ion-label position="stacked">{{ 'Modified By' | translate }}:</ion-label>
                 <ion-input
                   class="ion-no-padding"
                   type="text"
                   [value]="data_['_modified_by']"
                   id="_modified_by"
-                  disabled
-                >
+                  disabled labelPlacement="stacked">
+                    <div slot="label" class="field-label">{{ 'Modified By' | translate }}:</div>
                 </ion-input>
               </ion-item>
             }
