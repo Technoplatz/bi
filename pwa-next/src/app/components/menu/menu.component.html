@@ -1,0 +1,75 @@
+<div>
+  <ion-header class="ion-no-border">
+    <ion-toolbar class="clicked-item" (click)="misc.navi.next('dashboard')">
+      <img alt="logo" class="ion-margin-start bi-logo" src="../../../assets/images/logo.png" />
+    </ion-toolbar>
+  </ion-header>
+  <ion-list lines="none" class="menu-side">
+    <ion-item lines="none" class="pane-item">
+      <ion-label>
+        <span>
+          {{ companyName }}<br />
+          v{{ version }} [{{ release }}]
+        </span>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="stats-chart-sharp"></ion-icon>{{ 'Studio' | translate }}
+        </ion-button>
+        <div>
+          <p (click)="misc.navi.next('dashboard')" class="clicked-item dark">
+            {{ 'Dashboard' | translate }}
+          </p>
+          @if (perm_) {<p (click)="misc.navi.next('admin/_collection')" class="clicked-item dark">
+            {{ 'Collections' | translate }}
+          </p>}
+          <p (click)="misc.navi.next('admin/_query')" class="clicked-item dark">
+            {{ 'Queries' | translate }}
+          </p>
+          <p (click)="misc.navi.next('admin/_job')" class="clicked-item dark">
+            {{ 'Jobs' | translate }}
+          </p>
+        </div>
+      </ion-label>
+    </ion-item>
+    <ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="server-sharp"></ion-icon>{{ 'Database' | translate }}
+        </ion-button>
+        @for (item of collections_; track $index) {<p (click)="misc.navi.next('collection/'+ item?.col_id)"
+          class="clicked-item dark">
+          {{ item?.col_title | translate }}
+        </p>}
+      </ion-label>
+    </ion-item>
+    @if (perm_ && segmentsadm?.length > 0) {<ion-item lines="none">
+      <ion-label class="ion-text-wrap ion-no-margin">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="hammer-sharp"></ion-icon>{{ 'Administration' | translate }}
+        </ion-button>
+        @for (item of segmentsadm; track $index) {<p (click)="misc.navi.next('admin/' + item?.id)" class="clicked-item dark">
+          {{ item.title | translate }}
+        </p>}
+      </ion-label>
+    </ion-item>}
+    <ion-item>
+      <ion-label class="ion-text-wrap">
+        <ion-button size="default" fill="clear" class="menu-button">
+          <ion-icon name="settings-sharp"></ion-icon>{{ 'Account' | translate }}
+        </ion-button>
+        <p (click)="misc.navi.next('settings/account')" class="clicked-item dark">
+          {{ 'Settings' | translate }}
+        </p>
+        <p (click)="misc.navi.next('settings/profile-settings')" class="clicked-item dark">
+          {{ 'Preferences' | translate }}
+        </p>
+        <p (click)="sign_out()" class="clicked-item dark">
+          {{ 'Sign Out' | translate }}
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</div>

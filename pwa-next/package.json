@@ -1,0 +1,41 @@
+{
+  "name": "technoplatz-bi-pwa",
+  "version": "5.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "packageManager": "npm@11.19.1",
+  "dependencies": {
+    "@angular/animations": "^22.1.7",
+    "@angular/cdk": "^22.1.7",
+    "@angular/common": "^22.1.0",
+    "@angular/compiler": "^22.1.0",
+    "@angular/core": "^22.1.0",
+    "@angular/forms": "^22.1.0",
+    "@angular/platform-browser": "^22.1.0",
+    "@angular/router": "^22.1.0",
+    "@angular/service-worker": "^22.1.7",
+    "@ionic/angular": "^9.0.4",
+    "@ionic/storage-angular": "^4.0.0",
+    "@ngx-translate/core": "^18.0.0",
+    "@ngx-translate/http-loader": "^18.0.0",
+    "@swimlane/ngx-charts": "^25.0.2",
+    "angularx-qrcode": "^22.0.1",
+    "ionicons": "^8.1.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "vanilla-jsoneditor": "^3.13.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.1.8",
+    "@angular/cli": "^22.1.8",
+    "@angular/compiler-cli": "^22.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2"
+  }
+}

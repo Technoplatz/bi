@@ -485,6 +485,34 @@ services:
     networks:
       - network0
 
+  # the rebuilt interface (Angular 22 / Ionic 9); served beside the current one on the loopback port
+  # 8101 while pages are ported, then it replaces the pwa service and takes over its traefik route
+  pwa-next:
+    build:
+      context: ./pwa-next
+      dockerfile: Dockerfile
+    image: technoplatz/bi-pwa-next${REF}:${VERSION}
+    container_name: pwa-next
+    depends_on:
+      api:
+        condition: service_started
+    hostname: pwa-next
+    restart: always
+    labels:
+      - traefik.enable=false
+      - com.centurylinklabs.watchtower.enable=false
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "127.0.0.1:8101:80"
+    environment:
+      - TZ=${TZ}
+      - API_URL=${API_URL}
+      - COMPANY_NAME=${COMPANY_NAME}
+    networks:
+      - network0
+
   watchtower:
     image: containrrr/watchtower:1.7.1
     container_name: watchtower

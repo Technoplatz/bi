@@ -200,3 +200,4 @@ dmypy.json
 # security review reports (confidential)
 .pen/
 ._*
+.angular/

@@ -1,0 +1,11 @@
+<ion-app>
+  <app-tools></app-tools>
+  @if (user_) {
+    <ion-split-pane when="xs" contentId="main-content">
+      <app-menu></app-menu>
+      <ion-router-outlet id="main-content"></ion-router-outlet>
+    </ion-split-pane>
+  } @else {
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+  }
+</ion-app>

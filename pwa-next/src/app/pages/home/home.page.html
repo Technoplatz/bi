@@ -1,0 +1,57 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="1"></ion-col>
+        <ion-col size="11">
+          <img alt="logo" class="ion-no-padding bi-logo" src="../../../assets/images/logo.png" />
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-grid class="sign-section ion-no-padding">
+    <ion-row>
+      <ion-col size="1"></ion-col>
+      <ion-col size="11" class="ion-no-padding ion-padding-end">
+        <ion-icon name="stats-chart-sharp" class="index-logo ion-margin-bottom"></ion-icon><br />
+        {{ 'Low-code Data Application and Sharing Platform' | translate }}
+        <h2>{{ "It's time to get data-driven with your inner-cycle" | translate }}!</h2>
+      </ion-col>
+    </ion-row>
+    @if (user) {
+    <ion-row class="ion-margin-top">
+      <ion-col size="1"></ion-col>
+      <ion-col size="11" class="ion-padding-top">
+        <ion-button href="/dashboard" class="ion-margin-top">
+          <ion-icon name="easel-sharp"></ion-icon>{{ 'Dashboard' | translate }}
+        </ion-button>
+      </ion-col>
+    </ion-row>
+    } @else {
+      <ion-row class="ion-margin-top">
+        <ion-col size="1"></ion-col>
+        <ion-col size="11" class="ion-padding-top">
+          <ion-button (click)="misc.sign_modal('signin')" class="ion-margin-top">
+            <ion-icon name="log-in-sharp"></ion-icon>
+            {{ 'Sign in' | translate }}
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row class="ion-margin-top">
+        <ion-col size="1"></ion-col>
+        <ion-col size="11" (click)="misc.sign_modal('signup')">{{ "Don't have an account?" | translate }}
+          <a href="#">{{ 'Sign up' | translate }}</a>.
+        </ion-col>
+      </ion-row>
+    }
+    <ion-row class="ion-margin-top">
+      <ion-col size="1"></ion-col>
+      <ion-col size="11">
+        <app-lang></app-lang>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+<app-footer></app-footer>
