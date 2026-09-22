@@ -30,17 +30,17 @@
 # https://www.gnu.org/licenses.
 #
 
-FROM python:3.11-slim-bookworm
-ENV DEBIAN_FRONTEND=noninteractive
+FROM python:3.13-slim-bookworm
+ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 # mongodb database tools (mongodump, mongorestore, mongoexport) from the signed mongodb repository
 RUN apt-get update && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends cron ca-certificates curl gnupg wget libmagic-dev iputils-ping tzdata \
+    && apt-get install -y --no-install-recommends cron ca-certificates curl gnupg libmagic-dev tzdata \
     && curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg \
     && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main" > /etc/apt/sources.list.d/mongodb-org-7.0.list \
     && apt-get update && apt-get install -y --no-install-recommends mongodb-database-tools \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 COPY . /app
-RUN echo "python3 -m pip install --upgrade pip" > /run_module.sh
-RUN pip install -r requirements.txt
 CMD ["python3", "api.py"]

@@ -1,0 +1,7 @@
+Flask
+flask-cors
+pymongo[tls]
+requests
+python-dotenv
+pytz
+gevent

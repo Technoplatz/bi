@@ -1,0 +1,8 @@
+Flask
+flask-cors
+pymongo[tls]
+requests
+python-dotenv
+markupsafe
+pytz
+gevent

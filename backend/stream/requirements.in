@@ -1,0 +1,8 @@
+pymongo[tls]
+dnspython
+get-docker-secret
+requests
+unidecode
+pandas<3
+openpyxl
+pytz

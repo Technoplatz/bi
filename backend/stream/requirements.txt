@@ -1,10 +1,17 @@
-asyncio
-pymongo[tls]
-dnspython
-partial
-get-docker-secret
-requests
-unidecode
-pandas
-openpyxl
-pytz
+certifi==2026.7.22        # via requests
+charset-normalizer==3.5.1  # via requests
+dnspython==2.8.0          # via pymongo, -r backend/stream/requirements.in
+et-xmlfile==2.0.0         # via openpyxl
+get-docker-secret==2.0.0  # via -r backend/stream/requirements.in
+idna==3.20                # via requests
+numpy==2.5.3              # via pandas
+openpyxl==3.1.5           # via -r backend/stream/requirements.in
+pandas==2.3.3             # via -r backend/stream/requirements.in
+pymongo==4.18.1           # via -r backend/stream/requirements.in
+python-dateutil==2.9.0.post0  # via pandas
+pytz==2026.3.post1        # via pandas, -r backend/stream/requirements.in
+requests==2.34.2          # via -r backend/stream/requirements.in
+six==1.17.0               # via python-dateutil
+tzdata==2026.4            # via pandas
+unidecode==1.4.0          # via -r backend/stream/requirements.in
+urllib3==2.8.0            # via requests

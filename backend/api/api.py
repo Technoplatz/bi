@@ -64,7 +64,7 @@ import pandas as pd
 import numpy as np
 import bleach
 import pyotp
-from jose import jwt
+import jwt
 import numexpr as ne
 from flask import Flask, request, send_from_directory, make_response, send_file
 from flask_cors import CORS
@@ -606,20 +606,27 @@ class Misc:
         try:
             alg_ = "HS256"
             if endecode_ == "decode":
-                unverified_claims_ = jwt.get_unverified_claims(token_)
-                aud_ = unverified_claims_.get("aud")
-                sub_ = unverified_claims_.get("sub")
-                iss_ = unverified_claims_.get("iss")
+                if not jwt_secret_:
+                    raise jwt.InvalidTokenError("no session secret")
+                # expected claims are literals, never taken from the token itself
                 claims_ = jwt.decode(
                     token_,
                     jwt_secret_,
-                    options=payload_,
                     algorithms=[alg_],
-                    audience=aud_,
-                    issuer=iss_,
-                    subject=sub_,
+                    audience=JWT_AUDIENCE_,
+                    issuer=JWT_ISSUER_,
+                    options={"require": ["exp"]},
                 )
+                if claims_.get("sub") != JWT_SUBJECT_:
+                    raise jwt.InvalidTokenError("invalid subject")
             elif endecode_ == "encode":
+                # time claims are produced as naive local datetimes; make them timezone-aware so the
+                # encoded epoch seconds are correct utc (otherwise iat sits in the future and exp drifts)
+                payload_ = dict(payload_)
+                for claim_ in ("exp", "iat", "nbf"):
+                    value_ = payload_.get(claim_)
+                    if isinstance(value_, datetime) and value_.tzinfo is None:
+                        payload_[claim_] = value_.astimezone()
                 claims_ = jwt.encode(
                     payload_, jwt_secret_, algorithm=alg_, headers=header_
                 )
@@ -629,10 +636,7 @@ class Misc:
         except jwt.ExpiredSignatureError as exc__:
             return {"result": False, "msg": str(exc__), "exc": str(exc__)}
 
-        except jwt.JWTClaimsError as exc__:
-            return {"result": False, "msg": str(exc__), "exc": str(exc__)}
-
-        except jwt.JWTError as exc__:
+        except jwt.InvalidTokenError as exc__:
             return {"result": False, "msg": str(exc__), "exc": str(exc__)}
 
         except Exception as exc__:
@@ -5460,10 +5464,7 @@ class Auth:
         except jwt.ExpiredSignatureError as exc__:
             return {"result": False, "msg": str(exc__)}
 
-        except jwt.JWTClaimsError as exc__:
-            return {"result": False, "msg": str(exc__)}
-
-        except jwt.JWTError as exc__:
+        except jwt.InvalidTokenError as exc__:
             return {"result": False, "msg": str(exc__)}
 
         except Exception as exc__:
@@ -6118,8 +6119,13 @@ class Auth:
             if not firewall_f_["result"]:
                 raise AuthError(firewall_f_["msg"])
 
-            aut_salt_ = auth_["aut_salt"].strip() if "aut_salt" in auth_ and auth_["aut_salt"] is not None else None
-            aut_key_ = auth_["aut_key"].strip() if "aut_key" in auth_ and auth_["aut_key"] is not None else None
+            # salt and key are raw bytes; stripping them corrupts values that begin or end with whitespace bytes
+            aut_salt_ = auth_["aut_salt"] if "aut_salt" in auth_ and auth_["aut_salt"] is not None else None
+            aut_key_ = auth_["aut_key"] if "aut_key" in auth_ and auth_["aut_key"] is not None else None
+            if isinstance(aut_salt_, str):
+                aut_salt_ = aut_salt_.strip().encode("utf-8")
+            if isinstance(aut_key_, str):
+                aut_key_ = aut_key_.strip().encode("utf-8")
             if not aut_salt_ or not aut_key_:
                 raise AuthError("please set a new password")
 
@@ -6363,6 +6369,7 @@ ALLOWED_AGG_STAGES_ = {
     "$redact", "$densify", "$fill", "$setWindowFields", "$geoNear",
 }
 RATE_LIMITER_ = RateLimiter()
+JWT_ISSUER_, JWT_AUDIENCE_, JWT_SUBJECT_ = "Technoplatz", "api", "bi"
 PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "unique", "index", "required", "sort",
