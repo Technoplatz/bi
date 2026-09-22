@@ -23,6 +23,7 @@ import { PreloadAllModules, provideRouter, RouteReuseStrategy, withPreloading } 
 import { provideServiceWorker } from "@angular/service-worker";
 import { provideIonicAngular, IonicRouteStrategy } from "@ionic/angular";
 import { Storage } from "@ionic/storage-angular";
+import { Drivers } from "@ionic/storage";
 import { provideTranslateService } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 import { routes } from "./app.routes";
@@ -40,7 +41,7 @@ export const appConfig: ApplicationConfig = {
       loader: provideTranslateHttpLoader({ prefix: "./assets/i18n/", suffix: ".json" })
     }),
     // Ionic Storage 4 must be created before the first read; the old module did this implicitly
-    { provide: Storage, useFactory: () => new Storage({ name: "__bidb", driverOrder: ["indexeddb", "localstorage"] as any }) },
+    { provide: Storage, useFactory: () => new Storage({ name: "__bidb", driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage] }) },
     provideAppInitializer(() => inject(Storage).create().then(() => undefined)),
     provideServiceWorker("ngsw-worker.js", { enabled: !isDevMode(), registrationStrategy: "registerWhenStable:30000" })
   ]
