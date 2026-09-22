@@ -28,16 +28,37 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
+
+In-memory sliding window rate limiter.
 """
 
-from gevent.pywsgi import WSGIServer
+import time
+from collections import deque
 
-from bi import create_app
-from bi.scheduler import Schedular
 
-app = create_app()
 
-if __name__ == "__main__":
-    Schedular().main_f()
-    http_server = WSGIServer(("0.0.0.0", 80), app)
-    http_server.serve_forever()
+class RateLimiter:
+    """
+    in-memory sliding window limiter, keyed by (bucket, key)
+    the api runs as a single gevent process, so no locking is required
+    """
+
+    def __init__(self):
+        self.hits_ = {}
+
+    def check_f(self, bucket_, key_, limit_, window_seconds_):
+        now_ = time.monotonic()
+        k_ = (bucket_, str(key_))
+        q_ = self.hits_.get(k_)
+        if q_ is None:
+            q_ = deque()
+            self.hits_[k_] = q_
+        while q_ and now_ - q_[0] > window_seconds_:
+            q_.popleft()
+        if len(q_) >= limit_:
+            return False
+        q_.append(now_)
+        if len(self.hits_) > 50000:
+            for kk_ in [kk_ for kk_, qq_ in self.hits_.items() if not qq_ or now_ - qq_[-1] > window_seconds_]:
+                self.hits_.pop(kk_, None)
+        return True

@@ -28,16 +28,31 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
+
+Application factory for the Technoplatz BI api.
 """
 
-from gevent.pywsgi import WSGIServer
+import logging
 
-from bi import create_app
-from bi.scheduler import Schedular
+from flask import Flask
+from flask_cors import CORS
 
-app = create_app()
+from bi import config as cfg
+from bi.routes import bp
 
-if __name__ == "__main__":
-    Schedular().main_f()
-    http_server = WSGIServer(("0.0.0.0", 80), app)
-    http_server.serve_forever()
+
+def create_app():
+    """
+    builds the Flask application with cors, upload limits and the api blueprint
+    """
+    app = Flask(__name__)
+    app.config["CORS_SUPPORTS_CREDENTIALS"] = True
+    app.config["MAX_CONTENT_LENGTH"] = cfg.API_MAX_CONTENT_LENGTH_MB_ * 1024 * 1024
+    app.config["CORS_ORIGINS"] = cfg.API_CORS_ORIGINS_
+    app.config["UPLOAD_FOLDER"] = cfg.API_TEMPFILE_PATH_
+    app.config["CORS_HEADERS"] = cfg.CORS_HEADERS_
+    app.config["UPLOAD_EXTENSIONS"] = cfg.UPLOAD_EXTENSIONS_
+    CORS(app)
+    app.register_blueprint(bp)
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)
+    return app

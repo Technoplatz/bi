@@ -39,7 +39,7 @@ jobs:
         run: ruff check backend _integration
 
       - name: Compile every module
-        run: python -W error::SyntaxError -m compileall -q backend/api/api.py backend/stream/stream.py _integration/edoksis/edoksis.py _integration/cloudflare/cloudflare.py
+        run: python -W error::SyntaxError -m compileall -q backend/api backend/stream _integration
 
       - name: Unit tests
         run: pytest -q backend/tests

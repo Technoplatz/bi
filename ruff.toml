@@ -9,6 +9,5 @@ ignore = []
 
 [lint.per-file-ignores]
 # the legacy modules import a few names for side effects or future use
-"backend/api/api.py" = ["F401"]
 "backend/stream/stream.py" = ["F401"]
 "_integration/**/*.py" = ["F401"]

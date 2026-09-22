@@ -28,16 +28,27 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
+
+JSON encoder for ObjectId and datetime values.
 """
 
-from gevent.pywsgi import WSGIServer
+import json
+from datetime import datetime
+from bson.objectid import ObjectId
 
-from bi import create_app
-from bi.scheduler import Schedular
 
-app = create_app()
 
-if __name__ == "__main__":
-    Schedular().main_f()
-    http_server = WSGIServer(("0.0.0.0", 80), app)
-    http_server.serve_forever()
+class JSONEncoder(json.JSONEncoder):
+    """
+    docstring is in progress
+    """
+
+    def default(self, o):
+        """
+        docstring is in progress
+        """
+        if isinstance(o, ObjectId):
+            return str(o)
+        if isinstance(o, datetime):
+            return o.isoformat()
+        return json.JSONEncoder.default(self, o)

@@ -31,7 +31,13 @@ venv.bak/
 .vscode
 .venv
 doc/
-__*
+# local working folders (customer queries, jobs, playground, drafts) and python caches
+__queries/
+__jobs/
+__playground/
+__pre/
+__newyml/
+__pycache__/
 docker-compose.yml.bak*
 cert/
 .mongo

@@ -28,16 +28,43 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 https://www.gnu.org/licenses.
+
+Exception types shared by every module of the api.
 """
 
-from gevent.pywsgi import WSGIServer
 
-from bi import create_app
-from bi.scheduler import Schedular
 
-app = create_app()
+class APIError(BaseException):
+    """
+    docstring is in progress
+    """
 
-if __name__ == "__main__":
-    Schedular().main_f()
-    http_server = WSGIServer(("0.0.0.0", 80), app)
-    http_server.serve_forever()
+
+class AuthError(BaseException):
+    """
+    docstring is in progress
+    """
+
+
+class SessionError(BaseException):
+    """
+    docstring is in progress
+    """
+
+
+class AppException(BaseException):
+    """
+    docstring is in progress
+    """
+
+
+class PassException(BaseException):
+    """
+    docstring is in progress
+    """
+
+
+class RateLimitError(BaseException):
+    """
+    raised when a caller exceeds the request budget of an endpoint
+    """

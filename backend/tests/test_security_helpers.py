@@ -1,5 +1,5 @@
 """
-Unit checks for the security helpers in backend/api/api.py and backend/stream/stream.py.
+Unit checks for the security helpers in the backend/api/bi package and backend/stream/stream.py.
 
 Both modules read their configuration from the environment at import time and only open a
 MongoDB connection when a request is handled, so they can be imported with a stub environment
@@ -10,6 +10,7 @@ Run with:  pytest backend/tests
 import importlib.util
 import os
 import sys
+import types
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -43,7 +44,11 @@ def load(name, relpath):
 @pytest.fixture(scope="session")
 def api():
     os.environ.update(API_ENV)
-    return load("api_under_test", "backend/api/api.py")
+    sys.path.insert(0, str(ROOT / "backend" / "api"))
+    from bi import create_app
+    from bi.misc import Misc
+    from bi.ratelimit import RateLimiter
+    return types.SimpleNamespace(app=create_app(), Misc=Misc, RateLimiter=RateLimiter)
 
 
 @pytest.fixture(scope="session")
