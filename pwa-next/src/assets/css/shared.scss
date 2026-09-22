@@ -2568,3 +2568,10 @@ ion-item ion-checkbox {
   width: auto;
 }
 
+/* Ionic 6 buttons had a fixed height; Ionic 9 uses min-height plus vertical padding, so a 28px
+   spinner inside a button grew it from 36px to 44px. Without the padding the min-height rules. */
+ion-button {
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
