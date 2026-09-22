@@ -1,14 +1,25 @@
 /*
 Technoplatz BI - global styles
+
+The Ionic 9 custom-elements build appends its component styles to <head> at runtime, after this
+stylesheet, so an app rule with the same specificity as an Ionic rule (for example .menu-side vs
+.list-md) loses. Ionic 6 inserted its styles before the stylesheet link. To keep the cascade the
+app was written against, the utility classes and the shared styles are nested under :root, which
+adds one class of specificity to every rule.
 */
+@use "sass:meta";
+
 @import "@ionic/angular/css/core.css";
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
-@import "@ionic/angular/css/display.css";
-@import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
-@import "@ionic/angular/css/text-alignment.css";
-@import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
-@import "./assets/css/shared.scss";
+
+:root {
+  @include meta.load-css("@ionic/angular/css/display");
+  @include meta.load-css("@ionic/angular/css/padding");
+  @include meta.load-css("@ionic/angular/css/float-elements");
+  @include meta.load-css("@ionic/angular/css/text-alignment");
+  @include meta.load-css("@ionic/angular/css/text-transformation");
+  @include meta.load-css("@ionic/angular/css/flex-utils");
+  @include meta.load-css("./assets/css/shared");
+}

@@ -8,15 +8,32 @@ const [url, email, password] = process.argv.slice(2);
 const browser = await chromium.launch({ args: ["--no-sandbox"] });
 const page = await browser.newPage();
 const logs = [];
+// serialize error objects inside the page before they reach the console, so the text survives
+// even when the page navigates away before the message can be inspected
+await page.addInitScript(() => {
+  const serialize = (v) => {
+    if (v instanceof Error) return `${v.name}: ${v.message} @ ${(v.stack || "").split("\n").slice(1, 4).join(" ").trim()}`;
+    if (v && typeof v === "object") {
+      const picked = {};
+      for (const k of ["name", "message", "status", "statusText", "url", "error", "rejection", "code"]) if (k in v) picked[k] = v[k] instanceof Error ? serialize(v[k]) : v[k];
+      try { return `${v.constructor?.name ?? "object"} ${JSON.stringify(picked).slice(0, 400)}`; } catch { return String(v); }
+    }
+    return v;
+  };
+  const original = console.error;
+  console.error = (...args) => original(...args.map(serialize));
+  window.addEventListener("unhandledrejection", (e) => original("UNHANDLED", serialize(e.reason)));
+});
 page.on("console", async (m) => {
   if (!["error", "warning"].includes(m.type())) return;
   // resolve error objects to their message and first stack frames; the production bundle minifies class names
   const parts = [];
   for (const arg of m.args()) {
     try { parts.push(await arg.evaluate((v) => v instanceof Error ? `${v.message} @ ${(v.stack || "").split("\n").slice(1, 3).join(" ").trim()}` : String(v))); }
-    catch { parts.push("?"); }
+    catch { parts.push(null); }
   }
-  logs.push(`[console.${m.type()}] ${parts.join(" ") || m.text()}`.slice(0, 600));
+  const text = parts.every((x) => x !== null) ? parts.join(" ") : m.text();
+  logs.push(`[console.${m.type()}] ${text} (${m.location()?.url?.split("/").pop() ?? ""}:${m.location()?.lineNumber ?? ""})`.slice(0, 700));
 });
 page.on("pageerror", (e) => logs.push(`[pageerror] ${e.message}`.slice(0, 300)));
 page.on("response", (r) => { if (r.url().includes("/api/")) logs.push(`[api ${r.status()}] ${r.request().postData()?.slice(0, 60) ?? ""}`); });

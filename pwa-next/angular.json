@@ -63,8 +63,8 @@
               }
             ],
             "styles": [
-              "src/theme/variables.scss",
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/theme/variables.scss"
             ],
             "serviceWorker": "ngsw-config.json",
             "outputPath": "dist/bi-pwa",

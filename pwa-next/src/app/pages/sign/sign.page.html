@@ -117,8 +117,9 @@
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
-            <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe" mode="md" class="ion-margin-end">
-            </ion-checkbox>{{ 'Remember me' | translate }}
+            <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe" mode="md" labelPlacement="end" justify="start">
+                {{ 'Remember me' | translate }}
+            </ion-checkbox>
         </ion-item>
     </form>}
     @if (formtype=='tfac') {<form [formGroup]="TFACForm">
