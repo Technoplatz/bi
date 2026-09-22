@@ -681,7 +681,11 @@ class Crud:
                 raise APIError(f"file not allowed [restore] {fullpath_}")
 
             if op_ == "dumpu":
-                subprocess.call(["mongodump"] + Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_}))
+                config_ = Misc().tools_config_f()
+                try:
+                    subprocess.call(["mongodump"] + Misc().commands_f("mongodump", {"type": type_, "loc": fullpath_, "config": config_}))
+                finally:
+                    Misc().tools_config_remove_f(config_)
                 size_ = os.path.getsize(fullpath_)
                 Mongo().db_["_dump"].insert_one(
                     {
@@ -707,12 +711,11 @@ class Crud:
                 os.remove(fullpath_)
 
             if op_ == "dumpr":
-                subprocess.call(
-                    ["mongorestore"]
-                    + Misc().commands_f(
-                        "mongorestore", {"type": type_, "loc": fullpath_}
-                    )
-                )
+                config_ = Misc().tools_config_f()
+                try:
+                    subprocess.call(["mongorestore"] + Misc().commands_f("mongorestore", {"type": type_, "loc": fullpath_, "config": config_}))
+                finally:
+                    Misc().tools_config_remove_f(config_)
 
             files_ = [{"name": fullpath_, "type": type_}]
 
@@ -729,6 +732,37 @@ class Crud:
 
         except Exception as exc__:
             return Misc().notify_exception_f(exc__)
+
+    def frame_from_docs_f(self, docs_, fields_):
+        """
+        builds a dataframe with exactly the requested columns, in the requested order,
+        the way mongoexport --fields used to lay out its csv output
+        """
+        columns_ = [f_.strip() for f_ in (fields_.split(",") if isinstance(fields_, str) else list(fields_ or [])) if str(f_).strip()]
+        rows_ = []
+        for doc_ in docs_:
+            row_ = {}
+            for column_ in columns_:
+                value_ = doc_
+                for part_ in column_.split("."):
+                    value_ = value_.get(part_) if isinstance(value_, dict) else None
+                row_[column_] = str(value_) if isinstance(value_, ObjectId) else value_
+            rows_.append(row_)
+        return pd.DataFrame(rows_, columns=columns_)
+
+    def export_csv_f(self, collection_, filter_, fields_, sort_, file_):
+        """
+        replaces the mongoexport subprocess: reads the matching documents with the driver and writes
+        the csv attachment; returns the dataframe for html, excel and json rendering
+        """
+        sort_ = sort_ if sort_ else {"_modified_at": -1}
+        sort_list_ = list(sort_.items()) if isinstance(sort_, dict) else sort_
+        columns_ = [f_.strip() for f_ in (fields_.split(",") if isinstance(fields_, str) else list(fields_ or [])) if str(f_).strip()]
+        projection_ = {column_: 1 for column_ in columns_}
+        cursor_ = Mongo().db_[collection_].find(filter_ or {}, projection_).sort(sort_list_)
+        frame_ = self.frame_from_docs_f(cursor_, columns_)
+        frame_.to_csv(file_, index=False, date_format="%Y-%m-%dT%H:%M:%S")
+        return frame_
 
     def get_filtered_f(self, obj):
         """
@@ -3107,20 +3141,7 @@ class Crud:
                         raise AppException("no fields field found in link")
                     type_ = "csv"
                     file_ = f"{cfg.API_TEMPFILE_PATH_}/link-{Misc().get_timestamp_f()}.{type_}"
-                    query_ = json.dumps(filter0_, default=json_util.default, sort_keys=False)
-                    cmd_ = ["mongoexport"] + Misc().commands_f(
-                        "mongoexport",
-                        {
-                            "query": query_,
-                            "fields": fields_,
-                            "sort": nsort_,
-                            "type": type_,
-                            "file": file_,
-                            "collection": collection_,
-                        },
-                    )
-                    subprocess.call(cmd_)
-                    csv_file_ = pd.read_csv(file_)
+                    csv_file_ = self.export_csv_f(collection_, filter0_, fields_, nsort_, file_)
 
                     if attach_html_:
                         html_ = "<style>\
@@ -3538,13 +3559,7 @@ class Crud:
                     file_ = f"{beasefile_}.{type_}"
                     file_excel_ = f"{beasefile_}.xlsx"
                     file_json_ = f"{beasefile_}.json"
-                    query_ = json.dumps(get_notification_filtered_, default=json_util.default, sort_keys=False, )
-                    subprocess.call(
-                        ["mongoexport"] + Misc().commands_f(
-                            "mongoexport",
-                            {"query": query_, "fields": fields_, "sort": nsort_, "type": type_, "file": file_,
-                             "collection": notify_collection_, },))
-                    csv_file_ = pd.read_csv(file_)
+                    csv_file_ = self.export_csv_f(notify_collection_, get_notification_filtered_, fields_, nsort_, file_)
 
                     if attach_html_:
                         html_ = "<style> .etable { border-spacing: 0; border-collapse: collapse;} .etable td,th { padding: 7px; border: 1px solid #999;} </style>"

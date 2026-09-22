@@ -33,6 +33,7 @@ Helpers: client ip resolution, logging, notifications, formula and pipeline vali
 """
 
 import os
+import secrets
 import sys
 import re
 import json
@@ -157,78 +158,52 @@ class Misc:
         except Exception as exc__:
             return {"result": False, "msg": str(exc__)}
 
+    def tools_config_f(self):
+        """
+        writes the credentials for mongodump and mongorestore into a private config file so that
+        neither the connection string nor the certificate key password appears on a command line;
+        the caller removes the file with tools_config_remove_f when the tool has finished
+        """
+        connstr_ = f"mongodb://{cfg.MONGO_USERNAME_}:{cfg.MONGO_PASSWORD_}@{cfg.MONGO_HOST0_}:{cfg.MONGO_PORT0_},{cfg.MONGO_HOST1_}:{cfg.MONGO_PORT1_},{cfg.MONGO_HOST2_}:{cfg.MONGO_PORT2_}"
+        path_ = os.path.join(cfg.API_TEMPFILE_PATH_, f".mongotools-{secrets.token_hex(8)}.yml")
+        with open(os.open(path_, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w", encoding="utf-8") as fh_:
+            fh_.write(f"uri: {json.dumps(connstr_)}\n")
+            if cfg.MONGO_TLS_CERT_KEYFILE_PASSWORD_:
+                fh_.write(f"sslPEMKeyPassword: {json.dumps(cfg.MONGO_TLS_CERT_KEYFILE_PASSWORD_)}\n")
+        return path_
+
+    def tools_config_remove_f(self, path_):
+        """
+        removes a config file written by tools_config_f
+        """
+        try:
+            if path_ and os.path.exists(path_):
+                os.remove(path_)
+        except OSError:
+            pass
+
     def commands_f(self, command_, input_):
         """
-        docstring is in progress
+        argument lists for mongodump and mongorestore; secrets come from the config file
         """
-        collection_ = input_["collection"] if "collection" in input_ else None
-        file_ = input_["file"] if "file" in input_ else None
         type_ = input_["type"] if "type" in input_ else None
-        fields_ = input_["fields"] if "fields" in input_ else None
-        query_ = input_["query"] if "query" in input_ else None
-        sort_ = (
-            input_["sort"]
-            if "sort" in input_ and input_["sort"]
-            else {"_modified_at": -1}
-        )
         loc_ = input_["loc"] if "loc" in input_ else None
-        connstr_ = f"mongodb://{cfg.MONGO_USERNAME_}:{cfg.MONGO_PASSWORD_}@{cfg.MONGO_HOST0_}:{cfg.MONGO_PORT0_},{cfg.MONGO_HOST1_}:{cfg.MONGO_PORT1_},{cfg.MONGO_HOST2_}:{cfg.MONGO_PORT2_}"
+        config_ = input_["config"] if "config" in input_ else None
+        common_ = [
+            f"--config={config_}",
+            f"--db={cfg.MONGO_DB_}",
+            f"--authenticationDatabase={cfg.MONGO_AUTH_DB_}",
+            "--ssl",
+            f"--sslPEMKeyFile={cfg.MONGO_TLS_CERT_KEYFILE_}",
+            f"--sslCAFile={cfg.MONGO_TLS_CA_KEYFILE_}",
+            "--tlsInsecure",
+            f"--{type_}",
+            f"--archive={loc_}",
+            "--quiet",
+        ]
         commands_ = {
-            "mongoexport": [
-                f"--uri={connstr_}",
-                f"--db={cfg.MONGO_DB_}",
-                f"--authenticationDatabase={cfg.MONGO_AUTH_DB_}",
-                "--ssl",
-                f"--collection={collection_}",
-                f"--sslPEMKeyFile={cfg.MONGO_TLS_CERT_KEYFILE_}",
-                f"--sslCAFile={cfg.MONGO_TLS_CA_KEYFILE_}",
-                f"--sslPEMKeyPassword={cfg.MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
-                "--tlsInsecure",
-                f"--type={type_}",
-                f"--fields={fields_}",
-                f"--query={query_}",
-                f"--sort={sort_}",
-                f"--out={file_}",
-            ],
-            "mongorestore": [
-                "--uri",
-                connstr_,
-                "--db",
-                f"{cfg.MONGO_DB_}",
-                "--authenticationDatabase",
-                f"{cfg.MONGO_AUTH_DB_}",
-                "--ssl",
-                "--sslPEMKeyFile",
-                f"{cfg.MONGO_TLS_CERT_KEYFILE_}",
-                "--sslCAFile",
-                f"{cfg.MONGO_TLS_CA_KEYFILE_}",
-                "--sslPEMKeyPassword",
-                f"{cfg.MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
-                "--tlsInsecure",
-                f"--{type_}",
-                f"--archive={loc_}",
-                "--drop",
-                "--quiet",
-            ],
-            "mongodump": [
-                "--uri",
-                connstr_,
-                "--db",
-                f"{cfg.MONGO_DB_}",
-                "--authenticationDatabase",
-                f"{cfg.MONGO_AUTH_DB_}",
-                "--ssl",
-                "--sslPEMKeyFile",
-                f"{cfg.MONGO_TLS_CERT_KEYFILE_}",
-                "--sslCAFile",
-                f"{cfg.MONGO_TLS_CA_KEYFILE_}",
-                "--sslPEMKeyPassword",
-                f"{cfg.MONGO_TLS_CERT_KEYFILE_PASSWORD_}",
-                "--tlsInsecure",
-                f"--{type_}",
-                f"--archive={loc_}",
-                "--quiet",
-            ],
+            "mongorestore": common_ + ["--drop"],
+            "mongodump": common_,
         }
         return commands_[command_] if command_ in commands_ else []
 

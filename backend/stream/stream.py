@@ -44,7 +44,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
 from functools import partial
-from subprocess import call
 from bson.objectid import ObjectId
 from get_docker_secret import get_docker_secret
 from unidecode import unidecode
@@ -142,6 +141,27 @@ class Trigger:
                 PRINT_("!!! notification error", resp_)
 
         return True
+
+    def export_csv_f(self, collection_, filter_, fields_, sort_, file_):
+        """
+        writes the notification attachment csv with the driver, columns in the requested order
+        """
+        sort_ = sort_ if sort_ else {"_modified_at": -1}
+        sort_list_ = list(sort_.items()) if isinstance(sort_, dict) else sort_
+        columns_ = [f_.strip() for f_ in (fields_.split(",") if isinstance(fields_, str) else list(fields_ or [])) if str(f_).strip()]
+        projection_ = {column_: 1 for column_ in columns_}
+        rows_ = []
+        for doc_ in self.db_[collection_].find(filter_ or {}, projection_).sort(sort_list_):
+            row_ = {}
+            for column_ in columns_:
+                value_ = doc_
+                for part_ in column_.split("."):
+                    value_ = value_.get(part_) if isinstance(value_, dict) else None
+                row_[column_] = str(value_) if isinstance(value_, ObjectId) else value_
+            rows_.append(row_)
+        frame_ = pd.DataFrame(rows_, columns=columns_)
+        frame_.to_csv(file_, index=False, date_format="%Y-%m-%dT%H:%M:%S")
+        return frame_
 
     def safe_eval_f(self, expr_):
         """
@@ -1168,39 +1188,20 @@ class Trigger:
                         continue
 
                     if attachment_:
-                        query_ = json.dumps(
-                            self.get_filtered_f(
-                                {
-                                    "match": nfilter_,
-                                    "properties": nproperties_,
-                                    "data": full_document_,
-                                }
-                            )
+                        nquery_ = self.get_filtered_f(
+                            {
+                                "match": nfilter_,
+                                "properties": nproperties_,
+                                "data": full_document_,
+                            }
                         )
                         ts_ = self.get_timestamp_f()
                         file_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.{type_}"
                         file_excel_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.xlsx"
                         file_json_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.json"
                         ncollection_ += "_data"
-                        # C-3: argument list, no shell, so document values can never become commands
-                        command_ = [
-                            "mongoexport",
-                            f"--uri=mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}",
-                            "--ssl",
-                            f"--collection={ncollection_}",
-                            f"--out={file_}",
-                            f"--sslCAFile={mongo_tls_ca_keyfile_}",
-                            f"--sslPEMKeyFile={mongo_tls_cert_keyfile_}",
-                            f"--sslPEMKeyPassword={mongo_tls_cert_keyfile_password_}",
-                            "--tlsInsecure",
-                            f"--db={mongo_db_}",
-                            f"--type={type_}",
-                            f"--fields={fields_}",
-                            f"--query={query_}",
-                            f"--sort={json.dumps(nsort_) if isinstance(nsort_, dict) else nsort_}",
-                            "--quiet",
-                        ]
-                        call(command_)
+                        # the driver replaces the mongoexport subprocess: no shell, no credentials on argv
+                        self.export_csv_f(ncollection_, nquery_, fields_, nsort_, file_)
                         if not os.path.exists(file_):
                             raise PassException("no attachment generated")
                         with open(file_, "r", encoding="utf-8") as output_:

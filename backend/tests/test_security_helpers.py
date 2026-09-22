@@ -165,3 +165,19 @@ def test_safe_eval_arithmetic(stream, expr, expected):
 def test_safe_eval_rejects(stream, expr):
     with pytest.raises(stream.AppException):
         evaluator(stream)(expr)
+
+
+# ---------------------------------------------------------------- csv export frame
+def test_frame_from_docs_keeps_requested_columns_and_order(api):
+    from bi.crud import Crud
+    from bson.objectid import ObjectId
+    oid = ObjectId()
+    docs = [
+        {"_id": oid, "a": 1, "b": {"c": "x"}, "extra": "ignored"},
+        {"_id": ObjectId(), "a": 2},
+    ]
+    frame = Crud().frame_from_docs_f(docs, "b.c, a ,_id")
+    assert list(frame.columns) == ["b.c", "a", "_id"]
+    assert frame.iloc[0].tolist() == ["x", 1, str(oid)]
+    assert frame.iloc[1]["b.c"] is None or frame.iloc[1]["b.c"] != frame.iloc[1]["b.c"]  # missing nested value stays empty
+    assert Crud().frame_from_docs_f([], ["a"]).shape == (0, 1)
