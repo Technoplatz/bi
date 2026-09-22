@@ -47,7 +47,7 @@ services:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     ports:
-      - "8802:80"
+      - "127.0.0.1:8802:80"
     environment:
       - TZ=${TZ}
       - MONGO_DB=${MONGO_DB}
@@ -67,6 +67,7 @@ services:
       - MONGO_TLS_CERT_KEYFILE_PASSWORD=${MONGO_TLS_CERT_KEYFILE_PASSWORD}
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - API_ADMIN_IPS=${API_ADMIN_IPS}
+      - INTEGRATION_API_KEY=${INTEGRATION_API_KEY}
     env_file:
       - ./_integration/cloudflare/.env-cloudflare
     networks:
@@ -89,7 +90,7 @@ services:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     ports:
-      - "8801:80"
+      - "127.0.0.1:8801:80"
     environment:
       - TZ=${TZ}
       - MONGO_DB=${MONGO_DB}
@@ -110,6 +111,7 @@ services:
       - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
       - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
       - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
+      - INTEGRATION_API_KEY=${INTEGRATION_API_KEY}
     env_file:
       - ./_integration/edoksis/.env-edoksis
     networks:

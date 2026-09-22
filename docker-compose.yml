@@ -128,7 +128,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DB}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo --noscripting"
     links:
       - init
       - mongo1
@@ -166,7 +166,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DB}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo --noscripting"
     links:
       - init
     networks:
@@ -202,7 +202,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DB}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo --noscripting"
     links:
       - init
     networks:
@@ -344,7 +344,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "${API_CONTAINER_PORT}:${HTTP_PORT}"
+      - "127.0.0.1:${API_CONTAINER_PORT}:${HTTP_PORT}"
     environment:
       - TZ=${TZ}
       - DOMAIN=${DOMAIN}
@@ -406,6 +406,15 @@ services:
       - RESTAPI_ENABLED=${RESTAPI_ENABLED}
       - HTML_TABLE_MAX_ROWS=${HTML_TABLE_MAX_ROWS}
       - HTML_TABLE_MAX_COLS=${HTML_TABLE_MAX_COLS}
+      - API_TRUSTED_PROXIES=${API_TRUSTED_PROXIES}
+      - API_CLOUDFLARE_IPS=${API_CLOUDFLARE_IPS}
+      - API_OTP_EXP_MINUTES=${API_OTP_EXP_MINUTES}
+      - API_OTP_MAX_ATTEMPTS=${API_OTP_MAX_ATTEMPTS}
+      - API_RATE_LIMIT_AUTH_IP=${API_RATE_LIMIT_AUTH_IP}
+      - API_RATE_LIMIT_AUTH_USER=${API_RATE_LIMIT_AUTH_USER}
+      - API_RATE_LIMIT_WINDOW_SEC=${API_RATE_LIMIT_WINDOW_SEC}
+      - API_OUTBOUND_HOSTS=${API_OUTBOUND_HOSTS}
+      - INTEGRATION_API_KEY=${INTEGRATION_API_KEY}
     links:
       - replicaset
     networks:

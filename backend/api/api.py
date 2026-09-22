@@ -41,6 +41,9 @@ import smtplib
 import hashlib
 import ast
 import subprocess
+import ipaddress
+import time
+from collections import deque
 import pytz
 from unidecode import unidecode
 from email import encoders
@@ -102,6 +105,39 @@ class PassException(BaseException):
     """
     docstring is in progress
     """
+
+
+class RateLimitError(BaseException):
+    """
+    raised when a caller exceeds the request budget of an endpoint
+    """
+
+
+class RateLimiter:
+    """
+    in-memory sliding window limiter, keyed by (bucket, key)
+    the api runs as a single gevent process, so no locking is required
+    """
+
+    def __init__(self):
+        self.hits_ = {}
+
+    def check_f(self, bucket_, key_, limit_, window_seconds_):
+        now_ = time.monotonic()
+        k_ = (bucket_, str(key_))
+        q_ = self.hits_.get(k_)
+        if q_ is None:
+            q_ = deque()
+            self.hits_[k_] = q_
+        while q_ and now_ - q_[0] > window_seconds_:
+            q_.popleft()
+        if len(q_) >= limit_:
+            return False
+        q_.append(now_)
+        if len(self.hits_) > 50000:
+            for kk_ in [kk_ for kk_, qq_ in self.hits_.items() if not qq_ or now_ - qq_[-1] > window_seconds_]:
+                self.hits_.pop(kk_, None)
+        return True
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -718,19 +754,90 @@ class Misc:
                 doc_[field_] = doc_[field_].strip()
         return doc_
 
+    def ip_in_networks_f(self, ip_, networks_):
+        """
+        true when ip_ belongs to one of the cidr networks in networks_
+        """
+        try:
+            addr_ = ipaddress.ip_address(str(ip_).strip())
+        except ValueError:
+            return False
+        for net_ in networks_:
+            try:
+                if addr_ in ipaddress.ip_network(str(net_).strip(), strict=False):
+                    return True
+            except ValueError:
+                continue
+        return False
+
     def get_client_ip_f(self):
         """
-        docstring is in progress
+        resolves the real client ip
+        walks the X-Forwarded-For chain from the right, skipping trusted local proxies (traefik),
+        and honours cf-connecting-ip only when the peer that reached the proxy is a cloudflare edge
         """
-        return (
-            "0.0.0.0"
-            if not request
-            else (
-                request.headers["cf-connecting-ip"]
-                if "cf-connecting-ip" in request.headers
-                else request.access_route[-1]
-            )
-        )
+        if not request:
+            return "0.0.0.0"
+        remote_ = request.remote_addr or "0.0.0.0"
+        forwarded_ = request.headers.get("X-Forwarded-For", "") or ""
+        chain_ = [ip_.strip() for ip_ in forwarded_.split(",") if ip_.strip()] + [remote_]
+        peer_ = chain_[0]
+        for hop_ in reversed(chain_):
+            if not self.ip_in_networks_f(hop_, API_TRUSTED_PROXIES_):
+                peer_ = hop_
+                break
+        cf_ip_ = request.headers.get("cf-connecting-ip", None)
+        if cf_ip_ and self.ip_in_networks_f(peer_, API_CLOUDFLARE_IPS_):
+            try:
+                return str(ipaddress.ip_address(cf_ip_.strip()))
+            except ValueError:
+                return peer_
+        return peer_
+
+    def age_minutes_f(self, dt_):
+        """
+        minutes elapsed since dt_ (tolerates tz-aware values read back from mongo)
+        """
+        if dt_ is None:
+            return None
+        if getattr(dt_, "tzinfo", None) is not None:
+            dt_ = dt_.replace(tzinfo=None)
+        return (datetime.now() - dt_).total_seconds() / 60
+
+    def scan_forbidden_ops_f(self, node_):
+        """
+        returns the first forbidden mongodb operator found anywhere in node_, else None
+        """
+        if isinstance(node_, dict):
+            for key_, value_ in node_.items():
+                if isinstance(key_, str) and key_ in FORBIDDEN_AGG_OPS_:
+                    return key_
+                found_ = self.scan_forbidden_ops_f(value_)
+                if found_:
+                    return found_
+        elif isinstance(node_, (list, tuple)):
+            for item_ in node_:
+                found_ = self.scan_forbidden_ops_f(item_)
+                if found_:
+                    return found_
+        return None
+
+    def validate_pipeline_f(self, pipeline_):
+        """
+        validates a user or admin supplied aggregation pipeline against the stage allowlist
+        """
+        if not isinstance(pipeline_, list):
+            return {"result": False, "msg": "aggregation must be a list of stages"}
+        for ix_, stage_ in enumerate(pipeline_):
+            if not isinstance(stage_, dict) or len(stage_) != 1:
+                return {"result": False, "msg": f"invalid aggregation stage at index {ix_}"}
+            name_ = list(stage_.keys())[0]
+            if name_ not in ALLOWED_AGG_STAGES_:
+                return {"result": False, "msg": f"aggregation stage is not allowed: {name_}"}
+        found_ = self.scan_forbidden_ops_f(pipeline_)
+        if found_:
+            return {"result": False, "msg": f"aggregation operator is not allowed: {found_}"}
+        return {"result": True}
 
     def get_except_underdashes(self):
         """
@@ -1560,8 +1667,21 @@ class Crud:
             method_ = obj["process"] if "process" in obj and obj["process"] is not None else "insert"
             upserted_ = False
             updated_ = method_ == "update"
-            email_ = form_["email"]
+            # H-8: the acting user comes from the session, never from the form
+            session_user_ = obj["user"] if "user" in obj and obj["user"] else {}
+            email_ = session_user_["usr_id"] if "usr_id" in session_user_ else None
+            if not email_:
+                raise APIError("user session not found")
             mimetype_ = file_.content_type
+            original_name_ = secure_filename(file_.filename or "")
+            extension_ = original_name_.rsplit(".", 1)[-1].lower() if "." in original_name_ else ""
+            if extension_ not in app.config["UPLOAD_EXTENSIONS"]:
+                raise APIError("file extension is not allowed")
+            file_.seek(0, os.SEEK_END)
+            filesize_ = file_.tell()
+            file_.seek(0)
+            if filesize_ > API_UPLOAD_LIMIT_BYTES_:
+                raise APIError(f"invalid file size, limit is {API_UPLOAD_LIMIT_BYTES_} bytes")
 
             user_ = Mongo().db_["_user"].find_one({"usr_id": email_})
             if not user_:
@@ -1609,17 +1729,10 @@ class Crud:
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     "application/vnd.ms-excel",
                 ]:
-                    filesize_ = file_.tell()
-                    if filesize_ > API_UPLOAD_LIMIT_BYTES_:
-                        raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
-                    file_.seek(0, os.SEEK_END)
                     df_ = pd.read_excel(file_, sheet_name=collection_, header=0, engine="openpyxl", dtype="object")
                 elif mimetype_ == "text/csv":
                     filetype_ = "txt"
                     decoded_ = file_.read().decode("utf-8")
-                    filesize_ = file_.content_length
-                    if filesize_ > API_UPLOAD_LIMIT_BYTES_:
-                        raise APIError(f"invalid file size {API_UPLOAD_LIMIT_BYTES_} bytes")
                     df_ = pd.read_csv(io.StringIO(decoded_), header=0, dtype="object")
                 else:
                     raise APIError("file type is not supported")
@@ -1657,10 +1770,11 @@ class Crud:
                     else:
                         columns_tobe_deleted_.append(column_)
                 else:
-                    if column_ != "_id":
-                        columns_tobe_deleted_.append(column_)
-                    else:
+                    # H-8: an _id column may only drive updates when the update permission was checked
+                    if column_ == "_id" and updated_:
                         df_[column_] = df_[column_].apply(self.frame_convert_objectid_f)
+                    else:
+                        columns_tobe_deleted_.append(column_)
 
             if defaults_:
                 for key_, value_ in defaults_.items():
@@ -2493,6 +2607,11 @@ class Crud:
                 else None
             )
 
+            # H-4: re-validate at run time so pipelines stored before the allowlist cannot run
+            validate_ = Misc().validate_pipeline_f(que_aggregate_)
+            if not validate_["result"]:
+                raise APIError(validate_["msg"])
+
             match_exists_, set_, aggregate_ = False, None, []
             for agg_ in que_aggregate_:
                 if "$limit" in agg_ or "$skip" in agg_:
@@ -2845,6 +2964,10 @@ class Crud:
             """
             if not run_:
                 raise PassException("")
+
+            validate_ = Misc().validate_pipeline_f(job_aggregate_)
+            if not validate_["result"]:
+                raise APIError(validate_["msg"])
 
             aggregate_update_ = []
             for agg_ in job_aggregate_:
@@ -3572,6 +3695,11 @@ class Crud:
                 if not permission_:
                     raise AuthError("no permission to save query")
 
+            # H-4: only allowlisted stages and operators may be stored
+            validate_ = Misc().validate_pipeline_f(aggregate_)
+            if not validate_["result"]:
+                raise APIError(validate_["msg"])
+
             doc_ = {
                 "que_aggregate": aggregate_,
                 "_modified_at": Misc().get_now_f(),
@@ -3733,17 +3861,12 @@ class Crud:
             doc = obj["doc"]
 
             _id = ObjectId(doc["_id"]) if "_id" in doc else None
-            match_ = (
-                {"_id": _id}
-                if _id
-                else (
-                    obj["match"]
-                    if "match" in obj
-                    and obj["match"] is not None
-                    and len(obj["match"]) > 0
-                    else obj["filter"] if "filter" in obj else None
-                )
-            )
+            if not _id:
+                raise APIError("document id is required to update")
+            allowmatch_ = [
+                rule_ for rule_ in (obj["match"] if "match" in obj and obj["match"] else [])
+                if isinstance(rule_, dict) and "key" in rule_ and "op" in rule_
+            ]
             link_ = obj["link"] if "link" in obj and obj["link"] is not None else None
             linked_ = (
                 obj["linked"] if "linked" in obj and obj["linked"] is not None else None
@@ -3766,6 +3889,28 @@ class Crud:
                 if not schemavalidate_["result"]:
                     raise APIError(schemavalidate_["msg"])
 
+            # H-5: the row filter granted by the permission must apply to id-based updates too
+            match_ = {"_id": _id}
+            if allowmatch_:
+                props_ = self.get_properties_f(collection_id_)
+                if not props_["result"]:
+                    raise APIError(props_["msg"])
+                filtered_ = self.get_filtered_f({"match": allowmatch_, "properties": props_["properties"], "data": doc})
+                if filtered_ is None:
+                    raise APIError("invalid permission filter")
+                if filtered_:
+                    match_ = {"$and": [{"_id": _id}, filtered_]}
+
+            # H-7: only administrators may grant or touch administrator tags
+            if collection_id_ == "_user" and not Auth().is_admin_f(user_):
+                existing_ = Mongo().db_["_user"].find_one({"_id": _id})
+                existing_tags_ = existing_["_tags"] if existing_ and "_tags" in existing_ and existing_["_tags"] else []
+                new_tags_ = doc["_tags"] if "_tags" in doc and doc["_tags"] else []
+                if any(tag_ in API_ADMIN_TAGS_ for tag_ in list(existing_tags_) + list(new_tags_)):
+                    raise APIError("only administrators can manage administrator users")
+                if existing_ and user_ and existing_.get("usr_id") == user_.get("usr_id") and "_tags" in doc:
+                    raise APIError("users cannot change their own tags")
+
             doc = Misc().set_strip_doc_f(doc)
 
             doc_ = {}
@@ -3779,8 +3924,10 @@ class Crud:
             )
 
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
-            Mongo().db_[collection_].update_one(
+            update_one_ = Mongo().db_[collection_].update_one(
                 match_, {"$set": doc_, "$inc": {"_modified_count": 1}})
+            if update_one_.matched_count == 0:
+                raise APIError("record not found or not permitted")
 
             if is_crud_ and link_ and linked_:
                 link_f_ = self.link_f(
@@ -3830,7 +3977,12 @@ class Crud:
         try:
             doc_ = obj["doc"]
             _id = ObjectId(doc_["_id"]) if "_id" in doc_ else None
-            match_ = {"_id": _id} if _id else obj["match"]
+            if not _id:
+                raise APIError("document id is required to remove")
+            allowmatch_ = [
+                rule_ for rule_ in (obj["match"] if "match" in obj and obj["match"] else [])
+                if isinstance(rule_, dict) and "key" in rule_ and "op" in rule_
+            ]
             user_ = obj["user"] if "user" in obj else None
             collection_id_ = obj["collection"]
 
@@ -3844,11 +3996,31 @@ class Crud:
             is_crud_ = collection_id_[:1] != "_"
             collection_ = f"{collection_id_}_data" if is_crud_ else collection_id_
 
+            # H-5: apply the permission row filter to id-based removals
+            match_ = {"_id": _id}
+            if allowmatch_:
+                props_ = self.get_properties_f(collection_id_)
+                if not props_["result"]:
+                    raise APIError(props_["msg"])
+                filtered_ = self.get_filtered_f({"match": allowmatch_, "properties": props_["properties"], "data": doc_})
+                if filtered_ is None:
+                    raise APIError("invalid permission filter")
+                if filtered_:
+                    match_ = {"$and": [{"_id": _id}, filtered_]}
+
+            if collection_id_ == "_user" and not Auth().is_admin_f(user_):
+                existing_ = Mongo().db_["_user"].find_one({"_id": _id})
+                existing_tags_ = existing_["_tags"] if existing_ and "_tags" in existing_ and existing_["_tags"] else []
+                if any(tag_ in API_ADMIN_TAGS_ for tag_ in existing_tags_):
+                    raise APIError("only administrators can manage administrator users")
+
             doc_["_removed_at"] = Misc().get_now_f()
             doc_["_removed_by"] = user_[
                 "email"] if user_ and "email" in user_ else None
 
-            Mongo().db_[collection_].delete_one(match_)
+            delete_one_ = Mongo().db_[collection_].delete_one(match_)
+            if delete_one_.deleted_count == 0:
+                raise APIError("record not found or not permitted")
 
             log_ = Misc().log_f(
                 {
@@ -4004,6 +4176,35 @@ class Crud:
         except Exception as exc:
             return Misc().notify_exception_f(exc)
 
+    def get_stored_link_f(self, source_, requested_):
+        """
+        resolves a link definition from the stored schema of the source collection
+        the client may only choose which stored link to run, never define one
+        """
+        try:
+            if not source_ or source_[:1] == "_":
+                raise APIError("links are only available on data collections")
+            if not isinstance(requested_, dict):
+                raise APIError("invalid link request")
+            req_collection_ = requested_["collection"] if "collection" in requested_ else None
+            req_get_ = requested_["get"] if "get" in requested_ else None
+            if not req_collection_ or not req_get_:
+                raise APIError("link collection and get fields are required")
+            col_ = Mongo().db_["_collection"].find_one({"col_id": source_})
+            if not col_ or "col_structure" not in col_:
+                raise APIError("source collection structure not found")
+            links_ = col_["col_structure"]["links"] if "links" in col_["col_structure"] and col_["col_structure"]["links"] else []
+            for stored_ in links_:
+                if isinstance(stored_, dict) and stored_.get("collection") == req_collection_ and stored_.get("get") == req_get_:
+                    return {"result": True, "link": json.loads(json.dumps(stored_, default=json_util.default))}
+            raise APIError(f"link is not defined in the {source_} schema")
+
+        except APIError as exc__:
+            return {"result": False, "msg": str(exc__)}
+
+        except Exception as exc__:
+            return {"result": False, "msg": str(exc__)}
+
     def link_f(self, obj_):
         """
         docstring is in progress
@@ -4013,6 +4214,12 @@ class Crud:
             _id = obj_["_id"] if "_id" in obj_ else None
             link_ = obj_["link"] if "link" in obj_ else None
             op_ = obj_["op"] if "op" in obj_ else "insert"
+
+            # C-1: never trust the link definition sent by the client
+            stored_link_ = self.get_stored_link_f(source_, link_)
+            if not stored_link_["result"]:
+                raise APIError(stored_link_["msg"])
+            link_ = stored_link_["link"]
             data_ = obj_["data"] if "data" in obj_ else None
             linked_ = list(set(obj_["linked"])) if "linked" in obj_ and len(obj_["linked"]) > 0 else []
             linked_count_ = len(linked_)
@@ -4070,6 +4277,14 @@ class Crud:
 
             if usr_id_ is None:
                 raise APIError("link user id is missing")
+
+            if col_id_[:1] == "_":
+                raise APIError("links may only target data collections")
+
+            # C-1: the acting user needs update permission on the target collection
+            target_permission_ = Auth().permission_f({"user": user_, "auth": None, "collection": col_id_, "op": "update"})
+            if not target_permission_["result"]:
+                raise APIError(f"no permission to link into {col_id_}")
 
             get_properties_ = self.get_properties_f(col_id_)
             if not get_properties_["result"]:
@@ -4292,11 +4507,20 @@ class Crud:
             if not path_:
                 raise PassException(f"invalid api path in {id_}")
 
+            # SSRF guard: outbound calls only to the configured integration hosts
+            host_ = f"{subdomain_}{domain_}".lower()
+            if host_ not in API_OUTBOUND_HOSTS_:
+                raise APIError(f"api host is not allowed: {host_}")
+            headers_ = dict(headers_)
+            if INTEGRATION_API_KEY_:
+                headers_["X-Integration-Key"] = INTEGRATION_API_KEY_
+
             response_ = requests.post(
-                f"{protocol_}://{subdomain_}{domain_}{path_}",
+                f"{protocol_}://{host_}{path_}",
                 json=json.loads(JSONEncoder().encode(json_)),
                 headers=headers_,
                 timeout=60,
+                allow_redirects=False,
             )
             res_ = json.loads(response_.content)
             msg_ = res_["msg"] if "msg" in res_ else ""
@@ -4667,6 +4891,12 @@ class Crud:
 
             if "_structure" in doc_:
                 doc_.pop("_structure", None)
+
+            # H-7: only administrators may create users carrying administrator tags
+            if collection_id_ == "_user" and not Auth().is_admin_f(user_):
+                new_tags_ = doc_["_tags"] if "_tags" in doc_ and doc_["_tags"] else []
+                if any(tag_ in API_ADMIN_TAGS_ for tag_ in new_tags_):
+                    raise APIError("only administrators can assign administrator tags")
 
             inserted_ = None
             is_crud_ = collection_id_[:1] != "_"
@@ -5113,12 +5343,13 @@ class OTP:
 
             usr_id_ = user_["usr_id"]
             name_ = user_["usr_name"]
-            tfac_ = randint(100001, 999999)
+            tfac_ = secrets.randbelow(900000) + 100000
             Mongo().db_["_auth"].update_one(
                 {"aut_id": usr_id_},
                 {
                     "$set": {
                         "aut_tfac": tfac_,
+                        "aut_tfac_attempts": 0,
                         "_tfac_modified_at": Misc().get_now_f(),
                     },
                     "$inc": {"_modified_count": 1},
@@ -5221,7 +5452,7 @@ class Auth:
             ):
                 raise AuthError(f"IP is not allowed to do {operation_}")
 
-            return {"result": True}
+            return {"result": True, "token": find_}
 
         except AuthError as exc__:
             return {"result": False, "msg": str(exc__)}
@@ -5256,13 +5487,24 @@ class Auth:
             if not aut_tfac_:
                 raise AuthError("otp not provided")
 
-            if str(aut_tfac_) != str(tfac_):
-                if aut_otp_secret_:
-                    validate_qr_f_ = OTP().validate_qr_f(
-                        email_, {"otp": tfac_})
-                    if not validate_qr_f_["result"]:
-                        raise AuthError("invalid otp")
-                else:
+            age_ = Misc().age_minutes_f(auth_["_tfac_modified_at"] if "_tfac_modified_at" in auth_ else None)
+            if age_ is None or age_ > API_OTP_EXP_MINUTES_ or age_ < 0:
+                Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_tfac": None}})
+                raise AuthError("otp expired, please request a new code")
+
+            attempts_ = int(auth_["aut_tfac_attempts"]) if "aut_tfac_attempts" in auth_ and auth_["aut_tfac_attempts"] else 0
+            if attempts_ >= API_OTP_MAX_ATTEMPTS_:
+                Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$set": {"aut_tfac": None}})
+                raise AuthError("too many invalid attempts, please request a new code")
+
+            otp_validated_ = "aut_otp_validated" in auth_ and auth_["aut_otp_validated"] is True
+            if not secrets.compare_digest(str(aut_tfac_), str(tfac_)):
+                totp_ok_ = False
+                if aut_otp_secret_ and otp_validated_:
+                    validate_qr_f_ = OTP().validate_qr_f(email_, {"otp": tfac_})
+                    totp_ok_ = validate_qr_f_["result"] is True
+                if not totp_ok_:
+                    Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$inc": {"aut_tfac_attempts": 1}})
                     raise AuthError("invalid otp")
 
             Mongo().db_["_auth"].update_one(
@@ -5270,6 +5512,7 @@ class Auth:
                 {
                     "$set": {
                         "aut_tfac": None,
+                        "aut_tfac_attempts": 0,
                         "aut_tfac_ex": aut_tfac_,
                         "_modified_at": Misc().get_now_f(),
                     },
@@ -5294,7 +5537,6 @@ class Auth:
                     "user": email_,
                     "document": {
                         "otp_entered": tfac_,
-                        "otp_expected": aut_tfac_,
                         "exception": str(exc__),
                         "_modified_at": Misc().get_now_f(),
                         "_modified_by": email_,
@@ -5696,6 +5938,7 @@ class Auth:
                         "aut_jwt_secret": secret_,
                         "aut_jwt_token": token_,
                         "aut_tfac": None,
+                        "aut_verified": True,
                         "aut_api_key": api_key_,
                         "_modified_at": Misc().get_now_f(),
                         "_jwt_at": Misc().get_now_f(),
@@ -5943,7 +6186,9 @@ class Auth:
             password_ = Misc().clean_f(input_["password"])
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
-            if auth_:
+            # a record that never completed its first second-factor check may be re-registered,
+            # so that whoever controls the mailbox always wins over a pre-registration attempt
+            if auth_ and not ("aut_verified" in auth_ and auth_["aut_verified"] is False):
                 raise AuthError("account already exists")
 
             user_ = (
@@ -5972,31 +6217,38 @@ class Auth:
             key_ = hash_f_["key"]
 
             aut_otp_secret_ = pyotp.random_base32()
-            qr_ = pyotp.totp.TOTP(aut_otp_secret_).provisioning_uri(name=user_id_, issuer_name="Technoplatz-BI")
             api_key_ = secrets.token_hex(16)
 
-            Mongo().db_["_auth"].insert_one(
-                {
-                    "aut_id": user_id_,
-                    "aut_salt": salt_,
-                    "aut_key": key_,
-                    "aut_api_key": api_key_,
-                    "aut_tfac": None,
-                    "aut_expires": 0,
-                    "aut_otp_secret": aut_otp_secret_,
-                    "aut_otp_validated": False,
-                    "_qr_modified_at": Misc().get_now_f(),
-                    "_qr_modified_by": user_id_,
-                    "_qr_modified_count": 0,
-                    "_created_at": Misc().get_now_f(),
-                    "_created_by": user_id_,
-                    "_modified_at": Misc().get_now_f(),
-                    "_modified_by": user_id_,
-                    "_created_ip": Misc().get_client_ip_f(),
-                }
-            )
+            # the totp secret is never returned here; it is shown only to an authenticated
+            # session (otp show) and only counts as a factor once validated
+            doc_ = {
+                "aut_id": user_id_,
+                "aut_salt": salt_,
+                "aut_key": key_,
+                "aut_api_key": api_key_,
+                "aut_tfac": None,
+                "aut_tfac_attempts": 0,
+                "aut_expires": 0,
+                "aut_otp_secret": aut_otp_secret_,
+                "aut_otp_validated": False,
+                "aut_verified": False,
+                "aut_jwt_secret": None,
+                "aut_jwt_token": None,
+                "_qr_modified_at": Misc().get_now_f(),
+                "_qr_modified_by": user_id_,
+                "_qr_modified_count": 0,
+                "_modified_at": Misc().get_now_f(),
+                "_modified_by": user_id_,
+                "_created_ip": Misc().get_client_ip_f(),
+            }
+            if auth_:
+                Mongo().db_["_auth"].update_one({"aut_id": user_id_}, {"$set": doc_, "$inc": {"_modified_count": 1}})
+            else:
+                doc_["_created_at"] = Misc().get_now_f()
+                doc_["_created_by"] = user_id_
+                Mongo().db_["_auth"].insert_one(doc_)
 
-            return {"result": True, "qr": qr_, "user": None}
+            return {"result": True, "user": None, "msg": "account created, please sign in to verify your e-mail address"}
 
         except pymongo.errors.PyMongoError as exc__:
             return Misc().mongo_error_f(exc__)
@@ -6078,6 +6330,39 @@ MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get(
     "MONGO_TIMEOUT_MS") and int(os.environ.get("MONGO_TIMEOUT_MS")) > 0 else 90000
 PREVIEW_ROWS_ = int(os.environ.get("PREVIEW_ROWS")) if os.environ.get(
     "PREVIEW_ROWS") and int(os.environ.get("PREVIEW_ROWS")) > 0 else 10
+API_TRUSTED_PROXIES_ = [
+    net_.strip() for net_ in (os.environ.get("API_TRUSTED_PROXIES") or "172.16.0.0/12,127.0.0.0/8,::1/128").split(",") if net_.strip()
+]
+# current published cloudflare ranges; override with API_CLOUDFLARE_IPS when they change
+API_CLOUDFLARE_IPS_ = [
+    net_.strip() for net_ in (os.environ.get("API_CLOUDFLARE_IPS") or (
+        "173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,"
+        "190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/13,"
+        "104.24.0.0/14,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,2803:f800::/32,"
+        "2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32"
+    )).split(",") if net_.strip()
+]
+API_OTP_EXP_MINUTES_ = int(os.environ.get("API_OTP_EXP_MINUTES")) if os.environ.get("API_OTP_EXP_MINUTES") else 10
+API_OTP_MAX_ATTEMPTS_ = int(os.environ.get("API_OTP_MAX_ATTEMPTS")) if os.environ.get("API_OTP_MAX_ATTEMPTS") else 5
+API_RATE_LIMIT_AUTH_IP_ = int(os.environ.get("API_RATE_LIMIT_AUTH_IP")) if os.environ.get("API_RATE_LIMIT_AUTH_IP") else 30
+API_RATE_LIMIT_AUTH_USER_ = int(os.environ.get("API_RATE_LIMIT_AUTH_USER")) if os.environ.get("API_RATE_LIMIT_AUTH_USER") else 10
+API_RATE_LIMIT_WINDOW_SEC_ = int(os.environ.get("API_RATE_LIMIT_WINDOW_SEC")) if os.environ.get("API_RATE_LIMIT_WINDOW_SEC") else 600
+API_OUTBOUND_HOSTS_ = [
+    host_.strip().lower() for host_ in (os.environ.get("API_OUTBOUND_HOSTS") or "edoksis,cloudflare").split(",") if host_.strip()
+]
+INTEGRATION_API_KEY_ = os.environ.get("INTEGRATION_API_KEY") or None
+FORBIDDEN_AGG_OPS_ = {
+    "$where", "$function", "$accumulator", "$out", "$merge", "$lookup", "$graphLookup", "$unionWith",
+    "$currentOp", "$listSessions", "$listLocalSessions", "$collStats", "$indexStats", "$planCacheStats",
+    "$search", "$searchMeta", "$vectorSearch", "$documents", "$changeStream", "$shardedDataDistribution",
+    "$querySettings", "$listSampledQueries", "$listSearchIndexes", "$sql",
+}
+ALLOWED_AGG_STAGES_ = {
+    "$match", "$project", "$group", "$sort", "$limit", "$skip", "$unwind", "$addFields", "$set", "$unset",
+    "$count", "$facet", "$bucket", "$bucketAuto", "$sortByCount", "$replaceRoot", "$replaceWith", "$sample",
+    "$redact", "$densify", "$fill", "$setWindowFields", "$geoNear",
+}
+RATE_LIMITER_ = RateLimiter()
 PROTECTED_COLLS_ = ["_log", "_dump", "_event", "_announcement"]
 PROTECTED_INSDEL_EXC_COLLS_ = ["_token"]
 STRUCTURE_KEYS_ = ["properties", "unique", "index", "required", "sort",
@@ -6225,7 +6510,7 @@ def api_crud_f():
 
         allowmatch_ = permission_f_["allowmatch"] if "allowmatch" in permission_f_ and len(permission_f_["allowmatch"]) > 0 else []
 
-        if op_ in ["read", "update", "delete", "action"]:
+        if op_ in ["read", "update", "delete", "action", "remove"]:
             match_ += allowmatch_
             input_["match"] = match_
 
@@ -6363,6 +6648,10 @@ def api_otp_f():
 
         op_ = escape(request_["op"])
 
+        # H-2: otp requests and validations are budgeted per account
+        if not RATE_LIMITER_.check_f("otp-user", email_, API_RATE_LIMIT_AUTH_USER_, API_RATE_LIMIT_WINDOW_SEC_):
+            raise RateLimitError({"result": False, "msg": "too many otp requests, please try again later"})
+
         if op_ == "reset":
             res_ = OTP().reset_otp_f(email_)
         elif op_ == "show":
@@ -6376,6 +6665,9 @@ def api_otp_f():
 
         if not res_["result"]:
             raise APIError(res_)
+
+    except RateLimitError as exc__:
+        sc__, res_ = 429, ast.literal_eval(str(exc__))
 
     except SessionError as exc__:
         sc__, res_ = 403, ast.literal_eval(str(exc__))
@@ -6409,6 +6701,14 @@ def api_auth_f():
             raise APIError({"result": False, "msg": "no operation found"})
         op_ = input_["op"]
 
+        # H-2: budget for credential and otp guesses, per client ip and per account
+        ip_ = Misc().get_client_ip_f()
+        if not RATE_LIMITER_.check_f("auth-ip", ip_, API_RATE_LIMIT_AUTH_IP_, API_RATE_LIMIT_WINDOW_SEC_):
+            raise RateLimitError({"result": False, "msg": "too many attempts, please try again later"})
+        email_key_ = str(input_["email"]).strip().lower() if "email" in input_ and input_["email"] else None
+        if email_key_ and not RATE_LIMITER_.check_f("auth-user", email_key_, API_RATE_LIMIT_AUTH_USER_, API_RATE_LIMIT_WINDOW_SEC_):
+            raise RateLimitError({"result": False, "msg": "too many attempts for this account, please try again later"})
+
         user_, auth_ = None, None
 
         if op_ == "signup":
@@ -6438,6 +6738,9 @@ def api_auth_f():
 
         if not res_["result"]:
             raise AuthError(res_)
+
+    except RateLimitError as exc__:
+        sc__, res_ = 429, ast.literal_eval(str(exc__))
 
     except APIError as exc__:
         sc__, res_ = 400, ast.literal_eval(str(exc__))
@@ -6572,6 +6875,14 @@ def api_post_f():
         if not access_validate_by_api_token_f_["result"]:
             raise AuthError(access_validate_by_api_token_f_["msg"])
 
+        # H-6: the rest api serves data collections only, and a token bound to a collection stays there
+        if rh_collection_[:1] == "_":
+            raise AuthError("system collections are not accessible through the rest api")
+        token_doc_ = access_validate_by_api_token_f_["token"] if "token" in access_validate_by_api_token_f_ else {}
+        tkn_collection_id_ = token_doc_["tkn_collection_id"] if "tkn_collection_id" in token_doc_ and token_doc_["tkn_collection_id"] else None
+        if tkn_collection_id_ and tkn_collection_id_ != rh_collection_:
+            raise AuthError(f"token is not allowed to access {rh_collection_}")
+
         if not request.json:
             raise APIError("no json data provided")
 
@@ -6623,7 +6934,12 @@ def api_post_f():
 
         if operation_ == "read":
             for item_ in body_:
-                cursor_ = session_db_[collection_data_].find(item_)
+                if not isinstance(item_, dict):
+                    raise APIError("read filters must be objects")
+                forbidden_ = Misc().scan_forbidden_ops_f(item_)
+                if forbidden_:
+                    raise APIError(f"filter operator is not allowed: {forbidden_}")
+                cursor_ = session_db_[collection_data_].find(item_).limit(int(API_OUTPUT_ROWS_LIMIT_))
                 docs_ = (
                     json.loads(JSONEncoder().encode(
                         list(cursor_))) if cursor_ else []
@@ -6654,10 +6970,14 @@ def api_post_f():
                         raise APIError(
                             f"at least one unique field must be provided for {operation_} index {ix_}"
                         )
+                if not isinstance(item_, dict):
+                    raise APIError(f"item at index {ix_} must be an object")
+                item_ = {key_: value_ for key_, value_ in item_.items() if not str(key_).startswith("_") and not str(key_).startswith("$")}
                 decode_crud_doc_f_ = Crud().decode_crud_doc_f(item_, properties_)
                 if not decode_crud_doc_f_["result"]:
                     raise APIError(decode_crud_doc_f_["msg"])
                 doc__ = decode_crud_doc_f_["doc"]
+                doc__ = {key_: value_ for key_, value_ in doc__.items() if not str(key_).startswith("_") and not str(key_).startswith("$")}
                 doc__["_modified_at"] = Misc().get_now_f()
                 doc__["_modified_by"] = "API"
                 if operation_ in ["insert"]:

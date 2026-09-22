@@ -33,6 +33,7 @@ https://www.gnu.org/licenses.
 import os
 import re
 import json
+import hmac
 from functools import partial
 import uuid
 import base64
@@ -142,7 +143,33 @@ SUPPLIER_TAX_OFFICE_ = os.environ.get("SUPPLIER_TAX_OFFICE")
 SUPPLIER_TAX_NO_ = os.environ.get("SUPPLIER_TAX_NO")
 
 PRINT_ = partial(print, flush=True)
-PRINT_("*** STARTED", EDOKSIS_VKN_)
+PRINT_("*** STARTED")
+
+INTEGRATION_API_KEY_ = os.environ.get("INTEGRATION_API_KEY") or None
+COLLECTION_NAME_PATTERN_ = re.compile(r"^[a-z][a-z0-9]{0,63}_data$")
+
+
+def check_integration_auth_f():
+    """
+    C-4: every call must carry the shared integration key; fails closed when none is configured
+    """
+    if not INTEGRATION_API_KEY_:
+        raise AuthError("integration api key is not configured")
+    provided_ = request.headers.get("X-Integration-Key", None)
+    if not provided_:
+        authorization_ = request.headers.get("Authorization", "") or ""
+        provided_ = authorization_[7:].strip() if authorization_.lower().startswith("bearer ") else None
+    if not provided_ or not hmac.compare_digest(str(provided_), str(INTEGRATION_API_KEY_)):
+        raise AuthError("unauthorized")
+
+
+def check_collection_name_f(name_):
+    """
+    C-4: mapped collections must be business data collections, never system collections
+    """
+    if not isinstance(name_, str) or not COLLECTION_NAME_PATTERN_.match(name_):
+        raise APIError(f"collection is not allowed: {name_}")
+    return name_
 
 
 class Mongo:
@@ -338,6 +365,7 @@ def download_f():
     try:
         if not request.headers:
             raise AuthError("no headers provided")
+        check_integration_auth_f()
 
         content_type_ = (
             request.headers.get("Content-Type", None)
@@ -409,6 +437,7 @@ def multi_issue_f():
     try:
         if not request.headers:
             raise AuthError("no headers provided")
+        check_integration_auth_f()
 
         content_type_ = (
             request.headers.get("Content-Type", None)
@@ -441,6 +470,7 @@ def multi_issue_f():
         )
         if not shipment_collection_:
             raise APIError("missing shipment collection in mapping")
+        check_collection_name_f(shipment_collection_)
 
         shipment_id_field_ = (
             map_["shipment_id_field"] if "shipment_id_field" in map_ else None
@@ -501,6 +531,7 @@ def multi_issue_f():
         )
         if not delivery_collection_:
             raise APIError("missing delivery collection in mapping")
+        check_collection_name_f(delivery_collection_)
 
         delivery_shipment_id_field_ = (
             map_["delivery_shipment_id_field"]

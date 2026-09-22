@@ -33,6 +33,7 @@ https://www.gnu.org/licenses.
 import os
 import sys
 import re
+import ast
 import asyncio
 import smtplib
 import json
@@ -141,6 +142,46 @@ class Trigger:
                 PRINT_("!!! notification error", resp_)
 
         return True
+
+    def safe_eval_f(self, expr_):
+        """
+        C-2: evaluates arithmetic only (numbers, + - * / // % ** and parentheses)
+        anything else in a trigger formula is rejected instead of being executed
+        """
+        try:
+            tree_ = ast.parse(str(expr_).strip(), mode="eval")
+        except SyntaxError as exc_:
+            raise AppException(f"invalid formula: {expr_} ({exc_})")
+
+        def ev_(node_):
+            if isinstance(node_, ast.Expression):
+                return ev_(node_.body)
+            if isinstance(node_, ast.Constant) and isinstance(node_.value, (int, float)) and not isinstance(node_.value, bool):
+                return node_.value
+            if isinstance(node_, ast.UnaryOp) and isinstance(node_.op, (ast.UAdd, ast.USub)):
+                val_ = ev_(node_.operand)
+                return val_ if isinstance(node_.op, ast.UAdd) else -val_
+            if isinstance(node_, ast.BinOp):
+                left_, right_ = ev_(node_.left), ev_(node_.right)
+                if isinstance(node_.op, ast.Add):
+                    return left_ + right_
+                if isinstance(node_.op, ast.Sub):
+                    return left_ - right_
+                if isinstance(node_.op, ast.Mult):
+                    return left_ * right_
+                if isinstance(node_.op, ast.Div):
+                    return left_ / right_
+                if isinstance(node_.op, ast.FloorDiv):
+                    return left_ // right_
+                if isinstance(node_.op, ast.Mod):
+                    return left_ % right_
+                if isinstance(node_.op, ast.Pow):
+                    if abs(right_) > 64 or abs(left_) > 1e12:
+                        raise AppException(f"formula exponent out of range: {expr_}")
+                    return left_ ** right_
+            raise AppException(f"unsupported expression in formula: {expr_}")
+
+        return ev_(tree_)
 
     def get_now_f(self):
         """
@@ -928,15 +969,15 @@ class Trigger:
                                             part_, str(full_document_[part_])
                                         )
                                 set_[target_field_] = (
-                                    round(eval(value_), decimals_)
+                                    round(self.safe_eval_f(value_), decimals_)
                                     if decimals_
-                                    else eval(value_)
+                                    else self.safe_eval_f(value_)
                                 )
                         else:
                             set_[target_field_] = (
-                                round(eval(value_), decimals_)
+                                round(self.safe_eval_f(value_), decimals_)
                                 if decimals_
-                                else eval(value_)
+                                else self.safe_eval_f(value_)
                             )
                     elif type_ == "sourcevalue":
                         if full_document_ and value_ in full_document_:
@@ -1141,8 +1182,25 @@ class Trigger:
                         file_excel_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.xlsx"
                         file_json_ = f"{API_TEMPFILE_PATH_}/stream-{ts_}.json"
                         ncollection_ += "_data"
-                        command_ = f"mongoexport --uri=\"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}\" --ssl --collection={ncollection_} --out={file_} --sslCAFile={mongo_tls_ca_keyfile_} --sslPEMKeyFile={mongo_tls_cert_keyfile_} --sslPEMKeyPassword={mongo_tls_cert_keyfile_password_} --tlsInsecure --db={mongo_db_} --type={type_} --fields='{fields_}' --query='{query_}' --sort='{nsort_}' --quiet"
-                        call(command_, shell=True)
+                        # C-3: argument list, no shell, so document values can never become commands
+                        command_ = [
+                            "mongoexport",
+                            f"--uri=mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/?authSource={mongo_auth_db_}",
+                            "--ssl",
+                            f"--collection={ncollection_}",
+                            f"--out={file_}",
+                            f"--sslCAFile={mongo_tls_ca_keyfile_}",
+                            f"--sslPEMKeyFile={mongo_tls_cert_keyfile_}",
+                            f"--sslPEMKeyPassword={mongo_tls_cert_keyfile_password_}",
+                            "--tlsInsecure",
+                            f"--db={mongo_db_}",
+                            f"--type={type_}",
+                            f"--fields={fields_}",
+                            f"--query={query_}",
+                            f"--sort={json.dumps(nsort_) if isinstance(nsort_, dict) else nsort_}",
+                            "--quiet",
+                        ]
+                        call(command_)
                         if not os.path.exists(file_):
                             raise PassException("no attachment generated")
                         with open(file_, "r", encoding="utf-8") as output_:

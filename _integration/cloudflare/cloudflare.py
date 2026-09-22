@@ -34,6 +34,7 @@ import requests
 import json
 import sys
 import os
+import hmac
 import pymongo
 import pytz
 from pymongo import MongoClient
@@ -312,6 +313,35 @@ app.json_encoder = JSONEncoder
 CORS(app)
 
 
+class APIError(BaseException):
+    """
+    request level error
+    """
+
+
+class AuthError(BaseException):
+    """
+    authentication error
+    """
+
+
+INTEGRATION_API_KEY_ = os.environ.get("INTEGRATION_API_KEY") or None
+
+
+def check_integration_auth_f():
+    """
+    C-4: every call must carry the shared integration key; fails closed when none is configured
+    """
+    if not INTEGRATION_API_KEY_:
+        raise AuthError("integration api key is not configured")
+    provided_ = request.headers.get("X-Integration-Key", None)
+    if not provided_:
+        authorization_ = request.headers.get("Authorization", "") or ""
+        provided_ = authorization_[7:].strip() if authorization_.lower().startswith("bearer ") else None
+    if not provided_ or not hmac.compare_digest(str(provided_), str(INTEGRATION_API_KEY_)):
+        raise AuthError("unauthorized")
+
+
 @app.route("/waf", methods=["POST"], endpoint="waf")
 def waf_f():
     """
@@ -319,6 +349,8 @@ def waf_f():
     """
     status_code_, count_, msg_ = 200, 0, ""
     try:
+        check_integration_auth_f()
+
         json_ = request.json
         if not json_:
             raise APIError("no request json provided")
@@ -327,6 +359,9 @@ def waf_f():
         msg_ = set_rules_["msg"] if "msg" in set_rules_ else None
         if not set_rules_["result"]:
             raise APIError(msg_)
+
+    except AuthError as exc__:
+        status_code_, msg_ = 401, str(exc__)
 
     except APIError as exc__:
         status_code_, msg_ = 400, str(exc__)
