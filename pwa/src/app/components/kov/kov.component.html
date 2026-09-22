@@ -1,139 +1,211 @@
-<!--
-Technoplatz BI
-
-Copyright ©Technoplatz IT Solutions GmbH, Mustafa Mat
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see https://www.gnu.org/licenses.
-
-If your software can interact with users remotely through a computer
-network, you should also make sure that it provides a way for users to
-get its source.  For example, if your program is a web application, its
-interface could display a "Source" link that leads users to an archive
-of the code.  There are many ways you could offer source, and different
-solutions will be better for different programs; see section 13 for the
-specific requirements.
-
-You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU AGPL, see
-https://www.gnu.org/licenses.
--->
-
-<ion-reorder-group disabled="false" *ngIf="ok; else loading" (ionItemReorder)="doReorder($event, fname)"
-  class="ion-no-padding">
-  <ion-item *ngIf="!field.manualAdd && (!data[fname] || data[fname]?.length == 0)" lines="none"
-    class="ion-no-margin ion-no-padding">
-    <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
-      <ion-icon name="add-circle-sharp"></ion-icon>
-      {{ 'Add' | translate }}
-    </ion-button>
-  </ion-item>
-  <ion-item *ngFor="let kv of data[fname]; let i = index" lines="full" class="ion-no-padding ion-no-margin">
-    <ion-reorder slot="start"></ion-reorder>
-    <ion-grid class="kov-grid">
-      <ion-row>
-        <!-- key -->
-        <ion-col *ngIf="type=='key'" size="10.5">
-          <ion-input *ngIf="field.manualAdd; else nomanualadd" required="true" [(ngModel)]="data[field.name][i]"
-            [ngModelOptions]="{standalone: true}"></ion-input>
-          <ng-template #nomanualadd>
-            <ion-select required="true" [(ngModel)]="data[fname][i]" [ngModelOptions]="{standalone: true}" mode="md"
-              placeholder="{{ 'Please select' | translate }}">
-              <ion-select-option *ngFor="let item of kovs" [value]="item.key">
-                {{ item.key }}
-              </ion-select-option>
-            </ion-select>
-          </ng-template>
-        </ion-col>
-        <!-- keyop -->
-        <ion-col *ngIf="type=='keyop'" size="5">
-          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}" mode="md"
-            placeholder="{{ 'Please select' | translate }}">
-            <ion-select-option *ngFor="let item of kovs" [value]="item.key">
-              {{ item.key }}
-            </ion-select-option>
-          </ion-select>
-        </ion-col>
-        <ion-col *ngIf="type=='keyop'" size="5">
-          <ion-select required="true" [(ngModel)]="data[fname][i].op" [ngModelOptions]="{standalone: true}" mode="md"
-            placeholder="{{ 'Please select' | translate }}">
-            <ion-select-option *ngFor="let item of keyop_" [value]="item.key">
-              {{ item.key }}
-            </ion-select-option>
-          </ion-select>
-        </ion-col>
-        <!-- keyvalue -->
-        <ion-col *ngIf="type=='keyvalue'" size="4">
-          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}" mode="md"
-            placeholder="{{ 'Please select' | translate }}">
-            <ion-select-option *ngFor="let item of kovs" [value]="item.key">
-              {{ item.key }}
-            </ion-select-option>
-          </ion-select>
-        </ion-col>
-        <ion-col *ngIf="type=='keyvalue'" size="6.5">
-          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fname][i].value"
-            [ngModelOptions]="{standalone: true}" placeholder="{{ 'value' | translate }}">
-          </ion-input>
-        </ion-col>
-        <!-- keyopvalue -->
-        <ion-col *ngIf="type=='keyopvalue'" size="4">
-          <ion-select required="true" [(ngModel)]="data[fname][i].key" [ngModelOptions]="{standalone: true}" mode="md"
-            placeholder="{{ 'Please select' | translate }}">
-            <ion-select-option *ngFor="let item of kovs" [value]="item.key">
-              {{ item.key }}
-            </ion-select-option>
-          </ion-select>
-        </ion-col>
-        <ion-col *ngIf="type=='keyopvalue'" size="3">
-          <ion-select required="true" [(ngModel)]="data[fname][i].op" [ngModelOptions]="{standalone: true}" mode="md"
-            placeholder="{{ 'operator' | translate }}">
-            <ion-select-option *ngFor="let f of filterops" [value]="f.value">
-              {{ f.key | translate }}
-            </ion-select-option>
-          </ion-select>
-        </ion-col>
-        <ion-col *ngIf="type=='keyopvalue'" size="3.5">
-          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fname][i].value"
-            [ngModelOptions]="{standalone: true}" placeholder="{{ 'value' | translate }}">
-          </ion-input>
-        </ion-col>
-        <!-- emptyfield -->
-        <ion-col *ngIf="type=='emptyfield'" size="5">
-          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fname][i].key"
-            [ngModelOptions]="{standalone: true}" placeholder="{{ 'Remote Field' | translate }}">
-          </ion-input>
-        </ion-col>
-        <ion-col *ngIf="type=='emptyfield'" size="5.5">
-          <ion-input class="ion-no-padding" type="text" [(ngModel)]="data[fname][i].value"
-            [ngModelOptions]="{standalone: true}" placeholder="{{ 'value' | translate }}">
-          </ion-input>
-        </ion-col>
-        <!-- buttons -->
-        <ion-col size="1.5" class="ion-no-padding ion-text-right">
-          <ion-button *ngIf="!field.manualAdd && i == data[fname].length - 1" fill="clear" size="default"
-            (click)="doLineAdd(i)" class="ion-no-padding ion-no-margin">
-            <ion-icon name="add-circle-sharp"></ion-icon>
-          </ion-button>
-          <ion-button fill="clear" size="default" (click)="doLineRemove(i)" class="ion-no-padding ion-no-margin">
-            <ion-icon name="remove-circle-sharp"></ion-icon>
-          </ion-button>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </ion-item>
-</ion-reorder-group>
-<ng-template #loading>
+@if (ok) {
+  <ion-reorder-group
+    disabled="false"
+    (ionItemReorder)="doReorder($event, fname)"
+    class="ion-no-padding"
+  >
+    @if (!field.manualAdd && (!data[fname] || data[fname]?.length == 0)) {
+      <ion-item lines="none" class="ion-no-margin ion-no-padding">
+        <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
+          <ion-icon name="add-circle-sharp"></ion-icon>
+          {{ 'Add' | translate }}
+        </ion-button>
+      </ion-item>
+    }
+    @for (kv of data[fname]; track kv; let i = $index) {
+      <ion-item lines="full" class="ion-no-padding ion-no-margin">
+        <ion-reorder slot="start"></ion-reorder>
+        <ion-grid class="kov-grid">
+          <ion-row>
+            <!-- key -->
+            @if (type == 'key') {
+              <ion-col size="10.5">
+                @if (field.manualAdd) {
+                  <ion-input
+                    required="true"
+                    [(ngModel)]="data[field.name][i]"
+                    [ngModelOptions]="{ standalone: true }"
+                  ></ion-input>
+                } @else {
+                  <ion-select
+                    required="true"
+                    [(ngModel)]="data[fname][i]"
+                    [ngModelOptions]="{ standalone: true }"
+                    mode="md"
+                    placeholder="{{ 'Please select' | translate }}"
+                  >
+                    @for (item of kovs; track item) {
+                      <ion-select-option [value]="item.key">
+                        {{ item.key }}
+                      </ion-select-option>
+                    }
+                  </ion-select>
+                }
+              </ion-col>
+            }
+            <!-- keyop -->
+            @if (type == 'keyop') {
+              <ion-col size="5">
+                <ion-select
+                  required="true"
+                  [(ngModel)]="data[fname][i].key"
+                  [ngModelOptions]="{ standalone: true }"
+                  mode="md"
+                  placeholder="{{ 'Please select' | translate }}"
+                >
+                  @for (item of kovs; track item) {
+                    <ion-select-option [value]="item.key">
+                      {{ item.key }}
+                    </ion-select-option>
+                  }
+                </ion-select>
+              </ion-col>
+            }
+            @if (type == 'keyop') {
+              <ion-col size="5">
+                <ion-select
+                  required="true"
+                  [(ngModel)]="data[fname][i].op"
+                  [ngModelOptions]="{ standalone: true }"
+                  mode="md"
+                  placeholder="{{ 'Please select' | translate }}"
+                >
+                  @for (item of keyop_; track item) {
+                    <ion-select-option [value]="item.key">
+                      {{ item.key }}
+                    </ion-select-option>
+                  }
+                </ion-select>
+              </ion-col>
+            }
+            <!-- keyvalue -->
+            @if (type == 'keyvalue') {
+              <ion-col size="4">
+                <ion-select
+                  required="true"
+                  [(ngModel)]="data[fname][i].key"
+                  [ngModelOptions]="{ standalone: true }"
+                  mode="md"
+                  placeholder="{{ 'Please select' | translate }}"
+                >
+                  @for (item of kovs; track item) {
+                    <ion-select-option [value]="item.key">
+                      {{ item.key }}
+                    </ion-select-option>
+                  }
+                </ion-select>
+              </ion-col>
+            }
+            @if (type == 'keyvalue') {
+              <ion-col size="6.5">
+                <ion-input
+                  class="ion-no-padding"
+                  type="text"
+                  [(ngModel)]="data[fname][i].value"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="{{ 'value' | translate }}"
+                >
+                </ion-input>
+              </ion-col>
+            }
+            <!-- keyopvalue -->
+            @if (type == 'keyopvalue') {
+              <ion-col size="4">
+                <ion-select
+                  required="true"
+                  [(ngModel)]="data[fname][i].key"
+                  [ngModelOptions]="{ standalone: true }"
+                  mode="md"
+                  placeholder="{{ 'Please select' | translate }}"
+                >
+                  @for (item of kovs; track item) {
+                    <ion-select-option [value]="item.key">
+                      {{ item.key }}
+                    </ion-select-option>
+                  }
+                </ion-select>
+              </ion-col>
+            }
+            @if (type == 'keyopvalue') {
+              <ion-col size="3">
+                <ion-select
+                  required="true"
+                  [(ngModel)]="data[fname][i].op"
+                  [ngModelOptions]="{ standalone: true }"
+                  mode="md"
+                  placeholder="{{ 'operator' | translate }}"
+                >
+                  @for (f of filterops; track f) {
+                    <ion-select-option [value]="f.value">
+                      {{ f.key | translate }}
+                    </ion-select-option>
+                  }
+                </ion-select>
+              </ion-col>
+            }
+            @if (type == 'keyopvalue') {
+              <ion-col size="3.5">
+                <ion-input
+                  class="ion-no-padding"
+                  type="text"
+                  [(ngModel)]="data[fname][i].value"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="{{ 'value' | translate }}"
+                >
+                </ion-input>
+              </ion-col>
+            }
+            <!-- emptyfield -->
+            @if (type == 'emptyfield') {
+              <ion-col size="5">
+                <ion-input
+                  class="ion-no-padding"
+                  type="text"
+                  [(ngModel)]="data[fname][i].key"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="{{ 'Remote Field' | translate }}"
+                >
+                </ion-input>
+              </ion-col>
+            }
+            @if (type == 'emptyfield') {
+              <ion-col size="5.5">
+                <ion-input
+                  class="ion-no-padding"
+                  type="text"
+                  [(ngModel)]="data[fname][i].value"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="{{ 'value' | translate }}"
+                >
+                </ion-input>
+              </ion-col>
+            }
+            <!-- buttons -->
+            <ion-col size="1.5" class="ion-no-padding ion-text-right">
+              @if (!field.manualAdd && i == data[fname].length - 1) {
+                <ion-button
+                  fill="clear"
+                  size="default"
+                  (click)="doLineAdd(i)"
+                  class="ion-no-padding ion-no-margin"
+                >
+                  <ion-icon name="add-circle-sharp"></ion-icon>
+                </ion-button>
+              }
+              <ion-button
+                fill="clear"
+                size="default"
+                (click)="doLineRemove(i)"
+                class="ion-no-padding ion-no-margin"
+              >
+                <ion-icon name="remove-circle-sharp"></ion-icon>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+    }
+  </ion-reorder-group>
+} @else {
   <ion-spinner name="dots" class="ion-margin-end"></ion-spinner>
-</ng-template>
+}

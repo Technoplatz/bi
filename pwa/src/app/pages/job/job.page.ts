@@ -4,59 +4,75 @@ Technoplatz BI
 Copyright ©Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General private License as published by
+it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General private License for more details.
+GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General private License
+You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
-
-If your software can interact with users remotely through a computer
-network, you should also make sure that it provides a way for users to
-get its source.  For example, if your program is a web application, its
-interface could display a "Source" link that leads users to an archive
-of the code.  There are many ways you could offer source, and different
-solutions will be better for different programs; see section 13 for the
-specific requirements.
-
-You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU AGPL, see
-https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild } from "@angular/core";
-import { ModalController } from "@ionic/angular";
-import { Router } from "@angular/router";
-import { Storage } from "@ionic/storage";
-import { Crud } from "../../classes/crud";
-import { Auth } from "../../classes/auth";
-import { Miscellaneous } from "../../classes/misc";
-import { environment } from "../../../environments/environment";
-import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
-import { CrudPage } from "../crud/crud.page";
+import { TranslatePipe } from '@ngx-translate/core';
+import { InnerFooterComponent } from '../../components/inner-footer/inner-footer.component';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import {
+  IonButton,
+  IonCol,
+  IonContent,
+  IonGrid,
+  IonIcon,
+  IonRow,
+  IonSpinner,
+  IonText,
+  ModalController,
+} from '@ionic/angular';
+import { Router } from '@angular/router';
+import { Storage } from '@ionic/storage-angular';
+import { Crud } from '../../classes/crud';
+import { Auth } from '../../classes/auth';
+import { Miscellaneous } from '../../classes/misc';
+import { environment } from '../../../environments/environment';
+import {
+  JsonEditorOptions,
+  JsonEditorComponent,
+} from '../../components/json-editor/json-editor.component';
+import { CrudPage } from '../crud/crud.page';
 
 @Component({
-  selector: "app-job",
-  templateUrl: "./job.page.html",
-  styleUrls: ["./job.page.scss"]
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [
+    TranslatePipe,
+    IonButton,
+    IonCol,
+    IonContent,
+    IonGrid,
+    IonIcon,
+    IonRow,
+    IonSpinner,
+    IonText,
+    InnerFooterComponent,
+    JsonEditorComponent,
+  ],
+  selector: 'app-job',
+  templateUrl: './job.page.html',
+  styleUrl: './job.page.scss',
 })
-
 export class JobPage implements OnInit {
-  @ViewChild("editor", { static: false }) editor: any = new JsonEditorComponent();
+  @ViewChild('editor', { static: false }) editor?: JsonEditorComponent;
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
-  public header: string = "JOBS";
-  public subheader: string = "";
+  public header: string = 'JOBS';
+  public subheader: string = '';
   public loadingText: string = environment.misc.loadingText;
   public user: any = null;
   public perm: boolean = false;
-  public id: string = "";
+  public id: string = '';
   public data_: any = [];
   public pages: any = [];
   public limit_: number = environment.misc.limit;
@@ -74,14 +90,14 @@ export class JobPage implements OnInit {
   public is_inprogress: boolean = false;
   public is_url_copied: boolean = false;
   public running_: boolean = false;
-  public job_scheduled_cron_: string = "";
-  private menu: string = "";
-  private submenu: string = "";
+  public job_scheduled_cron_: string = '';
+  private menu: string = '';
+  private submenu: string = '';
   private job_: any = {};
   public perma_: boolean = false;
   private collections_: any = [];
   public json_content_: any = null;
-  public col_: string = "";
+  public col_: string = '';
   private schema_: any = {};
 
   constructor(
@@ -90,7 +106,7 @@ export class JobPage implements OnInit {
     private auth: Auth,
     private crud: Crud,
     private router: Router,
-    private modal: ModalController
+    private modal: ModalController,
   ) {
     this.auth.user.subscribe((res: any) => {
       this.user = res;
@@ -106,17 +122,17 @@ export class JobPage implements OnInit {
     this.crud.collections.unsubscribe;
   }
 
-  ngOnInit() { }
+  ngOnInit() {}
 
   ionViewDidEnter() {
-    this.storage.get("LSPAGINATION").then((LSPAGINATION: any) => {
+    this.storage.get('LSPAGINATION').then((LSPAGINATION: any) => {
       this.limit_ = LSPAGINATION * 1;
-      this.storage.get("LSJOB").then((LSJOB_: any) => {
+      this.storage.get('LSJOB').then((LSJOB_: any) => {
         this.col_ = LSJOB_?.job_collection_id;
         this.job_ = LSJOB_;
-        this.menu = this.router.url.split("/")[1];
-        this.id = this.subheader = this.submenu = this.router.url.split("/")[2];
-        this.refresh_data(false).then(() => { });
+        this.menu = this.router.url.split('/')[1];
+        this.id = this.subheader = this.submenu = this.router.url.split('/')[2];
+        this.refresh_data(false).then(() => {});
       });
     });
   }
@@ -125,37 +141,41 @@ export class JobPage implements OnInit {
     return new Promise((resolve, reject) => {
       this.running_ = true;
       this.schemavis_ = false;
-      this.crud.get_query_job("job", this.id, this.limit_, run_).then((res: any) => {
-        if (res && res.job) {
-          this.schema_ = res.schema;
-          this.job_scheduled_cron_ = res.job?.job_scheduled_cron;
-          this.subheader = res.job.job_name;
-          this.json_content_ = res.job.job_aggregate;
-          this.aggregate_ = res.job.job_aggregate;
-          this.count_ = res.count;
-          resolve(true);
-        } else {
-          this.misc.doMessage("no data found", "error");
+      this.crud
+        .get_query_job('job', this.id, this.limit_, run_)
+        .then((res: any) => {
+          if (res && res.job) {
+            this.schema_ = res.schema;
+            this.job_scheduled_cron_ = res.job?.job_scheduled_cron;
+            this.subheader = res.job.job_name;
+            this.json_content_ = res.job.job_aggregate;
+            this.aggregate_ = res.job.job_aggregate;
+            this.count_ = res.count;
+            resolve(true);
+          } else {
+            this.misc.doMessage('no data found', 'error');
+            reject();
+          }
+          if (res.err) {
+            this.misc.doMessage(res.err, 'error');
+            reject();
+          }
+        })
+        .catch((res: any) => {
+          this.misc.doMessage(res.err, 'error');
           reject();
-        }
-        if (res.err) {
-          this.misc.doMessage(res.err, "error");
-          reject();
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res.err, "error");
-        reject();
-      }).finally(() => {
-        this.running_ = false;
-      });
+        })
+        .finally(() => {
+          this.running_ = false;
+        });
     });
   }
 
   json_editor_init() {
     return new Promise((resolve, reject) => {
       this.jeoptions = new JsonEditorOptions();
-      this.jeoptions.modes = ["tree", "code", "text"]
-      this.jeoptions.mode = "code";
+      this.jeoptions.modes = ['tree', 'code', 'text'];
+      this.jeoptions.mode = 'code';
       this.jeoptions.statusBar = false;
       this.jeoptions.navigationBar = false;
       this.jeoptions.mainMenuBar = true;
@@ -167,74 +187,79 @@ export class JobPage implements OnInit {
 
   set_editor(set_: boolean) {
     this.schemavis_ = !this.schemavis_ && set_ && !this.running_;
-    set_ ? this.json_editor_init().then(() => { }) : null;
+    set_ ? this.json_editor_init().then(() => {}) : null;
   }
 
   save_job_json_f(approved_: boolean) {
     if (this.json_content_ && this.json_content_.length > 0) {
       this._saving = true;
       this.aggregate_ = this.json_content_;
-      this.misc.api_call("crud", {
-        op: "savejob",
-        collection: "_job",
-        id: this.id,
-        aggregate: this.aggregate_,
-        approved: approved_
-      }).then(() => {
-        this.misc.doMessage("job saved successfully", "success");
-        this.refresh_data(false).then(() => {
-          this.schemavis_ = false;
+      this.misc
+        .api_call('crud', {
+          op: 'savejob',
+          collection: '_job',
+          id: this.id,
+          aggregate: this.aggregate_,
+          approved: approved_,
+        })
+        .then(() => {
+          this.misc.doMessage('job saved successfully', 'success');
+          this.refresh_data(false).then(() => {
+            this.schemavis_ = false;
+          });
+        })
+        .catch((error: any) => {
+          this.misc.doMessage(error, 'error');
+        })
+        .finally(() => {
+          this._saving = false;
         });
-      }).catch((error: any) => {
-        this.misc.doMessage(error, "error");
-      }).finally(() => {
-        this._saving = false;
-      });
     } else {
-      this.misc.doMessage("invalid aggregation", "error");
+      this.misc.doMessage('invalid aggregation', 'error');
     }
   }
 
   json_changed(event_: any) {
-    !event_.isTrusted ? this.json_content_ = event_ : null;
+    !event_.isTrusted ? (this.json_content_ = event_) : null;
   }
 
   run_job() {
-    this.refresh_data(true).then(() => { });
+    this.refresh_data(true).then(() => {});
   }
 
   edit_query() {
-    this.modal.create({
-      component: CrudPage,
-      backdropDismiss: true,
-      cssClass: "crud-modal",
-      componentProps: {
-        shuttle: {
-          op: "update",
-          collection: "_job",
-          collections: this.collections_,
-          views: [],
-          user: this.user,
-          data: this.job_,
-          counters: null,
-          structure: this.schema_,
-          sweeped: [],
-          filter: null,
-          actions: [],
-          actionix: -1,
-          view: null,
-          scan: null
-        }
-      }
-    }).then((modal_: any) => {
-      modal_.onDidDismiss().then((res: any) => {
-        if (res.data.modified && res.data.res.result) {
-          this.misc.doMessage("job settings updated successfully", "success");
-          this.refresh_data(true);
-        }
+    this.modal
+      .create({
+        component: CrudPage,
+        backdropDismiss: true,
+        cssClass: 'crud-modal',
+        componentProps: {
+          shuttle: {
+            op: 'update',
+            collection: '_job',
+            collections: this.collections_,
+            views: [],
+            user: this.user,
+            data: this.job_,
+            counters: null,
+            structure: this.schema_,
+            sweeped: [],
+            filter: null,
+            actions: [],
+            actionix: -1,
+            view: null,
+            scan: null,
+          },
+        },
+      })
+      .then((modal_: any) => {
+        modal_.onDidDismiss().then((res: any) => {
+          if (res.data.modified && res.data.res.result) {
+            this.misc.doMessage('job settings updated successfully', 'success');
+            this.refresh_data(true);
+          }
+        });
+        modal_.present();
       });
-      modal_.present();
-    });
   }
-
 }

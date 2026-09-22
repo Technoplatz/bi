@@ -4,51 +4,46 @@ Technoplatz BI
 Copyright ©Technoplatz IT Solutions GmbH, Mustafa Mat
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General private License as published by
+it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General private License for more details.
+GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU Affero General private License
+You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
-
-If your software can interact with users remotely through a computer
-network, you should also make sure that it provides a way for users to
-get its source.  For example, if your program is a web application, its
-interface could display a "Source" link that leads users to an archive
-of the code.  There are many ways you could offer source, and different
-solutions will be better for different programs; see section 13 for the
-specific requirements.
-
-You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU AGPL, see
-https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
-import { ModalController, AlertController } from "@ionic/angular";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { TranslatePipe } from "@ngx-translate/core";
+import { InnerFooterComponent } from "../../components/inner-footer/inner-footer.component";
+import { PaginationComponent } from "../../components/pagination/pagination.component";
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectionStrategy } from "@angular/core";
+import { AlertController, IonButton, IonCheckbox, IonCol, IonContent, IonGrid, IonIcon, IonInput, IonLabel, IonRow, IonSpinner, IonText, IonTextarea, ModalController } from "@ionic/angular";
 import { Router } from "@angular/router";
-import { Storage } from "@ionic/storage";
+import { Storage } from "@ionic/storage-angular";
 import { Crud } from "../../classes/crud";
 import { Auth } from "../../classes/auth";
 import { Miscellaneous } from "../../classes/misc";
 import { environment } from "../../../environments/environment";
 import { CrudPage } from "../crud/crud.page";
-import { JsonEditorOptions, JsonEditorComponent } from "ang-jsoneditor";
+import { JsonEditorOptions, JsonEditorComponent } from "../../components/json-editor/json-editor.component";
 
 @Component({
+  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [CommonModule, FormsModule, TranslatePipe, IonButton, IonCheckbox, IonCol, IonContent, IonGrid, IonIcon, IonInput, IonLabel, IonRow, IonSpinner, IonText, IonTextarea, InnerFooterComponent, PaginationComponent, JsonEditorComponent],
   selector: "app-collection",
   templateUrl: "./collection.page.html",
-  styleUrls: ["./collection.page.scss"]
+  styleUrl: "./collection.page.scss"
 })
 
 export class CollectionPage implements OnInit {
-  @ViewChild("editor", { static: false }) editor: any = new JsonEditorComponent();
+  @ViewChild("editor", { static: false }) editor?: JsonEditorComponent;
   @ViewChild("searchfocus", { static: false }) searchfocus: any = [];
   @ViewChild("svg") svg: any = ElementRef;
   private json_content_: any = null;
@@ -385,13 +380,13 @@ export class CollectionPage implements OnInit {
     return a.value.index < b.value.index ? -1 : (b.value.index > a.value.index ? 1 : 0);
   }
 
-  do_sort(key: string, d: number) {
+  do_sort(key: any, d: number) {
     this.sort = {};
     this.sort[key] = d ? d * -1 : 1;
     this.refresh_data(0, false);
   }
 
-  set_search(k_: string) {
+  set_search(k_: any) {
     this.colvis_activated_ = false;
     setTimeout(() => {
       this.searchfocus?.setFocus();
@@ -436,7 +431,7 @@ export class CollectionPage implements OnInit {
     });
   }
 
-  init_search_item(key_: string) {
+  init_search_item(key_: any) {
     const n_ = this.filter_.length;
     this.searched[key_].actived = false;
     for (let d = 0; d < n_; d++) {
@@ -458,7 +453,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  search(key_: string, value_: string) {
+  search(key_: any, value_: string) {
     this.searched[key_].actived = false;
     if (!this.filter_ || this.filter_.length === 0) {
       if (["true", "false"].includes(value_)) {
@@ -510,7 +505,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  set_search_item(key_: string, op: string) {
+  set_search_item(key_: any, op: string) {
     this.searched[key_].op = op;
   }
 
@@ -638,7 +633,7 @@ export class CollectionPage implements OnInit {
     event_.stopPropagation();
   }
 
-  selection_changed(item_: string, s_: number) {
+  selection_changed(item_: any, s_: number) {
     this.selections_[item_][s_].value = !this.selections_[item_][s_].value;
   }
 
@@ -649,7 +644,7 @@ export class CollectionPage implements OnInit {
     }
   }
 
-  set_colvis_item(key_: string) {
+  set_colvis_item(key_: any) {
     this.colvis_[key_] = !this.colvis_[key_];
   }
 

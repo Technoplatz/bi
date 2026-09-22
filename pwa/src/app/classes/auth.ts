@@ -15,31 +15,15 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
-
-If your software can interact with users remotely through a computer
-network, you should also make sure that it provides a way for users to
-get its source.  For example, if your program is a web application, its
-interface could display a "Source" link that leads users to an archive
-of the code.  There are many ways you could offer source, and different
-solutions will be better for different programs; see section 13 for the
-specific requirements.
-
-You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU AGPL, see
-https://www.gnu.org/licenses.
 */
 
 import { Injectable } from "@angular/core";
-import { Storage } from "@ionic/storage";
+import { Storage } from "@ionic/storage-angular";
 import { BehaviorSubject } from "rxjs";
 import { Crud } from "./crud";
 import { Miscellaneous } from "./misc";
 
-@Injectable({
-  providedIn: "root"
-})
-
+@Injectable({ providedIn: "root" })
 export class Auth {
   public user = new BehaviorSubject<any>(null);
 
@@ -49,13 +33,15 @@ export class Auth {
     private crud: Crud
   ) {
     this.misc.session_.subscribe((session_: any) => {
-      session_ === "ended" ? this.setUserOut() : null;
+      if (session_ === "ended") {
+        this.setUserOut();
+      }
     });
   }
 
   setUserOut() {
     // clear the stored session first; the redirect would otherwise abort the IndexedDB delete
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.storage.remove("LSUSERMETA").then(() => {
         this.user.next(null);
         window.location.replace("/");
@@ -67,15 +53,15 @@ export class Auth {
     });
   }
 
-  sign_in(creds: any) {
+  private auth_call(creds: any, op: string, endpoint = "auth") {
     return new Promise((resolve, reject) => {
-      creds.op = "signin";
-      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
+      creds.op = op;
+      this.misc.api_call(endpoint, JSON.stringify(creds)).then((res: any) => {
         if (res && res.result) {
-          resolve(true);
+          resolve(res);
         } else {
-          this.misc.doMessage(res.msg, "error");
-          reject(res.msg);
+          this.misc.doMessage(res?.msg, "error");
+          reject(res?.msg);
         }
       }).catch((res: any) => {
         this.misc.doMessage(res, "error");
@@ -84,68 +70,36 @@ export class Auth {
     });
   }
 
+  sign_in(creds: any) {
+    return this.auth_call(creds, "signin").then(() => true);
+  }
+
   Forgot(creds: any) {
-    return new Promise((resolve, reject) => {
-      creds.op = "forgot";
-      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
-        if (res && res.result) {
-          resolve(true);
-        } else {
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
-    });
+    return this.auth_call(creds, "forgot").then(() => true);
   }
 
   TFAC(creds: any) {
     return new Promise((resolve, reject) => {
-      creds.op = "tfac";
-      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
-        if (res && res.result) {
-          this.user.next(res.user);
-          this.storage.set("LSUSERMETA", res.user).then(() => {
-            resolve(true);
-            this.misc.navi.next("/dashboard");
-            this.crud.get_all().then(() => { }).catch((error: any) => {
-              this.misc.doMessage(error, "error");
-              reject(error);
-            });
+      this.auth_call(creds, "tfac").then((res: any) => {
+        this.user.next(res.user);
+        this.storage.set("LSUSERMETA", res.user).then(() => {
+          resolve(true);
+          this.misc.navi.next("/dashboard");
+          this.crud.get_all().catch((error: any) => {
+            this.misc.doMessage(error, "error");
           });
-        } else {
-          this.misc.doMessage(res.msg, "error");
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
+        });
+      }).catch((error: any) => reject(error));
     });
   }
 
   Reset(creds: any) {
-    return new Promise((resolve, reject) => {
-      creds.op = "reset";
-      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
-        if (res && res.result) {
-          resolve(true);
-        } else {
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
-    });
+    return this.auth_call(creds, "reset").then(() => true);
   }
 
   OTP(obj: any) {
     return new Promise((resolve, reject) => {
-      this.misc.api_call("otp", JSON.stringify({
-        request: obj
-      })).then((res: any) => {
+      this.misc.api_call("otp", JSON.stringify({ request: obj })).then((res: any) => {
         if (res && res.result) {
           resolve(res);
         } else {
@@ -161,9 +115,7 @@ export class Auth {
   sign_out() {
     // invalidate the server session while the token is still available, then clear and redirect
     return new Promise((resolve, reject) => {
-      this.misc.api_call("auth", JSON.stringify({
-        op: "signout"
-      })).then((res: any) => {
+      this.misc.api_call("auth", JSON.stringify({ op: "signout" })).then((res: any) => {
         this.setUserOut().then(() => {
           res && res.result ? resolve(true) : reject(res?.msg);
         });
@@ -189,36 +141,6 @@ export class Auth {
   }
 
   sign_up(creds: any) {
-    return new Promise((resolve, reject) => {
-      creds.op = "signup";
-      this.misc.api_call("auth", JSON.stringify(creds)).then((res: any) => {
-        if (res && res.result) {
-          resolve(true);
-        } else {
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
-    });
-  }
-
-  forgotPassword(creds: any) {
-    return new Promise((resolve, reject) => {
-      creds.op = "forgot";
-      this.misc.api_call("otp", JSON.stringify(creds)).then((res: any) => {
-        if (res && res.result) {
-          this.setUserOut().then(() => {
-            resolve(true);
-          });
-        } else {
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
-    });
+    return this.auth_call(creds, "signup");
   }
 }

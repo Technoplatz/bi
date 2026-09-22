@@ -54,3 +54,20 @@ jobs:
           cp .env.example .env
           docker compose -f docker-compose.yml config --quiet
           docker compose -f docker-compose-integration.yml config --quiet
+
+  frontend:
+    name: Build the web application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: pwa/package-lock.json
+      - name: Install dependencies
+        working-directory: pwa
+        run: npm ci --no-audit --no-fund
+      - name: Production build
+        working-directory: pwa
+        run: npm run build -- --configuration production

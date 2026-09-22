@@ -3,16 +3,16 @@
 # Browser end-to-end check of the sign-in flow against the local stack.
 # Seeds a throwaway user, registers its password through the api, drives the interface in a
 # Playwright container, hands the e-mailed code over from the local database and cleans up.
-# Usage: tools/e2e-signin.sh [url]   (default http://localhost:8101/)
+# Usage: tools/e2e-signin.sh [url]   (default http://localhost:${PWA_CONTAINER_PORT}/)
 #
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 set -a; . ./.env; set +a
-URL="${1:-http://localhost:8101/}"
+URL="${1:-http://localhost:${PWA_CONTAINER_PORT}/}"
 API="http://127.0.0.1:${API_CONTAINER_PORT}/api"
 USER_ID="e2e-browser@example.invalid"
 PASS='E2eBrowser#2026'
-TOOLS="$PWD/pwa-next/tools"
+TOOLS="$PWD/pwa/tools"
 MSH="docker exec mongo0 mongosh mongodb://$MONGO_USERNAME:$MONGO_PASSWORD@mongo0:27017/$MONGO_DB?authSource=$MONGO_AUTH_DB --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval"
 rm -f "$TOOLS/otp.txt" "$TOOLS/otp-requested.txt"
 

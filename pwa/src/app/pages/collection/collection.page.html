@@ -1,477 +1,751 @@
-<!--
-Technoplatz BI
-
-Copyright ©Technoplatz IT Solutions GmbH, Mustafa Mat
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see https://www.gnu.org/licenses.
-
-If your software can interact with users remotely through a computer
-network, you should also make sure that it provides a way for users to
-get its source.  For example, if your program is a web application, its
-interface could display a "Source" link that leads users to an archive
-of the code.  There are many ways you could offer source, and different
-solutions will be better for different programs; see section 13 for the
-specific requirements.
-
-You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU AGPL, see
-https://www.gnu.org/licenses.
--->
-
 <ion-content class="ion-no-padding">
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
         <h3>[{{ subheader }}]&nbsp;</h3>
-        <span *ngIf="is_loaded" class="bold primary">{{ count }} {{ count > 1 ? ('documents' | translate)
-          : ('document' | translate) }} {{ (filter_?.length > 0 ? 'filtered' : 'found') | translate }}.</span><span
-          *ngIf="!is_loaded" class="bold primary">{{
-          loadingText | translate }}...&nbsp;</span>
+        @if (is_loaded) {
+          <span class="bold primary"
+            >{{ count }} {{ count > 1 ? ('documents' | translate) : ('document' | translate) }}
+            {{ (filter_?.length > 0 ? 'filtered' : 'found') | translate }}.</span
+          >
+        }
+        @if (!is_loaded) {
+          <span class="bold primary">{{ loadingText | translate }}...&nbsp;</span>
+        }
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              <div *ngIf="is_crud && importvis_" (click)="import_modal()" class="data-sq-button">
-                <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text color="primary">{{ 'File Upload' |
-                  translate }}</ion-text>
-              </div>
-              <div *ngIf="scan_; else newrecord" (click)="go_crud(null, 'insert')" class="data-sq-button">
-                <ion-icon name="qr-code-outline"></ion-icon><br />
-                <ion-text color="primary">{{ 'Scan Barcode' | translate }}</ion-text>
-              </div>
-              <ng-template #newrecord>
-                <div *ngIf="!['_log', '_announcement'].includes(id)" (click)="go_crud(null, 'insert')"
-                  class="data-sq-button">
-                  <ion-icon name="add-circle-outline"></ion-icon><br />
-                  <ion-text color="primary">{{ 'New Record' | translate }}</ion-text>
+              @if (is_crud && importvis_) {
+                <div (click)="import_modal()" class="data-sq-button">
+                  <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text
+                    color="primary"
+                    >{{ 'File Upload' | translate }}</ion-text
+                  >
                 </div>
-              </ng-template>
+              }
+              @if (scan_) {
+                <div (click)="go_crud(null, 'insert')" class="data-sq-button">
+                  <ion-icon name="qr-code-outline"></ion-icon><br />
+                  <ion-text color="primary">{{ 'Scan Barcode' | translate }}</ion-text>
+                </div>
+              } @else {
+                @if (!['_log', '_announcement'].includes(id)) {
+                  <div (click)="go_crud(null, 'insert')" class="data-sq-button">
+                    <ion-icon name="add-circle-outline"></ion-icon><br />
+                    <ion-text color="primary">{{ 'New Record' | translate }}</ion-text>
+                  </div>
+                }
+              }
               <div (click)="refresh_data(0, false)" class="data-sq-button">
-                <ion-icon *ngIf="is_loaded" name="sync-circle-outline"></ion-icon>
-                <ion-spinner *ngIf="!is_loaded" name="lines-sharp"></ion-spinner>
+                @if (is_loaded) {
+                  <ion-icon name="sync-circle-outline"></ion-icon>
+                }
+                @if (!is_loaded) {
+                  <ion-spinner name="lines-sharp"></ion-spinner>
+                }
                 <br />
                 <ion-text color="primary">{{ 'Refresh List' | translate }}</ion-text>
               </div>
-              <div (click)="clear_filter()" [class]="is_loaded ? 'data-sq-button' : 'data-sq-button disabled'">
-                <ion-icon name="filter-circle-outline"
-                  [color]="filter_?.length > 0 ? 'danger' : 'primary'"></ion-icon><br />
-                <ion-text [color]="filter_?.length > 0 ? 'danger' : 'primary'">{{ 'Clear Filter' | translate
-                  }}</ion-text>
+              <div
+                (click)="clear_filter()"
+                [class]="is_loaded ? 'data-sq-button' : 'data-sq-button disabled'"
+              >
+                <ion-icon
+                  name="filter-circle-outline"
+                  [color]="filter_?.length > 0 ? 'danger' : 'primary'"
+                ></ion-icon
+                ><br />
+                <ion-text [color]="filter_?.length > 0 ? 'danger' : 'primary'">{{
+                  'Clear Filter' | translate
+                }}</ion-text>
               </div>
               <div (click)="multi_crud('clone')" class="data-sq-button">
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 <ion-text color="primary">{{ 'Clone Record' | translate }}</ion-text>
               </div>
-              <div *ngIf="perma_" (click)="multi_crud('delete')" class="data-sq-button">
-                <ion-icon name="trash-outline"></ion-icon>
-                <br />
-                <ion-text color="primary">{{ 'Delete Record' | translate }}</ion-text>
-              </div>
+              @if (perma_) {
+                <div (click)="multi_crud('delete')" class="data-sq-button">
+                  <ion-icon name="trash-outline"></ion-icon>
+                  <br />
+                  <ion-text color="primary">{{ 'Delete Record' | translate }}</ion-text>
+                </div>
+              }
               <div (click)="copy(propkeys_, $event, -1)" class="data-sq-button">
-                <ion-icon *ngIf="!is_copied" name="browsers-sharp"></ion-icon>
-                <ion-icon *ngIf="is_copied" name="checkmark-sharp"></ion-icon>
+                @if (!is_copied) {
+                  <ion-icon name="browsers-sharp"></ion-icon>
+                }
+                @if (is_copied) {
+                  <ion-icon name="checkmark-sharp"></ion-icon>
+                }
                 <br />
-                <ion-text color="primary" *ngIf="!is_copied">{{ 'Copy Headers' | translate }}</ion-text>
-                <ion-text color="primary" *ngIf="is_copied">{{ 'Successfully Copied' | translate }}</ion-text>
+                @if (!is_copied) {
+                  <ion-text color="primary">{{ 'Copy Headers' | translate }}</ion-text>
+                }
+                @if (is_copied) {
+                  <ion-text color="primary">{{ 'Successfully Copied' | translate }}</ion-text>
+                }
               </div>
-              <div *ngIf="is_crud && perm_" (click)="set_editor(true)" class="data-sq-button">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000" #svg class="json-icon-large">
-                  <title>json_scheme</title>
-                  <rect fill="none" />
-                  <path
-                    d="M5,3H7V5H5v5a2,2,0,0,1-2,2,2,2,0,0,1,2,2v5H7v2H5c-1.07-.27-2-.9-2-2V15a2,2,0,0,0-2-2H0V11H1A2,2,0,0,0,3,9V5A2,2,0,0,1,5,3M19,3a2,2,0,0,1,2,2V9a2,2,0,0,0,2,2h1v2H23a2,2,0,0,0-2,2v4a2,2,0,0,1-2,2H17V19h2V14a2,2,0,0,1,2-2,2,2,0,0,1-2-2V5H17V3h2M12,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1M8,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1m8,0a1,1,0,1,1-1,1A1,1,0,0,1,16,15Z" />
-                </svg>
-                <br />
-                <ion-text color="primary">{{ 'Edit Schema' | translate }}</ion-text>
-              </div>
+              @if (is_crud && perm_) {
+                <div (click)="set_editor(true)" class="data-sq-button">
+                  <svg
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="#000"
+                    #svg
+                    class="json-icon-large"
+                  >
+                    <title>json_scheme</title>
+                    <rect fill="none" />
+                    <path
+                      d="M5,3H7V5H5v5a2,2,0,0,1-2,2,2,2,0,0,1,2,2v5H7v2H5c-1.07-.27-2-.9-2-2V15a2,2,0,0,0-2-2H0V11H1A2,2,0,0,0,3,9V5A2,2,0,0,1,5,3M19,3a2,2,0,0,1,2,2V9a2,2,0,0,0,2,2h1v2H23a2,2,0,0,0-2,2v4a2,2,0,0,1-2,2H17V19h2V14a2,2,0,0,1,2-2,2,2,0,0,1-2-2V5H17V3h2M12,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1M8,15a1,1,0,1,1-1,1,1,1,0,0,1,1-1m8,0a1,1,0,1,1-1,1A1,1,0,0,1,16,15Z"
+                    />
+                  </svg>
+                  <br />
+                  <ion-text color="primary">{{ 'Edit Schema' | translate }}</ion-text>
+                </div>
+              }
             </ion-col>
           </ion-row>
         </ion-grid>
         <!-- SCHEMA -->
-        <ion-grid *ngIf="is_crud && perm_ && schemavis_" class="actions-grid">
-          <ion-row>
-            <ion-col size="12">
-              <ion-button *ngIf="!is_saving" (click)="save_schema_f()">
-                <ion-icon name="cloud-upload-outline"></ion-icon>
-                <span>{{ 'Save Schema' | translate }}</span>
-              </ion-button>
-              <ion-button *ngIf="is_saving">
-                <ion-spinner name="lines-sharp-small"></ion-spinner>&nbsp;&nbsp;
-                <span>{{ 'Saving' | translate }}</span>
-              </ion-button>
-              <ion-button (click)="set_editor(false)" color="medium">
-                <ion-icon name="close-circle-outline"></ion-icon>
-                {{ 'Close' | translate }}
-              </ion-button>
-            </ion-col>
-          </ion-row>
-          <ion-row class="jrow">
-            <ion-col size="12">
-              <json-editor id="struc" [options]="jeoptions" [data]="structure_" (change)="json_changed($event)"
-                #editor></json-editor>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-
-        <!-- CRUD GRID SECTION -->
-        <div *ngIf="is_initialized; else notinit">
-          <!-- ACTION BUTTONS -->
-          <ion-grid *ngIf="actions?.length > 0" class="actions-grid">
+        @if (is_crud && perm_ && schemavis_) {
+          <ion-grid class="actions-grid">
             <ion-row>
               <ion-col size="12">
-                <span *ngFor="let item of actions; let ac = index">
-                  <ion-button *ngIf="item.enabled; actionhide" (click)="action(ac)">
-                    <ion-icon *ngIf="item?.icon" [name]="item?.icon" class="action-icon"></ion-icon>
-                    {{ item.title | translate }}
+                @if (!is_saving) {
+                  <ion-button (click)="save_schema_f()">
+                    <ion-icon name="cloud-upload-outline"></ion-icon>
+                    <span>{{ 'Save Schema' | translate }}</span>
                   </ion-button>
-                  <ng-template #actionhide></ng-template>
-                </span>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <!-- FLASHCARDS -->
-          <ion-grid *ngIf="flashcards_?.length > 0" class="ion-no-padding">
-            <ion-row>
-              <ion-col size="12" class="schema-flashcard-container">
-                <div *ngFor="let item of flashcards_" (click)="do_flashcard(item)">{{
-                  item.view.title | translate }}<br /><span>{{ item.count }}</span></div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-
-          <table class="data-table">
-            <tr>
-              <th class="no-padding">
-                <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin colvis-button"
-                  (click)="colvis_activate()">
-                  <ion-icon *ngIf="colvised_" name="eye-off"></ion-icon>
-                  <ion-icon *ngIf="!colvised_" name="eye-outline"></ion-icon>
+                }
+                @if (is_saving) {
+                  <ion-button>
+                    <ion-spinner name="lines-sharp-small"></ion-spinner>&nbsp;&nbsp;
+                    <span>{{ 'Saving' | translate }}</span>
+                  </ion-button>
+                }
+                <ion-button (click)="set_editor(false)" color="medium">
+                  <ion-icon name="close-circle-outline"></ion-icon>
+                  {{ 'Close' | translate }}
                 </ion-button>
-                <div *ngIf="colvis_activated_" class="colvis-box">
-                  <div>
-                    <div>{{ 'Column Visibility' | translate }}</div>
-                    <ion-button size="small" (click)="colvis_allon()" fill="clear"
-                      class="ion-no-padding ion-no-margin text-underlined">
-                      {{ 'All On' | translate }}
-                    </ion-button>&nbsp;
-                    <ion-button size="small" (click)="colvis_alloff()" fill="clear"
-                      class="ion-no-padding ion-no-margin text-underlined">
-                      {{ 'All Off' | translate }}
-                    </ion-button>
-                  </div>
-                  <div class="filler-4"></div>
-                  <ion-button size="small" (click)="set_colvis()">
-                    {{ 'Save' | translate }}
+              </ion-col>
+            </ion-row>
+            <ion-row class="jrow">
+              <ion-col size="12">
+                <json-editor
+                  id="struc"
+                  [options]="jeoptions"
+                  [data]="structure_"
+                  (change)="json_changed($event)"
+                  #editor
+                ></json-editor>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        }
+
+        <!-- CRUD GRID SECTION -->
+        @if (is_initialized) {
+          <div>
+            <!-- ACTION BUTTONS -->
+            @if (actions?.length > 0) {
+              <ion-grid class="actions-grid">
+                <ion-row>
+                  <ion-col size="12">
+                    @for (item of actions; track item; let ac = $index) {
+                      <span>
+                        @if (item.enabled) {
+                          <ion-button (click)="action(ac)">
+                            @if (item?.icon) {
+                              <ion-icon [name]="item?.icon" class="action-icon"></ion-icon>
+                            }
+                            {{ item.title | translate }}
+                          </ion-button>
+                        } @else {}
+                      </span>
+                    }
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            }
+            <!-- FLASHCARDS -->
+            @if (flashcards_?.length > 0) {
+              <ion-grid class="ion-no-padding">
+                <ion-row>
+                  <ion-col size="12" class="schema-flashcard-container">
+                    @for (item of flashcards_; track item) {
+                      <div (click)="do_flashcard(item)">
+                        {{ item.view.title | translate }}<br /><span>{{ item.count }}</span>
+                      </div>
+                    }
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            }
+            <table class="data-table">
+              <tr>
+                <th class="no-padding">
+                  <ion-button
+                    size="small"
+                    fill="clear"
+                    class="ion-no-padding ion-no-margin colvis-button"
+                    (click)="colvis_activate()"
+                  >
+                    @if (colvised_) {
+                      <ion-icon name="eye-off"></ion-icon>
+                    }
+                    @if (!colvised_) {
+                      <ion-icon name="eye-outline"></ion-icon>
+                    }
                   </ion-button>
-                  <ion-button size="small" (click)="colvis_activate()" color="light">
-                    {{ 'Cancel' | translate }}
-                  </ion-button>
-                  <div class="filler-8"></div>
-                  <div *ngFor="let item of properties_ | keyvalue : orderByIndex">
-                    <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin"
-                      (click)="set_colvis_item(item.key)">
-                      <ion-icon [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"></ion-icon> {{ item.value.title |
-                      translate }}&nbsp;&nbsp;[{{ item.key}}]
-                    </ion-button>
-                  </div>
-                  ---
-                  <div *ngFor="let item of fixedcols_">
-                    <ion-button size="small" fill="clear" class="ion-no-padding ion-no-margin"
-                      (click)="set_colvis_item(item.key)">
-                      <ion-icon [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"></ion-icon> {{ item.title |
-                      translate }}&nbsp;&nbsp;[{{ item.key}}]
-                    </ion-button>
-                  </div>
-                </div>
-              </th>
-              <th *ngIf="!['_log','_dump','_announcement'].includes(id)">
-                <ion-checkbox [(ngModel)]="multicheckbox" (ionChange)="switch_select_data($event.detail.checked)"
-                  mode="md">
-                </ion-checkbox>
-              </th>
-              <th *ngIf="['_query','_job'].includes(id)">
-                {{ 'Approval' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_approved'}}</ion-button>
-              </th>
-              <!-- DATA LIST HEADER -->
-              <th *ngFor="let item of properties_ | keyvalue : orderByIndex"
-                [style]="colvis_ == {} || colvis_[item.key] ? 'display: none;' : ''">
-                <div
-                  [class]="['number','decimal','float'].includes(item.value.bsonType) ? 'align-right clicked-item' : 'align-left clicked-item'"
-                  (click)="set_search(item.key)">
-                  {{ item.value.title | translate }}<br />
-                  <ion-button size="small" fill="clear"
-                    [class]="searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'">{{
-                    item.key }}<ion-icon name="caret-down"></ion-icon>
-                  </ion-button>
-                </div>
-                <!-- SEARCH BOX -->
-                <div *ngIf="searched && searched[item.key]?.actived" class="search-box">
-                  <div>{{ item.key | translate }}</div>
-                  <div class="filler-8"></div>
-                  <ion-button color="light" size="small" (click)="do_sort(item.key, -1)">
-                    <ion-icon name="arrow-down"></ion-icon>
-                  </ion-button>
-                  <ion-button color="light" size="small" (click)="do_sort(item.key, 1)">
-                    <ion-icon name="arrow-up"></ion-icon>
-                  </ion-button>
-                  <ion-button color="light" size="small" (click)="copy_column(item.key)">
-                    <ion-icon *ngIf="!is_key_copied && !is_key_copying" name="copy-sharp"></ion-icon>
-                    <ion-icon *ngIf="is_key_copied" name="checkmark-sharp"></ion-icon>
-                    <ion-icon *ngIf="is_key_copying" name="stopwatch-"></ion-icon>
-                  </ion-button>
-                  <br />
-                  <div *ngIf="item.value.bsonType!='bool'" class="search-ops">
-                    <ion-button [color]="searched[item.key]?.op == 'contains' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'contains')">
-                      {{ 'in' | translate }}
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'like' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'like')">
-                      {{ 'A&rarr;' | translate }}
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'eq' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'eq')">
-                      =
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'ne' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'ne')">
-                      &ne;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'gte' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'gte')">
-                      &ge;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'lte' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'lte')">
-                      &le;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'null' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'null')">
-                      &#9723;
-                    </ion-button>
-                    <ion-button [color]="searched[item.key]?.op == 'nnull' ? 'primary' : 'light'" size="small"
-                      (click)="set_search_item(item.key, 'nnull')">
-                      &#9724;
-                    </ion-button>
-                  </div>
-                  <div *ngIf="!['bool','date'].includes(item.value.bsonType) && !item.value.selection; else boolordate">
-                    <ion-textarea #searchfocus cols="32" [(ngModel)]="searched[item.key].kw"
-                      [ngModelOptions]="{standalone: true}" class="ion-no-padding search-area"
-                      placeholder="{{ 'Search' | translate }}" disabled="false" rows="1" auto-grow="true">
-                    </ion-textarea>
-                  </div>
-                  <ng-template #boolordate>
-                    <div *ngIf="item.value.bsonType=='bool'">
-                      <ion-button [color]="searched[item.key]?.op == 'true' ? 'primary' : 'light'" size="small"
-                        (click)="set_search_item(item.key, 'true')">
-                        <ion-icon name="checkbox-sharp" color="success"></ion-icon>
+                  @if (colvis_activated_) {
+                    <div class="colvis-box">
+                      <div>
+                        <div>{{ 'Column Visibility' | translate }}</div>
+                        <ion-button
+                          size="small"
+                          (click)="colvis_allon()"
+                          fill="clear"
+                          class="ion-no-padding ion-no-margin text-underlined"
+                        >
+                          {{ 'All On' | translate }} </ion-button
+                        >&nbsp;
+                        <ion-button
+                          size="small"
+                          (click)="colvis_alloff()"
+                          fill="clear"
+                          class="ion-no-padding ion-no-margin text-underlined"
+                        >
+                          {{ 'All Off' | translate }}
+                        </ion-button>
+                      </div>
+                      <div class="filler-4"></div>
+                      <ion-button size="small" (click)="set_colvis()">
+                        {{ 'Save' | translate }}
                       </ion-button>
-                      <ion-button [color]="searched[item.key]?.op == 'false' ? 'primary' : 'light'" size="small"
-                        (click)="set_search_item(item.key, 'false')">
-                        <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
+                      <ion-button size="small" (click)="colvis_activate()" color="light">
+                        {{ 'Cancel' | translate }}
+                      </ion-button>
+                      <div class="filler-8"></div>
+                      @for (item of properties_ | keyvalue: orderByIndex; track item) {
+                        <div>
+                          <ion-button
+                            size="small"
+                            fill="clear"
+                            class="ion-no-padding ion-no-margin"
+                            (click)="set_colvis_item(item.key)"
+                          >
+                            <ion-icon
+                              [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"
+                            ></ion-icon>
+                            {{ item.value.title | translate }}&nbsp;&nbsp;[{{ item.key }}]
+                          </ion-button>
+                        </div>
+                      }
+                      ---
+                      @for (item of fixedcols_; track item) {
+                        <div>
+                          <ion-button
+                            size="small"
+                            fill="clear"
+                            class="ion-no-padding ion-no-margin"
+                            (click)="set_colvis_item(item.key)"
+                          >
+                            <ion-icon
+                              [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"
+                            ></ion-icon>
+                            {{ item.title | translate }}&nbsp;&nbsp;[{{ item.key }}]
+                          </ion-button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </th>
+                @if (!['_log', '_dump', '_announcement'].includes(id)) {
+                  <th>
+                    <ion-checkbox
+                      [(ngModel)]="multicheckbox"
+                      (ionChange)="switch_select_data($event.detail.checked)"
+                      mode="md"
+                    >
+                    </ion-checkbox>
+                  </th>
+                }
+                @if (['_query', '_job'].includes(id)) {
+                  <th>
+                    {{ 'Approval' | translate }}<br />
+                    <ion-button size="small" class="unfiltered-btn">{{ '_approved' }}</ion-button>
+                  </th>
+                }
+                <!-- DATA LIST HEADER -->
+                @for (item of properties_ | keyvalue: orderByIndex; track item) {
+                  <th [style]="colvis_ == {} || colvis_[item.key] ? 'display: none;' : ''">
+                    <div
+                      [class]="
+                        ['number', 'decimal', 'float'].includes(item.value.bsonType)
+                          ? 'align-right clicked-item'
+                          : 'align-left clicked-item'
+                      "
+                      (click)="set_search(item.key)"
+                    >
+                      {{ item.value.title | translate }}<br />
+                      <ion-button
+                        size="small"
+                        fill="clear"
+                        [class]="
+                          searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'
+                        "
+                        >{{ item.key }}<ion-icon name="caret-down"></ion-icon>
                       </ion-button>
                     </div>
-                    <div *ngIf="item.value.bsonType=='date'">
-                      <ion-input type="date" [(ngModel)]="searched[item.key].kw"
-                        class="ion-no-padding search-area"></ion-input>
-                    </div>
-                    <div *ngIf="item.value.selection" class="search-selection">
-                      <ul>
-                        <li *ngFor="let item_ of selections_[item.key]; let s_ = index"
-                          (click)="selection_changed(item.key, s_)">
-                          <ion-checkbox [(ngModel)]="selections_[item.key][s_].value" disabled>
-                          </ion-checkbox> {{ item_.id | translate }}
-                        </li>
-                      </ul>
-                    </div>
-                  </ng-template>
-                  <div class="search-actions">
-                    <ion-button size="small" (click)="search(item.key, searched[item.key].kw)">
-                      <ion-icon name="search"></ion-icon>
-                      {{ 'Search' | translate }}
+                    <!-- SEARCH BOX -->
+                    @if (searched && searched[item.key]?.actived) {
+                      <div class="search-box">
+                        <div>{{ $any(item.key) | translate }}</div>
+                        <div class="filler-8"></div>
+                        <ion-button color="light" size="small" (click)="do_sort(item.key, -1)">
+                          <ion-icon name="arrow-down"></ion-icon>
+                        </ion-button>
+                        <ion-button color="light" size="small" (click)="do_sort(item.key, 1)">
+                          <ion-icon name="arrow-up"></ion-icon>
+                        </ion-button>
+                        <ion-button color="light" size="small" (click)="copy_column(item.key)">
+                          @if (!is_key_copied && !is_key_copying) {
+                            <ion-icon name="copy-sharp"></ion-icon>
+                          }
+                          @if (is_key_copied) {
+                            <ion-icon name="checkmark-sharp"></ion-icon>
+                          }
+                          @if (is_key_copying) {
+                            <ion-icon name="stopwatch-"></ion-icon>
+                          }
+                        </ion-button>
+                        <br />
+                        @if (item.value.bsonType != 'bool') {
+                          <div class="search-ops">
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'contains' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'contains')"
+                            >
+                              {{ 'in' | translate }}
+                            </ion-button>
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'like' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'like')"
+                            >
+                              {{ 'A&rarr;' | translate }}
+                            </ion-button>
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'eq' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'eq')"
+                            >
+                              =
+                            </ion-button>
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'ne' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'ne')"
+                            >
+                              &ne;
+                            </ion-button>
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'gte' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'gte')"
+                            >
+                              &ge;
+                            </ion-button>
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'lte' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'lte')"
+                            >
+                              &le;
+                            </ion-button>
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'null' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'null')"
+                            >
+                              &#9723;
+                            </ion-button>
+                            <ion-button
+                              [color]="searched[item.key]?.op == 'nnull' ? 'primary' : 'light'"
+                              size="small"
+                              (click)="set_search_item(item.key, 'nnull')"
+                            >
+                              &#9724;
+                            </ion-button>
+                          </div>
+                        }
+                        @if (
+                          !['bool', 'date'].includes(item.value.bsonType) && !item.value.selection
+                        ) {
+                          <div>
+                            <ion-textarea
+                              #searchfocus
+                              cols="32"
+                              [(ngModel)]="searched[item.key].kw"
+                              [ngModelOptions]="{ standalone: true }"
+                              class="ion-no-padding search-area"
+                              placeholder="{{ 'Search' | translate }}"
+                              disabled="false"
+                              rows="1"
+                              auto-grow="true"
+                            >
+                            </ion-textarea>
+                          </div>
+                        } @else {
+                          @if (item.value.bsonType == 'bool') {
+                            <div>
+                              <ion-button
+                                [color]="searched[item.key]?.op == 'true' ? 'primary' : 'light'"
+                                size="small"
+                                (click)="set_search_item(item.key, 'true')"
+                              >
+                                <ion-icon name="checkbox-sharp" color="success"></ion-icon>
+                              </ion-button>
+                              <ion-button
+                                [color]="searched[item.key]?.op == 'false' ? 'primary' : 'light'"
+                                size="small"
+                                (click)="set_search_item(item.key, 'false')"
+                              >
+                                <ion-icon name="close-circle-sharp" color="danger"></ion-icon>
+                              </ion-button>
+                            </div>
+                          }
+                          @if (item.value.bsonType == 'date') {
+                            <div>
+                              <ion-input
+                                type="date"
+                                [(ngModel)]="searched[item.key].kw"
+                                class="ion-no-padding search-area"
+                              ></ion-input>
+                            </div>
+                          }
+                          @if (item.value.selection) {
+                            <div class="search-selection">
+                              <ul>
+                                @for (
+                                  item_ of selections_[item.key];
+                                  track item_;
+                                  let s_ = $index
+                                ) {
+                                  <li (click)="selection_changed(item.key, s_)">
+                                    <ion-checkbox
+                                      [(ngModel)]="selections_[item.key][s_].value"
+                                      disabled
+                                    >
+                                    </ion-checkbox>
+                                    {{ item_.id | translate }}
+                                  </li>
+                                }
+                              </ul>
+                            </div>
+                          }
+                        }
+                        <div class="search-actions">
+                          <ion-button
+                            size="small"
+                            (click)="search(item.key, searched[item.key].kw)"
+                          >
+                            <ion-icon name="search"></ion-icon>
+                            {{ 'Search' | translate }}
+                          </ion-button>
+                          <ion-button
+                            size="small"
+                            (click)="init_search_item(item.key)"
+                            color="medium"
+                          >
+                            <ion-icon name="close-circle-outline"></ion-icon>
+                            {{ 'Clear' | translate }}
+                          </ion-button>
+                        </div>
+                      </div>
+                    }
+                  </th>
+                }
+                @for (link_ of links_; track link_; let lnk_ = $index) {
+                  <th class="ion-text-right">
+                    {{ 'Count [Sum]' | translate }}<br />
+                    <ion-button size="small" class="unfiltered-btn"
+                      >Link: {{ link_.get | translate }}</ion-button
+                    >
+                  </th>
+                }
+                <th [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
+                  {{ 'Created At' | translate }}<br />
+                  <ion-button size="small" class="unfiltered-btn">{{ '_created_at' }}</ion-button>
+                </th>
+                <th [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
+                  {{ 'Created By' | translate }}<br />
+                  <ion-button size="small" class="unfiltered-btn">{{ '_created_by' }}</ion-button>
+                </th>
+                <th [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
+                  {{ 'Modified At' | translate }}<br />
+                  <ion-button size="small" class="unfiltered-btn">{{ '_modified_at' }}</ion-button>
+                </th>
+                <th [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
+                  {{ 'Modified By' | translate }}<br />
+                  <ion-button size="small" class="unfiltered-btn">{{ '_modified_by' }}</ion-button>
+                </th>
+                <th [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
+                  {{ 'ID' }}<br />
+                  <ion-button size="small" class="unfiltered-btn">{{ '_id' }}</ion-button>
+                </th>
+              </tr>
+              @for (record of data; track record; let i = $index) {
+                <tr
+                  (click)="
+                    ['_query', '_job'].includes(id)
+                      ? go_query_job(record, $event)
+                      : go_crud(record, 'update')
+                  "
+                  [class]="record['_reminder'] ? 'data-tr' : ''"
+                >
+                  <td
+                    [class]="record['_reminder'] ? 'danger' : 'primary'"
+                    (click)="misc.show_note(record['_note'], $event)"
+                  >
+                    @if (record['_reminder']) {
+                      <ion-icon name="flag"></ion-icon>
+                    } @else {
+                      {{ (pager_ - 1) * limit_ + i + 1 }}
+                    }
+                  </td>
+                  @if (!['_log', '_dump', '_announcement'].includes(id)) {
+                    <td (click)="tdc($event, record)">
+                      <ion-checkbox
+                        id="checkbox"
+                        [(ngModel)]="selected[i]"
+                        [checked]="selected[i]"
+                        (ionChange)="set_select_data(i, $event)"
+                        mode="md"
+                      >
+                      </ion-checkbox>
+                    </td>
+                  }
+                  @if (['_query', '_job'].includes(id)) {
+                    <td class="ion-text-center">
+                      @if (record?._approved) {
+                        <ion-icon
+                          name="checkmark-sharp"
+                          class="bool-mark"
+                          color="success"
+                        ></ion-icon>
+                      } @else {
+                        <ion-icon name="close-sharp" class="bool-mark" color="danger"></ion-icon>
+                      }
+                    </td>
+                  }
+                  @for (item_ of properties_ | keyvalue: orderByIndex; track item_) {
+                    <td
+                      [class]="
+                        ['number', 'decimal', 'float'].includes(item_.value.bsonType)
+                          ? 'align-right'
+                          : ''
+                      "
+                      [style]="colvis_ == {} || colvis_[item_.key] ? 'display: none;' : ''"
+                    >
+                      @if (item_.value.bsonType == 'date') {
+                        <span>
+                          @if (item_.value?.dateOnly) {
+                            <span>{{ record[item_.key] | date: 'dd.MM.yyyy' : 'utc' }}</span>
+                          } @else {
+                            {{ record[item_.key] | date: 'dd.MM.yyyy HH:mm:ss' : 'utc' }}
+                          }
+                        </span>
+                      } @else {
+                        @if (item_.value.bsonType == 'array') {
+                          <span>
+                            @if (item_.value.items?.bsonType == 'object') {
+                              <span>
+                                {{ record[item_.key] ? record[item_.key].length : '0' }}
+                                @if (record[item_.key]?.length === 1) {
+                                  <span>{{ 'Item' | translate }}</span>
+                                }
+                                @if (record[item_.key]?.length > 1) {
+                                  <span>{{ 'Items' | translate }}</span>
+                                }
+                              </span>
+                            } @else {
+                              @if (record[item_.key]?.length > 0) {
+                                <span>{{ record[item_.key].join(', ') }}</span>
+                              }
+                            }
+                          </span>
+                        } @else {
+                          @if (item_.value.bsonType == 'bool') {
+                            <span>
+                              @if (record[item_.key]) {
+                                <ion-icon
+                                  name="checkmark-sharp"
+                                  color="success"
+                                  class="bool-mark"
+                                ></ion-icon>
+                              } @else {
+                                <ion-icon
+                                  name="close-sharp"
+                                  color="danger"
+                                  class="bool-mark"
+                                ></ion-icon>
+                              }
+                            </span>
+                          } @else {
+                            @if (['number', 'decimal', 'float'].includes(item_.value.bsonType)) {
+                              <span>{{
+                                record[item_.key]?.toFixed(
+                                  item_.value.decimals ? item_.value.decimals : 0
+                                )
+                              }}</span>
+                            } @else {
+                              @if (item_.value.bsonType == 'object') {
+                                <span>{{ 'Object' | translate }}</span>
+                              } @else {
+                                {{ record[item_.key]?.toString() | translate }}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    </td>
+                  }
+                  @for (link_ of links_; track link_; let lnk_ = $index) {
+                    <td class="ion-text-right primary bold">
+                      @if (record['is_copied']) {
+                        <span
+                          >{{ 'copied' | translate }}&nbsp;<ion-icon
+                            name="checkmark-sharp"
+                          ></ion-icon
+                        ></span>
+                      } @else {
+                        <span
+                          (click)="copy(record['_link_' + link_.collection].count, $event, i)"
+                          >{{ record['_link_' + link_.collection]?.count }}</span
+                        >&nbsp;<span
+                          (click)="
+                            copy(record['_link_' + link_.collection].sum?.toFixed(2), $event, i)
+                          "
+                          >[{{ record['_link_' + link_.collection].sum?.toFixed(2) }}]</span
+                        >
+                      }
+                    </td>
+                  }
+                  <td [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
+                    {{
+                      record._created_at?.replace(' ', 'T') | date: 'dd.MM.yyyy HH:mm:ss' : 'utc'
+                    }}
+                  </td>
+                  <td [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
+                    {{ record._created_by }}
+                  </td>
+                  <td [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
+                    {{
+                      record._modified_at?.replace(' ', 'T') | date: 'dd.MM.yyyy HH:mm:ss' : 'utc'
+                    }}
+                  </td>
+                  <td [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
+                    {{ record._modified_by }}
+                  </td>
+                  <td [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
+                    {{ record._id }}
+                  </td>
+                </tr>
+              }
+            </table>
+            @if (data.length > 0) {
+              <div>
+                @if (pager_ > 1) {
+                  <ion-button
+                    size="small"
+                    fill="clear"
+                    (click)="refresh_data(0, false)"
+                    class="ion-no-padding ion-margin-end"
+                  >
+                    <ion-icon name="play-skip-back"></ion-icon>
+                  </ion-button>
+                }
+                @if (pager_ > 10) {
+                  <span>
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      (click)="refresh_data(pager_ - 1, false)"
+                      class="ion-no-padding"
+                    >
+                      <ion-icon name="caret-back"></ion-icon>
                     </ion-button>
-                    <ion-button size="small" (click)="init_search_item(item.key)" color="medium">
-                      <ion-icon name="close-circle-outline"></ion-icon>
-                      {{ 'Clear' | translate }}
+                  </span>
+                }
+                @for (pn of paget_; track pn) {
+                  <span>
+                    @if (pager_ != pn) {
+                      <ion-button
+                        size="small"
+                        fill="clear"
+                        (click)="refresh_data(pn, false)"
+                        class="ion-no-padding"
+                      >
+                        <ion-label>&nbsp;{{ pn }}&nbsp;</ion-label>
+                      </ion-button>
+                    }
+                    @if (pager_ == pn) {
+                      <ion-button size="small" fill="clear" class="ion-no-padding text-underlined">
+                        <ion-label>&nbsp;{{ pn }}&nbsp;</ion-label>
+                      </ion-button>
+                    }
+                  </span>
+                }
+                @if (pages_ > 10 && pager_ < pages_) {
+                  <span>
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      (click)="refresh_data(pages_, false)"
+                      class="ion-no-padding"
+                    >
+                      ...&nbsp;&nbsp;{{ pages_ }}
                     </ion-button>
-                  </div>
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      (click)="refresh_data(pager_ + 1, false)"
+                      class="ion-no-padding"
+                    >
+                      <ion-icon name="caret-forward"></ion-icon>
+                    </ion-button>
+                  </span>
+                }
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  (click)="refresh_data(0, false)"
+                  class="ion-no-padding ion-margin-start"
+                >
+                  <ion-icon name="list-sharp"></ion-icon>
+                  {{ 'Pagination' | translate }} [<app-pagination
+                    [pagination_]="pagination_"
+                    [id_]="id"
+                  ></app-pagination
+                  >]
+                </ion-button>
+              </div>
+            } @else {
+              @if (is_loaded) {
+                <div class="ion-margin-top">
+                  {{ 'NO DOCUMENTS FOUND' | translate }}
                 </div>
-              </th>
-              <th *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right">
-                {{ 'Count [Sum]' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">Link: {{ link_.get | translate }}</ion-button>
-              </th>
-              <th [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
-                {{ 'Created At' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_created_at'}}</ion-button>
-              </th>
-              <th [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
-                {{ 'Created By' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_created_by'}}</ion-button>
-              </th>
-              <th [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
-                {{ 'Modified At' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_modified_at'}}</ion-button>
-              </th>
-              <th [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
-                {{ 'Modified By' | translate }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_modified_by'}}</ion-button>
-              </th>
-              <th [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
-                {{ 'ID' }}<br />
-                <ion-button size="small" class="unfiltered-btn">{{'_id'}}</ion-button>
-              </th>
-            </tr>
-            <tr *ngFor="let record of data; let i = index"
-              (click)="['_query','_job'].includes(id) ? go_query_job(record, $event) : go_crud(record, 'update')"
-              [class]="record['_reminder'] ? 'data-tr' : ''">
-              <td [class]="record['_reminder'] ? 'danger' : 'primary'"
-                (click)="misc.show_note(record['_note'], $event)">
-                <ion-icon *ngIf="record['_reminder']; else noreminder" name="flag"></ion-icon>
-                <ng-template #noreminder>
-                  {{ ((pager_ - 1) * limit_) + i + 1}}
-                </ng-template>
-              </td>
-              <td *ngIf="!['_log','_dump','_announcement'].includes(id)" (click)="tdc($event, record)">
-                <ion-checkbox id="checkbox" [(ngModel)]="selected[i]" [checked]="selected[i]"
-                  (ionChange)="set_select_data(i,$event)" mode="md">
-                </ion-checkbox>
-              </td>
-              <td *ngIf="['_query','_job'].includes(id)" class="ion-text-center">
-                <ion-icon *ngIf="record?._approved; else notapproved" name="checkmark-sharp" class="bool-mark"
-                  color="success"></ion-icon>
-                <ng-template #notapproved>
-                  <ion-icon name="close-sharp" class="bool-mark" color="danger"></ion-icon>
-                </ng-template>
-              </td>
-              <td *ngFor="let item_ of properties_ | keyvalue : orderByIndex"
-                [class]="['number','decimal','float'].includes(item_.value.bsonType) ? 'align-right' : ''"
-                [style]="colvis_ == {} || colvis_[item_.key] ? 'display: none;' : ''">
-                <span *ngIf="item_.value.bsonType=='date'; else else1">
-                  <span *ngIf="item_.value?.dateOnly; else nodateOnly">{{ record[item_.key] | date:'dd.MM.yyyy':'utc'
-                    }}</span>
-                  <ng-template #nodateOnly>
-                    {{ record[item_.key] | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
-                  </ng-template>
-                </span>
-                <ng-template #else1>
-                  <span *ngIf="item_.value.bsonType=='array'; else else2">
-                    <span *ngIf="item_.value.items?.bsonType=='object'; else noarrayobject">
-                      {{ record[item_.key] ? record[item_.key].length : '0' }}
-                      <span *ngIf="record[item_.key]?.length === 1">{{ 'Item' | translate }}</span>
-                      <span *ngIf="record[item_.key]?.length > 1">{{ 'Items' | translate }}</span>
-                    </span>
-                    <ng-template #noarrayobject>
-                      <span *ngIf="record[item_.key]?.length > 0">{{ record[item_.key].join(', ') }}</span>
-                    </ng-template>
-                  </span>
-                </ng-template>
-                <ng-template #else2>
-                  <span *ngIf="item_.value.bsonType=='bool'; else else3">
-                    <ion-icon *ngIf="record[item_.key]; else isfalse" name="checkmark-sharp" color="success"
-                      class="bool-mark"></ion-icon>
-                    <ng-template #isfalse>
-                      <ion-icon name="close-sharp" color="danger" class="bool-mark"></ion-icon>
-                    </ng-template>
-                  </span>
-                </ng-template>
-                <ng-template #else3>
-                  <span *ngIf="['number','decimal','float'].includes(item_.value.bsonType); else else4">{{
-                    record[item_.key]?.toFixed(item_.value.decimals ? item_.value.decimals : 0) }}</span>
-                </ng-template>
-                <ng-template #else4>
-                  <span *ngIf="item_.value.bsonType=='object'; else else0">{{ 'Object' | translate }}</span>
-                </ng-template>
-                <ng-template #else0>
-                  {{ record[item_.key]?.toString() | translate }}
-                </ng-template>
-              </td>
-              <td *ngFor="let link_ of links_; let lnk_ = index" class="ion-text-right primary bold">
-                <span *ngIf="record['is_copied']; else nocopied">{{
-                  'copied' | translate }}&nbsp;<ion-icon name="checkmark-sharp"></ion-icon></span>
-                <ng-template #nocopied>
-                  <span (click)="copy(record['_link_' + link_.collection].count, $event, i)">{{ record["_link_" +
-                    link_.collection ]?.count }}</span>&nbsp;<span
-                    (click)="copy(record['_link_' + link_.collection].sum?.toFixed(2), $event, i)">[{{
-                    record["_link_" + link_.collection].sum?.toFixed(2) }}]</span>
-                </ng-template>
-              </td>
-              <td [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
-                {{ record._created_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
-              </td>
-              <td [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
-                {{ record._created_by }}
-              </td>
-              <td [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
-                {{ record._modified_at?.replace(' ', 'T') | date:'dd.MM.yyyy HH:mm:ss':'utc' }}
-              </td>
-              <td [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
-                {{ record._modified_by }}
-              </td>
-              <td [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
-                {{ record._id }}
-              </td>
-            </tr>
-          </table>
-          <div *ngIf="data.length > 0; else norecs">
-            <ion-button *ngIf="pager_ > 1" size="small" fill="clear" (click)="refresh_data(0, false)"
-              class="ion-no-padding ion-margin-end">
-              <ion-icon name="play-skip-back"></ion-icon>
-            </ion-button>
-            <span *ngIf="pager_ > 10">
-              <ion-button size="small" fill="clear" (click)="refresh_data(pager_-1, false)" class="ion-no-padding">
-                <ion-icon name="caret-back"></ion-icon>
-              </ion-button>
-            </span>
-            <span *ngFor="let in of paget_">
-              <ion-button *ngIf="pager_ != in" size="small" fill="clear" (click)="refresh_data(in, false)"
-                class="ion-no-padding">
-                <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-              </ion-button>
-              <ion-button *ngIf="pager_ == in" size="small" fill="clear" class="ion-no-padding text-underlined">
-                <ion-label>&nbsp;{{ in }}&nbsp;</ion-label>
-              </ion-button>
-            </span>
-            <span *ngIf="pages_ > 10 && pager_ < pages_">
-              <ion-button size="small" fill="clear" (click)="refresh_data(pages_, false)" class="ion-no-padding">
-                ...&nbsp;&nbsp;{{ pages_ }}
-              </ion-button>
-              <ion-button size="small" fill="clear" (click)="refresh_data(pager_+1, false)" class="ion-no-padding">
-                <ion-icon name="caret-forward"></ion-icon>
-              </ion-button>
-            </span>
-            <ion-button size="small" fill="clear" (click)="refresh_data(0, false)"
-              class="ion-no-padding ion-margin-start">
-              <ion-icon name="list-sharp"></ion-icon>
-              {{ 'Pagination' | translate }} [<app-pagination [pagination_]="pagination_" [id_]="id"></app-pagination>]
-            </ion-button>
+              }
+            }
           </div>
-          <ng-template #norecs>
-            <div *ngIf="is_loaded" class="ion-margin-top">
-              {{ 'NO DOCUMENTS FOUND' | translate }}
-            </div>
-          </ng-template>
-        </div>
-        <ng-template #notinit>
-          <div class="ion-margin-top">
-            {{ 'Loading' | translate }}...
-          </div>
-        </ng-template>
+        } @else {
+          <div class="ion-margin-top">{{ 'Loading' | translate }}...</div>
+        }
       </ion-col>
     </ion-row>
   </ion-grid>

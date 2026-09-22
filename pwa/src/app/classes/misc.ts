@@ -15,36 +15,17 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
-
-If your software can interact with users remotely through a computer
-network, you should also make sure that it provides a way for users to
-get its source.  For example, if your program is a web application, its
-interface could display a "Source" link that leads users to an archive
-of the code.  There are many ways you could offer source, and different
-solutions will be better for different programs; see section 13 for the
-specific requirements.
-
-You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU AGPL, see
-https://www.gnu.org/licenses.
 */
 
-import { Injectable } from "@angular/core";
-import { ModalController, AlertController, ToastController } from "@ionic/angular";
-import { Subject, BehaviorSubject } from "rxjs";
-import { Storage } from "@ionic/storage";
-import { TranslateService } from "@ngx-translate/core";
-import { environment } from "../../environments/environment";
+import { Injectable, Type } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { CrudPage } from "../pages/crud/crud.page";
-import { SignPage } from "../pages/sign/sign.page";
-import { ClipboardService } from "ngx-clipboard";
+import { ModalController, AlertController, ToastController } from "@ionic/angular";
+import { Storage } from "@ionic/storage-angular";
+import { TranslateService } from "@ngx-translate/core";
+import { Subject, BehaviorSubject } from "rxjs";
+import { environment } from "../../environments/environment";
 
-@Injectable({
-  providedIn: "root"
-})
-
+@Injectable({ providedIn: "root" })
 export class Miscellaneous {
   public collections = new BehaviorSubject<any>([]);
   public session_ = new BehaviorSubject<any>([]);
@@ -53,7 +34,9 @@ export class Miscellaneous {
   public saas = new BehaviorSubject<any>(null);
   public localization = new BehaviorSubject<any>(null);
   private collections_: any;
-  private mopen_: boolean = false;
+  private mopen_ = false;
+  // the modal pages register themselves here so this service does not import them (no circular imports)
+  private modalComponents_: { [key: string]: Type<any> } = {};
 
   constructor(
     private storage: Storage,
@@ -61,7 +44,6 @@ export class Miscellaneous {
     private modal: ModalController,
     private alert: AlertController,
     private toast: ToastController,
-    private cb: ClipboardService,
     private http: HttpClient
   ) {
     this.collections.subscribe((res: any) => {
@@ -69,45 +51,80 @@ export class Miscellaneous {
     });
   }
 
+  register_modal(name: string, component: Type<any>) {
+    this.modalComponents_[name] = component;
+  }
+
+  private session_meta() {
+    return this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => ({
+      meta: LSUSERMETA,
+      token: LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "",
+      api_key: LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : ""
+    }));
+  }
+
+  private on_http_error(res__: any, reject: (reason?: any) => void) {
+    if (res__ && res__.error && res__.status) {
+      if (res__.status === 403) {
+        this.session_.next("ended");
+        this.doMessage(res__.error.msg, "error");
+      }
+      reject(res__.error.msg ? res__.error.msg : res__.error);
+    } else {
+      reject(res__);
+    }
+  }
+
   api_call(qstr_: string, posted_: any) {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
-        const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
-        let hdr_: any = {
+      this.session_meta().then(({ token, api_key }) => {
+        const body_ = typeof posted_ === "string" ? JSON.parse(posted_) : posted_;
+        const hdr_: any = {
           headers: new HttpHeaders({
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + token_,
-            "X-Api-Key": api_key_
+            "Authorization": "Bearer " + token,
+            "X-Api-Key": api_key
           }),
           observe: "response"
+        };
+        if (body_["responseType"]) {
+          hdr_.responseType = body_["responseType"];
         }
-        if (posted_["responseType"]) {
-          hdr_.responseType = posted_["responseType"];
-        }
-        this.http.post<any>(`${environment.apiUrl}/${qstr_}`, posted_, hdr_).subscribe((res: any) => {
-          const res_ = res.body;
-          const qt_ = res.headers.get("Content-Type");
-          const filename_ = qt_.indexOf("filename=") > 0 ? qt_.substring(qt_.indexOf("filename=") + 9).trim() : null;
-          if (posted_.responseType) {
-            resolve({ "binary": res_, "filename": filename_ });
-          } else {
-            if (res_.result) {
+        this.http.post<any>(`${environment.apiUrl}/${qstr_}`, body_, hdr_).subscribe({
+          next: (res: any) => {
+            const res_ = res.body;
+            const qt_ = res.headers.get("Content-Type") || "";
+            const filename_ = qt_.indexOf("filename=") > 0 ? qt_.substring(qt_.indexOf("filename=") + 9).trim() : null;
+            if (body_.responseType) {
+              resolve({ binary: res_, filename: filename_ });
+            } else if (res_ && res_.result) {
               resolve(res_);
             } else {
               reject(res_ && res_.msg ? res_.msg : res_);
             }
-          }
-        }, (res__: any) => {
-          if (res__.error && res__.status) {
-            if (res__.status === 403) {
-              this.session_.next("ended");
-              this.doMessage(res__.error.msg, "error");
+          },
+          error: (res__: any) => this.on_http_error(res__, reject)
+        });
+      });
+    });
+  }
+
+  api_call_file(qstr_: string, posted_: FormData) {
+    return new Promise((resolve, reject) => {
+      this.session_meta().then(({ token, api_key }) => {
+        this.http.post<any>(`${environment.apiUrl}/${qstr_}`, posted_, {
+          headers: new HttpHeaders({ "Authorization": "Bearer " + token, "X-Api-Key": api_key }),
+          observe: "response"
+        }).subscribe({
+          next: (res: any) => {
+            const res_ = res.body;
+            if (res_ && res_.result) {
+              resolve(res_);
+            } else {
+              reject(res_ && res_.msg ? res_.msg : res_);
             }
-            reject(res__.error.msg ? res__.error.msg : res__.error);
-          } else {
-            reject(res__);
-          }
+          },
+          error: (res__: any) => this.on_http_error(res__, reject)
         });
       });
     });
@@ -115,9 +132,14 @@ export class Miscellaneous {
 
   import_modal(id: any) {
     return new Promise((resolve, reject) => {
+      const component_ = this.modalComponents_["crud"];
+      if (!component_) {
+        reject("the data editor is not available yet");
+        return;
+      }
       this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
         this.modal.create({
-          component: CrudPage,
+          component: component_,
           backdropDismiss: false,
           cssClass: "crud-modal",
           componentProps: {
@@ -126,12 +148,7 @@ export class Miscellaneous {
               collection: "_storage",
               collections: this.collections_ ? this.collections_ : [],
               user: LSUSERMETA,
-              data: {
-                "sto_id": "data-import",
-                "sto_collection_id": id,
-                "sto_process": "insert",
-                "sto_file": null
-              },
+              data: { sto_id: "data-import", sto_collection_id: id, sto_process: "insert", sto_file: null },
               structure: environment.import_structure,
               sweeped: [],
               filter: {},
@@ -154,47 +171,11 @@ export class Miscellaneous {
     });
   }
 
-  api_call_file(qstr_: string, posted_: any) {
-    return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
-        const token_: string = LSUSERMETA && LSUSERMETA.token ? LSUSERMETA.token : "";
-        const api_key_: string = LSUSERMETA && LSUSERMETA.api_key ? LSUSERMETA.api_key : "";
-        posted_.append("email", LSUSERMETA.email);
-        const uri_ = `${environment.apiUrl}/${qstr_}`;
-        this.http.post<any>(uri_, posted_, {
-          headers: new HttpHeaders({
-            "Authorization": "Bearer " + token_,
-            "X-Api-Key": api_key_
-          }),
-          observe: "response" as "response"
-        }).subscribe((res: any) => {
-          const res_ = res.body;
-          if (res_ && res_.result) {
-            resolve(res_);
-          } else {
-            reject(res_ && res_.msg ? res_.msg : res_);
-          }
-        }, (res: any) => {
-          const res_ = res;
-          if (res_.error && res_.status) {
-            if (res_.status === 403) {
-              this.session_.next("ended");
-              this.doMessage(res_.error.msg, "error");
-            }
-            reject(res_.error.msg ? res_.error.msg : res_.error);
-          } else {
-            reject(res_);
-          }
-        });
-      });
-    });
-  }
-
   set_locale(LSLOCALE_: string) {
     return new Promise((resolve, reject) => {
       if (LSLOCALE_) {
         this.storage.set("LSLOCALE", LSLOCALE_).then(() => {
-          this.translate.setDefaultLang(LSLOCALE_);
+          this.translate.setFallbackLang(LSLOCALE_);
           this.translate.use(LSLOCALE_);
           this.localization.next(LSLOCALE_ === "tr" ? "tr-TR" : LSLOCALE_ === "de" ? "de-DE" : LSLOCALE_ === "en" ? "en-US" : null);
           resolve(true);
@@ -221,35 +202,15 @@ export class Miscellaneous {
         subHeader: this.translate.instant("OTP Validation") + ` [${type_}]`,
         message: this.translate.instant("Please enter your one-time password") + ":",
         backdropDismiss: false,
-        inputs: [
-          {
-            name: "id",
-            value: null,
-            type: "number",
-            cssClass: "token",
-            placeholder: "000000"
-          }
-        ],
+        inputs: [{ name: "id", value: null, type: "number", cssClass: "token", placeholder: "000000" }],
         buttons: [
-          {
-            text: this.translate.instant("Cancel"),
-            role: "cancel",
-            cssClass: "primary",
-            handler: () => {
-              reject();
-            }
-          }, {
-            text: this.translate.instant("OK"),
-            handler: (alertData: any) => {
-              resolve(alertData.id);
-            }
-          }
+          { text: this.translate.instant("Cancel"), role: "cancel", cssClass: "primary", handler: () => { reject(); } },
+          { text: this.translate.instant("OK"), handler: (alertData: any) => { resolve(alertData.id); } }
         ]
       }).then((alert: any) => {
         alert.present().then(() => {
-          const fnput_: any = document.querySelector('ion-alert input');
-          fnput_.focus();
-          return;
+          const fnput_: any = document.querySelector("ion-alert input");
+          fnput_?.focus();
         });
       }).catch((error_: any) => {
         reject(error_);
@@ -257,18 +218,16 @@ export class Miscellaneous {
     });
   }
 
-  doMessage(msg: string, type: string) {
-    type === "error" ? console.error("!!! err", msg) : null;
+  doMessage(msg: any, type: string) {
+    if (type === "error") {
+      console.error("!!! err", msg);
+    }
+    const text_ = this.translate.instant(String(msg ?? "")) ?? "";
     this.toast.create({
-      message: `${this.translate.instant(msg?.toString())?.toLowerCase()}.`,
+      message: `${String(text_).toLowerCase()}.`,
       duration: ["success", "warning"].includes(type) ? 3000 : 7000,
       cssClass: type === "success" ? "toast-class-success" : type === "error" ? "toast-class-error" : "toast-class-warning",
-      buttons: [{
-        side: "end",
-        icon: "close-outline",
-        role: "cancel",
-        handler: () => { }
-      }]
+      buttons: [{ side: "end", icon: "close-outline", role: "cancel", handler: () => { } }]
     }).then((toast_: any) => {
       toast_.present();
     });
@@ -276,40 +235,38 @@ export class Miscellaneous {
 
   getFormattedDate(val: any) {
     const tzoffset = new Date().getTimezoneOffset() * 60000;
-    let date_ = val ? val : new Date(Date.now() - tzoffset).toISOString();
+    const date_ = val ? val : new Date(Date.now() - tzoffset).toISOString();
     return date_.substring(0, 19) + "Z";
   }
 
   copy_to_clipboard(s: string) {
-    return new Promise((resolve, reject) => {
-      this.cb.copy(s)
-      resolve(true);
-    });
+    return navigator.clipboard.writeText(s).then(() => true);
   }
 
   dismissModal(obj_: any) {
     return new Promise((resolve, reject) => {
       this.mopen_ = false;
-      this.modal ? setTimeout(() => {
+      setTimeout(() => {
         this.modal.dismiss(obj_).then((dismiss_: any) => {
           resolve(dismiss_);
         }).catch((error: any) => {
           reject(error);
         });
-      }, 200) : null;
+      }, 200);
     });
   }
 
   sign_modal(op: string) {
     return new Promise((resolve, reject) => {
-      this.mopen_ ? null : this.modal.create({
-        component: SignPage,
+      const component_ = this.modalComponents_["sign"];
+      if (this.mopen_ || !component_) {
+        return;
+      }
+      this.modal.create({
+        component: component_,
         backdropDismiss: false,
         cssClass: "sign-modal",
-        componentProps: {
-          op: op,
-          user: null
-        }
+        componentProps: { op: op, user: null }
       }).then((modal_: any) => {
         modal_.present().then(() => {
           this.mopen_ = true;
@@ -332,11 +289,7 @@ export class Miscellaneous {
     this.alert.create({
       subHeader: this.translate.instant("Notes"),
       message: this.translate.instant(note_),
-      buttons: [{
-        text: this.translate.instant("Got It"),
-        role: "cancel",
-        handler: () => { }
-      }],
+      buttons: [{ text: this.translate.instant("Got It"), role: "cancel", handler: () => { } }]
     }).then((alert: any) => {
       alert.style.cssText = "--backdrop-opacity: 0 !important; z-index: 99999 !important; box-shadow: none !important;";
       alert.present();
@@ -346,5 +299,4 @@ export class Miscellaneous {
   unique_array(value_: any, index_: number, self_: any) {
     return self_.indexOf(value_) === index_;
   }
-
 }

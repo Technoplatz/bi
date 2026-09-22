@@ -1,121 +1,130 @@
-<!--
-Technoplatz BI
-
-Copyright ©Technoplatz IT Solutions GmbH, Mustafa Mat
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see https://www.gnu.org/licenses.
-
-If your software can interact with users remotely through a computer
-network, you should also make sure that it provides a way for users to
-get its source.  For example, if your program is a web application, its
-interface could display a "Source" link that leads users to an archive
-of the code.  There are many ways you could offer source, and different
-solutions will be better for different programs; see section 13 for the
-specific requirements.
-
-You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU AGPL, see
-https://www.gnu.org/licenses.
--->
-
 <ion-content class="ion-no-padding">
-  <div *ngIf="is_initialized" class="console-right">
-    <ion-button fill="clear" class="ion-no-padding ion-no-margin">
-      {{ header | translate }}
-    </ion-button>
-    <h3>{{ subheader | translate }}</h3>
-    <div class="profile-settings">
-      <ion-list *ngIf="submenu=='account'" class="ion-padding-end">
-        <ion-list-header>{{ 'Security' | translate }}</ion-list-header>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'E-mail' | translate }}
-          </ion-label>
-          {{ user.email }}
-        </ion-item>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Password' | translate }}
-          </ion-label>
-          ************************
-          <ion-button (click)="misc.sign_modal('forgot')" size="small" slot="end">
-            {{ 'Reset' | translate }}
-          </ion-button>
-        </ion-item>
-        <ion-item class="api-key-item">
-          <ion-label position="fixed" class="ion-margin-end">{{ '2FA Auth' | translate }}
-          </ion-label>
-          <span *ngIf="!otp_show">
-            {{ 'Always On' | translate }}
-          </span>
-          <div *ngIf="otp_qr && otp_show">
-            <qrcode [qrdata]="otp_qr" [width]="200" [errorCorrectionLevel]="'M'" [allowEmptyString]="true">
-            </qrcode>
-            <ion-note slot="start" class="ion-margin-start">{{ 'Read QR code with your Authenticator App to generate a
-              one-time password' | translate }}.</ion-note>
-            <div class="filler-8"></div>
-          </div>
-          <ion-button *ngIf="!otp_show" (click)="doOTP({ op: 'show' })" size="small" slot="end">
-            <ion-spinner *ngIf="otp_process; else noprocess" name="dots"></ion-spinner>
-            <ng-template #noprocess>
-              <ion-label>{{ 'Show QR' | translate }}</ion-label>
-            </ng-template>
-          </ion-button>
-          <ion-button *ngIf="otp_show" (click)="doOTP({ op: 'hide' })" size="small" slot="end">
-            <ion-label>{{ 'Hide' | translate }}</ion-label>
-          </ion-button>
-          <ion-button *ngIf="otp_show" (click)="doResetOTP()" size="small" slot="end">
-            <ion-label>{{ 'Reset' | translate }}</ion-label>
-          </ion-button>
-          <ion-button *ngIf="otp_show" (click)="doValidateOTP()" size="small" slot="end">
-            <ion-label>{{ 'Validate' | translate }}</ion-label>
-          </ion-button>
-        </ion-item>
-        <ion-list-header>{{ 'System' | translate }}</ion-list-header>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Time Zone' | translate }}
-          </ion-label>
-          {{ timeZone }}
-        </ion-item>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Version' | translate }}
-          </ion-label>
-          v{{ version }} ({{ release }})
-        </ion-item>
-      </ion-list>
-      <ion-list *ngIf="submenu=='profile-settings'" class="ion-padding-end">
-        <ion-list-header>{{ 'Theme' | translate }}</ion-list-header>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Pagination' | translate }}
-          </ion-label>
-          <app-pagination></app-pagination>
-        </ion-item>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Theme Color' | translate }}
-          </ion-label>
-          <div class="flex-container">
-            <div *ngFor="let item of themes" size="default" [style.background-color]="item.color" class="theme-button"
-              (click)="doTheme(item)">
-            </div>
-          </div>
-        </ion-item>
-        <ion-item>
-          <ion-label position="fixed" class="ion-margin-end">{{ 'Language' | translate }}
-          </ion-label>
-          <app-lang></app-lang>
-        </ion-item>
-      </ion-list>
+  @if (is_initialized) {
+    <div class="console-right">
+      <ion-button fill="clear" class="ion-no-padding ion-no-margin">
+        {{ header | translate }}
+      </ion-button>
+      <h3>{{ subheader | translate }}</h3>
+      <div class="profile-settings">
+        @if (submenu == 'account') {
+          <ion-list class="ion-padding-end">
+            <ion-list-header>{{ 'Security' | translate }}</ion-list-header>
+            <ion-item>
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ 'E-mail' | translate }}
+              </ion-label>
+              {{ user.email }}
+            </ion-item>
+            <ion-item>
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ 'Password' | translate }}
+              </ion-label>
+              ************************
+              <ion-button (click)="misc.sign_modal('forgot')" size="small" slot="end">
+                {{ 'Reset' | translate }}
+              </ion-button>
+            </ion-item>
+            <ion-item class="api-key-item">
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ '2FA Auth' | translate }}
+              </ion-label>
+              @if (!otp_show) {
+                <span>
+                  {{ 'Always On' | translate }}
+                </span>
+              }
+              @if (otp_qr && otp_show) {
+                <div>
+                  <qrcode
+                    [qrdata]="otp_qr"
+                    [width]="200"
+                    [errorCorrectionLevel]="'M'"
+                    [allowEmptyString]="true"
+                  >
+                  </qrcode>
+                  <ion-note slot="start" class="ion-margin-start"
+                    >{{
+                      'Read QR code with your Authenticator App to generate a
+                  one-time password' | translate
+                    }}.</ion-note
+                  >
+                  <div class="filler-8"></div>
+                </div>
+              }
+              @if (!otp_show) {
+                <ion-button (click)="doOTP({ op: 'show' })" size="small" slot="end">
+                  @if (otp_process) {
+                    <ion-spinner name="dots"></ion-spinner>
+                  } @else {
+                    <ion-label>{{ 'Show QR' | translate }}</ion-label>
+                  }
+                </ion-button>
+              }
+              @if (otp_show) {
+                <ion-button (click)="doOTP({ op: 'hide' })" size="small" slot="end">
+                  <ion-label>{{ 'Hide' | translate }}</ion-label>
+                </ion-button>
+              }
+              @if (otp_show) {
+                <ion-button (click)="doResetOTP()" size="small" slot="end">
+                  <ion-label>{{ 'Reset' | translate }}</ion-label>
+                </ion-button>
+              }
+              @if (otp_show) {
+                <ion-button (click)="doValidateOTP()" size="small" slot="end">
+                  <ion-label>{{ 'Validate' | translate }}</ion-label>
+                </ion-button>
+              }
+            </ion-item>
+            <ion-list-header>{{ 'System' | translate }}</ion-list-header>
+            <ion-item>
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ 'Time Zone' | translate }}
+              </ion-label>
+              {{ timeZone }}
+            </ion-item>
+            <ion-item>
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ 'Version' | translate }}
+              </ion-label>
+              v{{ version }} ({{ release }})
+            </ion-item>
+          </ion-list>
+        }
+        @if (submenu == 'profile-settings') {
+          <ion-list class="ion-padding-end">
+            <ion-list-header>{{ 'Theme' | translate }}</ion-list-header>
+            <ion-item>
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ 'Pagination' | translate }}
+              </ion-label>
+              <app-pagination></app-pagination>
+            </ion-item>
+            <ion-item>
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ 'Theme Color' | translate }}
+              </ion-label>
+              <div class="flex-container">
+                @for (item of themes; track item) {
+                  <div
+                    size="default"
+                    [style.background-color]="item.color"
+                    class="theme-button"
+                    (click)="doTheme(item)"
+                  ></div>
+                }
+              </div>
+            </ion-item>
+            <ion-item>
+              <ion-label position="fixed" class="ion-margin-end"
+                >{{ 'Language' | translate }}
+              </ion-label>
+              <app-lang></app-lang>
+            </ion-item>
+          </ion-list>
+        }
+      </div>
     </div>
-  </div>
+  }
 </ion-content>
 <app-inner-footer></app-inner-footer>
