@@ -20,3 +20,4 @@ botocore
 unidecode
 pytz
 gevent
+gunicorn[gevent]

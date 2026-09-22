@@ -181,3 +181,39 @@ def test_frame_from_docs_keeps_requested_columns_and_order(api):
     assert frame.iloc[0].tolist() == ["x", 1, str(oid)]
     assert frame.iloc[1]["b.c"] is None or frame.iloc[1]["b.c"] != frame.iloc[1]["b.c"]  # missing nested value stays empty
     assert Crud().frame_from_docs_f([], ["a"]).shape == (0, 1)
+
+
+# ---------------------------------------------------------------- routes registered and health probe
+def test_all_routes_registered(api):
+    rules = {rule.rule for rule in api.app.url_map.iter_rules()}
+    assert {"/api/health", "/api/import", "/api/crud", "/api/otp", "/api/auth", "/api/iot", "/api/post",
+            "/api/get/query/<string:id_>"} <= rules
+
+
+def test_health_reports_database_state(api, monkeypatch):
+    import bi.routes as routes
+
+    class _Admin:
+        def command(self, name):
+            assert name == "ping"
+
+    class _Client:
+        admin = _Admin()
+
+    class _Mongo:
+        def __init__(self):
+            self.client_ = _Client()
+
+    monkeypatch.setattr(routes, "Mongo", _Mongo)
+    with api.app.test_client() as client:
+        response = client.get("/api/health")
+    assert response.status_code == 200 and response.get_json() == {"result": True, "db": True}
+
+    class _Down:
+        def __init__(self):
+            raise RuntimeError("no primary")
+
+    monkeypatch.setattr(routes, "Mongo", _Down)
+    with api.app.test_client() as client:
+        response = client.get("/api/health")
+    assert response.status_code == 503 and response.get_json()["db"] is False

@@ -53,6 +53,23 @@ from bi.otp import OTP
 bp = Blueprint("api", __name__)
 
 
+@bp.route("/api/health", methods=["GET"])
+def api_health_f():
+    """
+    liveness and readiness probe: verifies the database answers a ping
+    """
+    try:
+        Mongo().client_.admin.command("ping")
+        res_, sc__ = {"result": True, "db": True}, 200
+    except Exception as exc__:
+        res_, sc__ = {"result": False, "db": False, "msg": str(exc__)}, 503
+    response_ = make_response(json.dumps(res_))
+    response_.status_code = sc__
+    response_.mimetype = "application/json"
+    return response_
+
+
+@bp.route("/api/import", methods=["POST"], endpoint="import")
 def api_import_f():
     """
     docstring is in progress
@@ -122,14 +139,18 @@ def api_import_f():
             hdr_,
         )
 
+    except SessionError as exc__:
+        return {"result": False, "msg": str(exc__)}, 403
+
     except AuthError as exc__:
-        return {"msg": str(exc__), "status": 401}
+        return {"result": False, "msg": str(exc__)}, 401
 
     except APIError as exc__:
-        return {"msg": str(exc__), "status": 400}
+        return {"result": False, "msg": str(exc__)}, 400
 
     except Exception as exc__:
-        return {"msg": str(exc__), "status": 500}
+        Misc().notify_exception_f(exc__)
+        return {"result": False, "msg": str(exc__)}, 500
 
 
 @bp.route("/api/crud", methods=["POST"])

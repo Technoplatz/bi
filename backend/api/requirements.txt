@@ -12,8 +12,9 @@ et-xmlfile==2.0.0         # via openpyxl
 flask==3.1.3              # via flask-cors, -r backend/api/requirements.in
 flask-cors==6.0.5         # via -r backend/api/requirements.in
 get-docker-secret==2.0.0  # via -r backend/api/requirements.in
-gevent==26.9.0            # via -r backend/api/requirements.in
+gevent==26.9.0            # via gunicorn, -r backend/api/requirements.in
 greenlet==3.5.6           # via gevent
+gunicorn==26.2.0          # via -r backend/api/requirements.in
 idna==3.20                # via requests
 itsdangerous==2.2.0       # via flask
 jinja2==3.1.6             # via flask, -r backend/api/requirements.in
@@ -22,6 +23,7 @@ markupsafe==3.0.3         # via flask, jinja2, werkzeug
 numexpr==2.14.2           # via -r backend/api/requirements.in
 numpy==2.5.3              # via numexpr, pandas, -r backend/api/requirements.in
 openpyxl==3.1.5           # via -r backend/api/requirements.in
+packaging==26.3           # via gunicorn
 pandas==2.3.3             # via -r backend/api/requirements.in
 pyjwt==2.14.0             # via -r backend/api/requirements.in
 pymongo==4.18.1           # via -r backend/api/requirements.in

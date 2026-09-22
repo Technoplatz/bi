@@ -33,6 +33,7 @@ Application factory for the Technoplatz BI api.
 """
 
 import logging
+import os
 
 from flask import Flask
 from flask_cors import CORS
@@ -41,10 +42,25 @@ from bi import config as cfg
 from bi.routes import bp
 
 
+def configure_logging(level_=None):
+    """
+    one consistent line format for the api and the scheduler; gunicorn reuses the root handlers
+    """
+    level_ = level_ or os.environ.get("API_LOG_LEVEL", "INFO").upper()
+    logging.basicConfig(
+        level=getattr(logging, level_, logging.INFO),
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S",
+        force=True,
+    )
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)
+
+
 def create_app():
     """
     builds the Flask application with cors, upload limits and the api blueprint
     """
+    configure_logging()
     app = Flask(__name__)
     app.config["CORS_SUPPORTS_CREDENTIALS"] = True
     app.config["MAX_CONTENT_LENGTH"] = cfg.API_MAX_CONTENT_LENGTH_MB_ * 1024 * 1024
@@ -54,5 +70,4 @@ def create_app():
     app.config["UPLOAD_EXTENSIONS"] = cfg.UPLOAD_EXTENSIONS_
     CORS(app)
     app.register_blueprint(bp)
-    logging.getLogger("werkzeug").setLevel(logging.ERROR)
     return app

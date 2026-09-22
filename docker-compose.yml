@@ -30,6 +30,86 @@
 # https://www.gnu.org/licenses.
 #
 
+x-api-environment: &api-environment
+      - TZ=${TZ}
+      - DOMAIN=${DOMAIN}
+      - COMPANY_NAME=${COMPANY_NAME}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - ADMIN_NAME=${ADMIN_NAME}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - DEFAULT_LOCALE=${DEFAULT_LOCALE}
+      - MONGO_DB=${MONGO_DB}
+      - MONGO_AUTH_DB=${MONGO_AUTH_DB}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST0=${MONGO_HOST0}
+      - MONGO_HOST1=${MONGO_HOST1}
+      - MONGO_HOST2=${MONGO_HOST2}
+      - MONGO_PORT0=${MONGO_PORT0}
+      - MONGO_PORT1=${MONGO_PORT1}
+      - MONGO_PORT2=${MONGO_PORT2}
+      - MONGO_RS=${MONGO_RS}
+      - MONGO_DUMP_HOURS=${MONGO_DUMP_HOURS}
+      - MONGO_TLS=${MONGO_TLS}
+      - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
+      - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
+      - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
+      - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
+      - MONGO_READPREF=${MONGO_READPREF}
+      - MONGO_CPUS=${MONGO_CPUS}
+      - MONGO_TIMEOUT_MS=${MONGO_TIMEOUT_MS}
+      - SMTP_ENDPOINT=${SMTP_ENDPOINT}
+      - SMTP_USERID=${SMTP_USERID}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_TLS_PORT=${SMTP_TLS_PORT}
+      - EMAIL_SUBJECT_PREFIX=${EMAIL_SUBJECT_PREFIX}
+      - EMAIL_DISCLAIMER_HTML=${EMAIL_DISCLAIMER_HTML}
+      - API_SCHEDULE_INTERVAL_MIN=${API_SCHEDULE_INTERVAL_MIN}
+      - API_FW_TEMP_DURATION_MIN=${API_FW_TEMP_DURATION_MIN}
+      - API_SESSION_EXP_MINUTES=${API_SESSION_EXP_MINUTES}
+      - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
+      - API_JOB_UPDATE_LIMIT=${API_JOB_UPDATE_LIMIT}
+      - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
+      - API_MAX_CONTENT_LENGTH_MB=${API_MAX_CONTENT_LENGTH_MB}
+      - API_DEFAULT_AGGREGATION_LIMIT=${API_DEFAULT_AGGREGATION_LIMIT}
+      - API_DEFAULT_VISUAL_LIMIT=${API_DEFAULT_VISUAL_LIMIT}
+      - API_QUERY_PAGE_SIZE=${API_QUERY_PAGE_SIZE}
+      - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
+      - API_MONGODUMP_PATH=${API_MONGODUMP_PATH}
+      - API_S3_ACTIVE=${API_S3_ACTIVE}
+      - API_S3_REGION=${API_S3_REGION}
+      - API_S3_BUCKET_NAME=${API_S3_BUCKET_NAME}
+      - API_S3_KEY_ID=${API_S3_KEY_ID}
+      - API_S3_KEY=${API_S3_KEY}
+      - API_PERMISSIVE_TAGS=${API_PERMISSIVE_TAGS}
+      - API_ADMIN_TAGS=${API_ADMIN_TAGS}
+      - API_QADMIN_TAGS=${API_QADMIN_TAGS}
+      - API_ADMIN_IPS=${API_ADMIN_IPS}
+      - API_DELETE_ALLOWED=${API_DELETE_ALLOWED}
+      - API_CORS_ORIGINS=${API_CORS_ORIGINS}
+      - NOTIFICATION_PUSH_URL=${NOTIFICATION_PUSH_URL}
+      - RESTAPI_ENABLED=${RESTAPI_ENABLED}
+      - HTML_TABLE_MAX_ROWS=${HTML_TABLE_MAX_ROWS}
+      - HTML_TABLE_MAX_COLS=${HTML_TABLE_MAX_COLS}
+      - API_TRUSTED_PROXIES=${API_TRUSTED_PROXIES}
+      - API_CLOUDFLARE_IPS=${API_CLOUDFLARE_IPS}
+      - API_OTP_EXP_MINUTES=${API_OTP_EXP_MINUTES}
+      - API_OTP_MAX_ATTEMPTS=${API_OTP_MAX_ATTEMPTS}
+      - API_RATE_LIMIT_AUTH_IP=${API_RATE_LIMIT_AUTH_IP}
+      - API_RATE_LIMIT_AUTH_USER=${API_RATE_LIMIT_AUTH_USER}
+      - API_RATE_LIMIT_WINDOW_SEC=${API_RATE_LIMIT_WINDOW_SEC}
+      - API_OUTBOUND_HOSTS=${API_OUTBOUND_HOSTS}
+      - INTEGRATION_API_KEY=${INTEGRATION_API_KEY}
+      - API_WORKERS=${API_WORKERS}
+
+x-api-volumes: &api-volumes
+      - bi-storage-volume:${API_TEMPFILE_PATH}
+      - bi-storage-volume:${API_MONGODUMP_PATH}
+      - bi-storage-volume:/cron
+      - bi-cert-volume:/cert
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
 services:
   traefik:
     image: traefik:v3
@@ -329,93 +409,47 @@ services:
         condition: service_started
     hostname: api
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:${HTTP_PORT}/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
       - traefik.http.routers.api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)
       - traefik.http.services.api.loadbalancer.server.port=${HTTP_PORT}
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
-    volumes:
-      - bi-storage-volume:${API_TEMPFILE_PATH}
-      - bi-storage-volume:${API_MONGODUMP_PATH}
-      - bi-storage-volume:/cron
-      - bi-cert-volume:/cert
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+    volumes: *api-volumes
     ports:
       - "127.0.0.1:${API_CONTAINER_PORT}:${HTTP_PORT}"
-    environment:
-      - TZ=${TZ}
-      - DOMAIN=${DOMAIN}
-      - COMPANY_NAME=${COMPANY_NAME}
-      - FROM_EMAIL=${FROM_EMAIL}
-      - ADMIN_NAME=${ADMIN_NAME}
-      - ADMIN_EMAIL=${ADMIN_EMAIL}
-      - DEFAULT_LOCALE=${DEFAULT_LOCALE}
-      - MONGO_DB=${MONGO_DB}
-      - MONGO_AUTH_DB=${MONGO_AUTH_DB}
-      - MONGO_USERNAME=${MONGO_USERNAME}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
-      - MONGO_HOST0=${MONGO_HOST0}
-      - MONGO_HOST1=${MONGO_HOST1}
-      - MONGO_HOST2=${MONGO_HOST2}
-      - MONGO_PORT0=${MONGO_PORT0}
-      - MONGO_PORT1=${MONGO_PORT1}
-      - MONGO_PORT2=${MONGO_PORT2}
-      - MONGO_RS=${MONGO_RS}
-      - MONGO_DUMP_HOURS=${MONGO_DUMP_HOURS}
-      - MONGO_TLS=${MONGO_TLS}
-      - MONGO_TLS_CA_KEYFILE=${MONGO_TLS_CA_KEYFILE}
-      - MONGO_TLS_CERT_KEYFILE=${MONGO_TLS_CERT_KEYFILE}
-      - MONGO_TLS_ALLOW_INVALID_CERTIFICATES=${MONGO_TLS_ALLOW_INVALID_CERTIFICATES}
-      - MONGO_RETRY_WRITES=${MONGO_RETRY_WRITES}
-      - MONGO_READPREF=${MONGO_READPREF}
-      - MONGO_CPUS=${MONGO_CPUS}
-      - MONGO_TIMEOUT_MS=${MONGO_TIMEOUT_MS}
-      - SMTP_ENDPOINT=${SMTP_ENDPOINT}
-      - SMTP_USERID=${SMTP_USERID}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SMTP_TLS_PORT=${SMTP_TLS_PORT}
-      - EMAIL_SUBJECT_PREFIX=${EMAIL_SUBJECT_PREFIX}
-      - EMAIL_DISCLAIMER_HTML=${EMAIL_DISCLAIMER_HTML}
-      - API_SCHEDULE_INTERVAL_MIN=${API_SCHEDULE_INTERVAL_MIN}
-      - API_FW_TEMP_DURATION_MIN=${API_FW_TEMP_DURATION_MIN}
-      - API_SESSION_EXP_MINUTES=${API_SESSION_EXP_MINUTES}
-      - API_OUTPUT_ROWS_LIMIT=${API_OUTPUT_ROWS_LIMIT}
-      - API_JOB_UPDATE_LIMIT=${API_JOB_UPDATE_LIMIT}
-      - API_UPLOAD_LIMIT_BYTES=${API_UPLOAD_LIMIT_BYTES}
-      - API_MAX_CONTENT_LENGTH_MB=${API_MAX_CONTENT_LENGTH_MB}
-      - API_DEFAULT_AGGREGATION_LIMIT=${API_DEFAULT_AGGREGATION_LIMIT}
-      - API_DEFAULT_VISUAL_LIMIT=${API_DEFAULT_VISUAL_LIMIT}
-      - API_QUERY_PAGE_SIZE=${API_QUERY_PAGE_SIZE}
-      - API_TEMPFILE_PATH=${API_TEMPFILE_PATH}
-      - API_MONGODUMP_PATH=${API_MONGODUMP_PATH}
-      - API_S3_ACTIVE=${API_S3_ACTIVE}
-      - API_S3_REGION=${API_S3_REGION}
-      - API_S3_BUCKET_NAME=${API_S3_BUCKET_NAME}
-      - API_S3_KEY_ID=${API_S3_KEY_ID}
-      - API_S3_KEY=${API_S3_KEY}
-      - API_PERMISSIVE_TAGS=${API_PERMISSIVE_TAGS}
-      - API_ADMIN_TAGS=${API_ADMIN_TAGS}
-      - API_QADMIN_TAGS=${API_QADMIN_TAGS}
-      - API_ADMIN_IPS=${API_ADMIN_IPS}
-      - API_DELETE_ALLOWED=${API_DELETE_ALLOWED}
-      - API_CORS_ORIGINS=${API_CORS_ORIGINS}
-      - NOTIFICATION_PUSH_URL=${NOTIFICATION_PUSH_URL}
-      - RESTAPI_ENABLED=${RESTAPI_ENABLED}
-      - HTML_TABLE_MAX_ROWS=${HTML_TABLE_MAX_ROWS}
-      - HTML_TABLE_MAX_COLS=${HTML_TABLE_MAX_COLS}
-      - API_TRUSTED_PROXIES=${API_TRUSTED_PROXIES}
-      - API_CLOUDFLARE_IPS=${API_CLOUDFLARE_IPS}
-      - API_OTP_EXP_MINUTES=${API_OTP_EXP_MINUTES}
-      - API_OTP_MAX_ATTEMPTS=${API_OTP_MAX_ATTEMPTS}
-      - API_RATE_LIMIT_AUTH_IP=${API_RATE_LIMIT_AUTH_IP}
-      - API_RATE_LIMIT_AUTH_USER=${API_RATE_LIMIT_AUTH_USER}
-      - API_RATE_LIMIT_WINDOW_SEC=${API_RATE_LIMIT_WINDOW_SEC}
-      - API_OUTBOUND_HOSTS=${API_OUTBOUND_HOSTS}
-      - INTEGRATION_API_KEY=${INTEGRATION_API_KEY}
+    environment: *api-environment
     links:
       - replicaset
+    networks:
+      - network0
+
+  scheduler:
+    image: technoplatz/bi-api${REF}:${VERSION}
+    container_name: scheduler
+    command: ["python3", "scheduler.py"]
+    depends_on:
+      api:
+        condition: service_started
+    hostname: scheduler
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "test $(( $(date +%s) - $(cat /tmp/scheduler.heartbeat 2>/dev/null || echo 0) )) -lt 180"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - traefik.enable=false
+      - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
+    volumes: *api-volumes
+    environment: *api-environment
     networks:
       - network0
 
