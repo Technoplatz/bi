@@ -6344,7 +6344,7 @@ API_CLOUDFLARE_IPS_ = [
 ]
 API_OTP_EXP_MINUTES_ = int(os.environ.get("API_OTP_EXP_MINUTES")) if os.environ.get("API_OTP_EXP_MINUTES") else 10
 API_OTP_MAX_ATTEMPTS_ = int(os.environ.get("API_OTP_MAX_ATTEMPTS")) if os.environ.get("API_OTP_MAX_ATTEMPTS") else 5
-API_RATE_LIMIT_AUTH_IP_ = int(os.environ.get("API_RATE_LIMIT_AUTH_IP")) if os.environ.get("API_RATE_LIMIT_AUTH_IP") else 30
+API_RATE_LIMIT_AUTH_IP_ = int(os.environ.get("API_RATE_LIMIT_AUTH_IP")) if os.environ.get("API_RATE_LIMIT_AUTH_IP") else 200
 API_RATE_LIMIT_AUTH_USER_ = int(os.environ.get("API_RATE_LIMIT_AUTH_USER")) if os.environ.get("API_RATE_LIMIT_AUTH_USER") else 10
 API_RATE_LIMIT_WINDOW_SEC_ = int(os.environ.get("API_RATE_LIMIT_WINDOW_SEC")) if os.environ.get("API_RATE_LIMIT_WINDOW_SEC") else 600
 API_OUTBOUND_HOSTS_ = [

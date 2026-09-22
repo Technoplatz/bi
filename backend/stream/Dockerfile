@@ -30,14 +30,15 @@
 # https://www.gnu.org/licenses.
 #
 
-FROM python:3.11-slim
-RUN DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y cron dirmngr gnupg2 apt-transport-https ca-certificates software-properties-common wget libmagic-dev curl iputils-ping
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | apt-key add -
-RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-RUN apt-get update
-RUN apt-get install -y mongodb-org-tools
+FROM python:3.11-slim-bookworm
+ENV DEBIAN_FRONTEND=noninteractive
+# mongodb database tools (mongodump, mongorestore, mongoexport) from the signed mongodb repository
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends cron ca-certificates curl gnupg wget libmagic-dev iputils-ping tzdata \
+    && curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+    && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main" > /etc/apt/sources.list.d/mongodb-org-7.0.list \
+    && apt-get update && apt-get install -y --no-install-recommends mongodb-database-tools \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . /app
 RUN echo "python3 -m pip install --upgrade pip" >/run_module.sh
