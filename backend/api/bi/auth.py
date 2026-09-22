@@ -41,7 +41,6 @@ import pymongo
 import pyotp
 import jwt
 from flask import request
-from markupsafe import escape
 
 from bi import config as cfg
 from bi.db import Mongo
@@ -475,14 +474,16 @@ class Auth:
             email_ = Misc().clean_f(input_["email"])
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
-            if not auth_:
-                raise AuthError("account not found")
+            if auth_:
+                otp_send_ = OTP().request_otp_f(email_)
+                if not otp_send_["result"]:
+                    raise APIError(otp_send_["msg"])
+            else:
+                Misc().log_f({"type": "Info", "collection": "_auth", "op": "forgot", "user": email_,
+                              "document": {"exception": "unknown account", "_modified_at": Misc().get_now_f()}})
 
-            otp_send_ = OTP().request_otp_f(email_)
-            if not otp_send_["result"]:
-                raise APIError(otp_send_["msg"])
-
-            return {"result": True, "user": None}
+            # L-4: identical answer for known and unknown addresses
+            return {"result": True, "user": None, "msg": "if the account exists, a code has been e-mailed"}
 
         except pymongo.errors.PyMongoError as exc:
             return Misc().mongo_error_f(exc)
@@ -502,9 +503,9 @@ class Auth:
         """
         try:
             input_ = request.json
-            email_ = escape(input_["email"])
-            password_ = escape(input_["password"])
-            tfac_ = escape(input_["tfac"])
+            email_ = Misc().clean_f(input_["email"])
+            password_ = str(input_["password"]).strip()
+            tfac_ = Misc().clean_f(input_["tfac"])
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": email_})
             if not auth_:
@@ -557,7 +558,7 @@ class Auth:
         try:
             input_ = request.json
             email_ = Misc().clean_f(input_["email"])
-            password_ = Misc().clean_f(input_["password"])
+            password_ = str(input_["password"]).strip()
             tfac_ = Misc().clean_f(input_["tfac"])
 
             user_validate_ = self.user_validate_by_auth_f({"userid": email_, "password": password_})
@@ -770,7 +771,7 @@ class Auth:
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
             if not auth_:
-                raise AuthError("account not found")
+                raise AuthError("invalid email or password")
 
             user_ = (
                 Mongo()
@@ -784,7 +785,7 @@ class Auth:
                 )
             )
             if not user_:
-                raise AuthError("user not found")
+                raise AuthError("invalid email or password")
 
             firewall_f_ = self.firewall_f(user_)
             if not firewall_f_["result"]:
@@ -805,8 +806,18 @@ class Auth:
                 raise AuthError(hash_f_["msg"])
 
             new_key_ = hash_f_["key"]
-            if new_key_ != aut_key_:
-                raise AuthError("invalid email or password")
+            if not secrets.compare_digest(new_key_, aut_key_):
+                # L-3: older records were hashed on the html-escaped password; accept once and re-hash raw
+                legacy_ = Misc().clean_f(password_)
+                legacy_hash_ = self.password_hash_f(legacy_, aut_salt_) if legacy_ and legacy_ != password_ else None
+                if not (legacy_hash_ and legacy_hash_["result"] and secrets.compare_digest(legacy_hash_["key"], aut_key_)):
+                    raise AuthError("invalid email or password")
+                rehash_ = self.password_hash_f(password_, None)
+                if rehash_["result"]:
+                    Mongo().db_["_auth"].update_one(
+                        {"aut_id": user_id_},
+                        {"$set": {"aut_salt": rehash_["salt"], "aut_key": rehash_["key"], "_modified_at": Misc().get_now_f()}},
+                    )
 
             user_["aut_api_key"] = auth_["aut_api_key"] if "aut_api_key" in auth_ and auth_["aut_api_key"] is not None else None
 
@@ -828,7 +839,7 @@ class Auth:
         try:
             input_ = request.json
             email_ = Misc().clean_f(input_["email"])
-            password_ = Misc().clean_f(input_["password"])
+            password_ = str(input_["password"]).strip()
 
             user_validate_ = self.user_validate_by_auth_f({"userid": email_, "password": password_})
             if not user_validate_["result"]:
@@ -860,7 +871,7 @@ class Auth:
 
             input_ = request.json
             user_id_ = Misc().clean_f(input_["email"])
-            password_ = Misc().clean_f(input_["password"])
+            password_ = str(input_["password"]).strip()
 
             auth_ = Mongo().db_["_auth"].find_one({"aut_id": user_id_})
             # a record that never completed its first second-factor check may be re-registered,

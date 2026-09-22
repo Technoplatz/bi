@@ -36,6 +36,7 @@ import secrets
 import pymongo
 import pyotp
 
+from bi import config as cfg
 from bi.db import Mongo
 from bi.errors import APIError, AuthError
 from bi.mailer import Email
@@ -229,6 +230,11 @@ class OTP:
 
             usr_id_ = user_["usr_id"]
             name_ = user_["usr_name"]
+            # L-4: one code per API_OTP_RESEND_SEC per account, so the mailbox cannot be flooded
+            auth_ = Mongo().db_["_auth"].find_one({"aut_id": usr_id_}, {"_tfac_modified_at": 1, "aut_tfac": 1})
+            age_ = Misc().age_minutes_f(auth_["_tfac_modified_at"]) if auth_ and auth_.get("_tfac_modified_at") else None
+            if auth_ and auth_.get("aut_tfac") and age_ is not None and 0 <= age_ * 60 < cfg.API_OTP_RESEND_SEC_:
+                raise APIError(f"a code was sent recently, please wait {cfg.API_OTP_RESEND_SEC_} seconds")
             tfac_ = secrets.randbelow(900000) + 100000
             Mongo().db_["_auth"].update_one(
                 {"aut_id": usr_id_},

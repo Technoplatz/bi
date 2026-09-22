@@ -34,7 +34,6 @@ HTTP routes of the api, registered as a Flask blueprint.
 
 import re
 import json
-import ast
 import pymongo
 from bson import json_util
 from markupsafe import escape
@@ -51,6 +50,19 @@ from bi.misc import Misc
 from bi.otp import OTP
 
 bp = Blueprint("api", __name__)
+
+
+def error_payload_f(exc__):
+    """
+    L-2: turns an exception raised with a dict or with a message into the json error body,
+    without evaluating the exception text
+    """
+    arg_ = exc__.args[0] if getattr(exc__, "args", None) else str(exc__)
+    if isinstance(arg_, dict):
+        payload_ = dict(arg_)
+        payload_.setdefault("result", False)
+        return payload_
+    return {"result": False, "msg": str(arg_)}
 
 
 @bp.route("/api/health", methods=["GET"])
@@ -158,7 +170,7 @@ def api_crud_f():
     """
     docstring is in progress
     """
-    sc__, res_ = 200, {}
+    sc__, res_, op_ = 200, {}, None
     try:
         input_ = request.json
         if "op" not in input_:
@@ -270,33 +282,33 @@ def api_crud_f():
 
     except APIError as exc__:
         Misc().notify_exception_f(exc__)
-        sc__, res_ = 400, ast.literal_eval(str(exc__))
+        sc__, res_ = 400, error_payload_f(exc__)
 
     except AuthError as exc__:
-        sc__, res_ = 401, ast.literal_eval(str(exc__))
+        sc__, res_ = 401, error_payload_f(exc__)
 
     except SessionError as exc__:
-        sc__, res_ = 403, ast.literal_eval(str(exc__))
+        sc__, res_ = 403, error_payload_f(exc__)
 
     except Exception as exc__:
         Misc().notify_exception_f(exc__)
-        sc__, res_ = 500, ast.literal_eval(str(exc__))
+        sc__, res_ = 500, error_payload_f(exc__)
 
-    finally:
-        response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
-        files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
 
-        if "result" in res_ and res_["result"] is True and op_ in ["dumpd", "action"] and files_:
-            path_ = files_[0]["name"].strip().lower()
-            fname_ = path_.replace(f"{cfg.API_TEMPFILE_PATH_}/", "").replace(f"{cfg.API_MONGODUMP_PATH_}/", "")
-            response_ = make_response(send_file(path_))
-            response_.status_code = sc__
-            response_.headers["Content-Type"] = (f"application/octet-stream; filename={fname_}")
-            return response_
+    response_ = make_response(json.dumps(res_, default=json_util.default, sort_keys=False))
+    files_ = res_["files"] if "files" in res_ and len(res_["files"]) > 0 else None
 
+    if "result" in res_ and res_["result"] is True and op_ in ["dumpd", "action"] and files_:
+        path_ = files_[0]["name"].strip().lower()
+        fname_ = path_.replace(f"{cfg.API_TEMPFILE_PATH_}/", "").replace(f"{cfg.API_MONGODUMP_PATH_}/", "")
+        response_ = make_response(send_file(path_))
         response_.status_code = sc__
-        response_.mimetype = "application/json"
+        response_.headers["Content-Type"] = (f"application/octet-stream; filename={fname_}")
         return response_
+
+    response_.status_code = sc__
+    response_.mimetype = "application/json"
+    return response_
 
 
 @bp.route("/api/otp", methods=["POST"])
@@ -352,24 +364,24 @@ def api_otp_f():
             raise APIError(res_)
 
     except RateLimitError as exc__:
-        sc__, res_ = 429, ast.literal_eval(str(exc__))
+        sc__, res_ = 429, error_payload_f(exc__)
 
     except SessionError as exc__:
-        sc__, res_ = 403, ast.literal_eval(str(exc__))
+        sc__, res_ = 403, error_payload_f(exc__)
 
     except APIError as exc__:
-        sc__, res_ = 401, ast.literal_eval(str(exc__))
+        sc__, res_ = 401, error_payload_f(exc__)
 
     except Exception as exc__:
-        sc__, res_ = 500, ast.literal_eval(str(exc__))
+        sc__, res_ = 500, error_payload_f(exc__)
 
-    finally:
-        response_ = make_response(
-            json.dumps(res_, default=json_util.default, sort_keys=False)
-        )
-        response_.status_code = sc__
-        response_.mimetype = "application/json"
-        return response_
+
+    response_ = make_response(
+        json.dumps(res_, default=json_util.default, sort_keys=False)
+    )
+    response_.status_code = sc__
+    response_.mimetype = "application/json"
+    return response_
 
 
 @bp.route("/api/auth", methods=["POST"], endpoint="auth")
@@ -425,27 +437,27 @@ def api_auth_f():
             raise AuthError(res_)
 
     except RateLimitError as exc__:
-        sc__, res_ = 429, ast.literal_eval(str(exc__))
+        sc__, res_ = 429, error_payload_f(exc__)
 
     except APIError as exc__:
-        sc__, res_ = 400, ast.literal_eval(str(exc__))
+        sc__, res_ = 400, error_payload_f(exc__)
 
     except SessionError as exc__:
-        sc__, res_ = 403, ast.literal_eval(str(exc__))
+        sc__, res_ = 403, error_payload_f(exc__)
 
     except AuthError as exc__:
-        sc__, res_ = 401, ast.literal_eval(str(exc__))
+        sc__, res_ = 401, error_payload_f(exc__)
 
     except Exception as exc__:
-        sc__, res_ = 500, ast.literal_eval(str(exc__))
+        sc__, res_ = 500, error_payload_f(exc__)
 
-    finally:
-        response_ = make_response(
-            json.dumps(res_, default=json_util.default, sort_keys=False)
-        )
-        response_.status_code = sc__
-        response_.mimetype = "application/json"
-        return response_
+
+    response_ = make_response(
+        json.dumps(res_, default=json_util.default, sort_keys=False)
+    )
+    response_.status_code = sc__
+    response_.mimetype = "application/json"
+    return response_
 
 
 @bp.route("/api/iot", methods=["POST"])
@@ -483,21 +495,21 @@ def api_iot_f():
             res_ = Iot().iot_query_f(searched_, page_)
 
     except AuthError as exc__:
-        sc__, res_ = 401, ast.literal_eval(str(exc__))
+        sc__, res_ = 401, error_payload_f(exc__)
 
     except APIError as exc__:
-        sc__, res_ = 400, ast.literal_eval(str(exc__))
+        sc__, res_ = 400, error_payload_f(exc__)
 
     except Exception as exc__:
-        sc__, res_ = 500, ast.literal_eval(str(exc__))
+        sc__, res_ = 500, error_payload_f(exc__)
 
-    finally:
-        response_ = make_response(
-            json.dumps(res_, default=json_util.default, sort_keys=False)
-        )
-        response_.status_code = sc__
-        response_.mimetype = "application/json"
-        return response_
+
+    response_ = make_response(
+        json.dumps(res_, default=json_util.default, sort_keys=False)
+    )
+    response_.status_code = sc__
+    response_.mimetype = "application/json"
+    return response_
 
 
 @bp.route("/api/post", methods=["POST"])
@@ -782,23 +794,23 @@ def api_get_query(id_):
 
     except AuthError as exc__:
         Misc().notify_exception_f(exc__)
-        res_ = ast.literal_eval(str(exc__))
+        res_ = error_payload_f(exc__)
         status_code_ = 401
 
     except APIError as exc__:
         Misc().notify_exception_f(exc__)
-        res_ = ast.literal_eval(str(exc__))
+        res_ = error_payload_f(exc__)
         status_code_ = 500
 
     except Exception as exc__:
         Misc().notify_exception_f(exc__)
-        res_ = ast.literal_eval(str(exc__))
+        res_ = error_payload_f(exc__)
         status_code_ = 500
 
-    finally:
-        response_ = make_response(
-            json.dumps(res_, default=json_util.default, sort_keys=False)
-        )
-        response_.status_code = status_code_
-        response_.mimetype = "application/json"
-        return response_
+
+    response_ = make_response(
+        json.dumps(res_, default=json_util.default, sort_keys=False)
+    )
+    response_.status_code = status_code_
+    response_.mimetype = "application/json"
+    return response_

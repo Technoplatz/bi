@@ -32,7 +32,6 @@ https://www.gnu.org/licenses.
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SanitizeHtmlPipe } from './sanitize-html-pipe';
 import { ArraySortPipe } from './array-sort.pipe';
 
 @NgModule({
@@ -40,11 +39,9 @@ import { ArraySortPipe } from './array-sort.pipe';
         CommonModule
     ],
     exports: [
-        SanitizeHtmlPipe,
         ArraySortPipe
     ],
     declarations: [
-        SanitizeHtmlPipe,
         ArraySortPipe
     ]
 })

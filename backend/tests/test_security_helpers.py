@@ -253,3 +253,22 @@ def test_stream_loop_guard(stream):
     assert results[:stream.TRIGGER_LOOP_LIMIT_] == [True] * stream.TRIGGER_LOOP_LIMIT_
     assert results[stream.TRIGGER_LOOP_LIMIT_:] == [False] * 5
     assert trigger.loop_guard_f("zz_data", "id2") is True
+
+
+# ---------------------------------------------------------------- low findings: error payloads never evaluate exception text
+def test_error_payload_shapes(api):
+    from bi.errors import APIError, AuthError
+    from bi.routes import error_payload_f
+    assert error_payload_f(APIError({"result": False, "msg": "x", "extra": 1})) == {"result": False, "msg": "x", "extra": 1}
+    assert error_payload_f(AuthError("plain text")) == {"result": False, "msg": "plain text"}
+    assert error_payload_f(KeyError("missing")) == {"result": False, "msg": "missing"}
+    assert error_payload_f(APIError({"msg": "no result key"})) == {"result": False, "msg": "no result key"}
+
+
+def test_crud_route_reports_errors_with_status(api):
+    with api.app.test_client() as client:
+        response = client.post("/api/crud", json={"collection": "x"})
+    assert response.status_code == 400 and response.get_json() == {"result": False, "msg": "no operation found"}
+    with api.app.test_client() as client:
+        response = client.post("/api/crud", json={"op": "read", "collection": "x"})
+    assert response.status_code == 403 and response.get_json()["result"] is False

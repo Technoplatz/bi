@@ -47,6 +47,7 @@ from pymongo import MongoClient, ReturnDocument
 import pymongo
 from flask import Flask, request, make_response
 from markupsafe import escape
+from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from gevent.pywsgi import WSGIServer
 
@@ -328,12 +329,11 @@ class Edoksis:
                             if not tag.text:
                                 raise APIError("!!! missing icerik tag")
                             document_ = base64.b64decode(tag.text)
-                            fn_ = (
-                                f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}"
-                            )
-                            fullpath_ = os.path.normpath(
-                                os.path.join(API_TEMPFILE_PATH_, fn_)
-                            )
+                            # L-6: the name is built from database values; sanitise it and keep it inside the temp path
+                            fn_ = secure_filename(f"waybill_{shipment_id_}_{shipment_ettn_}.{file_type_}")
+                            fullpath_ = os.path.normpath(os.path.join(API_TEMPFILE_PATH_, fn_))
+                            if not fn_ or not fullpath_.startswith(os.path.normpath(API_TEMPFILE_PATH_) + os.sep):
+                                raise APIError("file path not allowed")
                             os.makedirs(os.path.dirname(fullpath_), exist_ok=True)
                             with open(fullpath_, "wb") as file_:
                                 file_.write(document_)
