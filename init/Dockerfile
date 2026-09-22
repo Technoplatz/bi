@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 #
 
-FROM bash:latest
+FROM bash:5.2
 RUN apk update
 RUN apk add openssl
 COPY bi-init.sh /

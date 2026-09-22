@@ -32,21 +32,21 @@
 
 services:
   traefik:
-    image: traefik:latest
+    image: traefik:v3
     container_name: traefik
     hostname: traefik
     restart: always
     labels:
-      - traefik.enable=true
-      - traefik.docker.network=network0
-      - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
-      - traefik.http.routers.traefik.service=api@internal
+      - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     command:
       - --log.level=INFO
-      - --api.insecure=true
+      - --global.checknewversion=false
+      - --global.sendanonymoususage=false
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:${HTTP_PORT}
+      - --entrypoints.websecure.address=:${HTTPS_PORT}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/timezone:/etc/timezone:ro
@@ -56,7 +56,6 @@ services:
     ports:
       - "${HTTP_PORT}:${HTTP_PORT}"
       - "${HTTPS_PORT}:${HTTPS_PORT}"
-      - "${TRAEFIK_CONTAINER_PORT}:${TRAEFIK_CONTAINER_PORT}"
     networks:
       - network0
 
@@ -113,7 +112,7 @@ services:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     ports:
-      - "${MONGO_PORT0}:${MONGO_PORT0}"
+      - "127.0.0.1:${MONGO_PORT0}:${MONGO_PORT0}"
     volumes:
       - bi-cert-volume:/cert:ro
       - bi-mongo0-volume:/data/db
@@ -151,7 +150,7 @@ services:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     ports:
-      - "${MONGO_PORT1}:${MONGO_PORT0}"
+      - "127.0.0.1:${MONGO_PORT1}:${MONGO_PORT0}"
     volumes:
       - bi-cert-volume:/cert:ro
       - bi-mongo1-volume:/data/db
@@ -187,7 +186,7 @@ services:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
     ports:
-      - "${MONGO_PORT2}:${MONGO_PORT0}"
+      - "127.0.0.1:${MONGO_PORT2}:${MONGO_PORT0}"
     volumes:
       - bi-cert-volume:/cert:ro
       - bi-mongo2-volume:/data/db
@@ -212,6 +211,8 @@ services:
     build:
       context: ./replicaset
       dockerfile: Dockerfile
+      args:
+        MONGO_VERSION: ${MONGO_VERSION}
     image: technoplatz/bi-replicaset${REF}:${VERSION}
     container_name: replicaset
     hostname: replicaset
@@ -282,8 +283,6 @@ services:
       - bi-storage-volume:${API_TEMPFILE_PATH}
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-    ports:
-      - "${STREAM_CONTAINER_PORT}:${STREAM_CONTAINER_PORT}"
     environment:
       - TZ=${TZ}
       - MONGO_DB=${MONGO_DB}
@@ -453,7 +452,7 @@ services:
       - network0
 
   watchtower:
-    image: containrrr/watchtower:latest
+    image: containrrr/watchtower:1.7.1
     container_name: watchtower
     hostname: watchtower
     restart: always
@@ -465,6 +464,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
     environment:
       - TZ=${TZ}
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_MONITOR_ONLY=${WATCHTOWER_MONITOR_ONLY}
       - WATCHTOWER_NOTIFICATIONS=slack
       - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER=${NOTIFICATION_IDENTIFIER}
       - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=${NOTIFICATION_PUSH_URL}

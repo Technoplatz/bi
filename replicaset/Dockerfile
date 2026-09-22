@@ -30,7 +30,8 @@
 # https://www.gnu.org/licenses.
 #
 
-FROM mongo:latest
+ARG MONGO_VERSION=7.0.15
+FROM mongo:${MONGO_VERSION}
 RUN apt-get update && apt-get upgrade -y && apt-get install -y jq
 WORKDIR /app
 COPY bi-replicaset.sh .

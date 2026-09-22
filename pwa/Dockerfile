@@ -40,7 +40,7 @@ RUN npm install
 COPY . /app/
 RUN ionic build --prod
 
-FROM nginx:mainline-alpine
+FROM nginx:1.28-alpine
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/www /usr/share/nginx/html
