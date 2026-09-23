@@ -19,12 +19,10 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
   Component,
   ElementRef,
-  OnChanges,
   OnDestroy,
-  SimpleChanges,
+  effect,
   input,
   output,
   viewChild,
@@ -51,7 +49,6 @@ export class JsonEditorOptions {
  * Emits the parsed document on every valid change; invalid text is not emitted.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'json-editor',
   template: `<div #host class="json-editor-host"></div>`,
   styles: [
@@ -65,7 +62,7 @@ export class JsonEditorOptions {
     `,
   ],
 })
-export class JsonEditorComponent implements AfterViewInit, OnChanges, OnDestroy {
+export class JsonEditorComponent implements AfterViewInit, OnDestroy {
   readonly options = input<JsonEditorOptions>(new JsonEditorOptions());
   readonly data = input<any>(null);
   readonly change = output<any>();
@@ -73,6 +70,33 @@ export class JsonEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
   private editor: any = null;
   private lastEmitted: string | null = null;
   private observer: MutationObserver | null = null;
+  // the input values the editor was created with or received last; a later change of the
+  // reference is what ngOnChanges used to report as a non-first change
+  private shownData: any = undefined;
+  private shownOptions: JsonEditorOptions | undefined = undefined;
+
+  constructor() {
+    effect(() => {
+      const data = this.data();
+      if (!this.editor || data === this.shownData) {
+        return;
+      }
+      this.shownData = data;
+      const serialized = JSON.stringify(data ?? []);
+      if (serialized !== this.lastEmitted) {
+        this.lastEmitted = serialized;
+        this.editor.set({ json: data ?? [] });
+      }
+    });
+    effect(() => {
+      const options = this.options();
+      if (!this.editor || options === this.shownOptions) {
+        return;
+      }
+      this.shownOptions = options;
+      this.editor.updateProps({ mode: options?.mode === 'tree' ? Mode.tree : Mode.text });
+    });
+  }
 
   ngAfterViewInit() {
     // CodeMirror mounts its stylesheet into the nearest shadow root the editor is slotted into, here
@@ -88,6 +112,8 @@ export class JsonEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.observer = new MutationObserver(reroot);
     const host = this.host();
     this.observer.observe(host.nativeElement, { childList: true, subtree: true });
+    this.shownData = this.data();
+    this.shownOptions = this.options();
     this.editor = createJSONEditor({
       target: host.nativeElement,
       props: {
@@ -113,19 +139,6 @@ export class JsonEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
         },
       },
     });
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (this.editor && changes['data'] && !changes['data'].firstChange) {
-      const serialized = JSON.stringify(this.data() ?? []);
-      if (serialized !== this.lastEmitted) {
-        this.lastEmitted = serialized;
-        this.editor.set({ json: this.data() ?? [] });
-      }
-    }
-    if (this.editor && changes['options'] && !changes['options'].firstChange) {
-      this.editor.updateProps({ mode: this.options()?.mode === 'tree' ? Mode.tree : Mode.text });
-    }
   }
 
   ngOnDestroy() {

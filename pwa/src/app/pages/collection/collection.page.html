@@ -2,22 +2,22 @@
   <ion-grid class="ion-no-padding ion-no-border">
     <ion-row>
       <ion-col class="console-right">
-        <p class="hdr">{{ header | translate }}&nbsp;</p>
-        <h3>[{{ subheader }}]&nbsp;</h3>
-        @if (is_loaded) {
+        <p class="hdr">{{ header() | translate }}&nbsp;</p>
+        <h3>[{{ subheader() }}]&nbsp;</h3>
+        @if (is_loaded()) {
           <span class="bold primary"
-            >{{ count }} {{ count > 1 ? ('documents' | translate) : ('document' | translate) }}
-            {{ (filter_?.length > 0 ? 'filtered' : 'found') | translate }}.</span
+            >{{ count() }} {{ count() > 1 ? ('documents' | translate) : ('document' | translate) }}
+            {{ (filter_()?.length > 0 ? 'filtered' : 'found') | translate }}.</span
           >
         }
-        @if (!is_loaded) {
+        @if (!is_loaded()) {
           <span class="bold primary">{{ loadingText | translate }}...&nbsp;</span>
         }
         <div class="filler-10"></div>
         <ion-grid class="ion-no-padding">
           <ion-row class="sub-menu-row sq-menu-row">
             <ion-col size="12" class="data-sq-container">
-              @if (is_crud && importvis_) {
+              @if (is_crud() && importvis_()) {
                 <div (click)="import_modal()" class="data-sq-button">
                   <ion-icon name="cloud-upload-outline"></ion-icon><br /><ion-text
                     color="primary"
@@ -25,13 +25,13 @@
                   >
                 </div>
               }
-              @if (scan_) {
+              @if (scan_()) {
                 <div (click)="go_crud(null, 'insert')" class="data-sq-button">
                   <ion-icon name="qr-code-outline"></ion-icon><br />
                   <ion-text color="primary">{{ 'Scan Barcode' | translate }}</ion-text>
                 </div>
               } @else {
-                @if (!['_log', '_announcement'].includes(id)) {
+                @if (!['_log', '_announcement'].includes(id())) {
                   <div (click)="go_crud(null, 'insert')" class="data-sq-button">
                     <ion-icon name="add-circle-outline"></ion-icon><br />
                     <ion-text color="primary">{{ 'New Record' | translate }}</ion-text>
@@ -39,10 +39,10 @@
                 }
               }
               <div (click)="refresh_data(0, false)" class="data-sq-button">
-                @if (is_loaded) {
+                @if (is_loaded()) {
                   <ion-icon name="sync-circle-outline"></ion-icon>
                 }
-                @if (!is_loaded) {
+                @if (!is_loaded()) {
                   <ion-spinner name="lines-sharp"></ion-spinner>
                 }
                 <br />
@@ -50,14 +50,14 @@
               </div>
               <div
                 (click)="clear_filter()"
-                [class]="is_loaded ? 'data-sq-button' : 'data-sq-button disabled'"
+                [class]="is_loaded() ? 'data-sq-button' : 'data-sq-button disabled'"
               >
                 <ion-icon
                   name="filter-circle-outline"
-                  [color]="filter_?.length > 0 ? 'danger' : 'primary'"
+                  [color]="filter_()?.length > 0 ? 'danger' : 'primary'"
                 ></ion-icon
                 ><br />
-                <ion-text [color]="filter_?.length > 0 ? 'danger' : 'primary'">{{
+                <ion-text [color]="filter_()?.length > 0 ? 'danger' : 'primary'">{{
                   'Clear Filter' | translate
                 }}</ion-text>
               </div>
@@ -65,29 +65,29 @@
                 <ion-icon name="duplicate-outline"></ion-icon><br />
                 <ion-text color="primary">{{ 'Clone Record' | translate }}</ion-text>
               </div>
-              @if (perma_) {
+              @if (perma_()) {
                 <div (click)="multi_crud('delete')" class="data-sq-button">
                   <ion-icon name="trash-outline"></ion-icon>
                   <br />
                   <ion-text color="primary">{{ 'Delete Record' | translate }}</ion-text>
                 </div>
               }
-              <div (click)="copy(propkeys_, $event, -1)" class="data-sq-button">
-                @if (!is_copied) {
+              <div (click)="copy(propkeys_(), $event, -1)" class="data-sq-button">
+                @if (!is_copied()) {
                   <ion-icon name="browsers-sharp"></ion-icon>
                 }
-                @if (is_copied) {
+                @if (is_copied()) {
                   <ion-icon name="checkmark-sharp"></ion-icon>
                 }
                 <br />
-                @if (!is_copied) {
+                @if (!is_copied()) {
                   <ion-text color="primary">{{ 'Copy Headers' | translate }}</ion-text>
                 }
-                @if (is_copied) {
+                @if (is_copied()) {
                   <ion-text color="primary">{{ 'Successfully Copied' | translate }}</ion-text>
                 }
               </div>
-              @if (is_crud && perm_) {
+              @if (is_crud() && perm_()) {
                 <div (click)="set_editor(true)" class="data-sq-button">
                   <svg
                     viewBox="0 0 24 24"
@@ -110,17 +110,17 @@
           </ion-row>
         </ion-grid>
         <!-- SCHEMA -->
-        @if (is_crud && perm_ && schemavis_) {
+        @if (is_crud() && perm_() && schemavis_()) {
           <ion-grid class="actions-grid">
             <ion-row>
               <ion-col size="12">
-                @if (!is_saving) {
+                @if (!is_saving()) {
                   <ion-button (click)="save_schema_f()">
                     <ion-icon name="cloud-upload-outline"></ion-icon>
                     <span>{{ 'Save Schema' | translate }}</span>
                   </ion-button>
                 }
-                @if (is_saving) {
+                @if (is_saving()) {
                   <ion-button>
                     <ion-spinner name="lines-sharp-small"></ion-spinner>&nbsp;&nbsp;
                     <span>{{ 'Saving' | translate }}</span>
@@ -136,8 +136,8 @@
               <ion-col size="12">
                 <json-editor
                   id="struc"
-                  [options]="jeoptions"
-                  [data]="structure_"
+                  [options]="jeoptions()"
+                  [data]="structure_()"
                   (change)="json_changed($event)"
                   #editor
                 ></json-editor>
@@ -147,14 +147,14 @@
         }
 
         <!-- CRUD GRID SECTION -->
-        @if (is_initialized) {
+        @if (is_initialized()) {
           <div>
             <!-- ACTION BUTTONS -->
-            @if (actions?.length > 0) {
+            @if (actions()?.length > 0) {
               <ion-grid class="actions-grid">
                 <ion-row>
                   <ion-col size="12">
-                    @for (item of actions; track item; let ac = $index) {
+                    @for (item of actions(); track item; let ac = $index) {
                       <span>
                         @if (item.enabled) {
                           <ion-button (click)="action(ac)">
@@ -171,11 +171,11 @@
               </ion-grid>
             }
             <!-- FLASHCARDS -->
-            @if (flashcards_?.length > 0) {
+            @if (flashcards_()?.length > 0) {
               <ion-grid class="ion-no-padding">
                 <ion-row>
                   <ion-col size="12" class="schema-flashcard-container">
-                    @for (item of flashcards_; track item) {
+                    @for (item of flashcards_(); track item) {
                       <div (click)="do_flashcard(item)">
                         {{ item.view.title | translate }}<br /><span>{{ item.count }}</span>
                       </div>
@@ -193,14 +193,14 @@
                     class="ion-no-padding ion-no-margin colvis-button"
                     (click)="colvis_activate()"
                   >
-                    @if (colvised_) {
+                    @if (colvised_()) {
                       <ion-icon name="eye-off"></ion-icon>
                     }
-                    @if (!colvised_) {
+                    @if (!colvised_()) {
                       <ion-icon name="eye-outline"></ion-icon>
                     }
                   </ion-button>
-                  @if (colvis_activated_) {
+                  @if (colvis_activated_()) {
                     <div class="colvis-box">
                       <div>
                         <div>{{ 'Column Visibility' | translate }}</div>
@@ -229,7 +229,7 @@
                         {{ 'Cancel' | translate }}
                       </ion-button>
                       <div class="filler-8"></div>
-                      @for (item of properties_ | keyvalue: orderByIndex; track item) {
+                      @for (item of properties_() | keyvalue: orderByIndex; track item.key) {
                         <div>
                           <ion-button
                             size="small"
@@ -238,14 +238,14 @@
                             (click)="set_colvis_item(item.key)"
                           >
                             <ion-icon
-                              [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"
+                              [name]="colvis_()[item.key] ? 'eye-off' : 'eye-outline'"
                             ></ion-icon>
                             {{ item.value.title | translate }}&nbsp;&nbsp;[{{ item.key }}]
                           </ion-button>
                         </div>
                       }
                       ---
-                      @for (item of fixedcols_; track item) {
+                      @for (item of fixedcols_; track item.key) {
                         <div>
                           <ion-button
                             size="small"
@@ -254,7 +254,7 @@
                             (click)="set_colvis_item(item.key)"
                           >
                             <ion-icon
-                              [name]="colvis_[item.key] ? 'eye-off' : 'eye-outline'"
+                              [name]="colvis_()[item.key] ? 'eye-off' : 'eye-outline'"
                             ></ion-icon>
                             {{ item.title | translate }}&nbsp;&nbsp;[{{ item.key }}]
                           </ion-button>
@@ -263,25 +263,26 @@
                     </div>
                   }
                 </th>
-                @if (!['_log', '_dump', '_announcement'].includes(id)) {
+                @if (!['_log', '_dump', '_announcement'].includes(id())) {
                   <th>
                     <ion-checkbox
-                      [(ngModel)]="multicheckbox"
+                      [ngModel]="multicheckbox()"
+                      (ngModelChange)="multicheckbox.set($event)"
                       (ionChange)="switch_select_data($event.detail.checked)"
                       mode="md"
                     >
                     </ion-checkbox>
                   </th>
                 }
-                @if (['_query', '_job'].includes(id)) {
+                @if (['_query', '_job'].includes(id())) {
                   <th>
                     {{ 'Approval' | translate }}<br />
                     <ion-button size="small" class="unfiltered-btn">{{ '_approved' }}</ion-button>
                   </th>
                 }
                 <!-- DATA LIST HEADER -->
-                @for (item of properties_ | keyvalue: orderByIndex; track item) {
-                  <th [style]="colvis_ == {} || colvis_[item.key] ? 'display: none;' : ''">
+                @for (item of properties_() | keyvalue: orderByIndex; track item.key) {
+                  <th [style]="colvis_() == {} || colvis_()[item.key] ? 'display: none;' : ''">
                     <div
                       [class]="
                         ['number', 'decimal', 'float'].includes(item.value.bsonType)
@@ -295,13 +296,13 @@
                         size="small"
                         fill="clear"
                         [class]="
-                          searched && searched[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'
+                          searched() && searched()[item.key]?.f ? 'filtered-btn' : 'unfiltered-btn'
                         "
                         >{{ item.key }}<ion-icon name="caret-down"></ion-icon>
                       </ion-button>
                     </div>
                     <!-- SEARCH BOX -->
-                    @if (searched && searched[item.key]?.actived) {
+                    @if (searched() && searched()[item.key]?.actived) {
                       <div class="search-box">
                         <div>{{ $any(item.key) | translate }}</div>
                         <div class="filler-8"></div>
@@ -312,13 +313,13 @@
                           <ion-icon name="arrow-up"></ion-icon>
                         </ion-button>
                         <ion-button color="light" size="small" (click)="copy_column(item.key)">
-                          @if (!is_key_copied && !is_key_copying) {
+                          @if (!is_key_copied() && !is_key_copying()) {
                             <ion-icon name="copy-sharp"></ion-icon>
                           }
-                          @if (is_key_copied) {
+                          @if (is_key_copied()) {
                             <ion-icon name="checkmark-sharp"></ion-icon>
                           }
-                          @if (is_key_copying) {
+                          @if (is_key_copying()) {
                             <ion-icon name="stopwatch-"></ion-icon>
                           }
                         </ion-button>
@@ -326,56 +327,56 @@
                         @if (item.value.bsonType != 'bool') {
                           <div class="search-ops">
                             <ion-button
-                              [color]="searched[item.key]?.op == 'contains' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'contains' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'contains')"
                             >
                               {{ 'in' | translate }}
                             </ion-button>
                             <ion-button
-                              [color]="searched[item.key]?.op == 'like' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'like' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'like')"
                             >
                               {{ 'A&rarr;' | translate }}
                             </ion-button>
                             <ion-button
-                              [color]="searched[item.key]?.op == 'eq' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'eq' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'eq')"
                             >
                               =
                             </ion-button>
                             <ion-button
-                              [color]="searched[item.key]?.op == 'ne' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'ne' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'ne')"
                             >
                               &ne;
                             </ion-button>
                             <ion-button
-                              [color]="searched[item.key]?.op == 'gte' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'gte' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'gte')"
                             >
                               &ge;
                             </ion-button>
                             <ion-button
-                              [color]="searched[item.key]?.op == 'lte' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'lte' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'lte')"
                             >
                               &le;
                             </ion-button>
                             <ion-button
-                              [color]="searched[item.key]?.op == 'null' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'null' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'null')"
                             >
                               &#9723;
                             </ion-button>
                             <ion-button
-                              [color]="searched[item.key]?.op == 'nnull' ? 'primary' : 'light'"
+                              [color]="searched()[item.key]?.op == 'nnull' ? 'primary' : 'light'"
                               size="small"
                               (click)="set_search_item(item.key, 'nnull')"
                             >
@@ -390,7 +391,8 @@
                             <ion-textarea
                               #searchfocus
                               cols="32"
-                              [(ngModel)]="searched[item.key].kw"
+                              [ngModel]="searched()[item.key].kw"
+                              (ngModelChange)="set_search_kw(item.key, $event)"
                               [ngModelOptions]="{ standalone: true }"
                               class="ion-no-padding search-area"
                               placeholder="{{ 'Search' | translate }}"
@@ -404,14 +406,14 @@
                           @if (item.value.bsonType == 'bool') {
                             <div>
                               <ion-button
-                                [color]="searched[item.key]?.op == 'true' ? 'primary' : 'light'"
+                                [color]="searched()[item.key]?.op == 'true' ? 'primary' : 'light'"
                                 size="small"
                                 (click)="set_search_item(item.key, 'true')"
                               >
                                 <ion-icon name="checkbox-sharp" color="success"></ion-icon>
                               </ion-button>
                               <ion-button
-                                [color]="searched[item.key]?.op == 'false' ? 'primary' : 'light'"
+                                [color]="searched()[item.key]?.op == 'false' ? 'primary' : 'light'"
                                 size="small"
                                 (click)="set_search_item(item.key, 'false')"
                               >
@@ -423,7 +425,8 @@
                             <div>
                               <ion-input
                                 type="date"
-                                [(ngModel)]="searched[item.key].kw"
+                                [ngModel]="searched()[item.key].kw"
+                                (ngModelChange)="set_search_kw(item.key, $event)"
                                 class="ion-no-padding search-area"
                               ></ion-input>
                             </div>
@@ -432,13 +435,13 @@
                             <div class="search-selection">
                               <ul>
                                 @for (
-                                  item_ of selections_[item.key];
+                                  item_ of selections_()[item.key];
                                   track item_;
                                   let s_ = $index
                                 ) {
                                   <li (click)="selection_changed(item.key, s_)">
                                     <ion-checkbox
-                                      [(ngModel)]="selections_[item.key][s_].value"
+                                      [ngModel]="selections_()[item.key][s_].value"
                                       disabled
                                     >
                                     </ion-checkbox>
@@ -452,7 +455,7 @@
                         <div class="search-actions">
                           <ion-button
                             size="small"
-                            (click)="search(item.key, searched[item.key].kw)"
+                            (click)="search(item.key, searched()[item.key].kw)"
                           >
                             <ion-icon name="search"></ion-icon>
                             {{ 'Search' | translate }}
@@ -470,7 +473,7 @@
                     }
                   </th>
                 }
-                @for (link_ of links_; track link_; let lnk_ = $index) {
+                @for (link_ of links_(); track link_; let lnk_ = $index) {
                   <th class="ion-text-right">
                     {{ 'Count [Sum]' | translate }}<br />
                     <ion-button size="small" class="unfiltered-btn"
@@ -478,31 +481,31 @@
                     >
                   </th>
                 }
-                <th [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
+                <th [style]="colvis_() == {} || colvis_()['_created_at'] ? 'display: none;' : ''">
                   {{ 'Created At' | translate }}<br />
                   <ion-button size="small" class="unfiltered-btn">{{ '_created_at' }}</ion-button>
                 </th>
-                <th [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
+                <th [style]="colvis_() == {} || colvis_()['_created_by'] ? 'display: none;' : ''">
                   {{ 'Created By' | translate }}<br />
                   <ion-button size="small" class="unfiltered-btn">{{ '_created_by' }}</ion-button>
                 </th>
-                <th [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
+                <th [style]="colvis_() == {} || colvis_()['_modified_at'] ? 'display: none;' : ''">
                   {{ 'Modified At' | translate }}<br />
                   <ion-button size="small" class="unfiltered-btn">{{ '_modified_at' }}</ion-button>
                 </th>
-                <th [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
+                <th [style]="colvis_() == {} || colvis_()['_modified_by'] ? 'display: none;' : ''">
                   {{ 'Modified By' | translate }}<br />
                   <ion-button size="small" class="unfiltered-btn">{{ '_modified_by' }}</ion-button>
                 </th>
-                <th [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
+                <th [style]="colvis_() == {} || colvis_()['_id'] ? 'display: none;' : ''">
                   {{ 'ID' }}<br />
                   <ion-button size="small" class="unfiltered-btn">{{ '_id' }}</ion-button>
                 </th>
               </tr>
-              @for (record of data; track record; let i = $index) {
+              @for (record of data(); track record._id; let i = $index) {
                 <tr
                   (click)="
-                    ['_query', '_job'].includes(id)
+                    ['_query', '_job'].includes(id())
                       ? go_query_job(record, $event)
                       : go_crud(record, 'update')
                   "
@@ -515,22 +518,22 @@
                     @if (record['_reminder']) {
                       <ion-icon name="flag"></ion-icon>
                     } @else {
-                      {{ (pager_ - 1) * limit_ + i + 1 }}
+                      {{ (pager_() - 1) * limit_() + i + 1 }}
                     }
                   </td>
-                  @if (!['_log', '_dump', '_announcement'].includes(id)) {
+                  @if (!['_log', '_dump', '_announcement'].includes(id())) {
                     <td (click)="tdc($event, record)">
                       <ion-checkbox
                         id="checkbox"
-                        [(ngModel)]="selected[i]"
-                        [checked]="selected[i]"
+                        [ngModel]="selected()[i]"
+                        [checked]="selected()[i]"
                         (ionChange)="set_select_data(i, $event)"
                         mode="md"
                       >
                       </ion-checkbox>
                     </td>
                   }
-                  @if (['_query', '_job'].includes(id)) {
+                  @if (['_query', '_job'].includes(id())) {
                     <td class="ion-text-center">
                       @if (record?._approved) {
                         <ion-icon
@@ -543,14 +546,14 @@
                       }
                     </td>
                   }
-                  @for (item_ of properties_ | keyvalue: orderByIndex; track item_) {
+                  @for (item_ of properties_() | keyvalue: orderByIndex; track item_.key) {
                     <td
                       [class]="
                         ['number', 'decimal', 'float'].includes(item_.value.bsonType)
                           ? 'align-right'
                           : ''
                       "
-                      [style]="colvis_ == {} || colvis_[item_.key] ? 'display: none;' : ''"
+                      [style]="colvis_() == {} || colvis_()[item_.key] ? 'display: none;' : ''"
                     >
                       @if (item_.value.bsonType == 'date') {
                         <span>
@@ -615,7 +618,7 @@
                       }
                     </td>
                   }
-                  @for (link_ of links_; track link_; let lnk_ = $index) {
+                  @for (link_ of links_(); track link_; let lnk_ = $index) {
                     <td class="ion-text-right primary bold">
                       @if (record['is_copied']) {
                         <span
@@ -636,31 +639,31 @@
                       }
                     </td>
                   }
-                  <td [style]="colvis_ == {} || colvis_['_created_at'] ? 'display: none;' : ''">
+                  <td [style]="colvis_() == {} || colvis_()['_created_at'] ? 'display: none;' : ''">
                     {{
                       record._created_at?.replace(' ', 'T') | date: 'dd.MM.yyyy HH:mm:ss' : 'utc'
                     }}
                   </td>
-                  <td [style]="colvis_ == {} || colvis_['_created_by'] ? 'display: none;' : ''">
+                  <td [style]="colvis_() == {} || colvis_()['_created_by'] ? 'display: none;' : ''">
                     {{ record._created_by }}
                   </td>
-                  <td [style]="colvis_ == {} || colvis_['_modified_at'] ? 'display: none;' : ''">
+                  <td [style]="colvis_() == {} || colvis_()['_modified_at'] ? 'display: none;' : ''">
                     {{
                       record._modified_at?.replace(' ', 'T') | date: 'dd.MM.yyyy HH:mm:ss' : 'utc'
                     }}
                   </td>
-                  <td [style]="colvis_ == {} || colvis_['_modified_by'] ? 'display: none;' : ''">
+                  <td [style]="colvis_() == {} || colvis_()['_modified_by'] ? 'display: none;' : ''">
                     {{ record._modified_by }}
                   </td>
-                  <td [style]="colvis_ == {} || colvis_['_id'] ? 'display: none;' : ''">
+                  <td [style]="colvis_() == {} || colvis_()['_id'] ? 'display: none;' : ''">
                     {{ record._id }}
                   </td>
                 </tr>
               }
             </table>
-            @if (data.length > 0) {
+            @if (data().length > 0) {
               <div>
-                @if (pager_ > 1) {
+                @if (pager_() > 1) {
                   <ion-button
                     size="small"
                     fill="clear"
@@ -670,21 +673,21 @@
                     <ion-icon name="play-skip-back"></ion-icon>
                   </ion-button>
                 }
-                @if (pager_ > 10) {
+                @if (pager_() > 10) {
                   <span>
                     <ion-button
                       size="small"
                       fill="clear"
-                      (click)="refresh_data(pager_ - 1, false)"
+                      (click)="refresh_data(pager_() - 1, false)"
                       class="ion-no-padding"
                     >
                       <ion-icon name="caret-back"></ion-icon>
                     </ion-button>
                   </span>
                 }
-                @for (pn of paget_; track pn) {
+                @for (pn of paget_(); track pn) {
                   <span>
-                    @if (pager_ != pn) {
+                    @if (pager_() != pn) {
                       <ion-button
                         size="small"
                         fill="clear"
@@ -694,27 +697,27 @@
                         <ion-label>&nbsp;{{ pn }}&nbsp;</ion-label>
                       </ion-button>
                     }
-                    @if (pager_ == pn) {
+                    @if (pager_() == pn) {
                       <ion-button size="small" fill="clear" class="ion-no-padding text-underlined">
                         <ion-label>&nbsp;{{ pn }}&nbsp;</ion-label>
                       </ion-button>
                     }
                   </span>
                 }
-                @if (pages_ > 10 && pager_ < pages_) {
+                @if (pages_() > 10 && pager_() < pages_()) {
                   <span>
                     <ion-button
                       size="small"
                       fill="clear"
-                      (click)="refresh_data(pages_, false)"
+                      (click)="refresh_data(pages_(), false)"
                       class="ion-no-padding"
                     >
-                      ...&nbsp;&nbsp;{{ pages_ }}
+                      ...&nbsp;&nbsp;{{ pages_() }}
                     </ion-button>
                     <ion-button
                       size="small"
                       fill="clear"
-                      (click)="refresh_data(pager_ + 1, false)"
+                      (click)="refresh_data(pager_() + 1, false)"
                       class="ion-no-padding"
                     >
                       <ion-icon name="caret-forward"></ion-icon>
@@ -729,14 +732,14 @@
                 >
                   <ion-icon name="list-sharp"></ion-icon>
                   {{ 'Pagination' | translate }} [<app-pagination
-                    [pagination_]="pagination_"
-                    [id_]="id"
+                    [pagination_]="pagination_()"
+                    [id_]="id()"
                   ></app-pagination
                   >]
                 </ion-button>
               </div>
             } @else {
-              @if (is_loaded) {
+              @if (is_loaded()) {
                 <div class="ion-margin-top">
                   {{ 'NO DOCUMENTS FOUND' | translate }}
                 </div>
