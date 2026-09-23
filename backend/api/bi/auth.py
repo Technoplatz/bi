@@ -171,10 +171,9 @@ class Auth:
 
             otp_validated_ = "aut_otp_validated" in auth_ and auth_["aut_otp_validated"] is True
             if not secrets.compare_digest(str(aut_tfac_), str(tfac_)):
-                totp_ok_ = False
-                if aut_otp_secret_ and otp_validated_:
-                    validate_qr_f_ = OTP().validate_qr_f(email_, {"otp": tfac_})
-                    totp_ok_ = validate_qr_f_["result"] is True
+                # an authenticator code is checked without side effects: validate_qr_f would
+                # clear the pairing on a mistyped code
+                totp_ok_ = bool(aut_otp_secret_ and otp_validated_ and pyotp.TOTP(aut_otp_secret_).verify(str(tfac_), valid_window=1))
                 if not totp_ok_:
                     Mongo().db_["_auth"].update_one({"aut_id": email_}, {"$inc": {"aut_tfac_attempts": 1}})
                     raise AuthError("invalid otp")
