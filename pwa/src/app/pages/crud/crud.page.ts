@@ -22,16 +22,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { KovComponent } from '../../components/kov/kov.component';
 import { ModalFooterComponent } from '../../components/modal-footer/modal-footer.component';
-import {
-  Component,
-  OnInit,
-  HostListener,
-  Input,
-  ChangeDetectionStrategy,
-  input,
-  viewChild,
-  inject,
-} from '@angular/core';
+import { Component, OnInit, HostListener, viewChild, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import {
   AlertController,
@@ -63,8 +55,6 @@ import { Crud } from './../../classes/crud';
 import { environment } from './../../../environments/environment';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     FormsModule,
@@ -105,60 +95,61 @@ export class CrudPage implements OnInit {
   private alert = inject(AlertController);
   translate = inject(TranslateService);
 
-  readonly shuttle = input<any>({});
-  @Input() modified: boolean = false;
+  // set by the modal controller as plain properties (componentProps), so not signal inputs
+  shuttle: any = {};
+  modified: boolean = false;
   readonly barcodefocus = viewChild<any>('barcodefocus');
   public crudForm: UntypedFormGroup;
   public novalue: any = null;
   public required: any = [];
-  public property_list: any = [];
-  public tab: string = 'data';
-  public op: string = '';
+  readonly property_list = signal<any>([]);
+  readonly tab = signal<string>('data');
+  readonly op = signal<string>('');
   public saved_filter: string = '';
   public saved_filters: any = [];
-  public collection: string = '';
-  public user: any;
-  public data_: any = {};
+  readonly collection = signal<string>('');
+  readonly user = signal<any>(undefined);
+  readonly data_ = signal<any>({});
   public filterops: any = environment.filterops;
   public pivotvalueops: any = environment.pivotvalueops;
   public loadingText: string = environment.misc.loadingText;
   public timeout: number = environment.misc.default_delay;
   public timeZone = environment.timeZone;
   public selected_: any = [];
-  public fieldsupd: any = [];
+  readonly fieldsupd = signal<any>([]);
   public fields: any = [];
-  public in_progress: boolean = false;
+  readonly in_progress = signal<boolean>(false);
   public is_ready: boolean = false;
   public _id: string = '';
-  public arrayitem: any = {};
+  readonly arrayitem = signal<any>({});
   public error: string = '';
   public arrays: any = [];
   public parentkey: number = 0;
-  public localfield: string = '';
+  readonly localfield = signal<string>('');
   public field_parents: any;
   public parents: any;
   public relact: boolean = false;
-  public reloading: boolean = false;
-  public related: any = [];
+  readonly reloading = signal<boolean>(false);
+  readonly related = signal<any>([]);
   public actionix: number = -1;
   public is_token_copied: boolean = false;
-  public scan_: boolean = false;
-  public scanned_: any = [];
+  readonly scan_ = signal<boolean>(false);
+  readonly scanned_ = signal<any>([]);
   public istrue_: boolean = true;
-  public isnoninteractive_: boolean = false;
-  public visible: string = 'hide';
-  public parent: any = {};
+  readonly isnoninteractive_ = signal<boolean>(false);
+  readonly visible = signal<string>('hide');
+  readonly parent = signal<any>({});
   public aktions: any = [];
-  public properties_: any = {};
-  public links: any = [];
+  readonly properties_ = signal<any>({});
+  readonly links = signal<any>([]);
   public counter: number = 0;
   public scan_result: string = '';
   private sweeped: any;
-  public link_text: string = '';
-  public link_: any = {};
+  readonly link_text = signal<string>('');
+  readonly link_ = signal<any>({});
   public linked_: any = [];
   public date_format: string = 'DD.MM.YYYY HH:mm';
-  public locale_: string = 'en-US';
+  readonly locale_ = toSignal(this.misc.localization, { initialValue: 'en-US' as any });
   public link_limit_: number = 100;
   private counters: any = {};
   private filter: any = [];
@@ -187,9 +178,6 @@ export class CrudPage implements OnInit {
 
   constructor() {
     this.crudForm = this.formBuilder.group({}, {});
-    this.misc.localization.subscribe((l_: any) => {
-      this.locale_ = l_;
-    });
   }
 
   customCounterFormatter(inputLength: number, maxLength: number) {
@@ -202,55 +190,54 @@ export class CrudPage implements OnInit {
 
   ngOnInit() {
     this.modified = false;
-    this.collection = this.shuttle().collection;
-    this.user = this.shuttle().user;
-    this.op = this.shuttle().op;
-    this.structure__ = this.shuttle().structure;
-    this.properties_ = this.shuttle().structure.properties;
-    this.sweeped = this.shuttle().sweeped;
-    this.counters = this.shuttle().counters;
-    this.filter = this.shuttle().filter;
-    this.collections = this.shuttle().collections;
-    this.actionix = this.shuttle().actionix;
-    this.scan_ = this.shuttle().scan;
-    this.links = this.shuttle().structure.links;
-    this.link_ = this.links ? this.links[0] : null;
+    const shuttle = this.shuttle;
+    this.collection.set(shuttle.collection);
+    this.user.set(shuttle.user);
+    this.op.set(shuttle.op);
+    this.structure__ = shuttle.structure;
+    this.properties_.set(shuttle.structure.properties);
+    this.sweeped = shuttle.sweeped;
+    this.counters = shuttle.counters;
+    this.filter = shuttle.filter;
+    this.collections = shuttle.collections;
+    this.actionix = shuttle.actionix;
+    this.scan_.set(shuttle.scan);
+    this.links.set(shuttle.structure.links);
+    this.link_.set(this.links() ? this.links()[0] : null);
     this.parents = this.structure__?.parents ? this.structure__.parents : [];
-    const shuttle = this.shuttle();
     this.actions = shuttle.actions && shuttle.actions.length > 0 ? shuttle.actions : [];
-    this.isnoninteractive_ = this.actions[this.actionix]?.noninteractive === true ? true : false;
+    this.isnoninteractive_.set(this.actions[this.actionix]?.noninteractive === true ? true : false);
     this.storage.get('LSSCANNED').then((LSSCANNED: any) => {
-      this.scanned_ = LSSCANNED ? LSSCANNED : [];
-      this.doGetAllAktions(this.op).then((res: any) => {
+      this.scanned_.set(LSSCANNED ? LSSCANNED : []);
+      this.doGetAllAktions(this.op()).then((res: any) => {
         this.aktions = res;
         this.crud
           .init_form(
-            this.op,
+            this.op(),
             this.structure__,
             this.crudForm,
-            this.shuttle().data,
+            shuttle.data,
             this.collections,
             this.counters,
             this.actionix,
           )
           .then((res: any) => {
-            this.tab = 'data';
+            this.tab.set('data');
             this.crudForm = res.form;
             this.fields = res.fields;
-            this.fieldsupd =
-              this.op === 'insert' && this.collection === '_collection'
+            this.fieldsupd.set(
+              this.op() === 'insert' && this.collection() === '_collection'
                 ? res.fields.filter((obj: any) => obj.name !== 'col_structure')
-                : res.fields;
-            const shuttleValue = this.shuttle();
-            this.data_ = shuttleValue.data ? shuttleValue.data : res.init;
-            const shuttleVal = this.shuttle();
+                : res.fields,
+            );
+            this.data_.set(shuttle.data ? shuttle.data : res.init);
             this._id =
-              this.op === 'update'
-                ? shuttleVal.data && shuttleVal.data._id
-                  ? shuttleVal.data._id
+              this.op() === 'update'
+                ? shuttle.data && shuttle.data._id
+                  ? shuttle.data._id
                   : null
                 : null;
-            this.get_sub_properties(this.collection)
+            this.get_sub_properties(this.collection())
               .then(() => {
                 if (this.actionix >= 0) {
                   this.doAktionChange(this.actionix)
@@ -264,8 +251,8 @@ export class CrudPage implements OnInit {
                 this.misc.doMessage(error, 'error');
               })
               .finally(() => {
-                this.visible = 'show';
-                this.scan_
+                this.visible.set('show');
+                this.scan_()
                   ? setInterval(() => {
                       this.barcodefocus().setFocus();
                     }, 1000)
@@ -282,19 +269,29 @@ export class CrudPage implements OnInit {
     });
   }
 
+  // replaces the data object so that the template sees the change; the reactive form control gets the
+  // value through its own [ngModel] binding
+  set_field(name: string, value: any) {
+    this.data_.update((d: any) => ({ ...d, [name]: value }));
+  }
+
+  set_arrayitem(name: string, value: any) {
+    this.arrayitem.update((a: any) => ({ ...a, [name]: value }));
+  }
+
   doGetAllAktions(op: string) {
     return new Promise((resolve) => {
       if (op !== 'action') {
         resolve([]);
       } else {
-        const shuttle = this.shuttle();
+        const shuttle = this.shuttle;
         resolve(shuttle.actions && shuttle.actions.length > 0 ? shuttle.actions : []);
       }
     });
   }
 
   async propertiesAktionFilter(action_: any) {
-    return Object.entries(this.properties_).filter((obj: any) =>
+    return Object.entries(this.properties_()).filter((obj: any) =>
       action_.set.some((f: any) => obj[0] === f.key),
     );
   }
@@ -305,8 +302,8 @@ export class CrudPage implements OnInit {
       const struc_: any = this.structure__;
       let controls_: any = {};
       let fields_: any = {};
-      this.fieldsupd = this.fields.filter((obj: any) =>
-        action_.set.some((f: any) => obj.name === f.key),
+      this.fieldsupd.set(
+        this.fields.filter((obj: any) => action_.set.some((f: any) => obj.name === f.key)),
       );
       this.propertiesAktionFilter(action_).then((props_: any) => {
         for (let j = 0; j < props_.length; j++) {
@@ -334,17 +331,14 @@ export class CrudPage implements OnInit {
                           .replace(/-|:|T/gi, '')
                           .substring(0, 14))
                       : null;
-                  this.data_[action_.set[f].key] = !action_.set[f].value
-                    ? this.data_[action_.set[f].key]
+                  const value_ = !action_.set[f].value
+                    ? this.data_()[action_.set[f].key]
                     : action_.set[f].value;
-                  this.crudForm
-                    .get(action_.set[f].key)
-                    ?.setValue(
-                      !action_.set[f].value ? this.data_[action_.set[f].key] : action_.set[f].value,
-                    );
+                  this.set_field(action_.set[f].key, value_);
+                  this.crudForm.get(action_.set[f].key)?.setValue(value_);
                   if (f === action_.set.length - 1) {
                     this.crudForm.controls = controls_;
-                    this.visible = 'show';
+                    this.visible.set('show');
                     resolve(true);
                   }
                 }
@@ -357,18 +351,18 @@ export class CrudPage implements OnInit {
   }
 
   submit_f() {
-    if (!this.in_progress) {
+    if (!this.in_progress()) {
       this.input_ = '';
       this.crudForm.updateValueAndValidity();
-      if (!['remove'].includes(this.op) && !this.crudForm.valid && !this.isnoninteractive_) {
+      if (!['remove'].includes(this.op()) && !this.crudForm.valid && !this.isnoninteractive_()) {
         const msg_ =
-          this.op === 'action'
+          this.op() === 'action'
             ? 'form is not valid or action is not non-interactive'
             : 'form is not valid';
         this.misc.doMessage(msg_, 'error');
       } else {
-        this.linked_ = this.link_text
-          ? this.link_text
+        this.linked_ = this.link_text()
+          ? this.link_text()
               .trim()
               .split('\n')
               .filter((e: any) => {
@@ -376,25 +370,25 @@ export class CrudPage implements OnInit {
               })
           : [];
         this.modified = true;
-        this.in_progress = true;
+        this.in_progress.set(true);
         this.crud
           .submit_f(
-            this.data_,
-            this.collection,
+            this.data_(),
+            this.collection(),
             this.structure__,
             this.crudForm,
             this._id,
-            this.op,
+            this.op(),
             this.file,
             this.sweeped,
             this.filter,
             this.actionix,
-            this.link_,
+            this.link_(),
             this.linked_,
           )
           .then((res_: any) => {
             res_ && res_?.result === true
-              ? this.misc.doMessage(`${this.op} completed successfully`, 'success')
+              ? this.misc.doMessage(`${this.op()} completed successfully`, 'success')
               : null;
             this.crud.modalSubmitListener.next({ result: true });
             if (res_ && res_.token) {
@@ -414,7 +408,7 @@ export class CrudPage implements OnInit {
                           })
                           .finally(() => {
                             this.dismiss_modal({
-                              op: this.op,
+                              op: this.op(),
                               modified: this?.modified,
                               filter: [],
                               cid: res_ && res_.cid ? res_.cid : null,
@@ -431,19 +425,22 @@ export class CrudPage implements OnInit {
             } else {
               this.scan_result = '';
               const iot_input_ = 'bar_input';
-              if (this.scan_) {
+              if (this.scan_()) {
                 this.scan_result = `<div class="scan-ok">&#10003; OK ${this.crudForm.get(iot_input_)?.value}<br /><span>Read at ${new Date(Date.now()).toISOString()}</span></div>`;
-                this.scanned_.unshift({
-                  input: this.crudForm.get(iot_input_)?.value,
-                  date: new Date(Date.now()).toISOString(),
-                });
-                this.storage.set('LSSCANNED', this.scanned_).then(() => {
-                  this.data_[iot_input_] = '';
-                  this.crudForm.get(iot_input_)?.setValue(this.data_[iot_input_]);
+                this.scanned_.update((s: any) => [
+                  {
+                    input: this.crudForm.get(iot_input_)?.value,
+                    date: new Date(Date.now()).toISOString(),
+                  },
+                  ...s,
+                ]);
+                this.storage.set('LSSCANNED', this.scanned_()).then(() => {
+                  this.set_field(iot_input_, '');
+                  this.crudForm.get(iot_input_)?.setValue(this.data_()[iot_input_]);
                 });
               } else {
                 this.dismiss_modal({
-                  op: this.op,
+                  op: this.op(),
                   modified: this?.modified,
                   filter: [],
                   cid: res_ && res_.cid ? res_.cid : null,
@@ -456,20 +453,20 @@ export class CrudPage implements OnInit {
             this.misc.doMessage(error_, 'error');
           })
           .finally(() => {
-            this.in_progress = false;
+            this.in_progress.set(false);
           });
       }
     }
   }
 
   dump(op_: string) {
-    this.in_progress = true;
+    this.in_progress.set(true);
     this.misc
       .api_call('crud', {
         op: op_,
         collection: '_dump',
-        dumpid: this.data_.dmp_id,
-        type: this.data_.dmp_type,
+        dumpid: this.data_().dmp_id,
+        type: this.data_().dmp_type,
         responseType: 'blob' as 'json',
       })
       .then((res_: any) => {
@@ -492,13 +489,13 @@ export class CrudPage implements OnInit {
       })
       .finally(() => {
         this.dismiss_modal({ op: op_, modified: true, filter: [] });
-        this.in_progress = false;
+        this.in_progress.set(false);
       });
   }
 
   action_f() {
     const op_ = 'action';
-    this.in_progress = true;
+    this.in_progress.set(true);
     const properties_ = this.structure__.properties;
     let doc_: any = {};
     let i = 0;
@@ -508,20 +505,19 @@ export class CrudPage implements OnInit {
           ? new Date(this.crudForm.get(item)?.value)
           : this.crudForm.get(item)?.value;
       if (i === Object.keys(properties_).length - 1) {
+        const data_ = this.data_();
         const posted_: any = {
           op: op_,
-          collection: this.collection,
+          collection: this.collection(),
           doc: doc_,
-          data: this.data_,
+          data: data_,
           match: this.sweeped,
           filter: this.filter,
           _id: this._id,
           actionix: this.actionix,
         };
         const download_by_ = this.actions[this.actionix]['download_by'];
-        download_by_ && this.data_ && this.data_[download_by_]
-          ? (posted_.responseType = 'blob')
-          : null;
+        download_by_ && data_ && data_[download_by_] ? (posted_.responseType = 'blob') : null;
         this.misc
           .api_call('crud', posted_)
           .then((res_: any) => {
@@ -554,7 +550,7 @@ export class CrudPage implements OnInit {
           })
           .finally(() => {
             this.dismiss_modal({ op: op_, modified: true, filter: [] });
-            this.in_progress = false;
+            this.in_progress.set(false);
           });
       } else {
         i++;
@@ -576,7 +572,7 @@ export class CrudPage implements OnInit {
         {
           text: 'OKAY',
           handler: () => {
-            this.op = 'remove';
+            this.op.set('remove');
             this.submit_f();
           },
         },
@@ -588,37 +584,34 @@ export class CrudPage implements OnInit {
   }
 
   doDeleteItemFromArray(name: any, item: any) {
-    this.data_[name] = this.data_[name].filter((e: any) => e !== item);
-    this.crudForm.controls[name].setValue(this.data_[name]);
+    this.set_field(
+      name,
+      this.data_()[name].filter((e: any) => e !== item),
+    );
+    this.crudForm.controls[name].setValue(this.data_()[name]);
   }
 
   doAddItemToArray(event: any) {
     return new Promise((resolve, reject) => {
-      const field_ = this.fields.filter(
-        (obj: any) => obj.name === event.target.getAttribute('title'),
-      );
+      const name_ = event.target.getAttribute('title');
+      const field_ = this.fields.filter((obj: any) => obj.name === name_);
       const maxItems = field_[0] && field_[0].maxItems ? field_[0].maxItems : 32;
       const chipEl = document.createElement('ion-chip');
       chipEl.slot = 'start';
       chipEl.outline = true;
-      !this.data_[event.target.getAttribute('title')]
-        ? (this.data_[event.target.getAttribute('title')] = [])
-        : null;
-      if (event.target.value && this.data_[event.target.getAttribute('title')].length < maxItems) {
-        this.data_[event.target.getAttribute('title')]
-          ? null
-          : (this.data_[event.target.getAttribute('title')] = []);
-        this.data_[event.target.getAttribute('title')].push(
+      const items_ = this.data_()[name_] ? this.data_()[name_] : [];
+      if (event.target.value && items_.length < maxItems) {
+        this.set_field(name_, [
+          ...items_,
           event.target.getAttribute('type') === 'number'
             ? Number(event.target.value)
             : event.target.value,
-        );
-        this.arrayitem[event.target.getAttribute('title')] = null;
-        this.crudForm.controls[event.target.getAttribute('title')].setValue(
-          this.data_[event.target.getAttribute('title')],
-        );
+        ]);
+        this.set_arrayitem(name_, null);
+        this.crudForm.controls[name_].setValue(this.data_()[name_]);
         resolve(true);
       } else {
+        !this.data_()[name_] ? this.set_field(name_, []) : null;
         this.misc.doMessage('maximum number of items exceeds', 'error');
         reject('array item is invalid');
       }
@@ -626,25 +619,21 @@ export class CrudPage implements OnInit {
   }
 
   goTab(tab: any) {
-    this.tab = tab;
-    this.localfield = tab.local_field ? tab.local_field : null;
+    this.tab.set(tab);
+    this.localfield.set(tab.local_field ? tab.local_field : null);
   }
 
   doSubmitRelated() {
-    this.tab = 'data';
-    this.related = this.relatedx;
-    this.data_[this.field_parents.match[0].key] = [];
-    for (let k = 0; k < this.related.length; k++) {
-      if (this.related[k].selected) {
-        this.data_[this.field_parents.match[0].key].push(
-          this.related[k][this.field_parents.match[0].value],
-        );
-      }
-      if (k === this.related.length - 1) {
-        this.crudForm
-          .get(this.field_parents.match[0].key)
-          ?.setValue(this.data_[this.field_parents.match[0].key]);
-      }
+    this.tab.set('data');
+    this.related.set(this.relatedx);
+    const key_ = this.field_parents.match[0].key;
+    const value_ = this.field_parents.match[0].value;
+    const selected_ = this.related()
+      .filter((item: any) => item.selected)
+      .map((item: any) => item[value_]);
+    this.set_field(key_, selected_);
+    if (this.related().length > 0) {
+      this.crudForm.get(key_)?.setValue(selected_);
     }
   }
 
@@ -661,8 +650,7 @@ export class CrudPage implements OnInit {
     const file: any = ev.target.files[0];
     if (file) {
       this.file = file;
-      this.data_['sto_file_name'] = file.name;
-      this.data_['sto_file_size'] = file.size;
+      this.data_.update((d: any) => ({ ...d, sto_file_name: file.name, sto_file_size: file.size }));
     } else {
       this.file = null;
     }
@@ -670,6 +658,7 @@ export class CrudPage implements OnInit {
 
   get_sub_properties(coll_: string) {
     return new Promise((resolve, reject) => {
+      const data_ = this.data_();
       this.misc
         .api_call('crud', {
           op: 'read',
@@ -681,13 +670,13 @@ export class CrudPage implements OnInit {
               op: 'eq',
               value:
                 coll_ === '_collection'
-                  ? this.data_['col_id']
+                  ? data_['col_id']
                   : coll_ === '_visual'
-                    ? this.data_['vis_collection_id']
+                    ? data_['vis_collection_id']
                     : coll_ === '_token'
-                      ? this.data_['tkn_collection_id']
+                      ? data_['tkn_collection_id']
                       : coll_ === '_permission'
-                        ? this.data_['per_collection_id']
+                        ? data_['per_collection_id']
                         : coll_,
             },
           ],
@@ -703,14 +692,14 @@ export class CrudPage implements OnInit {
             res.data[0].col_structure &&
             res.data[0].col_structure.properties
               ? res.data[0].col_structure.properties
-              : this.properties_;
+              : this.properties_();
           let i = 0;
           let array_: any = [];
           for (let prop_ in properties) {
             if (i === Object.keys(properties).length - 1) {
               array_.push({ key: prop_, value: properties[prop_]?.title });
-              this.property_list = array_;
-              resolve(this.property_list);
+              this.property_list.set(array_);
+              resolve(this.property_list());
             } else {
               array_.push({ key: prop_, value: properties[prop_]?.title });
               i++;
@@ -728,7 +717,7 @@ export class CrudPage implements OnInit {
     if (field_.collection) {
       this.get_sub_properties(coll_)
         .then((props_: any) => {
-          this.property_list = props_;
+          this.property_list.set(props_);
         })
         .catch((res: any) => {
           this.misc.doMessage(res, 'error');
@@ -737,36 +726,38 @@ export class CrudPage implements OnInit {
   }
 
   doGoLink(link_: any) {
-    this.link_ = link_;
-    this.link_text = '';
+    this.link_.set(link_);
+    let text_ = '';
     let j_ = 0;
-    this.data_['_link_' + link_.collection]?.length > 0
-      ? this.data_['_link_' + link_.collection].forEach((obj_: any) => {
-          this.link_text += obj_[link_.get] ? (j_ > 0 ? '\n' : '') + obj_[link_.get] : '';
+    const linked_ = this.data_()['_link_' + link_.collection];
+    linked_?.length > 0
+      ? linked_.forEach((obj_: any) => {
+          text_ += obj_[link_.get] ? (j_ > 0 ? '\n' : '') + obj_[link_.get] : '';
           j_++;
-          j_ === this.data_['_link_' + link_.collection].length ? (this.tab = 'link') : null;
+          j_ === linked_.length ? this.tab.set('link') : null;
         })
-      : (this.tab = 'link');
+      : this.tab.set('link');
+    this.link_text.set(text_);
   }
 
   get_linked() {
     let filter_ = [];
-    this.link_text = '';
-    const match_ = this.link_?.match;
-    const collection_ = this.link_?.collection;
-    const get_ = this.link_?.get;
-    const autofill_ = this.link_?.autofill;
+    this.link_text.set('');
+    const match_ = this.link_()?.match;
+    const collection_ = this.link_()?.collection;
+    const get_ = this.link_()?.get;
+    const autofill_ = this.link_()?.autofill;
     if (match_ && collection_ && this.link_projection_ && get_ && autofill_) {
-      this.reloading = true;
+      this.reloading.set(true);
       this.link_projection_ = {};
       this.link_projection_[get_] = 1;
       for (let l = 0; l < match_.length; l++) {
         filter_.push({
           key: match_[l].key,
           op: match_[l].op,
-          value: this.properties_[match_[l].value]
-            ? this.data_[match_[l].value] !== ''
-              ? this.data_[match_[l].value]
+          value: this.properties_()[match_[l].value]
+            ? this.data_()[match_[l].value] !== ''
+              ? this.data_()[match_[l].value]
               : null
             : match_[l].value,
         });
@@ -785,20 +776,22 @@ export class CrudPage implements OnInit {
             .then((res: any) => {
               const data_ = res.data;
               if (data_) {
+                let text_ = '';
                 for (let d = 0; d < data_.length; d++) {
-                  this.link_text += data_[d][get_];
+                  text_ += data_[d][get_];
                   if (d === data_.length - 1) {
                   } else {
-                    this.link_text += '\n';
+                    text_ += '\n';
                   }
                 }
+                this.link_text.set(text_);
               }
             })
             .catch((error: any) => {
               this.misc.doMessage(error, 'error');
             })
             .finally(() => {
-              this.reloading = false;
+              this.reloading.set(false);
             });
         }
       }
@@ -806,31 +799,31 @@ export class CrudPage implements OnInit {
   }
 
   get_parent(parent_: any) {
-    this.parent = parent_;
+    this.parent.set(parent_);
     let projection_: any = {};
     this.relact = true;
-    this.tab = 'relation';
-    let filter_ = this.parent.filter ? this.parent.filter : [];
-    this.parent.filter.forEach((f: any) =>
+    this.tab.set('relation');
+    let filter_ = parent_.filter ? parent_.filter : [];
+    parent_.filter.forEach((f: any) =>
       f.value?.toString().substr(0, 1) === '$'
-        ? (f.value = this.data_[f.value?.toString().substr(1)])
-        : Object.keys(this.properties_).includes(f.value)
-          ? (f.value = this.data_[f.value])
+        ? (f.value = this.data_()[f.value?.toString().substr(1)])
+        : Object.keys(this.properties_()).includes(f.value)
+          ? (f.value = this.data_()[f.value])
           : null,
     );
     let matchkeys_: any = [];
-    const group_ = this.parent.group ? this.parent.group : false;
-    this.parent.match.forEach((m: any) => matchkeys_.push(m.key));
-    if (this.parent.get && this.parent.get.length > 0) {
-      this.reloading = true;
-      for (let p = 0; p < this.parent.get.length; p++) {
-        projection_[this.parent.get[p]] = 1;
-        if (p === this.parent.get.length - 1) {
-          this.related = [];
+    const group_ = parent_.group ? parent_.group : false;
+    parent_.match.forEach((m: any) => matchkeys_.push(m.key));
+    if (parent_.get && parent_.get.length > 0) {
+      this.reloading.set(true);
+      for (let p = 0; p < parent_.get.length; p++) {
+        projection_[parent_.get[p]] = 1;
+        if (p === parent_.get.length - 1) {
+          this.related.set([]);
           this.misc
             .api_call('crud', {
               op: 'read',
-              collection: this.parent.collection,
+              collection: parent_.collection,
               projection: projection_,
               match: filter_,
               sort: { _modified_at: -1 },
@@ -840,13 +833,11 @@ export class CrudPage implements OnInit {
             })
             .then((res: any) => {
               if (res && res.data) {
-                this.related = res.data;
-                for (let k = 0; k < this.related.length; k++) {
-                  this.related[k].selected = true;
-                  if (k === this.related.length - 1) {
-                    this.relatedx = this.related;
-                    this.reloading = false;
-                  }
+                const related_ = res.data.map((item: any) => ({ ...item, selected: true }));
+                this.related.set(related_);
+                if (related_.length > 0) {
+                  this.relatedx = related_;
+                  this.reloading.set(false);
                 }
               }
             })
@@ -855,7 +846,7 @@ export class CrudPage implements OnInit {
             })
             .finally(() => {
               this.field_parents = parent_;
-              this.reloading = false;
+              this.reloading.set(false);
             });
         }
       }
@@ -863,41 +854,47 @@ export class CrudPage implements OnInit {
   }
 
   doStartSearch(e: any) {
-    this.related = this.relatedx;
-    this.related = this.related.filter(
-      (obj: any) =>
-        (
-          obj[this.field_parents.get[0]] +
-          obj[this.field_parents.get[1]] +
-          obj[this.field_parents.get[2]]
-        )
-          .toLowerCase()
-          .indexOf(e.toLowerCase()) > -1,
+    this.related.set(
+      this.relatedx.filter(
+        (obj: any) =>
+          (
+            obj[this.field_parents.get[0]] +
+            obj[this.field_parents.get[1]] +
+            obj[this.field_parents.get[2]]
+          )
+            .toLowerCase()
+            .indexOf(e.toLowerCase()) > -1,
+      ),
     );
-    if (this.related.length === 0 && this.scan_) {
-      this.parent.filter =
-        e !== ''
-          ? () => {
-              [
-                {
-                  key: this.parent.match[0].value,
-                  op: 'eq',
-                  value: e,
-                },
-              ];
-            }
-          : [];
-      this.get_parent(this.parent);
+    if (this.related().length === 0 && this.scan_()) {
+      const parent_ = {
+        ...this.parent(),
+        filter:
+          e !== ''
+            ? () => {
+                [
+                  {
+                    key: this.parent().match[0].value,
+                    op: 'eq',
+                    value: e,
+                  },
+                ];
+              }
+            : [],
+      };
+      this.get_parent(parent_);
     }
   }
 
   doSetRelated(item_: any) {
+    const values_: any = {};
     for (let k = 0; k < this.field_parents.match.length; k++) {
       if (this.field_parents.match[k].key) {
-        this.data_[this.field_parents.match[k].key] = item_[this.field_parents.match[k].value];
+        values_[this.field_parents.match[k].key] = item_[this.field_parents.match[k].value];
       }
       if (k === this.field_parents.match.length - 1) {
-        this.tab = 'data';
+        this.data_.update((d: any) => ({ ...d, ...values_ }));
+        this.tab.set('data');
       }
     }
   }
@@ -905,28 +902,28 @@ export class CrudPage implements OnInit {
   doTextManipulate(event: any, field: any) {
     const val_ = event.detail.value;
     if (field?.caseType === 'lowercase') {
-      this.data_[field.name] = val_.toLowerCase();
+      this.set_field(field.name, val_.toLowerCase());
     } else if (field?.caseType === 'uppercase') {
-      this.data_[field.name] = val_.toUpperCase();
+      this.set_field(field.name, val_.toUpperCase());
     } else if (field?.caseType === 'capitalize') {
-      this.data_[field.name] = val_.charAt(0).toUpperCase() + val_.slice(1);
+      this.set_field(field.name, val_.charAt(0).toUpperCase() + val_.slice(1));
     }
   }
 
   doDateAssign(event: any, fn: string) {
     const date_ = this.misc.getFormattedDate(event.detail.value);
-    this.data_[fn] = date_;
+    this.set_field(fn, date_);
     this.crudForm.get(fn)?.setValue(date_);
   }
 
   doInitDate(fn: string) {
     const date_ = this.misc.getFormattedDate(null);
-    this.data_[fn] = date_;
+    this.set_field(fn, date_);
     this.crudForm.get(fn)?.setValue(date_);
   }
 
   field_nulla(fn_: string) {
-    this.data_[fn_] = null;
+    this.set_field(fn_, null);
     this.crudForm.get(fn_)?.setValue(null);
   }
 
@@ -936,6 +933,8 @@ export class CrudPage implements OnInit {
 
   unlock_field(fn_: string, index_: number) {
     this.crudForm.get(fn_)?.enable();
-    this.fieldsupd[index_].permanent = false;
+    this.fieldsupd.update((list: any) =>
+      list.map((f: any, i: number) => (i === index_ ? { ...f, permanent: false } : f)),
+    );
   }
 }

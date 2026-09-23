@@ -33,13 +33,11 @@ import {
   IonSelectOption,
   IonSpinner,
 } from '@ionic/angular';
-import { Component, OnInit, Input, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, OnInit, SimpleChanges, input, model, signal } from '@angular/core';
 import { environment } from './../../../environments/environment';
 import { ItemReorderEventDetail } from '@ionic/core';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     TranslatePipe,
@@ -62,14 +60,15 @@ import { ItemReorderEventDetail } from '@ionic/core';
 })
 export class KovComponent implements OnInit {
   readonly properties = input<any>(undefined);
-  @Input() data: any;
-  @Input() field: any;
+  // the parent's data object; every edit replaces the array inside it and hands the new object back
+  readonly data = model<any>({});
+  readonly field = input<any>({});
   readonly op = input<string>('');
-  public kovs: any = null;
-  public type: string = 'key';
-  public ok: boolean = false;
+  readonly kovs = signal<any>(null);
+  readonly type = signal<string>('key');
+  readonly ok = signal<boolean>(false);
   public filterops: any = environment.filterops;
-  public fname: string = '';
+  readonly fname = signal<string>('');
   private hours_: any = [];
   private minutes_: any = [];
   private days_: any = [
@@ -103,69 +102,76 @@ export class KovComponent implements OnInit {
     }
   }
 
-  ngOnChanges() {
-    this.ok = false;
-    this.fname = this.field.name;
-    if (['keyop', 'keyvalue', 'emptyfield'].includes(this.field.subType)) {
-      this.type = this.field.subType;
-    } else if (this.field.subType === 'filter') {
-      this.type = 'keyopvalue';
+  ngOnChanges(changes: SimpleChanges) {
+    // the data object is replaced on every edit; only a new field or property list resets the rows
+    if (!changes['field'] && !changes['properties']) {
+      return;
     }
-    if (['keyop', 'keyvalue', 'filter', 'property'].includes(this.field.subType)) {
-      this.kovs = this.properties();
-    } else if (this.field.subType === 'hour') {
-      this.kovs = this.hours_;
-    } else if (this.field.subType === 'minute') {
-      this.kovs = this.minutes_;
-    } else if (this.field.subType === 'day') {
-      this.kovs = this.days_;
-    } else if (this.field.subType === 'tag') {
-      this.kovs = this.tags_;
-    } else if (this.field.subType === 'string') {
-      this.kovs = this.empty_;
-    } else if (this.field.subType === 'emptyfield') {
-      this.kovs = this.dual_;
+    const field_ = this.field();
+    this.ok.set(false);
+    this.fname.set(field_.name);
+    if (['keyop', 'keyvalue', 'emptyfield'].includes(field_.subType)) {
+      this.type.set(field_.subType);
+    } else if (field_.subType === 'filter') {
+      this.type.set('keyopvalue');
+    }
+    if (['keyop', 'keyvalue', 'filter', 'property'].includes(field_.subType)) {
+      this.kovs.set(this.properties());
+    } else if (field_.subType === 'hour') {
+      this.kovs.set(this.hours_);
+    } else if (field_.subType === 'minute') {
+      this.kovs.set(this.minutes_);
+    } else if (field_.subType === 'day') {
+      this.kovs.set(this.days_);
+    } else if (field_.subType === 'tag') {
+      this.kovs.set(this.tags_);
+    } else if (field_.subType === 'string') {
+      this.kovs.set(this.empty_);
+    } else if (field_.subType === 'emptyfield') {
+      this.kovs.set(this.dual_);
     }
     setTimeout(() => {
-      this.ok = true;
+      this.ok.set(true);
     }, 1000);
   }
 
+  private set_lines(lines: any[]) {
+    this.data.update((d: any) => ({ ...d, [this.fname()]: lines }));
+  }
+
+  // a value typed or selected in a row: the row and the array are replaced, never mutated
+  doLineChange(i: number, key: string | null, value: any) {
+    const lines_ = this.data()[this.fname()] ? [...this.data()[this.fname()]] : [];
+    lines_[i] = key === null ? value : { ...lines_[i], [key]: value };
+    this.set_lines(lines_);
+  }
+
   doLineAdd(i: number) {
-    if (i === -1 || !this.data[this.fname]) {
-      this.data[this.fname] = [{ key: null }];
+    const lines_ = this.data()[this.fname()];
+    if (i === -1 || !lines_) {
+      this.set_lines([{ key: null }]);
     } else {
-      if (this.type === 'keyopvalue') {
-        this.data[this.fname].push({
-          key: null,
-          op: null,
-          value: null,
-        });
-      } else if (this.type === 'keyop') {
-        this.data[this.fname].push({
-          key: null,
-          op: null,
-        });
-      } else if (this.type === 'keyvalue' || this.type === 'emptyfield') {
-        this.data[this.fname].push({
-          key: null,
-          value: null,
-        });
-      } else if (this.type === 'key') {
-        this.data[this.fname].push({
-          key: null,
-        });
-      } else if (this.type === 'other') {
-        this.data[this.fname].push(null);
+      if (this.type() === 'keyopvalue') {
+        this.set_lines([...lines_, { key: null, op: null, value: null }]);
+      } else if (this.type() === 'keyop') {
+        this.set_lines([...lines_, { key: null, op: null }]);
+      } else if (this.type() === 'keyvalue' || this.type() === 'emptyfield') {
+        this.set_lines([...lines_, { key: null, value: null }]);
+      } else if (this.type() === 'key') {
+        this.set_lines([...lines_, { key: null }]);
+      } else if (this.type() === 'other') {
+        this.set_lines([...lines_, null]);
       }
     }
   }
 
   doLineRemove(i: number) {
-    this.data[this.fname].splice(i, 1);
+    this.set_lines(this.data()[this.fname()].filter((_: any, j: number) => j !== i));
   }
 
   doReorder(ev: CustomEvent<ItemReorderEventDetail>, fn: string) {
-    this.data[fn] = ev.detail.complete(this.data[fn]);
+    // complete() reorders the copy it is given and leaves the DOM to the @for loop
+    const lines_ = ev.detail.complete([...this.data()[fn]]);
+    this.data.update((d: any) => ({ ...d, [fn]: lines_ }));
   }
 }

@@ -1,10 +1,10 @@
-@if (ok) {
+@if (ok()) {
   <ion-reorder-group
     disabled="false"
-    (ionItemReorder)="doReorder($event, fname)"
+    (ionItemReorder)="doReorder($event, fname())"
     class="ion-no-padding"
   >
-    @if (!field.manualAdd && (!data[fname] || data[fname]?.length == 0)) {
+    @if (!field().manualAdd && (!data()[fname()] || data()[fname()]?.length == 0)) {
       <ion-item lines="none" class="ion-no-margin ion-no-padding">
         <ion-button fill="clear" size="default" (click)="doLineAdd(-1)" class="ion-no-padding">
           <ion-icon name="add-circle-sharp"></ion-icon>
@@ -12,29 +12,29 @@
         </ion-button>
       </ion-item>
     }
-    @for (kv of data[fname]; track kv; let i = $index) {
+    @for (kv of data()[fname()]; track $index; let i = $index) {
       <ion-item lines="full" class="ion-no-padding ion-no-margin">
         <ion-reorder slot="start"></ion-reorder>
         <ion-grid class="kov-grid">
           <ion-row>
             <!-- key -->
-            @if (type == 'key') {
+            @if (type() == 'key') {
               <ion-col size="10.5">
-                @if (field.manualAdd) {
+                @if (field().manualAdd) {
                   <ion-input
                     required="true"
-                    [(ngModel)]="data[field.name][i]"
+                    [ngModel]="kv" (ngModelChange)="doLineChange(i, null, $event)"
                     [ngModelOptions]="{ standalone: true }"
                   ></ion-input>
                 } @else {
                   <ion-select
                     required="true"
-                    [(ngModel)]="data[fname][i]"
+                    [ngModel]="kv" (ngModelChange)="doLineChange(i, null, $event)"
                     [ngModelOptions]="{ standalone: true }"
                     mode="md"
                     placeholder="{{ 'Please select' | translate }}"
                   >
-                    @for (item of kovs; track item) {
+                    @for (item of kovs(); track item) {
                       <ion-select-option [value]="item.key">
                         {{ item.key }}
                       </ion-select-option>
@@ -44,16 +44,16 @@
               </ion-col>
             }
             <!-- keyop -->
-            @if (type == 'keyop') {
+            @if (type() == 'keyop') {
               <ion-col size="5">
                 <ion-select
                   required="true"
-                  [(ngModel)]="data[fname][i].key"
+                  [ngModel]="kv.key" (ngModelChange)="doLineChange(i, 'key', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   mode="md"
                   placeholder="{{ 'Please select' | translate }}"
                 >
-                  @for (item of kovs; track item) {
+                  @for (item of kovs(); track item) {
                     <ion-select-option [value]="item.key">
                       {{ item.key }}
                     </ion-select-option>
@@ -61,11 +61,11 @@
                 </ion-select>
               </ion-col>
             }
-            @if (type == 'keyop') {
+            @if (type() == 'keyop') {
               <ion-col size="5">
                 <ion-select
                   required="true"
-                  [(ngModel)]="data[fname][i].op"
+                  [ngModel]="kv.op" (ngModelChange)="doLineChange(i, 'op', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   mode="md"
                   placeholder="{{ 'Please select' | translate }}"
@@ -79,16 +79,16 @@
               </ion-col>
             }
             <!-- keyvalue -->
-            @if (type == 'keyvalue') {
+            @if (type() == 'keyvalue') {
               <ion-col size="4">
                 <ion-select
                   required="true"
-                  [(ngModel)]="data[fname][i].key"
+                  [ngModel]="kv.key" (ngModelChange)="doLineChange(i, 'key', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   mode="md"
                   placeholder="{{ 'Please select' | translate }}"
                 >
-                  @for (item of kovs; track item) {
+                  @for (item of kovs(); track item) {
                     <ion-select-option [value]="item.key">
                       {{ item.key }}
                     </ion-select-option>
@@ -96,12 +96,12 @@
                 </ion-select>
               </ion-col>
             }
-            @if (type == 'keyvalue') {
+            @if (type() == 'keyvalue') {
               <ion-col size="6.5">
                 <ion-input
                   class="ion-no-padding"
                   type="text"
-                  [(ngModel)]="data[fname][i].value"
+                  [ngModel]="kv.value" (ngModelChange)="doLineChange(i, 'value', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   placeholder="{{ 'value' | translate }}"
                 >
@@ -109,16 +109,16 @@
               </ion-col>
             }
             <!-- keyopvalue -->
-            @if (type == 'keyopvalue') {
+            @if (type() == 'keyopvalue') {
               <ion-col size="4">
                 <ion-select
                   required="true"
-                  [(ngModel)]="data[fname][i].key"
+                  [ngModel]="kv.key" (ngModelChange)="doLineChange(i, 'key', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   mode="md"
                   placeholder="{{ 'Please select' | translate }}"
                 >
-                  @for (item of kovs; track item) {
+                  @for (item of kovs(); track item) {
                     <ion-select-option [value]="item.key">
                       {{ item.key }}
                     </ion-select-option>
@@ -126,11 +126,11 @@
                 </ion-select>
               </ion-col>
             }
-            @if (type == 'keyopvalue') {
+            @if (type() == 'keyopvalue') {
               <ion-col size="3">
                 <ion-select
                   required="true"
-                  [(ngModel)]="data[fname][i].op"
+                  [ngModel]="kv.op" (ngModelChange)="doLineChange(i, 'op', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   mode="md"
                   placeholder="{{ 'operator' | translate }}"
@@ -143,12 +143,12 @@
                 </ion-select>
               </ion-col>
             }
-            @if (type == 'keyopvalue') {
+            @if (type() == 'keyopvalue') {
               <ion-col size="3.5">
                 <ion-input
                   class="ion-no-padding"
                   type="text"
-                  [(ngModel)]="data[fname][i].value"
+                  [ngModel]="kv.value" (ngModelChange)="doLineChange(i, 'value', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   placeholder="{{ 'value' | translate }}"
                 >
@@ -156,24 +156,24 @@
               </ion-col>
             }
             <!-- emptyfield -->
-            @if (type == 'emptyfield') {
+            @if (type() == 'emptyfield') {
               <ion-col size="5">
                 <ion-input
                   class="ion-no-padding"
                   type="text"
-                  [(ngModel)]="data[fname][i].key"
+                  [ngModel]="kv.key" (ngModelChange)="doLineChange(i, 'key', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   placeholder="{{ 'Remote Field' | translate }}"
                 >
                 </ion-input>
               </ion-col>
             }
-            @if (type == 'emptyfield') {
+            @if (type() == 'emptyfield') {
               <ion-col size="5.5">
                 <ion-input
                   class="ion-no-padding"
                   type="text"
-                  [(ngModel)]="data[fname][i].value"
+                  [ngModel]="kv.value" (ngModelChange)="doLineChange(i, 'value', $event)"
                   [ngModelOptions]="{ standalone: true }"
                   placeholder="{{ 'value' | translate }}"
                 >
@@ -182,7 +182,7 @@
             }
             <!-- buttons -->
             <ion-col size="1.5" class="ion-no-padding ion-text-right">
-              @if (!field.manualAdd && i == data[fname].length - 1) {
+              @if (!field().manualAdd && i == data()[fname()].length - 1) {
                 <ion-button
                   fill="clear"
                   size="default"
