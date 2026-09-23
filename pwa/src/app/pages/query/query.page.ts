@@ -19,7 +19,9 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 
 import { TranslatePipe } from '@ngx-translate/core';
 import { InnerFooterComponent } from '../../components/inner-footer/inner-footer.component';
-import { Component, OnInit, ChangeDetectionStrategy, viewChild, inject } from '@angular/core';
+import { Component, OnInit, viewChild, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import {
   IonButton,
   IonCol,
@@ -45,8 +47,6 @@ import {
 import { CrudPage } from '../crud/crud.page';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     TranslatePipe,
     IonButton,
@@ -74,73 +74,57 @@ export class QueryPage implements OnInit {
   private translate = inject(TranslateService);
 
   readonly editor = viewChild<JsonEditorComponent>('editor');
-  public jeoptions: JsonEditorOptions = new JsonEditorOptions();
+  readonly jeoptions = signal<JsonEditorOptions>(new JsonEditorOptions());
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = 'QUERIES';
-  public subheader: string = '';
+  readonly subheader = signal<string>('');
   public loadingText: string = environment.misc.loadingText;
-  public user: any = null;
+  readonly user = toSignal(this.auth.user, { initialValue: null as any });
   public perm: boolean = false;
   public id: string = '';
-  public data_: any = [];
+  readonly data_ = signal<any>([]);
   public pages: any = [];
-  public limit_: number = environment.misc.limit;
+  readonly limit_ = signal<number>(environment.misc.limit);
   public count_: number = 0;
-  public fields_: any = {};
-  public _saving: boolean = false;
+  readonly fields_ = signal<any>({});
+  readonly _saving = signal<boolean>(false);
   public sort: any = {};
-  public schemavis_: boolean = false;
-  public aggregate_: any = [];
+  readonly schemavis_ = signal<boolean>(false);
+  readonly aggregate_ = signal<any>([]);
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public templates: any = [];
   public is_inprogress: boolean = false;
-  public is_url_copied: boolean = false;
-  public running_: boolean = false;
-  public running_test_: boolean = false;
-  public running_live_: boolean = false;
+  readonly is_url_copied = signal<boolean>(false);
+  readonly running_ = signal<boolean>(false);
+  readonly running_test_ = signal<boolean>(false);
+  readonly running_live_ = signal<boolean>(false);
   public query_url_: string = '';
-  public que_scheduled_cron_: string = '';
-  public _tags: any = [];
-  public collections_: any = [];
+  readonly que_scheduled_cron_ = signal<string>('');
+  readonly _tags = signal<any>([]);
+  readonly collections_ = toSignal(this.crud.collections.pipe(map((res: any) => (res && res.data ? res.data : []))), { initialValue: [] as any[] });
   private menu: string = '';
   private submenu: string = '';
   private query_: any = {};
-  public perm_: boolean = false;
-  public perma_: boolean = false;
-  public permqa_: boolean = false;
+  readonly perm_ = computed(() => !!this.user()?.perm);
+  readonly perma_ = computed(() => !!this.user()?.perma);
+  readonly permqa_ = computed(() => !!this.user()?.permqa);
   private schema_: any = {};
   public json_content_: any = null;
   public col_: string = '';
-  public pivot_: string = '';
-
-  constructor() {
-    this.auth.user.subscribe((res: any) => {
-      this.user = res;
-      this.perm_ = res.perm;
-      this.perma_ = res.perma;
-      this.permqa_ = res.permqa;
-    });
-    this.crud.collections.subscribe((res: any) => {
-      this.collections_ = res && res.data ? res.data : [];
-    });
-  }
-
-  ngOnDestroy() {
-    this.auth.user.unsubscribe;
-    this.crud.collections.unsubscribe;
-  }
+  readonly pivot_ = signal<string>('');
 
   ngOnInit() {}
 
   ionViewDidEnter() {
     this.storage.get('LSPAGINATION').then((LSPAGINATION: any) => {
-      this.limit_ = LSPAGINATION * 1;
+      this.limit_.set(LSPAGINATION * 1);
       this.storage.get('LSQUERY').then((LSQUERY_: any) => {
         this.col_ = LSQUERY_?.que_collection_id;
         this.query_ = LSQUERY_;
         this.menu = this.router.url.split('/')[1];
-        this.id = this.subheader = this.submenu = this.router.url.split('/')[2];
+        this.id = this.submenu = this.router.url.split('/')[2];
+        this.subheader.set(this.id);
         this.query_url_ = `${environment.apiUrl}/get/query/${this.id}`;
         this.refresh_data(false).then(() => {});
       });
@@ -149,21 +133,21 @@ export class QueryPage implements OnInit {
 
   refresh_data(run_: boolean) {
     return new Promise((resolve, reject) => {
-      this.running_ = true;
-      this.schemavis_ = false;
+      this.running_.set(true);
+      this.schemavis_.set(false);
       this.crud
-        .get_query_job('query', this.id, this.limit_, run_)
+        .get_query_job('query', this.id, this.limit_(), run_)
         .then((res: any) => {
           if (res.query && res.data) {
-            this.pivot_ = res.pivot !== '' ? res.pivot : null;
+            this.pivot_.set(res.pivot !== '' ? res.pivot : null);
             this.schema_ = res.schema;
-            this.que_scheduled_cron_ = res.query?.que_scheduled_cron;
-            this._tags = res.query?._tags;
-            this.subheader = res.query.que_title;
+            this.que_scheduled_cron_.set(res.query?.que_scheduled_cron);
+            this._tags.set(res.query?._tags);
+            this.subheader.set(res.query.que_title);
             this.json_content_ = res.query.que_aggregate;
-            this.aggregate_ = res.query.que_aggregate;
-            this.fields_ = res.fields;
-            this.data_ = res.data;
+            this.aggregate_.set(res.query.que_aggregate);
+            this.fields_.set(res.fields);
+            this.data_.set(res.data);
             this.count_ = res.count;
             resolve(true);
           } else {
@@ -180,40 +164,41 @@ export class QueryPage implements OnInit {
           reject();
         })
         .finally(() => {
-          this.running_ = false;
+          this.running_.set(false);
         });
     });
   }
 
   json_editor_init() {
     return new Promise((resolve) => {
-      this.jeoptions = new JsonEditorOptions();
-      this.jeoptions.modes = ['tree', 'code', 'text'];
-      this.jeoptions.mode = 'code';
-      this.jeoptions.statusBar = false;
-      this.jeoptions.navigationBar = false;
-      this.jeoptions.mainMenuBar = true;
-      this.jeoptions.enableSort = false;
-      this.jeoptions.expandAll = false;
+      const jeoptions_ = new JsonEditorOptions();
+      jeoptions_.modes = ['tree', 'code', 'text'];
+      jeoptions_.mode = 'code';
+      jeoptions_.statusBar = false;
+      jeoptions_.navigationBar = false;
+      jeoptions_.mainMenuBar = true;
+      jeoptions_.enableSort = false;
+      jeoptions_.expandAll = false;
+      this.jeoptions.set(jeoptions_);
       resolve(true);
     });
   }
 
   set_editor(set_: boolean) {
-    this.schemavis_ = !this.schemavis_ && set_ && !this.running_;
+    this.schemavis_.set(!this.schemavis_() && set_ && !this.running_());
     set_ ? this.json_editor_init().then(() => {}) : null;
   }
 
   save_query_json_f(approved_: boolean) {
     if (this.json_content_ && this.json_content_.length > 0) {
-      this._saving = true;
-      this.aggregate_ = this.json_content_;
+      this._saving.set(true);
+      this.aggregate_.set(this.json_content_);
       this.misc
         .api_call('crud', {
           op: 'savequery',
           collection: '_query',
           id: this.id,
-          aggregate: this.aggregate_,
+          aggregate: this.aggregate_(),
           approved: approved_,
         })
         .then(() => {
@@ -222,14 +207,14 @@ export class QueryPage implements OnInit {
             'success',
           );
           this.refresh_data(false).then(() => {
-            this.schemavis_ = false;
+            this.schemavis_.set(false);
           });
         })
         .catch((error: any) => {
           this.misc.doMessage(error, 'error');
         })
         .finally(() => {
-          this._saving = false;
+          this._saving.set(false);
         });
     } else {
       this.misc.doMessage('invalid aggregation', 'error');
@@ -241,37 +226,37 @@ export class QueryPage implements OnInit {
   }
 
   copy_url() {
-    this.is_url_copied = false;
+    this.is_url_copied.set(false);
     this.misc
       .copy_to_clipboard(this.query_url_)
       .then(() => {
-        this.is_url_copied = true;
+        this.is_url_copied.set(true);
       })
       .catch((error: any) => {
         console.error('copy error', error);
       })
       .finally(() => {
         setTimeout(() => {
-          this.is_url_copied = false;
+          this.is_url_copied.set(false);
         }, 1000);
       });
   }
 
   run_query() {
-    if (!this.running_) {
-      this.running_ = true;
+    if (!this.running_()) {
+      this.running_.set(true);
       this.refresh_data(true)
         .then(() => {})
         .finally(() => {
-          this.running_ = false;
+          this.running_.set(false);
         });
     }
   }
 
   do_announce(type_: string) {
-    if (!this.running_test_ && !this.running_live_) {
-      this.running_test_ = type_ === 'test' ? true : false;
-      this.running_live_ = type_ === 'live' ? true : false;
+    if (!this.running_test_() && !this.running_live_()) {
+      this.running_test_.set(type_ === 'test' ? true : false);
+      this.running_live_.set(type_ === 'live' ? true : false);
       this.misc
         .api_call('crud', {
           op: 'reqotp',
@@ -298,19 +283,22 @@ export class QueryPage implements OnInit {
                   this.misc.doMessage(error, 'error');
                 })
                 .finally(() => {
-                  this.running_test_ = this.running_live_ = false;
+                  this.running_test_.set(false);
+                  this.running_live_.set(false);
                 });
             })
             .catch(() => {
-              this.running_test_ = this.running_live_ = false;
+              this.running_test_.set(false);
+              this.running_live_.set(false);
             });
         })
         .catch((err_: any) => {
           this.misc.doMessage(err_, 'error');
-          this.running_test_ = this.running_live_ = false;
+          this.running_test_.set(false);
+          this.running_live_.set(false);
         })
         .finally(() => {
-          this._saving = false;
+          this._saving.set(false);
         });
     }
   }
@@ -325,9 +313,9 @@ export class QueryPage implements OnInit {
           shuttle: {
             op: 'update',
             collection: '_query',
-            collections: this.collections_,
+            collections: this.collections_(),
             views: [],
-            user: this.user,
+            user: this.user(),
             data: this.query_,
             counters: null,
             structure: this.schema_,

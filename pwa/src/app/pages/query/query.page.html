@@ -3,12 +3,12 @@
     <ion-row>
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
-        <h3>{{ subheader }}&nbsp;</h3>
-        @if (_tags) {
-          <span class="bold primary">{{ _tags.join(' ') }}</span>
+        <h3>{{ subheader() }}&nbsp;</h3>
+        @if (_tags()) {
+          <span class="bold primary">{{ _tags().join(' ') }}</span>
         }
-        @if (que_scheduled_cron_) {
-          <span class="bold primary">&nbsp;&nbsp;[{{ que_scheduled_cron_ }}]</span>
+        @if (que_scheduled_cron_()) {
+          <span class="bold primary">&nbsp;&nbsp;[{{ que_scheduled_cron_() }}]</span>
         }
         &nbsp;
         <div class="filler-10"></div>
@@ -24,15 +24,15 @@
               </div>
               <div
                 (click)="refresh_data(false)"
-                [class]="running_ ? 'data-sq-button' : 'data-sq-button'"
+                [class]="running_() ? 'data-sq-button' : 'data-sq-button'"
               >
-                @if (!running_) {
+                @if (!running_()) {
                   <span>
                     <ion-icon name="sync-circle-outline"></ion-icon><br />
                     <ion-text color="primary">{{ 'Refresh Query' | translate }}</ion-text>
                   </span>
                 }
-                @if (running_) {
+                @if (running_()) {
                   <span>
                     <ion-spinner name="lines-sharp"></ion-spinner><br />
                     <ion-text color="primary">{{ 'Please Wait' | translate }}</ion-text>
@@ -40,41 +40,41 @@
                 }
               </div>
               <div (click)="do_announce('test')" class="data-sq-button">
-                @if (!running_test_) {
+                @if (!running_test_()) {
                   <ion-icon name="megaphone-outline"></ion-icon>
                 }
-                @if (running_test_) {
+                @if (running_test_()) {
                   <ion-spinner name="lines-sharp"></ion-spinner>
                 }
                 <br />
                 <ion-text color="primary">{{ 'Announce Test' | translate }}</ion-text>
               </div>
               <div (click)="do_announce('live')" class="data-sq-button">
-                @if (!running_live_) {
+                @if (!running_live_()) {
                   <ion-icon name="megaphone"></ion-icon>
                 }
-                @if (running_live_) {
+                @if (running_live_()) {
                   <ion-spinner name="lines-sharp"></ion-spinner>
                 }
                 <br />
                 <ion-text color="primary">{{ 'Announce Live' | translate }}</ion-text>
               </div>
               <div (click)="copy_url()" class="data-sq-button">
-                @if (!is_url_copied) {
+                @if (!is_url_copied()) {
                   <ion-icon name="globe-outline"></ion-icon>
                 }
-                @if (is_url_copied) {
+                @if (is_url_copied()) {
                   <ion-icon name="checkmark-sharp"></ion-icon>
                 }
                 <br />
-                @if (!is_url_copied) {
+                @if (!is_url_copied()) {
                   <ion-text color="primary">{{ 'Copy URL' | translate }}</ion-text>
                 }
-                @if (is_url_copied) {
+                @if (is_url_copied()) {
                   <ion-text color="primary">{{ 'URL Copied' | translate }}</ion-text>
                 }
               </div>
-              <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
+              <div (click)="!running_() ? set_editor(true) : null" class="data-sq-button">
                 <svg
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
@@ -102,26 +102,26 @@
         </ion-grid>
 
         <!-- SCHEMA -->
-        @if (schemavis_) {
+        @if (schemavis_()) {
           <ion-grid class="actions-grid">
             <ion-row>
               <ion-col size="12">
                 <ion-button (click)="save_query_json_f(false)">
                   <ion-icon name="cloud-upload-outline"></ion-icon>
-                  @if (!_saving) {
+                  @if (!_saving()) {
                     <span>&nbsp;{{ 'Save' | translate }}</span>
                   }
-                  @if (_saving) {
+                  @if (_saving()) {
                     <span>{{ 'In Progress' | translate }}...</span>
                   }
                 </ion-button>
-                @if (permqa_) {
+                @if (permqa_()) {
                   <ion-button (click)="save_query_json_f(true)">
                     <ion-icon name="checkmark-circle-outline"></ion-icon>
-                    @if (!_saving) {
+                    @if (!_saving()) {
                       <span>{{ 'Approve' | translate }}</span>
                     }
-                    @if (_saving) {
+                    @if (_saving()) {
                       <span>{{ 'In Progress' | translate }}...</span>
                     }
                   </ion-button>
@@ -136,8 +136,8 @@
               <ion-col size="12">
                 <json-editor
                   id="aggregate"
-                  [options]="jeoptions"
-                  [data]="aggregate_"
+                  [options]="jeoptions()"
+                  [data]="aggregate_()"
                   (change)="json_changed($event)"
                   #editor
                   id="editor"
@@ -148,21 +148,21 @@
         }
 
         <!-- CRUD GRID SECTION -->
-        @if (data_.length > 0) {
+        @if (data_().length > 0) {
           <div>
-            @if (pivot_) {
-              <div [innerHtml]="pivot_"></div>
+            @if (pivot_()) {
+              <div [innerHtml]="pivot_()"></div>
             }
             <table class="data-table">
               <tr>
                 <th></th>
-                @for (item_ of fields_; track item_) {
+                @for (item_ of fields_(); track item_) {
                   <th>
                     {{ item_ }}
                   </th>
                 }
               </tr>
-              @for (record_ of data_; track record_; let i = $index) {
+              @for (record_ of data_(); track record_; let i = $index) {
                 <tr>
                   <td
                     [class]="record_['_note'] ? 'danger align-right' : 'primary align-right'"
@@ -174,7 +174,7 @@
                       {{ i + 1 }}
                     }
                   </td>
-                  @for (item_ of fields_; track item_) {
+                  @for (item_ of fields_(); track item_) {
                     <td>
                       {{ record_[item_]?.toString() | translate }}
                     </td>
@@ -182,17 +182,17 @@
                 </tr>
               }
             </table>
-            @if (data_.length >= limit_) {
+            @if (data_().length >= limit_()) {
               <span>
-                {{ 'The first' | translate }} {{ limit_ }}
+                {{ 'The first' | translate }} {{ limit_() }}
                 {{ 'records are displayed' | translate }}.
               </span>
             } @else {
-              {{ data_.length }} {{ 'records displayed' | translate }}.
+              {{ data_().length }} {{ 'records displayed' | translate }}.
             }
           </div>
         } @else {
-          @if (!running_) {
+          @if (!running_()) {
             <div class="ion-margin-top">
               <h6>{{ 'No data matching the criteria found' | translate }}.</h6>
               {{ 'You can edit the query or get help from the Administrators' | translate }}.

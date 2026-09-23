@@ -19,7 +19,9 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 
 import { TranslatePipe } from '@ngx-translate/core';
 import { InnerFooterComponent } from '../../components/inner-footer/inner-footer.component';
-import { Component, OnInit, ChangeDetectionStrategy, viewChild, inject } from '@angular/core';
+import { Component, OnInit, viewChild, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import {
   IonButton,
   IonCol,
@@ -44,8 +46,6 @@ import {
 import { CrudPage } from '../crud/crud.page';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     TranslatePipe,
     IonButton,
@@ -72,55 +72,40 @@ export class JobPage implements OnInit {
   private modal = inject(ModalController);
 
   readonly editor = viewChild<JsonEditorComponent>('editor');
-  public jeoptions: JsonEditorOptions = new JsonEditorOptions();
+  readonly jeoptions = signal<JsonEditorOptions>(new JsonEditorOptions());
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = 'JOBS';
-  public subheader: string = '';
+  readonly subheader = signal<string>('');
   public loadingText: string = environment.misc.loadingText;
-  public user: any = null;
+  readonly user = toSignal(this.auth.user, { initialValue: null as any });
   public perm: boolean = false;
   public id: string = '';
   public data_: any = [];
   public pages: any = [];
   public limit_: number = environment.misc.limit;
-  public count_: number = 0;
+  readonly count_ = signal<number>(0);
   public status_: any = {};
   public columns_: any;
-  public _saving: boolean = false;
+  readonly _saving = signal<boolean>(false);
   public is_deleting: boolean = false;
   public sort: any = {};
-  public schemavis_: boolean = false;
-  public aggregate_: any = [];
+  readonly schemavis_ = signal<boolean>(false);
+  readonly aggregate_ = signal<any>([]);
   public is_key_copied: boolean = false;
   public is_key_copying: boolean = false;
   public templates: any = [];
   public is_inprogress: boolean = false;
   public is_url_copied: boolean = false;
-  public running_: boolean = false;
+  readonly running_ = signal<boolean>(false);
   public job_scheduled_cron_: string = '';
   private menu: string = '';
   private submenu: string = '';
   private job_: any = {};
-  public perma_: boolean = false;
-  private collections_: any = [];
+  readonly perma_ = computed(() => !!this.user()?.perma);
+  private readonly collections_ = toSignal(this.crud.collections.pipe(map((res: any) => (res && res.data ? res.data : []))), { initialValue: [] as any[] });
   public json_content_: any = null;
   public col_: string = '';
   private schema_: any = {};
-
-  constructor() {
-    this.auth.user.subscribe((res: any) => {
-      this.user = res;
-      this.perma_ = res.perma;
-    });
-    this.crud.collections.subscribe((res: any) => {
-      this.collections_ = res && res.data ? res.data : [];
-    });
-  }
-
-  ngOnDestroy() {
-    this.auth.user.unsubscribe;
-    this.crud.collections.unsubscribe;
-  }
 
   ngOnInit() {}
 
@@ -131,7 +116,8 @@ export class JobPage implements OnInit {
         this.col_ = LSJOB_?.job_collection_id;
         this.job_ = LSJOB_;
         this.menu = this.router.url.split('/')[1];
-        this.id = this.subheader = this.submenu = this.router.url.split('/')[2];
+        this.id = this.submenu = this.router.url.split('/')[2];
+        this.subheader.set(this.id);
         this.refresh_data(false).then(() => {});
       });
     });
@@ -139,18 +125,18 @@ export class JobPage implements OnInit {
 
   refresh_data(run_: boolean) {
     return new Promise((resolve, reject) => {
-      this.running_ = true;
-      this.schemavis_ = false;
+      this.running_.set(true);
+      this.schemavis_.set(false);
       this.crud
         .get_query_job('job', this.id, this.limit_, run_)
         .then((res: any) => {
           if (res && res.job) {
             this.schema_ = res.schema;
             this.job_scheduled_cron_ = res.job?.job_scheduled_cron;
-            this.subheader = res.job.job_name;
+            this.subheader.set(res.job.job_name);
             this.json_content_ = res.job.job_aggregate;
-            this.aggregate_ = res.job.job_aggregate;
-            this.count_ = res.count;
+            this.aggregate_.set(res.job.job_aggregate);
+            this.count_.set(res.count);
             resolve(true);
           } else {
             this.misc.doMessage('no data found', 'error');
@@ -166,53 +152,54 @@ export class JobPage implements OnInit {
           reject();
         })
         .finally(() => {
-          this.running_ = false;
+          this.running_.set(false);
         });
     });
   }
 
   json_editor_init() {
     return new Promise((resolve, reject) => {
-      this.jeoptions = new JsonEditorOptions();
-      this.jeoptions.modes = ['tree', 'code', 'text'];
-      this.jeoptions.mode = 'code';
-      this.jeoptions.statusBar = false;
-      this.jeoptions.navigationBar = false;
-      this.jeoptions.mainMenuBar = true;
-      this.jeoptions.enableSort = false;
-      this.jeoptions.expandAll = false;
+      const jeoptions_ = new JsonEditorOptions();
+      jeoptions_.modes = ['tree', 'code', 'text'];
+      jeoptions_.mode = 'code';
+      jeoptions_.statusBar = false;
+      jeoptions_.navigationBar = false;
+      jeoptions_.mainMenuBar = true;
+      jeoptions_.enableSort = false;
+      jeoptions_.expandAll = false;
+      this.jeoptions.set(jeoptions_);
       resolve(true);
     });
   }
 
   set_editor(set_: boolean) {
-    this.schemavis_ = !this.schemavis_ && set_ && !this.running_;
+    this.schemavis_.set(!this.schemavis_() && set_ && !this.running_());
     set_ ? this.json_editor_init().then(() => {}) : null;
   }
 
   save_job_json_f(approved_: boolean) {
     if (this.json_content_ && this.json_content_.length > 0) {
-      this._saving = true;
-      this.aggregate_ = this.json_content_;
+      this._saving.set(true);
+      this.aggregate_.set(this.json_content_);
       this.misc
         .api_call('crud', {
           op: 'savejob',
           collection: '_job',
           id: this.id,
-          aggregate: this.aggregate_,
+          aggregate: this.aggregate_(),
           approved: approved_,
         })
         .then(() => {
           this.misc.doMessage('job saved successfully', 'success');
           this.refresh_data(false).then(() => {
-            this.schemavis_ = false;
+            this.schemavis_.set(false);
           });
         })
         .catch((error: any) => {
           this.misc.doMessage(error, 'error');
         })
         .finally(() => {
-          this._saving = false;
+          this._saving.set(false);
         });
     } else {
       this.misc.doMessage('invalid aggregation', 'error');
@@ -237,9 +224,9 @@ export class JobPage implements OnInit {
           shuttle: {
             op: 'update',
             collection: '_job',
-            collections: this.collections_,
+            collections: this.collections_(),
             views: [],
-            user: this.user,
+            user: this.user(),
             data: this.job_,
             counters: null,
             structure: this.schema_,

@@ -3,7 +3,7 @@
     <ion-row>
       <ion-col class="console-right">
         <p class="hdr">{{ header | translate }}&nbsp;</p>
-        <h3>{{ subheader }}&nbsp;</h3>
+        <h3>{{ subheader() }}&nbsp;</h3>
         <div class="filler-10">&nbsp;</div>
         <!-- BUTTONS -->
         <ion-grid class="ion-no-padding">
@@ -15,21 +15,21 @@
                   {{ 'Back-To List' | translate }}
                 </div>
               </div>
-              <div (click)="run_job()" [class]="running_ ? 'data-sq-button' : 'data-sq-button'">
-                @if (!running_) {
+              <div (click)="run_job()" [class]="running_() ? 'data-sq-button' : 'data-sq-button'">
+                @if (!running_()) {
                   <span>
                     <ion-icon name="play-sharp"></ion-icon><br />
                     {{ 'Run Job' | translate }}
                   </span>
                 }
-                @if (running_) {
+                @if (running_()) {
                   <span>
                     <ion-spinner name="lines-sharp"></ion-spinner><br />
                     {{ 'Please Wait' | translate }}
                   </span>
                 }
               </div>
-              <div (click)="!running_ ? set_editor(true) : null" class="data-sq-button">
+              <div (click)="!running_() ? set_editor(true) : null" class="data-sq-button">
                 <svg
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
@@ -57,26 +57,26 @@
         </ion-grid>
 
         <!-- SCHEMA -->
-        @if (schemavis_) {
+        @if (schemavis_()) {
           <ion-grid class="actions-grid">
             <ion-row>
               <ion-col size="12">
                 <ion-button (click)="save_job_json_f(false)">
                   <ion-icon name="cloud-upload-outline"></ion-icon>&nbsp;
-                  @if (!_saving) {
+                  @if (!_saving()) {
                     <span>{{ 'Save' | translate }}</span>
                   }
-                  @if (_saving) {
+                  @if (_saving()) {
                     <span>{{ 'In Progress' | translate }}...</span>
                   }
                 </ion-button>
-                @if (perma_) {
+                @if (perma_()) {
                   <ion-button (click)="save_job_json_f(true)">
                     <ion-icon name="checkmark-circle-outline"></ion-icon>
-                    @if (!_saving) {
+                    @if (!_saving()) {
                       <span>{{ 'Approve' | translate }}</span>
                     }
-                    @if (_saving) {
+                    @if (_saving()) {
                       <span>{{ 'In Progress' | translate }}...</span>
                     }
                   </ion-button>
@@ -91,8 +91,8 @@
               <ion-col size="12">
                 <json-editor
                   id="aggregate"
-                  [options]="jeoptions"
-                  [data]="aggregate_"
+                  [options]="jeoptions()"
+                  [data]="aggregate_()"
                   (change)="json_changed($event)"
                   #editor
                 ></json-editor>
@@ -104,12 +104,12 @@
         <!-- RESULT FOR A JOB -->
         <div class="ion-margin-top">
           <h6>
-            @if (running_) {
+            @if (running_()) {
               <span>{{ 'Processing' | translate }}..</span>
             } @else {
               <span
-                >{{ count_ }}
-                {{ count_ > 1 ? 'records affected' : ('record affected' | translate) }}</span
+                >{{ count_() }}
+                {{ count_() > 1 ? 'records affected' : ('record affected' | translate) }}</span
               >
             }
             .
