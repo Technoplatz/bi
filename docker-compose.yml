@@ -193,7 +193,7 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST0}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST0}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE}
     depends_on:
       init:
         condition: service_completed_successfully
@@ -216,7 +216,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DB}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo --noscripting"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST0}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile /cert/${MONGO_HOST0}.pem --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --timeZoneInfo /usr/share/zoneinfo --noscripting"
     links:
       - init
       - mongo1
@@ -232,7 +232,7 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST1}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST1}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE}
     depends_on:
       init:
         condition: service_completed_successfully
@@ -255,7 +255,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DB}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo --noscripting"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST1}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile /cert/${MONGO_HOST1}.pem --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --timeZoneInfo /usr/share/zoneinfo --noscripting"
     links:
       - init
     networks:
@@ -269,7 +269,7 @@ services:
     restart: always
     logging: *default-logging
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST2}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
+      test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST2}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE}
     depends_on:
       init:
         condition: service_completed_successfully
@@ -292,7 +292,7 @@ services:
       - MONGO_INITDB_DATABASE=${MONGO_DB}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates --timeZoneInfo /usr/share/zoneinfo --noscripting"
+    command: "/usr/bin/mongod --bind_ip_all --dbpath /data/db --logpath /log/mongodb/${MONGO_HOST2}.log --logappend --quiet --replSet ${MONGO_RS} --port ${MONGO_PORT0} --tlsMode requireTLS --tlsCertificateKeyFile /cert/${MONGO_HOST2}.pem --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --timeZoneInfo /usr/share/zoneinfo --noscripting"
     links:
       - init
     networks:

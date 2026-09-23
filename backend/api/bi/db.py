@@ -72,7 +72,7 @@ class Mongo:
         tls_ca_file_ = (
             f"&tlsCAFile={cfg.MONGO_TLS_CA_KEYFILE_}" if cfg.MONGO_TLS_CA_KEYFILE_ else ""
         )
-        tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
+        tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true" if cfg.MONGO_TLS_ALLOW_INVALID_CERTIFICATES_ else ""
         retry_writes_ = (
             "&retryWrites=true" if cfg.MONGO_RETRY_WRITES_ else "&retryWrites=false"
         )

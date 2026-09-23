@@ -131,7 +131,7 @@ class Mongo:
         tls_ca_file_ = (
             f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         )
-        tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
+        tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true" if str(os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")).lower() == "true" else ""
         self.connstr_ = f"mongodb://{MONGO_USERNAME_}:{MONGO_PASSWORD_}@{MONGO_HOST0_}:{MONGO_PORT0_},{MONGO_HOST1_}:{MONGO_PORT1_},{MONGO_HOST2_}:{MONGO_PORT2_}/?{auth_source_}{replicaset_}{read_preference_primary_}{appname_}{tls_}{tls_certificate_key_file_}{tls_certificate_key_file_password_}{tls_ca_file_}{tls_allow_invalid_certificates_}"
         client_ = MongoClient(self.connstr_)
         self.db_ = client_[MONGO_DB_]

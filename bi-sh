@@ -79,7 +79,7 @@ function startBI() {
     docker compose --project-name $PRNAME --env-file $DOTENV $DCFILES --compatibility up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
-        docker cp init:/cert/mongo0.pem mongo0.pem
+        docker cp init:/cert/client.pem client.pem
         docker cp init:/cert/mongo-ca.pem mongo-ca.pem
         echo -e "\n✔ Platform core is up and running.\n"
     else

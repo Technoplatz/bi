@@ -111,6 +111,7 @@ MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_PASSWORD_ = secret_f("MONGO_TLS_CERT_KEYFILE_PASSWORD")
+MONGO_TLS_ALLOW_INVALID_CERTIFICATES_ = str(os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")).lower() == "true"
 MONGO_READPREF_ = os.environ.get("MONGO_READPREF")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get(

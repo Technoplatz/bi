@@ -19,7 +19,7 @@ PASS='E2eBrowser#2026'
 TOOLS="$PWD/pwa/tools"
 PROBE=$(mktemp -d)
 cp "$TOOLS/e2e-signin.mjs" "$PROBE/"
-MSH="docker exec mongo0 mongosh mongodb://$MONGO_USERNAME:$MONGO_PASSWORD@mongo0:27017/$MONGO_DB?authSource=$MONGO_AUTH_DB --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval"
+MSH="docker exec mongo0 mongosh mongodb://$MONGO_USERNAME:$MONGO_PASSWORD@mongo0:27017/$MONGO_DB?authSource=$MONGO_AUTH_DB --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --eval"
 # wait until the api and the frontend answer; the api needs a few seconds after a restart
 wait_for() {
   for i in $(seq 1 60); do

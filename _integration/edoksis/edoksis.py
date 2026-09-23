@@ -220,7 +220,7 @@ class Mongo:
         tls_ca_file_ = (
             f"&tlsCAFile={MONGO_TLS_CA_KEYFILE_}" if MONGO_TLS_CA_KEYFILE_ else ""
         )
-        tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true"
+        tls_allow_invalid_certificates_ = "&tlsAllowInvalidCertificates=true" if str(os.environ.get("MONGO_TLS_ALLOW_INVALID_CERTIFICATES")).lower() == "true" else ""
         retry_writes_ = (
             "&retryWrites=true" if MONGO_RETRY_WRITES_ else "&retryWrites=false"
         )

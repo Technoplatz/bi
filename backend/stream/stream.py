@@ -93,7 +93,7 @@ class Trigger:
         self.pipeline_ = [{"$match": {"operationType": {"$in": self.operations_}}}]
         self.numerics_ = ["number", "int", "float", "decimal"]
         self.groupbys_ = ["sum", "count", "mean", "std", "var"]
-        self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_keyfile_password_}&retryWrites={mongo_retry_writes_}&tz_aware=true"
+        self.connstr_ = f"mongodb://{mongo_username_}:{mongo_password_}@{mongo_host0_}:{mongo_port0_},{mongo_host1_}:{mongo_port1_},{mongo_host2_}:{mongo_port2_}/{mongo_db_}?authSource={mngo_auth_db_}&replicaSet={mongo_rs_}&tls={mongo_tls_}&tlsCertificateKeyFile={mongo_tls_cert_keyfile_}&tlsCAFile={mongo_tls_ca_keyfile_}&tlsAllowInvalidCertificates={mongo_tls_allow_invalid_certificates_}&tlsCertificateKeyFilePassword={mongo_tls_cert_keyfile_password_}&retryWrites={mongo_retry_writes_}&tz_aware=true"
         self.client = pymongo.MongoClient(self.connstr_)
         self.db_ = self.client[mongo_db_]
         self.counter_ = 0
