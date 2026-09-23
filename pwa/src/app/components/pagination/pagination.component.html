@@ -1,5 +1,5 @@
 <div class="flex-container">
-  @for (item of selections_; track item; let i = $index) {
+  @for (item of selections_(); track item.id; let i = $index) {
     <div [class]="item.class" (click)="set_pagination(i, item.id)">{{ item.id }}</div>
   }
 </div>

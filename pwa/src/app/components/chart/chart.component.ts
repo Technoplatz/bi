@@ -18,32 +18,45 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { Component, OnInit, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import * as shape from 'd3-shape';
 import { LegendPosition } from '@swimlane/ngx-charts';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgxChartsModule],
   selector: 'app-chart',
   templateUrl: './chart.component.html',
   styleUrl: './chart.component.scss',
 })
-export class ChartComponent implements OnInit {
+export class ChartComponent {
   readonly item = input<any>(undefined);
   readonly width = input<any>(undefined);
-  public series: any = [];
-  public chartStyle: string = '';
+  private minWidth: number = 16;
+  // everything the template reads derives from the two inputs
+  private readonly view_ = computed(() => (this.item() && this.item().view ? this.item().view : {}));
+  readonly series = computed(() => (this.item() && this.item().series ? this.item().series : []));
+  readonly chartStyle = computed<string>(() => this.view_().chart_type ?? '');
+  readonly showXAxis = computed<boolean>(() => !!this.view_().chart_xaxis);
+  readonly showYAxis = computed<boolean>(() => !!this.view_().chart_yaxis);
+  readonly showXAxisLabel = computed<boolean>(() => !!this.view_().chart_xaxis_label);
+  readonly showYAxisLabel = computed<boolean>(() => !!this.view_().chart_yaxis_label);
+  readonly showLegend = computed<boolean>(() => !!this.view_().chart_legend);
+  // this.xAxisLabel = this.showXAxisLabel && view_.xaxis_label ? view_.xaxis_label : view_.xaxis;
+  // this.yAxisLabel = this.showYAxisLabel && view_.yaxis_label ? view_.yaxis_label :  view_.yaxis;
+  // this.legendTitle = this.showLegend && view_.legend_title ? view_.legend_title : view_.legend;
+  readonly showDataLabel = computed<boolean>(() => !!this.view_().chart_label);
+  readonly showGridLines = computed<boolean>(() => !!this.view_().chart_grid);
+  readonly gradient = computed<boolean>(() => !!this.view_().chart_gradient);
+  readonly colorSchema = computed<any>(() =>
+    this.view_().chart_colors && this.view_().chart_colors.length > 0
+      ? { domain: this.view_().chart_colors }
+      : null,
+  );
+  readonly dimension = computed<[number, number] | undefined>(() =>
+    this.width() > this.minWidth ? [this.width() - 16, this.width() * 0.75] : undefined,
+  );
+  readonly ok = computed<boolean>(() => !!this.item());
   public publicshowXAxis: boolean = false;
-  public showXAxis: boolean = false;
-  public showYAxis: boolean = false;
-  public showXAxisLabel: boolean = false;
-  public showYAxisLabel: boolean = false;
-  public gradient: boolean = false;
-  public showLegend: boolean = false;
-  public showDataLabel: boolean = false;
-  public showGridLines: boolean = false;
   public noBarWhenZero: boolean = true;
   public roundDomains: boolean = false;
   public xAxisLabel: string = '';
@@ -51,44 +64,7 @@ export class ChartComponent implements OnInit {
   public legendTitle: string = '';
   public legendPosition: LegendPosition = LegendPosition.Right;
   public tooltipDisabled: boolean = false;
-  public dimension: [number, number] | undefined = undefined;
-  public colorSchema: any = [];
-  public curve: any;
-  public ok: boolean = false;
-  private minWidth: number = 16;
-
-  constructor() {}
-
-  ngOnInit() {
-    this.ok = false;
-  }
-
-  ngOnChanges() {
-    const view_ = this.item().view;
-    this.series = this.item().series;
-    this.chartStyle = view_.chart_type;
-    this.showXAxis = view_.chart_xaxis;
-    this.showYAxis = view_.chart_yaxis;
-    this.showXAxisLabel = view_.chart_xaxis_label;
-    this.showYAxisLabel = view_.chart_yaxis_label;
-    this.showLegend = view_.chart_legend;
-    // this.xAxisLabel = this.showXAxisLabel && view_.xaxis_label ? view_.xaxis_label : view_.xaxis;
-    // this.yAxisLabel = this.showYAxisLabel && view_.yaxis_label ? view_.yaxis_label :  view_.yaxis;
-    // this.legendTitle = this.showLegend && view_.legend_title ? view_.legend_title : view_.legend;
-    this.showDataLabel = view_.chart_label;
-    this.showGridLines = view_.chart_grid;
-    this.gradient = view_.chart_gradient;
-    this.curve = shape.curveCardinal;
-    this.colorSchema =
-      view_.chart_colors && view_.chart_colors.length > 0
-        ? {
-            domain: view_.chart_colors,
-          }
-        : null;
-    this.dimension =
-      this.width() > this.minWidth ? [this.width() - 16, this.width() * 0.75] : undefined;
-    this.ok = true;
-  }
+  public curve: any = shape.curveCardinal;
 
   onSelect(event: any) {
     console.log('*** event', event);

@@ -22,7 +22,7 @@ import { InnerFooterComponent } from '../../components/inner-footer/inner-footer
 import { LangComponent } from '../../components/lang/lang.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { QRCodeComponent } from 'angularx-qrcode';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { Auth } from '../../classes/auth';
 import {
@@ -41,8 +41,6 @@ import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     TranslatePipe,
     IonButton,
@@ -73,11 +71,11 @@ export class SettingsPage implements OnInit {
   public release = environment.release;
   public timeZone = environment.timeZone;
   public header: string = 'SETTINGS';
-  public subheader: string = '';
-  public user: any = null;
-  public is_initialized: boolean = false;
+  readonly subheader = signal<string>('');
+  readonly user = signal<any>(null);
+  readonly is_initialized = signal<boolean>(false);
   public menu: string = '';
-  public submenu: string = '';
+  readonly submenu = signal<string>('');
   public themes: any = environment.themes;
   public perm: boolean = false;
   public accountf_api_key: string = '';
@@ -90,27 +88,28 @@ export class SettingsPage implements OnInit {
   public viewurl_: string = '';
   public viewurl_masked_: string = '';
   public qr_exists: boolean = false;
-  public otp_show: boolean = false;
-  public otp_process: boolean = false;
+  readonly otp_show = signal<boolean>(false);
+  readonly otp_process = signal<boolean>(false);
   public qr_show: boolean = false;
-  public otp_qr: string = '';
+  readonly otp_qr = signal<string>('');
   public saas: any = null;
   public pagination_: string = '25';
 
   ngOnInit() {
     this.menu = this.router.url.split('/')[1];
-    this.submenu = this.router.url.split('/')[2];
-    this.subheader =
-      this.submenu === 'account'
+    this.submenu.set(this.router.url.split('/')[2]);
+    this.subheader.set(
+      this.submenu() === 'account'
         ? 'Account'
-        : this.submenu === 'profile-settings'
+        : this.submenu() === 'profile-settings'
           ? 'Profile Settings'
-          : this.submenu;
+          : this.submenu(),
+    );
     this.storage.get('LSUSERMETA').then((LSUSERMETA: any) => {
-      this.user = LSUSERMETA;
+      this.user.set(LSUSERMETA);
       this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
       this.accountf_api_key = LSUSERMETA.api_key;
-      this.is_initialized = true;
+      this.is_initialized.set(true);
     });
   }
 
@@ -217,22 +216,22 @@ export class SettingsPage implements OnInit {
 
   doOTP(obj: any) {
     return new Promise((resolve, reject) => {
-      this.otp_qr = '';
+      this.otp_qr.set('');
       const op_ = obj && obj.op ? obj.op : null;
       if (op_) {
         if (op_ === 'hide') {
-          this.otp_show = false;
+          this.otp_show.set(false);
           resolve(true);
         } else {
-          this.otp_process = true;
-          this.otp_show = false;
+          this.otp_process.set(true);
+          this.otp_show.set(false);
           this.auth
             .OTP(obj)
             .then((res: any) => {
               if (res && res.result) {
-                this.otp_qr = res.qr;
+                this.otp_qr.set(res.qr);
                 if (op_ === 'reset' || op_ === 'show') {
-                  this.otp_show = true;
+                  this.otp_show.set(true);
                   resolve(true);
                 } else if (op_ === 'validate') {
                   if (res.success) {
@@ -261,7 +260,7 @@ export class SettingsPage implements OnInit {
               reject(error);
             })
             .finally(() => {
-              this.otp_process = false;
+              this.otp_process.set(false);
             });
         }
       }

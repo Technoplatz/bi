@@ -17,13 +17,10 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, ChangeDetectionStrategy, input, inject } from '@angular/core';
+import { Component, OnInit, input, inject, signal } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { environment } from '../../../environments/environment';
-
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [],
   selector: 'app-pagination',
   templateUrl: './pagination.component.html',
@@ -37,7 +34,7 @@ export class PaginationComponent implements OnInit {
   public version_ = environment.appVersion;
   public css_: string = 'selection-passive';
   public default_: number = 25;
-  public selections_: any = [];
+  readonly selections_ = signal<any[]>([]);
   public set_proc_ = false;
   public selectionsoriginal_: any = [
     { id: 25, class: 'selection-passive' },
@@ -47,15 +44,24 @@ export class PaginationComponent implements OnInit {
 
   ngOnInit() {
     this.get_selections().then((selections_: any) => {
-      this.selections_ = selections_;
+      this.selections_.set(selections_);
       this.storage.get('LSPAGINATION_' + this.id_()).then((LSPAGINATION: any) => {
         if (LSPAGINATION) {
-          this.default_ = LSPAGINATION ? LSPAGINATION : this.selections_[0].id;
-          const index = this.selections_.findIndex((obj: any) => obj['id'] === this.default_);
-          this.selections_[index].class = 'selection-active';
+          this.default_ = LSPAGINATION ? LSPAGINATION : selections_[0].id;
+          this.set_class(this.selections_().findIndex((obj: any) => obj['id'] === this.default_));
         }
       });
     });
+  }
+
+  // marks the selection at index_ active and every other one passive, with a new list for the signal
+  private set_class(index_: number) {
+    this.selections_.update((list_) =>
+      list_.map((item_, i_) => ({
+        ...item_,
+        class: i_ === index_ ? 'selection-active' : 'selection-passive',
+      })),
+    );
   }
 
   get_selections() {
@@ -77,17 +83,13 @@ export class PaginationComponent implements OnInit {
 
   set_pagination(i: number, limit_: number) {
     this.set_proc_ = true;
-    for (let j = 0; j < this.selectionsoriginal_.length; j++) {
-      this.selections_[j].class = 'selection-passive';
-      j === this.selectionsoriginal_.length - 1
-        ? this.storage.set('LSPAGINATION_' + this.id_(), limit_).then(() => {
-            this.selections_[i].class = 'selection-active';
-            setTimeout(() => {
-              this.set_proc_ = false;
-              window.location.reload();
-            }, 500);
-          })
-        : null;
-    }
+    this.set_class(-1);
+    this.storage.set('LSPAGINATION_' + this.id_(), limit_).then(() => {
+      this.set_class(i);
+      setTimeout(() => {
+        this.set_proc_ = false;
+        window.location.reload();
+      }, 500);
+    });
   }
 }

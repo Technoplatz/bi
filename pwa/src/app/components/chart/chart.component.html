@@ -1,236 +1,236 @@
-@if (chartStyle == 'Pie') {
+@if (chartStyle() == 'Pie') {
   <ngx-charts-pie-chart
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [legend]="showLegend()"
     [legendPosition]="legendPosition"
-    [labels]="showDataLabel"
+    [labels]="showDataLabel()"
     [tooltipDisabled]="tooltipDisabled"
     [doughnut]="false"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-pie-chart>
 }
 
-@if (chartStyle == 'Doughnut') {
+@if (chartStyle() == 'Doughnut') {
   <ngx-charts-pie-chart
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [legend]="showLegend()"
     [legendPosition]="legendPosition"
-    [labels]="showDataLabel"
+    [labels]="showDataLabel()"
     [tooltipDisabled]="tooltipDisabled"
     [doughnut]="true"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-pie-chart>
 }
 
-@if (chartStyle == 'Vertical Bar') {
+@if (chartStyle() == 'Vertical Bar') {
   <ngx-charts-bar-vertical
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
-    [showGridLines]="showGridLines"
+    [showGridLines]="showGridLines()"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-vertical>
 }
 
-@if (chartStyle == 'Normalized Vertical Bar') {
+@if (chartStyle() == 'Normalized Vertical Bar') {
   <ngx-charts-bar-vertical-normalized
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showGridLines]="showGridLines"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showGridLines]="showGridLines()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-vertical-normalized>
 }
 
-@if (chartStyle == 'Stacked Vertical Bar') {
+@if (chartStyle() == 'Stacked Vertical Bar') {
   <ngx-charts-bar-vertical-stacked
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showGridLines]="showGridLines"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showGridLines]="showGridLines()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [showDataLabel]="showDataLabel"
-    [view]="$any(dimension)"
+    [showDataLabel]="showDataLabel()"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-vertical-stacked>
 }
 
-@if (chartStyle == 'Grouped Vertical Bar') {
+@if (chartStyle() == 'Grouped Vertical Bar') {
   <ngx-charts-bar-vertical-2d
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showYAxisLabel]="showYAxisLabel"
-    [showDataLabel]="showDataLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showYAxisLabel]="showYAxisLabel()"
+    [showDataLabel]="showDataLabel()"
     [xAxisLabel]="xAxisLabel"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-vertical-2d>
 }
 
-@if (chartStyle == 'Horizontal Bar') {
+@if (chartStyle() == 'Horizontal Bar') {
   <ngx-charts-bar-horizontal
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
-    [showGridLines]="showGridLines"
+    [showGridLines]="showGridLines()"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-horizontal>
 }
 
-@if (chartStyle == 'Normalized Horizontal Bar') {
+@if (chartStyle() == 'Normalized Horizontal Bar') {
   <ngx-charts-bar-horizontal-normalized
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
-    [showGridLines]="showGridLines"
+    [showGridLines]="showGridLines()"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-horizontal-normalized>
 }
 
-@if (chartStyle == 'Stacked Horizontal Bar') {
+@if (chartStyle() == 'Stacked Horizontal Bar') {
   <ngx-charts-bar-horizontal-stacked
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showDataLabel]="showDataLabel"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showDataLabel]="showDataLabel()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
-    [showGridLines]="showGridLines"
+    [showGridLines]="showGridLines()"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-horizontal-stacked>
 }
 
-@if (chartStyle == 'Grouped Horizontal Bar') {
+@if (chartStyle() == 'Grouped Horizontal Bar') {
   <ngx-charts-bar-horizontal-2d
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
     [noBarWhenZero]="noBarWhenZero"
-    [showXAxisLabel]="showXAxisLabel"
-    [showDataLabel]="showDataLabel"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showDataLabel]="showDataLabel()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
-    [showGridLines]="showGridLines"
+    [showGridLines]="showGridLines()"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     (select)="onSelect($event)"
   >
   </ngx-charts-bar-horizontal-2d>
 }
 
-@if (chartStyle == 'Line') {
+@if (chartStyle() == 'Line') {
   <ngx-charts-line-chart
-    [scheme]="colorSchema"
-    [results]="series"
-    [gradient]="gradient"
-    [xAxis]="showXAxis"
-    [yAxis]="showYAxis"
-    [legend]="showLegend"
+    [scheme]="colorSchema()"
+    [results]="series()"
+    [gradient]="gradient()"
+    [xAxis]="showXAxis()"
+    [yAxis]="showYAxis()"
+    [legend]="showLegend()"
     [legendTitle]="legendTitle"
     [legendPosition]="legendPosition"
-    [showXAxisLabel]="showXAxisLabel"
-    [showYAxisLabel]="showYAxisLabel"
+    [showXAxisLabel]="showXAxisLabel()"
+    [showYAxisLabel]="showYAxisLabel()"
     [xAxisLabel]="xAxisLabel"
-    [showGridLines]="showGridLines"
+    [showGridLines]="showGridLines()"
     [yAxisLabel]="yAxisLabel"
     [roundDomains]="roundDomains"
-    [view]="$any(dimension)"
+    [view]="$any(dimension())"
     [curve]="curve"
     (select)="onSelect($event)"
   >

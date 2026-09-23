@@ -1,19 +1,19 @@
 <ion-content class="ion-no-padding">
-  @if (is_initialized) {
+  @if (is_initialized()) {
     <div class="console-right">
       <ion-button fill="clear" class="ion-no-padding ion-no-margin">
         {{ header | translate }}
       </ion-button>
-      <h3>{{ subheader | translate }}</h3>
+      <h3>{{ subheader() | translate }}</h3>
       <div class="profile-settings">
-        @if (submenu == 'account') {
+        @if (submenu() == 'account') {
           <ion-list class="ion-padding-end">
             <ion-list-header>{{ 'Security' | translate }}</ion-list-header>
             <ion-item>
               <ion-label position="fixed" class="ion-margin-end"
                 >{{ 'E-mail' | translate }}
               </ion-label>
-              {{ user.email }}
+              {{ user().email }}
             </ion-item>
             <ion-item>
               <ion-label position="fixed" class="ion-margin-end"
@@ -28,15 +28,15 @@
               <ion-label position="fixed" class="ion-margin-end"
                 >{{ '2FA Auth' | translate }}
               </ion-label>
-              @if (!otp_show) {
+              @if (!otp_show()) {
                 <span>
                   {{ 'Always On' | translate }}
                 </span>
               }
-              @if (otp_qr && otp_show) {
+              @if (otp_qr() && otp_show()) {
                 <div>
                   <qrcode
-                    [qrdata]="otp_qr"
+                    [qrdata]="otp_qr()"
                     [width]="200"
                     [errorCorrectionLevel]="'M'"
                     [allowEmptyString]="true"
@@ -51,26 +51,26 @@
                   <div class="filler-8"></div>
                 </div>
               }
-              @if (!otp_show) {
+              @if (!otp_show()) {
                 <ion-button (click)="doOTP({ op: 'show' })" size="small" slot="end">
-                  @if (otp_process) {
+                  @if (otp_process()) {
                     <ion-spinner name="dots"></ion-spinner>
                   } @else {
                     <ion-label>{{ 'Show QR' | translate }}</ion-label>
                   }
                 </ion-button>
               }
-              @if (otp_show) {
+              @if (otp_show()) {
                 <ion-button (click)="doOTP({ op: 'hide' })" size="small" slot="end">
                   <ion-label>{{ 'Hide' | translate }}</ion-label>
                 </ion-button>
               }
-              @if (otp_show) {
+              @if (otp_show()) {
                 <ion-button (click)="doResetOTP()" size="small" slot="end">
                   <ion-label>{{ 'Reset' | translate }}</ion-label>
                 </ion-button>
               }
-              @if (otp_show) {
+              @if (otp_show()) {
                 <ion-button (click)="doValidateOTP()" size="small" slot="end">
                   <ion-label>{{ 'Validate' | translate }}</ion-label>
                 </ion-button>
@@ -91,7 +91,7 @@
             </ion-item>
           </ion-list>
         }
-        @if (submenu == 'profile-settings') {
+        @if (submenu() == 'profile-settings') {
           <ion-list class="ion-padding-end">
             <ion-list-header>{{ 'Theme' | translate }}</ion-list-header>
             <ion-item>

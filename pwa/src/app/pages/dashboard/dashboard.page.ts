@@ -30,15 +30,14 @@ import {
   IonText,
 } from '@ionic/angular';
 import { InnerFooterComponent } from '../../components/inner-footer/inner-footer.component';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Crud } from '../../classes/crud';
 import { Miscellaneous } from '../../classes/misc';
 import { Auth } from '../../classes/auth';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     TranslatePipe,
@@ -61,24 +60,19 @@ export class DashboardPage implements OnInit {
   misc = inject(Miscellaneous);
   private auth = inject(Auth);
 
-  public announcements_: any = [];
+  readonly announcements_ = signal<any[]>([]);
   public loadingText: string = environment.misc.loadingText;
   public flashsizes_: any = environment.flashsizes;
-  public visuals_: any = [];
-  public perm_: boolean = false;
-
-  constructor() {
-    this.auth.user.subscribe((res: any) => {
-      this.perm_ = res && res.perm;
-    });
-  }
+  readonly visuals_ = signal<any[]>([]);
+  private readonly user_ = toSignal(this.auth.user, { initialValue: null as any });
+  readonly perm_ = computed(() => !!(this.user_() && this.user_().perm));
 
   ngOnInit() {
-    this.announcements_ = [];
+    this.announcements_.set([]);
     this.crud
       .get_announcements()
       .then((res: any) => {
-        this.announcements_ = res.data ? res.data.slice(0, 15) : [];
+        this.announcements_.set(res.data ? res.data.slice(0, 15) : []);
       })
       .catch((err_: any) => {
         console.warn('announcements not loaded', err_);
@@ -89,27 +83,36 @@ export class DashboardPage implements OnInit {
     this.crud
       .get_visuals(null)
       .then((visuals_: any) => {
-        this.visuals_ = visuals_.visuals;
-        for (let ix_: number = 0; ix_ < this.visuals_.length; ix_++) {
-          this.visuals_[ix_].is_loaded = false;
+        const list_: any[] = visuals_.visuals.map((visual_: any) => ({ ...visual_, is_loaded: false }));
+        this.visuals_.set(list_);
+        for (let ix_: number = 0; ix_ < list_.length; ix_++) {
           this.crud
-            .get_visual(this.visuals_[ix_].id)
+            .get_visual(list_[ix_].id)
             .then((visual_: any) => {
-              this.visuals_[ix_].data = visual_.visual.data;
-              this.visuals_[ix_].fields = visual_.visual.fields;
-              this.visuals_[ix_].count = visual_.visual.count;
+              this.patch_visual(ix_, {
+                data: visual_.visual.data,
+                fields: visual_.visual.fields,
+                count: visual_.visual.count,
+              });
             })
             .catch((err_: any) => {
-              this.visuals_[ix_].error = err_;
+              this.patch_visual(ix_, { error: err_ });
             })
             .finally(() => {
-              this.visuals_[ix_].is_loaded = true;
+              this.patch_visual(ix_, { is_loaded: true });
             });
         }
       })
       .catch((err_: any) => {
         console.warn('visuals not loaded', err_);
       });
+  }
+
+  // replaces the visual at ix_ with a patched copy, so the list signal notifies the template
+  private patch_visual(ix_: number, patch_: any) {
+    this.visuals_.update((list_) =>
+      list_.map((visual_, i_) => (i_ === ix_ ? { ...visual_, ...patch_ } : visual_)),
+    );
   }
 
   orderByIndex = (a: any, b: any): number => {
