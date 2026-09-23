@@ -54,7 +54,7 @@ function helpBI() {
 
 function updateBI() {
     echo -e "Updating core...\n"
-    docker compose --project-name $PRNAME --file $DCYML pull
+    docker compose --project-name $PRNAME $DCFILES pull
     if [[ -f $DCINTGYML ]]; then
         echo -e "Updating integration...\n"
         docker compose --project-name $PRNAME --file $DCINTGYML pull
@@ -76,7 +76,7 @@ function pruneBI() {
 
 function startBI() {
     echo -e "Starting core containers...\n"
-    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML --compatibility up --detach --no-build
+    docker compose --project-name $PRNAME --env-file $DOTENV $DCFILES --compatibility up --detach --no-build
     if [ $? -eq 0 ]; then
         echo -e "\nCopying certificates to host..."
         docker cp init:/cert/mongo0.pem mongo0.pem
@@ -103,7 +103,7 @@ function downBI() {
     if [[ -f $DCINTGYML ]]; then
         docker compose --project-name $PRNAME --env-file $DOTENV --file $DCINTGYML down
     fi
-    docker compose --project-name $PRNAME --env-file $DOTENV --file $DCYML down
+    docker compose --project-name $PRNAME --env-file $DOTENV $DCFILES down
     return 1
 }
 
@@ -143,7 +143,7 @@ function buildBI() {
     if [ "${str:0:13}" = "_integration/" ]; then
         docker compose --env-file $DOTENV --file $DCINTGYML build "${str:13}"
     else
-        docker compose --env-file $DOTENV --file $DCYML build $1
+        docker compose --env-file $DOTENV $DCFILES build $1
     fi
     if [ $? -ne 0 ]; then
         echo -e "\n✘ Sorry! An error occured."
@@ -159,6 +159,11 @@ COLOR='\033[0;31m'
 NOCOLOR='\033[0m'
 LOGTAIL=20
 DCYML="docker-compose.yml"
+# optional overlays from .env, space separated, e.g. "docker-compose.secrets.yml docker-compose.tls.yml"
+DCFILES="--file $DCYML"
+for OVERLAY in $(grep -E '^BI_COMPOSE_OVERLAYS=' .env 2>/dev/null | cut -d= -f2- | tr -d '"'); do
+    DCFILES="$DCFILES --file $OVERLAY"
+done
 DCINTGYML="docker-compose-integration.yml"
 RAWREPO="https://raw.githubusercontent.com/Technoplatz/bi/main"
 

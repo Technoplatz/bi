@@ -160,6 +160,18 @@ docker compose -f docker-compose.yml -f docker-compose.secrets.yml up -d
 The api, scheduler and stream services read a mounted secret in preference to the environment
 variable. The MongoDB members and the bootstrap job still take their credentials from `.env`.
 
+### Serving over https
+
+With a public DNS name in `DOMAIN` and a contact address in `ACME_EMAIL`, the TLS overlay lets
+Traefik obtain and renew a Let's Encrypt certificate, serve the platform on https only and redirect
+http. Ports 80 and 443 must be reachable from the internet for the challenge.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d
+```
+
+Both overlays can be combined by passing all three files.
+
 ## Schema Structure
 
 ```json
