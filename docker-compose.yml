@@ -30,6 +30,12 @@
 # https://www.gnu.org/licenses.
 #
 
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 x-api-environment: &api-environment
       - TZ=${TZ}
       - DOMAIN=${DOMAIN}
@@ -116,6 +122,7 @@ services:
     container_name: traefik
     hostname: traefik
     restart: always
+    logging: *default-logging
     labels:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
@@ -140,6 +147,7 @@ services:
       - network0
 
   init:
+    logging: *default-logging
     build:
       context: ./init
       dockerfile: Dockerfile
@@ -183,6 +191,7 @@ services:
     hostname: ${MONGO_HOST0}
     cpus: ${MONGO_CPUS}
     restart: always
+    logging: *default-logging
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST0}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
@@ -221,6 +230,7 @@ services:
     hostname: ${MONGO_HOST1}
     cpus: ${MONGO_CPUS}
     restart: always
+    logging: *default-logging
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST1}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
@@ -257,6 +267,7 @@ services:
     hostname: ${MONGO_HOST2}
     cpus: ${MONGO_CPUS}
     restart: always
+    logging: *default-logging
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh "mongodb://${MONGO_HOST2}:$MONGO_PORT0/test" --quiet --tls --tlsCertificateKeyFile ${MONGO_TLS_CERT_KEYFILE} --tlsCertificateKeyFilePassword ${MONGO_TLS_CERT_KEYFILE_PASSWORD} --tlsCAFile ${MONGO_TLS_CA_KEYFILE} --tlsAllowInvalidCertificates
     depends_on:
@@ -288,6 +299,7 @@ services:
       - network0
 
   replicaset:
+    logging: *default-logging
     build:
       context: ./replicaset
       dockerfile: Dockerfile
@@ -355,6 +367,7 @@ services:
         condition: service_completed_successfully
     hostname: stream
     restart: always
+    logging: *default-logging
     labels:
       - traefik.enable=false
       - com.centurylinklabs.watchtower.enable=${WATCHTOWER_ENABLED}
@@ -409,6 +422,7 @@ services:
         condition: service_started
     hostname: api
     restart: always
+    logging: *default-logging
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:${HTTP_PORT}/api/health"]
       interval: 30s
@@ -439,6 +453,7 @@ services:
         condition: service_started
     hostname: scheduler
     restart: always
+    logging: *default-logging
     healthcheck:
       test: ["CMD-SHELL", "test $(( $(date +%s) - $(cat /tmp/scheduler.heartbeat 2>/dev/null || echo 0) )) -lt 180"]
       interval: 60s
@@ -464,6 +479,7 @@ services:
         condition: service_started
     hostname: pwa
     restart: always
+    logging: *default-logging
     labels:
       - traefik.enable=true
       - traefik.docker.network=network0
@@ -490,6 +506,7 @@ services:
     container_name: watchtower
     hostname: watchtower
     restart: always
+    logging: *default-logging
     labels:
       - traefik.enable=false
     volumes:
