@@ -31,6 +31,7 @@ https://www.gnu.org/licenses.
 """
 
 import os
+from pathlib import Path
 import re
 import json
 import hmac
@@ -50,6 +51,17 @@ from markupsafe import escape
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from gevent.pywsgi import WSGIServer
+
+
+def secret_f(name, default=None, secrets_dir="/run/secrets"):
+    """
+    value of the docker secret mounted at /run/secrets/<name> when present, otherwise the
+    environment variable NAME; lets a compose deployment keep credentials out of the environment
+    """
+    path_ = Path(secrets_dir) / name.lower()
+    if path_.is_file():
+        return path_.read_text().strip()
+    return os.environ.get(name.upper(), default)
 
 
 class APIError(BaseException):
@@ -102,8 +114,8 @@ MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
 MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
 MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
-MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
-MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
+MONGO_PASSWORD_ = secret_f("MONGO_PASSWORD")
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = secret_f("MONGO_TLS_CERT_KEYFILE_PASSWORD")
 MONGO_TLS_ = str(os.environ.get("MONGO_TLS")).lower() == "true"
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
@@ -146,7 +158,7 @@ SUPPLIER_TAX_NO_ = os.environ.get("SUPPLIER_TAX_NO")
 PRINT_ = partial(print, flush=True)
 PRINT_("*** STARTED")
 
-INTEGRATION_API_KEY_ = os.environ.get("INTEGRATION_API_KEY") or None
+INTEGRATION_API_KEY_ = secret_f("INTEGRATION_API_KEY") or None
 COLLECTION_NAME_PATTERN_ = re.compile(r"^[a-z][a-z0-9]{0,63}_data$")
 
 

@@ -31,6 +31,7 @@ https://www.gnu.org/licenses.
 """
 
 import os
+from pathlib import Path
 import sys
 import re
 import ast
@@ -53,6 +54,17 @@ from unidecode import unidecode
 import pymongo
 import requests
 import pandas as pd
+
+
+def secret_f(name, default=None, secrets_dir="/run/secrets"):
+    """
+    value of the docker secret mounted at /run/secrets/<name> when present, otherwise the
+    environment variable NAME; lets a compose deployment keep credentials out of the environment
+    """
+    path_ = Path(secrets_dir) / name.lower()
+    if path_.is_file():
+        return path_.read_text().strip()
+    return os.environ.get(name.upper(), default)
 
 
 class AppException(BaseException):
@@ -1504,10 +1516,10 @@ mongo_port2_ = int(os.environ.get("MONGO_PORT2"))
 mongo_db_ = os.environ.get("MONGO_DB")
 mngo_auth_db_ = os.environ.get("MONGO_AUTH_DB")
 mongo_username_ = os.environ.get("MONGO_USERNAME")
-mongo_password_ = os.environ.get("MONGO_PASSWORD")
+mongo_password_ = secret_f("MONGO_PASSWORD")
 mongo_tls_ = os.environ.get("MONGO_TLS")
 mongo_tls_cert_keyfile_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
-mongo_tls_cert_keyfile_password_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
+mongo_tls_cert_keyfile_password_ = secret_f("MONGO_TLS_CERT_KEYFILE_PASSWORD")
 mongo_tls_allow_invalid_certificates_ = os.environ.get(
     "MONGO_TLS_ALLOW_INVALID_CERTIFICATES"
 )

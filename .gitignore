@@ -201,3 +201,6 @@ dmypy.json
 .pen/
 ._*
 .angular/
+
+# docker secrets overlay (docker-compose.secrets.yml)
+secrets/

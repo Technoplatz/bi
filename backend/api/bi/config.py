@@ -33,9 +33,21 @@ Runtime configuration read from the environment once at import time.
 """
 
 import os
+from pathlib import Path
 from functools import partial
 
 from bi.ratelimit import RateLimiter
+
+
+def secret_f(name, default=None, secrets_dir="/run/secrets"):
+    """
+    value of the docker secret mounted at /run/secrets/<name> when present, otherwise the
+    environment variable NAME; lets a compose deployment keep credentials out of the environment
+    """
+    path_ = Path(secrets_dir) / name.lower()
+    if path_.is_file():
+        return path_.read_text().strip()
+    return os.environ.get(name.upper(), default)
 
 
 API_OUTPUT_ROWS_LIMIT_ = int(str(os.environ.get("API_OUTPUT_ROWS_LIMIT")))
@@ -49,7 +61,7 @@ ADMIN_NAME_ = os.environ.get("ADMIN_NAME")
 ADMIN_EMAIL_ = os.environ.get("ADMIN_EMAIL")
 SMTP_ENDPOINT_ = os.environ.get("SMTP_ENDPOINT")
 SMTP_USERID_ = os.environ.get("SMTP_USERID")
-SMTP_PASSWORD_ = os.environ.get("SMTP_PASSWORD")
+SMTP_PASSWORD_ = secret_f("SMTP_PASSWORD")
 SMTP_TLS_PORT_ = int(str(os.environ.get("SMTP_TLS_PORT")))
 FROM_EMAIL_ = os.environ.get("FROM_EMAIL")
 EMAIL_DISCLAIMER_HTML_ = os.environ.get("EMAIL_DISCLAIMER_HTML")
@@ -93,12 +105,12 @@ MONGO_PORT2_ = int(os.environ.get("MONGO_PORT2"))
 MONGO_DB_ = os.environ.get("MONGO_DB")
 MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
 MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
-MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
+MONGO_PASSWORD_ = secret_f("MONGO_PASSWORD")
 MONGO_DUMP_HOURS_ = os.environ.get("MONGO_DUMP_HOURS") if os.environ.get("MONGO_DUMP_HOURS") else "23"
 MONGO_TLS_ = os.environ.get("MONGO_TLS") in [True, "true", "True", "TRUE"]
 MONGO_TLS_CA_KEYFILE_ = os.environ.get("MONGO_TLS_CA_KEYFILE")
 MONGO_TLS_CERT_KEYFILE_ = os.environ.get("MONGO_TLS_CERT_KEYFILE")
-MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get("MONGO_TLS_CERT_KEYFILE_PASSWORD")
+MONGO_TLS_CERT_KEYFILE_PASSWORD_ = secret_f("MONGO_TLS_CERT_KEYFILE_PASSWORD")
 MONGO_READPREF_ = os.environ.get("MONGO_READPREF")
 MONGO_RETRY_WRITES_ = os.environ.get("MONGO_RETRY_WRITES") in [True, "true", "True", "TRUE"]
 MONGO_TIMEOUT_MS_ = int(os.environ.get("MONGO_TIMEOUT_MS")) if os.environ.get(
@@ -126,7 +138,7 @@ API_RATE_LIMIT_WINDOW_SEC_ = int(os.environ.get("API_RATE_LIMIT_WINDOW_SEC")) if
 API_OUTBOUND_HOSTS_ = [
     host_.strip().lower() for host_ in (os.environ.get("API_OUTBOUND_HOSTS") or "edoksis,cloudflare").split(",") if host_.strip()
 ]
-INTEGRATION_API_KEY_ = os.environ.get("INTEGRATION_API_KEY") or None
+INTEGRATION_API_KEY_ = secret_f("INTEGRATION_API_KEY") or None
 FORBIDDEN_AGG_OPS_ = {
     "$where", "$function", "$accumulator", "$out", "$merge", "$lookup", "$graphLookup", "$unionWith",
     "$currentOp", "$listSessions", "$listLocalSessions", "$collStats", "$indexStats", "$planCacheStats",

@@ -34,6 +34,7 @@ import requests
 import json
 import sys
 import os
+from pathlib import Path
 import hmac
 import pymongo
 import pytz
@@ -44,6 +45,17 @@ from flask import Flask, request, make_response
 from flask_cors import CORS
 from functools import partial
 from gevent.pywsgi import WSGIServer
+
+
+def secret_f(name, default=None, secrets_dir="/run/secrets"):
+    """
+    value of the docker secret mounted at /run/secrets/<name> when present, otherwise the
+    environment variable NAME; lets a compose deployment keep credentials out of the environment
+    """
+    path_ = Path(secrets_dir) / name.lower()
+    if path_.is_file():
+        return path_.read_text().strip()
+    return os.environ.get(name.upper(), default)
 
 
 class APIException(BaseException):
@@ -85,7 +97,7 @@ class Mongo:
         MONGO_DB_ = os.environ.get("MONGO_DB")
         MONGO_AUTH_DB_ = os.environ.get("MONGO_AUTH_DB")
         MONGO_USERNAME_ = os.environ.get("MONGO_USERNAME")
-        MONGO_PASSWORD_ = os.environ.get("MONGO_PASSWORD")
+        MONGO_PASSWORD_ = secret_f("MONGO_PASSWORD")
         MONGO_TLS_CERT_KEYFILE_PASSWORD_ = os.environ.get(
             "MONGO_TLS_CERT_KEYFILE_PASSWORD"
         )
@@ -326,7 +338,7 @@ class AuthError(BaseException):
     """
 
 
-INTEGRATION_API_KEY_ = os.environ.get("INTEGRATION_API_KEY") or None
+INTEGRATION_API_KEY_ = secret_f("INTEGRATION_API_KEY") or None
 
 
 def check_integration_auth_f():

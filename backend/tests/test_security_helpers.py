@@ -272,3 +272,16 @@ def test_crud_route_reports_errors_with_status(api):
     with api.app.test_client() as client:
         response = client.post("/api/crud", json={"op": "read", "collection": "x"})
     assert response.status_code == 403 and response.get_json()["result"] is False
+
+
+# ---------------------------------------------------------------- docker secrets (Phase 3)
+def test_secret_prefers_mounted_file_over_environment(tmp_path, monkeypatch):
+    from bi.config import secret_f
+    monkeypatch.setenv("MONGO_PASSWORD", "from-env")
+    assert secret_f("MONGO_PASSWORD", secrets_dir=str(tmp_path)) == "from-env"
+    (tmp_path / "mongo_password").write_text("from-file\n")
+    assert secret_f("MONGO_PASSWORD", secrets_dir=str(tmp_path)) == "from-file"
+    monkeypatch.delenv("MONGO_PASSWORD")
+    assert secret_f("MONGO_PASSWORD", secrets_dir=str(tmp_path)) == "from-file"
+    assert secret_f("NOT_SET_ANYWHERE", default="d", secrets_dir=str(tmp_path)) == "d"
+

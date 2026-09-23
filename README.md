@@ -145,6 +145,21 @@ curl -Lso ~/technoplatz-bi/#1 --create-dirs \
 ./bi-sh start
 ```
 
+### Keeping credentials out of the environment
+
+The passwords and keys in `.env` (`MONGO_PASSWORD`, `MONGO_TLS_CERT_KEYFILE_PASSWORD`, `SMTP_PASSWORD`,
+`INTEGRATION_API_KEY`) can instead be provided as Docker secrets. Put each value into a file under
+`secrets/` (the folder is git-ignored) named after the variable in lower case, and start the stack with
+the overlay:
+
+```bash
+mkdir -p secrets && printf '%s' 'the-password' > secrets/mongo_password
+docker compose -f docker-compose.yml -f docker-compose.secrets.yml up -d
+```
+
+The api, scheduler and stream services read a mounted secret in preference to the environment
+variable. The MongoDB members and the bootstrap job still take their credentials from `.env`.
+
 ## Schema Structure
 
 ```json
