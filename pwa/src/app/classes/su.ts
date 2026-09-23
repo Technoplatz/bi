@@ -17,22 +17,28 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
-import { Injectable } from "@angular/core";
-import { SwUpdate, VersionEvent } from "@angular/service-worker";
-import { Miscellaneous } from "./misc";
-import { environment } from "../../environments/environment";
+import { Injectable, inject } from '@angular/core';
+import { SwUpdate, VersionEvent } from '@angular/service-worker';
+import { Miscellaneous } from './misc';
+import { environment } from '../../environments/environment';
 
-@Injectable({ providedIn: "root" })
+@Injectable({ providedIn: 'root' })
 export class Su {
+  private swu = inject(SwUpdate);
+  private misc = inject(Miscellaneous);
+
   private delay_: number = environment.swu_interval_mins;
 
-  constructor(private swu: SwUpdate, private misc: Miscellaneous) {
+  constructor() {
     if (this.swu.isEnabled) {
-      setInterval(() => {
-        this.swu.checkForUpdate().catch((error_: any) => {
-          console.error("swu check error", error_);
-        });
-      }, this.delay_ * 60 * 1000);
+      setInterval(
+        () => {
+          this.swu.checkForUpdate().catch((error_: any) => {
+            console.error('swu check error', error_);
+          });
+        },
+        this.delay_ * 60 * 1000,
+      );
     }
   }
 
@@ -42,14 +48,14 @@ export class Su {
     }
     this.swu.versionUpdates.subscribe((event_: VersionEvent) => {
       switch (event_.type) {
-        case "VERSION_DETECTED":
+        case 'VERSION_DETECTED':
           this.misc.version.next({ detected: true });
           break;
-        case "VERSION_READY":
+        case 'VERSION_READY':
           this.misc.version.next({ ready: true });
           break;
-        case "VERSION_INSTALLATION_FAILED":
-          console.error("swu version installation failed");
+        case 'VERSION_INSTALLATION_FAILED':
+          console.error('swu version installation failed');
           break;
         default:
           break;

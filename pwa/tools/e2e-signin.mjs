@@ -79,14 +79,14 @@ try {
   // tour: every ported route must render content without page errors or console errors
   const firstCollection = await page.evaluate(() => [...document.querySelectorAll("app-menu p")].map((p) => p.textContent.trim())[0]);
   const collections = await page.evaluate(() => fetch("/assets/env.js").then(() => null));
-  const routes = ["/dashboard", "/admin/_collection", "/admin/_query", "/admin/_job", "/admin/_user", "/settings/account", "/settings/profile-settings", "/404"];
+  const routes = process.env.E2E_ROUTES ? process.env.E2E_ROUTES.split(",").map((r) => r.trim()).filter(Boolean) : ["/dashboard", "/admin/_collection", "/admin/_query", "/admin/_job", "/admin/_user", "/settings/account", "/settings/profile-settings", "/404"];
   const colId = await page.evaluate(async () => {
     const meta = await new Promise((res) => { const r = indexedDB.open("__bidb"); r.onsuccess = () => { const db = r.result; const g = db.transaction(db.objectStoreNames[0]).objectStore(db.objectStoreNames[0]).get("LSUSERMETA"); g.onsuccess = () => res(g.result); g.onerror = () => res(null); }; r.onerror = () => res(null); });
     const env = window.env || {};
     const r = await fetch(env.API_URL + "/crud", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + meta.token, "X-Api-Key": meta.api_key }, body: JSON.stringify({ op: "collections", collection: "_collection" }) });
     const j = await r.json(); return j?.data?.[0]?.col_id ?? null;
   });
-  if (colId) routes.splice(1, 0, `/collection/${colId}`);
+  if (colId && !process.env.E2E_ROUTES) routes.splice(1, 0, `/collection/${colId}`);
   for (const route of routes) {
     const before = logs.length;
     await page.goto(new URL(route, url).href, { waitUntil: "networkidle" });

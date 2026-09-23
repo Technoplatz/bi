@@ -1,26 +1,26 @@
 <ion-content class="sign-content">
-    @if (error) {<ion-grid class="ion-no-padding error-grid">
+    @if (error()) {<ion-grid class="ion-no-padding error-grid">
         <ion-row>
             <ion-col class="ion-padding">
-                {{ error | translate }}
+                {{ error() | translate }}
             </ion-col>
         </ion-row>
     </ion-grid>}
-    @if (success_str) {<ion-grid class="ion-no-padding success-grid">
+    @if (success_str()) {<ion-grid class="ion-no-padding success-grid">
         <ion-row>
             <ion-col class="ion-padding">
-                {{ success_str | translate }}
+                {{ success_str() | translate }}
             </ion-col>
         </ion-row>
     </ion-grid>}
-    @if (formtype=='reset') {<form [formGroup]="resetForm">
+    @if (formtype()=='reset') {<form [formGroup]="resetForm">
         <ion-item lines="none">
             <h3>{{ 'Reset Password' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
             <ion-input #tfacfocus formControlName="password" type="password"
                 placeholder="{{ '8+ [Aa9!]' | translate }}" class="ion-no-padding" required
-                [value]="email" labelPlacement="stacked">
+                [value]="email()" labelPlacement="stacked">
                 <div slot="label" class="field-label">{{ 'Password' | translate }} [{{ '8+ [Aa9!]' | translate }}]<sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
@@ -32,15 +32,15 @@
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-button (click)="Reset()" size="default" [disabled]="!resetForm.valid" class="no-hover">
-                @if (!isInProgress) {<span>{{ 'Set Password' | translate }}</span>}
-                @if (isInProgress) {<ion-spinner name="dots"></ion-spinner>}
+                @if (!isInProgress()) {<span>{{ 'Set Password' | translate }}</span>}
+                @if (isInProgress()) {<ion-spinner name="dots"></ion-spinner>}
             </ion-button>
             <ion-button slot="end" fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
     </form>}
-    @if (formtype=='signup') {<form [formGroup]="signupForm">
+    @if (formtype()=='signup') {<form [formGroup]="signupForm">
         <ion-item lines="none">
             <h3>{{ 'Sign up' | translate }}</h3>
         </ion-item>
@@ -64,21 +64,21 @@
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
             <ion-button (click)="sign_up()" size="default" class="no-hover ion-margin-end">
-                @if (!isInProgress) {<span>{{ 'Continue' | translate }}</span>}
-                @if (isInProgress) {<ion-spinner name="dots"></ion-spinner>}
+                @if (!isInProgress()) {<span>{{ 'Continue' | translate }}</span>}
+                @if (isInProgress()) {<ion-spinner name="dots"></ion-spinner>}
             </ion-button>
             <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
     </form>}
-    @if (formtype=='signin') {<form [formGroup]="signinForm">
+    @if (formtype()=='signin') {<form [formGroup]="signinForm">
         <ion-item lines="none">
             <h3>{{ 'Sign in' | translate }}</h3>
         </ion-item>
         <ion-item lines="full">
             <ion-input #emailfocussignin class="ion-no-padding" formControlName="email" type="email" spellcheck="false"
-                autocorrect="off" required [value]="email" placeholder="{{ 'Business e-mail' | translate}}" labelPlacement="stacked">
+                autocorrect="off" required [value]="email()" placeholder="{{ 'Business e-mail' | translate}}" labelPlacement="stacked">
                 <div slot="label" class="field-label">{{ 'E-mail' | translate }} <sup> <ion-icon name="star"></ion-icon> </sup></div>
             </ion-input>
         </ion-item>
@@ -90,8 +90,8 @@
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="sign_in()" size="default" class="ion-margin-end" class="sign-button">
-                @if (!isInProgress) {<span>{{ 'Continue' | translate }}</span>}
-                @if (isInProgress) {<ion-spinner name="dots"></ion-spinner>}
+                @if (!isInProgress()) {<span>{{ 'Continue' | translate }}</span>}
+                @if (isInProgress()) {<ion-spinner name="dots"></ion-spinner>}
             </ion-button>
             <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
@@ -101,12 +101,12 @@
             </ion-button>
         </ion-item>
         <ion-item lines="none" class="ion-margin-top">
-            <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe" mode="md" labelPlacement="end" justify="start">
+            <ion-checkbox formControlName="isRememberMe" [value]="isRememberMe()" mode="md" labelPlacement="end" justify="start">
                 {{ 'Remember me' | translate }}
             </ion-checkbox>
         </ion-item>
     </form>}
-    @if (formtype=='tfac') {<form [formGroup]="TFACForm">
+    @if (formtype()=='tfac') {<form [formGroup]="TFACForm">
         <ion-item lines="none">
             <h3>{{ '2F Authentication' | translate }}</h3>
         </ion-item>
@@ -118,8 +118,8 @@
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="TFAC()" size="default" class="ion-margin-end" class="sign-button">
-                @if (!isInProgress) {<span>{{ 'Sign in' | translate }}</span>}
-                @if (isInProgress) {<ion-spinner name="dots"></ion-spinner>}
+                @if (!isInProgress()) {<span>{{ 'Sign in' | translate }}</span>}
+                @if (isInProgress()) {<ion-spinner name="dots"></ion-spinner>}
             </ion-button>
             <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
@@ -132,7 +132,7 @@
             </ion-button>
         </ion-item>
     </form>}
-    @if (formtype=='forgot') {<form [formGroup]="forgotForm">
+    @if (formtype()=='forgot') {<form [formGroup]="forgotForm">
         <ion-item lines="none">
             <h3>{{ 'Reset Password' | translate }}</h3>
         </ion-item>
@@ -144,15 +144,15 @@
         </ion-item>
         <ion-item lines="none" class="ion-no-padding ion-margin-top">
             <ion-button (click)="doForgot()" size="default" class="ion-margin-end" class="sign-button">
-                @if (!isInProgress) {<span>{{ 'Continue' | translate }}</span>}
-                @if (isInProgress) {<ion-spinner name="dots"></ion-spinner>}
+                @if (!isInProgress()) {<span>{{ 'Continue' | translate }}</span>}
+                @if (isInProgress()) {<ion-spinner name="dots"></ion-spinner>}
             </ion-button>
             <ion-button fill="outline" (click)="doDismissModal()" size="default" type="reset">
                 <span>{{ 'Cancel' | translate }}</span>
             </ion-button>
         </ion-item>
     </form>}
-    @if (formtype=='success') {<form [formGroup]="successForm">
+    @if (formtype()=='success') {<form [formGroup]="successForm">
         <ion-item lines="none">
             <h2>{{ 'Thank you' | translate }}!</h2>
         </ion-item>

@@ -20,25 +20,21 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 import { TranslatePipe } from '@ngx-translate/core';
 import { IonButton, IonContent } from '@ionic/angular';
 import { InnerFooterComponent } from '../../components/inner-footer/inner-footer.component';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Miscellaneous } from '../../classes/misc';
 import { Storage } from '@ionic/storage-angular';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [TranslatePipe, IonButton, IonContent, InnerFooterComponent],
   selector: 'app-404',
   templateUrl: './_404.page.html',
   styleUrl: './_404.page.scss',
 })
 export class _404Page implements OnInit {
-  public header: string = 'Sorry!';
+  misc = inject(Miscellaneous);
+  private storage = inject(Storage);
 
-  constructor(
-    public misc: Miscellaneous,
-    private storage: Storage,
-  ) {}
+  public header: string = 'Sorry!';
 
   ngOnDestroy() {}
 

@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, input, inject } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { environment } from '../../../environments/environment';
 
@@ -30,8 +30,10 @@ import { environment } from '../../../environments/environment';
   styleUrl: './pagination.component.scss',
 })
 export class PaginationComponent implements OnInit {
-  @Input() id_: string = '';
-  @Input() pagination_: any = [];
+  private storage = inject(Storage);
+
+  readonly id_ = input<string>('');
+  readonly pagination_ = input<any>([]);
   public version_ = environment.appVersion;
   public css_: string = 'selection-passive';
   public default_: number = 25;
@@ -43,12 +45,10 @@ export class PaginationComponent implements OnInit {
     { id: 100, class: 'selection-passive' },
   ];
 
-  constructor(private storage: Storage) {}
-
   ngOnInit() {
     this.get_selections().then((selections_: any) => {
       this.selections_ = selections_;
-      this.storage.get('LSPAGINATION_' + this.id_).then((LSPAGINATION: any) => {
+      this.storage.get('LSPAGINATION_' + this.id_()).then((LSPAGINATION: any) => {
         if (LSPAGINATION) {
           this.default_ = LSPAGINATION ? LSPAGINATION : this.selections_[0].id;
           const index = this.selections_.findIndex((obj: any) => obj['id'] === this.default_);
@@ -60,11 +60,12 @@ export class PaginationComponent implements OnInit {
 
   get_selections() {
     return new Promise((resolve, reject) => {
-      if (this.pagination_.length > 0) {
+      if (this.pagination_().length > 0) {
         let selections_: any = [];
-        for (let j = 0; j < this.pagination_.length; j++) {
-          selections_.push({ id: this.pagination_[j], class: 'selection-passive' });
-          if (j === this.pagination_.length - 1) {
+        for (let j = 0; j < this.pagination_().length; j++) {
+          const pagination_ = this.pagination_();
+          selections_.push({ id: pagination_[j], class: 'selection-passive' });
+          if (j === pagination_.length - 1) {
             resolve(selections_);
           }
         }
@@ -79,7 +80,7 @@ export class PaginationComponent implements OnInit {
     for (let j = 0; j < this.selectionsoriginal_.length; j++) {
       this.selections_[j].class = 'selection-passive';
       j === this.selectionsoriginal_.length - 1
-        ? this.storage.set('LSPAGINATION_' + this.id_, limit_).then(() => {
+        ? this.storage.set('LSPAGINATION_' + this.id_(), limit_).then(() => {
             this.selections_[i].class = 'selection-active';
             setTimeout(() => {
               this.set_proc_ = false;

@@ -1,6 +1,6 @@
 <ion-app>
   <app-tools></app-tools>
-  @if (user_) {
+  @if (user_()) {
     <ion-split-pane when="xs" contentId="main-content">
       <app-menu></app-menu>
       <ion-router-outlet id="main-content"></ion-router-outlet>

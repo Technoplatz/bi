@@ -18,7 +18,7 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, input } from '@angular/core';
 import * as shape from 'd3-shape';
 import { LegendPosition } from '@swimlane/ngx-charts';
 
@@ -31,8 +31,8 @@ import { LegendPosition } from '@swimlane/ngx-charts';
   styleUrl: './chart.component.scss',
 })
 export class ChartComponent implements OnInit {
-  @Input() item: any;
-  @Input() width: any;
+  readonly item = input<any>(undefined);
+  readonly width = input<any>(undefined);
   public series: any = [];
   public chartStyle: string = '';
   public publicshowXAxis: boolean = false;
@@ -64,8 +64,8 @@ export class ChartComponent implements OnInit {
   }
 
   ngOnChanges() {
-    const view_ = this.item.view;
-    this.series = this.item.series;
+    const view_ = this.item().view;
+    this.series = this.item().series;
     this.chartStyle = view_.chart_type;
     this.showXAxis = view_.chart_xaxis;
     this.showYAxis = view_.chart_yaxis;
@@ -85,7 +85,8 @@ export class ChartComponent implements OnInit {
             domain: view_.chart_colors,
           }
         : null;
-    this.dimension = this.width > this.minWidth ? [this.width - 16, this.width * 0.75] : undefined;
+    this.dimension =
+      this.width() > this.minWidth ? [this.width() - 16, this.width() * 0.75] : undefined;
     this.ok = true;
   }
 

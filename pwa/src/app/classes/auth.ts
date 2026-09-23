@@ -17,23 +17,23 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
-import { Injectable } from "@angular/core";
-import { Storage } from "@ionic/storage-angular";
-import { BehaviorSubject } from "rxjs";
-import { Crud } from "./crud";
-import { Miscellaneous } from "./misc";
+import { Injectable, inject } from '@angular/core';
+import { Storage } from '@ionic/storage-angular';
+import { BehaviorSubject } from 'rxjs';
+import { Crud } from './crud';
+import { Miscellaneous } from './misc';
 
-@Injectable({ providedIn: "root" })
+@Injectable({ providedIn: 'root' })
 export class Auth {
+  private storage = inject(Storage);
+  private misc = inject(Miscellaneous);
+  private crud = inject(Crud);
+
   public user = new BehaviorSubject<any>(null);
 
-  constructor(
-    private storage: Storage,
-    private misc: Miscellaneous,
-    private crud: Crud
-  ) {
+  constructor() {
     this.misc.session_.subscribe((session_: any) => {
-      if (session_ === "ended") {
+      if (session_ === 'ended') {
         this.setUserOut();
       }
     });
@@ -42,98 +42,112 @@ export class Auth {
   setUserOut() {
     // clear the stored session first; the redirect would otherwise abort the IndexedDB delete
     return new Promise((resolve) => {
-      this.storage.remove("LSUSERMETA").then(() => {
-        this.user.next(null);
-        window.location.replace("/");
-        resolve(true);
-      }).catch(() => {
-        window.location.replace("/");
-        resolve(true);
-      });
+      this.storage
+        .remove('LSUSERMETA')
+        .then(() => {
+          this.user.next(null);
+          window.location.replace('/');
+          resolve(true);
+        })
+        .catch(() => {
+          window.location.replace('/');
+          resolve(true);
+        });
     });
   }
 
-  private auth_call(creds: any, op: string, endpoint = "auth") {
+  private auth_call(creds: any, op: string, endpoint = 'auth') {
     return new Promise((resolve, reject) => {
       creds.op = op;
-      this.misc.api_call(endpoint, JSON.stringify(creds)).then((res: any) => {
-        if (res && res.result) {
-          resolve(res);
-        } else {
-          this.misc.doMessage(res?.msg, "error");
-          reject(res?.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
+      this.misc
+        .api_call(endpoint, JSON.stringify(creds))
+        .then((res: any) => {
+          if (res && res.result) {
+            resolve(res);
+          } else {
+            this.misc.doMessage(res?.msg, 'error');
+            reject(res?.msg);
+          }
+        })
+        .catch((res: any) => {
+          this.misc.doMessage(res, 'error');
+          reject(res);
+        });
     });
   }
 
   sign_in(creds: any) {
-    return this.auth_call(creds, "signin").then(() => true);
+    return this.auth_call(creds, 'signin').then(() => true);
   }
 
   Forgot(creds: any) {
-    return this.auth_call(creds, "forgot").then(() => true);
+    return this.auth_call(creds, 'forgot').then(() => true);
   }
 
   TFAC(creds: any) {
     return new Promise((resolve, reject) => {
-      this.auth_call(creds, "tfac").then((res: any) => {
-        this.user.next(res.user);
-        this.storage.set("LSUSERMETA", res.user).then(() => {
-          resolve(true);
-          this.misc.navi.next("/dashboard");
-          this.crud.get_all().catch((error: any) => {
-            this.misc.doMessage(error, "error");
+      this.auth_call(creds, 'tfac')
+        .then((res: any) => {
+          this.user.next(res.user);
+          this.storage.set('LSUSERMETA', res.user).then(() => {
+            resolve(true);
+            this.misc.navi.next('/dashboard');
+            this.crud.get_all().catch((error: any) => {
+              this.misc.doMessage(error, 'error');
+            });
           });
-        });
-      }).catch((error: any) => reject(error));
+        })
+        .catch((error: any) => reject(error));
     });
   }
 
   Reset(creds: any) {
-    return this.auth_call(creds, "reset").then(() => true);
+    return this.auth_call(creds, 'reset').then(() => true);
   }
 
   OTP(obj: any) {
     return new Promise((resolve, reject) => {
-      this.misc.api_call("otp", JSON.stringify({ request: obj })).then((res: any) => {
-        if (res && res.result) {
-          resolve(res);
-        } else {
-          reject(res.msg);
-        }
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        reject(res);
-      });
+      this.misc
+        .api_call('otp', JSON.stringify({ request: obj }))
+        .then((res: any) => {
+          if (res && res.result) {
+            resolve(res);
+          } else {
+            reject(res.msg);
+          }
+        })
+        .catch((res: any) => {
+          this.misc.doMessage(res, 'error');
+          reject(res);
+        });
     });
   }
 
   sign_out() {
     // invalidate the server session while the token is still available, then clear and redirect
     return new Promise((resolve, reject) => {
-      this.misc.api_call("auth", JSON.stringify({ op: "signout" })).then((res: any) => {
-        this.setUserOut().then(() => {
-          res && res.result ? resolve(true) : reject(res?.msg);
+      this.misc
+        .api_call('auth', JSON.stringify({ op: 'signout' }))
+        .then((res: any) => {
+          this.setUserOut().then(() => {
+            res && res.result ? resolve(true) : reject(res?.msg);
+          });
+        })
+        .catch((res: any) => {
+          this.misc.doMessage(res, 'error');
+          this.setUserOut().then(() => reject(res));
         });
-      }).catch((res: any) => {
-        this.misc.doMessage(res, "error");
-        this.setUserOut().then(() => reject(res));
-      });
     });
   }
 
   Session() {
     return new Promise((resolve, reject) => {
-      this.storage.get("LSUSERMETA").then((LSUSERMETA: any) => {
+      this.storage.get('LSUSERMETA').then((LSUSERMETA: any) => {
         if (LSUSERMETA && LSUSERMETA?.token) {
           resolve(true);
         } else {
           this.setUserOut().then(() => {
-            reject("session closed");
+            reject('session closed');
           });
         }
       });
@@ -141,6 +155,6 @@ export class Auth {
   }
 
   sign_up(creds: any) {
-    return this.auth_call(creds, "signup");
+    return this.auth_call(creds, 'signup');
   }
 }

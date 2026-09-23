@@ -1,44 +1,39 @@
-import { Component, ChangeDetectionStrategy } from "@angular/core";
-import { Miscellaneous } from "../../classes/misc";
-import { environment } from "../../../environments/environment";
+import { Component, computed, inject, signal } from "@angular/core";
+import { Miscellaneous } from '../../classes/misc';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
-  selector: "app-lang",
+  selector: 'app-lang',
   template: `
     <div class="flex-container">
-      @for (item of langs_; track item.id; let i = $index) {
-        <div [class]="item.class" (click)="do_set_locale(i, item.id)">{{ item.name }}</div>
+      @for (item of langs_(); track item.id) {
+        <div [class]="item.class" (click)="do_set_locale(item.id)">{{ item.name }}</div>
       }
     </div>
   `,
-  styleUrl: "./lang.component.scss"
+  styleUrl: './lang.component.scss',
 })
 export class LangComponent {
-  public version_ = environment.appVersion;
-  public lang_proc_ = false;
-  public langs_ = [
-    { id: "en", name: "EN", class: "selection-passive" },
-    { id: "de", name: "DE", class: "selection-passive" },
-    { id: "tr", name: "TR", class: "selection-passive" }
-  ];
+  private misc = inject(Miscellaneous);
 
-  constructor(private misc: Miscellaneous) {
-    this.misc.locale().then((LSLOCALE_: any) => {
-      const index = this.langs_.findIndex((obj) => obj.id === LSLOCALE_);
-      if (index >= 0) {
-        this.langs_[index].class = "selection-active";
-      }
-    });
+  private readonly locale_ = signal<string | null>(null);
+  readonly lang_proc_ = signal(false);
+  readonly langs_ = computed(() =>
+    [
+      { id: "en", name: "EN" },
+      { id: "de", name: "DE" },
+      { id: "tr", name: "TR" }
+    ].map((l) => ({ ...l, class: l.id === this.locale_() ? "selection-active" : "selection-passive" }))
+  );
+
+  constructor() {
+    this.misc.locale().then((LSLOCALE_: any) => this.locale_.set(LSLOCALE_ ?? null));
   }
 
-  do_set_locale(i: number, lang_: string) {
-    this.lang_proc_ = true;
-    this.langs_.forEach((l) => (l.class = "selection-passive"));
+  do_set_locale(lang_: string) {
+    this.lang_proc_.set(true);
     this.misc.set_locale(lang_).then(() => {
-      this.langs_[i].class = "selection-active";
-      setTimeout(() => (this.lang_proc_ = false), 500);
+      this.locale_.set(lang_);
+      setTimeout(() => this.lang_proc_.set(false), 500);
     });
   }
 }

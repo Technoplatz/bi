@@ -22,7 +22,7 @@ import { InnerFooterComponent } from '../../components/inner-footer/inner-footer
 import { LangComponent } from '../../components/lang/lang.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { QRCodeComponent } from 'angularx-qrcode';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { Auth } from '../../classes/auth';
 import {
@@ -63,6 +63,12 @@ import { Router } from '@angular/router';
   styleUrl: './settings.page.scss',
 })
 export class SettingsPage implements OnInit {
+  private storage = inject(Storage);
+  private auth = inject(Auth);
+  private router = inject(Router);
+  private alert = inject(AlertController);
+  misc = inject(Miscellaneous);
+
   public version = environment.appVersion;
   public release = environment.release;
   public timeZone = environment.timeZone;
@@ -90,14 +96,6 @@ export class SettingsPage implements OnInit {
   public otp_qr: string = '';
   public saas: any = null;
   public pagination_: string = '25';
-
-  constructor(
-    private storage: Storage,
-    private auth: Auth,
-    private router: Router,
-    private alert: AlertController,
-    public misc: Miscellaneous,
-  ) {}
 
   ngOnInit() {
     this.menu = this.router.url.split('/')[1];

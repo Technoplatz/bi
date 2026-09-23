@@ -33,7 +33,7 @@ import {
   IonSelectOption,
   IonSpinner,
 } from '@ionic/angular';
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy, input } from '@angular/core';
 import { environment } from './../../../environments/environment';
 import { ItemReorderEventDetail } from '@ionic/core';
 
@@ -61,10 +61,10 @@ import { ItemReorderEventDetail } from '@ionic/core';
   styleUrl: './kov.component.scss',
 })
 export class KovComponent implements OnInit {
-  @Input() properties: any;
+  readonly properties = input<any>(undefined);
   @Input() data: any;
   @Input() field: any;
-  @Input() op: string = '';
+  readonly op = input<string>('');
   public kovs: any = null;
   public type: string = 'key';
   public ok: boolean = false;
@@ -112,7 +112,7 @@ export class KovComponent implements OnInit {
       this.type = 'keyopvalue';
     }
     if (['keyop', 'keyvalue', 'filter', 'property'].includes(this.field.subType)) {
-      this.kovs = this.properties;
+      this.kovs = this.properties();
     } else if (this.field.subType === 'hour') {
       this.kovs = this.hours_;
     } else if (this.field.subType === 'minute') {

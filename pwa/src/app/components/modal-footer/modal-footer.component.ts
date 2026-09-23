@@ -19,11 +19,9 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 
 import { TranslatePipe } from '@ngx-translate/core';
 import { IonCol, IonFooter, IonGrid, IonRow } from '@ionic/angular';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, } from '@angular/core';
 
 @Component({
-  // ported code updates plain fields in promise callbacks; angular 22 components are OnPush by default
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [TranslatePipe, IonCol, IonFooter, IonGrid, IonRow],
   selector: 'modal-footer',
   templateUrl: './modal-footer.component.html',

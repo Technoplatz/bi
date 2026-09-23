@@ -19,7 +19,7 @@ along with this program.  If not, see https://www.gnu.org/licenses.
 
 import { TranslatePipe } from '@ngx-translate/core';
 import { InnerFooterComponent } from '../../components/inner-footer/inner-footer.component';
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, viewChild, inject } from '@angular/core';
 import {
   IonButton,
   IonCol,
@@ -65,7 +65,15 @@ import { CrudPage } from '../crud/crud.page';
   styleUrl: './query.page.scss',
 })
 export class QueryPage implements OnInit {
-  @ViewChild('editor', { static: false }) editor?: JsonEditorComponent;
+  misc = inject(Miscellaneous);
+  private storage = inject(Storage);
+  private auth = inject(Auth);
+  private crud = inject(Crud);
+  private router = inject(Router);
+  private modal = inject(ModalController);
+  private translate = inject(TranslateService);
+
+  readonly editor = viewChild<JsonEditorComponent>('editor');
   public jeoptions: JsonEditorOptions = new JsonEditorOptions();
   public default_width: number = environment.misc.defaultColumnWidth;
   public header: string = 'QUERIES';
@@ -106,15 +114,7 @@ export class QueryPage implements OnInit {
   public col_: string = '';
   public pivot_: string = '';
 
-  constructor(
-    public misc: Miscellaneous,
-    private storage: Storage,
-    private auth: Auth,
-    private crud: Crud,
-    private router: Router,
-    private modal: ModalController,
-    private translate: TranslateService,
-  ) {
+  constructor() {
     this.auth.user.subscribe((res: any) => {
       this.user = res;
       this.perm_ = res.perm;
