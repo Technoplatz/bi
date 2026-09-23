@@ -54,6 +54,8 @@ jobs:
           cp .env.example .env
           docker compose -f docker-compose.yml config --quiet
           docker compose -f docker-compose-integration.yml config --quiet
+          mkdir -p secrets && for s in mongo_password mongo_tls_cert_keyfile_password smtp_password integration_api_key; do echo x > secrets/$s; done
+          ACME_EMAIL=ci@example.invalid docker compose -f docker-compose.yml -f docker-compose.secrets.yml -f docker-compose.tls.yml config --quiet
 
   frontend:
     name: Build the web application
