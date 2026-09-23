@@ -36,9 +36,14 @@ echo "REPLICASET STARTED"
 
 PROC_DATE_=$(date '+%Y%m%d%H%M%S')
 
-if [ ! -f mongo-init.flag ]; then
-    mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
-        rs_ = {
+MSH="mongosh mongodb://$MONGO_HOST0:$MONGO_PORT0/?authSource=$MONGO_AUTH_DB --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates"
+# initiate only a set that has never been initiated; an existing set keeps its configuration, a
+# forced reconfiguration on every stack start could desynchronise the members
+RS_STATE=$($MSH --eval "try { rs.status().ok } catch (e) { e.codeName }" | tail -1)
+echo "replicaset state: $RS_STATE"
+if [[ "$RS_STATE" == "NotYetInitialized" ]]; then
+    $MSH --eval "
+        rs.initiate({
             _id: '${MONGO_RS}',
             version: 1,
             members: [
@@ -46,26 +51,12 @@ if [ ! -f mongo-init.flag ]; then
                 { _id: 1, host: '${MONGO_HOST1}:${MONGO_PORT0}', priority: 0 },
                 { _id: 2, host: '${MONGO_HOST2}:${MONGO_PORT0}', priority: 0 }
             ]
-        }
-        rs.initiate(rs_, { force: true });
+        });
     "
     echo "Replicaset was initiated successfully."
 else
-    mongosh "mongodb://$MONGO_HOST0:$MONGO_PORT0/?authSource=$MONGO_AUTH_DB" --quiet --tls --tlsCertificateKeyFile $MONGO_TLS_CERT_KEYFILE --tlsCertificateKeyFilePassword $MONGO_TLS_CERT_KEYFILE_PASSWORD --tlsCAFile $MONGO_TLS_CA_KEYFILE --tlsAllowInvalidCertificates --eval "
-        rs_ = {
-            _id: '${MONGO_RS}',
-            version: 1,
-            members: [
-                { _id: 0, host: '${MONGO_HOST0}:${MONGO_PORT0}', priority: 2 },
-                { _id: 1, host: '${MONGO_HOST1}:${MONGO_PORT0}', priority: 0 },
-                { _id: 2, host: '${MONGO_HOST2}:${MONGO_PORT0}', priority: 0 }
-            ]
-        }
-        rs.reconfig(rs_, { force: true });
-    "
-    echo "Replicaset was reconfigured successfully."
+    echo "Replicaset is already initiated, configuration left untouched."
 fi
-
 RS_OK=""
 until [[ $RS_OK -eq "1" ]]; do
     echo "Checking replicaset status..."
