@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see https://www.gnu.org/licenses.
 */
 
-import { ApplicationConfig, inject, isDevMode, provideAppInitializer, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from "@angular/core";
+import { ApplicationConfig, inject, isDevMode, provideAppInitializer, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from "@angular/core";
 import { provideHttpClient } from "@angular/common/http";
 import { PreloadAllModules, provideRouter, RouteReuseStrategy, withPreloading } from "@angular/router";
 import { provideServiceWorker } from "@angular/service-worker";
@@ -32,9 +32,9 @@ import { environment } from "../environments/environment";
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // the ported code updates state inside promise callbacks; zone-based change detection keeps that
-    // working until pages are moved to signals one by one
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    // component state lives in signals: no zone.js, angular schedules change detection from signal
+    // writes, template events and async pipes
+    provideZonelessChangeDetection(),
     provideIonicAngular({ animated: environment.animated, sanitizerEnabled: environment.sanitizerEnabled }),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideRouter(routes, withPreloading(PreloadAllModules)),

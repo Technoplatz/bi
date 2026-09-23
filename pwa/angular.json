@@ -68,9 +68,7 @@
             ],
             "serviceWorker": "ngsw-config.json",
             "outputPath": "dist/bi-pwa",
-            "polyfills": [
-              "zone.js"
-            ]
+            "polyfills": []
           },
           "configurations": {
             "production": {
