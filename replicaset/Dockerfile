@@ -30,7 +30,7 @@
 # https://www.gnu.org/licenses.
 #
 
-ARG MONGO_VERSION=7.0.15
+ARG MONGO_VERSION=8.0.32
 FROM mongo:${MONGO_VERSION}
 RUN apt-get update && apt-get upgrade -y && apt-get install -y jq
 WORKDIR /app
