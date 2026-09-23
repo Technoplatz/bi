@@ -108,7 +108,7 @@ export class SettingsPage implements OnInit {
     this.storage.get('LSUSERMETA').then((LSUSERMETA: any) => {
       this.user.set(LSUSERMETA);
       this.perm = LSUSERMETA && LSUSERMETA.perm ? true : false;
-      this.accountf_api_key = LSUSERMETA.api_key;
+      this.accountf_api_key = LSUSERMETA?.api_key ?? '';
       this.is_initialized.set(true);
     });
   }
