@@ -23,6 +23,8 @@ await page.addInitScript(() => {
   const original = console.error;
   console.error = (...args) => original(...args.map(serialize));
   window.addEventListener("unhandledrejection", (e) => original("UNHANDLED", serialize(e.reason)));
+  // content security policy violations (also fired for a report-only policy) are logged as warnings
+  document.addEventListener("securitypolicyviolation", (e) => console.warn("CSP", e.disposition, e.violatedDirective, e.blockedURI || e.sourceFile || "", String(e.sample || "").slice(0, 80)));
 });
 page.on("console", async (m) => {
   if (!["error", "warning"].includes(m.type())) return;
