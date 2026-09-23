@@ -196,7 +196,7 @@ class Misc:
             "--ssl",
             f"--sslPEMKeyFile={cfg.MONGO_TLS_CERT_KEYFILE_}",
             f"--sslCAFile={cfg.MONGO_TLS_CA_KEYFILE_}",
-            "--tlsInsecure",
+        ] + (["--tlsInsecure"] if cfg.MONGO_TLS_ALLOW_INVALID_CERTIFICATES_ else []) + [
             f"--{type_}",
             f"--archive={loc_}",
             "--quiet",
